@@ -50,8 +50,8 @@ defmodule Bonfire.Boundaries.Migrations do
 
       Ecto.Migration.flush()
 
-      # insert initial data
-      Bonfire.Boundaries.Fixtures.insert()
+      # insert initial data (moved to its own repo/migrations file)
+      # Bonfire.Boundaries.Fixtures.insert()
     end
   end
 
