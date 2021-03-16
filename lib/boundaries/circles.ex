@@ -1,8 +1,13 @@
 defmodule Bonfire.Boundaries.Circles do
 
+  alias Bonfire.Data.Social.Named
   alias Bonfire.Data.Social.Circle
+  alias Bonfire.Data.Social.Encircle
+  alias Bonfire.Data.Identity.Caretaker
+
   import Bonfire.Boundaries.Integration
   import Ecto.Query
+  alias Ecto.Changeset
 
   def circles do
     Bonfire.Common.Config.get!(:default_circles)
@@ -27,5 +32,8 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   def changeset(:create, attrs), do: Circle.changeset(attrs)
+    |> Changeset.cast_assoc(:named, with: &Named.changeset/2)
+    |> Changeset.cast_assoc(:caretaker, with: &Caretaker.changeset/2)
+    |> Changeset.cast_assoc(:encircles, with: &Encircle.changeset/2)
 
 end

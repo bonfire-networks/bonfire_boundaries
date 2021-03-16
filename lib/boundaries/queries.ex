@@ -93,6 +93,7 @@ defmodule Bonfire.Boundaries.Queries do
 
   defp admin_can(controlled, _user) do
     extra = quote do: [
+      # TODO
     ]
     shared_can(controlled, nil, extra)
   end
