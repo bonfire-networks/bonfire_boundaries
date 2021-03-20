@@ -4,6 +4,7 @@ defmodule Bonfire.Boundaries.Grants do
   alias Bonfire.Boundaries.Accesses
 
   import Bonfire.Boundaries.Integration
+  import Ecto.Query
 
   def grants do
     %{ read_only:  "GRANT0N1YACCESS1SREADACCES"}
@@ -26,5 +27,13 @@ defmodule Bonfire.Boundaries.Grants do
   def changeset(access \\ %Grant{}, attrs) do
     Grant.changeset(access, attrs)
   end
+
+  def list, do: repo().all(from(
+    u in Grant,
+    left_join: acl in assoc(u, :acl),
+    left_join: named in assoc(acl, :named),
+    left_join: access in assoc(u, :access),
+    preload: [:subject_profile, :subject_named, acl: [:named], access: [interacts: [:verb]]]
+  ))
 
 end

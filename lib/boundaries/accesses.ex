@@ -9,8 +9,8 @@ defmodule Bonfire.Boundaries.Accesses do
   alias Ecto.Changeset
 
   def accesses do
-    %{ read_only:  "THE0N1YACCESS1SREADACCESS1",
-       administer: "AT0TA1C0NTR010VERS0METH1NG",
+    %{ read_only:  "2HE0N1YACCESS1SREADACCESS1",
+       administer: "2T0TA1C0NTR010VERS0METH1NG",
     }
   end
 

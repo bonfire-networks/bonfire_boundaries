@@ -44,7 +44,7 @@ defmodule Bonfire.Boundaries.Queries do
     quote do
       require Ecto.Query
       require Bonfire.Boundaries.Queries
-      verb = Bonfire.Data.AccessControl.Verbs.id!(unquote(verb))
+      verb_ids = Bonfire.Boundaries.Queries.verb_ids(unquote(verb))
       case unquote(user) do
         %{id: user_id, instance_admin: %{is_instance_admin: true}} ->
           unquote(admin_can(controlled, controlled_id))
@@ -58,6 +58,9 @@ defmodule Bonfire.Boundaries.Queries do
       |> Ecto.Query.subquery()
     end
   end
+
+  def verb_ids(verbs) when is_list(verbs), do: Enum.map(verbs, &Bonfire.Data.AccessControl.Verbs.id!(&1))
+  def verb_ids(verb), do: [Bonfire.Data.AccessControl.Verbs.id!(verb)]
 
   # defp can_deprecated(controlled, user, verb) when is_atom(controlled) do
   #   quote do
@@ -111,7 +114,7 @@ defmodule Bonfire.Boundaries.Queries do
         join: interact in assoc(access, :interacts),
         left_join: circle in Bonfire.Data.Social.Circle,
         on: grant.subject_id == circle.id,
-        where: interact.verb_id == ^verb,
+        where: interact.verb_id in ^verb_ids,
         where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
         group_by: [controlled.id, interact.id],
         having: fragment("agg_perms(?)", interact.value),
@@ -132,7 +135,7 @@ defmodule Bonfire.Boundaries.Queries do
         join: interact in assoc(access, :interacts),
         left_join: circle in Bonfire.Data.Social.Circle,
         on: grant.subject_id == circle.id,
-        where: interact.verb_id == ^verb,
+        where: interact.verb_id in ^verb_ids,
         where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
         group_by: [controlled.id, interact.id],
         having: fragment("agg_perms(?)", interact.value),
@@ -156,7 +159,7 @@ defmodule Bonfire.Boundaries.Queries do
         join: interact in assoc(access, :interacts),
         left_join: circle in Bonfire.Data.Social.Circle,
         on: grant.subject_id == circle.id,
-        where: interact.verb_id == ^verb,
+        where: interact.verb_id in ^verb_ids,
         where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
         group_by: [controlled.id, interact.id],
         having: fragment("agg_perms(?)", interact.value),
