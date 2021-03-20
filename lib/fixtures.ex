@@ -60,7 +60,7 @@ defmodule Bonfire.Boundaries.Fixtures do
     )
 
     # some of these things are public
-    # read_only and read are visible to local users, so they need an
+    # the read_only ACL and the read Verb are visible to local users, so they need an
     # acl and a controlled mixin that associates them
     acls = Acls.acls()
 
@@ -89,9 +89,9 @@ defmodule Bonfire.Boundaries.Fixtures do
       [
         %{
          id:         grants.read_only,
-         acl_id:     acls.read_only,
-         access_id:  accesses.read_only,
-         subject_id: circles.local
+         acl_id:     acls.read_only, # what (list of) things we are granting access to
+         access_id:  accesses.read_only, # what level of access
+         subject_id: circles.local # who we are granting access to
         },
       ],
       on_conflict: :nothing

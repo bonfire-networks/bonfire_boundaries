@@ -22,7 +22,7 @@ defmodule Bonfire.Boundaries.Acls do
     |> Changeset.cast_assoc(:caretaker, with: &Caretaker.changeset/2)
   end
 
-  def list, do: repo().all(from(u in Acl))
+  def list, do: repo().all(from(u in Acl, left_join: named in assoc(u, :named), preload: [:named]))
 
 
 end
