@@ -1,8 +1,12 @@
 defmodule Bonfire.Boundaries.Accesses do
 
   alias Bonfire.Data.AccessControl.Access
+  alias Bonfire.Data.Social.Named
+  alias Bonfire.Data.Identity.Caretaker
+
   import Bonfire.Boundaries.Integration
   import Ecto.Query
+  alias Ecto.Changeset
 
   def accesses do
     %{ read_only:  "THE0N1YACCESS1SREADACCESS1",
@@ -20,6 +24,8 @@ defmodule Bonfire.Boundaries.Accesses do
 
   def changeset(access \\ %Access{}, attrs) do
     Access.changeset(access, attrs)
+    |> Changeset.cast_assoc(:named, with: &Named.changeset/2)
+    |> Changeset.cast_assoc(:caretaker, with: &Caretaker.changeset/2)
   end
 
   def list, do: repo().all(from(u in Access))

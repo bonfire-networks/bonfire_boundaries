@@ -11,7 +11,7 @@ defmodule Bonfire.Boundaries.Fixtures do
 
   def insert() do
 
-    # to start with, we need our special users
+    # to start with, we need our special circles (eg, guest, local, activity_pub, admin)
     circles = Circles.circles()
 
     repo().insert_all(
@@ -20,13 +20,14 @@ defmodule Bonfire.Boundaries.Fixtures do
       on_conflict: :nothing
     )
 
+    # give the circles some names
     repo().insert_all(
       Named,
       Circles.circles_named_fixture(),
       on_conflict: :nothing
     )
 
-    # now we need to insert verbs for our standard actions
+    # now we need to insert verbs for our standard actions (eg, read, see, create...)
     verbs  = Verbs.verbs()
 
     repo().insert_all(
@@ -35,7 +36,7 @@ defmodule Bonfire.Boundaries.Fixtures do
       on_conflict: :nothing
     )
 
-    # then our standard accesses
+    # then our standard accesses (eg, read_only, administer)
     accesses = Accesses.accesses()
 
     repo().insert_all(
