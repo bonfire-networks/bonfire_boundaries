@@ -60,7 +60,8 @@ defmodule Bonfire.Boundaries.Queries do
   end
 
   def verb_ids(verbs) when is_list(verbs), do: Enum.map(verbs, &Bonfire.Data.AccessControl.Verbs.id!(&1))
-  def verb_ids(verb), do: [Bonfire.Data.AccessControl.Verbs.id!(verb)]
+  def verb_ids(verb) when is_atom(verb), do: [Bonfire.Data.AccessControl.Verbs.id!(verb)]
+  def verb_ids(_), do: []
 
   # defp can_deprecated(controlled, user, verb) when is_atom(controlled) do
   #   quote do
