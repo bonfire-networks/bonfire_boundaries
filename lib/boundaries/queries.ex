@@ -47,13 +47,13 @@ defmodule Bonfire.Boundaries.Queries do
       verb_ids = Bonfire.Boundaries.Queries.verb_ids(unquote(verb))
       case unquote(user) do
         %{id: user_id, instance_admin: %{is_instance_admin: true}} ->
-          unquote(admin_can(controlled, controlled_id))
+          unquote(admin_can(verb, controlled, controlled_id))
         %{id: user_id} ->
-          unquote(user_can(controlled, controlled_id))
+          unquote(user_can(verb, controlled, controlled_id))
         user_id when is_binary(user_id) ->
-            unquote(user_can(controlled, controlled_id))
+            unquote(user_can(verb, controlled, controlled_id))
           _ ->
-          unquote(guest_can(controlled, controlled_id))
+          unquote(guest_can(verb, controlled, controlled_id))
       end
       |> Ecto.Query.subquery()
     end
@@ -62,6 +62,95 @@ defmodule Bonfire.Boundaries.Queries do
   def verb_ids(verbs) when is_list(verbs), do: Enum.map(verbs, &Bonfire.Data.AccessControl.Verbs.id!(&1))
   def verb_ids(verb) when is_atom(verb), do: [Bonfire.Data.AccessControl.Verbs.id!(verb)]
   def verb_ids(_), do: []
+
+  defp guest_can(_, controlled, controlled_id) do
+    quote do
+      guest_circle_id = Bonfire.Boundaries.Circles.circles()[:guest]
+      Ecto.Query.from(controlled in Bonfire.Data.AccessControl.Controlled, [
+        join: acl in assoc(controlled, :acl),
+        join: grant in assoc(acl, :grants),
+        join: access in assoc(grant, :access),
+        join: interact in assoc(access, :interacts),
+        left_join: circle in Bonfire.Data.Social.Circle,
+        on: grant.subject_id == circle.id,
+        where: interact.verb_id in ^verb_ids,
+        where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
+        group_by: [controlled.id, interact.id],
+        having: fragment("agg_perms(?)", interact.value),
+        select: struct(interact, [:id]),
+        # guest can:
+        where: circle.id == ^guest_circle_id,
+      ])
+    end
+  end
+
+  defp user_can(_, controlled, controlled_id) do
+    quote do
+      guest_circle_id = Bonfire.Boundaries.Circles.circles()[:guest]
+      Ecto.Query.from(controlled in Bonfire.Data.AccessControl.Controlled, [
+        join: acl in assoc(controlled, :acl),
+        join: grant in assoc(acl, :grants),
+        join: access in assoc(grant, :access),
+        join: interact in assoc(access, :interacts),
+        left_join: circle in Bonfire.Data.Social.Circle,
+        on: grant.subject_id == circle.id,
+        where: interact.verb_id in ^verb_ids,
+        where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
+        group_by: [controlled.id, interact.id],
+        having: fragment("agg_perms(?)", interact.value),
+        select: struct(interact, [:id]),
+        # guest or user or circle-user-is-in can:
+        left_join: encircle in assoc(circle, :encircles),
+        where: circle.id == ^guest_circle_id or grant.subject_id == ^user_id or encircle.subject_id == ^user_id,
+      ])
+    end
+  end
+
+  @doc "Checks if an admin OR the user can X"
+  defp admin_can(verb, controlled, controlled_id) when verb in [:see, :read] or verb == [:see, :read] do
+    quote do
+      admin_circle_id = Bonfire.Boundaries.Circles.circles()[:admin]
+      guest_circle_id = Bonfire.Boundaries.Circles.circles()[:guest]
+      Ecto.Query.from(controlled in Bonfire.Data.AccessControl.Controlled, [
+        join: acl in assoc(controlled, :acl),
+        join: grant in assoc(acl, :grants),
+        join: access in assoc(grant, :access),
+        left_join: circle in Bonfire.Data.Social.Circle,
+        on: grant.subject_id == circle.id,
+        where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
+        group_by: [controlled.id, access.id],
+        # guest or admin or user or circle-user-is-in can see/read:
+        having: fragment("agg_perms(?)", access.can_see),
+        select: %{struct(access, [:id]) | can_see: fragment("agg_perms(?)", access.can_see), can_read: fragment("agg_perms(?)", access.can_read)},
+        left_join: encircle in assoc(circle, :encircles),
+        where: circle.id == ^guest_circle_id or circle.id == ^admin_circle_id or grant.subject_id == ^user_id or encircle.subject_id == ^user_id,
+      ])
+    end
+  end
+
+  @doc "Checks if an admin OR the user can X"
+  defp admin_can(_, controlled, controlled_id) do
+    quote do
+      admin_circle_id = Bonfire.Boundaries.Circles.circles()[:admin]
+      guest_circle_id = Bonfire.Boundaries.Circles.circles()[:guest]
+      Ecto.Query.from(controlled in Bonfire.Data.AccessControl.Controlled, [
+        join: acl in assoc(controlled, :acl),
+        join: grant in assoc(acl, :grants),
+        join: access in assoc(grant, :access),
+        join: interact in assoc(access, :interacts),
+        left_join: circle in Bonfire.Data.Social.Circle,
+        on: grant.subject_id == circle.id,
+        where: interact.verb_id in ^verb_ids,
+        where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
+        group_by: [controlled.id, interact.id],
+        having: fragment("agg_perms(?)", interact.value),
+        select: %{struct(interact, [:id]) | value: fragment("agg_perms(?)", interact.value)},
+        # guest or admin or user or circle-user-is-in can:
+        left_join: encircle in assoc(circle, :encircles),
+        where: circle.id == ^guest_circle_id or circle.id == ^admin_circle_id or grant.subject_id == ^user_id or encircle.subject_id == ^user_id,
+      ])
+    end
+  end
 
   # defp can_deprecated(controlled, user, verb) when is_atom(controlled) do
   #   quote do
@@ -105,73 +194,6 @@ defmodule Bonfire.Boundaries.Queries do
   #   end
   # end
 
-  defp guest_can(controlled, controlled_id) do
-    quote do
-      guest_circle_id = Bonfire.Boundaries.Circles.circles()[:guest]
-      Ecto.Query.from(controlled in Bonfire.Data.AccessControl.Controlled, [
-        join: acl in assoc(controlled, :acl),
-        join: grant in assoc(acl, :grants),
-        join: access in assoc(grant, :access),
-        join: interact in assoc(access, :interacts),
-        left_join: circle in Bonfire.Data.Social.Circle,
-        on: grant.subject_id == circle.id,
-        where: interact.verb_id in ^verb_ids,
-        where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
-        group_by: [controlled.id, interact.id],
-        having: fragment("agg_perms(?)", interact.value),
-        select: struct(interact, [:id]),
-        # guest can:
-        where: circle.id == ^guest_circle_id,
-      ])
-    end
-  end
-
-  defp user_can(controlled, controlled_id) do
-    quote do
-      guest_circle_id = Bonfire.Boundaries.Circles.circles()[:guest]
-      Ecto.Query.from(controlled in Bonfire.Data.AccessControl.Controlled, [
-        join: acl in assoc(controlled, :acl),
-        join: grant in assoc(acl, :grants),
-        join: access in assoc(grant, :access),
-        join: interact in assoc(access, :interacts),
-        left_join: circle in Bonfire.Data.Social.Circle,
-        on: grant.subject_id == circle.id,
-        where: interact.verb_id in ^verb_ids,
-        where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
-        group_by: [controlled.id, interact.id],
-        having: fragment("agg_perms(?)", interact.value),
-        select: struct(interact, [:id]),
-        # guest or user or circle-user-is-in can:
-        left_join: encircle in assoc(circle, :encircles),
-        where: circle.id == ^guest_circle_id or grant.subject_id == ^user_id or encircle.subject_id == ^user_id,
-      ])
-    end
-  end
-
-  @doc "Checks if an admin OR the user can"
-  defp admin_can(controlled, controlled_id) do
-    quote do
-      admin_circle_id = Bonfire.Boundaries.Circles.circles()[:admin]
-      guest_circle_id = Bonfire.Boundaries.Circles.circles()[:guest]
-      Ecto.Query.from(controlled in Bonfire.Data.AccessControl.Controlled, [
-        join: acl in assoc(controlled, :acl),
-        join: grant in assoc(acl, :grants),
-        join: access in assoc(grant, :access),
-        join: interact in assoc(access, :interacts),
-        left_join: circle in Bonfire.Data.Social.Circle,
-        on: grant.subject_id == circle.id,
-        where: interact.verb_id in ^verb_ids,
-        where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
-        group_by: [controlled.id, interact.id],
-        having: fragment("agg_perms(?)", interact.value),
-        select: struct(interact, [:id]),
-        # guest or admin or user or circle-user-is-in can:
-        left_join: encircle in assoc(circle, :encircles),
-        where: circle.id == ^guest_circle_id or circle.id == ^admin_circle_id or grant.subject_id == ^user_id or encircle.subject_id == ^user_id,
-      ])
-    end
-  end
-
 
   @doc "Call the `add_perms(bool?, bool?)` postgres function for combining permissions."
   defmacro add_perms(l, r) do
@@ -184,6 +206,7 @@ defmodule Bonfire.Boundaries.Queries do
   end
 
   @doc """
+  FIXME
   Lists permitted interactions on something for the current user.
 
   Parameters are the alias for the controlled item in the parent

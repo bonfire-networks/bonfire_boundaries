@@ -15,7 +15,7 @@ defmodule Bonfire.Boundaries.Accesses do
   end
 
   def accesses_fixture do
-    Enum.map(accesses(), fn {k, v} -> %{id: v} end)
+    Enum.map(accesses(), fn {k, v} -> %{id: v, can_see: true, can_read: true} end)
   end
 
   def create(%{}=attrs) when not is_struct(attrs) do
