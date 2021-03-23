@@ -59,6 +59,13 @@ defmodule Bonfire.Boundaries.Fixtures do
       on_conflict: :nothing
     )
 
+    # say no (false) for every verb in the no_no_no access
+    repo().insert_all(
+      Interact,
+      Enum.map(verbs, fn {_, v} -> %{id: ULID.generate(), access_id: accesses.no_no_no, verb_id: v, value: false} end),
+      on_conflict: :nothing
+    )
+
     # some of these things are public
     # the read_only ACL and the read Verb are visible to local users, so they need an
     # acl and a controlled mixin that associates them
@@ -66,7 +73,7 @@ defmodule Bonfire.Boundaries.Fixtures do
 
     repo().insert_all(
       Acl,
-      [ %{id: acls.read_only} ],
+      Acls.acls_fixture(),
       on_conflict: :nothing
     )
 

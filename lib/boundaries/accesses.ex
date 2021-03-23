@@ -11,11 +11,12 @@ defmodule Bonfire.Boundaries.Accesses do
   def accesses do
     %{ read_only:  "2HE0N1YACCESS1SREADACCESS1",
        administer: "2T0TA1C0NTR010VERS0METH1NG",
+       no_no_no: "1D0N0TG1VEC0NSENTT0ANYVERB",
     }
   end
 
   def accesses_fixture do
-    Enum.map(accesses(), fn {k, v} -> %{id: v, can_see: true, can_read: true} end)
+    Enum.map(accesses(), fn {_k, v} -> %{id: v, can_see: true, can_read: true} end)
   end
 
   def create(%{}=attrs) when not is_struct(attrs) do

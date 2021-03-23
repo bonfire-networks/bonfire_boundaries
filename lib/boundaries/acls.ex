@@ -9,7 +9,14 @@ defmodule Bonfire.Boundaries.Acls do
   alias Ecto.Changeset
 
   def acls do
-    %{ read_only:  "AC10N1YACCESS1SREADACCESS1"}
+    %{
+      read_only:  "AC10N1YACCESS1SREADACCESS1",
+      instance_blocked: "110CA1ADM1NSHAVESA1DEN0VGH"
+    }
+  end
+
+  def acls_fixture do
+    Enum.map(acls(), fn {_k, v} -> %{id: v} end)
   end
 
   def create(%{}=attrs) when not is_struct(attrs) do
