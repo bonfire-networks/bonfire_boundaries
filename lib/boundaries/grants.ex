@@ -10,9 +10,12 @@ defmodule Bonfire.Boundaries.Grants do
     %{ read_only:  "GRANT0N1YACCESS1SREADACCES"}
   end
 
-  def grant(subject_id, acl_id, access_id \\ :read_only)
+  def grant(subject_id, acl_id, access \\ :read_only)
+
   def grant(subject_id, acl_id, access) when is_atom(access), do: grant(subject_id, acl_id, Accesses.accesses[access])
+
   def grant(subject_ids, acl_id, access_id) when is_list(subject_ids), do: Enum.each(subject_ids, &grant(&1, acl_id, access_id))
+
   def grant(subject_id, acl_id, access_id) do
     create(%{
       subject_id: subject_id, # who we are granting access to

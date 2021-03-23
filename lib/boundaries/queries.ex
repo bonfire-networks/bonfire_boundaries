@@ -63,6 +63,26 @@ defmodule Bonfire.Boundaries.Queries do
   def verb_ids(verb) when is_atom(verb), do: [Bonfire.Data.AccessControl.Verbs.id!(verb)]
   def verb_ids(_), do: []
 
+  @doc "Checks if a guest (i.e. anyone) can X"
+  defp guest_can(verb, controlled, controlled_id) when verb in [:see, :read] or verb == [:see, :read] do
+    quote do
+      guest_circle_id = Bonfire.Boundaries.Circles.circles()[:guest]
+      Ecto.Query.from(controlled in Bonfire.Data.AccessControl.Controlled, [
+        join: acl in assoc(controlled, :acl),
+        join: grant in assoc(acl, :grants),
+        join: access in assoc(grant, :access),
+        left_join: circle in Bonfire.Data.Social.Circle,
+        on: grant.subject_id == circle.id,
+        where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
+        group_by: [controlled.id, access.id],
+        # guest or user or circle-user-is-in can see/read:
+        having: fragment("agg_perms(?)", access.can_see),
+        select: %{struct(access, [:id]) | can_see: fragment("agg_perms(?)", access.can_see), can_read: fragment("agg_perms(?)", access.can_read)},
+        where: circle.id == ^guest_circle_id,
+      ])
+    end
+  end
+
   defp guest_can(_, controlled, controlled_id) do
     quote do
       guest_circle_id = Bonfire.Boundaries.Circles.circles()[:guest]
@@ -80,6 +100,27 @@ defmodule Bonfire.Boundaries.Queries do
         select: struct(interact, [:id]),
         # guest can:
         where: circle.id == ^guest_circle_id,
+      ])
+    end
+  end
+
+  @doc "Checks if an user OR the user can X"
+  defp user_can(verb, controlled, controlled_id) when verb in [:see, :read] or verb == [:see, :read] do
+    quote do
+      guest_circle_id = Bonfire.Boundaries.Circles.circles()[:guest]
+      Ecto.Query.from(controlled in Bonfire.Data.AccessControl.Controlled, [
+        join: acl in assoc(controlled, :acl),
+        join: grant in assoc(acl, :grants),
+        join: access in assoc(grant, :access),
+        left_join: circle in Bonfire.Data.Social.Circle,
+        on: grant.subject_id == circle.id,
+        where: controlled.id == field(parent_as(unquote(controlled)), unquote(controlled_id)),
+        group_by: [controlled.id, access.id],
+        # guest or user or circle-user-is-in can see/read:
+        having: fragment("agg_perms(?)", access.can_see),
+        select: %{struct(access, [:id]) | can_see: fragment("agg_perms(?)", access.can_see), can_read: fragment("agg_perms(?)", access.can_read)},
+        left_join: encircle in assoc(circle, :encircles),
+        where: circle.id == ^guest_circle_id or grant.subject_id == ^user_id or encircle.subject_id == ^user_id,
       ])
     end
   end
