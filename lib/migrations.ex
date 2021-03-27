@@ -46,9 +46,11 @@ defmodule Bonfire.Boundaries.Migrations do
       Bonfire.Data.AccessControl.Verb.Migration.migrate_verb()
       Bonfire.Data.AccessControl.Interact.Migration.migrate_interact()
 
+      Ecto.Migration.flush()
+
       Bonfire.Boundaries.Migrations.migrate_functions()
 
-      Ecto.Migration.flush()
+      # Ecto.Migration.flush()
 
       # insert initial data (moved to its own repo/migrations file)
       # Bonfire.Boundaries.Fixtures.insert()
