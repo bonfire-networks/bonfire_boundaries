@@ -31,9 +31,11 @@ defmodule Bonfire.Boundaries.Circles do
     repo().insert(changeset(:create, attrs))
   end
 
-  def changeset(:create, attrs), do: Circle.changeset(attrs)
-    |> Changeset.cast_assoc(:named, with: &Named.changeset/2)
+  def changeset(:create, attrs), do: changeset(attrs)
     |> Changeset.cast_assoc(:caretaker, with: &Caretaker.changeset/2)
+
+  def changeset(circle \\ %Circle{}, attrs), do: Circle.changeset(circle, attrs)
+    |> Changeset.cast_assoc(:named, with: &Named.changeset/2)
     |> Changeset.cast_assoc(:encircles, with: &Encircle.changeset/2)
 
 end
