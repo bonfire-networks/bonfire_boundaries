@@ -7,15 +7,7 @@ defmodule Bonfire.Boundaries.Test.FakeHelpers do
 
   import Bonfire.Boundaries.Integration
 
-  def fake_account!(attrs \\ %{}) do
-    cs = Accounts.signup_changeset(Fake.account(attrs))
-    assert {:ok, account} = repo().insert(cs)
-    account
-  end
+  Bonfire.Common.Utils.import_if_available(Bonfire.Me.Fake)
 
-  def fake_user!(%Account{}=account, attrs \\ %{}) do
-    assert {:ok, user} = Users.create(Fake.user(attrs), account)
-    user
-  end
 
 end
