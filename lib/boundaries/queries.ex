@@ -59,7 +59,7 @@ defmodule Bonfire.Boundaries.Queries do
     end
   end
 
-  def verb_ids(verbs) when is_list(verbs), do: Enum.map(verbs, Bonfire.Boundaries.Verbs.get(&1))
+  def verb_ids(verbs) when is_list(verbs), do: Enum.map(verbs, &Bonfire.Boundaries.Verbs.get(&1))
   def verb_ids(verb) when is_atom(verb), do: [Bonfire.Boundaries.Verbs.get(verb)]
   def verb_ids(_), do: []
 
