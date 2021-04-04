@@ -8,6 +8,10 @@ defmodule Bonfire.Boundaries.Verbs do
     Bonfire.Common.Config.get!(:verbs)
   end
 
+def get(verb) do
+Bonfire.Common.Config.get!([:verbs, verb])
+end
+
   def verbs_fixture do
     Enum.map(verbs(), fn {k, v} -> %{id: v, verb: to_string(k)} end)
   end
