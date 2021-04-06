@@ -14,9 +14,10 @@ defmodule Bonfire.Boundaries.Grants do
 
   def grant(subject_id, acl_id, access) when is_atom(access), do: grant(subject_id, acl_id, Accesses.accesses[access])
 
-  def grant(subject_ids, acl_id, access_id) when is_list(subject_ids), do: Enum.each(subject_ids, &grant(&1, acl_id, access_id))
+  def grant(subject_ids, acl_id, access) when is_list(subject_ids), do: Enum.each(subject_ids, &grant(&1, acl_id, access))
 
-  def grant(subject_id, acl_id, access_id) do
+  def grant(%{id: subject_id}, acl_id, access_id), do: grant(subject_id, acl_id, access_id)
+  def grant(subject_id, acl_id, access_id) when is_binary(subject_id) and is_binary(acl_id) and is_binary(access_id) do
     create(%{
       subject_id: subject_id, # who we are granting access to
       acl_id:     acl_id, # what (list of) things we are granting access to
