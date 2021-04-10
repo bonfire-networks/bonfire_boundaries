@@ -17,6 +17,47 @@ defmodule Bonfire.Boundaries.Circles do
     Bonfire.Common.Config.get!(:circle_names)
   end
 
+  def list_builtins() do
+    circles()
+    |> Enum.map(fn
+      {slug, id} ->
+        %{
+          id: id,
+          slug: slug,
+          name: circle_names()[slug]
+        }
+      _ -> nil
+    end)
+  end
+
+  def by_id(id) do
+    circles()
+    |> Enum.find(fn {key, val} -> val == id end)
+    # |> elem(0)
+  end
+
+  def get_name(id) when is_binary(id) do
+    case by_id(id) do
+      {slug, _} -> get_name(slug)
+      _ ->  #TODO
+    end
+  end
+
+  def get_name(slug) when is_atom(slug) do
+    Bonfire.Common.Config.get([:circle_names, slug])
+  end
+
+  def get_tuple(id) when is_binary(id) do
+    case by_id(id) do
+      {slug, _} -> get_tuple(slug)
+      _ ->  # TODO
+    end
+  end
+
+  def get_tuple(slug) when is_atom(slug) do
+    {Bonfire.Common.Config.get!([:circle_names, slug]), Bonfire.Common.Config.get!([:default_circles, slug])}
+  end
+
   def circles_fixture do
     Enum.map(circles(), fn {k, v} -> %{id: v} end)
   end
