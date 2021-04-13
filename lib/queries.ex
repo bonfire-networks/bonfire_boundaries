@@ -11,12 +11,12 @@ defmodule Bonfire.Boundaries.Queries do
   lateral join and the macro is a bit loltastic when we could just
   return an arbitrary tuple if ecto would support inferring (or us
   providing) the return type of a subquery.
+
   """
-  alias Bonfire.Data.AccessControl.Controlled
-  alias Bonfire.Data.Social.Circle
-  alias Bonfire.Boundaries.Verbs
-  alias Bonfire.Me.Users
-  alias Bonfire.Boundaries.Circles
+  # alias Bonfire.Data.AccessControl.Controlled
+  # alias Bonfire.Data.Social.Circle
+  # alias Bonfire.Boundaries.Verbs
+  # alias Bonfire.Boundaries.Circles
 
   @doc """
   A subquery to join to which filters out results the current user is
@@ -86,7 +86,7 @@ defmodule Bonfire.Boundaries.Queries do
     ]
   end
 
-  defp can_other(verb, controlled_schema, controlled_id) do
+  defp can_other(_verb, controlled_schema, controlled_id) do
     quote do: [
       join: acl in assoc(controlled, :acl),
       join: grant in assoc(acl, :grants),
@@ -113,7 +113,7 @@ defmodule Bonfire.Boundaries.Queries do
     ]
   end
 
-  @doc "Checks if a guest (i.e. anyone) can X"
+  #doc "Checks if a guest (i.e. anyone) can X"
   defp guest_can(verb, controlled_schema, controlled_id) when verb in [:see, :read] or verb == [:see, :read] do
     controlled_query(can_see_read(controlled_schema, controlled_id) ++ guest_where())
   end
@@ -153,8 +153,8 @@ defmodule Bonfire.Boundaries.Queries do
   Does not recognise admins correctly right now, they're treated as regular users.
   """
   def permitted_on(controlled, user) do
-    local = Users.local_user_id() # FIXME, what should this do?
-    guest = Users.guest_user_id()
+    local = Bonfire.Me.Users.local_user_id() # FIXME, what should this do?
+    guest = Bonfire.Me.Users.guest_user_id()
     quote do
       require Ecto.Query
       users = case unquote(user) do

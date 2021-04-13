@@ -1,6 +1,6 @@
 defmodule Bonfire.Boundaries.Circles do
 
-  alias Bonfire.Data.Social.Named
+  alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Social.Circle
   alias Bonfire.Data.Social.Encircle
   alias Bonfire.Data.Identity.Caretaker
@@ -32,14 +32,14 @@ defmodule Bonfire.Boundaries.Circles do
 
   def by_id(id) do
     circles()
-    |> Enum.find(fn {key, val} -> val == id end)
+    |> Enum.find(fn {_key, val} -> val == id end)
     # |> elem(0)
   end
 
   def get_name(id) when is_binary(id) do
     case by_id(id) do
       {slug, _} -> get_name(slug)
-      _ ->  #TODO
+      _ ->  nil #TODO
     end
   end
 
@@ -50,7 +50,7 @@ defmodule Bonfire.Boundaries.Circles do
   def get_tuple(id) when is_binary(id) do
     case by_id(id) do
       {slug, _} -> get_tuple(slug)
-      _ ->  # TODO
+      _ -> nil  # TODO
     end
   end
 
@@ -59,7 +59,7 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   def circles_fixture do
-    Enum.map(circles(), fn {k, v} -> %{id: v} end)
+    Enum.map(circles(), fn {_k, v} -> %{id: v} end)
   end
 
   def circles_named_fixture do
@@ -72,10 +72,12 @@ defmodule Bonfire.Boundaries.Circles do
     repo().insert(changeset(:create, attrs))
   end
 
+  def changeset(circle \\ %Circle{}, attrs)
+
   def changeset(:create, attrs), do: changeset(attrs)
     |> Changeset.cast_assoc(:caretaker, with: &Caretaker.changeset/2)
 
-  def changeset(circle \\ %Circle{}, attrs), do: Circle.changeset(circle, attrs)
+  def changeset(%Circle{} = circle, attrs), do: Circle.changeset(circle, attrs)
     |> Changeset.cast_assoc(:named, with: &Named.changeset/2)
     |> Changeset.cast_assoc(:encircles, with: &Encircle.changeset/2)
 

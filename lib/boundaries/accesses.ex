@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Accesses do
 
   alias Bonfire.Data.AccessControl.Access
-  alias Bonfire.Data.Social.Named
+  alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Identity.Caretaker
 
   import Bonfire.Boundaries.Integration
