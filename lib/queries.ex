@@ -53,7 +53,7 @@ defmodule Bonfire.Boundaries.Queries do
         %{id: user_id} ->
           unquote(user_can(verb, controlled_schema, controlled_id, [guests]))
         user_id when is_binary(user_id) ->
-          unquote(user_can(verb, controlled_schema, controlled_id, []))
+          unquote(user_can(verb, controlled_schema, controlled_id, [guests]))
         _ ->
           unquote(guest_can(verb, controlled_schema, controlled_id))
       end
@@ -71,8 +71,7 @@ defmodule Bonfire.Boundaries.Queries do
     end
   end
 
-
-  defp can_see_read(controlled_schema, controlled_id) do
+  defp can_join_where(verb, controlled_schema, controlled_id) when verb in [:see, :read] or verb == [:see, :read] or verb == [:read, :see] do
     quote do: [
       join: acl in assoc(controlled, :acl),
       join: grant in assoc(acl, :grants),
@@ -86,7 +85,7 @@ defmodule Bonfire.Boundaries.Queries do
     ]
   end
 
-  defp can_other(_verb, controlled_schema, controlled_id) do
+  defp can_join_where(_verb, controlled_schema, controlled_id) do
     quote do: [
       join: acl in assoc(controlled, :acl),
       join: grant in assoc(acl, :grants),
@@ -114,20 +113,13 @@ defmodule Bonfire.Boundaries.Queries do
   end
 
   #doc "Checks if a guest (i.e. anyone) can X"
-  defp guest_can(verb, controlled_schema, controlled_id) when verb in [:see, :read] or verb == [:see, :read] do
-    controlled_query(can_see_read(controlled_schema, controlled_id) ++ guest_where())
-  end
 
   defp guest_can(verb, controlled_schema, controlled_id) do
-    controlled_query(can_other(verb, controlled_schema, controlled_id) ++ guest_where())
-  end
-
-  defp user_can(verb, controlled_schema, controlled_id, circles) when verb in [:see, :read] or verb == [:see, :read] do
-    controlled_query(can_see_read(controlled_schema, controlled_id) ++ user_where(circles))
+    controlled_query(can_join_where(verb, controlled_schema, controlled_id) ++ guest_where())
   end
 
   defp user_can(verb, controlled_schema, controlled_id, circles) do
-    controlled_query(can_other(verb, controlled_schema, controlled_id) ++ user_where(circles))
+    controlled_query(can_join_where(verb, controlled_schema, controlled_id) ++ user_where(circles))
   end
 
   @doc "Call the `add_perms(bool?, bool?)` postgres function for combining permissions."
