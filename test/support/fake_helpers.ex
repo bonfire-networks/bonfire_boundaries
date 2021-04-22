@@ -7,7 +7,7 @@ defmodule Bonfire.Boundaries.Test.FakeHelpers do
 
   import Bonfire.Boundaries.Integration
 
-  Bonfire.Common.Utils.import_if_available(Bonfire.Me.Fake)
+  Bonfire.Common.Utils.import_if_enabled(Bonfire.Me.Fake)
 
 
 end
