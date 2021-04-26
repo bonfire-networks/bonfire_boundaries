@@ -6,6 +6,7 @@ defmodule Bonfire.Boundaries.Test.FakeHelpers do
   import ExUnit.Assertions
 
   import Bonfire.Boundaries.Integration
+  require Bonfire.Common.Utils
 
   Bonfire.Common.Utils.import_if_enabled(Bonfire.Me.Fake)
 
