@@ -12,9 +12,11 @@ defmodule Bonfire.Boundaries.Grants do
 
   def grant(subject_id, acl_id, access \\ :read_only)
 
+  def grant(subject_ids, acl_id, access) when is_list(subject_ids), do: subject_ids |> Enum.uniq() |> Enum.each(&grant(&1, acl_id, access))
+
   def grant(subject_id, acl_id, access) when is_atom(access), do: grant(subject_id, acl_id, Accesses.accesses[access])
 
-  def grant(subject_ids, acl_id, access) when is_list(subject_ids), do: subject_ids |> Enum.uniq() |> Enum.each(&grant(&1, acl_id, access))
+  def grant(subject_id, acl_id, access) when is_atom(subject_id), do: grant(Bonfire.Boundaries.Circles.circles[subject_id], acl_id, access)
 
   def grant(%{id: subject_id}, acl_id, access_id), do: grant(subject_id, acl_id, access_id)
   def grant(subject_id, acl_id, access_id) when is_binary(subject_id) and is_binary(acl_id) and is_binary(access_id) do
