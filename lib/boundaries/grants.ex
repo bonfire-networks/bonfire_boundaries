@@ -16,7 +16,7 @@ defmodule Bonfire.Boundaries.Grants do
 
   def grant(subject_id, acl_id, access) when is_atom(access), do: grant(subject_id, acl_id, Accesses.accesses[access])
 
-  def grant(subject_id, acl_id, access) when is_atom(subject_id), do: grant(Bonfire.Boundaries.Circles.circles[subject_id], acl_id, access)
+  def grant(subject_id, acl_id, access) when is_atom(subject_id) and not is_nil(subject_id), do: grant(Bonfire.Boundaries.Circles.circles[subject_id], acl_id, access)
 
   def grant(%{id: subject_id}, acl_id, access_id), do: grant(subject_id, acl_id, access_id)
   def grant(subject_id, acl_id, access_id) when is_binary(subject_id) and is_binary(acl_id) and is_binary(access_id) do
@@ -26,6 +26,8 @@ defmodule Bonfire.Boundaries.Grants do
       access_id:  access_id, # what level of access
     })
   end
+
+  def grant(_, _, _), do: nil
 
   def create(%{}=attrs) when not is_struct(attrs) do
     repo().insert(changeset(attrs))
