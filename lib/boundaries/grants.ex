@@ -12,13 +12,10 @@ defmodule Bonfire.Boundaries.Grants do
 
   def grant(subject_id, acl_id, access \\ :read_only)
 
-  def grant(subject_ids, acl_id, access) when is_list(subject_ids), do: subject_ids |> Enum.uniq() |> Enum.each(&grant(&1, acl_id, access))
+  def grant(subject_ids, acl_id, access) when is_list(subject_ids), do: subject_ids |> subject_id() |> Enum.uniq() |> Enum.map(&grant(&1, acl_id, access)) # TODO: optimise?
 
   def grant(subject_id, acl_id, access) when is_atom(access), do: grant(subject_id, acl_id, Accesses.accesses[access])
 
-  def grant(subject_id, acl_id, access) when is_atom(subject_id) and not is_nil(subject_id), do: grant(Bonfire.Boundaries.Circles.circles[subject_id], acl_id, access)
-
-  def grant(%{id: subject_id}, acl_id, access_id), do: grant(subject_id, acl_id, access_id)
   def grant(subject_id, acl_id, access_id) when is_binary(subject_id) and is_binary(acl_id) and is_binary(access_id) do
     create(%{
       subject_id: subject_id, # who we are granting access to
@@ -27,7 +24,17 @@ defmodule Bonfire.Boundaries.Grants do
     })
   end
 
+  def grant(subject_id, acl_id, access) when not is_nil(subject_id), do: grant(subject_id(subject_id), acl_id, access)
+
   def grant(_, _, _), do: nil
+
+
+  def subject_id(subjects) when is_list(subjects), do: Enum.map(subjects, &subject_id/1)
+  def subject_id(subject_id) when is_atom(subject_id) and not is_nil(subject_id), do: Boundaries.Circles.circles[subject_id]
+  def subject_id(%{id: subject_id}), do: subject_id
+  def subject_id(subject_id) when is_binary(subject_id), do: subject_id
+  def subject_id(_), do: nil
+
 
   def create(%{}=attrs) when not is_struct(attrs) do
     repo().insert(changeset(attrs))
