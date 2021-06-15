@@ -46,7 +46,7 @@ defmodule Bonfire.Boundaries.Queries do
     quote do
       require Ecto.Query
       require Bonfire.Boundaries.Queries
-      verb_ids = Bonfire.Boundaries.Queries.verb_ids(unquote(verb))
+      verb_ids = Bonfire.Boundaries.Verbs.ids(unquote(verb))
       case unquote(user) do
         %{id: user_id, instance_admin: %{is_instance_admin: true}} ->
           unquote(user_can(verb, controlled_schema, controlled_id, [guests, admins]))
@@ -60,10 +60,6 @@ defmodule Bonfire.Boundaries.Queries do
       |> Ecto.Query.subquery()
     end
   end
-
-  def verb_ids(verbs) when is_list(verbs), do: Enum.map(verbs, &Bonfire.Boundaries.Verbs.get(&1))
-  def verb_ids(verb) when is_atom(verb), do: [Bonfire.Boundaries.Verbs.get(verb)]
-  def verb_ids(_), do: []
 
   defp controlled_query(args) do
     quote do

@@ -10,10 +10,24 @@ defmodule Bonfire.Boundaries.Verbs do
 
   def verbs, do: declare_verbs
 
-  def get(verb) do
-    Bonfire.Common.Config.get!([:verbs, verb])
-    # TODO use Verbs service
+  def id!(verb) do
+    Bonfire.Common.Config.get([:verbs, verb], Bonfire.Data.AccessControl.Verbs.id!(verb))
   end
+
+  def id(verb) do
+    Bonfire.Common.Config.get([:verbs, verb], id_ok(verb))
+  end
+
+  defp id_ok(verb) do
+    with {:ok, id} <- Bonfire.Data.AccessControl.Verbs.id(verb) do
+      id
+    else _ -> nil
+    end
+  end
+
+  def ids(verbs) when is_list(verbs), do: Enum.map(verbs, &id(&1)) |> Enum.reject(&is_nil/1)
+  def ids(verb) when is_atom(verb), do: [id(verb)] |> Enum.reject(&is_nil/1)
+  def ids(_), do: []
 
   def verbs_fixture do
     Enum.map(verbs(), fn {k, v} -> %{id: v, verb: to_string(k)} end)
