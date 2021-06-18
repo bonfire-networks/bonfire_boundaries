@@ -30,7 +30,7 @@ defmodule Bonfire.Boundaries.Grants do
 
 
   def subject_id(subjects) when is_list(subjects), do: Enum.map(subjects, &subject_id/1)
-  def subject_id(subject_id) when is_atom(subject_id) and not is_nil(subject_id), do: Boundaries.Circles.circles[subject_id]
+  def subject_id(subject_id) when is_atom(subject_id) and not is_nil(subject_id), do: Bonfire.Boundaries.Circles.circles[subject_id]
   def subject_id(%{id: subject_id}), do: subject_id
   def subject_id(subject_id) when is_binary(subject_id), do: subject_id
   def subject_id(_), do: nil
