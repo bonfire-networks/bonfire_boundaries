@@ -12,7 +12,7 @@ defmodule Bonfire.Boundaries.Controlleds do
     Controlled.changeset(c, attrs)
   end
 
-  def list, do: repo().all(from(
+  def list, do: repo().many(from(
     u in Controlled,
     left_join: acl in assoc(u, :acl),
     left_join: named in assoc(acl, :named),

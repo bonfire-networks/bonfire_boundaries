@@ -29,6 +29,6 @@ defmodule Bonfire.Boundaries.Accesses do
     |> Changeset.cast_assoc(:caretaker, with: &Caretaker.changeset/2)
   end
 
-  def list, do: repo().all(from(u in Access, left_join: named in assoc(u, :named), preload: [:named]))
+  def list, do: repo().many(from(u in Access, left_join: named in assoc(u, :named), preload: [:named]))
 
 end

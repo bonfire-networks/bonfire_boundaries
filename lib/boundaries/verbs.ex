@@ -43,7 +43,7 @@ defmodule Bonfire.Boundaries.Verbs do
 
   def list(from \\ :db)
   def list(:db) do
-    repo().all(Verb)
+    repo().many(Verb)
     |> Enum.reduce(%{}, fn t, acc ->
       Map.merge(acc, %{t.verb => t})
     end)

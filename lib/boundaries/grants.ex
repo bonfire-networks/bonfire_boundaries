@@ -48,7 +48,7 @@ defmodule Bonfire.Boundaries.Grants do
     Grant.changeset(access, attrs)
   end
 
-  def list, do: repo().all(from(
+  def list, do: repo().many(from(
     u in Grant,
     left_join: acl in assoc(u, :acl),
     left_join: named in assoc(acl, :named),

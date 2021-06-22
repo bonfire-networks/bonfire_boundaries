@@ -29,7 +29,7 @@ defmodule Bonfire.Boundaries.Acls do
     |> Changeset.cast_assoc(:caretaker, with: &Caretaker.changeset/2)
   end
 
-  def list, do: repo().all(
+  def list, do: repo().many(
     from(u in Acl,
     left_join: named in assoc(u, :named),
     preload: [:named, :controlled, :caretaker, grants: [:subject_profile, :subject_named, access: [:interacts]]]

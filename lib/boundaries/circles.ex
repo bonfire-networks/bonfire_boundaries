@@ -72,7 +72,7 @@ defmodule Bonfire.Boundaries.Circles do
     Enum.map(circles(), fn {k, v} -> %{id: v, name: circle_names()[k]} end)
   end
 
-  def list, do: repo().all(from(u in Circle, left_join: named in assoc(u, :named), preload: [:named]))
+  def list, do: repo().many(from(u in Circle, left_join: named in assoc(u, :named), preload: [:named]))
 
   def create(%{}=attrs) do
     repo().insert(changeset(:create, attrs))
