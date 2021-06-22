@@ -74,6 +74,29 @@ defmodule Bonfire.Boundaries.Circles do
 
   def list, do: repo().many(from(u in Circle, left_join: named in assoc(u, :named), preload: [:named]))
 
+
+  def circle_ids(subjects) when is_list(subjects), do: subjects |> Enum.map(&circle_ids/1) |> Enum.uniq()
+  def circle_ids(circle_name) when is_atom(circle_name) and not is_nil(circle_name), do: get_id(circle_name)
+  def circle_ids(%{id: subject_id}), do: subject_id
+  def circle_ids(subject_id) when is_binary(subject_id), do: subject_id
+  def circle_ids(_), do: nil
+
+  def to_circle_ids(subjects) do
+    public = get_id(:guest)
+    selected_circles = circle_ids(subjects)
+
+    if public in selected_circles do # public/guests defaults to also being visible to local users and federating
+      selected_circles ++ [
+        get_id(:local),
+        get_id(:admin),
+        get_id(:activity_pub)
+      ]
+    else
+      selected_circles
+    end
+    |> Enum.uniq()
+  end
+
   def create(%{}=attrs) do
     repo().insert(changeset(:create, attrs))
   end
