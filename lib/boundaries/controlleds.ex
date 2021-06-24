@@ -5,7 +5,10 @@ defmodule Bonfire.Boundaries.Controlleds do
   import Ecto.Query
 
   def create(%{}=attrs) when not is_struct(attrs) do
-    repo().insert(changeset(attrs))
+    repo().insert(
+      changeset(attrs),
+      on_conflict: :nothing
+    )
   end
 
   def changeset(c \\ %Controlled{}, attrs) do
