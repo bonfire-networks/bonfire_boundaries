@@ -140,16 +140,23 @@ defmodule Bonfire.Boundaries.Queries do
 
   Does not recognise admins correctly right now, they're treated as regular users.
   """
-  def permitted_on(controlled, user) do
-    local = Bonfire.Me.Users.local_user_id() # FIXME, what should this do?
-    guest = Bonfire.Me.Users.guest_user_id()
+  def permitted_on(controlled_schema, user)
+  def permitted_on({controlled_schema, controlled_id}, user), do: permitted_on(controlled_schema, user, controlled_id)
+  def permitted_on(controlled_schema, user), do: permitted_on(controlled_schema, user, :id)
+
+  defp permitted_on(controlled_schema, user, controlled_id) do
+    local = Bonfire.Boundaries.Circles.circles()[:local]
+    guest = Bonfire.Boundaries.Circles.circles()[:guest]
+
     quote do
       require Ecto.Query
+
       users = case unquote(user) do
         %{id: id} -> [id, unquote(local)]
         _ -> [unquote(guest)]
       end
-      Ecto.Query.from controlled on Bonfire.Data.AccessControl.Controlled,
+
+    Ecto.Query.from controlled on Bonfire.Data.AccessControl.Controlled,
         join: acl in assoc(controlled, :acl),
         join: grant in assoc(acl, :grants),
         join: access in assoc(grant, :access),
@@ -158,7 +165,7 @@ defmodule Bonfire.Boundaries.Queries do
         on: grant.subject_id == circle.id,
         left_join: encircle in assoc(circle, :encircles),
         where: grant.subject_id in ^users or encircle.subject_id in ^users,
-        where: controlled.id == parent_as(unquote(controlled)).id,
+        where: controlled.id == field(parent_as(unquote(controlled_schema)), unquote(controlled_id)),
         group_by: [controlled.id, interact.verb_id],
         having: Bonfire.Boundaries.Queries.agg_perms(interact.value),
         select: struct(interact, [:id, :verb_id])
