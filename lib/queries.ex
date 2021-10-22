@@ -13,10 +13,6 @@ defmodule Bonfire.Boundaries.Queries do
   providing) the return type of a subquery.
 
   """
-  # alias Bonfire.Data.AccessControl.Controlled
-  # alias Bonfire.Data.Social.Circle
-  # alias Bonfire.Boundaries.Verbs
-  # alias Bonfire.Boundaries.Circles
 
   @doc """
   A subquery to join to which filters out results the current user is
@@ -44,17 +40,22 @@ defmodule Bonfire.Boundaries.Queries do
     admins = Bonfire.Boundaries.Circles.circles()[:admin]
     guests = Bonfire.Boundaries.Circles.circles()[:guest]
     quote do
+      require Logger
       require Ecto.Query
       require Bonfire.Boundaries.Queries
       verb_ids = Bonfire.Boundaries.Verbs.ids(unquote(verb))
       case unquote(user) do
         %{id: user_id, instance_admin: %{is_instance_admin: true}} ->
+          Logger.debug("Boundaries: query as admin")
           unquote(user_can(verb, controlled_schema, controlled_id, [guests, admins]))
         %{id: user_id} ->
+          Logger.debug("Boundaries: query as user")
           unquote(user_can(verb, controlled_schema, controlled_id, [guests]))
         user_id when is_binary(user_id) ->
+          Logger.debug("Boundaries: query as user")
           unquote(user_can(verb, controlled_schema, controlled_id, [guests]))
         _ ->
+          Logger.debug("Boundaries: query as guest")
           unquote(guest_can(verb, controlled_schema, controlled_id))
       end
       |> Ecto.Query.subquery()
