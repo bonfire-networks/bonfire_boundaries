@@ -10,6 +10,7 @@ defmodule Bonfire.Boundaries.Circles do
   alias Ecto.Changeset
 
   def circles do
+    # special built-in circles (eg, guest, local, activity_pub, admin)
     Bonfire.Common.Config.get!(:default_circles)
   end
 

@@ -1,5 +1,7 @@
 defmodule Bonfire.Boundaries.Acls do
-
+  @moduledoc """
+  acls represent fully populated access control rules that can be reused
+  """
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Identity.Caretaker
@@ -10,7 +12,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   def acls do
     %{
-      read_only:  "AC10N1YACCESS1SREADACCESS1",
+      read_only:  "AC10N1YACCESS1SREADACCESS1", # for stuff noone should be able to interact with
       instance_blocked: "110CA1ADM1NSHAVESA1DEN0VGH"
     }
   end

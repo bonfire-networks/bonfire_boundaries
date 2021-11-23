@@ -89,6 +89,7 @@ defmodule Bonfire.Boundaries.Fixtures do
     # finally, we do a horrible thing and grant read_only to
     # read_only_acl and it actually kinda works out because of the
     # indirection through pointer
+    # so it's recursive - we use the access control to access control the access control
     grants = Grants.grants()
 
     repo().insert_all(

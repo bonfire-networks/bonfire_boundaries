@@ -1,5 +1,7 @@
 defmodule Bonfire.Boundaries.Accesses do
-
+  @moduledoc """
+  an access can be granted many times
+  """
   alias Bonfire.Data.AccessControl.Access
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Identity.Caretaker
@@ -9,9 +11,9 @@ defmodule Bonfire.Boundaries.Accesses do
   alias Ecto.Changeset
 
   def accesses do
-    %{ read_only:  "2HE0N1YACCESS1SREADACCESS1",
-       administer: "2T0TA1C0NTR010VERS0METH1NG",
-       no_no_no: "1D0N0TG1VEC0NSENTT0ANYVERB",
+    %{ read_only:  "2HE0N1YACCESS1SREADACCESS1", # a collection of permissions that does not entitle someone to do anything but read. you can reuse that by granting it to multiple circles
+       administer: "2T0TA1C0NTR010VERS0METH1NG", # total control over something
+       no_no_no: "1D0N0TG1VEC0NSENTT0ANYVERB", # nothing is permitted
     }
   end
 
