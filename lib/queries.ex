@@ -13,6 +13,7 @@ defmodule Bonfire.Boundaries.Queries do
   providing) the return type of a subquery.
 
   """
+  require Logger
 
   @doc """
   A subquery to join to which filters out results the current user is
@@ -46,13 +47,13 @@ defmodule Bonfire.Boundaries.Queries do
       verb_ids = Bonfire.Boundaries.Verbs.ids(unquote(verb))
       case unquote(user) do
         %{id: user_id, instance_admin: %{is_instance_admin: true}} ->
-          Logger.debug("Boundaries: query as admin")
+          Logger.debug("Boundaries: query as admin and #{user_id}")
           unquote(user_can(verb, controlled_schema, controlled_id, [guests, admins]))
         %{id: user_id} ->
-          Logger.debug("Boundaries: query as user")
+          Logger.debug("Boundaries: query as user #{user_id}")
           unquote(user_can(verb, controlled_schema, controlled_id, [guests]))
         user_id when is_binary(user_id) ->
-          Logger.debug("Boundaries: query as user")
+          Logger.debug("Boundaries: query as user_id #{user_id}")
           unquote(user_can(verb, controlled_schema, controlled_id, [guests]))
         _ ->
           Logger.debug("Boundaries: query as guest")
@@ -103,10 +104,12 @@ defmodule Bonfire.Boundaries.Queries do
   end
 
   defp user_where(circles) do
-    quote do: [
-      left_join: encircle in assoc(circle, :encircles),
-      where: circle.id in ^unquote(circles) or grant.subject_id == ^user_id or encircle.subject_id == ^user_id,
-    ]
+    quote do
+      [
+        left_join: encircle in assoc(circle, :encircles),
+        where: circle.id in ^unquote(circles) or grant.subject_id == ^user_id or encircle.subject_id == ^user_id,
+      ]
+    end
   end
 
   #doc "Checks if a guest (i.e. anyone) can X"
@@ -171,6 +174,15 @@ defmodule Bonfire.Boundaries.Queries do
         having: Bonfire.Boundaries.Queries.agg_perms(interact.value),
         select: struct(interact, [:id, :verb_id])
     end
+  end
+
+   def object_only_visible_for(q, opts_or_user_or_conn_or_socket \\ nil) do
+      user = Bonfire.Common.Utils.current_user(opts_or_user_or_conn_or_socket)
+      cs = can_see?(:main_object, user)
+
+      q
+      |> Ecto.Query.join(:left_lateral, [], cs in ^cs, as: :cs)
+      |> Ecto.Query.where([cs: cs], cs.can_see == true)
   end
 
 end
