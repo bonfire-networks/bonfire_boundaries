@@ -5,7 +5,7 @@ defmodule Bonfire.Boundaries.Test.FakeHelpers do
   alias Bonfire.Me.{Accounts, Users}
   import ExUnit.Assertions
 
-  import Bonfire.Boundaries.Integration
+  import Bonfire.Boundaries
   require Bonfire.Common.Extend
 
   Bonfire.Common.Extend.import_if_enabled(Bonfire.Me.Fake)

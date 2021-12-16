@@ -1,4 +1,4 @@
-defmodule Bonfire.Boundaries.Integration do
+defmodule Bonfire.Boundaries do
 
   def repo, do: Bonfire.Common.Config.get!(:repo_module)
 

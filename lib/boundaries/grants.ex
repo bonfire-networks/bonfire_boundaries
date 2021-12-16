@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Grants do
   alias Bonfire.Boundaries.Accesses
   alias Bonfire.Boundaries.Circles
 
-  import Bonfire.Boundaries.Integration
+  import Bonfire.Boundaries
   import Ecto.Query
 
   def grants do

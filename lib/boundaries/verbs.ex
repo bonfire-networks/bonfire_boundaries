@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Verbs do
 
   alias Bonfire.Data.AccessControl.Verb
-  import Bonfire.Boundaries.Integration
+  import Bonfire.Boundaries
   import Ecto.Query
 
   def declare_verbs do

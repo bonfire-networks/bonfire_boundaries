@@ -5,7 +5,7 @@ defmodule Bonfire.Boundaries.Circles do
   alias Bonfire.Data.Social.Encircle
   alias Bonfire.Data.Identity.Caretaker
 
-  import Bonfire.Boundaries.Integration
+  import Bonfire.Boundaries
   import Ecto.Query
   alias Ecto.Changeset
 

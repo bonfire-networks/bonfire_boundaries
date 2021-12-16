@@ -1,4 +1,4 @@
-# Bonfire:Boundaries
+# Bonfire.Boundaries
 
 An extension for [Bonfire](https://bonfire.cafe/) that handles:
 

@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Controlleds do
 
   alias Bonfire.Data.AccessControl.Controlled
-  import Bonfire.Boundaries.Integration
+  import Bonfire.Boundaries
   import Ecto.Query
 
   def create(%{}=attrs) when not is_struct(attrs) do

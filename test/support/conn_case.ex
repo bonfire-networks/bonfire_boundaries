@@ -36,7 +36,7 @@ defmodule Bonfire.Boundaries.ConnCase do
 
   setup tags do
 
-    import Bonfire.Boundaries.Integration
+    import Bonfire.Boundaries
 
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(repo())
 

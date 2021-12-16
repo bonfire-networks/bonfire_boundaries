@@ -7,7 +7,7 @@ defmodule Bonfire.Boundaries.Fixtures do
   alias Bonfire.Boundaries.Circles
   # alias Ecto.UUID
   alias Pointers.ULID
-  import Bonfire.Boundaries.Integration
+  import Bonfire.Boundaries
 
   def insert() do
 

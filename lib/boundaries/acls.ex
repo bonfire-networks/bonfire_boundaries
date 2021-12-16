@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Identity.Caretaker
 
-  import Bonfire.Boundaries.Integration
+  import Bonfire.Boundaries
   import Ecto.Query
   alias Ecto.Changeset
 
