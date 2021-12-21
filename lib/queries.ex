@@ -176,9 +176,11 @@ defmodule Bonfire.Boundaries.Queries do
     end
   end
 
-   def object_only_visible_for(q, opts_or_user_or_conn_or_socket \\ nil) do
-      user = Bonfire.Common.Utils.current_user(opts_or_user_or_conn_or_socket)
-      cs = can_see?(:main_object, user)
+   def object_only_visible_for(q, opts \\ nil) do
+
+      agent = Bonfire.Common.Utils.current_user(opts) || Bonfire.Common.Utils.current_account(opts)
+
+      cs = can_see?(:main_object, agent)
 
       q
       |> Ecto.Query.join(:left_lateral, [], cs in ^cs, as: :cs)
