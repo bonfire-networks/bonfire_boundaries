@@ -14,112 +14,48 @@ defmodule Bonfire.Boundaries.Queries do
 
   """
   require Logger
+  import Ecto.Query
+  alias Bonfire.Boundaries.SeeRead
 
-  @doc """
-  A subquery to join to which filters out results the current user is
-  not permitted to see.
+  # @doc """
+  # A subquery to join to which filters out results the current user is
+  # not permitted to see.
 
-  Parameters are the alias for the controlled item in the parent
-  query and an expression evaluating to the current user.
+  # Parameters are the alias for the controlled item in the parent
+  # query and an expression evaluating to the current user.
 
-  Currently requires a lateral join, but this shouldn't be necessary
-  once we've figured out how to make ecto support what we do better.
-  """
-  defmacro can_see?(controlled, user), do: can(controlled, user, :see)
+  # Currently requires a lateral join, but this shouldn't be necessary
+  # once we've figured out how to make ecto support what we do better.
+  # """
+  # defmacro can_see?(controlled, user), do: can(controlled, user, :see)
 
-  defmacro can_read?(controlled, user), do: can(controlled, user, :read)
+  # defmacro can_edit?(controlled, user), do: can(controlled, user, :edit)
 
-  defmacro can_edit?(controlled, user), do: can(controlled, user, :edit)
+  # defmacro can_delete?(controlled, user), do: can(controlled, user, :delete)
 
-  defmacro can_delete?(controlled, user), do: can(controlled, user, :delete)
+  # defmacro can?(controlled, user, verb \\ :see), do: can(controlled, user, verb)
 
-  defmacro can?(controlled, user, verb \\ :see), do: can(controlled, user, verb)
-
-  defp can({controlled, _, _}, user, verb), do: can(controlled, user, verb)
-  defp can({controlled_schema, controlled_id}, user, verb), do: can(controlled_schema, user, verb, controlled_id)
-  defp can(controlled_schema, user, verb, controlled_id \\ :id) when is_atom(controlled_schema) do
-    admins = Bonfire.Boundaries.Circles.circles()[:admin]
-    guests = Bonfire.Boundaries.Circles.circles()[:guest]
-    quote do
-      require Logger
-      require Ecto.Query
-      require Bonfire.Boundaries.Queries
-      verb_ids = Bonfire.Boundaries.Verbs.ids(unquote(verb))
-      case unquote(user) do
-        %{id: user_id, instance_admin: %{is_instance_admin: true}} ->
-          Logger.debug("Boundaries: query as admin and #{user_id}")
-          unquote(user_can(verb, controlled_schema, controlled_id, [guests, admins]))
-        %{id: user_id} ->
-          Logger.debug("Boundaries: query as user #{user_id}")
-          unquote(user_can(verb, controlled_schema, controlled_id, [guests]))
-        user_id when is_binary(user_id) ->
-          Logger.debug("Boundaries: query as user_id #{user_id}")
-          unquote(user_can(verb, controlled_schema, controlled_id, [guests]))
-        _ ->
-          Logger.debug("Boundaries: query as guest")
-          unquote(guest_can(verb, controlled_schema, controlled_id))
-      end
-      |> Ecto.Query.subquery()
+  def user_and_circle_ids(user) do
+    circles = Bonfire.Boundaries.Circles.circles()
+    case user do
+      %{id: user_id, instance_admin: %{is_instance_admin: true}} ->
+        [user_id, circles[:guest], circles[:local], circles[:admin]]
+      # user_id when is_binary(user_id) ->  [user_id, circles[:guest], circles[:local]]
+      %{id: user_id} -> [user_id, circles[:guest], circles[:local]]
+      _ -> [circles[:guest]]
     end
   end
 
-  defp controlled_query(args) do
-    quote do
-      Ecto.Query.from(controlled in Bonfire.Data.AccessControl.Controlled, unquote(args))
-    end
-  end
-
-  defp can_join_where(verb, controlled_schema, controlled_id) when verb in [:see, :read] or verb == [:see, :read] or verb == [:read, :see] do
-    quote do: [
-      join: acl in assoc(controlled, :acl),
-      join: grant in assoc(acl, :grants),
-      join: access in assoc(grant, :access),
-      left_join: circle in Bonfire.Data.Social.Circle,
-      on: grant.subject_id == circle.id,
-      where: controlled.id == field(parent_as(unquote(controlled_schema)), unquote(controlled_id)),
-      group_by: [controlled.id, access.id],
-      having: fragment("agg_perms(?)", access.can_see),
-      select: %{struct(access, [:id]) | can_see: fragment("agg_perms(?)", access.can_see), can_read: fragment("agg_perms(?)", access.can_read)}
-    ]
-  end
-
-  defp can_join_where(_verb, controlled_schema, controlled_id) do
-    quote do: [
-      join: acl in assoc(controlled, :acl),
-      join: grant in assoc(acl, :grants),
-      join: access in assoc(grant, :access),
-      join: interact in assoc(access, :interacts),
-      left_join: circle in Bonfire.Data.Social.Circle,
-      on: grant.subject_id == circle.id,
-      where: interact.verb_id in ^verb_ids,
-      where: controlled.id == field(parent_as(unquote(controlled_schema)), unquote(controlled_id)),
-      group_by: [controlled.id, interact.id],
-      having: fragment("agg_perms(?)", interact.value),
-      select: struct(interact, [:id])
-    ]
-  end
-
-  defp guest_where() do
-    quote do: [ where: circle.id == ^Bonfire.Boundaries.Circles.circles()[:guest] ]
-  end
-
-  defp user_where(circles) do
-    quote do
-      [
-        left_join: encircle in assoc(circle, :encircles),
-        where: circle.id in ^unquote(circles) or grant.subject_id == ^user_id or encircle.subject_id == ^user_id,
-      ]
-    end
-  end
-
-  #doc "Checks if a guest (i.e. anyone) can X"
-
-  defp guest_can(verb, controlled_schema, controlled_id) do
-    controlled_query(can_join_where(verb, controlled_schema, controlled_id) ++ guest_where())
-  end
-
-  defp user_can(verb, controlled_schema, controlled_id, circles) do
-    controlled_query(can_join_where(verb, controlled_schema, controlled_id) ++ user_where(circles))
+  def filter_invisible(user) do
+    ids = user_and_circle_ids(user)
+    from see_read in SeeRead,
+      where: see_read.subject_id in ^ids,
+      group_by: see_read.object_id,
+      having: fragment("add_perms(agg_perms(?), agg_perms(?))", see_read.can_see?, see_read.can_read?),
+      select: %{
+        subjects: count(see_read.subject_id),
+        object_id: see_read.object_id,
+      }
   end
 
   @doc "Call the `add_perms(bool?, bool?)` postgres function for combining permissions."
@@ -132,59 +68,59 @@ defmodule Bonfire.Boundaries.Queries do
     quote do: Ecto.Query.fragment("agg_perms(?)", unquote(p))
   end
 
-  @doc """
-  FIXME
-  Lists permitted interactions on something for the current user.
+  # @doc """
+  # FIXME
+  # Lists permitted interactions on something for the current user.
 
-  Parameters are the alias for the controlled item in the parent
-  query and an expression evaluating to the current user.
+  # Parameters are the alias for the controlled item in the parent
+  # query and an expression evaluating to the current user.
 
-  Currently requires a left lateral join. The final version may or may
-  not, depending on how it is used.
+  # Currently requires a left lateral join. The final version may or may
+  # not, depending on how it is used.
 
-  Does not recognise admins correctly right now, they're treated as regular users.
-  """
-  def permitted_on(controlled_schema, user)
-  def permitted_on({controlled_schema, controlled_id}, user), do: permitted_on(controlled_schema, user, controlled_id)
-  def permitted_on(controlled_schema, user), do: permitted_on(controlled_schema, user, :id)
+  # Does not recognise admins correctly right now, they're treated as regular users.
+  # """
+  # def permitted_on(controlled_schema, user)
+  # def permitted_on({controlled_schema, controlled_id}, user), do: permitted_on(controlled_schema, user, controlled_id)
+  # def permitted_on(controlled_schema, user), do: permitted_on(controlled_schema, user, :id)
 
-  defp permitted_on(controlled_schema, user, controlled_id) do
-    local = Bonfire.Boundaries.Circles.circles()[:local]
-    guest = Bonfire.Boundaries.Circles.circles()[:guest]
+  # defp permitted_on(controlled_schema, user, controlled_id) do
+  #   local = Bonfire.Boundaries.Circles.circles()[:local]
+  #   guest = Bonfire.Boundaries.Circles.circles()[:guest]
 
-    quote do
-      require Ecto.Query
+  #   quote do
+  #     require Ecto.Query
 
-      users = case unquote(user) do
-        %{id: id} -> [id, unquote(local)]
-        _ -> [unquote(guest)]
-      end
+  #     users = case unquote(user) do
+  #       %{id: id} -> [id, unquote(local)]
+  #       _ -> [unquote(guest)]
+  #     end
 
-    Ecto.Query.from controlled on Bonfire.Data.AccessControl.Controlled,
-        join: acl in assoc(controlled, :acl),
-        join: grant in assoc(acl, :grants),
-        join: access in assoc(grant, :access),
-        join: interact in assoc(access, :interacts),
-        left_join: circle in Bonfire.Data.Social.Circle,
-        on: grant.subject_id == circle.id,
-        left_join: encircle in assoc(circle, :encircles),
-        where: grant.subject_id in ^users or encircle.subject_id in ^users,
-        where: controlled.id == field(parent_as(unquote(controlled_schema)), unquote(controlled_id)),
-        group_by: [controlled.id, interact.verb_id],
-        having: Bonfire.Boundaries.Queries.agg_perms(interact.value),
-        select: struct(interact, [:id, :verb_id])
-    end
-  end
+  #   Ecto.Query.from controlled on Bonfire.Data.AccessControl.Controlled,
+  #       join: acl in assoc(controlled, :acl),
+  #       join: grant in assoc(acl, :grants),
+  #       join: access in assoc(grant, :access),
+  #       join: interact in assoc(access, :interacts),
+  #       left_join: circle in Bonfire.Data.AccessControl.Circle,
+  #       on: grant.subject_id == circle.id,
+  #       left_join: encircle in assoc(circle, :encircles),
+  #       where: grant.subject_id in ^users or encircle.subject_id in ^users,
+  #       where: controlled.id == field(parent_as(unquote(controlled_schema)), unquote(controlled_id)),
+  #       group_by: [controlled.id, interact.verb_id],
+  #       having: Bonfire.Boundaries.Queries.agg_perms(interact.value),
+  #       select: struct(interact, [:id, :verb_id])
+  #   end
+  # end
 
-   def object_only_visible_for(q, opts \\ nil) do
+  #  def object_only_visible_for(q, opts \\ nil) do
 
-      agent = Bonfire.Common.Utils.current_user(opts) || Bonfire.Common.Utils.current_account(opts)
+  #     agent = Bonfire.Common.Utils.current_user(opts) || Bonfire.Common.Utils.current_account(opts)
 
-      cs = can_see?(:main_object, agent)
+  #     cs = can_see?(:main_object, agent)
 
-      q
-      |> Ecto.Query.join(:left_lateral, [], cs in ^cs, as: :cs)
-      |> Ecto.Query.where([cs: cs], cs.can_see == true)
-  end
+  #     q
+  #     |> Ecto.Query.join(:left_lateral, [], cs in ^cs, as: :cs)
+  #     |> Ecto.Query.where([cs: cs], cs.can_see == true)
+  # end
 
 end

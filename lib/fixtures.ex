@@ -1,8 +1,9 @@
 defmodule Bonfire.Boundaries.Fixtures do
 
-  alias Bonfire.Data.AccessControl.{Access, Acl, Controlled, Grant, Interact, Verb}
+  alias Bonfire.Data.AccessControl.{
+    Access, Acl, Circle, Controlled, Grant, Interact, Verb,
+  }
   alias Bonfire.Data.Identity.Named
-  alias Bonfire.Data.Social.Circle
   alias Bonfire.Boundaries.{Accesses, Verbs, Acls, Grants}
   alias Bonfire.Boundaries.Circles
   # alias Ecto.UUID

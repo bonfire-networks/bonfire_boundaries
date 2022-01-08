@@ -1,8 +1,7 @@
 defmodule Bonfire.Boundaries.Circles do
 
   alias Bonfire.Data.Identity.Named
-  alias Bonfire.Data.Social.Circle
-  alias Bonfire.Data.Social.Encircle
+  alias Bonfire.Data.AccessControl.{Circle, Encircle}
   alias Bonfire.Data.Identity.Caretaker
 
   import Bonfire.Boundaries
