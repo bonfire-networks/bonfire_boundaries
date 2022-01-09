@@ -43,6 +43,7 @@ defmodule Bonfire.Boundaries.Queries do
         [user_id, circles[:guest], circles[:local], circles[:admin]]
       # user_id when is_binary(user_id) ->  [user_id, circles[:guest], circles[:local]]
       %{id: user_id} -> [user_id, circles[:guest], circles[:local]]
+      _ when is_binary(user) -> [user, circles[:guest], circles[:local]]
       _ -> [circles[:guest]]
     end
   end
@@ -55,14 +56,18 @@ defmodule Bonfire.Boundaries.Queries do
       {{:., _, [{alia, _, _},field]}, [{:no_parens, true}|_], []} ->
         quote do
           query = unquote(query)
-          case Bonfire.Common.Utils.current_user(unquote(opts)) do
-            :system -> query
-            %{id: _, instance_admin: %{is_instance_admin: true}} -> query
-            %{}=current_user ->
-              vis = Bonfire.Boundaries.Queries.filter_invisible(current_user)
-              join unquote(query), :inner,
-                [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
-                v in subquery(vis), on: unquote(field_ref) == v.object_id
+          opts = unquote(opts)
+          if is_list(opts) and opts[:skip_boundary_check] do
+            query
+          else
+            case Bonfire.Common.Utils.current_user(opts) do
+              %{id: _, instance_admin: %{is_instance_admin: true}} -> query
+              current_user ->
+                vis = Bonfire.Boundaries.Queries.filter_invisible(current_user)
+                join unquote(query), :inner,
+                  [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
+                  v in subquery(vis), on: unquote(field_ref) == v.object_id
+            end
           end
         end
       _ -> raise RuntimeError, message: "Expected a field reference of the form `alias.field, got: #{inspect(field_ref)}`"
