@@ -112,15 +112,17 @@ defmodule Bonfire.Boundaries.Queries do
   #   end
   # end
 
-  #  def object_only_visible_for(q, opts \\ nil) do
+  def object_only_visible_for(q, opts \\ nil) do
+    if is_list(opts) and opts[:skip_boundary_check] do
+      q
+    else
+      agent = Bonfire.Common.Utils.current_user(opts) || Bonfire.Common.Utils.current_account(opts)
 
-  #     agent = Bonfire.Common.Utils.current_user(opts) || Bonfire.Common.Utils.current_account(opts)
-
-  #     cs = can_see?(:main_object, agent)
-
-  #     q
-  #     |> Ecto.Query.join(:left_lateral, [], cs in ^cs, as: :cs)
-  #     |> Ecto.Query.where([cs: cs], cs.can_see == true)
-  # end
+      vis = filter_invisible(agent)
+      join q, :inner, [main_object: main_object],
+        v in subquery(vis),
+        on: main_object.id == v.object_id
+    end
+  end
 
 end
