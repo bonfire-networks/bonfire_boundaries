@@ -9,33 +9,31 @@ defmodule Bonfire.Boundaries.Acls do
   import Bonfire.Boundaries
   import Ecto.Query
   alias Ecto.Changeset
+  import EctoSparkles
 
-  def acls do
-    %{
-      read_only:  "AC10N1YACCESS1SREADACCESS1", # for stuff noone should be able to interact with
-      instance_blocked: "110CA1ADM1NSHAVESA1DEN0VGH"
-    }
+  # special built-in acls (eg, guest, local, activity_pub)
+  def acls, do: Bonfire.Common.Config.get([:acls])
+
+  def get(slug) when is_atom(slug), do: acls()[slug]
+  def get!(slug) when is_atom(slug) do
+    get(slug) || raise RuntimeError, message: "Missing default acl: #{inspect(slug)}"
   end
 
-  def acls_fixture do
-    Enum.map(acls(), fn {_k, v} -> %{id: v} end)
-  end
+  def get_id(slug), do: Map.get(acls(), slug, %{})[:id]
+
+  def get_id!(slug), do: get!(slug)[:id]
 
   def create(%{}=attrs) when not is_struct(attrs) do
     repo().insert(changeset(attrs))
   end
 
-  def changeset(access \\ %Acl{}, attrs) do
-    Acl.changeset(access, attrs)
-    |> Changeset.cast_assoc(:named, with: &Named.changeset/2)
-    |> Changeset.cast_assoc(:caretaker, with: &Caretaker.changeset/2)
+  def changeset(acl \\ %Acl{}, attrs) do
+    Acl.changeset(acl, attrs)
+    |> Changeset.cast_assoc(:named)
+    |> Changeset.cast_assoc(:caretaker)
+    |> Changeset.cast_assoc(:stereotype)
   end
 
-  def list, do: repo().many(
-    from(u in Acl,
-    left_join: named in assoc(u, :named),
-    preload: [:named, :controlled, :caretaker, grants: [:subject_profile, :subject_named, access: [:interacts]]]
-  ))
-
+  def list, do: repo().many(proload(from(u in Acl, as: :acl), [:named, :controlled, :stereotype, :caretaker]))
 
 end

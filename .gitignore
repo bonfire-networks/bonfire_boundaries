@@ -45,3 +45,5 @@ deps.path
 /forks
 
 .\#*
+# WIP
+lib/sentinel.ex

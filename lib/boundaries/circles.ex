@@ -8,72 +8,31 @@ defmodule Bonfire.Boundaries.Circles do
   import Ecto.Query
   alias Ecto.Changeset
 
-  def circles do
-    # special built-in circles (eg, guest, local, activity_pub, admin)
-    Bonfire.Common.Config.get!(:default_circles)
+  # special built-in circles (eg, guest, local, activity_pub)
+  def circles, do: Bonfire.Common.Config.get([:circles])
+
+  def get(slug) when is_atom(slug), do: Bonfire.Common.Config.get([:circles])[slug]
+
+  def get!(slug) when is_atom(slug) do
+    get(slug) || raise RuntimeError, message: "Missing default circle: #{inspect(slug)}"
   end
 
-  def circle_names do
-    Bonfire.Common.Config.get!(:circle_names)
-  end
+  def get_id(slug), do: Map.get(circles(), slug, %{})[:id]
 
-  def list_builtins() do
-    names = circle_names()
+  def get_id!(slug) when is_atom(slug), do: get!(slug).id
 
-    circles()
-    |> Enum.map(fn
-      {slug, id} ->
-        %{
-          id: id,
-          slug: slug,
-          name: names[slug]
-        }
-      _ -> nil
-    end)
-  end
-
-  def by_id(id) do
-    circles()
-    |> Enum.find(fn {_key, val} -> val == id end)
-    # |> elem(0)
-  end
-
-  def get_name(id) when is_binary(id) do
-    case by_id(id) do
-      {slug, _} -> get_name(slug)
-      _ ->  nil #TODO
-    end
-  end
-
-  def get_id(slug) when is_atom(slug) do
-    Bonfire.Common.Config.get([:default_circles, slug])
-  end
-
-  def get_name(slug) when is_atom(slug) do
-    Bonfire.Common.Config.get([:circle_names, slug])
-  end
-
-  def get_tuple(id) when is_binary(id) do
-    case by_id(id) do
-      {slug, _} -> get_tuple(slug)
-      _ -> nil  # TODO
-    end
-  end
+  # def get_tuple(id) when is_binary(id) do
+  #   case by_id(id) do
+  #     {slug, _} -> get_tuple(slug)
+  #     _ -> nil  # TODO
+  #   end
+  # end
 
   def get_tuple(slug) when is_atom(slug) do
-    {Bonfire.Common.Config.get!([:circle_names, slug]), Bonfire.Common.Config.get!([:default_circles, slug])}
-  end
-
-  def circles_fixture do
-    Enum.map(circles(), fn {_k, v} -> %{id: v} end)
-  end
-
-  def circles_named_fixture do
-    Enum.map(circles(), fn {k, v} -> %{id: v, name: circle_names()[k]} end)
+    {Bonfire.Common.Config.get!([:circles, slug, :name]), Bonfire.Common.Config.get!([:circles, slug, :id])}
   end
 
   def list, do: repo().many(from(u in Circle, left_join: named in assoc(u, :named), preload: [:named]))
-
 
   def circle_ids(subjects) when is_list(subjects), do: subjects |> Enum.map(&circle_ids/1) |> Enum.uniq()
   def circle_ids(circle_name) when is_atom(circle_name) and not is_nil(circle_name), do: get_id(circle_name)
@@ -84,12 +43,10 @@ defmodule Bonfire.Boundaries.Circles do
   def to_circle_ids(subjects) do
     public = get_id(:guest)
     selected_circles = circle_ids(subjects)
-
     if public in selected_circles do # public/guests defaults to also being visible to local users and federating
       selected_circles ++ [
-        get_id(:local),
-        get_id(:admin),
-        get_id(:activity_pub)
+        get_id!(:local),
+        get_id!(:activity_pub)
       ]
     else
       selected_circles

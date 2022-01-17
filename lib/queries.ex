@@ -15,7 +15,7 @@ defmodule Bonfire.Boundaries.Queries do
   """
   require Logger
   import Ecto.Query
-  alias Bonfire.Boundaries.SeeRead
+  alias Bonfire.Boundaries.{Summary, Verbs}
 
   # @doc """
   # A subquery to join to which filters out results the current user is
@@ -38,13 +38,9 @@ defmodule Bonfire.Boundaries.Queries do
   def user_and_circle_ids(user) do
     circles = Bonfire.Boundaries.Circles.circles()
     case user do
-        # we probably just shouldn't filter the admin's view. it is already effectively filtered by context.
-      %{id: user_id, instance_admin: %{is_instance_admin: true}} ->
-        [user_id, circles[:guest], circles[:local], circles[:admin]]
-      # user_id when is_binary(user_id) ->  [user_id, circles[:guest], circles[:local]]
-      %{id: user_id} -> [user_id, circles[:guest], circles[:local]]
-      _ when is_binary(user) -> [user, circles[:guest], circles[:local]]
-      _ -> [circles[:guest]]
+      %{id: user_id} -> [user_id]
+      _ when is_binary(user) -> [user]
+      _ -> [circles[:guest][:id]]
     end
   end
 
@@ -57,13 +53,14 @@ defmodule Bonfire.Boundaries.Queries do
         quote do
           query = unquote(query)
           opts = unquote(opts)
+          verbs = opts[:verbs] || [:see, :read]
           if is_list(opts) and opts[:skip_boundary_check] do
             query
           else
             case Bonfire.Common.Utils.current_user(opts) do
               %{id: _, instance_admin: %{is_instance_admin: true}} -> query
               current_user ->
-                vis = Bonfire.Boundaries.Queries.filter_invisible(current_user)
+                vis = Bonfire.Boundaries.Queries.filter_where_not(current_user, verbs)
                 join unquote(query), :inner,
                   [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
                   v in subquery(vis), on: unquote(field_ref) == v.object_id
@@ -74,15 +71,17 @@ defmodule Bonfire.Boundaries.Queries do
     end
   end
 
-  def filter_invisible(user) do
+  def filter_where_not(user, verbs \\ [:see, :read]) do
     ids = user_and_circle_ids(user)
-    from see_read in SeeRead,
-      where: see_read.subject_id in ^ids,
-      group_by: see_read.object_id,
-      having: fragment("add_perms(agg_perms(?), agg_perms(?))", see_read.can_see?, see_read.can_read?),
+    verbs = Verbs.ids(verbs)
+    from summary in Summary,
+      where: summary.subject_id in ^ids,
+      where: summary.verb_id in ^verbs,
+      group_by: summary.object_id,
+      having: fragment("agg_perms(?)", summary.value),
       select: %{
-        subjects: count(see_read.subject_id),
-        object_id: see_read.object_id,
+        subjects: count(summary.subject_id),
+        object_id: summary.object_id,
       }
   end
 
@@ -96,57 +95,13 @@ defmodule Bonfire.Boundaries.Queries do
     quote do: Ecto.Query.fragment("agg_perms(?)", unquote(p))
   end
 
-  # @doc """
-  # FIXME
-  # Lists permitted interactions on something for the current user.
-
-  # Parameters are the alias for the controlled item in the parent
-  # query and an expression evaluating to the current user.
-
-  # Currently requires a left lateral join. The final version may or may
-  # not, depending on how it is used.
-
-  # Does not recognise admins correctly right now, they're treated as regular users.
-  # """
-  # def permitted_on(controlled_schema, user)
-  # def permitted_on({controlled_schema, controlled_id}, user), do: permitted_on(controlled_schema, user, controlled_id)
-  # def permitted_on(controlled_schema, user), do: permitted_on(controlled_schema, user, :id)
-
-  # defp permitted_on(controlled_schema, user, controlled_id) do
-  #   local = Bonfire.Boundaries.Circles.circles()[:local]
-  #   guest = Bonfire.Boundaries.Circles.circles()[:guest]
-
-  #   quote do
-  #     require Ecto.Query
-
-  #     users = case unquote(user) do
-  #       %{id: id} -> [id, unquote(local)]
-  #       _ -> [unquote(guest)]
-  #     end
-
-  #   Ecto.Query.from controlled on Bonfire.Data.AccessControl.Controlled,
-  #       join: acl in assoc(controlled, :acl),
-  #       join: grant in assoc(acl, :grants),
-  #       join: access in assoc(grant, :access),
-  #       join: interact in assoc(access, :interacts),
-  #       left_join: circle in Bonfire.Data.AccessControl.Circle,
-  #       on: grant.subject_id == circle.id,
-  #       left_join: encircle in assoc(circle, :encircles),
-  #       where: grant.subject_id in ^users or encircle.subject_id in ^users,
-  #       where: controlled.id == field(parent_as(unquote(controlled_schema)), unquote(controlled_id)),
-  #       group_by: [controlled.id, interact.verb_id],
-  #       having: Bonfire.Boundaries.Queries.agg_perms(interact.value),
-  #       select: struct(interact, [:id, :verb_id])
-  #   end
-  # end
-
   def object_only_visible_for(q, opts \\ nil) do
     if is_list(opts) and opts[:skip_boundary_check] do
       q
     else
       agent = Bonfire.Common.Utils.current_user(opts) || Bonfire.Common.Utils.current_account(opts)
 
-      vis = filter_invisible(agent)
+      vis = filter_where_not(agent, [:see, :read])
       join q, :inner, [main_object: main_object],
         v in subquery(vis),
         on: main_object.id == v.object_id
