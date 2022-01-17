@@ -53,7 +53,7 @@ defmodule Bonfire.Boundaries.Queries do
         quote do
           query = unquote(query)
           opts = unquote(opts)
-          verbs = opts[:verbs] || [:see, :read]
+          verbs = Bonfire.Common.Utils.e(opts, :verbs, [:see, :read])
           if is_list(opts) and opts[:skip_boundary_check] do
             query
           else
