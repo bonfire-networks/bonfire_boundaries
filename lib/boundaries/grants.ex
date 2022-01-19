@@ -5,6 +5,7 @@ defmodule Bonfire.Boundaries.Grants do
   alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Boundaries.Accesses
   alias Bonfire.Boundaries.Circles
+  alias Ecto.Changeset
 
   import Bonfire.Boundaries
   import Bonfire.Common.Utils

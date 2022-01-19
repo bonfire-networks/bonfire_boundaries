@@ -29,7 +29,8 @@ defmodule Bonfire.Boundaries.Acls do
 
   def changeset(acl \\ %Acl{}, attrs) do
     Acl.changeset(acl, attrs)
-    |> Changeset.cast_assoc(:named)
+    # |> IO.inspect(label: "cs")
+    |> Changeset.cast_assoc(:named, [])
     |> Changeset.cast_assoc(:caretaker)
     |> Changeset.cast_assoc(:stereotype)
   end
