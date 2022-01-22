@@ -53,15 +53,36 @@ defmodule Bonfire.Boundaries.Migrations do
     left join "#{@grant_table}" g
       on  controlled.acl_id = g.acl_id
       and g.verb_id = verb.id
-      and g.subject_id = pointer.id
     left join "#{@circle_table}" circle
       on g.subject_id = circle.id
     left join "#{@encircle_table}" encircle
       on  encircle.circle_id  = circle.id
       and encircle.subject_id = pointer.id
-  where circle.id = pointer.id or encircle.id is not null
+  where g.subject_id = pointer.id or encircle.id is not null
   group by (pointer.id, controlled.id, verb.id)
   """
+  # @create_summary_view """
+  # create or replace view bonfire_boundaries_summary as
+  # select
+  #   pointer.id         as subject_id,
+  #   controlled.id      as object_id,
+  #   verb.id            as verb_id,
+  #   agg_perms(g.value) as value
+  # from
+  #   "#{@pointer_table}" pointer
+  #   cross join "#{@controlled_table}" controlled
+  #   cross join "#{@verb_table}" verb
+  #   left join "#{@grant_table}" g
+  #     on  controlled.acl_id = g.acl_id
+  #     and g.verb_id = verb.id
+  #     and g.subject_id = pointer.id
+  #   left join "#{@circle_table}" circle
+  #     on g.subject_id = circle.id
+  #   left join "#{@encircle_table}" encircle
+  #     on  encircle.circle_id  = circle.id
+  #     and encircle.subject_id = pointer.id
+  # group by (pointer.id, controlled.id, verb.id)
+  # """
 
   @drop_summary_view "drop view if exists boundaries_summary"
 
@@ -78,6 +99,7 @@ defmodule Bonfire.Boundaries.Migrations do
       require Bonfire.Data.AccessControl.Grant.Migration
       require Bonfire.Data.AccessControl.InstanceAdmin.Migration
       require Bonfire.Data.AccessControl.Verb.Migration
+      require Bonfire.Boundaries.Stereotype.Migration
 
 
       Bonfire.Data.AccessControl.Acl.Migration.migrate_acl()
@@ -87,6 +109,7 @@ defmodule Bonfire.Boundaries.Migrations do
       Bonfire.Data.AccessControl.Verb.Migration.migrate_verb()
       Bonfire.Data.AccessControl.Grant.Migration.migrate_grant()
       Bonfire.Data.AccessControl.InstanceAdmin.Migration.migrate_instance_admin()
+      Bonfire.Boundaries.Stereotype.Migration.migrate_stereotype()
 
       Ecto.Migration.flush()
 
@@ -104,10 +127,12 @@ defmodule Bonfire.Boundaries.Migrations do
       require Bonfire.Data.AccessControl.Grant.Migration
       require Bonfire.Data.AccessControl.InstanceAdmin.Migration
       require Bonfire.Data.AccessControl.Verb.Migration
+      require Bonfire.Boundaries.Stereotype.Migration
 
       Bonfire.Boundaries.Migrations.migrate_views()
       Bonfire.Boundaries.Migrations.migrate_functions()
 
+      Bonfire.Boundaries.Stereotype.Migration.migrate_stereotype()
       Bonfire.Data.AccessControl.InstanceAdmin.Migration.migrate_instance_admin()
       Bonfire.Data.AccessControl.Grant.Migration.migrate_grant()
       Bonfire.Data.AccessControl.Verb.Migration.migrate_verb()
