@@ -5,6 +5,8 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Identity.Caretaker
+  alias Bonfire.Boundaries.Stereotype
+  import Bonfire.Common.Utils
 
   import Bonfire.Boundaries
   import Ecto.Query
@@ -35,6 +37,19 @@ defmodule Bonfire.Boundaries.Acls do
     |> Changeset.cast_assoc(:stereotype)
   end
 
-  def list, do: repo().many(proload(from(u in Acl, as: :acl), [:named, :controlled, :stereotype, :caretaker]))
+  def list do
+    from(u in Acl, as: :acl)
+    |> proload([:named, :controlled, :stereotype, :caretaker])
+    |> repo().many()
+  end
+
+  def find_caretaker_stereotypes(caretaker_id, stereotypes) do
+    from(a in Acl,
+      join: c in Caretaker,  on: a.id == c.id and c.caretaker_id == ^caretaker_id,
+      join: s in Stereotype, on: a.id == s.id and s.stereotype_id in ^stereotypes,
+      preload: [caretaker: c, stereotype: s]
+    ) |> repo().all()
+    |> debug("stereotype acls")
+  end
 
 end
