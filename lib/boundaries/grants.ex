@@ -8,7 +8,7 @@ defmodule Bonfire.Boundaries.Grants do
   alias Ecto.Changeset
 
   import Bonfire.Boundaries
-  import Bonfire.Common.Utils
+  use Bonfire.Common.Utils
   import Ecto.Query
 
   def create(%{}=attrs) when not is_struct(attrs) do
