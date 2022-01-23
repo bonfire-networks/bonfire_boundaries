@@ -54,7 +54,7 @@ defmodule Bonfire.Boundaries.Queries do
           query = unquote(query)
           opts = unquote(opts)
           verbs = Bonfire.Common.Utils.e(opts, :verbs, [:see, :read])
-          if is_list(opts) and opts[:skip_boundary_check] do
+          if Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
             query
           else
             case Bonfire.Common.Utils.current_user(opts) do
@@ -96,7 +96,7 @@ defmodule Bonfire.Boundaries.Queries do
   end
 
   def object_only_visible_for(q, opts \\ nil) do
-    if is_list(opts) and opts[:skip_boundary_check] do
+    if Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
       q
     else
       agent = Bonfire.Common.Utils.current_user(opts) || Bonfire.Common.Utils.current_account(opts)
@@ -106,6 +106,12 @@ defmodule Bonfire.Boundaries.Queries do
         v in subquery(vis),
         on: main_object.id == v.object_id
     end
+  end
+
+  def skip_boundary_check?(opts) do
+    (Bonfire.Common.Config.get(:env) !=:prod and Bonfire.Common.Config.get(:skip_all_boundary_checks)==true)
+      ||
+    (is_list(opts) and opts[:skip_boundary_check]==true)
   end
 
 end
