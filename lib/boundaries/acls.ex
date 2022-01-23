@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Identity.Caretaker
   alias Bonfire.Boundaries.Stereotype
-  import Bonfire.Common.Utils
+  use Bonfire.Common.Utils
 
   import Bonfire.Boundaries
   import Ecto.Query
@@ -49,7 +49,7 @@ defmodule Bonfire.Boundaries.Acls do
       join: s in Stereotype, on: a.id == s.id and s.stereotype_id in ^stereotypes,
       preload: [caretaker: c, stereotype: s]
     ) |> repo().all()
-    |> debug("stereotype acls")
+    # |> debug("stereotype acls")
   end
 
 end
