@@ -16,17 +16,8 @@ defmodule Bonfire.Boundaries.Queries do
   require Logger
   import Ecto.Query
   alias Bonfire.Boundaries.{Summary, Verbs}
+  alias Bonfire.Common
 
-  # @doc """
-  # A subquery to join to which filters out results the current user is
-  # not permitted to see.
-
-  # Parameters are the alias for the controlled item in the parent
-  # query and an expression evaluating to the current user.
-
-  # Currently requires a lateral join, but this shouldn't be necessary
-  # once we've figured out how to make ecto support what we do better.
-  # """
   # defmacro can_see?(controlled, user), do: can(controlled, user, :see)
 
   # defmacro can_edit?(controlled, user), do: can(controlled, user, :edit)
@@ -36,11 +27,10 @@ defmodule Bonfire.Boundaries.Queries do
   # defmacro can?(controlled, user, verb \\ :see), do: can(controlled, user, verb)
 
   def user_and_circle_ids(user) do
-    circles = Bonfire.Boundaries.Circles.circles()
     case user do
       %{id: user_id} -> [user_id]
       _ when is_binary(user) -> [user]
-      _ -> [circles[:guest][:id]]
+      _ -> [Bonfire.Boundaries.Circles.circles()[:guest][:id]]
     end
   end
 
@@ -54,23 +44,79 @@ defmodule Bonfire.Boundaries.Queries do
           query = unquote(query)
           opts = unquote(opts)
           verbs = Bonfire.Common.Utils.e(opts, :verbs, [:see, :read])
-          if Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
-            query
-          else
-            case Bonfire.Common.Utils.current_user(opts) do
-              %{id: _, instance_admin: %{is_instance_admin: true}} -> query
-              current_user ->
-                vis = Bonfire.Boundaries.Queries.filter_where_not(current_user, verbs)
-                join unquote(query), :inner,
-                  [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
-                  v in subquery(vis), on: unquote(field_ref) == v.object_id
-            end
+          case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
+            true -> query
+            :admins ->
+              case Bonfire.Common.Utils.current_user(opts) do
+                %{id: _, instance_admin: %{is_instance_admin: true}} -> query
+                current_user ->
+                  vis = Bonfire.Boundaries.Queries.filter_where_not(current_user, verbs)
+                  join unquote(query), :inner,
+                    [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
+                    v in subquery(vis), on: unquote(field_ref) == v.object_id
+              end
+            false ->
+              user = Bonfire.Common.Utils.current_user(opts)
+              vis = Bonfire.Boundaries.Queries.filter_where_not(user, verbs)
+              join unquote(query), :inner,
+                [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
+                v in subquery(vis), on: unquote(field_ref) == v.object_id
+            other ->
+              require Bonfire.Common.Utils
+              Bonfire.Common.Utils.debug(other, "Weird skip_boundary_check")
+              query
           end
         end
-      _ -> raise RuntimeError, message: "Expected a field reference of the form `alias.field, got: #{inspect(field_ref)}`"
+      {field, [{:no_parens, true}|_], []}=field_ref when is_atom(field) ->
+        quote do
+          query = unquote(query)
+          opts = unquote(opts)
+          verbs = Bonfire.Common.Utils.e(opts, :verbs, [:see, :read])
+          case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
+            true -> query
+            :admins ->
+              case Bonfire.Common.Utils.current_user(opts) do
+                %{id: _, instance_admin: %{is_instance_admin: true}} -> query
+                current_user ->
+                  vis = Bonfire.Boundaries.Queries.filter_where_not(current_user, verbs)
+                  join unquote(query), :inner,
+                    [unquote(Macro.var(:root, __MODULE__))],
+                    v in subquery(vis),
+                    on: unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) == v.object_id
+              end
+            false ->
+              user = Bonfire.Common.Utils.current_user(opts)
+              vis = Bonfire.Boundaries.Queries.filter_where_not(user, verbs)
+              join unquote(query), :inner,
+                [unquote(Macro.var(:root, __MODULE__))],
+                v in subquery(vis),
+                on: unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) == v.object_id
+            other ->
+              require Bonfire.Common.Utils
+              Bonfire.Common.Utils.debug(other, "Weird skip_boundary_check")
+              query
+          end
+        end
+      _ ->
+        raise RuntimeError,
+          message: """
+          Invalid field reference: #{inspect(field_ref)}`
+
+          Expected one of these forms:
+
+           * `field` (for field `field` on the root schema)
+           * `alias.field` (for field `field` on alias `alias
+          """
     end
   end
 
+  @doc """
+  A subquery which filters out results the current user is
+  not permitted to perform *all* of the verbs on.
+
+  Parameters are the alias for the controlled item in the parent
+  query and an expression evaluating to the current user.
+  """
   def filter_where_not(user, verbs \\ [:see, :read]) do
     ids = user_and_circle_ids(user)
     verbs = Verbs.ids(verbs)
@@ -109,9 +155,8 @@ defmodule Bonfire.Boundaries.Queries do
   end
 
   def skip_boundary_check?(opts) do
-    (Bonfire.Common.Config.get(:env) !=:prod and Bonfire.Common.Config.get(:skip_all_boundary_checks)==true)
-      ||
-    (is_list(opts) and opts[:skip_boundary_check]==true)
+    (Common.Config.get(:env) != :prod && Common.Config.get(:skip_all_boundary_checks))
+    || is_list(opts) && Keyword.get(opts, :skip_boundary_check, false)
   end
 
 end
