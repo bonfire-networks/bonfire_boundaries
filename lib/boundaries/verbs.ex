@@ -4,34 +4,19 @@ defmodule Bonfire.Boundaries.Verbs do
   import Bonfire.Boundaries
   import Ecto.Query
 
-  def declare_verbs do
-    Bonfire.Common.Config.get!(:verbs)
+  def verbs, do: Bonfire.Common.Config.get!(:verbs)
+
+  def get(slug) when is_atom(slug), do: verbs()[slug]
+  def get!(slug) when is_atom(slug) do
+    get(slug) || raise RuntimeError, message: "Missing default verb: #{inspect(slug)}"
   end
 
-  def verbs, do: declare_verbs
+  def get_id(slug), do: Map.get(verbs(), slug, %{})[:id]
 
-  def id!(verb) do
-    Bonfire.Common.Config.get([:verbs, verb], Bonfire.Data.AccessControl.Verbs.id!(verb))
-  end
+  def get_id!(slug), do: get!(slug)[:id]
 
-  def id(verb) do
-    Bonfire.Common.Config.get([:verbs, verb], id_ok(verb))
-  end
-
-  defp id_ok(verb) do
-    with {:ok, id} <- Bonfire.Data.AccessControl.Verbs.id(verb) do
-      id
-    else _ -> nil
-    end
-  end
-
-  def ids(verbs) when is_list(verbs), do: Enum.map(verbs, &id(&1)) |> Enum.reject(&is_nil/1)
-  def ids(verb) when is_atom(verb), do: [id(verb)] |> Enum.reject(&is_nil/1)
-  def ids(_), do: []
-
-  def verbs_fixture do
-    Enum.map(verbs(), fn {k, v} -> %{id: v, verb: to_string(k)} end)
-  end
+  def ids(verbs) when is_list(verbs), do: Enum.map(verbs, &get_id/1) |> Enum.reject(&is_nil/1)
+  def ids(verb) when is_atom(verb), do: ids([verb])
 
   def create(%{}=attrs) when not is_struct(attrs) do
     repo().insert(changeset(attrs))
@@ -49,7 +34,6 @@ defmodule Bonfire.Boundaries.Verbs do
     end)
   end
   def list(:code), do: Bonfire.Data.AccessControl.Verbs.data
-
 
   def list_verbs_debug() do
     Enum.concat(list_verbs_db_vs_code(), list_verbs_code_vs_db())
