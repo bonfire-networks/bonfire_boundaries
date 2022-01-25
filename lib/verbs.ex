@@ -7,6 +7,12 @@ defmodule Bonfire.Boundaries.Verbs do
   def verbs, do: Bonfire.Common.Config.get!(:verbs)
 
   def get(slug) when is_atom(slug), do: verbs()[slug]
+  def get(id_or_name) when is_binary(id_or_name), do: get_tuple(id_or_name) |> elem(1)
+
+  def get_tuple(id_or_name) when is_binary(id_or_name), do: verbs() |> Enum.find(fn {_slug, verb} -> verb[:id] == id_or_name or verb[:verb] == id_or_name end)
+
+  def get_slug(id), do: get_tuple(id) |> elem(0)
+
   def get!(slug) when is_atom(slug) do
     get(slug) || raise RuntimeError, message: "Missing default verb: #{inspect(slug)}"
   end
@@ -33,7 +39,7 @@ defmodule Bonfire.Boundaries.Verbs do
       Map.merge(acc, %{t.verb => t})
     end)
   end
-  def list(:code), do: Bonfire.Data.AccessControl.Verbs.data
+  def list(:code), do: verbs()
 
   def list_verbs_debug() do
     Enum.concat(list_verbs_db_vs_code(), list_verbs_code_vs_db())
@@ -44,8 +50,8 @@ defmodule Bonfire.Boundaries.Verbs do
   defp list_verbs_db_vs_code() do
     list(:db)
     |> Enum.map(fn {verb, t} ->
-      verb = String.to_atom(verb)
-      with {:ok, p} <- Bonfire.Data.AccessControl.Verbs.verb(verb) do
+      verb = verb |> String.downcase() |> String.to_atom()
+      with %{} = p <- get(verb) do
         if t.id == p.id do
           {:ok, verb}
         else
@@ -65,7 +71,7 @@ defmodule Bonfire.Boundaries.Verbs do
     list(:code)
     |> Enum.map(fn {schema, p} when is_atom(schema) ->
 
-      t = Map.get(db_verbs, Atom.to_string(p.verb))
+      t = Map.get(db_verbs, p.verb)
 
       if not is_nil(t) do
         if t.id == p.id do
