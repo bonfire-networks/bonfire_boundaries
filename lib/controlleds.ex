@@ -23,20 +23,22 @@ defmodule Bonfire.Boundaries.Controlleds do
     preload: [acl: [:named]]
   ))
 
-  def list_on_object(object), do: list_on_object([object])
+  def list_on_object(object), do: list_on_objects([object])
 
-  def list_on_objects(objects) do
+  def list_on_objects(objects) when is_list(objects) do
     repo().many(list_on_objects_q(objects))
   end
 
-  def list_on_objects_q(objects, filter_acls \\ [:guests_may_see, :locals_may_interact, :locals_may_reply]) do
-    filter_acls = filter_acls |> Bonfire.Boundaries.Acls.get_id!()
+  defp list_on_objects_q(objects, filter_acls \\ [:guests_may_see, :locals_may_interact, :locals_may_reply]) do
+    filter_acls = filter_acls |> Enum.map(&Bonfire.Boundaries.Acls.get_id!/1)
 
     from c in Controlled,
     left_join: acl in assoc(c, :acl),
     left_join: named in assoc(acl, :named),
     where: c.acl_id in ^filter_acls,
-    where: c.object_id in ^Utils.ulid(objects)
+    where: c.id in ^Utils.ulid(objects),
+    order_by: [asc: c.acl_id],
+    preload: [acl: [:named]]
   end
 
 end
