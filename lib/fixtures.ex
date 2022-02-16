@@ -22,15 +22,13 @@ defmodule Bonfire.Boundaries.Fixtures do
           verb_id:    Verbs.get_id!(verb),
           value:      true}
       end
-    Logger.error(":grants")
     named = Enum.filter(acls ++ circles, &(&1[:name]))
-    Logger.error(":named")
-    repo().insert_all(Acl,    Enum.map(acls,    &Map.take(&1, [:id])))
-    repo().insert_all(Circle, Enum.map(circles, &Map.take(&1, [:id])))
-    repo().insert_all(Verb,   verbs)
-    repo().insert_all(Grant,  grants)
+    repo().insert_all_or_ignore(Acl,    Enum.map(acls,    &Map.take(&1, [:id])))
+    repo().insert_all_or_ignore(Circle, Enum.map(circles, &Map.take(&1, [:id])))
+    repo().insert_all_or_ignore(Verb,   verbs)
+    repo().insert_all_or_ignore(Grant,  grants)
     # Then the mixins
-    repo().insert_all(Named,  named)
+    repo().insert_all_or_ignore(Named,  named)
   end
 
 end
