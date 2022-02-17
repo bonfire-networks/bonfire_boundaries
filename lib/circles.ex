@@ -1,11 +1,11 @@
 defmodule Bonfire.Boundaries.Circles do
+  import Bonfire.Boundaries
+  import Ecto.Query
 
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.AccessControl.{Circle, Encircle}
   alias Bonfire.Data.Identity.Caretaker
-
-  import Bonfire.Boundaries
-  import Ecto.Query
+  alias Bonfire.Common.Utils
   alias Ecto.Changeset
 
   # special built-in circles (eg, guest, local, activity_pub)
@@ -67,4 +67,15 @@ defmodule Bonfire.Boundaries.Circles do
     |> Changeset.cast_assoc(:named, with: &Named.changeset/2)
     |> Changeset.cast_assoc(:encircles, with: &Encircle.changeset/2)
 
+  @doc """
+  Lists the circles that we are permitted to see.
+  """
+  def is_encircled_by?(subject, circle) when is_atom(circle), do: is_encircled_by?(subject, get_id!(circle))
+  def is_encircled_by?(subject, circle), do: repo().exists?(is_encircled_by_q(subject, circle))
+
+  @doc "query for `list_visible`"
+  defp is_encircled_by_q(subject, circle) do
+    from(encircle in Encircle, as: :encircle)
+    |> where([encircle: encircle], encircle.subject_id == ^Utils.ulid(subject) and encircle.circle_id == ^Utils.ulid(circle))
+  end
 end
