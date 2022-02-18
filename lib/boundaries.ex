@@ -25,7 +25,4 @@ defmodule Bonfire.Boundaries do
   end
   def take_care_of!(thing, user), do: hd(take_care_of!([thing], user))
 
-  def is_blocked?(user) do
-      Bonfire.Boundaries.Circles.is_encircled_by?(user, :block)
-  end
 end
