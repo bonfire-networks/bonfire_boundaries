@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Fixtures do
   alias Bonfire.Boundaries.Circles
   alias Pointers.ULID
   import Bonfire.Boundaries
-  require Logger
+  import Where
 
   def insert() do
     acls = Map.values(Acls.acls()) # e.g. public, read_only

@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.Queries do
   providing) the return type of a subquery.
 
   """
-  require Logger
+  import Where
   import Ecto.Query
   alias Bonfire.Boundaries.{Summary, Verbs}
   alias Bonfire.Common
@@ -62,8 +62,8 @@ defmodule Bonfire.Boundaries.Queries do
                 [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
                 v in subquery(vis), on: unquote(field_ref) == v.object_id
             other ->
-              require Bonfire.Common.Utils
-              Bonfire.Common.Utils.debug(other, "Weird skip_boundary_check")
+              import Where
+              debug(other, "Weird skip_boundary_check")
               query
           end
         end
@@ -92,8 +92,8 @@ defmodule Bonfire.Boundaries.Queries do
                 v in subquery(vis),
                 on: unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) == v.object_id
             other ->
-              require Bonfire.Common.Utils
-              Bonfire.Common.Utils.debug(other, "Weird skip_boundary_check")
+              import Where
+              debug(other, "Weird skip_boundary_check")
               query
           end
         end
