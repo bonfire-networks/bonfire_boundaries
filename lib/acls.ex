@@ -18,7 +18,9 @@ defmodule Bonfire.Boundaries.Acls do
 
   def get(slug) when is_atom(slug), do: acls()[slug]
   def get!(slug) when is_atom(slug) do
-    get(slug) || raise RuntimeError, message: "Missing default acl: #{inspect(slug)}"
+    get(slug)
+      || ( Bonfire.Boundaries.Fixtures.insert && get(slug) )
+      || raise RuntimeError, message: "Missing default acl: #{inspect(slug)}"
   end
 
   def get_id(slug), do: Map.get(acls(), slug, %{})[:id]
