@@ -5,7 +5,7 @@ defmodule Bonfire.Boundaries.Fixtures do
   alias Bonfire.Boundaries.{Verbs, Acls, Grants}
   alias Bonfire.Boundaries.Circles
   alias Pointers.ULID
-  import Bonfire.Boundaries
+  import Bonfire.Boundaries.Integration
   import Where
 
   def insert() do

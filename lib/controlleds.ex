@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Controlleds do
 
   alias Bonfire.Data.AccessControl.Controlled
-  import Bonfire.Boundaries
+  import Bonfire.Boundaries.Integration
   import Ecto.Query
   alias Bonfire.Common.Utils
 
