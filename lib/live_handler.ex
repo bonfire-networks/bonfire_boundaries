@@ -3,25 +3,35 @@ defmodule Bonfire.Boundaries.LiveHandler do
   import Bonfire.Boundaries.Integration
 
   def handle_event("block", %{"id" => id, "scope" => scope} = attrs, socket) when is_binary(id) do
-    if is_admin?(current_user(socket)) do
+    with {:ok, _} <- (
+      if is_admin?(current_user(socket)) do
       Bonfire.Boundaries.block(id, maybe_to_atom(attrs["block_type"]), maybe_to_atom(scope) || socket)
     else
       debug("not admin, fallback to user-level block")
       Bonfire.Boundaries.block(id, maybe_to_atom(attrs["block_type"]), socket)
     end
-
-    # TODO: show feedback
-    {:noreply,
-        socket
-    }
+    ) do
+      Bonfire.UI.Social.OpenModalLive.close()
+      # TODO: show feedback
+      {:noreply,
+          socket
+          |> put_flash(:info, "Blocked!")
+      }
+    end
   end
 
   def handle_event("block", %{"id" => id} = attrs, socket) when is_binary(id) do
-    Bonfire.Boundaries.block(id, maybe_to_atom(attrs["block_type"]), socket)
-    # TODO: show feedback
-    {:noreply,
-        socket
-    }
+    with {:ok, _} <- Bonfire.Boundaries.block(id, maybe_to_atom(attrs["block_type"]), socket) do
+      Bonfire.UI.Social.OpenModalLive.close()
+      # TODO: show feedback
+      {:noreply,
+          socket
+          |> put_flash(:info, "Blocked!")
+      }
+    else
+      e ->
+        error(e)
+    end
   end
 
   # def handle_event("input", %{"circles" => selected_circles} = _attrs, socket) when is_list(selected_circles) and length(selected_circles)>0 do

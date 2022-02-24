@@ -45,23 +45,32 @@ defmodule Bonfire.Boundaries do
 
   def block(user_to_block, block_type, :instance_wide) do
     instance_wide_block_circles(block_type)
-    |> Circles.add_to_circle(user_to_block, ...)
+    |> debug("instance_wide_block_circles")
+    |> block_circles(user_to_block, ...)
   end
-
-  defp instance_wide_block_circles(block_type) do
-    block_type(block_type)
-    |> Enum.map(&Bonfire.Boundaries.Circles.get_id/1)
-  end
-
 
   @doc """
   Block something for the current user (current_user should be passed in opts)
   """
   def block(user_to_block, block_type, opts) do
-    with %{id: _} = current_user <- Utils.current_user(opts),
-         {:ok, current_user_block_circles} <- user_block_circles(current_user, block_type) do
-           Circles.add_to_circle(user_to_block, current_user_block_circles)
+    Utils.current_user(opts)
+    |> user_block_circles(..., block_type)
+    |> debug("user_block_circles")
+    |> block_circles(user_to_block, ...)
+  end
+
+  defp block_circles(user_to_block, circles) do
+    with done when is_list(done) <- Circles.add_to_circles(user_to_block, circles) do # TODO: properly validate the inserts
+        {:ok, "Blocked"}
+    else e ->
+      error(e)
+      {:error, "Could not block"}
     end
+  end
+
+  defp instance_wide_block_circles(block_type) do
+    block_type(block_type)
+    |> Enum.map(&Bonfire.Boundaries.Circles.get_id/1)
   end
 
   defp user_block_circles(user, block_type), do: Circles.get_stereotype_circles(user, block_type(block_type))
