@@ -26,13 +26,16 @@ defmodule Bonfire.Boundaries do
   end
   def take_care_of!(thing, user), do: hd(take_care_of!([thing], user))
 
-  defp block_type(:ghost) do
+  def block_types(:ghost) do
     [:ghost]
   end
-  defp block_type(:silence) do
+  def block_types(:silence) do
     [:silence]
   end
-  defp block_type(_) do
+  def block_types([block_type]) do
+    block_types(block_type)
+  end
+  def block_types(_) do
     [:silence, :ghost]
   end
 
@@ -55,7 +58,7 @@ defmodule Bonfire.Boundaries do
   def block(user_to_block, block_type, opts) do
     Utils.current_user(opts)
     |> user_block_circles(..., block_type)
-    |> debug("user_block_circles")
+    # |> debug("user_block_circles")
     |> block_circles(user_to_block, ...)
   end
 
@@ -69,11 +72,11 @@ defmodule Bonfire.Boundaries do
   end
 
   defp instance_wide_block_circles(block_type) do
-    block_type(block_type)
+    block_types(block_type)
     |> Enum.map(&Bonfire.Boundaries.Circles.get_id/1)
   end
 
-  defp user_block_circles(user, block_type), do: Circles.get_stereotype_circles(user, block_type(block_type))
+  defp user_block_circles(user, block_type), do: Circles.get_stereotype_circles(user, block_types(block_type))
 
   def is_blocked?(peered, block_type \\ :any, opts \\ [])
 
@@ -82,7 +85,7 @@ defmodule Bonfire.Boundaries do
   end
 
   def is_blocked?(user, block_type, opts) do
-    debug(opts, "TODO: also check per-user")
+    debug(opts, "check if blocked (#{block_type}) instance-wide or per-user, if any has/have been provided in opts")
     Bonfire.Boundaries.Circles.is_encircled_by?(user, instance_wide_block_circles(block_type))
       ||
     is_blocked_by?(user, block_type, opts[:user_ids] || ulid(current_user(opts)))
@@ -94,7 +97,7 @@ defmodule Bonfire.Boundaries do
     user_ids
     |> dump("user_ids")
     |> Enum.map(&user_block_circles(&1, block_type))
-    |> dump("user_block_circles")
+    # |> dump("user_block_circles")
     |> Bonfire.Boundaries.Circles.is_encircled_by?(user, ...)
   end
   def is_blocked_by?(user, block_type, user_id) when is_binary(user_id) do

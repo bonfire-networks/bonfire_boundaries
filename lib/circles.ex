@@ -86,7 +86,8 @@ defmodule Bonfire.Boundaries.Circles do
     |> where([encircle: encircle],
       encircle.subject_id == ^ulid(subject)
       and encircle.circle_id in ^(
-        ulid(circles) |> dump("circle_ids")
+        ulid(circles)
+        # |> dump("circle_ids")
       )
     )
   end
@@ -134,7 +135,9 @@ defmodule Bonfire.Boundaries.Circles do
 
   @doc "query for `list_my`"
   def list_my_q(user, opts \\ []) when not is_nil(user) do
-    list_visible_q(user, opts)
+    user
+    |> dump
+    |> list_visible_q(opts)
     |> where([caretaker: caretaker], caretaker.caretaker_id == ^ulid(user))
   end
 
