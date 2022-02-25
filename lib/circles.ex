@@ -136,7 +136,7 @@ defmodule Bonfire.Boundaries.Circles do
   @doc "query for `list_my`"
   def list_my_q(user, opts \\ []) when not is_nil(user) do
     user
-    |> dump
+    # |> dump
     |> list_visible_q(opts)
     |> where([caretaker: caretaker], caretaker.caretaker_id == ^ulid(user))
   end
