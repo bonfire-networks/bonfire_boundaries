@@ -1,8 +1,8 @@
 defmodule Bonfire.Boundaries.Verbs do
-
-  alias Bonfire.Data.AccessControl.Verb
+  import Where
   import Bonfire.Boundaries.Integration
   import Ecto.Query
+  alias Bonfire.Data.AccessControl.Verb
 
   def verbs, do: Bonfire.Common.Config.get!(:verbs)
 
@@ -10,7 +10,7 @@ defmodule Bonfire.Boundaries.Verbs do
   def get(id_or_name) when is_binary(id_or_name), do: get_tuple(id_or_name) |> elem(1)
 
   def get_tuple(id_or_name) when is_binary(id_or_name) do
-    Enum.find verbs, fn {_slug, verb} ->
+    Enum.find verbs(), fn {_slug, verb} ->
       verb[:id] == id_or_name or verb[:verb] == id_or_name
     end
   end

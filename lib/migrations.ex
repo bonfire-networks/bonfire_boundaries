@@ -77,7 +77,7 @@ defmodule Bonfire.Boundaries.Migrations do
       require Bonfire.Data.AccessControl.Grant.Migration
       require Bonfire.Data.AccessControl.InstanceAdmin.Migration
       require Bonfire.Data.AccessControl.Verb.Migration
-      require Bonfire.Boundaries.Stereotype.Migration
+      require Bonfire.Boundaries.Stereotyped.Migration
 
 
       Bonfire.Data.AccessControl.Acl.Migration.migrate_acl()
@@ -87,7 +87,7 @@ defmodule Bonfire.Boundaries.Migrations do
       Bonfire.Data.AccessControl.Verb.Migration.migrate_verb()
       Bonfire.Data.AccessControl.Grant.Migration.migrate_grant()
       Bonfire.Data.AccessControl.InstanceAdmin.Migration.migrate_instance_admin()
-      Bonfire.Boundaries.Stereotype.Migration.migrate_stereotype()
+      Bonfire.Boundaries.Stereotyped.Migration.migrate_stereotype()
 
       Ecto.Migration.flush()
 
@@ -105,12 +105,12 @@ defmodule Bonfire.Boundaries.Migrations do
       require Bonfire.Data.AccessControl.Grant.Migration
       require Bonfire.Data.AccessControl.InstanceAdmin.Migration
       require Bonfire.Data.AccessControl.Verb.Migration
-      require Bonfire.Boundaries.Stereotype.Migration
+      require Bonfire.Boundaries.Stereotyped.Migration
 
       Bonfire.Boundaries.Migrations.migrate_views()
       Bonfire.Boundaries.Migrations.migrate_functions()
 
-      Bonfire.Boundaries.Stereotype.Migration.migrate_stereotype()
+      Bonfire.Boundaries.Stereotyped.Migration.migrate_stereotype()
       Bonfire.Data.AccessControl.InstanceAdmin.Migration.migrate_instance_admin()
       Bonfire.Data.AccessControl.Grant.Migration.migrate_grant()
       Bonfire.Data.AccessControl.Verb.Migration.migrate_verb()

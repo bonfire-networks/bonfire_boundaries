@@ -8,7 +8,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries.Circles
-  alias Bonfire.Boundaries.Stereotype
+  alias Bonfire.Boundaries.Stereotyped
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.AccessControl.{Circle, Encircle}
   alias Bonfire.Data.Identity.Caretaker
@@ -18,6 +18,7 @@ defmodule Bonfire.Boundaries.Circles do
   def circles, do: Bonfire.Common.Config.get([:circles])
 
   def get(slug) when is_atom(slug), do: Bonfire.Common.Config.get([:circles])[slug]
+  def get(id) when is_binary(id), do: get_tuple(id) |> elem_or(1, nil)
 
   def get!(slug) when is_atom(slug) do
     get(slug) || raise RuntimeError, message: "Missing default circle: #{inspect(slug)}"
@@ -27,15 +28,13 @@ defmodule Bonfire.Boundaries.Circles do
 
   def get_id!(slug) when is_atom(slug), do: get!(slug).id
 
-  # def get_tuple(id) when is_binary(id) do
-  #   case by_id(id) do
-  #     {slug, _} -> get_tuple(slug)
-  #     _ -> nil  # TODO
-  #   end
-  # end
-
   def get_tuple(slug) when is_atom(slug) do
     {Bonfire.Common.Config.get!([:circles, slug, :name]), Bonfire.Common.Config.get!([:circles, slug, :id])}
+  end
+  def get_tuple(id) when is_binary(id) do
+    Enum.find circles(), fn {_slug, c} ->
+      c[:id] == id
+    end
   end
 
   def list, do: repo().many(from(u in Circle, left_join: named in assoc(u, :named), preload: [:named]))
@@ -108,7 +107,7 @@ defmodule Bonfire.Boundaries.Circles do
         # encircles: [%{subject_id: user.id}] # add myself to circle?
       })
     )) do
-      Bonfire.Boundaries.Boundaries.maybe_make_visible_for(user, circle) # make visible to myself
+      # Bonfire.Boundaries.Boundaries.maybe_make_visible_for(user, circle) # make visible to myself - FIXME
       {:ok, circle}
     end
   end
@@ -123,7 +122,7 @@ defmodule Bonfire.Boundaries.Circles do
   def list_visible_q(user, opts \\ []) do
     from(circle in Circle, as: :circle)
     |> boundarise(circle.id, opts ++ [current_user: user])
-    |> proload([:named, :caretaker, stereotype: {"stereotype_",  [:named]}])
+    |> proload([:named, :caretaker, stereotyped: {"stereotype_", [:named]}])
   end
 
   @doc """
@@ -153,8 +152,9 @@ defmodule Bonfire.Boundaries.Circles do
   def get_stereotype_circles(subject, stereotypes) when is_list(stereotypes) do
     stereotypes = Enum.map(stereotypes, &Bonfire.Boundaries.Circles.get_id!/1)
 
-    list_my_q(subject, skip_boundary_check: true)
-    |> where([circle: circle, stereotype: stereotype], stereotype.stereotype_id in ^ulid(stereotypes))
+    list_my_q(subject, skip_boundary_check: true) # skip boundaries since we should only use this query internally
+    |> where([circle: circle, stereotyped: stereotyped], stereotyped.stereotype_id in ^ulid(stereotypes))
+    |> dump()
     |> repo().all()
   end
 

@@ -1,4 +1,4 @@
-defmodule Bonfire.Boundaries.Stereotype do
+defmodule Bonfire.Boundaries.Stereotyped do
   @moduledoc """
   A marker that identifies special context-dependent semantics to the system.
   """
@@ -7,7 +7,7 @@ defmodule Bonfire.Boundaries.Stereotype do
     otp_app: :bonfire_boundaries,
     source: "bonfire_boundaries_stereotype"
 
-  alias Bonfire.Boundaries.Stereotype
+  alias Bonfire.Boundaries.Stereotyped
   alias Ecto.Changeset
   alias Pointers.Pointer
 
@@ -15,11 +15,11 @@ defmodule Bonfire.Boundaries.Stereotype do
     belongs_to :stereotype, Pointer
   end
 
-  def changeset(stereotype \\ %Stereotype{}, params) do
+  def changeset(stereotype \\ %Stereotyped{}, params) do
     stereotype
     |> Changeset.cast(params, [:id, :stereotype_id])
     |> Changeset.assoc_constraint(:stereotype)
-    |> maybe_ignore() 
+    |> maybe_ignore()
   end
 
   # if the user didn't provide a stereotype, just ignore the changeset
@@ -30,20 +30,20 @@ defmodule Bonfire.Boundaries.Stereotype do
   end
 
 end
-defmodule Bonfire.Boundaries.Stereotype.Migration do
+defmodule Bonfire.Boundaries.Stereotyped.Migration do
 
   use Ecto.Migration
   import Pointers.Migration
-  alias Bonfire.Boundaries.Stereotype
+  alias Bonfire.Boundaries.Stereotyped
 
-  @stereotype_table Stereotype.__schema__(:source)
+  @stereotype_table Stereotyped.__schema__(:source)
 
   # create_stereotype_table/{0,1}
 
   defp make_stereotype_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Boundaries.Stereotype) do
+      Pointers.Migration.create_mixin_table(Bonfire.Boundaries.Stereotyped) do
         Ecto.Migration.add :stereotype_id,
           Pointers.Migration.strong_pointer(), null: false
         unquote_splicing(exprs)
@@ -56,7 +56,7 @@ defmodule Bonfire.Boundaries.Stereotype.Migration do
 
   # drop_stereotype_table/0
 
-  def drop_stereotype_table(), do: drop_mixin_table(Stereotype)
+  def drop_stereotype_table(), do: drop_mixin_table(Stereotyped)
 
   # create_stereotype_stereotype_index/{0, 1}
 
@@ -86,8 +86,8 @@ defmodule Bonfire.Boundaries.Stereotype.Migration do
   end
   defp ms(:down) do
     quote do
-      Bonfire.Boundaries.Stereotype.Migration.drop_stereotype_stereotype_index()
-      Bonfire.Boundaries.Stereotype.Migration.drop_stereotype_table()
+      Bonfire.Boundaries.Stereotyped.Migration.drop_stereotype_stereotype_index()
+      Bonfire.Boundaries.Stereotyped.Migration.drop_stereotype_table()
     end
   end
 

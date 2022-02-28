@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Identity.Caretaker
-  alias Bonfire.Boundaries.Stereotype
+  alias Bonfire.Boundaries.Stereotyped
   alias Pointers.ULID
   alias Bonfire.Data.AccessControl.{Acl, Controlled}
   alias Bonfire.Data.Identity.User
@@ -56,13 +56,19 @@ defmodule Bonfire.Boundaries.Acls do
 
   # when the user picks a preset, this maps to a set of base acls
   defp base_acls(user, preset_or_custom) do
-    acls = case Boundaries.preset(preset_or_custom) do
-      "public"    -> [:guests_may_read,  :locals_may_reply, :i_may_administer, :negative]
-      "federated" -> [:locals_may_reply, :i_may_administer, :negative]
-      "local"     -> [:locals_may_reply, :i_may_administer, :negative]
-      _           -> [:i_may_administer, :negative]
-    end
+    acls = (
+      Config.get!([:object_default_boundaries, :acls])
+      ++
+      case Boundaries.preset(preset_or_custom) do
+        "public"    -> [:guests_may_see_read,  :locals_may_reply]
+        "federated" -> [:locals_may_reply]
+        "local"     -> [:locals_may_reply]
+        _           -> []
+      end
+    )
+    |> dump
     |> find_acls(user)
+    |> dump
   end
 
   defp custom_grants(changeset, preset_or_custom) do
@@ -123,41 +129,37 @@ defmodule Bonfire.Boundaries.Acls do
     acls =
       acls
       |> Enum.map(&identify/1)
+      # |> dump("identified")
       |> filter_empty([])
       |> Enum.group_by(&elem(&1, 0))
     globals =
       acls
       |> Map.get(:global, [])
       |> Enum.map(&elem(&1, 1))
+      # |> dump("globals")
     stereo =
       case Map.get(acls, :stereo, []) do
         [] -> []
         stereo ->
           stereo
-          |> Enum.map(&elem(&1, 1))
+          |> Enum.map(&elem(&1, 1).id)
           |> Acls.find_caretaker_stereotypes(user_id, ...)
-          |> Enum.map(&(&1.id))
+          # |> dump("stereos")
       end
-    Enum.map(globals ++ stereo, &(%{acl_id: &1}))
+    Enum.map(globals ++ stereo, &(%{acl_id: &1.id}))
   end
   defp find_acls(_acls, _), do: []
 
   defp identify(name) do
-    defaults = user_default_acls()
-    case defaults[name] do
+    case user_default_acl(name) do
 
-      nil ->
-        case Acls.get_id(name) do
-          id when is_binary(id) -> {:global, id}
-          _ ->
-            error(name, "Unknown global ACL, please check that it is correctly defined in config")
-          nil
-        end
+      nil -> # seems to be a global ACL
+        {:global, Acls.get!(name)}
 
-      default ->
+      default -> # should a user-level stereotyped ACL
         case default[:stereotype] do
-          nil -> raise RuntimeError, message: "Unstereotyped user acl: #{inspect(name)}"
-          stereo -> {:stereo, Acls.get_id!(stereo)}
+          nil -> raise RuntimeError, message: "Boundaries: Unstereotyped user acl in config: #{inspect(name)}"
+          stereo -> {:stereo, Acls.get!(stereo)}
         end
     end
   end
@@ -202,7 +204,7 @@ defmodule Bonfire.Boundaries.Acls do
     # |> IO.inspect(label: "cs")
     |> Changeset.cast_assoc(:named, [])
     |> Changeset.cast_assoc(:caretaker)
-    |> Changeset.cast_assoc(:stereotype)
+    |> Changeset.cast_assoc(:stereotyped)
   end
 
 
@@ -217,7 +219,7 @@ defmodule Bonfire.Boundaries.Acls do
   def list_q(opts) do
     from(acl in Acl, as: :acl)
     |> boundarise(acl.id, opts)
-    |> proload([:caretaker, :named, :stereotype])
+    |> proload([:caretaker, :named, :stereotyped])
   end
 
   @doc """
@@ -236,35 +238,35 @@ defmodule Bonfire.Boundaries.Acls do
   # special built-in acls (eg, guest, local, activity_pub)
   def acls, do: Bonfire.Common.Config.get([:acls])
 
-  def user_default_acl(name), do: user_default_acls()[:name]
+  def user_default_acl(name), do: user_default_acls()[name]
 
   def user_default_acls() do # FIXME: this vs acls/0 ?
     Boundaries.user_default_boundaries()
     |> Map.fetch!(:acls)
+    # |> dump
   end
 
   def get(slug) when is_atom(slug), do: acls()[slug]
   def get!(slug) when is_atom(slug) do
     get(slug)
-      || ( Bonfire.Boundaries.Fixtures.insert && get(slug) )
+      # || ( Bonfire.Boundaries.Fixtures.insert && get(slug) )
       || raise RuntimeError, message: "Missing default acl: #{inspect(slug)}"
   end
 
-  def get_id(slug), do: Map.get(acls(), slug, %{})[:id]
-
+  def get_id(slug), do: e(acls(), slug, :id, nil)
   def get_id!(slug), do: get!(slug)[:id]
 
   def list do
     from(u in Acl, as: :acl)
-    |> proload([:named, :controlled, :stereotype, :caretaker])
+    |> proload([:named, :controlled, :stereotyped, :caretaker])
     |> repo().many()
   end
 
   def find_caretaker_stereotypes(caretaker_id, stereotypes) do
     from(a in Acl,
       join: c in Caretaker,  on: a.id == c.id and c.caretaker_id == ^caretaker_id,
-      join: s in Stereotype, on: a.id == s.id and s.stereotype_id in ^stereotypes,
-      preload: [caretaker: c, stereotype: s]
+      join: s in Stereotyped, on: a.id == s.id and s.stereotype_id in ^stereotypes,
+      preload: [caretaker: c, stereotyped: s]
     ) |> repo().all()
     # |> debug("stereotype acls")
   end

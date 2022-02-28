@@ -17,6 +17,7 @@ defmodule Bonfire.Boundaries.Grants do
   alias Bonfire.Boundaries.Accesses
   alias Bonfire.Boundaries.Circles
 
+  def grants, do: Bonfire.Common.Config.get([:grants])
 
   def create(%{}=attrs) when not is_struct(attrs) do
     repo().insert(changeset(attrs))

@@ -29,7 +29,7 @@ defmodule Bonfire.Boundaries.Controlleds do
     repo().many(list_on_objects_q(objects))
   end
 
-  defp list_on_objects_q(objects, filter_acls \\ [:guests_may_read, :locals_may_interact, :locals_may_reply]) do
+  defp list_on_objects_q(objects, filter_acls \\ [:guests_may_see_read, :locals_may_interact, :locals_may_reply]) do
     filter_acls = filter_acls |> Enum.map(&Bonfire.Boundaries.Acls.get_id!/1)
 
     from c in Controlled,
