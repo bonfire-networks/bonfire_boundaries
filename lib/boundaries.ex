@@ -26,8 +26,8 @@ defmodule Bonfire.Boundaries do
   end
   def take_care_of!(thing, user), do: hd(take_care_of!([thing], user))
 
-  def types_blocked([block_type]) do
-    types_blocked(block_type)
+  def types_blocked(types) when is_list(types) do
+    Enum.flat_map(types, &types_blocked/1) |> Enum.uniq()
   end
   def types_blocked(type) when type in [:ghost, :ghost_them] do
     [:ghost_them]
@@ -81,6 +81,7 @@ defmodule Bonfire.Boundaries do
   end
 
   defp user_circles_to_block(current_user, block_type, user_or_instance_to_block) when block_type in [:silence, :silence_them] do
+    debug("add silence block both users' circles, one to my #{inspect block_type} and the other to their :silence_me")
     user_circles_blocked(current_user, types_blocked(block_type)) # my list of people I silenced
       ++
     user_circles_blocked(user_or_instance_to_block, [:silence_me]) # their list of people who silenced them (this list shouldn't be visible to them, but is used so queries can filter stuff using `Bonfire.Boundaries.Queries`)
@@ -98,7 +99,7 @@ defmodule Bonfire.Boundaries do
   end
 
   def is_blocked?(user_or_instance, block_type, opts) do
-    debug(opts, "check if blocked (#{block_type}) instance-wide or per-user, if any has/have been provided in opts")
+    debug(opts, "check if blocked #{inspect block_type} instance-wide or per-user, if any has/have been provided in opts")
     is_blocked?(user_or_instance, block_type, :instance_wide)
       ||
     is_blocked_by?(user_or_instance, block_type, opts[:user_ids] || current_user(opts))
