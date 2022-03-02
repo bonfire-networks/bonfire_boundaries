@@ -81,8 +81,9 @@ defmodule Bonfire.Boundaries do
   end
 
   defp user_circles_to_block(current_user, block_type, user_or_instance_to_block) when block_type in [:silence, :silence_them] do
-    debug("add silence block both users' circles, one to my #{inspect block_type} and the other to their :silence_me")
-    user_circles_blocked(current_user, types_blocked(block_type)) # my list of people I silenced
+    silence_them = types_blocked(block_type)
+    debug("add silence block to both users' circles, one to my #{inspect silence_them} and the other to their :silence_me")
+    user_circles_blocked(current_user, silence_them) # my list of people I silenced
       ++
     user_circles_blocked(user_or_instance_to_block, [:silence_me]) # their list of people who silenced them (this list shouldn't be visible to them, but is used so queries can filter stuff using `Bonfire.Boundaries.Queries`)
   end

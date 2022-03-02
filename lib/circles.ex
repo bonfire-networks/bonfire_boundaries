@@ -154,7 +154,7 @@ defmodule Bonfire.Boundaries.Circles do
 
     list_my_q(subject, skip_boundary_check: true) # skip boundaries since we should only use this query internally
     |> where([circle: circle, stereotyped: stereotyped], stereotyped.stereotype_id in ^ulid(stereotypes))
-    |> dump()
+    # |> dump()
     |> repo().all()
   end
 
