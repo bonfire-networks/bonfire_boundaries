@@ -60,10 +60,12 @@ defmodule Bonfire.Boundaries.Debug do
     debug_acls(acls)
   end
 
-  def debug_my_grants_on(user, thing) do
+  def debug_my_grants_on(user, things) when not is_list(user), do: debug_my_grants_on([user], things)
+  def debug_my_grants_on(users, thing) when not is_list(thing), do: debug_my_grants_on(users, [thing])
+  def debug_my_grants_on(users, things) do
     from(s in Summary,
-      where: s.subject_id == ^user.id,
-      where: s.object_id == ^thing.id
+      where: s.subject_id in ^Utils.ulid(users),
+      where: s.object_id in ^Utils.ulid(things)
     )
     |> Repo.all()
     |> Enum.group_by(&{&1.subject_id, &1.object_id, &1.value})
