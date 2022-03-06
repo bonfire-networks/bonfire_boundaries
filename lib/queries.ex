@@ -41,6 +41,7 @@ defmodule Bonfire.Boundaries.Queries do
     case field_ref do
       {{:., _, [{alia, _, _},field]}, [{:no_parens, true}|_], []} ->
         quote do
+          require Where
           query = unquote(query)
           opts = unquote(opts)
           verbs = Bonfire.Common.Utils.e(opts, :verbs, [:see, :read])
@@ -48,7 +49,9 @@ defmodule Bonfire.Boundaries.Queries do
             true -> query
             :admins ->
               case Bonfire.Common.Utils.current_user(opts) do
-                %{id: _, instance_admin: %{is_instance_admin: true}} -> query
+                %{id: _, instance_admin: %{is_instance_admin: true}} ->
+                  Where.debug("Skipping boundary checks for instance administrator")
+                  query
                 current_user ->
                   vis = Bonfire.Boundaries.Queries.filter_where_not(current_user, verbs)
                   join unquote(query), :inner,
@@ -69,6 +72,7 @@ defmodule Bonfire.Boundaries.Queries do
         end
       {field, [{:no_parens, true}|_], []}=field_ref when is_atom(field) ->
         quote do
+          require Where
           query = unquote(query)
           opts = unquote(opts)
           verbs = Bonfire.Common.Utils.e(opts, :verbs, [:see, :read])
@@ -76,7 +80,9 @@ defmodule Bonfire.Boundaries.Queries do
             true -> query
             :admins ->
               case Bonfire.Common.Utils.current_user(opts) do
-                %{id: _, instance_admin: %{is_instance_admin: true}} -> query
+                %{id: _, instance_admin: %{is_instance_admin: true}} ->
+                  Where.debug("Skipping boundary checks for instance administrator")
+                  query
                 current_user ->
                   vis = Bonfire.Boundaries.Queries.filter_where_not(current_user, verbs)
                   join unquote(query), :inner,
@@ -123,6 +129,18 @@ defmodule Bonfire.Boundaries.Queries do
     from summary in Summary,
       where: summary.subject_id in ^ids,
       where: summary.verb_id in ^verbs,
+      group_by: summary.object_id,
+      having: fragment("agg_perms(?)", summary.value),
+      select: %{
+        subjects: count(summary.subject_id),
+        object_id: summary.object_id,
+      }
+  end
+
+  def list_permitted(user) do
+    ids = user_and_circle_ids(user)
+    from summary in Summary,
+      where: summary.subject_id in ^ids,
       group_by: summary.object_id,
       having: fragment("agg_perms(?)", summary.value),
       select: %{

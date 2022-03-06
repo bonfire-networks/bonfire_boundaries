@@ -13,13 +13,13 @@ defmodule Bonfire.Boundaries.Debug do
   end
 
   defp get_object_acls(object) do
-    Repo.preload(object, [controlled: [acl: [:named, :grants, stereotyped: [:named]]]]).controlled
+    Repo.preload(object, [controlled: [acl: [:named, :grants, stereotyped: [:named]]]], force: true).controlled
     |> Enum.map(&(&1.acl))
     # |> dump
   end
 
   def debug_user_circles(user) do
-    user = Repo.preload user, [encircles: [circle: [:named]]]
+    user = Repo.preload user, [encircles: [circle: [:named]]], force: true
     IO.puts "User: #{user.id}"
     for encircle <- user.encircles do
       %{circle_id: encircle.circle_id,
