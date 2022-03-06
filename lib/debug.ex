@@ -1,10 +1,11 @@
 defmodule Bonfire.Boundaries.Debug do
   use Arrows
   import Where
-  alias Bonfire.Boundaries.Verbs
+  alias Bonfire.Boundaries.{Summary, Verbs}
   alias Bonfire.Common.Utils
   alias Bonfire.Boundaries.{Acls, Circles}
   alias Bonfire.Repo
+  import Ecto.Query, only: [from: 2]
 
   defp get_user_acls(user) do
     Acls.list(current_user: user, skip_boundary_check: true)
@@ -57,6 +58,20 @@ defmodule Bonfire.Boundaries.Debug do
     acls = get_object_acls(thing)
     IO.puts "Object: #{thing.id}"
     debug_acls(acls)
+  end
+
+  def debug_my_grants_on(user, thing) do
+    from(s in Summary,
+      where: s.subject_id == ^user.id,
+      where: s.object_id == ^thing.id
+    )
+    |> Repo.all()
+    |> Enum.group_by(&{&1.subject_id, &1.object_id, &1.value})
+    |> for({k, [v|_]=vs} <- ...) do
+      Map.put(v, :verbs, Enum.sort(Enum.map(vs, &(Verbs.get!(&1.verb_id).verb))))
+    end
+    |> Enum.map(&Map.take(&1, [:subject_id, :object_id, :verbs, :value]))
+    |> Scribe.print()
   end
 
 end
