@@ -38,6 +38,12 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   def list, do: repo().many(from(u in Circle, left_join: named in assoc(u, :named), preload: [:named]))
+  def list_by_ids(ids), do: repo().many(
+    from(c in Circle,
+      left_join: named in assoc(c, :named),
+      where: c.id in ^ids,
+      preload: [:named]
+    ))
 
   def circle_ids(subjects) when is_list(subjects), do: subjects |> Enum.map(&circle_ids/1) |> Enum.uniq()
   def circle_ids(circle_name) when is_atom(circle_name) and not is_nil(circle_name), do: get_id(circle_name)

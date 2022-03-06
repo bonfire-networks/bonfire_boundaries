@@ -46,23 +46,43 @@ defmodule Bonfire.Boundaries do
     block(user_or_instance_to_block, block_type, :instance_wide)
   end
 
+  def block(user_or_instance_to_block, block_type, :instance_wide) when block_type in [:silence, :silence_them] do
+    instance_wide_circles([:silence_me])
+    |> dump("instance_wide_circles_silenced")
+    |> add_to_circles(user_or_instance_to_block, ...)
+  end
+
   def block(user_or_instance_to_block, block_type, :instance_wide) do
-    instance_wide_circles_blocked(block_type)
+    instance_wide_circles(types_blocked(block_type))
     |> dump("instance_wide_circles_blocked")
-    |> block_circles(user_or_instance_to_block, ...)
+    |> add_to_circles(user_or_instance_to_block, ...)
   end
 
   @doc """
   Block something for the current user (current_user should be passed in opts)
   """
-  def block(user_or_instance_to_block, block_type, opts) do
-    Utils.current_user(opts)
-    |> user_circles_to_block(..., block_type, user_or_instance_to_block)
-    |> repo().maybe_preload(caretaker: [caretaker: [:profile]]) |> dump("user_circles_to_block")
-    |> block_circles(user_or_instance_to_block, ...)
+  def block(user_or_instance_to_block, block_type, opts) when block_type in [:silence, :silence_them] do
+    current_user = Utils.current_user(opts)
+    silence_them = types_blocked(block_type)
+    debug("add silence block to both users' circles, one to my #{inspect silence_them} and the other to their :silence_me")
+    with {:ok, ret} <- add_to_blocklist(user_or_instance_to_block, silence_them, current_user), # my list of people I've silenced
+    {:ok, ret} <- add_to_blocklist(current_user, [:silence_me], user_or_instance_to_block) do # their list of people who silenced them (this list isn't meant to be visible to them, but is used so queries can filter stuff using `Bonfire.Boundaries.Queries`)
+      {:ok, ret}
+    end
   end
 
-  defp block_circles(user_or_instance_to_block, circles) do
+  def block(user_or_instance_to_block, block_type, opts) do
+    add_to_blocklist(user_or_instance_to_block, types_blocked(block_type), Utils.current_user(opts))
+  end
+
+  def add_to_blocklist(user_or_instance_add, block_type, circle_caretaker) do
+    circle_caretaker
+    |> user_circles_blocked(..., block_type)
+    |> repo().maybe_preload(caretaker: [caretaker: [:profile]]) |> dump("user:circles_to_block")
+    |> add_to_circles(user_or_instance_add, ...)
+  end
+
+  defp add_to_circles(user_or_instance_to_block, circles) do
     with done when is_list(done) <- Circles.add_to_circles(user_or_instance_to_block, circles) do # TODO: properly validate the inserts
         {:ok, "Blocked"}
     else e ->
@@ -71,30 +91,18 @@ defmodule Bonfire.Boundaries do
     end
   end
 
-  defp instance_wide_circles_blocked(block_type)  do
-    types_blocked(block_type)
-    |> Enum.map(&Bonfire.Boundaries.Circles.get_id/1)
+  def instance_wide_circles(block_types) when is_list(block_types) do
+    Enum.map(block_types, &Bonfire.Boundaries.Circles.get_id/1)
   end
 
   defp user_circles_blocked(current_user, block_types) when is_list(block_types) do
     Circles.get_stereotype_circles(current_user, block_types)
   end
 
-  defp user_circles_to_block(current_user, block_type, user_or_instance_to_block) when block_type in [:silence, :silence_them] do
-    silence_them = types_blocked(block_type)
-    debug("add silence block to both users' circles, one to my #{inspect silence_them} and the other to their :silence_me")
-    user_circles_blocked(current_user, silence_them) # my list of people I silenced
-      ++
-    user_circles_blocked(user_or_instance_to_block, [:silence_me]) # their list of people who silenced them (this list shouldn't be visible to them, but is used so queries can filter stuff using `Bonfire.Boundaries.Queries`)
-  end
-  defp user_circles_to_block(current_user, block_type, _user_to_block) do
-    user_circles_blocked(current_user, types_blocked(block_type))
-  end
-
   def is_blocked?(peered, block_type \\ :any, opts \\ [])
 
   def is_blocked?(user_or_instance, block_type, :instance_wide) do
-    instance_wide_circles_blocked(block_type)
+    instance_wide_circles(types_blocked(block_type))
     |> dump("instance_wide_circles_blocked")
     |> Bonfire.Boundaries.Circles.is_encircled_by?(user_or_instance, ...)
   end
@@ -107,7 +115,7 @@ defmodule Bonfire.Boundaries do
   end
 
   defp is_blocked_by?(%{} = user_or_instance, block_type, current_user_ids) when is_list(current_user_ids) and length(current_user_ids)>0 do
-    dump(user_or_instance, "user_or_instance to check")
+    # dump(user_or_instance, "user_or_instance to check")
     dump(current_user_ids, "current_user_ids")
 
     block_types = types_blocked(block_type)
