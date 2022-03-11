@@ -6,6 +6,8 @@ defmodule Bonfire.Boundaries.Verbs do
 
   def verbs, do: Bonfire.Common.Config.get!(:verbs)
 
+  def slugs, do: Keyword.keys(verbs())
+
   def get(slug) when is_atom(slug), do: verbs()[slug]
   def get(id_or_name) when is_binary(id_or_name), do: get_tuple(id_or_name) |> elem(1)
 

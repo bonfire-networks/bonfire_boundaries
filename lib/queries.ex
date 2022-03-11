@@ -137,15 +137,19 @@ defmodule Bonfire.Boundaries.Queries do
       }
   end
 
-  def list_permitted(user) do
+  def permitted(user), do: permitted(user, Verbs.slugs())
+  def permitted(user, verbs) do
     ids = user_and_circle_ids(user)
+    verbs = Verbs.ids(verbs)
     from summary in Summary,
       where: summary.subject_id in ^ids,
-      group_by: summary.object_id,
+      where: summary.verb_id in ^verbs,
+      group_by: [summary.object_id],
       having: fragment("agg_perms(?)", summary.value),
       select: %{
         subjects: count(summary.subject_id),
         object_id: summary.object_id,
+        verbs: fragment("array_agg(?)", summary.verb_id)
       }
   end
 

@@ -6,11 +6,10 @@ defmodule Bonfire.Boundaries.Permitted do
 
   @primary_key false
   @foreign_key_type ULID
-  schema "bonfire_boundaries_summary" do
-    belongs_to :subject, Pointer, primary_key: true
+  schema "bonfire_boundaries_permitted" do
+    belongs_to :subjects, :integer
     belongs_to :object, Pointer, primary_key: true
-    belongs_to :verb, Verb, primary_key: true
-    field :value, :boolean
+    field :verbs, {:array, ULID}
   end
 
 end
