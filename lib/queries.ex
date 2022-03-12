@@ -163,13 +163,13 @@ defmodule Bonfire.Boundaries.Queries do
     quote do: Ecto.Query.fragment("agg_perms(?)", unquote(p))
   end
 
-  def object_only_visible_for(q, opts \\ nil) do
+  def object_boundarised(q, opts \\ nil) do
     if Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
       q
     else
       agent = Bonfire.Common.Utils.current_user(opts) || Bonfire.Common.Utils.current_account(opts)
 
-      vis = filter_where_not(agent, [:see, :read])
+      vis = filter_where_not(agent, Common.Utils.e(opts, :verbs, [:see, :read]))
       join q, :inner, [main_object: main_object],
         v in subquery(vis),
         on: main_object.id == v.object_id

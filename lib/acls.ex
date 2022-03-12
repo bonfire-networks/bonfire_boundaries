@@ -91,7 +91,7 @@ defmodule Bonfire.Boundaries.Acls do
         "public" ->
           [ulid(reply_to_creator)]
         "local" ->
-          if check_local(reply_to_creator), do: [Utils.e(reply_to_creator, :id, nil)],
+          if is_local?(reply_to_creator), do: [Utils.e(reply_to_creator, :id, nil)],
           else: []
         _ -> []
       end
@@ -114,7 +114,7 @@ defmodule Bonfire.Boundaries.Acls do
         "local" ->
           ( # include only if local
             mentions
-            |> Enum.filter(&check_local/1)
+            |> Enum.filter(&is_local?/1)
             |> ulid()
           )
         _ ->
