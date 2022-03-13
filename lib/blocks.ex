@@ -88,12 +88,12 @@ defmodule Bonfire.Boundaries.Blocks do
   def list(block_type, :instance_wide) do # only for admins
     instance_wide_circles(types_blocked(block_type))
     |> Bonfire.Boundaries.Circles.list_by_ids()
-    |> repo().maybe_preload(caretaker: [:profile], encircles: [subject: [:profile, :character]])
+    |> repo().maybe_preload(caretaker: [:profile], encircles: [:peer, subject: [:profile, :character]])
   end
 
   def list(block_type, opts) do
     per_user_circles(current_user(opts), types_blocked(block_type))
-    |> repo().maybe_preload(encircles: [subject: [:profile, :character]])
+    |> repo().maybe_preload(encircles: [:peer, subject: [:profile, :character]])
   end
 
   ###
