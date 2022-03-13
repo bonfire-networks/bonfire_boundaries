@@ -41,7 +41,7 @@ defmodule Bonfire.Boundaries.Circles do
   def list_by_ids(ids), do: repo().many(
     from(c in Circle,
       left_join: named in assoc(c, :named),
-      where: c.id in ^ids,
+      where: c.id in ^ulid(ids),
       preload: [:named]
     ))
 
@@ -151,8 +151,8 @@ defmodule Bonfire.Boundaries.Circles do
     Enum.map([:guest, :local, :activity_pub], &Circles.get_tuple/1)
   end
 
-  def get(id, %User{}=user) do
-    repo().single(get_q(id, user))
+  def get_for_caretaker(id, caretaker) do
+    repo().single(get_q(id, caretaker))
   end
 
   def get_stereotype_circles(subject, stereotypes) when is_list(stereotypes) do
@@ -165,14 +165,14 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc "query for `get`"
-  def get_q(id, user) do
-    list_visible_q(user)
+  def get_q(id, caretaker) do
+    list_visible_q(caretaker)
     |> join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
-    |> where([circle: circle, caretaker: caretaker], circle.id == ^id and caretaker.caretaker_id == ^ulid(user))
+    |> where([circle: circle, caretaker: caretaker], circle.id == ^id and caretaker.caretaker_id == ^ulid(caretaker))
   end
 
   def update(id, %User{} = user, params) do
-    with {:ok, circle} <- get(id, user)
+    with {:ok, circle} <- get_for_caretaker(id, user)
     |> repo().maybe_preload([:encircles]) do
 
       repo().update(changeset(:update, circle, params))
@@ -184,6 +184,13 @@ defmodule Bonfire.Boundaries.Circles do
   end
   def add_to_circle(subject, circle) do
     repo().insert(Encircle.changeset(%{circle_id: ulid(circle), subject_id: ulid(subject)}))
+  end
+
+  def remove_from_circles(subject, circles) when is_list(circles) do
+    from(e in Encircle, where: e.subject_id == ^ulid(subject) and e.circle_id in ^ulid(circles)) |> repo().delete_all
+  end
+  def remove_from_circle(subject, circle) do
+    remove_from_circles(subject, [circle])
   end
 
   def changeset(:create, %User{}=_user, attrs) do

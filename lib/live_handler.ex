@@ -3,34 +3,54 @@ defmodule Bonfire.Boundaries.LiveHandler do
   import Bonfire.Boundaries.Integration
 
   def handle_event("block", %{"id" => id, "scope" => scope} = attrs, socket) when is_binary(id) do
-    with {:ok, _} <- (
+    with {:ok, status} <- (
       if is_admin?(current_user(socket)) do
-      Bonfire.Boundaries.block(id, maybe_to_atom(attrs["block_type"]), maybe_to_atom(scope) || socket)
+      Bonfire.Boundaries.Blocks.block(id, maybe_to_atom(attrs["block_type"]), maybe_to_atom(scope) || socket)
     else
       debug("not admin, fallback to user-level block")
-      Bonfire.Boundaries.block(id, maybe_to_atom(attrs["block_type"]), socket)
+      Bonfire.Boundaries.Blocks.block(id, maybe_to_atom(attrs["block_type"]), socket)
     end
     ) do
       Bonfire.UI.Social.OpenModalLive.close()
-      # TODO: show feedback
       {:noreply,
           socket
-          |> put_flash(:info, "Blocked!")
+          |> put_flash(:info, status)
       }
     end
   end
 
   def handle_event("block", %{"id" => id} = attrs, socket) when is_binary(id) do
-    with {:ok, _} <- Bonfire.Boundaries.block(id, maybe_to_atom(attrs["block_type"]), socket) do
+    with {:ok, status} <- Bonfire.Boundaries.Blocks.block(id, maybe_to_atom(attrs["block_type"]), socket) do
       Bonfire.UI.Social.OpenModalLive.close()
-      # TODO: show feedback
       {:noreply,
           socket
-          |> put_flash(:info, "Blocked!")
+          |> put_flash(:info, status)
       }
+    end
+  end
+
+    def handle_event("unblock", %{"id" => id, "scope" => scope} = attrs, socket) when is_binary(id) do
+    with {:ok, status} <- (
+      if is_admin?(current_user(socket)) do
+      Bonfire.Boundaries.Blocks.unblock(id, maybe_to_atom(attrs["block_type"]), maybe_to_atom(scope) || socket)
     else
-      e ->
-        error(e)
+      debug("not admin, fallback to user-level block")
+      Bonfire.Boundaries.Blocks.unblock(id, maybe_to_atom(attrs["block_type"]), socket)
+    end
+    ) do
+      {:noreply,
+          socket
+          |> put_flash(:info, status)
+      }
+    end
+  end
+
+  def handle_event("unblock", %{"id" => id} = attrs, socket) when is_binary(id) do
+    with {:ok, status} <- Bonfire.Boundaries.Blocks.unblock(id, maybe_to_atom(attrs["block_type"]), socket) do
+      {:noreply,
+          socket
+          |> put_flash(:info, status)
+      }
     end
   end
 
