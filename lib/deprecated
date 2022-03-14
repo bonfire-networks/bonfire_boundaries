@@ -7,12 +7,12 @@
   def maybe_grant_access_to(%{id: current_user_id} = current_user, object_id, circle_ids, verbs) when is_list(circle_ids) and is_binary(object_id) do
 
     opts = [current_user: current_user]
-    grant_subjects = Utils.ulid(circle_ids ++ [current_user]) #|> debug(label: "maybe_grant_access_to")
+    grant_subjects = Utils.ulid(circle_ids ++ [current_user]) #|> debug("maybe_grant_access_to")
 
     error("TODO: Refactor needed to grant #{inspect verbs} on object #{inspect object_id} to #{inspect grant_subjects}")
 
-    # with {:ok, %{id: acl_id}} <- Bonfire.Boundaries.Acls.create(opts),# |> debug(label: "acled"),
-    # {:ok, _controlled} <- Bonfire.Boundaries.Controlleds.create(%{id: object_id, acl_id: acl_id}), #|> debug(label: "ctled"),
+    # with {:ok, %{id: acl_id}} <- Bonfire.Boundaries.Acls.create(opts),# |> debug("acled"),
+    # {:ok, _controlled} <- Bonfire.Boundaries.Controlleds.create(%{id: object_id, acl_id: acl_id}), #|> debug("ctled"),
     # {:ok, grant} <- Bonfire.Boundaries.Grants.grant(grant_subjects, acl_id, verbs, true, opts) do
     #   # debug(one_grant: grant)
     #   {:ok, :granted}

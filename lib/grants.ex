@@ -37,9 +37,9 @@ defmodule Bonfire.Boundaries.Grants do
   """
   def grant(subject_id, acl_id, verb, value, opts \\ [])
 
-  def grant(subject_ids, acl_id, verb, value, opts) when is_list(subject_ids), do: subject_ids |> Circles.circle_ids() |> Enum.map(&grant(&1, acl_id, verb, value, opts)) #|> debug(label: "mapped") # TODO: optimise?
+  def grant(subject_ids, acl_id, verb, value, opts) when is_list(subject_ids), do: subject_ids |> Circles.circle_ids() |> Enum.map(&grant(&1, acl_id, verb, value, opts)) #|> debug("mapped") # TODO: optimise?
 
-  def grant(subject_id, acl_id, verbs, value, opts) when is_list(verbs), do: Enum.map(verbs, &grant(subject_id, acl_id, &1, value, opts)) #|> debug(label: "mapped") # TODO: optimise?
+  def grant(subject_id, acl_id, verbs, value, opts) when is_list(verbs), do: Enum.map(verbs, &grant(subject_id, acl_id, &1, value, opts)) #|> debug("mapped") # TODO: optimise?
 
   def grant(subject_id, acl_id, verb, value, opts) when is_atom(verb) and not is_nil(verb) do
     debug("Me.Grants - lookup verb #{inspect verb}")
@@ -73,7 +73,7 @@ defmodule Bonfire.Boundaries.Grants do
   def create(attrs, opts) do
     changeset(:create, attrs, opts)
     |> repo().insert()
-    # |> debug(label: "Me.Grants - granted")
+    # |> debug("Me.Grants - granted")
   end
 
   def changeset(:create, attrs, opts) do
