@@ -14,7 +14,7 @@ defmodule Bonfire.Boundaries.Integration do
   end
 
   def is_local?(thing) do
-    if Bonfire.Common.Utils.module_enabled?(Bonfire.Federate.ActivityPub.Utils) do
+    if Bonfire.Common.Extend.module_enabled?(Bonfire.Federate.ActivityPub.Utils) do
       Bonfire.Federate.ActivityPub.Utils.is_local?(thing)
     end
   end
