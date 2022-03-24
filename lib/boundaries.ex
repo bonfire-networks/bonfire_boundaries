@@ -10,6 +10,18 @@ defmodule Bonfire.Boundaries do
 
   @visibility_verbs [:see, :read]
 
+  def set_boundaries(%{id: _} = creator, object, opts) when is_list(opts) and ( is_binary(object) or is_map(object) ) do
+
+    with {:ok, pointer} <- Ecto.Changeset.cast(%Pointers.Pointer{id: ulid(object)}, %{}, [])
+                          |> Bonfire.Boundaries.Acls.cast(creator, opts) |> debug("ACL it")
+                          |> repo().update()
+                          do
+      # debug(one_grant: grant)
+      {:ok, :granted}
+    end
+  end
+
+
   @doc """
   Assigns the user as the caretaker of the given object or objects,
   replacing the existing caretaker, if any.
