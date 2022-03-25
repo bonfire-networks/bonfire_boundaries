@@ -1,12 +1,10 @@
 defmodule Bonfire.Boundaries.Blocks do
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
-
-  alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries.Circles
+  alias Bonfire.Data.Identity.User
   alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.Identity.Caretaker
-  alias Bonfire.Boundaries.Accesses
 
   def types_blocked(types) when is_list(types) do
     Enum.flat_map(types, &types_blocked/1) |> Enum.uniq()
@@ -131,8 +129,8 @@ defmodule Bonfire.Boundaries.Blocks do
     Circles.get_stereotype_circles(current_user, block_types)
   end
 
-  defp is_blocked_by?(%{} = user_or_instance, block_type, current_user_ids) when is_list(current_user_ids) and length(current_user_ids)>0 do
-    # dump(user_or_instance, "user_or_instance to check")
+  defp is_blocked_by?(%{} = user_or_peer, block_type, current_user_ids) when is_list(current_user_ids) and length(current_user_ids)>0 do
+    # dump(user_or_peer, "user_or_peer to check")
     dump(current_user_ids, "current_user_ids")
 
     block_types = types_blocked(block_type)
@@ -141,16 +139,19 @@ defmodule Bonfire.Boundaries.Blocks do
     |> dump("user_ids")
     |> Enum.map(&per_user_circles(&1, block_types))
     # |> dump("user_block_circles")
-    |> Bonfire.Boundaries.Circles.is_encircled_by?(user_or_instance, ...)
+    |> Bonfire.Boundaries.Circles.is_encircled_by?(user_or_peer, ...)
   end
-  defp is_blocked_by?(user_or_instance, block_type, user_id) when is_binary(user_id) do
-    is_blocked_by?(user_or_instance, block_type, [user_id])
+  defp is_blocked_by?(user_or_peer, block_type, user_id) when is_binary(user_id) do
+    is_blocked_by?(user_or_peer, block_type, [user_id])
   end
-  defp is_blocked_by?(user_or_instance, block_type, %{} = user) do
-    is_blocked_by?(user_or_instance, block_type, [user])
+  defp is_blocked_by?(user_or_peer, block_type, %{} = user) do
+    is_blocked_by?(user_or_peer, block_type, [user])
   end
-  defp is_blocked_by?(_user, _, _) do
-    error("no pattern found for user_or_instance or current_user/current_user_ids")
+  defp is_blocked_by?(user_or_peer, block_types, users) do
+    error("no pattern found for user_or_peer or current_user/current_user_ids")
+    dump(user_or_peer, "user_or_peer")
+    dump(block_types, "block_types")
+    dump(users, "users")
     nil
   end
 

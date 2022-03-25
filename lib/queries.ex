@@ -44,7 +44,7 @@ defmodule Bonfire.Boundaries.Queries do
           require Where
           query = unquote(query)
           opts = unquote(opts)
-          verbs = Bonfire.Common.Utils.e(opts, :verbs, [:see, :read])
+          verbs = List.wrap(Bonfire.Common.Utils.e(opts, :verbs, [:see, :read]))
           case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
             true -> query
             :admins ->
@@ -70,12 +70,14 @@ defmodule Bonfire.Boundaries.Queries do
               query
           end
         end
-      {field, [{:no_parens, true}|_], []}=field_ref when is_atom(field) ->
+      {field, meta, args}=field_ref
+      when is_atom(field) and is_list(meta)
+      and (is_nil(args) or args == []) ->
         quote do
           require Where
           query = unquote(query)
           opts = unquote(opts)
-          verbs = Bonfire.Common.Utils.e(opts, :verbs, [:see, :read])
+          verbs = List.wrap(Bonfire.Common.Utils.e(opts, :verbs, [:see, :read]))
           case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
             true -> query
             :admins ->

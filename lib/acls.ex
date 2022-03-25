@@ -14,43 +14,33 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Identity.Caretaker
   alias Bonfire.Boundaries.Stereotyped
-  alias Pointers.ULID
-  alias Bonfire.Data.AccessControl.{Acl, Controlled}
+  alias Bonfire.Data.AccessControl.{Acl, Controlled, Grant}
   alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Verbs
   alias Ecto.Changeset
+  alias Pointers.{Changesets, ULID}
 
   def cast(changeset, creator, preset_or_custom) do
-    # debug(creator, "creator")
-    acl = case acls(changeset, creator, preset_or_custom) do
+    id = Changeset.get_field(changeset, :id)
+    base = base_acls(creator, preset_or_custom)
+    case custom_grants(changeset, preset_or_custom) do
       [] ->
         changeset
-        |> Changeset.cast(%{controlled: base_acls(creator, preset_or_custom)}, [])
-        |> Changeset.cast_assoc(:controlled)
-      custom ->
-        # debug(custom, "cast a new custom acl for") # this is slightly tricky because we need to insert the acl with cast_assoc(:acl) while taking the rest of the controlleds from the base maps
-        changeset
-        |> Changeset.cast(%{controlled: custom}, [])
-        |> Changeset.cast_assoc(:controlled, with: &Controlled.changeset/2)
-        # |> Changeset.cast_assoc(:acl)
-    end
-  end
-
-  defp acls(changeset, creator, preset_or_custom) do
-    case custom_grants(changeset, preset_or_custom) do
-      [] -> []
-
-      custom_grants when is_list(custom_grants) ->
-        # debug(custom_grants)
+        |> Changesets.put_assoc(:controlled, base)
+      grants ->
         acl_id = ULID.generate()
-
-        [
-          %{acl: %{acl_id: acl_id, grants: Enum.flat_map(custom_grants, &grant_to(ulid(&1), acl_id))}}
-          | base_acls(creator, preset_or_custom)
-        ]
+        controlled = [%{acl_id: acl_id} | base]
+        grants = Enum.flat_map(grants, &grant_to(ulid(&1), acl_id))
+        changeset
+        |> Changeset.prepare_changes(fn changeset ->
+          changeset.repo.insert!(%Acl{id: acl_id})
+          changeset.repo.insert_all(Grant, grants)
+          changeset
+        end)
+        |> Changesets.put_assoc(:controlled, controlled)
     end
   end
 
@@ -66,9 +56,9 @@ defmodule Bonfire.Boundaries.Acls do
         _           -> []
       end
     )
-    |> dump
+    # |> dump
     |> find_acls(user)
-    |> dump
+    # |> dump
   end
 
   defp custom_grants(changeset, preset_or_custom) do
@@ -156,7 +146,7 @@ defmodule Bonfire.Boundaries.Acls do
       nil -> # seems to be a global ACL
         {:global, Acls.get!(name)}
 
-      default -> # should a user-level stereotyped ACL
+      default -> # should be a user-level stereotyped ACL
         case default[:stereotype] do
           nil -> raise RuntimeError, message: "Boundaries: Unstereotyped user acl in config: #{inspect(name)}"
           stereo -> {:stereo, Acls.get!(stereo)}
@@ -171,6 +161,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   defp grant_to(user_etc, acl_id, verb) do
     %{
+      id: ULID.generate(),
       acl_id: acl_id,
       subject_id: user_etc,
       verb_id: Verbs.get_id!(verb),

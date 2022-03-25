@@ -6,7 +6,11 @@ defmodule Bonfire.Boundaries do
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.Identity.Caretaker
-  alias Bonfire.Boundaries.Accesses
+  alias Bonfire.Boundaries.{Accesses, Queries}
+  alias Pointers
+  alias Pointers.Pointer
+  import Queries, only: [boundarise: 3]
+  import Ecto.Query, only: [from: 2]
 
   @visibility_verbs [:see, :read]
 
@@ -31,16 +35,37 @@ defmodule Bonfire.Boundaries do
   end
 
   def preset(preset) when is_binary(preset), do: preset
-  def preset(preset_and_custom_boundary), do: maybe_from_opts(preset_and_custom_boundary, :boundary)
+  def preset(opts), do: maybe_from_opts(opts, :boundary)
 
-  def maybe_custom_circles_or_users(preset_and_custom_boundary), do: maybe_from_opts(preset_and_custom_boundary, :to_circles)
+  def maybe_custom_circles_or_users(preset_or_opts), do: maybe_from_opts(preset_or_opts, :to_circles)
 
-  def maybe_from_opts(preset_and_custom_boundary, key, fallback \\ []) when is_list(preset_and_custom_boundary) do
-    preset_and_custom_boundary[key] || fallback
+  def maybe_from_opts(opts, key, fallback \\ []) when is_list(opts), do: opts[key] || fallback
+  def maybe_from_opts(_opts, _key, fallback), do: fallback
+
+  @doc """
+  Loads binaries (which are assumed to he ULID pointer IDs). Anything
+  else is returned as-is, except lists which are iterated and merged
+  back into the resulting list.
+  """
+  def load_pointers(item, opts) when not is_list(item) do
+    if is_binary(item), do: repo().one(load_query(item, opts)), else: item
   end
-  def maybe_from_opts(_preset_and_custom_boundary, _key, fallback), do: fallback
-
-  def maybe_compose_ad_hoc_acl(base_acl, user) do
+  def load_pointers(items, opts) do
+    debug(items, "items")
+    items = List.wrap(items)
+    case Enum.filter(items, &is_binary/1) do
+      [] -> items
+      ids ->
+        # load and index
+        loaded = Pointers.Util.index_objects_by_id(repo().many(load_query(ids, opts)))
+        debug(loaded, "loaded")
+        items
+        |> Enum.map(&if(is_binary(&1), do: loaded[&1], else: &1))
+    end
   end
-
+  
+  defp load_query(ids, opts) do
+    from(p in Pointers.query_base(), where: p.id in ^List.wrap(ids))
+    |> boundarise(id, opts)
+  end
 end
