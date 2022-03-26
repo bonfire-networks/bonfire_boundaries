@@ -14,7 +14,7 @@ defmodule Bonfire.Boundaries do
 
   @visibility_verbs [:see, :read]
 
-  def set_boundaries(%{id: _} = creator, object, opts) when is_list(opts) and ( is_binary(object) or is_map(object) ) do
+  def set_boundaries(creator, object, opts) when is_list(opts) and ( is_binary(object) or is_map(object) ) do
 
     with {:ok, pointer} <- Ecto.Changeset.cast(%Pointers.Pointer{id: ulid(object)}, %{}, [])
                           |> Bonfire.Boundaries.Acls.cast(creator, opts) |> debug("ACL it")
@@ -75,7 +75,7 @@ defmodule Bonfire.Boundaries do
         |> Enum.map(&if(is_binary(&1), do: loaded[&1], else: &1))
     end
   end
-  
+
   defp load_query(ids, opts) do
     from(p in Pointers.query_base(), where: p.id in ^List.wrap(ids))
     |> boundarise(id, opts)

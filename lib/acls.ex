@@ -115,7 +115,7 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
-  defp find_acls(acls, %{id: user_id}) do
+  defp find_acls(acls, user) when is_list(acls) and length(acls)>0 and ( is_binary(user) or is_map(user) ) do
     acls =
       acls
       |> Enum.map(&identify/1)
@@ -133,12 +133,15 @@ defmodule Bonfire.Boundaries.Acls do
         stereo ->
           stereo
           |> Enum.map(&elem(&1, 1).id)
-          |> Acls.find_caretaker_stereotypes(user_id, ...)
+          |> Acls.find_caretaker_stereotypes(user, ...)
           # |> dump("stereos")
       end
     Enum.map(globals ++ stereo, &(%{acl_id: &1.id}))
   end
-  defp find_acls(_acls, _), do: []
+  defp find_acls(_acls, _) do
+    warn("You need to provide an object creator to properly set ACLs")
+    []
+  end
 
   defp identify(name) do
     case user_default_acl(name) do
@@ -253,9 +256,9 @@ defmodule Bonfire.Boundaries.Acls do
     |> repo().many()
   end
 
-  def find_caretaker_stereotypes(caretaker_id, stereotypes) do
+  def find_caretaker_stereotypes(caretaker, stereotypes) do
     from(a in Acl,
-      join: c in Caretaker,  on: a.id == c.id and c.caretaker_id == ^caretaker_id,
+      join: c in Caretaker,  on: a.id == c.id and c.caretaker_id == ^ulid(caretaker),
       join: s in Stereotyped, on: a.id == s.id and s.stereotype_id in ^stereotypes,
       preload: [caretaker: c, stereotyped: s]
     ) |> repo().all()
