@@ -2,6 +2,23 @@ defmodule Bonfire.Boundaries.LiveHandler do
   use Bonfire.Web, :live_handler
   import Bonfire.Boundaries.Integration
 
+  def handle_event("blocks", %{"id" => id} = attrs, socket) when is_binary(id) do
+    dump(attrs)
+    current_user = current_user(socket)
+    opts = [current_user: current_user]
+
+    with {:ok, a} <- (if attrs["silence"], do: Bonfire.Boundaries.Blocks.block(id, :silence, opts), else: {:ok, nil}),
+    {:ok, b} <- (if attrs["ghost"], do: Bonfire.Boundaries.Blocks.block(id, :ghost, opts), else: {:ok, nil}),
+    {:ok, c} <- (if is_admin?(current_user) && attrs["instance_wide"]["silence"], do: Bonfire.Boundaries.Blocks.block(id, :silence, :instance_wide), else: {:ok, nil}),
+    {:ok, d} <- (if is_admin?(current_user) && attrs["instance_wide"]["ghost"], do: Bonfire.Boundaries.Blocks.block(id, :ghost, :instance_wide), else: {:ok, nil}) do
+      Bonfire.UI.Social.OpenModalLive.close()
+      {:noreply,
+          socket
+          |> put_flash(:info, Enum.join([a, b, c, d] |> filter_empty([]), "\n"))
+      }
+    end
+  end
+
   def handle_event("block", %{"id" => id, "scope" => scope} = attrs, socket) when is_binary(id) do
     with {:ok, status} <- (
       if is_admin?(current_user(socket)) do

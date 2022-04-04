@@ -182,7 +182,7 @@ defmodule Bonfire.Boundaries.Circles do
   def add_to_circles(subject, circles) when is_list(circles) do
     Enum.map(circles, &add_to_circle(subject, &1))
   end
-  def add_to_circle(subject, circle) do
+  def add_to_circle(subject, circle) when not is_nil(circle) do
     repo().insert(Encircle.changeset(%{circle_id: ulid(circle), subject_id: ulid(subject)}))
   end
 
