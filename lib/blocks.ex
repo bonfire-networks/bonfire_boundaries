@@ -148,10 +148,8 @@ defmodule Bonfire.Boundaries.Blocks do
     is_blocked_by?(user_or_peer, block_type, [user])
   end
   defp is_blocked_by?(user_or_peer, block_types, users) do
-    error("no pattern found for user_or_peer or current_user/current_user_ids")
-    dump(user_or_peer, "user_or_peer")
-    dump(block_types, "block_types")
-    dump(users, "users")
+    error(user_or_peer, "no pattern found for user_or_peer (or current_user/current_user_ids)")
+    error(users, "no pattern found for current_user/current_user_ids (or user_or_peer)")
     nil
   end
 
