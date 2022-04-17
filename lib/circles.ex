@@ -54,7 +54,7 @@ defmodule Bonfire.Boundaries.Circles do
   def to_circle_ids(subjects) do
     public = get_id(:guest)
     selected_circles = circle_ids(subjects)
-    if public in selected_circles do # public/guests defaults to also being visible to local users and federating
+    if public in selected_circles or :guest in selected_circles do # public/guests defaults to also being visible to local users and federating
       selected_circles ++ [
         get_id!(:local),
         get_id!(:activity_pub)
