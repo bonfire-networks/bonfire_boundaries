@@ -92,7 +92,7 @@ defmodule Bonfire.Boundaries.Circles do
       encircle.subject_id == ^ulid(subject)
       and encircle.circle_id in ^(
         ulid(circles)
-        # |> dump("circle_ids")
+        # |> info("circle_ids")
       )
     )
   end
@@ -160,7 +160,7 @@ defmodule Bonfire.Boundaries.Circles do
 
     list_my_q(subject, skip_boundary_check: true) # skip boundaries since we should only use this query internally
     |> where([circle: circle, stereotyped: stereotyped], stereotyped.stereotype_id in ^ulid(stereotypes))
-    # |> dump()
+    # |> info()
     |> repo().all()
   end
 

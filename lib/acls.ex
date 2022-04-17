@@ -119,14 +119,14 @@ defmodule Bonfire.Boundaries.Acls do
     acls =
       acls
       |> Enum.map(&identify/1)
-      # |> dump("identified")
+      # |> info("identified")
       |> filter_empty([])
       |> Enum.group_by(&elem(&1, 0))
     globals =
       acls
       |> Map.get(:global, [])
       |> Enum.map(&elem(&1, 1))
-      # |> dump("globals")
+      # |> info("globals")
     stereo =
       case Map.get(acls, :stereo, []) do
         [] -> []
@@ -134,7 +134,7 @@ defmodule Bonfire.Boundaries.Acls do
           stereo
           |> Enum.map(&elem(&1, 1).id)
           |> Acls.find_caretaker_stereotypes(user, ...)
-          # |> dump("stereos")
+          # |> info("stereos")
       end
     Enum.map(globals ++ stereo, &(%{acl_id: &1.id}))
   end

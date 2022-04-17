@@ -3,7 +3,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   import Bonfire.Boundaries.Integration
 
   def handle_event("blocks", %{"id" => id} = attrs, socket) when is_binary(id) do
-    dump(attrs)
+    info(attrs)
     current_user = current_user(socket)
     opts = [current_user: current_user]
 

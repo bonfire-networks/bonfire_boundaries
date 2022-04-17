@@ -36,13 +36,13 @@ defmodule Bonfire.Boundaries.Blocks do
 
   defp mutate(block_or_unblock, user_or_instance_to_block, block_type, :instance_wide) when block_type in [:silence, :silence_them] do
     instance_wide_circles([:silence_me])
-    |> dump("instance_wide_circles_silenced")
+    |> info("instance_wide_circles_silenced")
     |> do_mutate_blocklists(block_or_unblock, user_or_instance_to_block, ...)
   end
 
   defp mutate(block_or_unblock, user_or_instance_to_block, block_type, :instance_wide) do
     instance_wide_circles(types_blocked(block_type))
-    |> dump("instance_wide_circles_blocked")
+    |> info("instance_wide_circles_blocked")
     |> do_mutate_blocklists(block_or_unblock, user_or_instance_to_block, ...)
   end
 
@@ -72,7 +72,7 @@ defmodule Bonfire.Boundaries.Blocks do
 
   def is_blocked?(user_or_instance, block_type, :instance_wide) do
     instance_wide_circles(types_blocked(block_type))
-    |> dump("instance_wide_circles_blocked")
+    |> info("instance_wide_circles_blocked")
     |> Bonfire.Boundaries.Circles.is_encircled_by?(user_or_instance, ...)
   end
 
@@ -99,7 +99,7 @@ defmodule Bonfire.Boundaries.Blocks do
   defp mutate_blocklists(block_or_unblock, user_or_instance_add, block_type, circle_caretaker) do
     circle_caretaker
     |> per_user_circles(..., block_type)
-    |> repo().maybe_preload(caretaker: [caretaker: [:profile]]) #|> dump("user:circles_to_block")
+    |> repo().maybe_preload(caretaker: [caretaker: [:profile]]) #|> info("user:circles_to_block")
     |> do_mutate_blocklists(block_or_unblock, user_or_instance_add, ...)
   end
 
@@ -130,15 +130,15 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   defp is_blocked_by?(%{} = user_or_peer, block_type, current_user_ids) when is_list(current_user_ids) and length(current_user_ids)>0 do
-    # dump(user_or_peer, "user_or_peer to check")
-    dump(current_user_ids, "current_user_ids")
+    # info(user_or_peer, "user_or_peer to check")
+    info(current_user_ids, "current_user_ids")
 
     block_types = types_blocked(block_type)
 
     current_user_ids
-    |> dump("user_ids")
+    |> info("user_ids")
     |> Enum.map(&per_user_circles(&1, block_types))
-    # |> dump("user_block_circles")
+    # |> info("user_block_circles")
     |> Bonfire.Boundaries.Circles.is_encircled_by?(user_or_peer, ...)
   end
   defp is_blocked_by?(user_or_peer, block_type, user_id) when is_binary(user_id) do
