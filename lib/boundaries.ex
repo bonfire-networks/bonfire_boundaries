@@ -49,15 +49,9 @@ defmodule Bonfire.Boundaries do
   def preset(preset) when is_binary(preset), do: preset
   def preset(opts), do: maybe_from_opts(opts, :boundary)
 
-  def maybe_custom_circles_or_users(preset_or_opts), do: maybe_from_opts(preset_or_opts, :to_circles)
-
-  def maybe_from_opts(opts, key, fallback \\ []) when is_list(opts), do: opts[key] || fallback
-  def maybe_from_opts(_opts, _key, fallback), do: fallback
-
   @doc """
-  Loads binaries (which are assumed to he ULID pointer IDs). Anything
-  else is returned as-is, except lists which are iterated and merged
-  back into the resulting list.
+  Loads binaries according to boundaries (which are assumed to be ULID pointer IDs).
+  Anything else is returned as-is, except lists which are iterated and merged back into the resulting list.
   """
   def load_pointers(item, opts) when not is_list(item) do
     if is_binary(item), do: repo().one(load_query(item, opts)), else: item
@@ -65,14 +59,14 @@ defmodule Bonfire.Boundaries do
   def load_pointers(items, opts) do
     debug(items, "items")
     items = List.wrap(items)
-    case Enum.filter(items, &is_binary/1) do
+    case Enum.filter(items, &is_ulid?/1) do
       [] -> items
       ids ->
         # load and index
         loaded = Pointers.Util.index_objects_by_id(repo().many(load_query(ids, opts)))
         debug(loaded, "loaded")
         items
-        |> Enum.map(&if(is_binary(&1), do: loaded[&1], else: &1))
+        |> Enum.map(&if(is_ulid?(&1), do: loaded[&1], else: &1))
     end
   end
 

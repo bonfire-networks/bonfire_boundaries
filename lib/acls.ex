@@ -23,17 +23,20 @@ defmodule Bonfire.Boundaries.Acls do
   alias Ecto.Changeset
   alias Pointers.{Changesets, ULID}
 
-  def cast(changeset, creator, preset_or_custom) do
+  def cast(changeset, creator, opts) do
     id = Changeset.get_field(changeset, :id)
-    base = base_acls(creator, preset_or_custom)
-    case custom_grants(changeset, preset_or_custom) do
+    base = base_acls(creator, opts)
+    case custom_grants(changeset, opts) do
       [] ->
         changeset
         |> Changesets.put_assoc(:controlled, base)
       grants ->
         acl_id = ULID.generate()
         controlled = [%{acl_id: acl_id} | base]
-        grants = Enum.flat_map(grants, &grant_to(ulid(&1), acl_id))
+        grants =
+          (e(opts, :verbs_to_grant, nil) || Config.get(:verbs_interact_and_reply)) |> debug
+          |> Enum.flat_map(grants, &grant_to(ulid(&1), acl_id, ...))
+
         changeset
         |> Changeset.prepare_changes(fn changeset ->
           changeset.repo.insert!(%Acl{id: acl_id})
@@ -45,11 +48,11 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   # when the user picks a preset, this maps to a set of base acls
-  defp base_acls(user, preset_or_custom) do
+  defp base_acls(user, opts) do
     acls = (
       Config.get!([:object_default_boundaries, :acls])
       ++
-      case Boundaries.preset(preset_or_custom) do
+      case Boundaries.preset(opts) do
         "public"    -> [:guests_may_see_read,  :locals_may_reply]
         "federated" -> [:locals_may_reply]
         "local"     -> [:locals_may_reply]
@@ -61,27 +64,29 @@ defmodule Bonfire.Boundaries.Acls do
     # |> dump
   end
 
-  defp custom_grants(changeset, preset_or_custom) do
+  defp custom_grants(changeset, opts) do
     (
-      reply_to_grants(changeset, preset_or_custom)
-      ++ mentions_grants(changeset, preset_or_custom)
-      ++ Boundaries.maybe_custom_circles_or_users(preset_or_custom)
+      reply_to_grants(changeset, opts)
+      ++ mentions_grants(changeset, opts)
+      ++ maybe_custom_circles_or_users(opts)
     )
     |> Enum.uniq()
     |> filter_empty([])
   end
 
-  defp reply_to_grants(changeset, preset_or_custom) do
+  defp maybe_custom_circles_or_users(opts), do: maybe_from_opts(opts, :to_circles, [])
+
+  defp reply_to_grants(changeset, opts) do
     reply_to_creator = Utils.e(changeset, :changes, :replied, :changes, :replying_to, :created, :creator, nil)
 
     if reply_to_creator do
       # debug(reply_to_creator, "creators of reply_to should be added to a new ACL")
 
-      case Boundaries.preset(preset_or_custom) do
+      case Boundaries.preset(opts) do
         "public" ->
           [ulid(reply_to_creator)]
         "local" ->
-          if is_local?(reply_to_creator), do: [Utils.e(reply_to_creator, :id, nil)],
+          if is_local?(reply_to_creator), do: [ulid(reply_to_creator)],
           else: []
         _ -> []
       end
@@ -90,13 +95,13 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
-  defp mentions_grants(changeset, preset_or_custom) do
+  defp mentions_grants(changeset, opts) do
     mentions = Utils.e(changeset, :changes, :post_content, :changes, :mentions, nil)
 
     if mentions && mentions !=[] do
-      # debug(mentions, "mentions/tags should be added to a new ACL")
+      # debug(mentions, "mentions/tags may be added to a new ACL")
 
-      case Boundaries.preset(preset_or_custom) do
+      case Boundaries.preset(opts) do
         "public" ->
           ulid(mentions)
         "mentions" ->
@@ -108,6 +113,7 @@ defmodule Bonfire.Boundaries.Acls do
             |> ulid()
           )
         _ ->
+        # do not grant to mentions by default
         []
       end
     else
@@ -157,10 +163,7 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
-  defp grant_to(user_etc, acl_id) do
-    [:see, :read]
-    |> Enum.map(&grant_to(user_etc, acl_id, &1))
-  end
+  defp grant_to(user_etc, acl_id, verbs) when is_list(verbs), do: Enum.map(verbs, &grant_to(user_etc, acl_id, &1))
 
   defp grant_to(user_etc, acl_id, verb) do
     %{
