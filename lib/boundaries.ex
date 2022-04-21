@@ -57,14 +57,14 @@ defmodule Bonfire.Boundaries do
     if is_binary(item), do: repo().one(load_query(item, opts)), else: item
   end
   def load_pointers(items, opts) do
-    debug(items, "items")
+    # debug(items, "items")
     items = List.wrap(items)
     case Enum.filter(items, &is_ulid?/1) do
       [] -> items
       ids ->
         # load and index
         loaded = Pointers.Util.index_objects_by_id(repo().many(load_query(ids, opts)))
-        debug(loaded, "loaded")
+        # debug(loaded, "loaded")
         items
         |> Enum.map(&if(is_ulid?(&1), do: loaded[&1], else: &1))
     end

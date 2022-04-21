@@ -66,7 +66,7 @@ defmodule Bonfire.Boundaries.Queries do
                 v in subquery(vis), on: unquote(field_ref) == v.object_id
             other ->
               import Where
-              debug(other, "Weird skip_boundary_check")
+              error(other, "Weird skip_boundary_check")
               query
           end
         end
@@ -101,7 +101,7 @@ defmodule Bonfire.Boundaries.Queries do
                 on: unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) == v.object_id
             other ->
               import Where
-              debug(other, "Weird skip_boundary_check")
+              error(other, "Weird skip_boundary_check")
               query
           end
         end
@@ -113,24 +113,23 @@ defmodule Bonfire.Boundaries.Queries do
           Expected one of these forms:
 
            * `field` (for field `field` on the root schema)
-           * `alias.field` (for field `field` on alias `alias
+           * `alias.field` (for field `field` on alias `alias`)
           """
     end
   end
 
   @doc """
   A subquery which filters out results the current user is
-  not permitted to perform *all* of the verbs on.
+  not permitted to perform *all* of the specified verbs on.
 
-  Parameters are the alias for the controlled item in the parent
-  query and an expression evaluating to the current user.
+  Parameters are an expression evaluating to the current user,
+  and a list of verbs.
   """
   def filter_where_not(user, verbs \\ [:see, :read]) do
     ids = user_and_circle_ids(user)
     verbs = Verbs.ids(verbs)
     from summary in Summary,
-      where: summary.subject_id in ^ids,
-      where: summary.verb_id in ^verbs,
+      where: summary.subject_id in ^ids and summary.verb_id in ^verbs,
       group_by: summary.object_id,
       having: fragment("agg_perms(?)", summary.value),
       select: %{
@@ -169,7 +168,7 @@ defmodule Bonfire.Boundaries.Queries do
     if Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
       q
     else
-      agent = Bonfire.Common.Utils.current_user(opts) || Bonfire.Common.Utils.current_account(opts)
+      agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
 
       vis = filter_where_not(agent, Common.Utils.e(opts, :verbs, [:see, :read]))
       join q, :inner, [main_object: main_object],
@@ -178,9 +177,14 @@ defmodule Bonfire.Boundaries.Queries do
     end
   end
 
-  def skip_boundary_check?(opts) do
+  def skip_boundary_check?(opts, object \\ nil) do
+    agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
+
     (Common.Config.get(:env) != :prod && Common.Config.get(:skip_all_boundary_checks))
-    || is_list(opts) && Keyword.get(opts, :skip_boundary_check, false)
+    ||
+    (is_list(opts) && Keyword.get(opts, :skip_boundary_check, false))
+    ||
+    (not is_nil(object) && Common.Utils.ulid(object) !=agent)
   end
 
 end
