@@ -66,7 +66,7 @@ defmodule Bonfire.Boundaries.Blocks do
   @doc """
   Checks if a `user_or_instance` is blocked
   Pass a `block_type` (eg `:silence` or `:ghost`)
-  Pass a `current_user in opts or check `:instance_wide`
+  Pass a `current_user` in `opts` or check `:instance_wide`
   """
   def is_blocked?(user_or_instance, block_type \\ :any, opts \\ [])
 
