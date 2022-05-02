@@ -9,3 +9,4 @@ makeup = "1.0.5" # code syntax highlighting
 makeup_elixir = "~> 0.15.1"
 # makeup_html5 = "~> 0.2.0"
 # ex_spirit = "~> 0.4"
+scribe = "~> 0.10" # debug printing tables
