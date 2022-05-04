@@ -1,5 +1,5 @@
 defmodule Bonfire.Boundaries.LiveHandler do
-  use Bonfire.Web, :live_handler
+  use Bonfire.UI.Common.Web, :live_handler
   import Bonfire.Boundaries.Integration
 
   def handle_event("blocks", %{"id" => id} = attrs, socket) when is_binary(id) do

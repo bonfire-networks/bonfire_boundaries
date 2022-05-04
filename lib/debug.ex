@@ -4,7 +4,7 @@ defmodule Bonfire.Boundaries.Debug do
   alias Bonfire.Boundaries.{Summary, Verbs}
   alias Bonfire.Common.Utils
   alias Bonfire.Boundaries.{Acls, Circles}
-  alias Bonfire.Repo
+  alias Bonfire.Common.Repo
   import Ecto.Query, only: [from: 2]
 
   defp get_user_acls(user) do
