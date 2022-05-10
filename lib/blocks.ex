@@ -77,7 +77,7 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   def is_blocked?(user_or_instance, block_type, opts) do
-    debug(opts, "check if blocked #{inspect block_type} instance-wide or per-user, if any has/have been provided in opts")
+    info(opts, "check if blocked #{inspect block_type} instance-wide or per-user, if any has/have been provided in opts")
     is_blocked?(user_or_instance, block_type, :instance_wide)
       ||
     is_blocked_by?(user_or_instance, block_type, opts[:user_ids] || current_user(opts))
@@ -147,9 +147,9 @@ defmodule Bonfire.Boundaries.Blocks do
   defp is_blocked_by?(user_or_peer, block_type, %{} = user) do
     is_blocked_by?(user_or_peer, block_type, [user])
   end
-  defp is_blocked_by?(user_or_peer, block_types, users) do
+  defp is_blocked_by?(user_or_peer, block_types, current_user_ids) do
     error(user_or_peer, "no pattern found for user_or_peer (or current_user/current_user_ids)")
-    error(users, "no pattern found for current_user/current_user_ids (or user_or_peer)")
+    error(current_user_ids, "no pattern found for current_user/current_user_ids (or user_or_peer)")
     nil
   end
 
