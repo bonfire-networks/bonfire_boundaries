@@ -23,6 +23,20 @@ defmodule Bonfire.Boundaries.Acls do
   alias Ecto.Changeset
   alias Pointers.{Changesets, ULID}
 
+  # special built-in acls (eg, guest, local, activity_pub)
+  def acls, do: Bonfire.Common.Config.get([:acls])
+
+  def get(slug) when is_atom(slug), do: acls()[slug]
+  def get!(slug) when is_atom(slug) do
+    get(slug)
+      # || ( Bonfire.Boundaries.Fixtures.insert && get(slug) )
+      || raise RuntimeError, message: "Missing default acl: #{inspect(slug)}"
+  end
+
+  def get_id(slug), do: e(acls(), slug, :id, nil)
+  def get_id!(slug), do: get!(slug)[:id]
+
+
   def cast(changeset, creator, opts) do
     id = Changeset.get_field(changeset, :id)
     base = base_acls(creator, opts)
@@ -232,9 +246,6 @@ defmodule Bonfire.Boundaries.Acls do
     |> where([caretaker: caretaker], caretaker.caretaker_id == ^user_id)
   end
 
-  # special built-in acls (eg, guest, local, activity_pub)
-  def acls, do: Bonfire.Common.Config.get([:acls])
-
   def user_default_acl(name), do: user_default_acls()[name]
 
   def user_default_acls() do # FIXME: this vs acls/0 ?
@@ -242,16 +253,6 @@ defmodule Bonfire.Boundaries.Acls do
     |> Map.fetch!(:acls)
     # |> dump
   end
-
-  def get(slug) when is_atom(slug), do: acls()[slug]
-  def get!(slug) when is_atom(slug) do
-    get(slug)
-      # || ( Bonfire.Boundaries.Fixtures.insert && get(slug) )
-      || raise RuntimeError, message: "Missing default acl: #{inspect(slug)}"
-  end
-
-  def get_id(slug), do: e(acls(), slug, :id, nil)
-  def get_id!(slug), do: get!(slug)[:id]
 
   def list do
     from(u in Acl, as: :acl)

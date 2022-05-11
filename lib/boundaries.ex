@@ -6,13 +6,28 @@ defmodule Bonfire.Boundaries do
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.Identity.Caretaker
-  alias Bonfire.Boundaries.{Accesses, Queries}
+  alias Bonfire.Boundaries.{Accesses, Acls, Queries}
   alias Pointers
   alias Pointers.Pointer
   import Queries, only: [boundarise: 3]
   import Ecto.Query, only: [from: 2]
 
   @visibility_verbs [:see, :read]
+
+  @public_acl_ids [:guests_may_see, :guests_may_read, :guests_may_see_read]
+    |> Enum.map(&Acls.get_id!/1)
+
+  @local_acl_ids [:locals_may_interact, :locals_may_reply]
+    |> Enum.map(&Acls.get_id!/1)
+
+
+  def preset_boundary_name_from_acl(acl) do
+    case ulid(acl) do
+      acl_id when acl_id in @public_acl_ids -> "public"
+      acl_id when acl_id in @local_acl_ids -> "local"
+      _ -> "mentions"
+    end
+  end
 
   def set_boundaries(creator, object, opts) when is_list(opts) and ( is_binary(object) or is_map(object) ) do
 

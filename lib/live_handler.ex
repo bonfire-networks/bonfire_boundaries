@@ -197,14 +197,62 @@ defmodule Bonfire.Boundaries.LiveHandler do
   def handle_event("member_update", %{"circle" => %{"id" => id} = params}, socket) do
     # params = input_to_atoms(params)
 
-      with {:ok, _circle} <-
-        Circles.update(id, current_user(socket), %{encircles: e(params, "encircle", [])}) do
+    with {:ok, _circle} <-
+      Circles.update(id, current_user(socket), %{encircles: e(params, "encircle", [])}) do
 
-            {:noreply,
-            socket
-            |> put_flash(:info, "OK")
-            }
+          {:noreply,
+          socket
+          |> put_flash(:info, "OK")
+          }
 
-      end
     end
+  end
+
+
+  def preload_boundaries(list_of_assigns) do
+    current_user = current_user(List.first(list_of_assigns))
+    # |> debug("current_user")
+
+    list_of_objects = list_of_assigns
+    |> Enum.reject(&e(&1, :object_boundary, nil))
+    |> Enum.map(&the_object/1)
+    # |> debug("list_of_objects")
+
+    list_of_ids = list_of_objects
+    |> Enum.map(&ulid/1)
+    |> Enum.uniq()
+    |> filter_empty(nil)
+    |> debug("list_of_ids")
+
+    my_states = if list_of_ids && current_user,
+      do: Bonfire.Boundaries.Controlleds.list_on_objects(list_of_ids)
+        |> Map.new(fn c -> { # Map.new discards duplicates for the same key, which is convenient for now as we only display one ACL (note that the order_by in the `list_on_objects` query matters)
+          e(c, :id, nil),
+          e(c, :acl, nil)
+        } end),
+      else: %{}
+
+    # debug(my_states, "boundaries")
+
+    list_of_assigns
+    |> Enum.map(fn assigns ->
+      object_id = ulid(the_object(assigns))
+      previous_value = e(assigns, :object_boundary, nil)
+
+      assigns
+      # |> Map.put(
+      #   :object_boundaries,
+      #   Map.get(my_states, object_id)
+      # )
+      |> Map.put(
+        :object_boundary,
+        e(my_states, object_id, :named, nil) || previous_value || :none
+      )
+    end)
+  end
+
+  defp the_object(assigns) do
+    e(assigns, :object, nil) || e(assigns, :activity, :object, nil) || e(assigns, :object_id, nil) || e(assigns, :activity, :object_id, nil)
+  end
+
 end
