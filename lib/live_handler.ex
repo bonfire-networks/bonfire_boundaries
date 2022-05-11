@@ -240,7 +240,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     list_of_assigns
     |> Enum.map(fn assigns ->
       object_id = ulid(the_object(assigns))
-      if object_id not in my_visible_ids do
+      if list_of_ids && (object_id in list_of_ids and object_id not in my_visible_ids) do
         assigns
         |> Map.put(
           :activity,
