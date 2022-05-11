@@ -208,13 +208,69 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
+  def maybe_preload(list_of_assigns) do
+    list_of_assigns
+    |> maybe_check_boundaries()
+    |> maybe_preload_boundaries()
+  end
 
-  def preload_boundaries(list_of_assigns) do
+
+  def maybe_check_boundaries(list_of_assigns) do
     current_user = current_user(List.first(list_of_assigns))
     # |> debug("current_user")
 
     list_of_objects = list_of_assigns
-    |> Enum.reject(&e(&1, :object_boundary, nil))
+    |> Enum.reject(&e(&1, :check_object_boundary, nil) !=true) # ignore objects for which a boundary is already set (or set object_boundary to :skip in your component assigns to not preload them here)
+    |> Enum.map(&the_object/1)
+    # |> debug("list_of_objects")
+
+    list_of_ids = list_of_objects
+    |> Enum.map(&ulid/1)
+    |> Enum.uniq()
+    |> filter_empty(nil)
+    |> debug("list_of_ids")
+
+    my_visible_ids = if list_of_ids && current_user,
+      do: Bonfire.Boundaries.load_pointers(list_of_ids, current_user: current_user)
+        |> Enum.map(&ulid/1),
+      else: %{}
+
+    debug(my_visible_ids, "my_visible_ids")
+
+    list_of_assigns
+    |> Enum.map(fn assigns ->
+      object_id = ulid(the_object(assigns))
+      if object_id not in my_visible_ids do
+        assigns
+        |> Map.put(
+          :activity,
+          nil
+        )
+        |> Map.put(
+          :object,
+          nil
+        )
+        |> Map.put(
+          :object_boundary,
+          :not_visible
+        )
+      else
+        # avoid checking again
+        assigns
+        |> Map.put(
+          :check_object_boundary,
+          false
+        )
+      end
+    end)
+  end
+
+  def maybe_preload_boundaries(list_of_assigns) do
+    current_user = current_user(List.first(list_of_assigns))
+    # |> debug("current_user")
+
+    list_of_objects = list_of_assigns
+    |> Enum.reject(&e(&1, :object_boundary, nil)) # ignore objects for which a boundary is already set (or set object_boundary to :skip in your component assigns to not preload them here)
     |> Enum.map(&the_object/1)
     # |> debug("list_of_objects")
 

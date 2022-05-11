@@ -66,22 +66,26 @@ defmodule Bonfire.Boundaries do
 
   @doc """
   Loads binaries according to boundaries (which are assumed to be ULID pointer IDs).
-  Anything else is returned as-is, except lists which are iterated and merged back into the resulting list.
+  Lists which are iterated and return a [sub]list with only permitted pointers.
   """
-  def load_pointers(item, opts) when not is_list(item) do
-    if is_binary(item), do: repo().one(load_query(item, opts)), else: item
-  end
-  def load_pointers(items, opts) do
+  def load_pointers(items, opts) when is_list(items)  do
     # debug(items, "items")
-    items = List.wrap(items)
-    case Enum.filter(items, &is_ulid?/1) do
-      [] -> items
+    case ulid(items) do
+      [] -> []
+      nil -> []
       ids ->
-        # load and index
-        loaded = Pointers.Util.index_objects_by_id(repo().many(load_query(ids, opts)))
-        # debug(loaded, "loaded")
-        items
-        |> Enum.map(&if(is_ulid?(&1), do: loaded[&1], else: &1))
+        repo().many(load_query(ids, opts))
+    end
+  end
+  def load_pointers(item, opts) do
+    case ulid(item) do
+      id when is_binary(id) ->
+
+        repo().one(load_query(id, opts))
+
+      _ ->
+        error(item, "Expected an object or ULID ID, could not check boundaries for")
+        item
     end
   end
 
