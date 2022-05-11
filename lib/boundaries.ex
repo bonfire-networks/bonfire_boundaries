@@ -85,7 +85,7 @@ defmodule Bonfire.Boundaries do
 
       _ ->
         error(item, "Expected an object or ULID ID, could not check boundaries for")
-        item
+        nil
     end
   end
 
