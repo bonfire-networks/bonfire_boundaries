@@ -11,7 +11,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     {:ok, b} <- (if attrs["ghost"], do: Bonfire.Boundaries.Blocks.block(id, :ghost, opts), else: {:ok, nil}),
     {:ok, c} <- (if is_admin?(current_user) && attrs["instance_wide"]["silence"], do: Bonfire.Boundaries.Blocks.block(id, :silence, :instance_wide), else: {:ok, nil}),
     {:ok, d} <- (if is_admin?(current_user) && attrs["instance_wide"]["ghost"], do: Bonfire.Boundaries.Blocks.block(id, :ghost, :instance_wide), else: {:ok, nil}) do
-      Bonfire.UI.Social.OpenModalLive.close()
+      Bonfire.UI.Common.OpenModalLive.close()
       {:noreply,
           socket
           |> put_flash(:info, Enum.join([a, b, c, d] |> filter_empty([]), "\n"))
@@ -28,7 +28,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       Bonfire.Boundaries.Blocks.block(id, maybe_to_atom(attrs["block_type"]), socket)
     end
     ) do
-      Bonfire.UI.Social.OpenModalLive.close()
+      Bonfire.UI.Common.OpenModalLive.close()
       {:noreply,
           socket
           |> put_flash(:info, status)
@@ -38,7 +38,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("block", %{"id" => id} = attrs, socket) when is_binary(id) do
     with {:ok, status} <- Bonfire.Boundaries.Blocks.block(id, maybe_to_atom(attrs["block_type"]), socket) do
-      Bonfire.UI.Social.OpenModalLive.close()
+      Bonfire.UI.Common.OpenModalLive.close()
       {:noreply,
           socket
           |> put_flash(:info, status)
