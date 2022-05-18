@@ -1,6 +1,6 @@
 defmodule Bonfire.Boundaries.Debug do
   use Arrows
-  import Where
+  # import Where
   alias Bonfire.Boundaries.{Summary, Verbs}
   alias Bonfire.Common.Utils
   alias Bonfire.Boundaries.{Acls, Circles}
@@ -48,7 +48,7 @@ defmodule Bonfire.Boundaries.Debug do
     end
     # |> dump
     |> Enum.group_by(&{&1.acl_id, &1.grant_subject, &1.grant_value})
-    |> for({k, [v|_]=vs} <- ...) do
+    |> for({_k, [v|_]=vs} <- ...) do
       Map.put(v, :grant_verb, Enum.sort(Enum.map(vs, &(&1.grant_verb))))
     end
     |> Scribe.print()
@@ -69,7 +69,7 @@ defmodule Bonfire.Boundaries.Debug do
     )
     |> Repo.all()
     |> Enum.group_by(&{&1.subject_id, &1.object_id, &1.value})
-    |> for({k, [v|_]=vs} <- ...) do
+    |> for({_k, [v|_]=vs} <- ...) do
       Map.put(v, :verbs, Enum.sort(Enum.map(vs, &(Verbs.get!(&1.verb_id).verb))))
     end
     |> Enum.map(&Map.take(&1, [:subject_id, :object_id, :verbs, :value]))

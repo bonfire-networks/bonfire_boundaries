@@ -2,36 +2,39 @@ defmodule Bonfire.Boundaries do
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
 
-  alias Bonfire.Data.Identity.User
-  alias Bonfire.Boundaries.Circles
-  alias Bonfire.Data.AccessControl.Grant
+  # alias Bonfire.Data.Identity.User
+  # alias Bonfire.Boundaries.Circles
+  # alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.Identity.Caretaker
-  alias Bonfire.Boundaries.{Accesses, Acls, Queries}
+  alias Bonfire.Boundaries.{Acls, Queries}
   alias Pointers
-  alias Pointers.Pointer
+  # alias Pointers.Pointer
   import Queries, only: [boundarise: 3]
   import Ecto.Query, only: [from: 2]
 
-  @visibility_verbs [:see, :read]
-
-  @public_acl_ids [:guests_may_see, :guests_may_read, :guests_may_see_read]
-    |> Enum.map(&Acls.get_id!/1)
-
-  @local_acl_ids [:locals_may_interact, :locals_may_reply]
-    |> Enum.map(&Acls.get_id!/1)
-
+  # @visibility_verbs [:see, :read]
+  @public_acls [:guests_may_see, :guests_may_read, :guests_may_see_read]
+  @local_acls [:locals_may_interact, :locals_may_reply]
 
   def preset_boundary_name_from_acl(acl) do
-    case ulid(acl) do
-      acl_id when acl_id in @public_acl_ids -> "public"
-      acl_id when acl_id in @local_acl_ids -> "local"
-      _ -> "mentions"
+    public_acl_ids = @public_acls
+    |> Enum.map(&Acls.get_id!/1)
+
+    local_acl_ids = @local_acls
+    |> Enum.map(&Acls.get_id!/1)
+
+    acl = ulid(acl)
+
+    cond do
+      acl in public_acl_ids -> "public"
+      acl in local_acl_ids -> "local"
+      true -> "mentions"
     end
   end
 
   def set_boundaries(creator, object, opts) when is_list(opts) and ( is_binary(object) or is_map(object) ) do
 
-    with {:ok, pointer} <- Ecto.Changeset.cast(%Pointers.Pointer{id: ulid(object)}, %{}, [])
+    with {:ok, _pointer} <- Ecto.Changeset.cast(%Pointers.Pointer{id: ulid(object)}, %{}, [])
                           |> Bonfire.Boundaries.Acls.cast(creator, opts) |> debug("ACL it")
                           |> repo().update()
                           do

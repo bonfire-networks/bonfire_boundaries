@@ -1,6 +1,7 @@
 defmodule Bonfire.Boundaries.Migrations do
 
-  alias Bonfire.Data.AccessControl.{Acl, Circle, Controlled, Encircle, Grant, Verb}
+  # alias Bonfire.Boundaries.Verbs
+  alias Bonfire.Data.AccessControl.{Circle, Controlled, Encircle, Grant, Verb}
   alias Pointers.Pointer
 
   @create_add_perms """
@@ -132,14 +133,14 @@ defmodule Bonfire.Boundaries.Migrations do
   defmacro migrate_boundaries(dir), do: mb(dir)
 
   # retrieves a ULID in UUID format
-  defp verb!(id) do
-    # the verbs service is unlikely to be running...
-    {:ok, id} =
-      Verbs.declare_verbs()[:verbs]
-      |> Map.fetch!(id)
-      |> Pointers.ULID.cast!()
-      |> Pointers.ULID.dump()
-    Pointers.UUID.cast!(id)
-  end
+  # defp verb!(id) do
+  #   # the verbs service is unlikely to be running...
+  #   {:ok, id} =
+  #     Verbs.declare_verbs()[:verbs]
+  #     |> Map.fetch!(id)
+  #     |> Pointers.ULID.cast!()
+  #     |> Pointers.ULID.dump()
+  #   Pointers.UUID.cast!(id)
+  # end
 
 end

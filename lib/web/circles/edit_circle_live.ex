@@ -3,7 +3,7 @@ defmodule Bonfire.Boundaries.Web.EditCircleLive do
 
   def update(assigns, socket) do
 
-      with {:ok, circle} <- Bonfire.Boundaries.Circles.get(assigns.id, current_user(assigns)) |> repo().maybe_preload(encircles: [subject: [:profile, :character]]) do
+      with {:ok, circle} <- Bonfire.Boundaries.Circles.get_for_caretaker(assigns.id, current_user(assigns)) |> repo().maybe_preload(encircles: [subject: [:profile, :character]]) do
         debug(circle)
 
       # TODO: paginate

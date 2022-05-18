@@ -24,7 +24,7 @@ defmodule Bonfire.Boundaries.Stereotyped do
 
   # if the user didn't provide a stereotype, just ignore the changeset
   defp maybe_ignore(changeset) do
-    if Changeset.get_field(:stereotype_id),
+    if Changeset.get_field(changeset, :stereotype_id),
       do: changeset,
       else: Changeset.apply_action(changeset, :ignore)
   end

@@ -1,9 +1,9 @@
 defmodule Bonfire.Boundaries.Fixtures do
 
   import Bonfire.Boundaries.Integration
-  import Where
+  # import Where
   alias Bonfire.Common.Utils
-  alias Bonfire.Data.AccessControl.{Acl, Circle, Controlled, Grant, Verb}
+  alias Bonfire.Data.AccessControl.{Acl, Circle, Grant, Verb}
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Boundaries.{Verbs, Acls, Grants}
   alias Bonfire.Boundaries.Circles

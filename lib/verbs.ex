@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Verbs do
-  import Where
+  # import Where
   import Bonfire.Boundaries.Integration
-  import Ecto.Query
+  # import Ecto.Query
   alias Bonfire.Data.AccessControl.Verb
 
   def verbs, do: Bonfire.Common.Config.get!(:verbs)
@@ -63,7 +63,7 @@ defmodule Bonfire.Boundaries.Verbs do
         else
           {:error, "Code and DB have differing IDs for the same verb", verb, p.id, t.id}
         end
-      else e ->
+      else _e ->
         {:error, "Verb present in DB but not in code", verb}
       end
     end)

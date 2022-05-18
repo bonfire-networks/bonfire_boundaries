@@ -39,7 +39,7 @@ defmodule Bonfire.Boundaries.Queries do
 
   defp boundarise_impl(query, field_ref, opts) do
     case field_ref do
-      {{:., _, [{alia, _, _},field]}, [{:no_parens, true}|_], []} ->
+      {{:., _, [{alia, _, _},_field]}, [{:no_parens, true}|_], []} ->
         quote do
           require Where
           query = unquote(query)

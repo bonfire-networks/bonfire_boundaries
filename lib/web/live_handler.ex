@@ -1,6 +1,7 @@
 defmodule Bonfire.Boundaries.LiveHandler do
   use Bonfire.UI.Common.Web, :live_handler
   import Bonfire.Boundaries.Integration
+  alias Bonfire.Boundaries.Circles
 
   def handle_event("blocks", %{"id" => id} = attrs, socket) when is_binary(id) do
     info(attrs)
@@ -120,6 +121,36 @@ defmodule Bonfire.Boundaries.LiveHandler do
     }
   end
 
+  def handle_event("create_circle", %{"name" => name}, socket) do
+  # params = input_to_atoms(params)
+
+    with {:ok, %{id: id} = _circle} <-
+      Circles.create(current_user(socket), name) do
+
+          {:noreply,
+          socket
+          |> put_flash(:info, "Circle create!")
+          |> push_redirect(to: "/settings/circle/"<>id)
+          }
+
+    end
+  end
+
+  def handle_event("member_update", %{"circle" => %{"id" => id} = params}, socket) do
+    # params = input_to_atoms(params)
+
+    with {:ok, _circle} <-
+      Circles.update(id, current_user(socket), %{encircles: e(params, "encircle", [])}) do
+
+          {:noreply,
+          socket
+          |> put_flash(:info, "OK")
+          }
+
+    end
+  end
+
+
   def set_circles(selected_circles, previous_circles, add_to_previous \\ false) do
 
     # debug(previous_circles: previous_circles)
@@ -176,37 +207,6 @@ defmodule Bonfire.Boundaries.LiveHandler do
       end)
   end
 
-    alias Bonfire.Boundaries.Circles
-
-
-  def handle_event("create_circle", %{"name" => name}, socket) do
-  # params = input_to_atoms(params)
-
-    with {:ok, %{id: id} = _circle} <-
-      Circles.create(current_user(socket), name) do
-
-          {:noreply,
-          socket
-          |> put_flash(:info, "Circle create!")
-          |> push_redirect(to: "/settings/circle/"<>id)
-          }
-
-    end
-  end
-
-  def handle_event("member_update", %{"circle" => %{"id" => id} = params}, socket) do
-    # params = input_to_atoms(params)
-
-    with {:ok, _circle} <-
-      Circles.update(id, current_user(socket), %{encircles: e(params, "encircle", [])}) do
-
-          {:noreply,
-          socket
-          |> put_flash(:info, "OK")
-          }
-
-    end
-  end
 
   def maybe_preload(list_of_assigns) do
     list_of_assigns

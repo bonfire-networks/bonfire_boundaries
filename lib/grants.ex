@@ -6,15 +6,15 @@ defmodule Bonfire.Boundaries.Grants do
   import Bonfire.Boundaries.Queries
   import Bonfire.Boundaries.Integration
   import Ecto.Query
-  import EctoSparkles
+  # import EctoSparkles
 
   alias Bonfire.Common.Config
   alias Ecto.Changeset
   alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.Identity.User
-  alias Bonfire.Data.AccessControl.Accesses
+  # alias Bonfire.Data.AccessControl.Accesses
   alias Bonfire.Boundaries.{Circles, Grants}
-  alias Bonfire.Boundaries.Accesses
+  # alias Bonfire.Boundaries.Accesses
   alias Bonfire.Boundaries.Circles
 
   def grants, do: Bonfire.Common.Config.get([:grants])
@@ -80,8 +80,8 @@ defmodule Bonfire.Boundaries.Grants do
     changeset(:create, attrs, opts, Keyword.fetch!(opts, :current_user))
   end
 
-  defp changeset(:create, attrs, opts, :system), do: Grants.changeset(attrs)
-  defp changeset(:create, attrs, opts, %{id: id}) do
+  defp changeset(:create, attrs, _opts, :system), do: Grants.changeset(attrs)
+  defp changeset(:create, attrs, _opts, %{id: id}) do
     Changeset.cast(%Grant{}, %{caretaker: %{caretaker_id: id}}, [])
     |> Grants.changeset(attrs)
   end
@@ -96,7 +96,7 @@ defmodule Bonfire.Boundaries.Grants do
   end
 
   def list_q(opts), do: list_q(Keyword.fetch!(opts, :current_user), opts)
-  defp list_q(:system, opts), do: from(grant in Grant, as: :grant)
+  defp list_q(:system, _opts), do: from(grant in Grant, as: :grant)
   defp list_q(%User{}, opts), do: boundarise(list_q(:system, opts), grant.id, opts)
 
   @doc """

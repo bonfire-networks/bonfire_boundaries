@@ -8,7 +8,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries.Circles
-  alias Bonfire.Boundaries.Stereotyped
+  # alias Bonfire.Boundaries.Stereotyped
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.AccessControl.{Circle, Encircle}
   alias Bonfire.Data.Identity.Caretaker
@@ -85,7 +85,7 @@ defmodule Bonfire.Boundaries.Circles do
   def is_encircled_by?(subject, circle) when not is_list(circle), do: is_encircled_by?(subject, [circle])
   def is_encircled_by?(subject, circles), do: repo().exists?(is_encircled_by_q(subject, circles))
 
-  @doc "query for `list_visible`"
+  #@doc "query for `list_visible`"
   defp is_encircled_by_q(subject, circles) do
     from(encircle in Encircle, as: :encircle)
     |> where([encircle: encircle],

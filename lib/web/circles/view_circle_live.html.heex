@@ -1,6 +1,6 @@
 <div class="px-4 py-6 sm:p-6 lg:pb-8">
   <div class="sticky top-0">
-    <%= live_component(@socket, Bonfire.UI.Common.PageHeaderLive, assigns_clean(assigns)) %>
+    <%= live_component(Bonfire.UI.Common.PageHeaderLive, assigns_clean(assigns)) %>
     <div class="mt-6">
       <div class="flex items-center border-b-4 pb-10">
         <div class="shadow-2xl ring-4 ring-white flex-shrink-0 flex items-center justify-center w-24 h-24 rounded-full bg-pink-600 text-white text-sm font-medium">
@@ -68,7 +68,7 @@
                 <input type="hidden" name={"circle[encircle][#{member.id}][circle_id]"} value={e(@circle, :id, "")}>
                 <input type="hidden" name={"circle[encircle][#{member.id}][subject_id]"} value={e(member, :subject_id, "")}>
                 <div class="flex-1">
-                  <%= live_component(@socket, Bonfire.UI.Me.ProfileItemLive, assigns |> assigns_merge(%{profile: e(member, :subject, :profile, nil), character: e(member, :subject, :character, nil)})) %>
+                  <%= live_component(Bonfire.UI.Me.ProfileItemLive, assigns |> assigns_merge(%{profile: e(member, :subject, :profile, nil), character: e(member, :subject, :character, nil)})) %>
                 </div>
                 <div class="flex mr-1">
                   <span
@@ -144,7 +144,7 @@
                 <input type="hidden" name={"circle[encircle][#{suggested.id}][circle_id]"} value={e(@circle, :id, "")}>
                 <input type="hidden" name={"circle[encircle][#{suggested.id}][subject_id]"} value={e(suggested, :followed_profile, :id, "")}>
                 <div class="flex-1">
-                  <%= live_component(@socket, Bonfire.UI.Me.ProfileItemLive, assigns |> assigns_merge(%{profile: e(suggested, :followed_profile, nil), character: e(suggested, :followed_character, nil)})) %>
+                  <%= live_component(Bonfire.UI.Me.ProfileItemLive, assigns |> assigns_merge(%{profile: e(suggested, :followed_profile, nil), character: e(suggested, :followed_character, nil)})) %>
                 </div>
                   <div class="flex mr-1">
                     <span
@@ -186,7 +186,7 @@
                 <input type="hidden" name={"circle[encircle][#{suggested.id}][circle_id]"} value={e(@circle, :id, "")}>
                 <input type="hidden" name={"circle[encircle][#{suggested.id}][subject_id]"} value={ e(suggested, :follower_profile, :id, "")}>
                 <div class="flex-1">
-                  <%= live_component(@socket, Bonfire.UI.Me.ProfileItemLive, assigns |> assigns_merge(%{profile: e(suggested, :follower_profile, nil), character: e(suggested, :follower_character, nil)})) %>
+                  <%= live_component(Bonfire.UI.Me.ProfileItemLive, assigns |> assigns_merge(%{profile: e(suggested, :follower_profile, nil), character: e(suggested, :follower_character, nil)})) %>
                 </div>
                 <span class="to inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-base-content opacity-70 bg-base-100 hover:bg-neutral hover:bg-opacity-30 " @click="
                 const target = document.getElementById('circle_members');

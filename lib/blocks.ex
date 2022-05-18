@@ -2,9 +2,9 @@ defmodule Bonfire.Boundaries.Blocks do
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Circles
-  alias Bonfire.Data.Identity.User
-  alias Bonfire.Data.AccessControl.Grant
-  alias Bonfire.Data.Identity.Caretaker
+  # alias Bonfire.Data.Identity.User
+  # alias Bonfire.Data.AccessControl.Grant
+  # alias Bonfire.Data.Identity.Caretaker
 
   def types_blocked(types) when is_list(types) do
     Enum.flat_map(types, &types_blocked/1) |> Enum.uniq()
@@ -46,14 +46,12 @@ defmodule Bonfire.Boundaries.Blocks do
     |> do_mutate_blocklists(block_or_unblock, user_or_instance_to_block, ...)
   end
 
-  @doc """
-  Block something for the current user (current_user should be passed in opts)
-  """
+  #@doc "Block something for the current user (current_user should be passed in opts)"
   defp mutate(block_or_unblock, user_or_instance_to_block, block_type, opts) when block_type in [:silence, :silence_them] do
     current_user = Utils.current_user(opts)
     silence_them = types_blocked(block_type)
     debug("add silence block to both users' circles, one to my #{inspect silence_them} and the other to their :silence_me")
-    with {:ok, ret} <- mutate_blocklists(block_or_unblock, user_or_instance_to_block, silence_them, current_user), # my list of people I've silenced
+    with {:ok, _ret} <- mutate_blocklists(block_or_unblock, user_or_instance_to_block, silence_them, current_user), # my list of people I've silenced
     {:ok, ret} <- mutate_blocklists(block_or_unblock, current_user, [:silence_me], user_or_instance_to_block) do # their list of people who silenced them (this list isn't meant to be visible to them, but is used so queries can filter stuff using `Bonfire.Boundaries.Queries`)
       {:ok, ret}
     end
@@ -147,7 +145,7 @@ defmodule Bonfire.Boundaries.Blocks do
   defp is_blocked_by?(user_or_peer, block_type, %{} = user) do
     is_blocked_by?(user_or_peer, block_type, [user])
   end
-  defp is_blocked_by?(user_or_peer, block_types, current_user_ids) do
+  defp is_blocked_by?(user_or_peer, _block_types, current_user_ids) do
     error(user_or_peer, "no pattern found for user_or_peer (or current_user/current_user_ids)")
     error(current_user_ids, "no pattern found for current_user/current_user_ids (or user_or_peer)")
     nil

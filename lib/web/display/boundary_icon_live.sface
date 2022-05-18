@@ -1,3 +1,4 @@
+<span>
 {#if not is_nil(@object_boundary) and @object_boundary !=:skip}
 {#case Bonfire.Boundaries.preset_boundary_name_from_acl(@object_boundary)}
 {#match "public"}
@@ -31,3 +32,4 @@
 {#else}
 <span/>
 {/if}
+</span>
