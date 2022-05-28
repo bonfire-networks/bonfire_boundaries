@@ -15,7 +15,7 @@
       <span class="w-5 h-5 mr-2" 
         @click="open_boundaries = !open_boundaries"
         >
-        <Solid.HomeIcon/>
+        <Solid.LocationMarkerIcon/>
       </span>
       <span>
         {l "Your %{activity_type} will only be visible to members of your local instance.", activity_type: @activity_type_or_reply} 
