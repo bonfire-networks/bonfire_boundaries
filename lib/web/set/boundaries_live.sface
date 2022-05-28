@@ -21,7 +21,7 @@
       x-show="boundary_selected == 'local'"
       style="display: none"
       class="font-normal normal-case btn btn-ghost btn-xs" >
-      <Solid.HomeIcon class="w-4 h-4 text-slate-800 text-opacity-70"/>
+      <Solid.LocationMarkerIcon class="w-4 h-4 text-slate-800 text-opacity-70"/>
       <span class="ml-2 text-sm font-normal text-slate-800 text-opacity-70">{l "Local"}</span>
     </div>
     <div 
