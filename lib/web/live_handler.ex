@@ -208,7 +208,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
 
-  def preload_assigns(list_of_assigns) do
+  def maybe_preload_and_check_boundaries(list_of_assigns) do
     list_of_assigns
     |> maybe_check_boundaries()
     |> maybe_preload_boundaries()
