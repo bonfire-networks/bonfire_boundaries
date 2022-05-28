@@ -15,7 +15,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       Bonfire.UI.Common.OpenModalLive.close()
       {:noreply,
           socket
-          |> put_flash(:info, Enum.join([a, b, c, d] |> filter_empty([]), "\n"))
+          |> assign_flash(:info, Enum.join([a, b, c, d] |> filter_empty([]), "\n"))
       }
     end
   end
@@ -32,7 +32,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       Bonfire.UI.Common.OpenModalLive.close()
       {:noreply,
           socket
-          |> put_flash(:info, status)
+          |> assign_flash(:info, status)
       }
     end
   end
@@ -42,7 +42,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       Bonfire.UI.Common.OpenModalLive.close()
       {:noreply,
           socket
-          |> put_flash(:info, status)
+          |> assign_flash(:info, status)
       }
     end
   end
@@ -58,7 +58,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     ) do
       {:noreply,
           socket
-          |> put_flash(:info, status)
+          |> assign_flash(:info, status)
       }
     end
   end
@@ -67,7 +67,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     with {:ok, status} <- Bonfire.Boundaries.Blocks.unblock(id, maybe_to_atom(attrs["block_type"]), socket) do
       {:noreply,
           socket
-          |> put_flash(:info, status)
+          |> assign_flash(:info, status)
       }
     end
   end
@@ -129,8 +129,8 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
           {:noreply,
           socket
-          |> put_flash(:info, "Circle create!")
-          |> push_redirect(to: "/settings/circle/"<>id)
+          |> assign_flash(:info, "Circle create!")
+          |> redirect_to("/settings/circle/"<>id)
           }
 
     end
@@ -144,7 +144,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
           {:noreply,
           socket
-          |> put_flash(:info, "OK")
+          |> assign_flash(:info, "OK")
           }
 
     end
