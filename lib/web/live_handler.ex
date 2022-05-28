@@ -208,7 +208,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
 
-  def maybe_preload(list_of_assigns) do
+  def preload_assigns(list_of_assigns) do
     list_of_assigns
     |> maybe_check_boundaries()
     |> maybe_preload_boundaries()
@@ -220,7 +220,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     # |> debug("current_user")
 
     list_of_objects = list_of_assigns
-    |> Enum.reject(&e(&1, :check_object_boundary, nil) !=true) # ignore objects for which a boundary is already set (or set object_boundary to :skip in your component assigns to not preload them here)
+    |> Enum.reject(&e(&1, :check_object_boundary, nil) !=true) # only check when explicitly asked
     |> Enum.map(&the_object/1)
     # |> debug("list_of_objects")
 
@@ -270,7 +270,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     # |> debug("current_user")
 
     list_of_objects = list_of_assigns
-    |> Enum.reject(&e(&1, :object_boundary, nil)) # ignore objects for which a boundary is already set (or set object_boundary to :skip in your component assigns to not preload them here)
+    |> Enum.reject(&e(&1, :object_boundary, nil)) # ignore objects for which a boundary is already set (you can also set object_boundary to :skip in your component assigns to not preload them here)
     |> Enum.map(&the_object/1)
     # |> debug("list_of_objects")
 
