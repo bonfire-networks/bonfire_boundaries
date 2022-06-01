@@ -43,7 +43,7 @@ defmodule Bonfire.Boundaries.Acls do
     case custom_grants(changeset, opts) do
       [] ->
         changeset
-        |> Changesets.put_assoc(:controlled, base)
+        |> Changesets.maybe_put_assoc(:controlled, base)
       grants ->
         acl_id = ULID.generate()
         controlled = [%{acl_id: acl_id} | base]
@@ -57,7 +57,7 @@ defmodule Bonfire.Boundaries.Acls do
           changeset.repo.insert_all(Grant, grants)
           changeset
         end)
-        |> Changesets.put_assoc(:controlled, controlled)
+        |> Changesets.maybe_put_assoc(:controlled, controlled)
     end
   end
 
