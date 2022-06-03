@@ -9,8 +9,7 @@
     class="flex items-center focus:outline-none"
     >
 
-    <noscript>
-    <!-- default if JS is disabled -->
+    <!-- <noscript>
       <input 
       name={:boundary_selected} 
       type="hidden" 
@@ -20,7 +19,7 @@
         <Solid.LocationMarkerIcon class="w-4 h-4 text-slate-800 text-opacity-70"/>
         <span class="ml-2 text-sm font-normal text-slate-800 text-opacity-70">{l "Local"}</span>
       </div>
-    </noscript>
+    </noscript> -->
      
     <div
       x-show="boundary_selected == 'public'"
