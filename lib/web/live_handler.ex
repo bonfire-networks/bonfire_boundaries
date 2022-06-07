@@ -281,11 +281,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     |> debug("list_of_ids")
 
     my_states = if list_of_ids && current_user,
-      do: Bonfire.Boundaries.Controlleds.list_on_objects(list_of_ids)
-        |> Map.new(fn c -> { # Map.new discards duplicates for the same key, which is convenient for now as we only display one ACL (note that the order_by in the `list_on_objects` query matters)
-          e(c, :id, nil),
-          e(c, :acl, nil)
-        } end),
+      do: boundaries_on_objects(list_of_ids),
       else: %{}
 
     # debug(my_states, "boundaries")
@@ -305,6 +301,10 @@ defmodule Bonfire.Boundaries.LiveHandler do
         e(my_states, object_id, :named, nil) || previous_value || :none
       )
     end)
+  end
+
+  def boundaries_on_objects(list_of_ids) do
+    Bonfire.Boundaries.Controlleds.list_on_objects(list_of_ids)
   end
 
   defp the_object(assigns) do
