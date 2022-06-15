@@ -3,4 +3,5 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
 
   # prop showing_within, :any
   prop to_circles, :list
+  prop thread_mode, :string
 end
