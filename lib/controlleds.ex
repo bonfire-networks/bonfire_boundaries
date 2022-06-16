@@ -28,7 +28,9 @@ defmodule Bonfire.Boundaries.Controlleds do
   def list_on_object(object), do: list_on_objects([object])
 
   def list_on_objects(objects) when is_list(objects) do
+    # FIXME: caching ends up with everything appearing as public
     Cache.cached_preloads_for_objects("object_acl", objects, &do_list_on_objects/1)
+    # do_list_on_objects(objects)
   end
 
   defp do_list_on_objects(objects) when is_list(objects) and length(objects) >0 do

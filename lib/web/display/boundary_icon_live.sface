@@ -1,5 +1,5 @@
 <span>
-{#if not is_nil(@object_boundary) and @object_boundary !=:skip}
+{#if not is_atom(@object_boundary)}
 {#case Bonfire.Boundaries.preset_boundary_name_from_acl(@object_boundary)}
 {#match "public"}
   <span 

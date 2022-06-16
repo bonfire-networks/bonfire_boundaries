@@ -65,7 +65,7 @@ defmodule Bonfire.Boundaries do
   end
 
   def preset(preset) when is_binary(preset), do: preset
-  def preset(opts), do: maybe_from_opts(opts, :boundary)
+  def preset(opts), do: maybe_from_opts(opts, :boundary, "mentions")
 
   @doc """
   Loads binaries according to boundaries (which are assumed to be ULID pointer IDs).

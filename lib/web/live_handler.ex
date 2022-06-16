@@ -208,14 +208,14 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
 
-  def maybe_preload_and_check_boundaries(list_of_assigns) do
+  def maybe_preload_and_check_boundaries(list_of_assigns, caller_module \\ nil) do
     list_of_assigns
-    |> maybe_check_boundaries()
-    |> maybe_preload_boundaries()
+    |> maybe_check_boundaries(caller_module)
+    |> maybe_preload_boundaries(caller_module)
   end
 
 
-  def maybe_check_boundaries(list_of_assigns) do
+  def maybe_check_boundaries(list_of_assigns, caller_module \\ nil) do
     current_user = current_user(List.first(list_of_assigns))
     # |> debug("current_user")
 
@@ -228,7 +228,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     |> Enum.map(&ulid/1)
     |> Enum.uniq()
     |> filter_empty(nil)
-    |> debug("list_of_ids")
+    |> debug("list_of_ids (preload via #{caller_module})")
 
     my_visible_ids = if list_of_ids && current_user,
       do: Bonfire.Boundaries.load_pointers(list_of_ids, current_user: current_user)
@@ -265,7 +265,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end)
   end
 
-  def maybe_preload_boundaries(list_of_assigns) do
+  def maybe_preload_boundaries(list_of_assigns, caller_module \\ nil) do
     current_user = current_user(List.first(list_of_assigns))
     # |> debug("current_user")
 
@@ -278,18 +278,19 @@ defmodule Bonfire.Boundaries.LiveHandler do
     |> Enum.map(&ulid/1)
     |> Enum.uniq()
     |> filter_empty(nil)
-    |> debug("list_of_ids")
+    |> debug("list_of_ids (preload via #{caller_module})")
 
     my_states = if list_of_ids && current_user,
       do: boundaries_on_objects(list_of_ids),
       else: %{}
 
-    # debug(my_states, "boundaries")
+    debug(my_states, "boundaries")
 
     list_of_assigns
     |> Enum.map(fn assigns ->
       object_id = ulid(the_object(assigns))
       previous_value = e(assigns, :object_boundary, nil)
+      # |> debug("previous_value")
 
       assigns
       # |> Map.put(
