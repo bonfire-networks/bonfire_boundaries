@@ -228,41 +228,47 @@ defmodule Bonfire.Boundaries.LiveHandler do
     |> Enum.map(&ulid/1)
     |> Enum.uniq()
     |> filter_empty(nil)
-    |> debug("list_of_ids (preload via #{caller_module})")
 
-    my_visible_ids = if list_of_ids && current_user,
-      do: Bonfire.Boundaries.load_pointers(list_of_ids, current_user: current_user)
-        |> Enum.map(&ulid/1),
-      else: %{}
+    if list_of_ids do
+      debug(list_of_ids, "list_of_ids (check via #{caller_module})")
 
-    debug(my_visible_ids, "my_visible_ids")
+      my_visible_ids = if current_user,
+        do: Bonfire.Boundaries.load_pointers(list_of_ids, current_user: current_user)
+          |> Enum.map(&ulid/1),
+        else: %{}
 
-    list_of_assigns
-    |> Enum.map(fn assigns ->
-      object_id = ulid(the_object(assigns))
-      if list_of_ids && (object_id in list_of_ids and object_id not in my_visible_ids) do
-        assigns
-        |> Map.put(
-          :activity,
-          nil
-        )
-        |> Map.put(
-          :object,
-          nil
-        )
-        |> Map.put(
-          :object_boundary,
-          :not_visible
-        )
-      else
-        # avoid checking again
-        assigns
-        |> Map.put(
-          :check_object_boundary,
-          false
-        )
-      end
-    end)
+      debug(my_visible_ids, "my_visible_ids")
+
+      list_of_assigns
+      |> Enum.map(fn assigns ->
+        object_id = ulid(the_object(assigns))
+        if object_id in list_of_ids and object_id not in my_visible_ids do
+          assigns
+          |> Map.put(
+            :activity,
+            nil
+          )
+          |> Map.put(
+            :object,
+            nil
+          )
+          |> Map.put(
+            :object_boundary,
+            :not_visible
+          )
+        else
+          # avoid checking again
+          assigns
+          |> Map.put(
+            :check_object_boundary,
+            false
+          )
+        end
+      end)
+    else
+      debug("skip")
+      list_of_assigns
+    end
   end
 
   def maybe_preload_boundaries(list_of_assigns, caller_module \\ nil) do
