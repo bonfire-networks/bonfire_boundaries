@@ -48,7 +48,7 @@ defmodule Bonfire.Boundaries.Acls do
         acl_id = ULID.generate()
         controlled = [%{acl_id: acl_id} | base]
         grants =
-          (e(opts, :verbs_to_grant, nil) || Config.get(:verbs_interact_and_reply)) |> debug
+          (e(opts, :verbs_to_grant, nil) || Config.get(:verbs_interact_and_reply)) |> debug("verbs_to_grant")
           |> Enum.flat_map(grants, &grant_to(ulid(&1), acl_id, ...))
 
         changeset
@@ -66,14 +66,14 @@ defmodule Bonfire.Boundaries.Acls do
     (
       Config.get!([:object_default_boundaries, :acls])
       ++
-      case Boundaries.preset(opts) do
-        "public"    -> [:guests_may_see_read,  :locals_may_reply]
+      case Boundaries.preset(opts) |> debug("preset") do
+        "public"    -> [:guests_may_see_read, :locals_may_reply]
         "federated" -> [:locals_may_reply]
         "local"     -> [:locals_may_reply]
         _           -> []
       end
     )
-    # |> dump
+    |> debug("ACLs to set")
     |> find_acls(user)
     # |> dump
   end
