@@ -21,7 +21,7 @@ defmodule Bonfire.Boundaries.Fixtures do
           acl_id:     Acls.get_id!(acl),
           subject_id: Circles.get_id!(circle),
           verb_id:    Verbs.get_id!(Utils.elem_or(verb, 0, verb)),
-          value:      Utils.elem_or(verb, 1, true)} # if no monoid specified, default to positive grant
+          value:      Utils.elem_or(verb, 1, true)} # if no monoid specified in config, default to positive grant
       end
     named = Enum.filter(acls ++ circles, &(&1[:name]))
     repo().insert_all_or_ignore(Acl,    Enum.map(acls,    &Map.take(&1, [:id])))
