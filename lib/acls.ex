@@ -23,6 +23,8 @@ defmodule Bonfire.Boundaries.Acls do
   alias Ecto.Changeset
   alias Pointers.{Changesets, ULID}
 
+  @exclude_stereotypes ["2HEYS11ENCEDMES0CAN0TSEEME"] # don't show "others who silenced me"
+
   # special built-in acls (eg, guest, local, activity_pub)
   def acls, do: Bonfire.Common.Config.get([:acls])
 
@@ -218,6 +220,15 @@ defmodule Bonfire.Boundaries.Acls do
     |> Changeset.cast_assoc(:stereotyped)
   end
 
+  def get_for_caretaker(id, caretaker, opts \\ []) do
+    repo().single(get_q(id, caretaker, opts))
+  end
+
+  def get_q(id, caretaker, opts \\ []) do
+    list_q(opts ++ [skip_boundary_check: true])
+    # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
+    |> where([acl, caretaker: caretaker], acl.id == ^ulid!(id) and caretaker.caretaker_id == ^ulid!(caretaker))
+  end
 
   @doc """
   Lists ACLs we are permitted to see.
@@ -230,7 +241,7 @@ defmodule Bonfire.Boundaries.Acls do
   def list_q(opts) do
     from(acl in Acl, as: :acl)
     |> boundarise(acl.id, opts)
-    |> proload([:caretaker, :named, :stereotyped])
+    |> proload([:caretaker, :named, stereotyped: {"stereotype_", [:named]}])
   end
 
   @doc """
@@ -238,12 +249,13 @@ defmodule Bonfire.Boundaries.Acls do
   permitted to see. If any are created without permitting the
   user to see them, they will not be shown.
   """
-  def list_my(%{}=user), do: repo().many(list_my_q(user))
+  def list_my(user), do: repo().many(list_my_q(user))
 
   @doc "query for `list_my`"
-  def list_my_q(%{id: user_id}=user) do
-    list_q(user)
-    |> where([caretaker: caretaker], caretaker.caretaker_id == ^user_id)
+  def list_my_q(user) do
+    list_q(skip_boundary_check: true)
+    |> where([caretaker: caretaker], caretaker.caretaker_id == ^ulid!(user))
+    |> where([stereotyped: stereotyped], is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^@exclude_stereotypes)
   end
 
   def user_default_acl(name), do: user_default_acls()[name]

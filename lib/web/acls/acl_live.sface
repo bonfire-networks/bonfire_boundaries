@@ -1,0 +1,132 @@
+<div class="px-4 py-6 sm:p-6 lg:pb-8">
+  <div class="sticky top-0">
+    <div class="mt-6">
+      <div class="flex items-center border-b-4 pb-10">
+        <!-- <div class="shadow-2xl ring-4 ring-white flex-shrink-0 flex items-center justify-center w-24 h-24 rounded-full bg-pink-600 text-white text-sm font-medium">
+            GA
+        </div> -->
+        <div class="ml-4 flex flex-col">
+            <h3 class="text-2xl font-bold text-base-content opacity-80">{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</h3>
+            <!-- <p class="text-base font-regular text-base-content opacity-80 mt-1">This is a sample description to help remember what this Acl is about.</p> -->
+            <!-- <div :if={!e(@acl, :stereotyped, nil)} class="flex items-center mt-3 space-x-3">
+              <button :on-click="Bonfire.Boundaries:acl_delete" class="btn btn-primary w-max inline-flex items-center"><Solid.TrashIcon />{l "Delete boundary"}</button>
+            </div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mt-8">
+
+
+<div class="w-full border rounded-lg border-base-content/30">
+  <div class="flex items-center rounded-lg">
+    <span class="inline-flex items-center h-10 px-3 border-r rounded-l-lg border-base-content/30 text-base-content text-opacity-70 sm:text-sm"> {l "Add a circle or user"} </span>
+
+      <!-- <Bonfire.UI.Common.MultiselectLive.UserSelectorLive
+        selected_options={e(assigns, :to_circles, [])}
+        label={"Send to:"}
+        form_input_name="to_circles[]"
+        context_id={e(assigns, :context_id, nil)}
+      /> -->
+    <form :on-change="add">
+      <div
+        class="flex-1"
+        id={:select_more}
+        phx-hook="InputOrSelectOne"
+        >
+        <input name="to_circles" class="!text-slate-800 flex-1 w-full h-10 bg-transparent border-0 tagify border-base-content" />
+        <select class="tagify hide !text-slate-800">
+          {#for user <- @users}
+            <option class="!text-slate-800" value={e(user, :edge, :object, :id, nil)}>{e(user, :edge, :object, :profile, :name, "")} - {Bonfire.Me.Characters.display_username(e(user, :edge, :object, nil))}</option>
+          {/for}
+          {#for circle <- @user_circles}
+            <option class="!text-slate-800" value={e(circle, :id, nil)}>{ e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil) || l "Untitled" }</option>
+          {/for}
+        </select>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<div class="overflow-x-auto w-full">
+  <table class="table w-full">
+    <!-- head -->
+    <thead>
+      <tr>
+        <th>Who</th>
+        <th>What</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr :for={{id, l} <- e(@list, [])}>
+        <th>
+          <div class="flex items-center space-x-3">
+            <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} profile={e(l, :subject, :profile, nil)} />
+            <div>
+              <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || id}</div>
+              <!-- <div class="text-sm opacity-50">United States</div> -->
+            </div>
+          </div>
+        </th>
+        <td>
+          <p :for={grant <- e(l, :grants, [])} class="clear-left">
+            {e(grant, :verb, :verb, nil)}
+
+             <span class="switch-toggle">
+
+              <label>
+                <input name={e(id, "")<>e(grant, :verb_id, "")} type="radio" checked={e(grant, :value, nil)} />
+                <span class="rounded">👍</span>
+              </label>
+
+              <label>
+                <input name={e(id, "")<>e(grant, :verb_id, "")} type="radio" />
+                <span class="rounded">🤔</span>
+              </label>
+              
+              <label>
+                <input name={e(id, "")<>e(grant, :verb_id, "")} type="radio" checked={!e(grant, :value, nil)} />
+                <span class="rounded">👎</span>
+              </label>
+
+            </span>
+
+          </p>
+        </td>
+      </tr>
+    </tbody>
+    <!-- foot -->
+    <tfoot>
+      <tr>
+        <th>Who</th>
+        <th>What</th>
+      </tr>
+    </tfoot>
+    
+  </table>
+</div>
+
+<style>
+.switch-toggle {
+}
+.switch-toggle label {
+  float:left;
+  cursor: pointer;
+}
+.switch-toggle input {
+  position: absolute;
+  opacity: 0;
+}
+.switch-toggle input ~ span {
+  padding: 4px;
+}
+.switch-toggle input:checked ~ span {
+  border: 2px solid orange;
+}
+</style>
+
+
+  </div>
+</div>
+

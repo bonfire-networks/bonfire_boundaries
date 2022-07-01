@@ -2,6 +2,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   use Bonfire.UI.Common.Web, :live_handler
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Circles
+  alias Bonfire.Boundaries.Acls
 
   def handle_event("blocks", %{"id" => id} = attrs, socket) when is_binary(id) do
     info(attrs)
@@ -121,35 +122,56 @@ defmodule Bonfire.Boundaries.LiveHandler do
     }
   end
 
-  def handle_event("create_circle", %{"name" => name}, socket) do
-  # params = input_to_atoms(params)
-
+  def handle_event("circle_create", %{"name" => name}, socket) do
     with {:ok, %{id: id} = _circle} <-
       Circles.create(current_user(socket), name) do
-
           {:noreply,
           socket
-          |> assign_flash(:info, "Circle create!")
+          |> assign_flash(:info, "Circle created!")
           |> redirect_to("/settings/circle/"<>id)
           }
+    end
+  end
+
+  def handle_event("circle_edit", %{"circle" => circle_params}, socket) do
+    # params = input_to_atoms(params)
+    id = ulid!(e(socket.assigns, :circle, nil))
+
+    with {:ok, _circle} <- Circles.edit(id, current_user(socket), %{encircles: e(circle_params, "encircle", [])}) do
+
+      {:noreply,
+        socket
+        |> assign_flash(:info, "OK")
+      }
 
     end
   end
 
-  def handle_event("member_update", %{"circle" => %{"id" => id} = params}, socket) do
-    # params = input_to_atoms(params)
+  def handle_event("circle_delete", _, socket) do
+    id = ulid!(e(socket.assigns, :circle, nil))
 
     with {:ok, _circle} <-
-      Circles.update(id, current_user(socket), %{encircles: e(params, "encircle", [])}) do
+      Circles.delete(id, current_user(socket)) do
 
-          {:noreply,
-          socket
-          |> assign_flash(:info, "OK")
-          }
+      {:noreply,
+        socket
+        |> assign_flash(:info, "OK")
+        |> redirect_to("/settings/circles")
+      }
 
     end
   end
 
+  def handle_event("acl_create", %{"name" => name}, socket) do
+    with {:ok, %{id: id} = _acl} <-
+      Acls.create(%{named: %{name: name}}, current_user: current_user(socket)) do
+          {:noreply,
+          socket
+          |> assign_flash(:info, "Boundary created!")
+          |> redirect_to("/settings/acl/"<>id)
+          }
+    end
+  end
 
   def set_circles(selected_circles, previous_circles, add_to_previous \\ false) do
 

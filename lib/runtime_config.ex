@@ -63,10 +63,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         activity_pub: %{id: "7EDERATEDW1THANACT1V1TYPVB", name: "ActivityPub Peers"},
 
         ### Stereotypes - placeholders for special per-user circles the system will manage.
-        followers:    %{id: "7DAPE0P1E1PERM1TT0F0110WME", name: "My Followers"},
-        ghost_them:   %{id: "7N010NGERC0NSENTT0Y0VN0WTY", name: "Others I ghosted"},
-        silence_them: %{id: "7N010NGERWANTT011STENT0Y0V", name: "Others I silenced"},
-        silence_me:   %{id: "0KF1NEY0VD0N0TWANTT0HEARME", name: "Others who silenced me"},
+        followers:    %{id: "7DAPE0P1E1PERM1TT0F0110WME", name: "Those who follow me"},
+        followed:     %{id: "4THEPE0P1ES1CH00SET0F0110W", name: "Those I follow"},
+        ghost_them:   %{id: "7N010NGERC0NSENTT0Y0VN0WTY", name: "Those I ghosted"},
+        silence_them: %{id: "7N010NGERWANTT011STENT0Y0V", name: "Those I silenced"},
+        silence_me:   %{id: "0KF1NEY0VD0N0TWANTT0HEARME", name: "Those who silenced me"},
       },
       ### ACLs (Access Control Lists) are reusable lists of permissions assigned to users and circles. Objects in bonfire
       ### have one or more ACLs attached and we combine the results of all of them to determine whether a user is permitted
@@ -94,7 +95,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
         ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
         # TODO: are we going to use these for instance-wide blocks?
-        nobody_can_anything:  %{id: "0H0STEDCANTSEE0RD0ANYTH1NG", name: "People I ghosted"},
+        nobody_can_anything:  %{id: "0H0STEDCANTSEE0RD0ANYTH1NG", name: "People I ghosted cannot see"},
         nobody_can_reach:     %{id: "1S11ENCEDTHEMS0CAN0TP1NGME", name: "People I silenced aren't discoverable by me"},
         nobody_can_see:       %{id: "2HEYS11ENCEDMES0CAN0TSEEME", name: "People who silenced me cannot discover me"},
       },
@@ -131,10 +132,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     config :bonfire,
       user_default_boundaries: %{
         circles: %{
-          followers:    %{stereotype: :followers},    # users who have followed you
-          ghost_them:   %{stereotype: :ghost_them},   # users/instances you have ghosted
-          silence_them: %{stereotype: :silence_them}, # users/instances you have silenced
-          silence_me:   %{stereotype: :silence_me},   # users who have silenced me
+          followers:    %{stereotype: :followers},        # users who have followed you
+          followed:    %{stereotype: :followed}, # users who you have followed
+          ghost_them:   %{stereotype: :ghost_them},       # users/instances you have ghosted
+          silence_them: %{stereotype: :silence_them},     # users/instances you have silenced
+          silence_me:   %{stereotype: :silence_me},       # users who have silenced me
         },
         acls: %{
           ## ACLs that confer my personal permissions on things i have created

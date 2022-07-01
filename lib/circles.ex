@@ -14,6 +14,8 @@ defmodule Bonfire.Boundaries.Circles do
   alias Bonfire.Data.Identity.Caretaker
   alias Ecto.Changeset
 
+  @default_q_opts [exclude_stereotypes: ["0KF1NEY0VD0N0TWANTT0HEARME"]] # don't show "others who silenced me" in circles
+
   # special built-in circles (eg, guest, local, activity_pub)
   def circles, do: Bonfire.Common.Config.get([:circles])
 
@@ -69,6 +71,21 @@ defmodule Bonfire.Boundaries.Circles do
     repo().insert(changeset(:create, attrs))
   end
 
+  @doc "Create a circle for the provided user (and with the user in the circle?)"
+  def create(%User{}=user, name \\ nil, %{}=attrs \\ %{}) do
+    with {:ok, circle} <- repo().insert(changeset(:create,
+    attrs
+      |> deep_merge(%{
+        named: %{name: name},
+        caretaker: %{caretaker_id: user.id}
+        # encircles: [%{subject_id: user.id}] # add myself to circle?
+      })
+    )) do
+      # Bonfire.Boundaries.Boundaries.maybe_make_visible_for(user, circle) # make visible to myself - FIXME
+      {:ok, circle}
+    end
+  end
+
   def changeset(circle \\ %Circle{}, attrs)
 
   def changeset(:create, attrs), do: changeset(attrs)
@@ -77,6 +94,15 @@ defmodule Bonfire.Boundaries.Circles do
   def changeset(%Circle{} = circle, attrs), do: Circle.changeset(circle, attrs)
     |> Changeset.cast_assoc(:named, with: &Named.changeset/2)
     |> Changeset.cast_assoc(:encircles, with: &Encircle.changeset/2)
+
+  def changeset(:update, circle, params) do
+
+    # Ecto doesn't like mixed keys so we convert them all to strings
+    params = for {k, v} <- params, do: {to_string(k), v}, into: %{}
+    # debug(params)
+
+    changeset(circle, params)
+  end
 
   @doc """
   Lists the circles that we are permitted to see.
@@ -102,33 +128,22 @@ defmodule Bonfire.Boundaries.Circles do
   ## * Created circles will have the user as a caretaker
 
 
-  @doc "Create a circle for the provided user (and with the user in the circle?)"
-  def create(%User{}=user, name \\ nil, %{}=attrs \\ %{}) do
-    with {:ok, circle} <- repo().insert(changeset(:create,
-    user,
-    attrs
-      |> deep_merge(%{
-        named: %{name: name},
-        caretaker: %{caretaker_id: user.id}
-        # encircles: [%{subject_id: user.id}] # add myself to circle?
-      })
-    )) do
-      # Bonfire.Boundaries.Boundaries.maybe_make_visible_for(user, circle) # make visible to myself - FIXME
-      {:ok, circle}
-    end
-  end
-
-
   @doc """
   Lists the circles that we are permitted to see.
   """
-  def list_visible(user, opts \\ []), do: repo().many(list_visible_q(user, opts))
+  def list_visible(user, opts \\ []), do: repo().many(list_visible_q(user, opts ++ @default_q_opts))
+
+  @doc "query for `list_visible`"
+  def list_q(user, opts \\ []) do
+    from(circle in Circle, as: :circle)
+    |> proload([:named, :caretaker, stereotyped: {"stereotype_", [:named]}])
+    |> where([stereotyped: stereotyped], is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^e(opts, :exclude_stereotypes, []))
+  end
 
   @doc "query for `list_visible`"
   def list_visible_q(user, opts \\ []) do
-    from(circle in Circle, as: :circle)
+    list_q(user, opts)
     |> boundarise(circle.id, opts ++ [current_user: user])
-    |> proload([:named, :caretaker, stereotyped: {"stereotype_", [:named]}])
   end
 
   @doc """
@@ -136,13 +151,13 @@ defmodule Bonfire.Boundaries.Circles do
   permitted to see. If any circles are created without permitting the
   user to see them, they will not be shown.
   """
-  def list_my(user, opts \\ []), do: repo().many(list_my_q(user, opts))
+  def list_my(user, opts \\ []), do: repo().many(list_my_q(user, opts ++ @default_q_opts))
 
   @doc "query for `list_my`"
   def list_my_q(user, opts \\ []) when not is_nil(user) do
     user
     # |> dump
-    |> list_visible_q(opts)
+    |> list_q(opts)
     |> where([caretaker: caretaker], caretaker.caretaker_id == ^ulid(user))
   end
 
@@ -151,31 +166,39 @@ defmodule Bonfire.Boundaries.Circles do
     Enum.map([:guest, :local, :activity_pub], &Circles.get_tuple/1)
   end
 
-  def get_for_caretaker(id, caretaker) do
-    repo().single(get_q(id, caretaker))
+  def get_for_caretaker(id, caretaker, opts \\ []) do
+    repo().single(get_q(id, caretaker, opts ++ @default_q_opts))
   end
 
   def get_stereotype_circles(subject, stereotypes) when is_list(stereotypes) do
     stereotypes = Enum.map(stereotypes, &Bonfire.Boundaries.Circles.get_id!/1)
 
     list_my_q(subject, skip_boundary_check: true) # skip boundaries since we should only use this query internally
-    |> where([circle: circle, stereotyped: stereotyped], stereotyped.stereotype_id in ^ulid(stereotypes))
-    # |> info()
+    |> where(
+      [circle: circle, stereotyped: stereotyped],
+      stereotyped.stereotype_id in ^ulid(stereotypes)
+    )
     |> repo().all()
   end
+  def get_stereotype_circles(subject, stereotype), do: get_stereotype_circles(subject, [stereotype])
 
   @doc "query for `get`"
-  def get_q(id, caretaker) do
-    list_visible_q(caretaker)
-    |> join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
-    |> where([circle: circle, caretaker: caretaker], circle.id == ^id and caretaker.caretaker_id == ^ulid(caretaker))
+  def get_q(id, caretaker, opts \\ []) do
+    list_q(caretaker, opts)
+    # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
+    |> where([circle: circle, caretaker: caretaker], circle.id == ^ulid!(id) and caretaker.caretaker_id == ^ulid!(caretaker))
   end
 
-  def update(id, %User{} = user, params) do
-    with {:ok, circle} <- get_for_caretaker(id, user)
-    |> repo().maybe_preload([:encircles]) do
+  def edit(%Circle{} = circle, %User{} = user, params) do
+    circle = circle
+    |> repo().maybe_preload([:encircles])
 
-      repo().update(changeset(:update, circle, params))
+    repo().update(changeset(:update, circle, params))
+  end
+
+  def edit(id, %User{} = user, params) do
+    with {:ok, circle} <- get_for_caretaker(id, user) do
+      edit(circle, user, params)
     end
   end
 
@@ -186,25 +209,24 @@ defmodule Bonfire.Boundaries.Circles do
     repo().insert(Encircle.changeset(%{circle_id: ulid(circle), subject_id: ulid(subject)}))
   end
 
+  def remove_from_circles(subject, circles) when is_nil(circles) or length(circles)==0, do: error("No circle ID provided, so could not remove")
   def remove_from_circles(subject, circles) when is_list(circles) do
     from(e in Encircle, where: e.subject_id == ^ulid(subject) and e.circle_id in ^ulid(circles)) |> repo().delete_all
   end
-  def remove_from_circle(subject, circle) do
+  def remove_from_circles(subject, circle) do
     remove_from_circles(subject, [circle])
   end
 
-  def changeset(:create, %User{}=_user, attrs) do
-    Circles.changeset(:create, attrs)
+  def delete(%Circle{}=circle, %{} = current_user) do
+    assocs = [:encircles, :caretaker]
+
+    Bonfire.Social.Objects.maybe_generic_delete(Circle, circle, current_user: current_user, delete_associations: assocs)
+  end
+  def delete(id, %{} = user) do
+    with {:ok, circle} <- get_for_caretaker(id, user) do
+      delete(circle, user)
+    end
   end
 
-  def changeset(:update, circle, params) do
-
-    # Ecto doesn't like mixed keys so we convert them all to strings
-    params = for {k, v} <- params, do: {to_string(k), v}, into: %{}
-    # debug(params)
-
-    circle
-    |> Circles.changeset(params)
-  end
 
 end

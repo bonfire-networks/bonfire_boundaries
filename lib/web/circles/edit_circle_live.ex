@@ -7,8 +7,8 @@ defmodule Bonfire.Boundaries.Web.EditCircleLive do
         debug(circle)
 
       # TODO: paginate
-      followed = Bonfire.Social.Follows.list_my_followed(current_user(assigns), false) #|> IO.inspect
-      followers = Bonfire.Social.Follows.list_my_followers(current_user(assigns), false) #|> IO.inspect
+      followed = Bonfire.Social.Follows.list_my_followed(current_user(assigns), paginate: false) #|> IO.inspect
+      followers = Bonfire.Social.Follows.list_my_followers(current_user(assigns), paginate: false) #|> IO.inspect
 
       {:ok, assign(socket, assigns
       |> assigns_merge(%{circle: circle, followers: followers, followed:  followed}))}
