@@ -110,60 +110,59 @@
               </div>
 
               <div class="w-full overflow-x-auto">
-                <table class="table w-full">
-                  <!-- head -->
-                  <thead>
-                    <tr>
-                      <th>Who</th>
-                      <th>What</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr :for={{id, l} <- e(@list, [])}>
-                      <th>
-                        <div class="flex items-center space-x-3">
-                          <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} profile={e(l, :subject, :profile, nil)} />
-                          <div>
-                            <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
-                            <!-- <div class="text-sm opacity-50">United States</div> -->
-                          </div>
-                        </div>
-                      </th>
-                      <td>
-                        <p :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :grants, %{})) |> debug} class="clear-left">
-                          {e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}
+                <div 
+                  x-data="{active: false}"
+                  role="region"
+                  :for={{id, l} <- e(@list, [])} class="p-4 mb-3">
+                  <div 
+                    :class="!active ? '!border-b !rounded-b' : ''"
+                    class="flex items-center p-3 border border-b-0 rounded rounded-b-none border-base-content/30">
+                    <div class="flex items-center flex-1 space-x-2">
+                      <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} profile={e(l, :subject, :profile, nil)} />
+                      <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
+                    </div>
+                    <button 
+                      type="button"
+                      x-on:click="active = ! active"
+                      :aria-expanded="active"
+                      class="normal-case btn btn-outline btn-sm">
+                      <span x-show="!active">{l "View permissions"}</span>
+                      <span x-show="active">{l "Hide permissions"}</span>
+                      <span x-show="active" aria-hidden="true" class="ml-2">&minus;</span>
+                      <span x-show="!active" aria-hidden="true" class="ml-2">&plus;</span>
+                    </button>
+                  </div>
+                  <div 
+                    x-show="active" x-collapse
+                    class="border divide-y rounded rounded-t-none border-base-content/30 divide-base-content/30">
+                    <div :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :grants, %{})) |> debug} class="flex items-center p-3 space-x-3 ">
+                      <div class="flex-1 text-base font-semibold">
+                        {e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}
+                      </div>
+                      <div class="flex items-center space-x-3 switch-toggle">
 
-                          <span class="switch-toggle">
+                        <label>
+                          <input class="absolute opacity-0" name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==true} />
+                          <span class="btn btn-outline btn-square btn-primary">👍</span>
+                        </label>
 
-                            <label>
-                              <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==true} />
-                              <span class="rounded">👍</span>
-                            </label>
+                        <label>
+                          <input class="absolute opacity-0" name={e(id, "")<>e(verb_id, "")} type="radio" checked={is_nil(Map.get(grant, :value, nil))} />
+                          <span class="btn btn-outline btn-square btn-primary">🤔</span>
+                        </label>
+                        
+                        <label>
+                          <input class="absolute opacity-0" name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==false} />
+                          <span class="btn btn-outline btn-square btn-primary">👎</span>
+                        </label>
 
-                            <label>
-                              <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={is_nil(Map.get(grant, :value, nil))} />
-                              <span class="rounded">🤔</span>
-                            </label>
-                            
-                            <label>
-                              <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==false} />
-                              <span class="rounded">👎</span>
-                            </label>
+                      </div>
 
-                          </span>
-
-                        </p>
-                      </td>
-                    </tr>
-                  </tbody>
-                  <!-- foot -->
-                 
-                  
-                </table>
+                    </div>
+                  </div>
+                </div>
               </div>
             </section>
-
-       
 
             <section
              x-show="isSelected($id('tab', whichChild($el, $el.parentElement)))"
@@ -186,19 +185,7 @@
 
 
 <style>
-.switch-toggle {
-}
-.switch-toggle label {
-  float:left;
-  cursor: pointer;
-}
-.switch-toggle input {
-  position: absolute;
-  opacity: 0;
-}
-.switch-toggle input ~ span {
-  padding: 4px;
-}
+
 .switch-toggle input:checked ~ span {
   border: 2px solid orange;
 }
