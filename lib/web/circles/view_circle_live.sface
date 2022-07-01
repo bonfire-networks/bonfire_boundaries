@@ -1,198 +1,286 @@
-<div class="px-4 py-6 sm:p-6 lg:pb-8">
-  <div class="sticky top-0">
-    <div class="mt-6">
-      <div class="flex items-center border-b-4 pb-10">
-        <!-- <div class="shadow-2xl ring-4 ring-white flex-shrink-0 flex items-center justify-center w-24 h-24 rounded-full bg-pink-600 text-white text-sm font-medium">
+<div class="">
+  <div class="">
+      <div class="flex items-center p-4 pb-6 bg-base-content/10 border-base-content/30">
+        <!-- <div class="flex items-center justify-center flex-shrink-0 w-24 h-24 text-sm font-medium text-white bg-pink-600 rounded-full shadow-2xl ring-4 ring-white">
             GA
         </div> -->
-        <div class="ml-4 flex flex-col">
-            <h3 class="text-2xl font-bold text-base-content opacity-80">{ e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) || l "Untitled circle" }</h3>
-            <!-- <p class="text-base font-regular text-base-content opacity-80 mt-1">This is a sample description to help remember what this circle is about.</p> -->
-            <div :if={!e(@circle, :stereotyped, nil)} class="flex items-center mt-3 space-x-3">
-              <button :on-click="Bonfire.Boundaries:circle_delete" class="btn btn-primary w-max inline-flex items-center"><Solid.TrashIcon />{l "Delete circle"}</button>
-            </div>
+        <div class="flex flex-col">
+         <div class="flex items-center space-x-2 text-2xl font-bold text-base-content">
+          <Solid.UserGroupIcon class="w-6 h-6 text-base-content/80" />
+          <div>{ e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) || l "Untitled circle" }</div>
+        </div>
+            <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this circle is about."}</p>
         </div>
       </div>
-    </div>
-  </div>
-  <div class="mt-8">
+      <!-- Tabs -->
+      <div
+        x-data="{
+            adding: false,
+            removing: false,
+            selectedId: null,
+            init() {
+                // Set the first available tab on the page on page load.
+                this.$nextTick(() => this.select(this.$id('tab', 1)))
+            },
+            select(id) {
+                this.selectedId = id
+            },
+            isSelected(id) {
+                return this.selectedId === id
+            },
+            whichChild(el, parent) {
+                return Array.from(parent.children).indexOf(el) + 1
+            }
+        }"
+        x-id="['tab']"
+        class="">
+          <!-- Tab List -->
+          <ul
+            x-ref="tablist"
+            @keydown.right.prevent.stop="$focus.wrap().next()"
+            @keydown.home.prevent.stop="$focus.first()"
+            @keydown.page-up.prevent.stop="$focus.first()"
+            @keydown.left.prevent.stop="$focus.wrap().prev()"
+            @keydown.end.prevent.stop="$focus.last()"
+            @keydown.page-down.prevent.stop="$focus.last()"
+            role="tablist"
+            class="flex items-stretch -mb-px border-b bg-base-content/10 border-base-content/30"
+          >
+              <!-- Tab -->
+            <li>
+              <button
+                :id="$id('tab', whichChild($el.parentElement, $refs.tablist))"
+                @click="select($el.id)"
+                @mousedown.prevent
+                @focus="select($el.id)"
+                type="button"
+                :tabindex="isSelected($el.id) ? 0 : -1"
+                :aria-selected="isSelected($el.id)"
+                :class="isSelected($el.id) ? 'border-primary border-b-2' : 'border-0'"
+                class="inline-flex px-5 py-2.5 "
+                role="tab">
+                {l "Members"}
+              </button>
+            </li>
 
-  <div class="block"x-cloak  x-data="{ adding: false, removing: false }">
+            <li>
+              <button
+                :id="$id('tab', whichChild($el.parentElement, $refs.tablist))"
+                @click="select($el.id)"
+                @mousedown.prevent
+                @focus="select($el.id)"
+                type="button"
+                :tabindex="isSelected($el.id) ? 0 : -1"
+                :aria-selected="isSelected($el.id)"
+                :class="isSelected($el.id) ? 'border-primary border-b-2' : 'border-0'"
+                class="inline-flex px-5 py-2.5"
+                role="tab">{l "Suggestions"}</button>
+            </li>
 
-    <h3 class="font-sm mb-2 text-medium text-base-content opacity-80">Circle Members</h3>
-    <div class="overflow-hidden relative border rounded-lg  drag_drop__container__to">
-        <form :on-change={if !@read_only, do: "Bonfire.Boundaries:circle_edit"}>
-        <input type="hidden" name="circle[id]" value={e(@circle, :id, "")}>
-        <input type="hidden" id="circle_changed" name="circle_changed" value="0">
+            <li>
+              <button
+                :id="$id('tab', whichChild($el.parentElement, $refs.tablist))"
+                @click="select($el.id)"
+                @mousedown.prevent
+                @focus="select($el.id)"
+                type="button"
+                :tabindex="isSelected($el.id) ? 0 : -1"
+                :aria-selected="isSelected($el.id)"
+                :class="isSelected($el.id) ? 'border-primary border-b-2' : 'border-0'"
+                class="inline-flex px-5 py-2.5"
+                role="tab">{l "Settings"}</button>
+            </li>
+          </ul>
 
-        <ul
-            id="circle_members"
-            class="grid grid-flow-col grid-cols-5 p-4 gap-4"
-            :class="{ 'bg-secondary': adding }"
-            x-on:drop="adding = false"
-            x-on:drop.prevent="
-                target = event.target.closest('ul');
-                id = event.dataTransfer.getData('text/plain');
-                console.log(id);
-                element = document.getElementById(id);
-                target.appendChild(element);
-                dispatch_change();
-            "
-            x-on:dragover.prevent="adding = true"
-            x-on:dragleave.prevent="adding = false">
+          <!-- Panels -->
+          <div role="tabpanels" class="">
+            <!-- Panel -->
+            <section
+              x-show="isSelected($id('tab', whichChild($el, $el.parentElement)))"
+              :aria-labelledby="$id('tab', whichChild($el, $el.parentElement))"
+              role="tabpanel"
+              class=""
+              >   
+              <div class="">
+                <form :on-change={if !@read_only, do: "Bonfire.Boundaries:circle_edit"}>
+                  <input type="hidden" name="circle[id]" value={e(@circle, :id, "")}>
+                  <input type="hidden" id="circle_changed" name="circle_changed" value="0">
+                  <ul
+                    id="circle_members"
+                    class="divide-y divide-base-content/30">
+                
+                    {#for member <- e(@circle, :encircles, [])}
 
-             <!-- loop through current circle members  -->
+                      <li id={"item-"<> member.id }
+                        class="flex items-center p-4"
+                        :class="{ 'bg-base-2000': dragging }">
+                        <input type="hidden" name={"circle[encircle][#{member.id}][circle_id]"} value={e(@circle, :id, "")}>
+                        <input type="hidden" name={"circle[encircle][#{member.id}][subject_id]"} value={e(member, :subject_id, "")}>
+                        <div class="flex-1">
+                          <Bonfire.UI.Me.ProfileItemLive show_controls={[]} profile={e(member, :subject, :profile, nil)} character={e(member, :subject, :character, nil)} />
+                        </div>
+                        <div :if={!@read_only} class="flex">
+                          <!-- <span
+                            class="flex items-center to"
+                            @click="move_item(event, 'circle_members')">
+                            <Solid.PlusCircleIcon />
+                            </span> -->
+                          <button
+                            class="flex items-center normal-case btn btn-error btn-sm"
+                            @click="move_item(event, 'circle_suggestions')">
+                              <!-- <Solid.MinusIcon class="mr-2" /> -->
+                              <span>{l "Remove"}</span>
+                          </button>
+                        </div>
+                      </li>
+                    {#else}
+                      <div id="no-members" class="flex items-center my-12 place-content-center">
+                        <Bonfire.UI.Common.EmptyFeed
+                          feedback_title={e(assigns, :feedback_title, l "This circle has no members yet")}
+                          feedback_message={e(assigns, :feedback_message, nil)}
+                        /> 
+                      </div>
+                    {/for}
+                  </ul>
+                </form>
+              </div>
+            </section>
 
-            {#for member <- e(@circle, :encircles, [])}
+            <section
+              x-show="isSelected($id('tab', whichChild($el, $el.parentElement)))"
+              :aria-labelledby="$id('tab', whichChild($el, $el.parentElement))"
+              role="tabpanel"
+              class=""
+              >
+              <div :if={!@read_only}>
+                <div class="">
+                  <div class="p-4 m-4 mb-0 rounded-md bg-info/10">
+                    <div class="flex">
+                      <div class="flex-shrink-0">
+                        <Solid.InformationCircleIcon class="w-5 h-5 text-info" />
+                      </div>
+                      <div class="flex-1 ml-3 md:flex md:justify-between">
+                        <p class="text-sm text-info"> {l "Suggestions are based upon the users you follow and the ones who are following you."}</p>
+                      </div>
+                    </div>
+                  </div>
+                    <ul
+                      id="circle_suggestions"
+                      class="flex flex-col divide-y divide-base-content/10">
 
-              <li id={"item-"<> member.id }
-                class="p-2 flex"
-                :class="{ 'bg-base-2000': dragging }"
-                x-on:dragstart.self="
-                    dragging = true;
-                    event.dataTransfer.effectAllowed='move';
-                    event.dataTransfer.setData('text/plain', event.target.id);
-                "
-                x-cloak
-                x-on:dragend="dragging = false"
-                x-data="{ dragging: false }"
-                draggable="true">
+                        <!-- loop through people that can be added -->
 
-                <input type="hidden" name={"circle[encircle][#{member.id}][circle_id]"} value={e(@circle, :id, "")}>
-                <input type="hidden" name={"circle[encircle][#{member.id}][subject_id]"} value={e(member, :subject_id, "")}>
-                <div class="flex-1">
-                  <Bonfire.UI.Me.ProfileItemLive show_controls={[]} profile={e(member, :subject, :profile, nil)} character={e(member, :subject, :character, nil)} />
+                        {#for suggested <- @followed }
+                          <li id={"item-"<> suggested.id } class="flex p-4">
+                            <input type="hidden" name={"circle[encircle][#{suggested.id}][circle_id]"} value={e(@circle, :id, "")}>
+                            <input type="hidden" name={"circle[encircle][#{suggested.id}][subject_id]"} value={e(suggested, :edge, :object, :id, "")}>
+                            <div class="flex-1">
+                              <Bonfire.UI.Me.ProfileItemLive show_controls={[]} profile={e(suggested, :edge, :object, :profile, nil)} character={e(suggested, :edge, :object, :character, nil)} />
+                            </div>
+                          
+                            <div :if={!@read_only} class="flex mr-1">
+                              <button
+                                class="flex items-center normal-case btn btn-primary btn-sm"
+                                 @click="move_item(event, 'circle_members')">
+                                  <!-- <Solid.MinusIcon class="mr-2" /> -->
+                                  <span>{l "Add"}</span>
+                              </button>
+                            </div>
+                          </li>
+                        {/for}
+
+                        {#for suggested <- @followers }
+                          <li id={"item-"<> suggested.id }
+                            class="flex p-2"
+                            :class="{ 'drag_drop__iter__dragging': dragging }"
+                            x-on:dragstart.self="
+                                dragging = true;
+                                event.dataTransfer.effectAllowed='move';
+                                id = event.target.id;
+                                console.log(id);
+                                event.dataTransfer.setData('text/plain', id);
+                            "
+                            x-on:dragend="dragging = false"
+                            x-cloak
+                            x-data="{ dragging: false }"
+                            draggable="true">
+
+                            <input type="hidden" name={"circle[encircle][#{suggested.id}][circle_id]"} value={e(@circle, :id, "")}>
+                            <input type="hidden" name={"circle[encircle][#{suggested.id}][subject_id]"} value={e(suggested, :edge, :subject, :id, "")}>
+                            <div class="flex-1">
+                              <Bonfire.UI.Me.ProfileItemLive show_controls={[]} profile={e(suggested, :edge, :subject, :profile, nil)} character={e(suggested, :edge, :subject, :character, nil)} />
+                            </div>
+                            
+                            <div :if={!@read_only} class="flex mr-1">
+                              <span
+                                class="flex items-center to button"
+                                @click="move_item(event, 'circle_members')">
+                                  <Solid.PlusCircleIcon /> 
+                                </span>
+                              <span
+                              class="flex items-center from button"
+                              @click="move_item(event, 'circle_suggestions')">
+                                <Solid.MinusCircleIcon /> 
+                              </span>
+                            </div>
+
+                          </li>
+
+                        {/for}
+                        
+                    </ul>             
                 </div>
-                <div :if={!@read_only} class="flex mr-1">
-                  <span
-                    class="to flex items-center"
-                    @click="move_item(event, 'circle_members')">
-                    <Solid.PlusCircleIcon />
-                    </span>
-                  <span
-                    class="from flex items-center"
-                    @click="move_item(event, 'circle_suggestions')">
-                      <Solid.MinusCircleIcon />
-                  </span>
-                </div>
-              </li>
-            {#else}
-              <div id="no_members">{l "Nobody in this circle..."}</div>
-            {/for}
+              </div>
+            </section>
 
-        </ul>
-        </form>
-
-    </div>
-
-  <div :if={!@read_only}>
-    <h3 class="font-sm mt-4 mb-2 text-medium text-base-content opacity-80">Suggestions</h3>
-    <div class="overflow-hidden relative border rounded-lg drag_drop__container__from">
-        <ul
-            id="circle_suggestions"
-            class="flex flex-col divide-y-2"
-            :class="{ 'drag_drop__items__removing': removing }"
-            x-on:drop="removing = false"
-            x-on:drop.prevent="
-                target = event.target.closest('ul');
-                element = document.getElementById(event.dataTransfer.getData('text/plain'));
-                target.appendChild(element);
-                dispatch_change();
-            "
-            x-on:dragover.prevent="removing = true"
-            x-on:dragleave.prevent="removing = false">
-
-             <!-- loop through people that can be added -->
-
-            {#for suggested <- @followed }
-              <li id={"item-"<> suggested.id }
-                class="p-2 flex"
-                :class="{ 'drag_drop__iter__dragging': dragging }"
-                x-on:dragstart.self="
-                    dragging = true;
-                    event.dataTransfer.effectAllowed='move';
-                    id = event.target.id;
-                    console.log(id);
-                    event.dataTransfer.setData('text/plain', id);
-                "
-                x-on:dragend="dragging = false"
-                x-cloak
-                x-data="{ dragging: false }"
-                draggable="true">
-
-                <input type="hidden" name={"circle[encircle][#{suggested.id}][circle_id]"} value={e(@circle, :id, "")}>
-                <input type="hidden" name={"circle[encircle][#{suggested.id}][subject_id]"} value={e(suggested, :edge, :object, :id, "")}>
-                <div class="flex-1">
-                  <Bonfire.UI.Me.ProfileItemLive show_controls={[]} profile={e(suggested, :edge, :object, :profile, nil)} character={e(suggested, :edge, :object, :character, nil)} />
+            <section
+             x-show="isSelected($id('tab', whichChild($el, $el.parentElement)))"
+              :aria-labelledby="$id('tab', whichChild($el, $el.parentElement))"
+              role="tabpanel"
+              class="p-4"
+            >
+                <div class="pb-3 text-lg font-medium">{l "General"}</div>
+              <form class="p-4 border rounded-lg border-base-content/30">
+                <div class="w-full form-control">
+                  <label class="label">
+                    <span class="font-bold label-text">{l "Edit the circle name"}</span>
+                    </label>
+                    <div class="flex items-center">
+                      <input type="text" placeholder="Type here" class="w-full input input-bordered" />
+                    </div>
                 </div>
               
-                <div :if={!@read_only} class="flex mr-1">
-                  <span
-                    class="to flex items-center button"
-                    @click="move_item(event, 'circle_members')">
-                      <Solid.PlusCircleIcon /> 
-                    </span>
-                  <span
-                  class="from flex items-center button"
-                  @click="move_item(event, 'circle_suggestions')">
-                    <Solid.MinusCircleIcon /> 
-                  </span>
+                <div class="w-full mt-4 form-control">
+                  <label class="label">
+                    <span class="font-bold label-text">{l "Edit the circle description"}</span>
+                    </label>
+                    <div class="flex flex-col space-y-3">
+                      <textarea placeholder="A short description to help you remember what this circle is about" id="circle_description" name="" rows="3" class="w-full h-24 textarea textarea-bordered"></textarea>
+                    </div>
                 </div>
-              </li>
-            {/for}
+                <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l "Save"}</button>
+              </form>
 
-            {#for suggested <- @followers }
-              <li id={"item-"<> suggested.id }
-                class="p-2 flex"
-                :class="{ 'drag_drop__iter__dragging': dragging }"
-                x-on:dragstart.self="
-                    dragging = true;
-                    event.dataTransfer.effectAllowed='move';
-                    id = event.target.id;
-                    console.log(id);
-                    event.dataTransfer.setData('text/plain', id);
-                "
-                x-on:dragend="dragging = false"
-                x-cloak
-                x-data="{ dragging: false }"
-                draggable="true">
-
-                <input type="hidden" name={"circle[encircle][#{suggested.id}][circle_id]"} value={e(@circle, :id, "")}>
-                <input type="hidden" name={"circle[encircle][#{suggested.id}][subject_id]"} value={e(suggested, :edge, :subject, :id, "")}>
-                <div class="flex-1">
-                  <Bonfire.UI.Me.ProfileItemLive show_controls={[]} profile={e(suggested, :edge, :subject, :profile, nil)} character={e(suggested, :edge, :subject, :character, nil)} />
+              <div :if={!e(@circle, :stereotyped, nil)} class="pb-3 mt-6 text-lg font-medium">{l "Danger zone"}</div>
+              <div :if={!e(@circle, :stereotyped, nil)} class="p-4 border rounded-lg border-error/30">
+                <div class="flex items-center space-x-8">
+                  <div class="flex flex-col">
+                    <div class="flex-1 text-base font-bold">{l "Delete this circle"}</div>
+                    <div class="text-sm text-base-content/80">{l "Once you delete a circle, there is no going back. Please be certain."}</div>
+                  </div>
+                   <button 
+                    :on-click="Bonfire.Boundaries:circle_delete"  
+                    class="normal-case btn btn-outline btn-error btn-sm">{l "Delete this circle"}</button>
                 </div>
-                
-                <div :if={!@read_only} class="flex mr-1">
-                  <span
-                    class="to flex items-center button"
-                    @click="move_item(event, 'circle_members')">
-                      <Solid.PlusCircleIcon /> 
-                    </span>
-                  <span
-                  class="from flex items-center button"
-                  @click="move_item(event, 'circle_suggestions')">
-                    <Solid.MinusCircleIcon /> 
-                  </span>
-                </div>
+              </div>
 
-              </li>
-
-            {#else}
-              <li id="no_suggestions" class="p-2">{l "Follow some people first..."}</li>
-            {/for}
-
-        </ul>
-        
-    </div>
+            </section>
+          </div>
+      </div>
   </div>
-</div>
 
-<style>
-.drag_drop__container__to span.to, .drag_drop__container__from span.from  {
-  display: none;
-}
-</style>
+
+
 <script>
 function move_item(event, target_id){
   target = document.getElementById(target_id);
@@ -215,7 +303,6 @@ function dispatch_change(){
 }
 </script>
 
-  </div>
 </div>
 
 

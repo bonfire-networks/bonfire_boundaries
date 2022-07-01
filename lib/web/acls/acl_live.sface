@@ -1,108 +1,189 @@
-<div class="px-4 py-6 sm:p-6 lg:pb-8">
-  <div class="sticky top-0">
-    <div class="mt-6">
-      <div class="flex items-center border-b-4 pb-10">
-        <!-- <div class="shadow-2xl ring-4 ring-white flex-shrink-0 flex items-center justify-center w-24 h-24 rounded-full bg-pink-600 text-white text-sm font-medium">
-            GA
-        </div> -->
-        <div class="ml-4 flex flex-col">
-            <h3 class="text-2xl font-bold text-base-content opacity-80">{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</h3>
-            <!-- <p class="text-base font-regular text-base-content opacity-80 mt-1">This is a sample description to help remember what this Acl is about.</p> -->
-            <!-- <div :if={!e(@acl, :stereotyped, nil)} class="flex items-center mt-3 space-x-3">
-              <button :on-click="Bonfire.Boundaries:acl_delete" class="btn btn-primary w-max inline-flex items-center"><Solid.TrashIcon />{l "Delete boundary"}</button>
-            </div> -->
+<div class="">
+  <div class="flex items-center p-4 pb-6 bg-base-content/10 border-base-content/30">
+    <!-- <div class="flex items-center justify-center flex-shrink-0 w-24 h-24 text-sm font-medium text-white bg-pink-600 rounded-full shadow-2xl ring-4 ring-white">
+        GA
+    </div> -->
+    <div class="flex flex-col">
+        <div class="flex items-center space-x-2 text-2xl font-bold text-base-content">
+          <Solid.LockClosedIcon class="w-6 h-6 text-base-content/80" />
+          <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</div>
         </div>
-      </div>
+        <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p>
     </div>
   </div>
+
+   <div
+        x-data="{
+            adding: false,
+            removing: false,
+            selectedId: null,
+            init() {
+                // Set the first available tab on the page on page load.
+                this.$nextTick(() => this.select(this.$id('tab', 1)))
+            },
+            select(id) {
+                this.selectedId = id
+            },
+            isSelected(id) {
+                return this.selectedId === id
+            },
+            whichChild(el, parent) {
+                return Array.from(parent.children).indexOf(el) + 1
+            }
+        }"
+        x-id="['tab']"
+        class="">
+          <!-- Tab List -->
+          <ul
+            x-ref="tablist"
+            @keydown.right.prevent.stop="$focus.wrap().next()"
+            @keydown.home.prevent.stop="$focus.first()"
+            @keydown.page-up.prevent.stop="$focus.first()"
+            @keydown.left.prevent.stop="$focus.wrap().prev()"
+            @keydown.end.prevent.stop="$focus.last()"
+            @keydown.page-down.prevent.stop="$focus.last()"
+            role="tablist"
+            class="flex items-stretch -mb-px border-b bg-base-content/10 border-base-content/30"
+          >
+              <!-- Tab -->
+            <li>
+              <button
+                :id="$id('tab', whichChild($el.parentElement, $refs.tablist))"
+                @click="select($el.id)"
+                @mousedown.prevent
+                @focus="select($el.id)"
+                type="button"
+                :tabindex="isSelected($el.id) ? 0 : -1"
+                :aria-selected="isSelected($el.id)"
+                :class="isSelected($el.id) ? 'border-primary border-b-2' : 'border-0'"
+                class="inline-flex px-5 py-2.5 "
+                role="tab">
+                {l "Members"}
+              </button>
+            </li>
+
+
+            <li>
+              <button
+                :id="$id('tab', whichChild($el.parentElement, $refs.tablist))"
+                @click="select($el.id)"
+                @mousedown.prevent
+                @focus="select($el.id)"
+                type="button"
+                :tabindex="isSelected($el.id) ? 0 : -1"
+                :aria-selected="isSelected($el.id)"
+                :class="isSelected($el.id) ? 'border-primary border-b-2' : 'border-0'"
+                class="inline-flex px-5 py-2.5"
+                role="tab">{l "Settings"}</button>
+            </li>
+          </ul>
+
+          <!-- Panels -->
+          <div role="tabpanels" class="">
+            <!-- Panel -->
+            <section
+              x-show="isSelected($id('tab', whichChild($el, $el.parentElement)))"
+              :aria-labelledby="$id('tab', whichChild($el, $el.parentElement))"
+              role="tabpanel"
+              class=""
+              >   
+              <div class="m-4">
+                <div class="flex items-center rounded-lg">
+                  <form 
+                    class="flex-1"
+                    :on-change="add">
+                    <div
+                      class="flex-1"
+                      id={:select_more}
+                      phx-hook="InputOrSelectOne"
+                      >
+                      <label class="text-sm font-bold">{l "Add a circle or user"}</label>
+                      <input name="add" class="w-full mt-1 tagify input input-bordered" />
+                      <select class="tagify hide !text-slate-800">
+                        {#for {id, name} <- @suggestions}
+                          <option class="!text-slate-800" value={id}>{ name }</option>
+                        {/for}
+                      </select>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div class="w-full overflow-x-auto">
+                <table class="table w-full">
+                  <!-- head -->
+                  <thead>
+                    <tr>
+                      <th>Who</th>
+                      <th>What</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr :for={{id, l} <- e(@list, [])}>
+                      <th>
+                        <div class="flex items-center space-x-3">
+                          <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} profile={e(l, :subject, :profile, nil)} />
+                          <div>
+                            <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
+                            <!-- <div class="text-sm opacity-50">United States</div> -->
+                          </div>
+                        </div>
+                      </th>
+                      <td>
+                        <p :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :grants, %{})) |> debug} class="clear-left">
+                          {e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}
+
+                          <span class="switch-toggle">
+
+                            <label>
+                              <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==true} />
+                              <span class="rounded">👍</span>
+                            </label>
+
+                            <label>
+                              <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={is_nil(Map.get(grant, :value, nil))} />
+                              <span class="rounded">🤔</span>
+                            </label>
+                            
+                            <label>
+                              <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==false} />
+                              <span class="rounded">👎</span>
+                            </label>
+
+                          </span>
+
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                  <!-- foot -->
+                 
+                  
+                </table>
+              </div>
+            </section>
+
+       
+
+            <section
+             x-show="isSelected($id('tab', whichChild($el, $el.parentElement)))"
+              :aria-labelledby="$id('tab', whichChild($el, $el.parentElement))"
+              role="tabpanel"
+              class="p-4"
+            >
+            test
+
+            </section>
+          </div>
+      </div>
+
   <div class="mt-8">
 
 
-<div class="w-full border rounded-lg border-base-content/30">
-  <div class="flex items-center rounded-lg">
-    <span class="inline-flex items-center h-10 px-3 border-r rounded-l-lg border-base-content/30 text-base-content text-opacity-70 sm:text-sm"> {l "Add a circle or user"} </span>
-
-      <!-- <Bonfire.UI.Common.MultiselectLive.UserSelectorLive
-        selected_options={e(assigns, :to_circles, [])}
-        label={"Send to:"}
-        form_input_name="to_circles[]"
-        context_id={e(assigns, :context_id, nil)}
-      /> -->
-    <form :on-change="add">
-      <div
-        class="flex-1"
-        id={:select_more}
-        phx-hook="InputOrSelectOne"
-        >
-        <input name="add" class="!text-slate-800 flex-1 w-full h-10 bg-transparent border-0 tagify border-base-content" />
-        <select class="tagify hide !text-slate-800">
-          {#for {id, name} <- @suggestions}
-            <option class="!text-slate-800" value={id}>{ name }</option>
-          {/for}
-        </select>
-      </div>
-    </form>
-  </div>
-</div>
-
-
-<div class="overflow-x-auto w-full">
-  <table class="table w-full">
-    <!-- head -->
-    <thead>
-      <tr>
-        <th>Who</th>
-        <th>What</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr :for={{id, l} <- e(@list, [])}>
-        <th>
-          <div class="flex items-center space-x-3">
-            <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} profile={e(l, :subject, :profile, nil)} />
-            <div>
-              <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
-              <!-- <div class="text-sm opacity-50">United States</div> -->
-            </div>
-          </div>
-        </th>
-        <td>
-          <p :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :grants, %{})) |> debug} class="clear-left">
-            {e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}
-
-             <span class="switch-toggle">
-
-              <label>
-                <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==true} />
-                <span class="rounded">👍</span>
-              </label>
-
-              <label>
-                <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={is_nil(Map.get(grant, :value, nil))} />
-                <span class="rounded">🤔</span>
-              </label>
-              
-              <label>
-                <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==false} />
-                <span class="rounded">👎</span>
-              </label>
-
-            </span>
-
-          </p>
-        </td>
-      </tr>
-    </tbody>
-    <!-- foot -->
-    <tfoot>
-      <tr>
-        <th>Who</th>
-        <th>What</th>
-      </tr>
-    </tfoot>
     
-  </table>
-</div>
+
+
+
 
 <style>
 .switch-toggle {
