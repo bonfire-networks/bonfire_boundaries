@@ -34,13 +34,10 @@
         id={:select_more}
         phx-hook="InputOrSelectOne"
         >
-        <input name="to_circles" class="!text-slate-800 flex-1 w-full h-10 bg-transparent border-0 tagify border-base-content" />
+        <input name="add" class="!text-slate-800 flex-1 w-full h-10 bg-transparent border-0 tagify border-base-content" />
         <select class="tagify hide !text-slate-800">
-          {#for user <- @users}
-            <option class="!text-slate-800" value={e(user, :edge, :object, :id, nil)}>{e(user, :edge, :object, :profile, :name, "")} - {Bonfire.Me.Characters.display_username(e(user, :edge, :object, nil))}</option>
-          {/for}
-          {#for circle <- @user_circles}
-            <option class="!text-slate-800" value={e(circle, :id, nil)}>{ e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil) || l "Untitled" }</option>
+          {#for {id, name} <- @suggestions}
+            <option class="!text-slate-800" value={id}>{ name }</option>
           {/for}
         </select>
       </div>
@@ -64,29 +61,29 @@
           <div class="flex items-center space-x-3">
             <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} profile={e(l, :subject, :profile, nil)} />
             <div>
-              <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || id}</div>
+              <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
               <!-- <div class="text-sm opacity-50">United States</div> -->
             </div>
           </div>
         </th>
         <td>
-          <p :for={grant <- e(l, :grants, [])} class="clear-left">
-            {e(grant, :verb, :verb, nil)}
+          <p :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :grants, %{})) |> debug} class="clear-left">
+            {e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}
 
              <span class="switch-toggle">
 
               <label>
-                <input name={e(id, "")<>e(grant, :verb_id, "")} type="radio" checked={e(grant, :value, nil)} />
+                <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==true} />
                 <span class="rounded">👍</span>
               </label>
 
               <label>
-                <input name={e(id, "")<>e(grant, :verb_id, "")} type="radio" />
+                <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={is_nil(Map.get(grant, :value, nil))} />
                 <span class="rounded">🤔</span>
               </label>
               
               <label>
-                <input name={e(id, "")<>e(grant, :verb_id, "")} type="radio" checked={!e(grant, :value, nil)} />
+                <input name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==false} />
                 <span class="rounded">👎</span>
               </label>
 

@@ -38,14 +38,14 @@ defmodule Bonfire.Boundaries.Verbs do
     Verb.changeset(verb, attrs)
   end
 
-  def list(from \\ :db)
-  def list(:db) do
+  def list(from \\ :db, key \\ :verb)
+  def list(:db, key) do
     repo().many(Verb)
     |> Enum.reduce(%{}, fn t, acc ->
-      Map.merge(acc, %{t.verb => t})
+      Map.merge(acc, %{Map.get(t, key) => t})
     end)
   end
-  def list(:code), do: verbs()
+  def list(:code, _), do: verbs()
 
   def list_verbs_debug() do
     Enum.concat(list_verbs_db_vs_code(), list_verbs_code_vs_db())

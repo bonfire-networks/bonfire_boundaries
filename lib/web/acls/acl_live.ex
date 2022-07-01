@@ -17,8 +17,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
           grant.subject_id,
           %{subject: grant.subject |> repo().maybe_preload([:named, :profile, :character, stereotyped: [:named]])},
           fn existing_map ->
-            new_grant = [Map.drop(grant, [:subject])]
-            Map.update(existing_map, :grants, new_grant, fn existing_grants -> existing_grants ++ new_grant end)
+            new_grant = %{grant.verb_id => Map.drop(grant, [:subject])}
+            Map.update(existing_map, :grants, new_grant, fn existing_grants ->
+              Map.merge(existing_grants, new_grant)
+            end)
         end)
       end)
       # |> Map.new()
@@ -36,13 +38,23 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
       circles = Bonfire.Boundaries.Circles.list_my(current_user)
 
+      suggestions = (for user <- followed ++ followers do
+        {e(user, :edge, :object, :id, nil), e(user, :edge, :object, :profile, :name, "")<>" - "<>Bonfire.Me.Characters.display_username(e(user, :edge, :object, nil))}
+      end
+      ++
+      for circle <- circles do
+        {e(circle, :id, nil), (e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil) || l "Untitled")<>" "<> l "(circle)" }
+      end)
+      |> Map.new
+      |> debug
+
       {:ok, socket
       |> assign(assigns)
       |> assign(
+        verbs: Bonfire.Boundaries.Verbs.list(:db, :id),
         acl: acl,
         list: subjects,
-        users: followed ++ followers,
-        user_circles: circles,
+        suggestions: suggestions,
         read_only: e(acl, :stereotyped, :stereotype_id, nil) in ["7DAPE0P1E1PERM1TT0F0110WME", "4THEPE0P1ES1CH00SET0F0110W"],
         settings_section_title: "View " <> e(acl, :named, :name, "acl name") <> " boundary",
         settings_section_description: l "Create and manage your boundary."
@@ -52,9 +64,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   def handle_event("add", attrs, socket) do
     debug(attrs)
+    id = e(attrs, "add", nil)
     {:noreply, socket
     |> assign(
-      list: e(socket.assigns, :list, []) ++ [%{e(attrs, "to_circles", nil)=> nil}]
+      list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) |> debug
     )}
   end
 
