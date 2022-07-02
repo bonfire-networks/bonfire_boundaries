@@ -127,7 +127,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     grants
     |> Enum.filter(fn {_, grant} -> e(grant, :value, nil)==true end)
     |> Enum.map(fn {_, grant} -> e(grant, :verb, :verb, nil) || e(grant, :verb, nil) end)
-    |> maybe_join(l "Can")
+    # |> maybe_join(l "Can")
   end
 
   def cannot(grants) do
@@ -135,7 +135,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     # |> debug
     |> Enum.filter(fn {_, grant} -> is_map(grant) and Map.get(grant, :value, nil)==false end)
     |> Enum.map(fn {_, grant} -> e(grant, :verb, :verb, nil) || e(grant, :verb, nil) end)
-    |> maybe_join(l "Cannot")
+    # |> maybe_join(l "Cannot")
   end
 
   defp maybe_join(list, prefix) when is_list(list) and length(list)>0 do

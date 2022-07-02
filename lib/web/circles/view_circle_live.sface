@@ -84,8 +84,7 @@
                   {#for {id, member} <- @members}
 
                     <li id={"item-"<> id }
-                      class="flex items-center p-4"
-                      :class="{ 'bg-base-2000': dragging }">
+                      class="flex items-center p-4">
                       <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
                       <input type="hidden" name={"circle[encircle][#{id}][subject_id]"} value={e(member, :subject_id, "")}>
                       <div class="flex-1">

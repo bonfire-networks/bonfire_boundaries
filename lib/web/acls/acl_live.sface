@@ -72,13 +72,27 @@
                 <div 
                   x-data={"{active: #{Enum.count(e(l, :verb_grants, %{}))<1}}"}
                   role="region"
-                  :for={{id, l} <- e(@list, [])} class="p-4 mb-3">
+                  :for={{id, l} <- e(@list, [])} class="p-4 pb-2">
                   <div 
                     :class="!active ? '!border-b !rounded-b' : ''"
-                    class="flex items-center p-3 border border-b-0 rounded rounded-b-none border-base-content/30">
-                    <div class="flex items-center flex-1 space-x-2">
-                      <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} profile={e(l, :subject, :profile, nil)} />
-                      <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
+                    class="flex p-3 space-x-5 border border-b-0 rounded rounded-b-none items-top border-base-content/30">
+                    <div class="flex flex-col flex-1">
+                      <div class="flex items-center flex-1 space-x-2">
+                        <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} profile={e(l, :subject, :profile, nil)} />
+                        <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
+                      </div>
+                      <div class="flex flex-wrap gap-2 mt-2" x-show="!active">
+                        {#for verb <- can(e(l, :verb_grants, %{}))}
+                          <span class="badge badge-success">
+                            <Outline.CheckIcon class="w-4 h-4 mr-1" />
+                            {verb}</span>
+                        {/for}
+                         {#for verb <- cannot(e(l, :verb_grants, %{}))}
+                          <span class="badge badge-error">
+                            <Outline.XIcon class="w-4 h-4 mr-1" />
+                            {verb}</span>
+                        {/for}
+                      </div>
                     </div>
                     <button 
                       type="button"
@@ -91,12 +105,7 @@
                       <span x-show="!active" aria-hidden="true" class="ml-2">&plus;</span>
                     </button>
 
-                    <p x-show="!active">
-                      {can(e(l, :verb_grants, %{}))}
-                    </p>
-                    <p x-show="!active">
-                      {cannot(e(l, :verb_grants, %{}))}
-                    </p>
+                   
 
                   </div>
 
