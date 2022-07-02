@@ -65,14 +65,25 @@ defmodule Bonfire.Boundaries.Acls do
 
   # when the user picks a preset, this maps to a set of base acls
   defp base_acls(user, opts) do
+    preset = Boundaries.preset(opts)
+
     (
       Config.get!([:object_default_boundaries, :acls])
       ++
-      Boundaries.acls_from_preset_boundary_name(opts)
+      Boundaries.acls_from_preset_boundary_name(preset)
     )
-    |> debug("ACLs to set")
+    |> debug("preset ACLs to set")
     |> find_acls(user)
-    # |> dump
+    |> maybe_add_custom(preset)
+    |> debug("ACLs to set")
+  end
+
+  defp maybe_add_custom(acls, preset) do
+    if is_ulid?(preset) do
+      acls ++ [%{acl_id: preset}]
+    else
+      acls
+    end
   end
 
   defp custom_grants(changeset, opts) do
@@ -257,7 +268,7 @@ defmodule Bonfire.Boundaries.Acls do
   # end
 
   def built_in_ids do
-    ids = Config.get(:acls)
+    Config.get(:acls)
     |> Map.values()
     |> Enum.map(& &1.id)
   end
@@ -266,6 +277,18 @@ defmodule Bonfire.Boundaries.Acls do
     list_q(skip_boundary_check: true)
     |> where([acl], acl.id in ^built_in_ids)
     |> repo().many()
+  end
+
+  def built_in_for_dropdown do # TODO
+    filter = Config.get(:acls_to_present)
+    Config.get(:acls)
+    |> Enum.filter(fn {name, acl} -> name in filter end)
+    |> Enum.map(fn {name, acl} -> acl.id end)
+  end
+
+  def for_dropdown(opts) do
+    built_ins = built_in_for_dropdown()
+    list_my_with_counts(current_user(opts), opts ++ [extra_ids_to_include: built_ins, exclude_ids: @exclude_stereotypes ++ ["71MAYADM1N1STERMY0WNSTVFFS", "0H0STEDCANTSEE0RD0ANYTH1NG", "1S11ENCEDTHEMS0CAN0TP1NGME"]])
   end
 
   @doc """
@@ -293,8 +316,8 @@ defmodule Bonfire.Boundaries.Acls do
   @doc "query for `list_my`"
   def list_my_q(user, opts \\ []) do
     list_q(skip_boundary_check: true)
-    |> where([acl, caretaker: caretaker], caretaker.caretaker_id == ^ulid!(user) or (acl.id in ^e(opts, :extra_ids_to_include, []) and acl.id not in ^@exclude_stereotypes))
-    |> where([stereotyped: stereotyped], is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^@exclude_stereotypes)
+    |> where([acl, caretaker: caretaker], caretaker.caretaker_id == ^ulid!(user) or (acl.id in ^e(opts, :extra_ids_to_include, []) and acl.id not in ^e(opts, :exclude_ids, @exclude_stereotypes)))
+    |> where([stereotyped: stereotyped], is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^e(opts, :exclude_ids, @exclude_stereotypes))
   end
 
   def user_default_acl(name), do: user_default_acls()[name]

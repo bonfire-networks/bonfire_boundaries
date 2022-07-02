@@ -12,8 +12,17 @@ defmodule Bonfire.Boundaries do
   import Queries, only: [boundarise: 3]
   import Ecto.Query, only: [from: 2]
 
-  def acls_from_preset_boundary_name(opts) do
-    Config.get!(:preset_acls)[preset(opts)] || [] # empty means mentions-only
+  def acls_from_preset_boundary_name(preset) do
+    case preset do
+      preset when is_binary(preset) ->
+        acls = Config.get!(:preset_acls)[preset]
+        if acls do
+          acls
+        else
+          []
+        end
+      _ -> []
+    end
   end
 
   def preset_boundary_name_from_acl(acl) do

@@ -4,6 +4,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   import Ecto.Query
   import Where
   alias Bonfire.Common.Utils
+  alias Bonfire.Common.Config
   alias Bonfire.Common.Cache
   alias Bonfire.Data.AccessControl.Controlled
 
@@ -44,8 +45,10 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
   defp do_list_on_objects(_), do: %{}
 
-  defp list_on_objects_q(objects, filter_acls \\ [:guests_may_see_read, :locals_may_interact, :locals_may_reply]) do
-    filter_acls = filter_acls |> Enum.map(&Bonfire.Boundaries.Acls.get_id!/1)
+  defp list_on_objects_q(objects) do
+
+    filter_acls = Config.get(:public_acls_on_objects, [:guests_may_see_read, :locals_may_interact, :locals_may_reply])
+    |> Enum.map(&Bonfire.Boundaries.Acls.get_id!/1)
 
     from c in Controlled,
     left_join: acl in assoc(c, :acl),

@@ -37,20 +37,28 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_interact_incl_boost = verbs_interact_minus_boost ++ [:boost]
     verbs_interact_and_reply = verbs_interact_incl_boost ++ [:reply]
 
+    public_acls = [
+      :guests_may_see_read, :guests_may_read,
+      :remotes_may_interact, :remotes_may_reply,
+      :locals_may_read, :locals_may_interact, :locals_may_reply
+    ]
+
     config :bonfire,
       verbs: verbs,
       verbs_to_grant: [
         default: verbs_interact_and_reply,
         message: verbs_interact_minus_boost ++ [:reply]
       ],
+      acls_to_present: public_acls, # to show in smart input
+      public_acls_on_objects: public_acls ++ [:guests_may_see,], # what boundaries we can display to everyone when applied on objects
       preset_acls: %{
         "public"=>     [:guests_may_see_read, :locals_may_reply, :remotes_may_reply],
         "federated"=>  [:locals_may_reply],
         "local"=>      [:locals_may_reply]
       },
       preset_acls_all: %{
-        "public"=> [:guests_may_see, :guests_may_read, :guests_may_see_read, :remotes_may_reply],
-        "local"=> [:locals_may_interact, :locals_may_reply]
+        "public"=> [:guests_may_see, :guests_may_read, :guests_may_see_read, :remotes_may_interact, :remotes_may_reply],
+        "local"=>  [:locals_may_read, :locals_may_interact, :locals_may_reply]
       },
       create_verbs: [
         # block:  Bonfire.Data.Social.Block,
