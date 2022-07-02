@@ -2,7 +2,7 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
   use Bonfire.UI.Common.Web, :stateful_component
 
   def update(assigns, socket) do
-    circles = Bonfire.Boundaries.Circles.list_my(current_user(assigns)) #|> IO.inspect
+    circles = Bonfire.Boundaries.Circles.list_my_with_counts(current_user(assigns)) #|> IO.inspect
     debug(circles, "Circles")
 
     {:ok, assign(socket,

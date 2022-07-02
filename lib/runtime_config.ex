@@ -29,20 +29,29 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       request: %{id: "1NEEDPERM1SS10NT0D0TH1SN0W", verb: "Request"}, # request to do another verb (eg. request to follow)
     }
 
-    verbs_eyes_only = [:read, :see, :mention, :tag, :like, :follow, :request]
-    verbs_interact = verbs_eyes_only ++ [:boost]
-    verbs_interact_and_reply = verbs_interact ++ [:reply]
-    verbs_eyes_only_reply = verbs_eyes_only ++ [:reply]
-
     all_verb_names = Enum.map(verbs, &elem(&1, 0))
     # |> IO.inspect()
     verbs_negative = fn verbs -> Enum.reduce(verbs, %{}, &Map.put(&2, &1, false)) end
 
+    verbs_interact_minus_boost = [:read, :see, :mention, :tag, :like, :follow, :request]
+    verbs_interact_incl_boost = verbs_interact_minus_boost ++ [:boost]
+    verbs_interact_and_reply = verbs_interact_incl_boost ++ [:reply]
+
     config :bonfire,
       verbs: verbs,
-      verbs_interact: verbs_interact,
-      verbs_interact_and_reply: verbs_interact_and_reply,
-      verbs_eyes_only_reply: verbs_eyes_only_reply,
+      verbs_to_grant: [
+        default: verbs_interact_and_reply,
+        message: verbs_interact_minus_boost ++ [:reply]
+      ],
+      preset_acls: %{
+        "public"=>     [:guests_may_see_read, :locals_may_reply, :remotes_may_reply],
+        "federated"=>  [:locals_may_reply],
+        "local"=>      [:locals_may_reply]
+      },
+      preset_acls_all: %{
+        "public"=> [:guests_may_see, :guests_may_read, :guests_may_see_read, :remotes_may_reply],
+        "local"=> [:locals_may_interact, :locals_may_reply]
+      },
       create_verbs: [
         # block:  Bonfire.Data.Social.Block,
         boost:  Bonfire.Data.Social.Boost,
@@ -77,6 +86,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         guests_may_see_read: %{id: "7W1DE1YAVA11AB1ET0SEENREAD", name: "Publicly discoverable and readable"},
         guests_may_see:      %{id: "50VCANF1NDMEBVTCAN0T0PENME", name: "Publicly discoverable, but contents may be hidden"},
         guests_may_read:     %{id: "50VCANREAD1FY0VHAVETHE11NK", name: "Publicly readable, but not necessarily discoverable"},
+
+        remotes_may_interact:  %{id: "5REM0TEPE0P1E1NTERACTREACT", name: "Remote users may read and interact"},
+        remotes_may_reply:     %{id: "5REM0TEPE0P1E1NTERACTREP1Y", name: "Remote users may read, interact and reply"},
+
         locals_may_read:     %{id: "10CA1SMAYSEEANDREAD0N1YN0W", name: "Visible to local users"},
         locals_may_interact: %{id: "710CA1SMY1NTERACTN0TREP1YY", name: "Local users may read and interact"},
         locals_may_reply:    %{id: "710CA1SMY1NTERACTANDREP1YY", name: "Local users may read, interact and reply"},
@@ -89,12 +102,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         i_may_administer:      %{id: "71MAYADM1N1STERMY0WNSTVFFS", name: "I may administer"},
 
         ## ACLs that confer permissions for people i mention (or reply to, which causes a mention)
+        # TODO: these aren't used right now
         mentions_may_read:     %{id: "7MENT10NSCANREADTH1STH1NGS", name: "Mentions may read"},
         mentions_may_interact: %{id: "7MENT10NSCAN1NTERACTW1TH1T", name: "Mentions may read and interact"},
         mentions_may_reply:    %{id: "7MENT10NSCANEVENREP1YT01TS", name: "Mentions may read, interact and reply"},
 
         ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
-        # TODO: are we going to use these for instance-wide blocks?
         nobody_can_anything:  %{id: "0H0STEDCANTSEE0RD0ANYTH1NG", name: "People I ghosted cannot see"},
         nobody_can_reach:     %{id: "1S11ENCEDTHEMS0CAN0TP1NGME", name: "People I silenced aren't discoverable by me"},
         nobody_can_see:       %{id: "2HEYS11ENCEDMES0CAN0TSEEME", name: "People who silenced me cannot discover me"},
@@ -107,16 +120,19 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       ### * The inner values declare the verbs the user is permitted to see. Either a map of verb to boolean or a list
       ###   (where values are assumed to be true).
       grants: %{
-        ### Public ACLs need their permissions filling out
+        ### Public ACLs need their permissions filled out
         guests_may_see_read:  %{guest: [:read, :see, :request]},
         guests_may_see:       %{guest: [:see, :request]},
         guests_may_read:      %{guest: [:read, :request]},
-        locals_may_interact:  %{local: verbs_interact}, # interact but not reply
+        remotes_may_interact: %{activity_pub: verbs_interact_incl_boost}, # interact but not reply
+        remotes_may_reply:    %{activity_pub: verbs_interact_and_reply}, # interact and reply
+        locals_may_read:      %{local: [:read, :see, :request]},
+        locals_may_interact:  %{local: verbs_interact_incl_boost}, # interact but not reply
         locals_may_reply:     %{local: verbs_interact_and_reply}, # interact and reply
-        # TODO: are we doing this because of instance-wide blocking?
-        nobody_can_anything: %{ghost_them:   verbs_negative.(all_verb_names)},
-        nobody_can_reach:    %{silence_them: verbs_negative.([:mention, :message, :reply])},
-        nobody_can_see:      %{silence_me: verbs_negative.([:see])},
+        # negative grants:
+        nobody_can_anything:  %{ghost_them:   verbs_negative.(all_verb_names)},
+        nobody_can_reach:     %{silence_them: verbs_negative.([:mention, :message, :reply])},
+        nobody_can_see:       %{silence_me: verbs_negative.([:see])},
       }
     # end of global boundaries
 
@@ -133,7 +149,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       user_default_boundaries: %{
         circles: %{
           followers:    %{stereotype: :followers},        # users who have followed you
-          followed:    %{stereotype: :followed}, # users who you have followed
+          followed:     %{stereotype: :followed},         # users who you have followed
           ghost_them:   %{stereotype: :ghost_them},       # users/instances you have ghosted
           silence_them: %{stereotype: :silence_them},     # users/instances you have silenced
           silence_me:   %{stereotype: :silence_me},       # users who have silenced me
@@ -176,13 +192,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         },
       }
 
-    ### Finally, we have a list of default acls to apply to newly created objects, which makes it possible for the user to
-    ### administer their own stuff and enables ghosting and silencing to work.
+    ### Finally, we have a list of default acls to apply to newly created objects, which makes it possible for the user to administer their own stuff and enables ghosting and silencing to work.
     config :bonfire,
       object_default_boundaries: %{
         acls: [
-          :i_may_administer,                                           # positive permissions
-        ] ++ negative_grants
+          :i_may_administer, # positive permissions
+        ] ++ negative_grants # negative
       }
 
   end

@@ -8,73 +8,32 @@
           <Solid.LockClosedIcon class="w-6 h-6 text-base-content/80" />
           <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</div>
         </div>
-        <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p>
+        <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
     </div>
   </div>
 
    <div
-        x-data="{
-            adding: false,
-            removing: false,
-            selectedId: null,
-            init() {
-                // Set the first available tab on the page on page load.
-                this.$nextTick(() => this.select(this.$id('tab', 1)))
-            },
-            select(id) {
-                this.selectedId = id
-            },
-            isSelected(id) {
-                return this.selectedId === id
-            },
-            whichChild(el, parent) {
-                return Array.from(parent.children).indexOf(el) + 1
-            }
-        }"
-        x-id="['tab']"
         class="">
           <!-- Tab List -->
           <ul
-            x-ref="tablist"
-            @keydown.right.prevent.stop="$focus.wrap().next()"
-            @keydown.home.prevent.stop="$focus.first()"
-            @keydown.page-up.prevent.stop="$focus.first()"
-            @keydown.left.prevent.stop="$focus.wrap().prev()"
-            @keydown.end.prevent.stop="$focus.last()"
-            @keydown.page-down.prevent.stop="$focus.last()"
             role="tablist"
             class="flex items-stretch -mb-px border-b bg-base-content/10 border-base-content/30"
           >
               <!-- Tab -->
             <li>
-              <button
-                :id="$id('tab', whichChild($el.parentElement, $refs.tablist))"
-                @click="select($el.id)"
-                @mousedown.prevent
-                @focus="select($el.id)"
-                type="button"
-                :tabindex="isSelected($el.id) ? 0 : -1"
-                :aria-selected="isSelected($el.id)"
-                :class="isSelected($el.id) ? 'border-primary border-b-2' : 'border-0'"
-                class="inline-flex px-5 py-2.5 "
+              <LivePatch
+                to={"/settings/acl/#{ulid(@acl)}/permissions"}
+                class="inline-flex px-5 py-2.5"
                 role="tab">
-                {l "Members"}
-              </button>
+                {l "Permissions"}
+              </LivePatch>
             </li>
 
-
             <li>
-              <button
-                :id="$id('tab', whichChild($el.parentElement, $refs.tablist))"
-                @click="select($el.id)"
-                @mousedown.prevent
-                @focus="select($el.id)"
-                type="button"
-                :tabindex="isSelected($el.id) ? 0 : -1"
-                :aria-selected="isSelected($el.id)"
-                :class="isSelected($el.id) ? 'border-primary border-b-2' : 'border-0'"
+              <LivePatch
+                to={"/settings/acl/#{ulid(@acl)}/settings"}
                 class="inline-flex px-5 py-2.5"
-                role="tab">{l "Settings"}</button>
+                role="tab">{l "Settings"}</LivePatch>
             </li>
           </ul>
 
@@ -82,12 +41,12 @@
           <div role="tabpanels" class="">
             <!-- Panel -->
             <section
-              x-show="isSelected($id('tab', whichChild($el, $el.parentElement)))"
-              :aria-labelledby="$id('tab', whichChild($el, $el.parentElement))"
+              :if={@section=="permissions"}
               role="tabpanel"
               class=""
-              >   
-              <div class="m-4">
+              > 
+
+              <div :if={!@read_only} class="m-4">
                 <div class="flex items-center rounded-lg">
                   <form 
                     class="flex-1"
@@ -111,7 +70,7 @@
 
               <div class="w-full overflow-x-auto">
                 <div 
-                  x-data="{active: false}"
+                  x-data={"{active: #{Enum.count(e(l, :verb_grants, %{}))<1}}"}
                   role="region"
                   :for={{id, l} <- e(@list, [])} class="p-4 mb-3">
                   <div 
@@ -126,38 +85,80 @@
                       x-on:click="active = ! active"
                       :aria-expanded="active"
                       class="normal-case btn btn-outline btn-sm">
-                      <span x-show="!active">{l "View permissions"}</span>
-                      <span x-show="active">{l "Hide permissions"}</span>
+                      <span x-show="!active">{l "Edit permissions"}</span>
+                      <span x-show="active">{l "Hide details"}</span>
                       <span x-show="active" aria-hidden="true" class="ml-2">&minus;</span>
                       <span x-show="!active" aria-hidden="true" class="ml-2">&plus;</span>
                     </button>
+
+                    <p x-show="!active">
+                      {can(e(l, :verb_grants, %{}))}
+                    </p>
+                    <p x-show="!active">
+                      {cannot(e(l, :verb_grants, %{}))}
+                    </p>
+
                   </div>
+
+
                   <div 
-                    x-show="active" x-collapse
+                    x-show="active" 
+                    x-collapse
                     class="border divide-y rounded rounded-t-none border-base-content/30 divide-base-content/30">
-                    <div :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :grants, %{})) |> debug} class="flex items-center p-3 space-x-3 ">
+                    <div :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :verb_grants, %{}))} class="flex items-center p-3 space-x-3 ">
                       <div class="flex-1 text-base font-semibold">
                         {e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}
                       </div>
                       <div class="flex items-center space-x-3 switch-toggle">
+                      <form :on-change="edit_grant">
 
                         <label>
-                          <input class="absolute opacity-0" name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==true} />
-                          <span class="btn btn-outline btn-square btn-primary">👍</span>
+                          <input 
+                          class="absolute opacity-0" 
+                          name={"subject[#{id}][#{verb_id}]"} 
+                          type="radio" 
+                          value="1"
+                          checked={Map.get(grant, :value, nil)==true} 
+                          disabled={@read_only} />
+                          <span 
+                            class={"btn btn-sm btn-circle btn-ghost",
+                            "btn-disabled": @read_only}>
+                            👍
+                          </span>
                         </label>
 
                         <label>
-                          <input class="absolute opacity-0" name={e(id, "")<>e(verb_id, "")} type="radio" checked={is_nil(Map.get(grant, :value, nil))} />
-                          <span class="btn btn-outline btn-square btn-primary">🤔</span>
+                          <input 
+                          class="absolute opacity-0" 
+                          name={"subject[#{id}][#{verb_id}]"} 
+                          type="radio" 
+                          value=""
+                          checked={is_nil(Map.get(grant, :value, nil))} 
+                          disabled={@read_only} />
+                          <span 
+                            class={"btn btn-sm btn-circle btn-ghost",
+                            "btn-disabled": @read_only}>
+                            🤔
+                          </span>
                         </label>
                         
                         <label>
-                          <input class="absolute opacity-0" name={e(id, "")<>e(verb_id, "")} type="radio" checked={Map.get(grant, :value, nil)==false} />
-                          <span class="btn btn-outline btn-square btn-primary">👎</span>
+                          <input 
+                          class="absolute opacity-0" 
+                          name={"subject[#{id}][#{verb_id}]"} 
+                          type="radio" 
+                          value="0"
+                          checked={Map.get(grant, :value, nil)==false} 
+                          disabled={@read_only} />
+                          <span 
+                            class={"btn btn-sm btn-circle btn-ghost",
+                            "btn-disabled": @read_only}>
+                            👎
+                          </span>
                         </label>
 
+                      </form>
                       </div>
-
                     </div>
                   </div>
                 </div>
@@ -165,8 +166,7 @@
             </section>
 
             <section
-             x-show="isSelected($id('tab', whichChild($el, $el.parentElement)))"
-              :aria-labelledby="$id('tab', whichChild($el, $el.parentElement))"
+              :if={@section=="settings"}
               role="tabpanel"
               class="p-4"
             >
@@ -176,22 +176,13 @@
           </div>
       </div>
 
-  <div class="mt-8">
-
-
-    
-
-
-
 
 <style>
-
 .switch-toggle input:checked ~ span {
   border: 2px solid orange;
 }
 </style>
 
 
-  </div>
 </div>
 

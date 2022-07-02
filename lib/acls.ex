@@ -14,7 +14,7 @@ defmodule Bonfire.Boundaries.Acls do
   # alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Identity.Caretaker
   alias Bonfire.Boundaries.Stereotyped
-  alias Bonfire.Data.AccessControl.{Acl, Grant}
+  alias Bonfire.Data.AccessControl.{Acl, Controlled, Grant}
   # alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Acls
@@ -50,7 +50,7 @@ defmodule Bonfire.Boundaries.Acls do
         acl_id = ULID.generate()
         controlled = [%{acl_id: acl_id} | base]
         grants =
-          (e(opts, :verbs_to_grant, nil) || Config.get(:verbs_interact_and_reply)) |> debug("verbs_to_grant")
+          (e(opts, :verbs_to_grant, nil) || Config.get!([:verbs_to_grant, :default])) |> debug("verbs_to_grant")
           |> Enum.flat_map(grants, &grant_to(ulid(&1), acl_id, ...))
 
         changeset
@@ -68,12 +68,7 @@ defmodule Bonfire.Boundaries.Acls do
     (
       Config.get!([:object_default_boundaries, :acls])
       ++
-      case Boundaries.preset(opts) |> debug("preset") do
-        "public"    -> [:guests_may_see_read, :locals_may_reply]
-        "federated" -> [:locals_may_reply]
-        "local"     -> [:locals_may_reply]
-        _           -> []
-      end
+      Boundaries.acls_from_preset_boundary_name(opts)
     )
     |> debug("ACLs to set")
     |> find_acls(user)
@@ -227,21 +222,50 @@ defmodule Bonfire.Boundaries.Acls do
   def get_q(id, caretaker, opts \\ []) do
     list_q(opts ++ [skip_boundary_check: true])
     # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
-    |> where([acl, caretaker: caretaker], acl.id == ^ulid!(id) and caretaker.caretaker_id == ^ulid!(caretaker))
+    |> maybe_for_caretaker(id, caretaker)
+  end
+
+  defp maybe_for_caretaker(query, id, caretaker) do
+    if id in built_in_ids do
+      query
+      |> where([acl], acl.id == ^ulid!(id))
+    else
+      query
+      # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
+      |> where([acl, caretaker: caretaker], acl.id == ^ulid!(id) and caretaker.caretaker_id == ^ulid!(caretaker))
+    end
   end
 
   @doc """
   Lists ACLs we are permitted to see.
   """
-  def list(opts) do
+  def list(opts \\ []) do
     list_q(opts)
     |> repo().many()
   end
 
-  def list_q(opts) do
+  def list_q(opts \\ []) do
     from(acl in Acl, as: :acl)
     |> boundarise(acl.id, opts)
     |> proload([:caretaker, :named, stereotyped: {"stereotype_", [:named]}])
+  end
+
+  # def list_all do
+  #   from(u in Acl, as: :acl)
+  #   |> proload([:named, :controlled, :stereotyped, :caretaker])
+  #   |> repo().many()
+  # end
+
+  def built_in_ids do
+    ids = Config.get(:acls)
+    |> Map.values()
+    |> Enum.map(& &1.id)
+  end
+
+  def list_built_ins do
+    list_q(skip_boundary_check: true)
+    |> where([acl], acl.id in ^built_in_ids)
+    |> repo().many()
   end
 
   @doc """
@@ -249,12 +273,27 @@ defmodule Bonfire.Boundaries.Acls do
   permitted to see. If any are created without permitting the
   user to see them, they will not be shown.
   """
-  def list_my(user), do: repo().many(list_my_q(user))
+  def list_my(user, opts \\ []), do: repo().many(list_my_q(user, opts))
+
+  def list_my_with_counts(user, opts \\ []) do
+    list_my_q(user, opts)
+    |> join(:left, [acl], grants in subquery(from g in Grant,
+      group_by: g.acl_id,
+      select: %{acl_id: g.acl_id, count: count()}
+    ), on: grants.acl_id == acl.id, as: :grants)
+    |> join(:left, [acl], controlled in subquery(from c in Controlled,
+      group_by: c.acl_id,
+      select: %{acl_id: c.acl_id, count: count()}
+    ), on: controlled.acl_id == acl.id, as: :controlled)
+    |> select_merge([grants: grants, controlled: controlled], %{grants_count: grants.count, controlled_count: controlled.count})
+    |> order_by([grants: grants, controlled: controlled], desc_nulls_last: controlled.count, desc_nulls_last: grants.count)
+    |> repo().many()
+  end
 
   @doc "query for `list_my`"
-  def list_my_q(user) do
+  def list_my_q(user, opts \\ []) do
     list_q(skip_boundary_check: true)
-    |> where([caretaker: caretaker], caretaker.caretaker_id == ^ulid!(user))
+    |> where([acl, caretaker: caretaker], caretaker.caretaker_id == ^ulid!(user) or (acl.id in ^e(opts, :extra_ids_to_include, []) and acl.id not in ^@exclude_stereotypes))
     |> where([stereotyped: stereotyped], is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^@exclude_stereotypes)
   end
 
@@ -264,12 +303,6 @@ defmodule Bonfire.Boundaries.Acls do
     Boundaries.user_default_boundaries()
     |> Map.fetch!(:acls)
     # |> dump
-  end
-
-  def list do
-    from(u in Acl, as: :acl)
-    |> proload([:named, :controlled, :stereotyped, :caretaker])
-    |> repo().many()
   end
 
   def find_caretaker_stereotypes(caretaker, stereotypes) do

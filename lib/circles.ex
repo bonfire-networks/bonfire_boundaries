@@ -153,6 +153,17 @@ defmodule Bonfire.Boundaries.Circles do
   """
   def list_my(user, opts \\ []), do: repo().many(list_my_q(user, opts ++ @default_q_opts))
 
+  def list_my_with_counts(user, opts \\ []) do
+    list_my_q(user, opts ++ @default_q_opts)
+    |> join(:left, [circle], encircles in subquery(from ec in Encircle,
+      group_by: ec.circle_id,
+      select: %{circle_id: ec.circle_id, count: count()}
+    ), on: encircles.circle_id == circle.id, as: :encircles)
+    |> select_merge([encircles: encircles], %{encircles_count: encircles.count})
+    |> order_by([encircles: encircles], desc_nulls_last: encircles.count)
+    |> repo().many()
+  end
+
   @doc "query for `list_my`"
   def list_my_q(user, opts \\ []) when not is_nil(user) do
     user
@@ -203,9 +214,9 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   def add_to_circles(subject, circles) when is_list(circles) do
-    Enum.map(circles, &add_to_circle(subject, &1))
+    Enum.map(circles, &add_to_circles(subject, &1)) # TODO: optimise
   end
-  def add_to_circle(subject, circle) when not is_nil(circle) do
+  def add_to_circles(subject, circle) when not is_nil(circle) do
     repo().insert(Encircle.changeset(%{circle_id: ulid(circle), subject_id: ulid(subject)}))
   end
 

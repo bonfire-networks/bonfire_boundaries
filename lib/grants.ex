@@ -19,6 +19,17 @@ defmodule Bonfire.Boundaries.Grants do
 
   def grants, do: Bonfire.Common.Config.get([:grants])
 
+    ## invariants:
+
+  ## * All a user's GRANTs will have the user as an administrator but it
+  ##   will be hidden from the user
+
+  def create(attrs, opts) do
+    changeset(:create, attrs, opts)
+    |> repo().insert()
+    # |> debug("Me.Grants - granted")
+  end
+
   def create(%{}=attrs) when not is_struct(attrs) do
     repo().insert(changeset(attrs))
   end
@@ -28,12 +39,36 @@ defmodule Bonfire.Boundaries.Grants do
     |> Changeset.cast_assoc(:caretaker)
   end
 
+  def changeset(:create, attrs, opts) do
+    changeset(:create, attrs, opts, Keyword.fetch!(opts, :current_user))
+  end
+
+  defp changeset(:create, attrs, _opts, :system), do: changeset(attrs)
+  defp changeset(:create, attrs, _opts, %{id: id}) do
+    Changeset.cast(%Grant{}, %{caretaker: %{caretaker_id: id}}, [])
+    |> changeset(attrs)
+  end
+
+  def upsert_or_delete(%{acl_id: acl_id, subject_id: subject_id, verb_id: verb_id, value: nil}=attrs, opts) do
+    repo().get_by(Grant, acl_id: acl_id, subject_id: subject_id, verb_id: verb_id)
+    # |> debug
+    |> repo().delete()
+  end
+
+  def upsert_or_delete(%{}=attrs, opts) do
+    repo().upsert(
+      changeset(attrs),
+      attrs,
+      [:acl_id, :subject_id, :verb_id]
+    )
+  end
+
   @doc """
   Grant takes three parameters:
   - subject_id:  who we are granting access to
-  - acl_id: what (list of) things we are granting access to
+  - acl_id: what ACL we're applying a grant to
+  - verb: which verb/action
   - value: true, false, or nil
-  - verb_id: which verb/action
   """
   def grant(subject_id, acl_id, verb, value, opts \\ [])
 
@@ -46,11 +81,22 @@ defmodule Bonfire.Boundaries.Grants do
     grant(subject_id, acl_id, Config.get(:verbs)[verb][:id], value, opts)
   end
 
-  def grant(subject_id, acl_id, verb_id, value, opts) when is_binary(subject_id) and is_binary(acl_id) and is_binary(verb_id) do
-    create(
+  def grant(subject_id, acl, verb_id, value, opts) when is_binary(subject_id) and is_binary(verb_id) do
+    value = case value do
+      1 -> true
+      "1" -> true
+      true -> true
+      0 -> false
+      "0" -> false
+      false -> false
+      _ -> nil
+    end
+    |> debug("value")
+
+    upsert_or_delete(
       %{
         subject_id: subject_id,
-        acl_id:     acl_id,
+        acl_id:     ulid!(acl),
         verb_id:  verb_id,
         value: value
       },
@@ -62,29 +108,11 @@ defmodule Bonfire.Boundaries.Grants do
     subject_id |> Circles.circle_ids() |> grant(acl_id, access, value, opts)
   end
 
-  def grant(_, _, _, _, _), do: nil
-
-
-  ## invariants:
-
-  ## * All a user's GRANTs will have the user as an administrator but it
-  ##   will be hidden from the user
-
-  def create(attrs, opts) do
-    changeset(:create, attrs, opts)
-    |> repo().insert()
-    # |> debug("Me.Grants - granted")
+  def grant(_, _, _, _, _) do
+    error("No function matched")
+    nil
   end
 
-  def changeset(:create, attrs, opts) do
-    changeset(:create, attrs, opts, Keyword.fetch!(opts, :current_user))
-  end
-
-  defp changeset(:create, attrs, _opts, :system), do: Grants.changeset(attrs)
-  defp changeset(:create, attrs, _opts, %{id: id}) do
-    Changeset.cast(%Grant{}, %{caretaker: %{caretaker_id: id}}, [])
-    |> Grants.changeset(attrs)
-  end
 
   @doc """
   Lists the grants permitted to see.

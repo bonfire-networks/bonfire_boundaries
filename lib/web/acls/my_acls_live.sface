@@ -1,16 +1,16 @@
 <div class="p-4">
   <div class="py-3">
     <form class="flex items-center" phx-submit="Bonfire.Boundaries:acl_create">
-      <input class="flex-1 mr-2" type="text" name="name" placeholder="Boundary name"/>
-      <button type="submit" class="inline-flex items-center btn btn-primary w-max"><svg class="w-5 h-5 mr-2 text-base-content opacity-60" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z"></path></svg>Create a new boundary</button>
+      <input class="flex-1 mr-4 input input-bordered" type="text" name="name" placeholder="Boundary name"/>
+      <button type="submit" class="normal-case btn btn-primary">Create a new boundary</button>
     </form>
   </div>
 
   <div class="mt-6">
 
-    <h2 class="mt-4 text-xs font-medium tracking-wide uppercase text-base-content opacity-60">Your acls</h2>
+    <h2 class="mt-4 text-xs font-medium tracking-wide uppercase text-base-content opacity-60">My boundaries</h2>
     <ul class="mt-3">
-      {#for acl <- e(assigns, :acls, []) }
+      {#for acl <- e(assigns, :acls, []) ++ e(assigns, :built_ins, [])  }
 
        <li class="flex items-center justify-between flex-1 p-3 mb-3 border rounded hover:bg-base-content/5 border-base-content/30">
           <LiveRedirect class="flex-1 w-full" to={"/settings/acl/"<>acl.id}>
@@ -18,11 +18,16 @@
             <div class="flex items-center space-x-2">
               <div class="text-base font-semibold">{ e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled" }</div>
             </div>
-            <div class="text-sm text-base-content/80">{l "This is a sample description to help remember what this circle is about."}</div>
+            <div class="text-sm text-base-content/80">
+              {if e(acl, :grants_count, nil), do: "#{e(acl, :grants_count, 0)} permissions"} 
+              {if e(acl, :controlled_count, nil), do: "#{e(acl, :controlled_count, 0)} uses"} 
+            </div>
+            <div class="text-sm text-base-content/80">
+              <!-- {if e(acl, :stereotyped, :id, nil) || acl.id in @built_in_ids, do: l "Preset", else: l "This is a sample description to help remember what this circle is about."} -->
+            </div>
           </div>
          </LiveRedirect>
         </li>
-
         
       {/for}
     </ul>

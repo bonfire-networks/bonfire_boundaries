@@ -12,15 +12,17 @@ defmodule Bonfire.Boundaries do
   import Queries, only: [boundarise: 3]
   import Ecto.Query, only: [from: 2]
 
-  # @visibility_verbs [:see, :read]
-  @public_acls [:guests_may_see, :guests_may_read, :guests_may_see_read]
-  @local_acls [:locals_may_interact, :locals_may_reply]
+  def acls_from_preset_boundary_name(opts) do
+    Config.get!(:preset_acls)[preset(opts)] || [] # empty means mentions-only
+  end
 
   def preset_boundary_name_from_acl(acl) do
-    public_acl_ids = @public_acls
+    preset_acls = Config.get!(:preset_acls_all)
+
+    public_acl_ids = preset_acls["public"]
     |> Enum.map(&Acls.get_id!/1)
 
-    local_acl_ids = @local_acls
+    local_acl_ids = preset_acls["local"]
     |> Enum.map(&Acls.get_id!/1)
 
     acl = ulid(acl)
