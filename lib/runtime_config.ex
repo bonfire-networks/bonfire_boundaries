@@ -27,6 +27,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       tag:     %{id: "4ATEG0R1S1NGNGR0VP1NGSTVFF", verb: "Tag"},     # tag a user or object in an object.
       message: %{id: "40NTACTW1THAPR1VATEMESSAGE", verb: "Message"}, # send a direct message to the user.
       request: %{id: "1NEEDPERM1SS10NT0D0TH1SN0W", verb: "Request"}, # request to do another verb (eg. request to follow)
+      # verbs to maybe add: https://github.com/bonfire-networks/bonfire-app/issues/406
     }
 
     all_verb_names = Enum.map(verbs, &elem(&1, 0))
