@@ -88,7 +88,7 @@
                       <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
                       <input type="hidden" name={"circle[encircle][#{id}][subject_id]"} value={e(member, :subject_id, "")}>
                       <div class="flex-1">
-                        <Bonfire.UI.Me.ProfileItemLive show_controls={[]} profile={e(member, :subject, :profile, nil) || e(member, :profile, nil)} character={e(member, :subject, :character, nil) || e(member, :character, nil)} />
+                        <Bonfire.UI.Common.ProfileItemLive show_controls={[]} profile={e(member, :subject, :profile, nil) || e(member, :profile, nil)} character={e(member, :subject, :character, nil) || e(member, :character, nil)} />
                       </div>
                       <div :if={!@read_only} class="flex">
                         <button
@@ -139,7 +139,7 @@
                         {#for {id, suggested} <- @suggestions }
                           <li id={"item-"<> id } class="flex p-4">
                             <div class="flex-1">
-                              <Bonfire.UI.Me.ProfileItemLive show_controls={[]} profile={e(suggested, :profile, nil)} character={e(suggested, :character, nil)} />
+                              <Bonfire.UI.Common.ProfileItemLive show_controls={[]} profile={e(suggested, :profile, nil)} character={e(suggested, :character, nil)} />
                             </div>
                           
                             <div :if={!@read_only} class="flex mr-1">

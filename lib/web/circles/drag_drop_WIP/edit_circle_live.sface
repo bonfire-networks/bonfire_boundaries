@@ -61,7 +61,7 @@
                 <input type="hidden" name={"circle[encircle][#{member.id}][circle_id]"} value={e(@circle, :id, "")}>
                 <input type="hidden" name={"circle[encircle][#{member.id}][subject_id]"} value={e(member, :subject_id, "")}>
                 <div class="flex-1">
-                  <Bonfire.UI.Me.ProfileItemLive show_controls={[]} profile={e(member, :subject, :profile, nil)} character={e(member, :subject, :character, nil)} />
+                  <Bonfire.UI.Common.ProfileItemLive show_controls={[]} profile={e(member, :subject, :profile, nil)} character={e(member, :subject, :character, nil)} />
                 </div>
                 <div :if={!@read_only} class="flex mr-1">
                   <span
@@ -123,7 +123,7 @@
                 <input type="hidden" name={"circle[encircle][#{suggested.id}][circle_id]"} value={e(@circle, :id, "")}>
                 <input type="hidden" name={"circle[encircle][#{suggested.id}][subject_id]"} value={e(suggested, :edge, :object, :id, "")}>
                 <div class="flex-1">
-                  <Bonfire.UI.Me.ProfileItemLive show_controls={[]} profile={e(suggested, :edge, :object, :profile, nil)} character={e(suggested, :edge, :object, :character, nil)} />
+                  <Bonfire.UI.Common.ProfileItemLive show_controls={[]} profile={e(suggested, :edge, :object, :profile, nil)} character={e(suggested, :edge, :object, :character, nil)} />
                 </div>
               
                 <div :if={!@read_only} class="flex mr-1">
@@ -160,7 +160,7 @@
                 <input type="hidden" name={"circle[encircle][#{suggested.id}][circle_id]"} value={e(@circle, :id, "")}>
                 <input type="hidden" name={"circle[encircle][#{suggested.id}][subject_id]"} value={e(suggested, :edge, :subject, :id, "")}>
                 <div class="flex-1">
-                  <Bonfire.UI.Me.ProfileItemLive show_controls={[]} profile={e(suggested, :edge, :subject, :profile, nil)} character={e(suggested, :edge, :subject, :character, nil)} />
+                  <Bonfire.UI.Common.ProfileItemLive show_controls={[]} profile={e(suggested, :edge, :subject, :profile, nil)} character={e(suggested, :edge, :subject, :character, nil)} />
                 </div>
                 
                 <div :if={!@read_only} class="flex mr-1">
