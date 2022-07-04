@@ -78,7 +78,7 @@
                     class="flex p-3 space-x-5 border border-b-0 rounded rounded-b-none items-top border-base-content/30">
                     <div class="flex flex-col flex-1">
                       <div class="flex items-center flex-1 space-x-2">
-                        <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} profile={e(l, :subject, :profile, nil)} />
+                        <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} user={e(l, :subject, nil)} />
                         <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
                       </div>
                       <div class="flex flex-wrap gap-2 mt-2" x-show="!active">
