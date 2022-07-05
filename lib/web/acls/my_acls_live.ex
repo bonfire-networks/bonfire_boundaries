@@ -1,10 +1,12 @@
 defmodule Bonfire.Boundaries.Web.MyAclsLive do
   use Bonfire.UI.Common.Web, :stateful_component
-  import Bonfire.Boundaries.Integration
+  alias Bonfire.Boundaries.Web.AclLive
+  # import Bonfire.Boundaries.Integration
+
   def update(assigns, socket) do
     built_in_ids = Bonfire.Boundaries.Acls.built_in_ids
     # extra_ids_to_include = if is_admin?(current_user(assigns)), do: built_in_ids, else: []
-    acls = Bonfire.Boundaries.Acls.list_my_with_counts(current_user(assigns), extra_ids_to_include: built_in_ids) #|> IO.inspect
+    acls = Bonfire.Boundaries.Acls.list_my_with_counts(current_user(assigns), extra_ids_to_include: built_in_ids) |> repo().maybe_preload(grants: [:verb, subject: [:named, :profile, encircle_subjects: [:profile], stereotyped: [:named]]])
     debug(acls, "Acls")
 
     # acls |> Ecto.assoc(:grants) |> repo().aggregate(:count, :id)

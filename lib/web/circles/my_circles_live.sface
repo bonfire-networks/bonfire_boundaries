@@ -22,7 +22,13 @@
               <Solid.UserGroupIcon class="w-5 h-5 text-base-content/80" />
               <div class="text-base font-semibold">{ e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil) || l "Untitled" }</div>
             </div>
-            <div class="text-sm text-base-content/80">{e(circle, :encircles_count, 0)} members</div>
+
+          <Bonfire.Boundaries.Web.CirclePreviewLive
+            members={e(circle, :encircles, [])}
+            count={e(circle, :encircles_count, 0)}
+          />
+
+            <!-- <div class="text-sm text-base-content/80">{e(circle, :encircles_count, 0)} members</div> -->
             <!-- <div class="text-sm text-base-content/80">{l "This is a sample description to help remember what this circle is about."}</div> -->
           </div>
             <!-- <div class="flex-shrink-0 pr-2">

@@ -25,24 +25,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
       verbs = Bonfire.Boundaries.Verbs.list(:db, :id)
 
-      # TODO: rewrite this whole thing tbh
-      list = Enum.reduce(e(acl, :grants, []), %{}, fn grant, subjects_acc ->
-        new_grant = %{grant.verb_id => Map.drop(grant, [:subject])}
-        new_subject = %{subject: grant.subject, verb_grants: new_grant}
-        Map.update(subjects_acc,
-          grant.subject_id, # key
-          new_subject, # first entry
-          fn existing_subject ->
-            Map.update(existing_subject,
-            :verb_grants, # key
-            new_grant, # first entry
-            fn existing_grants ->
-              Map.merge(existing_grants, new_grant)
-            end)
-        end)
-      end)
-      # |> Map.new()
-      |> debug
+      list = subject_verb_grant(e(acl, :grants, []))
 
       already_set_ids = Map.keys(list)
 
@@ -138,10 +121,34 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     # |> maybe_join(l "Cannot")
   end
 
-  defp maybe_join(list, prefix) when is_list(list) and length(list)>0 do
+  def maybe_join(list, prefix) when is_list(list) and length(list)>0 do
     prefix<>": "<> Enum.join(list, ", ")
   end
-  defp maybe_join(_, _) do
+  def maybe_join(_, _) do
     nil
   end
+
+  def subject_verb_grant(grants) when is_list(grants) and length(grants)>0 do
+    # TODO: rewrite this whole thing tbh
+    Enum.reduce(grants, %{}, fn grant, subjects_acc ->
+      new_grant = %{grant.verb_id => Map.drop(grant, [:subject])}
+      new_subject = %{subject: grant.subject, verb_grants: new_grant}
+      Map.update(subjects_acc,
+        grant.subject_id, # key
+        new_subject, # first entry
+        fn existing_subject ->
+          Map.update(existing_subject,
+          :verb_grants, # key
+          new_grant, # first entry
+          fn existing_grants ->
+            Map.merge(existing_grants, new_grant)
+          end)
+      end)
+    end)
+    # |> Map.new()
+    |> debug
+  end
+
+  def subject_verb_grant(_), do: []
+
 end

@@ -1,0 +1,14 @@
+{#if ( @count || Enum.count(@members) ) >0}
+<div class={"avatar-group -space-x-#{round(@size/4)}"}>
+    <Bonfire.UI.Common.AvatarLive 
+    :for={member <- @members |> Enum.slice(0..3)}
+    user={e(member, :subject, nil) || member}
+    class={"w-#{@size} h-#{@size} bg-base-100"}
+    />
+    <div :if={( @count || Enum.count(@members) )>4} class="avatar placeholder">
+    <div class={"w-#{@size} h-#{@size} bg-neutral-focus text-neutral-content"}>
+        <span>+{( @count || Enum.count(@members) )-4}</span>
+    </div>
+    </div>
+</div>
+{/if}
