@@ -3,7 +3,7 @@
     "p-1 dropdown",
     "dropdown-top": e(assigns, :thread_mode, nil) == :flat
   }
-  :class="{'dropdown-top' : show_mobile_composer || distraction_free }"
+  :class="{'dropdown-top' : show_smart_input_fullscreen }"
   x-data="{
     boundary_selected_name: 'Custom'
   }">
