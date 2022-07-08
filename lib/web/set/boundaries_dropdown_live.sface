@@ -22,7 +22,7 @@
       value="local" />
       <div 
         class="font-normal normal-case btn btn-ghost btn-xs" >
-        <Solid.LocationMarkerIcon class="w-4 h-4 text-base-content text-opacity-70"/>
+        <Solid.LocationMarkerIcon class="w-5 h-5 text-base-content text-opacity-70"/>
         <span class="ml-2 text-sm font-normal text-base-content text-opacity-70">{l "Local"}</span>
       </div>
     </noscript> -->
@@ -67,7 +67,9 @@
       </span>
 
       <template x-for="name in to_boundaries_names">
-        <span x-text="name" class="text-sm badge"></span>
+        <span x-text="name" class="text-sm badge badge-outline">
+        <Outline.XIcon class="w-4 h-4 stroke-current" />
+        </span>
       </template>
       <template x-for="id in to_boundaries">
         <input 

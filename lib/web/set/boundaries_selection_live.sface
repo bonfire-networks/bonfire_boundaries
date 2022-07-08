@@ -1,28 +1,29 @@
 
-  <div x-show="to_boundaries.length==0 || (to_boundaries.length==1 && to_boundaries[0] == 'public')" class="flex text-xs">
-      <Outline.InformationCircleIcon class="stroke-current flex-shrink-0 w-4 h-4" />
-
-      <span>{l "Your %{activity_type} will be publicly visible to everyone on the fediverse and in search engines.", activity_type: @activity_type_or_reply}</span>
+  <div 
+    x-show="to_boundaries.length==0 || (to_boundaries.length==1 && to_boundaries[0] == 'public')" 
+    class="flex flex-1 text-xs">
+    <Outline.InformationCircleIcon class="flex-shrink-0 w-4 h-4 stroke-current" />
+    <span>{l "Your %{activity_type} will be publicly visible to everyone on the fediverse and in search engines.", activity_type: @activity_type_or_reply}</span>
   </div>
 
-  <div x-show="to_boundaries.length==1 && to_boundaries[0] == 'local'" class="flex text-xs">
-      <Outline.InformationCircleIcon class="stroke-current flex-shrink-0 w-4 h-4" />
-
-    <span>
-    {l "Your %{activity_type} will only be visible to members of your local instance.", activity_type: @activity_type_or_reply} </span>
+  <div 
+    x-show="to_boundaries.length==1 && to_boundaries[0] == 'local'" 
+    class="flex flex-1 text-xs">
+    <Outline.InformationCircleIcon class="flex-shrink-0 w-4 h-4 stroke-current" />
+    <span>{l "Your %{activity_type} will only be visible to members of your local instance.", activity_type: @activity_type_or_reply} </span>
   </div>
 
-  <div x-show="to_boundaries.length==1 && to_boundaries[0] == 'mentions'" class="flex text-xs">
-      <Outline.InformationCircleIcon class="stroke-current flex-shrink-0 w-4 h-4" />
-
-    <span>
-    {l "Your %{activity_type} will be visible to anyone @ mentioned (plus yourself and instance admins).", activity_type: @activity_type_or_reply} </span>
+  <div 
+    x-show="to_boundaries.length==1 && to_boundaries[0] == 'mentions'" 
+    class="flex flex-1 text-xs">
+    <Outline.InformationCircleIcon class="flex-shrink-0 w-4 h-4 stroke-current" />
+    <span>{l "Your %{activity_type} will be visible to anyone @ mentioned (plus yourself and instance admins).", activity_type: @activity_type_or_reply} </span>
   </div>
 
-  <div x-show="to_boundaries.length==1 && to_boundaries[0] == 'message'" class="flex text-xs">
-      <Outline.InformationCircleIcon class="stroke-current flex-shrink-0 w-4 h-4" />
-
-    <span>
-    {l "Your %{activity_type} will only be visible to the person you are messaging (plus yourself and possibly instance admins).", activity_type: @activity_type_or_reply} </span>
+  <div 
+    x-show="to_boundaries.length==1 && to_boundaries[0] == 'message'" 
+    class="flex flex-1 text-xs">
+    <Outline.InformationCircleIcon class="flex-shrink-0 w-4 h-4 stroke-current" />
+    <span>{l "Your %{activity_type} will only be visible to the person you are messaging (plus yourself and possibly instance admins).", activity_type: @activity_type_or_reply} </span>
   </div>
 

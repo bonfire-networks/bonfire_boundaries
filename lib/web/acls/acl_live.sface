@@ -1,198 +1,177 @@
 <div class="">
-  <div class="flex items-center p-4 pb-6 bg-base-content/10 border-base-content/30">
+  <div class="p-3">
     <!-- <div class="flex items-center justify-center flex-shrink-0 w-24 h-24 text-sm font-medium text-white bg-pink-600 rounded-full shadow-2xl ring-4 ring-white">
         GA
     </div> -->
-    <div class="flex flex-col">
-        <div class="flex items-center space-x-2 text-2xl font-bold text-base-content">
+    <div class="flex items-center">
+        <div class="flex items-center flex-1 space-x-2 text-xl font-bold text-base-content">
 
           <div 
             :if={e(assigns, :parent_back, nil)} 
             phx-click="back"
             phx-target={e(assigns, :parent_back, nil)}
-            class="btn btn-ghost" > 
+            class="btn btn-ghost btn-sm btn-circle" > 
             <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
           </div>
 
           <!-- <Solid.LockClosedIcon class="w-6 h-6 text-base-content/80" /> -->
           <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</div>
         </div>
+        <LivePatch
+          to={"/settings/acl/#{ulid(@acl)}/settings"}
+          class="normal-case btn btn-sm btn-outline">
+          {l "Settings"}
+        </LivePatch>
         <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
     </div>
   </div>
 
-   <div
-        class="">
-          <!-- Tab List -->
-          <ul
-            role="tablist"
-            class="flex items-stretch -mb-px border-b bg-base-content/10 border-base-content/30"
-          >
-              <!-- Tab -->
-            <li>
-              <LivePatch
-                to={"/settings/acl/#{ulid(@acl)}/permissions"}
-                class="inline-flex px-5 py-2.5"
-                role="tab">
-                {l "Permissions"}
-              </LivePatch>
-            </li>
-
-            <li>
-              <LivePatch
-                to={"/settings/acl/#{ulid(@acl)}/settings"}
-                class="inline-flex px-5 py-2.5"
-                role="tab">{l "Settings"}</LivePatch>
-            </li>
-          </ul>
-
-          <!-- Panels -->
-          <div role="tabpanels" class="">
-            <!-- Panel -->
-            <section
-              :if={@section=="permissions"}
-              role="tabpanel"
-              class=""
-              > 
-
-              <div :if={!@read_only} class="m-4">
-                <div class="flex items-center rounded-lg">
-                  <form 
-                    class="flex-1"
-                    :on-change="add">
-                    <div
-                      class="flex-1"
-                      id={:select_more}
-                      phx-hook="InputOrSelectOne"
-                      >
-                      <label class="text-sm font-bold">{l "Add a circle or user"}</label>
-                      <input name="add" class="w-full mt-1 tagify input input-bordered" />
-                      <select class="tagify hide !text-slate-800">
-                        {#for {id, name} <- @suggestions}
-                          <option class="!text-slate-800" value={id}>{ name }</option>
-                        {/for}
-                      </select>
-                    </div>
-                  </form>
-                </div>
+  <div class="">
+    <div :if={@section=="permissions"}>
+      <div class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
+        <div class="text-xs uppercase text-base-content/70">{l "Users and circles that belong to this boundary"}</div>
+        <div class="flex items-center mt-3 space-x-2">
+          <span class="flex items-center space-x-1 text-base badge-lg badge badge-outline">
+            <Solid.UserIcon class="w-4 h-4 stroke-current" />
+            <span>Alice</span>
+            <Solid.XIcon class="w-4 h-4 stroke-current" />
+          </span>
+        </div>
+        <div :if={!@read_only}>
+          <div class="flex items-center rounded-lg">
+            <form 
+              class="flex-1"
+              :on-change="add">
+              <div
+                class="flex-1"
+                id={:select_more}
+                phx-hook="InputOrSelectOne"
+                >
+                <input placeholder={l "Add more users or circles"} name="add" class="w-full h-10 mt-3 rounded-full tagify input input-bordered" />
+                <select class="tagify hide !text-slate-800">
+                  {#for {id, name} <- @suggestions}
+                    <option class="!text-slate-800" value={id}>{ name }</option>
+                  {/for}
+                </select>
               </div>
-
-              <div class="w-full overflow-x-auto">
-                <div 
-                  x-data={"{active: #{Enum.count(e(l, :verb_grants, %{}))<1}}"}
-                  role="region"
-                  :for={{id, l} <- e(@list, [])} class="p-4 pb-2">
-                  <div 
-                    :class="!active ? '!border-b !rounded-b' : ''"
-                    class="flex p-3 space-x-5 border border-b-0 rounded rounded-b-none items-top border-base-content/30">
-                    <div class="flex flex-col flex-1">
-                      <div class="flex items-center flex-1 space-x-2">
-                        <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} user={e(l, :subject, nil)} />
-                        <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
-                      </div>
-                      <div class="flex flex-wrap gap-2 mt-2" x-show="!active">
-                        {#for verb <- can(e(l, :verb_grants, %{}))}
-                          <span class="badge badge-success">
-                            <Outline.CheckIcon class="w-4 h-4 mr-1" />
-                            {verb}</span>
-                        {/for}
-                         {#for verb <- cannot(e(l, :verb_grants, %{}))}
-                          <span class="badge badge-error">
-                            <Outline.XIcon class="w-4 h-4 mr-1" />
-                            {verb}</span>
-                        {/for}
-                      </div>
-                    </div>
-                    <button 
-                      type="button"
-                      x-on:click="active = ! active"
-                      :aria-expanded="active"
-                      class="normal-case btn btn-outline btn-sm">
-                      <span x-show="!active">{l "Edit permissions"}</span>
-                      <span x-show="active">{l "Hide details"}</span>
-                      <span x-show="active" aria-hidden="true" class="ml-2">&minus;</span>
-                      <span x-show="!active" aria-hidden="true" class="ml-2">&plus;</span>
-                    </button>
-
-                   
-
-                  </div>
-
-
-                  <div 
-                    x-show="active" 
-                    x-collapse
-                    class="border divide-y rounded rounded-t-none border-base-content/30 divide-base-content/30">
-                    <div :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :verb_grants, %{}))} class="flex items-center p-3 space-x-3 ">
-                      <div class="flex-1 text-base font-semibold">
-                        {e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}
-                      </div>
-                      <div class="flex items-center space-x-3 switch-toggle">
-                      <form :on-change="edit_grant">
-
-                        <label>
-                          <input 
-                          class="absolute opacity-0" 
-                          name={"subject[#{id}][#{verb_id}]"} 
-                          type="radio" 
-                          value="1"
-                          checked={Map.get(grant, :value, nil)==true} 
-                          disabled={@read_only} />
-                          <span 
-                            class={"btn btn-sm btn-circle btn-ghost",
-                            "btn-disabled": @read_only}>
-                            👍
-                          </span>
-                        </label>
-
-                        <label>
-                          <input 
-                          class="absolute opacity-0" 
-                          name={"subject[#{id}][#{verb_id}]"} 
-                          type="radio" 
-                          value=""
-                          checked={is_nil(Map.get(grant, :value, nil))} 
-                          disabled={@read_only} />
-                          <span 
-                            class={"btn btn-sm btn-circle btn-ghost",
-                            "btn-disabled": @read_only}>
-                            🤔
-                          </span>
-                        </label>
-                        
-                        <label>
-                          <input 
-                          class="absolute opacity-0" 
-                          name={"subject[#{id}][#{verb_id}]"} 
-                          type="radio" 
-                          value="0"
-                          checked={Map.get(grant, :value, nil)==false} 
-                          disabled={@read_only} />
-                          <span 
-                            class={"btn btn-sm btn-circle btn-ghost",
-                            "btn-disabled": @read_only}>
-                            👎
-                          </span>
-                        </label>
-
-                      </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section
-              :if={@section=="settings"}
-              role="tabpanel"
-              class="p-4"
-            >
-            test
-
-            </section>
+            </form>
           </div>
+        </div>
       </div>
+      <div class="w-full overflow-x-auto">
+
+      
+        <div 
+          x-data={"{active: #{Enum.count(e(l, :verb_grants, %{}))<1}}"}
+          role="region"
+          :for={{id, l} <- e(@list, [])} class="p-4 pb-2">
+          <div 
+            :class="!active ? '!border-b !rounded-b' : ''"
+            class="flex p-3 space-x-5 border border-b-0 rounded rounded-b-none items-top border-base-content/30">
+            <div class="flex flex-col flex-1">
+              <div class="flex items-center flex-1 space-x-2">
+                <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} user={e(l, :subject, nil)} />
+                <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
+              </div>
+              <div class="flex flex-wrap gap-2 mt-2" x-show="!active">
+                {#for verb <- can(e(l, :verb_grants, %{}))}
+                  <span class="badge badge-success">
+                    <Outline.CheckIcon class="w-4 h-4 mr-1" />
+                    {verb}</span>
+                {/for}
+                  {#for verb <- cannot(e(l, :verb_grants, %{}))}
+                  <span class="badge badge-error">
+                    <Outline.XIcon class="w-4 h-4 mr-1" />
+                    {verb}</span>
+                {/for}
+              </div>
+            </div>
+            <button 
+              type="button"
+              x-on:click="active = ! active"
+              :aria-expanded="active"
+              class="normal-case btn btn-outline btn-sm">
+              <span x-show="!active">{l "Edit permissions"}</span>
+              <span x-show="active">{l "Hide details"}</span>
+              <span x-show="active" aria-hidden="true" class="ml-2">&minus;</span>
+              <span x-show="!active" aria-hidden="true" class="ml-2">&plus;</span>
+            </button>
+
+            
+
+          </div>
+
+
+          <div 
+            x-show="active" 
+            x-collapse
+            class="border divide-y rounded rounded-t-none border-base-content/30 divide-base-content/30">
+            <div :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :verb_grants, %{}))} class="flex items-center p-3 space-x-3 ">
+              <div class="flex-1 text-base font-semibold">
+                {e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}
+              </div>
+              <div class="flex items-center space-x-3 switch-toggle">
+              <form :on-change="edit_grant">
+
+                <label>
+                  <input 
+                  class="absolute opacity-0" 
+                  name={"subject[#{id}][#{verb_id}]"} 
+                  type="radio" 
+                  value="1"
+                  checked={Map.get(grant, :value, nil)==true} 
+                  disabled={@read_only} />
+                  <span 
+                    class={"btn btn-sm btn-circle btn-ghost",
+                    "btn-disabled": @read_only}>
+                    👍
+                  </span>
+                </label>
+
+                <label>
+                  <input 
+                  class="absolute opacity-0" 
+                  name={"subject[#{id}][#{verb_id}]"} 
+                  type="radio" 
+                  value=""
+                  checked={is_nil(Map.get(grant, :value, nil))} 
+                  disabled={@read_only} />
+                  <span 
+                    class={"btn btn-sm btn-circle btn-ghost",
+                    "btn-disabled": @read_only}>
+                    🤔
+                  </span>
+                </label>
+                
+                <label>
+                  <input 
+                  class="absolute opacity-0" 
+                  name={"subject[#{id}][#{verb_id}]"} 
+                  type="radio" 
+                  value="0"
+                  checked={Map.get(grant, :value, nil)==false} 
+                  disabled={@read_only} />
+                  <span 
+                    class={"btn btn-sm btn-circle btn-ghost",
+                    "btn-disabled": @read_only}>
+                    👎
+                  </span>
+                </label>
+
+              </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <section
+      :if={@section=="settings"}
+      class="p-4"
+    >
+    test
+    </section>
+  </div>
 
 
 <style>
