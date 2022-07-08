@@ -12,7 +12,20 @@ defmodule Bonfire.Boundaries do
   import Queries, only: [boundarise: 3]
   import Ecto.Query, only: [from: 2]
 
-  def acls_from_preset_boundary_name(preset) do
+  def preset(preset) when is_binary(preset), do: preset
+  def preset(opts), do: maybe_from_opts(opts, :boundary, opts) |> debug() |> preset_from_boundaries()
+  defp preset_from_boundaries(boundaries) when is_list(boundaries) do
+    debug(boundaries)
+    cond do
+      "public" in boundaries -> "public"
+      "local" in boundaries -> "local"
+      true -> "mentions"
+    end
+  end
+  defp preset_from_boundaries(_), do: "mentions"
+
+  def acls_from_preset_boundary_names(presets) when is_list(presets), do: Enum.flat_map(presets, &acls_from_preset_boundary_names/1)
+  def acls_from_preset_boundary_names(preset) do
     case preset do
       preset when is_binary(preset) ->
         acls = Config.get!(:preset_acls)[preset]
@@ -75,8 +88,6 @@ defmodule Bonfire.Boundaries do
     Config.get!(:user_default_boundaries)
   end
 
-  def preset(preset) when is_binary(preset), do: preset
-  def preset(opts), do: maybe_from_opts(opts, :boundary, "mentions")
 
   @doc """
   Loads binaries according to boundaries (which are assumed to be ULID pointer IDs).

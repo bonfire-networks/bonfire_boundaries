@@ -40,9 +40,13 @@ defmodule Bonfire.Boundaries.Acls do
 
 
   def cast(changeset, creator, opts) do
+
+    preset = Boundaries.preset(opts)
+    |> debug("preset")
+
     # id = Changeset.get_field(changeset, :id)
-    base = base_acls(creator, opts)
-    case custom_grants(changeset, opts) do
+    base = base_acls(creator, preset, opts)
+    case custom_recipients(changeset, preset, opts) do
       [] ->
         changeset
         |> Changesets.put_assoc(:controlled, base)
@@ -64,21 +68,19 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   # when the user picks a preset, this maps to a set of base acls
-  defp base_acls(user, opts) do
-    preset = Boundaries.preset(opts)
-
+  defp base_acls(user, preset, _opts) do
     (
       Config.get!([:object_default_boundaries, :acls])
       ++
-      Boundaries.acls_from_preset_boundary_name(preset)
+      Boundaries.acls_from_preset_boundary_names(preset)
     )
     |> debug("preset ACLs to set")
     |> find_acls(user)
-    |> maybe_add_custom(preset)
+    |> maybe_add_direct_acl_ids(preset)
     |> debug("ACLs to set")
   end
 
-  defp maybe_add_custom(acls, preset) do
+  defp maybe_add_direct_acl_ids(acls, preset) do
     if is_ulid?(preset) do
       acls ++ [%{acl_id: preset}]
     else
@@ -86,25 +88,25 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
-  defp custom_grants(changeset, opts) do
+  defp custom_recipients(changeset, preset, opts) do
     (
-      reply_to_grants(changeset, opts)
-      ++ mentions_grants(changeset, opts)
-      ++ maybe_custom_circles_or_users(opts)
+      reply_to_grants(changeset, preset, opts)
+      ++ mentions_grants(changeset, preset, opts)
+      ++ maybe_custom_circles_or_users(preset, opts)
     )
     |> Enum.uniq()
     |> filter_empty([])
   end
 
-  defp maybe_custom_circles_or_users(opts), do: maybe_from_opts(opts, :to_circles, [])
+  defp maybe_custom_circles_or_users(_, opts), do: maybe_from_opts(opts, :to_circles, [])
 
-  defp reply_to_grants(changeset, opts) do
+  defp reply_to_grants(changeset, preset, _opts) do
     reply_to_creator = Utils.e(changeset, :changes, :replied, :changes, :replying_to, :created, :creator, nil)
 
     if reply_to_creator do
       # debug(reply_to_creator, "creators of reply_to should be added to a new ACL")
 
-      case Boundaries.preset(opts) do
+      case preset do
         "public" ->
           [ulid(reply_to_creator)]
         "local" ->
@@ -117,13 +119,13 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
-  defp mentions_grants(changeset, opts) do
+  defp mentions_grants(changeset, preset, _opts) do
     mentions = Utils.e(changeset, :changes, :post_content, :changes, :mentions, nil)
 
     if mentions && mentions !=[] do
       # debug(mentions, "mentions/tags may be added to a new ACL")
 
-      case Boundaries.preset(opts) do
+      case preset do
         "public" ->
           ulid(mentions)
         "mentions" ->
@@ -279,16 +281,20 @@ defmodule Bonfire.Boundaries.Acls do
     |> repo().many()
   end
 
-  def built_in_for_dropdown do # TODO
+  defp built_ins_for_dropdown do # TODO
     filter = Config.get(:acls_to_present)
     Config.get(:acls)
     |> Enum.filter(fn {name, acl} -> name in filter end)
     |> Enum.map(fn {name, acl} -> acl.id end)
   end
 
+  def opts_for_dropdown() do
+    built_ins = built_ins_for_dropdown()
+    [extra_ids_to_include: built_ins, exclude_ids: @exclude_stereotypes ++ ["71MAYADM1N1STERMY0WNSTVFFS", "0H0STEDCANTSEE0RD0ANYTH1NG", "1S11ENCEDTHEMS0CAN0TP1NGME"]]
+  end
+
   def for_dropdown(opts) do
-    built_ins = built_in_for_dropdown()
-    list_my_with_counts(current_user(opts), opts ++ [extra_ids_to_include: built_ins, exclude_ids: @exclude_stereotypes ++ ["71MAYADM1N1STERMY0WNSTVFFS", "0H0STEDCANTSEE0RD0ANYTH1NG", "1S11ENCEDTHEMS0CAN0TP1NGME"]])
+    list_my_with_counts(current_user(opts), opts ++ opts_for_dropdown())
   end
 
   @doc """

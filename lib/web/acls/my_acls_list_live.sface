@@ -80,7 +80,7 @@
           </div>
         </div>
 
-        <div :if={@show_checkboxes} class="flex-none">
+        <div :if={@ui_for_setting_boundaries} class="flex-none">
           <!-- <input 
             value={acl.id}
             type="checkbox"

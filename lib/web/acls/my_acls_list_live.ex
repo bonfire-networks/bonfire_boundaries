@@ -4,7 +4,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsListLive do
   alias Bonfire.Boundaries.Integration
 
   prop hide_breakdown, :boolean, default: false
-  prop show_checkboxes, :boolean, default: false
+  prop ui_for_setting_boundaries, :boolean, default: false
   prop click_override, :boolean, default: false
   prop select_event, :string, default: nil
 
@@ -18,9 +18,16 @@ defmodule Bonfire.Boundaries.Web.MyAclsListLive do
   def update(assigns, socket) do
     built_in_ids = Bonfire.Boundaries.Acls.built_in_ids
 
-    extra_ids_to_include = if Integration.is_admin?(current_user(assigns)), do: built_in_ids, else: []
+    opts = if e(assigns, :ui_for_setting_boundaries, nil) do
+      Bonfire.Boundaries.Acls.opts_for_dropdown()
+    else
+      extra_ids_to_include = if Integration.is_admin?(current_user(assigns)), do: built_in_ids, else: []
 
-    acls = Bonfire.Boundaries.Acls.list_my_with_counts(current_user(assigns), extra_ids_to_include: extra_ids_to_include)
+      [extra_ids_to_include: extra_ids_to_include]
+    end
+
+
+    acls = Bonfire.Boundaries.Acls.list_my_with_counts(current_user(assigns), opts)
 
     acls = if e(assigns, :hide_breakdown, nil), do: acls, else: acls |> repo().maybe_preload(grants: [:verb, subject: [:named, :profile, encircle_subjects: [:profile], stereotyped: [:named]]])
     debug(acls, "Acls")
