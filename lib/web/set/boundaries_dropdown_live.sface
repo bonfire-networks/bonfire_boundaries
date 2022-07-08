@@ -1,16 +1,15 @@
+<input 
+  name={:to_boundaries} 
+  type="hidden" 
+  x-text="to_boundaries" />
+
 <div 
   class={
     "p-1 dropdown",
     "dropdown-top": e(assigns, :thread_mode, nil) == :flat
   }
-  :class="{'dropdown-top' : show_smart_input_fullscreen }"
-  x-data="{
-    boundary_selected_name: 'Custom'
-  }">
-  <input 
-    name={:boundary_selected} 
-    type="hidden" 
-    x-model="boundary_selected" />
+>
+
   <label
     tabindex="0"
     class="flex items-center focus:outline-none"
@@ -18,7 +17,7 @@
 
     <!-- <noscript>
       <input 
-      name={:boundary_selected} 
+      name={:to_boundaries} 
       type="hidden" 
       value="local" />
       <div 
@@ -29,52 +28,54 @@
     </noscript> -->
      
     <div
-      x-show="boundary_selected == 'public'"
+      x-show="to_boundaries.length==0 || (to_boundaries.length==1 && to_boundaries[0] == 'public')"
       style="display: none"
-      :class="{'bg-primary text-primary-content' : open_boundaries === true }"
       class="font-normal normal-case btn btn-ghost btn-xs" 
      >
       <Solid.GlobeIcon class="w-4 h-4 text-base-content text-opacity-70"/>
-      <span class="ml-2 text-sm font-normal text-base-content text-opacity-70">{l "Public"}</span>
     </div>
     <div 
-      x-show="boundary_selected == 'local'"
+      x-show="to_boundaries.length==1 && to_boundaries[0] == 'local'"
       style="display: none"
       class="font-normal normal-case btn btn-ghost btn-xs" >
       <Solid.LocationMarkerIcon class="w-4 h-4 text-base-content text-opacity-70"/>
-      <span class="ml-2 text-sm font-normal text-base-content text-opacity-70">{l "Local"}</span>
     </div>
     <div 
-      x-show="boundary_selected == 'mentions'"
+      x-show="to_boundaries.length==1 && to_boundaries[0] == 'mentions'"
       style="display: none"
       class="font-normal normal-case btn btn-ghost btn-xs" >
       <Solid.AtSymbolIcon class="w-4 h-4 text-base-content text-opacity-70"/>
-       <span class="ml-2 text-sm font-normal text-base-content text-opacity-70">{l "Mentions"}</span>
     </div>
     <div 
-      x-show="boundary_selected == 'message'"
+      x-show="to_boundaries.length==1 && to_boundaries[0] == 'message'"
       style="display: none"
       class="font-normal normal-case btn btn-ghost btn-xs" >
       <Solid.ChatAlt2Icon class="w-4 h-4 text-base-content text-opacity-70"/>
-       <span class="ml-2 text-sm font-normal text-base-content text-opacity-70">{l "Message"}</span>
     </div>
     <div 
-    x-show="!(['public','local','mentions','message'].includes(boundary_selected))"
-    style="display: none"
-    class="font-normal normal-case btn btn-ghost btn-xs" >
-      <Solid.CogIcon class="w-4 h-4 text-base-content text-opacity-70"/>
-       <span class="ml-2 text-sm font-normal text-base-content text-opacity-70" x-text="boundary_selected_name">{l "Custom"}</span>
+    class="font-normal normal-case btn btn-ghost btn-sm" >
+      
+      <span :for={{name, _id} <- @to_boundaries || [{l("Public"), "public"}]} class="text-sm badge">
+        {name}
+      </span>
+
+      <template x-for="name in to_boundaries_names">
+        <span x-text="name" class="text-sm badge"></span>
+      </template>
+
     </div>
   </label> 
+
+
   <div
     tabindex="0"
     class="rounded shadow w-52 menu dropdown-content bg-neutral-content"
     role="menu"
     aria-orientation="vertical"
     aria-labelledby="user-profile-menu">
-      <div x-show="boundary_selected != 'message'">
+      <div x-show="to_boundaries != ['message']">
       <div 
-      @click="boundary_selected = 'public'; open_boundaries = false" 
+      @click="to_boundaries = ['public']; to_boundaries_names = ['Public']; open_boundaries = false;" 
       class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-neutral rounded-t-md hover:bg-neutral hover:bg-opacity-30 ">
         <Solid.GlobeIcon/>
         <div class="flex-1">
@@ -82,14 +83,16 @@
           <p class="text-xs text-neutral text-opacity-80">{l "Publicly visible to everyone on the fediverse and in search engines"}</p>
         </div>
       </div>
-      <div @click="boundary_selected = 'local'; open_boundaries = false" class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
+      <div @click="to_boundaries = ['local']; to_boundaries_names = ['Local']; open_boundaries = false;" class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
         <Solid.HomeIcon/>
         <div class="flex-1">
           <div class="text-sm font-medium text-neutral text-opacity-80">{l "Local Instance"}</div>
           <p class="text-xs text-neutral text-opacity-80">{l "Visible to all members of this instance"}</p>
         </div>
       </div>
-      <div @click="boundary_selected = 'mentions'; open_boundaries = false" class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
+      <div 
+        @click="to_boundaries = ['mentions']; to_boundaries_names = ['Mentions']; open_boundaries = false;" 
+        class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
         <Solid.AtSymbolIcon/> 
         <div class="flex-1">
           <div class="text-sm font-medium text-neutral text-opacity-80">{l "Mentions"}</div>
@@ -97,7 +100,7 @@
           </div>
         </div>
       </div>
-      <div x-show="boundary_selected == 'message'" class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
+      <div x-show="to_boundaries.length==1 && to_boundaries[0] == 'message'" class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
         <Solid.ChatAlt2Icon/> 
         <div class="flex-1">
         <div class="text-sm font-medium text-neutral text-opacity-80">{l "Message"}</div>
@@ -112,7 +115,7 @@
       <div 
       :if={Config.get(:experimental_features_enabled)}
       :for={acl <- Bonfire.Boundaries.Acls.for_dropdown(current_user: current_user(assigns)) |> debug}
-      @click={"boundary_selected = '#{ulid(acl)}'; boundary_selected_name = \"#{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled"}\"; open_boundaries = false"} 
+      @click={"to_boundaries = ['#{ulid(acl)}']; to_boundaries_names = [\"#{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled"}\"]; open_boundaries = false;"} 
       class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
         <Solid.LockOpenIcon/> 
         <div class="flex-1">

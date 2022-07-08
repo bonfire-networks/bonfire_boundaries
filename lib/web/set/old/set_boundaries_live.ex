@@ -4,6 +4,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
 
   prop label, :string, default: ""
   prop default_circles, :list, default: []
+  prop to_boundaries, :list
   prop to_circles, :list
 
   # FIXME! update no longer works in stateless

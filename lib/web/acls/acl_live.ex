@@ -2,6 +2,9 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   use Bonfire.UI.Common.Web, :stateful_component
   alias Bonfire.Boundaries.Grants
 
+  prop acl_id, :any
+  prop parent_back, :any
+
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})
 
@@ -17,7 +20,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     current_user = current_user(assigns)
     params = e(assigns, :__context__, :current_params, %{})
 
-    id = e(params, "id", nil)
+    id = e(assigns, :acl_id, nil) || e(params, "id", nil)
     # |> debug
 
     with {:ok, acl} <- Bonfire.Boundaries.Acls.get_for_caretaker(id, current_user) |> repo().maybe_preload(grants: [:verb, subject: [:named, :profile, :character, stereotyped: [:named]]]) do
@@ -149,6 +152,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     |> debug
   end
 
-  def subject_verb_grant(_), do: []
+  def subject_verb_grant(_), do: %{}
 
 end

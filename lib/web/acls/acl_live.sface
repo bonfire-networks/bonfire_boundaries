@@ -5,7 +5,16 @@
     </div> -->
     <div class="flex flex-col">
         <div class="flex items-center space-x-2 text-2xl font-bold text-base-content">
-          <Solid.LockClosedIcon class="w-6 h-6 text-base-content/80" />
+
+          <div 
+            :if={e(assigns, :parent_back, nil)} 
+            phx-click="back"
+            phx-target={e(assigns, :parent_back, nil)}
+            class="btn btn-ghost" > 
+            <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
+          </div>
+
+          <!-- <Solid.LockClosedIcon class="w-6 h-6 text-base-content/80" /> -->
           <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</div>
         </div>
         <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->

@@ -1,0 +1,108 @@
+<div>
+
+{#if e(assigns, :edit_acl_id, nil)}
+
+  <Bonfire.Boundaries.Web.AclLive
+    id={e(assigns, :edit_acl_id, nil)} 
+    acl_id={e(assigns, :edit_acl_id, nil)} 
+    current_user={current_user(assigns)}
+    parent_back={@myself}
+  />
+
+{#else}
+
+<ul class="mt-3"> 
+  {#for acl <- e(assigns, :acls, []) ++ e(assigns, :built_ins, [])  }
+
+    <li class="flex items-center justify-between flex-1 p-3 mb-3 border rounded hover:bg-base-content/5 border-base-content/30">
+      <!-- <LiveRedirect 
+        to={if !@click_override, do: "/settings/acl/"<>acl.id}
+        class="flex-1 w-full" 
+        > -->
+      <label phx-click={if @select_event, do: JS.push(@select_event, value: %{id: acl.id, name: (e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled")}, target: "#smart_input")}>
+        <div class="">
+          <div class="flex items-center space-x-2">
+            <div class="text-base font-semibold">{ e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled" }</div>
+          </div>
+          <div class="text-sm text-base-content/80">
+            {if e(acl, :grants_count, nil), do: "#{e(acl, :grants_count, 0)} permissions"} 
+            {if e(acl, :controlled_count, nil), do: "#{e(acl, :controlled_count, 0)} uses"} 
+          </div>
+
+          {#if e(acl, :grants_count, 0)>0}
+          {#for {_subject_id, %{subject: subject, verb_grants: verb_grants}} <- AclLive.subject_verb_grant(e(acl, :grants, [])) |> Enum.slice(0..5)}
+            <div class="flex justify-between border-t mt-2 py-2">
+
+            <div>
+              {#case AclLive.can(verb_grants)}
+                {#match []}
+                {#match verbs}
+                  <div 
+                    class="indicator tooltip tooltip-right mr-4"
+                    data-tip={AclLive.maybe_join(verbs, l "Can")}>
+                    <span class="indicator-item indicator-bottom badge badge-secondary">{Enum.count(verbs)}</span> 
+                    <span class="btn btn-ghost btn-xs">👍</span>
+                  </div>
+                {/case}
+
+                {#case AclLive.cannot(verb_grants)}
+                {#match []}
+                {#match verbs}
+                  <div 
+                    class="indicator tooltip tooltip-right mr-5"
+                    data-tip={AclLive.maybe_join(verbs, l "Cannot")}>
+                    <span class="indicator-item indicator-bottom badge badge-secondary">{Enum.count(verbs)}</span> 
+                    <span class="btn btn-ghost btn-xs">👎</span>
+                  </div>
+                {/case}
+              </div>
+
+                {#if e(subject, :profile, nil)}
+                  <Bonfire.UI.Common.AvatarLive 
+                    user={e(subject, nil)}
+                    class="w-8 h-8 bg-base-100"
+                  />
+                {#else}
+                  <Bonfire.Boundaries.Web.CirclePreviewLive
+                    members={e(subject, :encircle_subjects, [])}
+                    size={8}
+                  />
+                {/if}
+
+                <span>{e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) || e(subject, :name, nil) || e(subject, :profile, :name, nil) || e(subject, :character, :username, nil) || ulid(subject)}</span>
+
+            </div>
+          {/for}
+          {/if}
+
+          <div class="text-sm text-base-content/80">
+            <!-- {if e(acl, :stereotyped, :id, nil) || acl.id in @built_in_ids, do: l "Preset", else: l "This is a sample description to help remember what this circle is about."} -->
+          </div>
+        </div>
+
+        <div :if={@show_checkboxes} class="flex-none">
+          <!-- <input 
+            value={acl.id}
+            type="checkbox"
+          /> -->
+          <Solid.PlusCircleIcon />
+        </div>
+      </label>
+      <!-- </LiveRedirect> -->
+
+      <!-- :if={@click_override} -->
+      <div 
+        class="btn btn-ghost"
+        phx-click="boundary_edit" 
+        phx-target={@myself}
+        phx-value-id={acl.id}
+      >
+        <Solid.ChevronRightIcon />
+      </div>
+
+    </li>
+    
+  {/for}
+</ul>
+{/if}
+</div>
