@@ -11,102 +11,178 @@
 
 {#else}
 
-<ul class="p-2"> 
-  {#for acl <- e(assigns, :acls, []) ++ e(assigns, :built_ins, [])  }
-
-    <li class="flex items-center justify-between flex-1 p-3 mb-3 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
-      <!-- <LiveRedirect 
-        to={if !@click_override, do: "/settings/acl/"<>acl.id}
-        class="flex-1 w-full" 
-        > -->
-      <label class="flex items-center w-full" phx-click={if @select_event, do: JS.push(@select_event, value: %{id: acl.id, name: (e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled")}, target: "#smart_input")}>
+  <ul class="p-2"> 
+    <!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
+    <li class="flex items-center justify-between flex-1 p-2 mb-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
+      <label 
+        class="flex items-center w-full"
+        phx-click={JS.push("select_boundary", value: %{id: "public", name: l "Public"}, target: "#smart_input")}>
         <div class="flex-1">
           <div class="flex items-center space-x-2">
-            <div class="text-base font-semibold">{ e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled" }</div>
+            <Solid.GlobeIcon/>
+            <div class="text-base font-semibold">{l "Public"}</div>
           </div>
           <div class="text-sm text-base-content/80">
-            {if e(acl, :grants_count, nil), do: "#{e(acl, :grants_count, 0)} permissions"} 
-            {if e(acl, :controlled_count, nil), do: "#{e(acl, :controlled_count, 0)} uses"} 
-          </div>
-
-          {#if e(acl, :grants_count, 0)>0}
-          {#for {_subject_id, %{subject: subject, verb_grants: verb_grants}} <- AclLive.subject_verb_grant(e(acl, :grants, [])) |> Enum.slice(0..5)}
-            <div class="flex justify-between py-2 mt-2 border-t">
-
-            <div>
-              {#case AclLive.can(verb_grants)}
-                {#match []}
-                {#match verbs}
-                  <div 
-                    class="mr-4 indicator tooltip tooltip-right"
-                    data-tip={AclLive.maybe_join(verbs, l "Can")}>
-                    <span class="indicator-item indicator-bottom badge badge-secondary">{Enum.count(verbs)}</span> 
-                    <span class="btn btn-ghost btn-xs">👍</span>
-                  </div>
-                {/case}
-
-                {#case AclLive.cannot(verb_grants)}
-                {#match []}
-                {#match verbs}
-                  <div 
-                    class="mr-5 indicator tooltip tooltip-right"
-                    data-tip={AclLive.maybe_join(verbs, l "Cannot")}>
-                    <span class="indicator-item indicator-bottom badge badge-secondary">{Enum.count(verbs)}</span> 
-                    <span class="btn btn-ghost btn-xs">👎</span>
-                  </div>
-                {/case}
-              </div>
-
-                {#if e(subject, :profile, nil)}
-                  <Bonfire.UI.Common.AvatarLive 
-                    user={e(subject, nil)}
-                    class="w-8 h-8 bg-base-100"
-                  />
-                {#else}
-                  <Bonfire.Boundaries.Web.CirclePreviewLive
-                    members={e(subject, :encircle_subjects, [])}
-                    size={8}
-                  />
-                {/if}
-
-                <span>{e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) || e(subject, :name, nil) || e(subject, :profile, :name, nil) || e(subject, :character, :username, nil) || ulid(subject)}</span>
-
-            </div>
-          {/for}
-          {/if}
-
-          <div class="text-sm text-base-content/80">
-            <!-- {if e(acl, :stereotyped, :id, nil) || acl.id in @built_in_ids, do: l "Preset", else: l "This is a sample description to help remember what this circle is about."} -->
+            {l "Publicly visible to everyone on the fediverse and in search engines"}
           </div>
         </div>
 
         <div class="flex items-center space-x-2">
           <div 
-            :if={@ui_for_setting_boundaries}
             class="btn btn-outline btn-sm btn-circle opacity-80">
-            <!-- <input 
-              value={acl.id}
-              type="checkbox"
-            /> -->
             <Solid.PlusIcon class="w-5 h-5 " />
-          </div>
-          <div 
-            class="btn btn-ghost btn-sm btn-circle"
-            phx-click="boundary_edit" 
-            phx-target={@myself}
-            phx-value-id={acl.id}
-          >
-            <Solid.ChevronRightIcon class="w-5 h-5 text-base-content/80" />
           </div>
         </div>
       </label>
-      <!-- </LiveRedirect> -->
-
-      <!-- :if={@click_override} -->
-
     </li>
-    
-  {/for}
-</ul>
+    <li class="flex items-center justify-between flex-1 p-2 mb-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
+      <label 
+        class="flex items-center w-full"
+        phx-click={JS.push("select_boundary", value: %{id: "local", name: l "Local Instance"}, target: "#smart_input")}>
+        <div class="flex-1">
+          <div class="flex items-center space-x-2">
+            <Solid.LocationMarkerIcon/>
+            <div class="text-base font-semibold">{l "Local Instance"}</div>
+          </div>
+          <div class="text-sm text-base-content/80">
+            {l "Visible to all members of this instance"}
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div 
+            class="btn btn-outline btn-sm btn-circle opacity-80">
+            <Solid.PlusIcon class="w-5 h-5 " />
+          </div>
+        </div>
+      </label>
+    </li>
+    <li class="flex items-center justify-between flex-1 p-2 mb-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
+      <label 
+        class="flex items-center w-full"
+        phx-click={JS.push("select_boundary", value: %{id: "mentions", name: l "Mentions"}, target: "#smart_input")}>
+        <div class="flex-1">
+          <div class="flex items-center space-x-2">
+            <Solid.AtSymbolIcon/> 
+            <div class="text-base font-semibold">{l "Mentions"}</div>
+          </div>
+          <div class="text-sm text-base-content/80">
+            {l "Visible only to those mentioned, across the fediverse"}
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div 
+            class="btn btn-outline btn-sm btn-circle opacity-80">
+            <Solid.PlusIcon class="w-5 h-5 " />
+          </div>
+        </div>
+      </label>
+    </li>
+    <!-- / -->
+    {#for acl <- e(assigns, :acls, []) ++ e(assigns, :built_ins, [])  }
+
+      <li class="flex items-center justify-between flex-1 p-2 mb-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
+        <!-- <LiveRedirect 
+          to={if !@click_override, do: "/settings/acl/"<>acl.id}
+          class="flex-1 w-full" 
+          > -->
+        <label class="flex items-center w-full" phx-click={if @select_event, do: JS.push(@select_event, value: %{id: acl.id, name: (e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled")}, target: "#smart_input")}>
+          <div class="flex-1">
+            <div class="flex items-center space-x-2">
+              <div class="text-base font-semibold">{ e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled" }</div>
+            </div>
+            <div class="text-sm text-base-content/80">
+              {if e(acl, :grants_count, nil), do: "#{e(acl, :grants_count, 0)} permissions"} 
+              {if e(acl, :controlled_count, nil), do: "#{e(acl, :controlled_count, 0)} uses"} 
+            </div>
+
+            {#if e(acl, :grants_count, 0)>0}
+            {#for {_subject_id, %{subject: subject, verb_grants: verb_grants}} <- AclLive.subject_verb_grant(e(acl, :grants, [])) |> Enum.slice(0..5)}
+              <div class="flex justify-between py-2 mt-2 border-t">
+
+              <div>
+                {#case AclLive.can(verb_grants)}
+                  {#match []}
+                  {#match verbs}
+                    <div 
+                      class="mr-4 indicator tooltip tooltip-right"
+                      data-tip={AclLive.maybe_join(verbs, l "Can")}>
+                      <span class="indicator-item indicator-bottom badge badge-secondary">{Enum.count(verbs)}</span> 
+                      <span class="btn btn-ghost btn-xs">👍</span>
+                    </div>
+                  {/case}
+
+                  {#case AclLive.cannot(verb_grants)}
+                  {#match []}
+                  {#match verbs}
+                    <div 
+                      class="mr-5 indicator tooltip tooltip-right"
+                      data-tip={AclLive.maybe_join(verbs, l "Cannot")}>
+                      <span class="indicator-item indicator-bottom badge badge-secondary">{Enum.count(verbs)}</span> 
+                      <span class="btn btn-ghost btn-xs">👎</span>
+                    </div>
+                  {/case}
+                </div>
+
+                  {#if e(subject, :profile, nil)}
+                    <Bonfire.UI.Common.AvatarLive 
+                      user={e(subject, nil)}
+                      class="w-8 h-8 bg-base-100"
+                    />
+                  {#else}
+                    <Bonfire.Boundaries.Web.CirclePreviewLive
+                      members={e(subject, :encircle_subjects, [])}
+                      size={8}
+                    />
+                  {/if}
+
+                  <span>{e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) || e(subject, :name, nil) || e(subject, :profile, :name, nil) || e(subject, :character, :username, nil) || ulid(subject)}</span>
+
+              </div>
+            {/for}
+            {/if}
+
+            <div class="text-sm text-base-content/80">
+              <!-- {if e(acl, :stereotyped, :id, nil) || acl.id in @built_in_ids, do: l "Preset", else: l "This is a sample description to help remember what this circle is about."} -->
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <div 
+              class="btn btn-ghost btn-sm btn-circle"
+              phx-click="boundary_edit" 
+              phx-target={@myself}
+              phx-value-id={acl.id}
+            >
+              <Solid.PencilIcon class="w-4 h-4 text-base-content/80" />
+            </div>
+            <div 
+              :if={@ui_for_setting_boundaries}
+              class="btn btn-outline btn-sm btn-circle opacity-80">
+              <!-- <input 
+                value={acl.id}
+                type="checkbox"
+              /> -->
+              <Solid.PlusIcon class="w-5 h-5 " />
+            </div>
+            
+          </div>
+        </label>
+        <!-- </LiveRedirect> -->
+
+        <!-- :if={@click_override} -->
+
+      </li>
+      
+    {/for}
+  </ul>
+
+  <div class="p-2 bg-base-200">
+    <button type="button" 
+      class="w-full normal-case btn btn-primary btn-sm btn-wide" 
+      @click="open_boundaries = false">
+      <Outline.CheckIcon />
+      {l "Add selected boundaries"}
+    </button>
+  </div>
 {/if}
 </div>

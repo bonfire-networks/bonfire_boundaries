@@ -18,8 +18,8 @@
           <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</div>
         </div>
         <LivePatch
-          to={"/settings/acl/#{ulid(@acl)}/settings"}
-          class="normal-case btn btn-sm btn-outline">
+          to={"#"}
+          class="text-sm font-medium link">
           {l "Settings"}
         </LivePatch>
         <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
@@ -29,11 +29,10 @@
   <div class="">
     <div :if={@section=="permissions"}>
       <div class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
-        <div class="text-xs uppercase text-base-content/70">{l "Users and circles that belong to this boundary"}</div>
+        <div class="text-xs font-semibold uppercase text-base-content/70">{l "Users and circles that belong to this boundary"}</div>
         <div class="flex items-center mt-3 space-x-2">
-          <span class="flex items-center space-x-1 text-base badge-lg badge badge-outline">
-            <Solid.UserIcon class="w-4 h-4 stroke-current" />
-            <span>Alice</span>
+          <span class="flex items-center space-x-1 badge-lg badge badge-outline">
+            <span class="text-sm">Alice</span>
             <Solid.XIcon class="w-4 h-4 stroke-current" />
           </span>
         </div>
@@ -58,10 +57,50 @@
           </div>
         </div>
       </div>
-      <div class="w-full overflow-x-auto">
-
-      
+      <div class="grid max-h-[400px] w-full grid-cols-3 gap-3 p-3 overflow-x-auto">
         <div 
+          :for={{verb_id, grant} <- @verbs} 
+          class="">
+          <div class="flex-1 col-span-1 text-sm font-semibold rounded bg-base-200">
+            <div class="flex items-center p-2">
+              <div class="flex-1">{e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}</div>
+              <div class="flex items-center space-x-1">
+                <div class="p-1 border rounded bg-base-100 border-base-300">👍</div>
+                <div class="p-1 border rounded bg-base-100 border-base-300">😐</div>
+                <div class="p-1 border rounded bg-base-100 border-base-300">👎</div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center px-2 py-1 mt-px bg-base-200">
+            <span class="flex-1 pr-2 text-sm truncate ellipsis">Alice</span>
+            <div class="flex items-center space-x-1">
+              <div class="w-[27px] mx-auto text-center">
+                <input type="radio" name="radio-1" class="radio radio-sm" checked />
+              </div>
+              <div class="w-[27px] mx-auto text-center">
+                <input type="radio" name="radio-1" class="radio radio-sm" />
+              </div>
+              <div class="w-[27px] mx-auto text-center">
+                <input type="radio" name="radio-1" class="radio radio-sm" />
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center px-2 py-1 bg-base-200">
+            <span class="flex-1 pr-2 text-sm truncate ellipsis">Alice destorsiocantivos</span>
+            <div class="flex items-center space-x-1">
+              <div class="w-[27px] mx-auto text-center">
+                <input type="radio" name="radio-1" class="radio radio-sm" checked />
+              </div>
+              <div class="w-[27px] mx-auto text-center">
+                <input type="radio" name="radio-1" class="radio radio-sm" />
+              </div>
+              <div class="w-[27px] mx-auto text-center">
+                <input type="radio" name="radio-1" class="radio radio-sm" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- <div 
           x-data={"{active: #{Enum.count(e(l, :verb_grants, %{}))<1}}"}
           role="region"
           :for={{id, l} <- e(@list, [])} class="p-4 pb-2">
@@ -162,7 +201,15 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
+      </div>
+      <div class="flex justify-end p-2 bg-base-200">
+        <button 
+          type="button" 
+          class="normal-case btn btn-primary btn-sm btn-wide" 
+          @click="open_boundaries = false">
+          {l "Save"}
+        </button>
       </div>
     </div>
     <section

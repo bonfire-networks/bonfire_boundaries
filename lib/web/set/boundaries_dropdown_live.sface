@@ -58,8 +58,11 @@
     <div 
     class="font-normal normal-case btn btn-ghost btn-sm" >
       
-      <span :for={{name, id} <- @to_boundaries || [{l("Public"), "public"}]} class="text-sm badge">
+      <span :for={{name, id} <- @to_boundaries || [{l("Public"), "public"}]} class="flex items-center badge-info badge">
         {name}
+        <span class="ml-1 cursor-pointer">
+        <Solid.XIcon class="w-4 h-4" />
+        </span>
         <input 
           name="to_boundaries[]"
           value={id}
