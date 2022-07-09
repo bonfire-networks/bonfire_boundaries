@@ -3,6 +3,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Acls
+  alias Bonfire.Boundaries.Grants
 
   def handle_event("blocks", %{"id" => id} = attrs, socket) when is_binary(id) do
     info(attrs)
@@ -147,6 +148,21 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
+  def handle_event("remove_from_circle", %{"subject_id" => subject}, socket) do
+    id = ulid!(e(socket.assigns, :circle, nil))
+
+    with {:ok, _circle} <-
+      Circles.remove_from_circles(subject, id) do
+
+      {:noreply,
+        socket
+        |> assign_flash(:info, "OK")
+        |> redirect_to("/settings/circles")
+      }
+
+    end
+  end
+
   def handle_event("circle_delete", _, socket) do
     id = ulid!(e(socket.assigns, :circle, nil))
 
@@ -172,6 +188,22 @@ defmodule Bonfire.Boundaries.LiveHandler do
           }
     end
   end
+
+
+  def handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
+    id = ulid!(e(socket.assigns, :acl, nil))
+
+    with {del, _} when is_integer(del) and del >0 <- Grants.remove_subject_from_acl(subject, id) do
+
+      {:noreply,
+        socket
+        |> assign_flash(:info, "OK")
+        |> redirect_to("/settings/acl/#{id}")
+      }
+
+    end
+  end
+
 
   def set_circles(selected_circles, previous_circles, add_to_previous \\ false) do
 

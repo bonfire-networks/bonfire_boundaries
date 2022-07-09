@@ -13,6 +13,7 @@ defmodule Bonfire.Boundaries.Circles do
   alias Bonfire.Data.AccessControl.{Circle, Encircle}
   alias Bonfire.Data.Identity.Caretaker
   alias Ecto.Changeset
+  alias Pointers.Pointer
 
   @default_q_opts [exclude_stereotypes: ["0KF1NEY0VD0N0TWANTT0HEARME"]] # don't show "others who silenced me" in circles
 
@@ -222,7 +223,8 @@ defmodule Bonfire.Boundaries.Circles do
 
   def remove_from_circles(subject, circles) when is_nil(circles) or length(circles)==0, do: error("No circle ID provided, so could not remove")
   def remove_from_circles(subject, circles) when is_list(circles) do
-    from(e in Encircle, where: e.subject_id == ^ulid(subject) and e.circle_id in ^ulid(circles)) |> repo().delete_all
+    from(e in Encircle, where: e.subject_id == ^ulid(subject) and e.circle_id in ^ulid(circles))
+    |> repo().delete_all
   end
   def remove_from_circles(subject, circle) do
     remove_from_circles(subject, [circle])

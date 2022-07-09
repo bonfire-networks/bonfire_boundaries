@@ -91,7 +91,7 @@ defmodule Bonfire.Boundaries.Grants do
       false -> false
       _ -> nil
     end
-    |> debug("value")
+    |> debug("grant value")
 
     upsert_or_delete(
       %{
@@ -105,12 +105,23 @@ defmodule Bonfire.Boundaries.Grants do
   end
 
   def grant(subject_id, acl_id, access, value, opts) when not is_nil(subject_id) do
-    subject_id |> Circles.circle_ids() |> grant(acl_id, access, value, opts)
+    subject_id
+    |> Circles.circle_ids()
+    |> grant(acl_id, access, value, opts)
   end
 
   def grant(_, _, _, _, _) do
     error("No function matched")
     nil
+  end
+
+  def remove_subject_from_acl(subject, acls) when is_nil(acls) or (is_list(acls) and length(acls)==0), do: error("No circle ID provided, so could not remove")
+  def remove_subject_from_acl(subject, acls) when is_list(acls) do
+    from(e in Grant, where: e.subject_id == ^ulid(subject) and e.acl_id in ^ulid(acls))
+    |> repo().delete_all
+  end
+  def remove_subject_from_acl(subject, acl) do
+    remove_subject_from_acl(subject, [acl])
   end
 
 
