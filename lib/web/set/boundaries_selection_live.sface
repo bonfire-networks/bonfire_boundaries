@@ -5,13 +5,16 @@
 
   <div>
     
-    <span :for={{name, id} <- e(@to_boundaries, nil) |> debug() || [{l("Public"), "public"}]} class="text-sm badge p-3">
+    <span :for={{id, name} <- e(@to_boundaries, nil) |> debug() || [{l("Public"), "public"}]} class="text-sm badge p-3">
       {name}
       <input 
         name="to_boundaries[]"
         value={id}
         type="hidden" />
-      <span class="cursor-pointer tooltip ml-1" data-tip={l "Remove this boundary"}>
+      <span 
+        class="cursor-pointer tooltip ml-1" 
+        data-tip={l "Remove this boundary"} 
+        phx-click={JS.push("remove_boundary", value: %{id: id}, target: "#smart_input")}>
         <Solid.XIcon class="w-4 h-4 stroke-current" />
       </span>
     </span>
