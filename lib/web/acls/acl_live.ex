@@ -43,7 +43,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       followers = Bonfire.Social.Follows.list_my_followers(current_user, paginate: false, exclude_ids: already_seen_ids)
       # |> debug
 
-      circles = Bonfire.Boundaries.Circles.list_my(current_user)
+      circles = Bonfire.Boundaries.Circles.list_my(current_user, extra_ids_to_include: ["0AND0MSTRANGERS0FF1NTERNET", "3SERSFR0MY0VR10CA11NSTANCE", "7EDERATEDW1THANACT1V1TYPVB"])
 
       suggestions = (for user <- followed ++ followers do
         {e(user, :edge, :object, :id, nil), e(user, :edge, :object, :profile, :name, "")<>" - "<>Bonfire.Me.Characters.display_username(e(user, :edge, :object, nil))}

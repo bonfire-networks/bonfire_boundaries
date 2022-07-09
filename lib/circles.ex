@@ -170,7 +170,7 @@ defmodule Bonfire.Boundaries.Circles do
     user
     # |> dump
     |> list_q(opts)
-    |> where([caretaker: caretaker], caretaker.caretaker_id == ^ulid(user))
+    |> where([circle, caretaker: caretaker], caretaker.caretaker_id == ^ulid!(user) or (circle.id in ^e(opts, :extra_ids_to_include, [])))
   end
 
   def list_my_defaults(_user \\ nil) do
