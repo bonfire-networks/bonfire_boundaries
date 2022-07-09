@@ -26,7 +26,7 @@ defmodule Bonfire.Boundaries.Fixtures do
     named = Enum.filter(acls ++ circles, &(&1[:name]))
     repo().insert_all_or_ignore(Acl,    Enum.map(acls,    &Map.take(&1, [:id])))
     repo().insert_all_or_ignore(Circle, Enum.map(circles, &Map.take(&1, [:id])))
-    repo().insert_all_or_ignore(Verb,   verbs)
+    repo().insert_all_or_ignore(Verb,   Enum.map(verbs,   &Map.take(&1, [:id, :verb])))
     repo().insert_all_or_ignore(Grant,  grants)
     # Then the mixins
     repo().insert_all_or_ignore(Named,  named)
