@@ -3,36 +3,9 @@
   class="flex items-center focus:outline-none"
   >
 
-  <div 
-    :if={not is_list(@to_boundaries) || length(@to_boundaries)==0}
-    class="mx-2"
-    >
-    <div
-      x-show="to_boundaries.length==0 || (to_boundaries.length==1 && to_boundaries[0] == 'public')"
-      style="display: none"
-    >
-      <Solid.GlobeIcon class="w-4 h-4 text-base-content text-opacity-70"/>
-    </div>
-    <div 
-      x-show="to_boundaries.length==1 && to_boundaries[0] == 'local'"
-      style="display: none">
-      <Solid.LocationMarkerIcon class="w-4 h-4 text-base-content text-opacity-70"/>
-    </div>
-    <div 
-      x-show="to_boundaries.length==1 && to_boundaries[0] == 'mentions'"
-      style="display: none">
-      <Solid.AtSymbolIcon class="w-4 h-4 text-base-content text-opacity-70"/>
-    </div>
-    <div 
-      x-show="to_boundaries.length==1 && to_boundaries[0] == 'message'"
-      style="display: none">
-      <Solid.ChatAlt2Icon class="w-4 h-4 text-base-content text-opacity-70"/>
-    </div>
-  </div>
-
   <div>
     
-    <span :for={{name, id} <- @to_boundaries || [{l("Public"), "public"}]} class="text-sm badge p-3">
+    <span :for={{name, id} <- e(@to_boundaries, nil) |> debug() || [{l("Public"), "public"}]} class="text-sm badge p-3">
       {name}
       <input 
         name="to_boundaries[]"
@@ -42,21 +15,6 @@
         <Solid.XIcon class="w-4 h-4 stroke-current" />
       </span>
     </span>
-
-    <template x-for="name in to_boundaries_names">
-      <span class="text-sm badge p-3">
-        <span x-text="name"></span>
-        <span class="cursor-pointer tooltip ml-1" data-tip={l "Remove this boundary"}>
-          <Outline.XIcon class="w-4 h-4 stroke-current" />
-        </span>
-      </span>
-    </template>
-    <template x-for="id in to_boundaries">
-      <input 
-        name="to_boundaries[]"
-        x-model="id"
-        type="hidden" />
-    </template>
 
   </div>
 </div> 

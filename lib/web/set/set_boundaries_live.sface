@@ -8,13 +8,6 @@
       to_circles={e(assigns, :to_circles, [])}
       thread_mode={e(assigns, :thread_mode, nil)}
     />
-    <Bonfire.Boundaries.Web.BoundariesInfoLive
-      :if={e(assigns, :to_boundaries, []) == []}
-      to_boundaries={e(assigns, :to_boundaries, [])}
-      to_circles={e(assigns, :to_circles, [])}
-      thread_mode={e(assigns, :thread_mode, nil)}
-      activity_type_or_reply={Bonfire.UI.Common.SmartInputLive.activity_type_or_reply(assigns)}
-    />
 
     <button type="button" 
       x-show="!open_boundaries"
@@ -26,6 +19,13 @@
     </button>
 
   </div>
+
+  <Bonfire.Boundaries.Web.BoundariesInfoLive
+    to_boundaries={e(assigns, :to_boundaries, [])}
+    to_circles={e(assigns, :to_circles, [])}
+    thread_mode={e(assigns, :thread_mode, nil)}
+    activity_type_or_reply={Bonfire.UI.Common.SmartInputLive.activity_type_or_reply(assigns)}
+  />
 
   <div x-show="open_boundaries">
     <ul class="p-2"> 

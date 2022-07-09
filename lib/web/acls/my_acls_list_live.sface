@@ -139,7 +139,7 @@
     {/for}
   </ul>
 
-  <div class="p-2 bg-base-200">
+  <div :if={@ui_for_setting_boundaries} class="p-2 bg-base-200">
     <button type="button" 
       class="w-full normal-case btn btn-primary btn-sm btn-wide" 
       @click="open_boundaries = false">
