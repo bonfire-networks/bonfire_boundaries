@@ -70,15 +70,21 @@
       </div>
       <div 
         :if={Enum.count(e(@subjects, []))>0}
-        class={"grid w-full grid-cols-#{@columns+1} gap-3 p-3"}>
+        class={"grid w-full grid-cols-3 gap-3 p-3"}>
 
         {#for {{verb_id, l}, i} <- Enum.with_index(e(@list, []))}   
-        <div class={"col-span-#{if rem(i, @columns) == 0, do: 2, else: 1}"}>
+        <div class={"col-span-1 border border-base-content/30 rounded"}>
 
           <div class={"flex-1 text-sm font-semibold rounded "}>
-            <div class="flex items-center p-2">
-              <div :if={rem(i, @columns) == 0} class="flex-1"></div>
-              <div class="flex-1 space-x-1 mx-auto text-center">
+            <div class="flex items-center p-2 space-x-2">
+              <span>
+                <Surface.Components.Dynamic.Component 
+                  module={e(l, :verb, :icon, Solid.QuestionMarkCircleIcon)}
+                  class="w-4 h-4"
+                  fill={"currentColor"}
+                />
+              </span>
+              <div class="flex-1">
                 {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
               </div>
             </div>
@@ -86,10 +92,8 @@
 
           <div 
             :for={%{id: subject_id} = subject <- e(@subjects, [])}
-            class={"flex items-center px-2 py-1 mt-px"}>
-            <span 
-              :if={rem(i, @columns) == 0} 
-              class="flex-1 pr-2 text-sm truncate ellipsis">
+            class={"flex items-center px-2 py-1 mt-px "}>
+            <span class="flex-1 pr-2 text-sm truncate ellipsis">
               {e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) || e(subject, :profile, :name, nil) || e(subject, :character, :username, nil) || e(subject, :name, nil) || subject_id}
             </span>
             <div class="flex items-center space-x-1">
@@ -104,9 +108,9 @@
                     disabled={@read_only}
                     />
                   <div 
-                    class={"btn btn-sm btn-circle btn-yes",
+                    class={"btn btn-sm btn-outline btn-circle btn-yes",
                     "btn-disabled": @read_only}>
-                    <Boxicon.Regular.CheckShield />
+                    <Boxicon.Regular.CheckShield class="w-4 h-4" />
                   </div>
                 </label>
                 <label class="w-[27px] mx-auto text-center">
@@ -119,9 +123,9 @@
                     disabled={@read_only}
                     />
                   <div 
-                    class={"btn btn-sm btn-circle btn-maybe",
+                    class={"btn btn-sm btn-outline btn-circle btn-maybe",
                     "btn-disabled": @read_only}>
-                    <Boxicon.Regular.Shield />
+                    <Boxicon.Regular.Shield class="w-4 h-4" />
                   </div>
                 </label>
                 <label class="w-[27px] mx-auto text-center">
@@ -134,9 +138,9 @@
                     disabled={@read_only}
                     />
                   <div 
-                    class={"btn btn-sm btn-circle btn-no",
+                    class={"btn btn-sm btn-outline btn-circle btn-no",
                     "btn-disabled": @read_only}>
-                    <Boxicon.Regular.ShieldX />
+                    <Boxicon.Regular.ShieldX class="w-4 h-4" />
                   </div>
                 </label>
               </form>

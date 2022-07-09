@@ -1,15 +1,11 @@
 <div class="p-4">
-  <div class="py-3">
-    <form class="flex items-center" phx-submit="Bonfire.Boundaries:acl_create">
-      <input class="flex-1 mr-4 input input-bordered" type="text" name="name" placeholder="Boundary name"/>
-      <button type="submit" class="normal-case btn btn-primary">Create a new boundary</button>
-    </form>
-  </div>
+  <form class="flex items-center" phx-submit="Bonfire.Boundaries:acl_create">
+    <input class="flex-1 mr-4 input input-bordered" type="text" name="name" placeholder="Boundary name"/>
+    <button type="submit" class="normal-case btn btn-primary">{l "Create a new boundary"}</button>
+  </form>
+</div>
 
-  <div class="mt-6">
- 
-    <h2 class="mt-4 text-xs font-medium tracking-wide uppercase text-base-content opacity-60">My boundaries</h2>
-
-    <Bonfire.Boundaries.Web.MyAclsListLive id={"my_acls"} />
-  </div>
+<div class="px-3 mt-6">
+  <h2 class="px-2 mb-3 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "My boundaries"}</h2>
+  <Bonfire.Boundaries.Web.MyAclsListLive id={"my_acls"} />
 </div>

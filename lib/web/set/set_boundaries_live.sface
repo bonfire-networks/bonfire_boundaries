@@ -1,7 +1,7 @@
 
 
 {#if Config.get(:experimental_features_enabled)}
-  <div class="flex items-center py-1 bg-base-content/10">
+  <div class="flex items-center p-3 bg-base-content/10">
     <Bonfire.Boundaries.Web.BoundariesSelectionLive
       :if={e(assigns, :thread_mode, nil) != :flat}
       to_boundaries={e(assigns, :to_boundaries, [])}
@@ -15,85 +15,100 @@
       phx-click="open_boundaries"
       phx-target="#smart_input"
       @click="open_boundaries = true">
-      <Solid.ChevronRightIcon />
+      <span class="sr-only">{l "Remove this boundary"}</span>
+      <Solid.ChevronRightIcon class="w-5 h-5 stroke-1" />
     </button>
 
+    <button type="button" 
+      x-show="open_boundaries"
+      class="space-x-1 normal-case btn btn-primary btn-xs" 
+      @click="open_boundaries = false">
+      <Outline.CheckIcon class="w-4 h-4"/>
+      <span class="text-sm">{l "Done"}</span>
+    </button>
+  
   </div>
 
-  <Bonfire.Boundaries.Web.BoundariesInfoLive
+  <!-- <Bonfire.Boundaries.Web.BoundariesInfoLive
     to_boundaries={e(assigns, :to_boundaries, [])}
     to_circles={e(assigns, :to_circles, [])}
     thread_mode={e(assigns, :thread_mode, nil)}
     activity_type_or_reply={Bonfire.UI.Common.SmartInputLive.activity_type_or_reply(assigns)}
-  />
+  /> -->
 
   <div x-show="open_boundaries">
-    <ul class="p-2"> 
-    <!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
-    <li class="flex items-center justify-between flex-1 p-2 mb-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
-      <label 
-        class="flex items-center w-full"
-        phx-click={JS.push("select_boundary", value: %{id: "public", name: l "Public"}, target: "#smart_input")}>
-        <div class="flex-1">
-          <div class="flex items-center space-x-2">
-            <Solid.GlobeIcon/>
-            <div class="text-base font-semibold">{l "Public"}</div>
+    <ul class="p-2 pb-0"> 
+      <!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
+      <li class="flex items-center justify-between flex-1 p-2 mb-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
+        <label 
+          class="flex items-center w-full"
+          phx-click={JS.push("select_boundary", value: %{id: "public", name: l "Public"}, target: "#smart_input")}>
+          <div class="flex-1">
+            <div class="flex items-start space-x-2">
+              <span class="text-lg">🌍</span>
+              <div class="flex flex-col">
+                <div class="text-base font-semibold">{l "Public"}</div>
+                <div class="text-sm text-base-content/80">
+                  {l "Publicly visible to everyone on the fediverse and in search engines"}
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="text-sm text-base-content/80">
-            {l "Publicly visible to everyone on the fediverse and in search engines"}
-          </div>
-        </div>
 
-        <div class="flex items-center space-x-2">
-          <div 
-            class="btn btn-outline btn-sm btn-circle opacity-80">
-            <Solid.PlusIcon class="w-5 h-5 " />
-          </div>
-        </div>
-      </label>
-    </li>
-    <li class="flex items-center justify-between flex-1 p-2 mb-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
-      <label 
-        class="flex items-center w-full"
-        phx-click={JS.push("select_boundary", value: %{id: "local", name: l "Local Instance"}, target: "#smart_input")}>
-        <div class="flex-1">
           <div class="flex items-center space-x-2">
-            <Solid.LocationMarkerIcon/>
-            <div class="text-base font-semibold">{l "Local Instance"}</div>
+            <div 
+              class="btn btn-outline btn-sm btn-circle opacity-80">
+              <Solid.PlusIcon class="w-5 h-5 " />
+            </div>
           </div>
-          <div class="text-sm text-base-content/80">
-            {l "Visible to all members of this instance"}
+        </label>
+      </li>
+      <li class="flex items-center justify-between flex-1 p-2 mb-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
+        <label 
+          class="flex items-center w-full"
+          phx-click={JS.push("select_boundary", value: %{id: "local", name: l "Local Instance"}, target: "#smart_input")}>
+          <div class="flex-1">
+            <div class="flex items-start space-x-2">
+              <span class="text-lg">🏠</span>
+              <div class="flex flex-col">
+                <div class="text-base font-semibold">{l "Local Instance"}</div>
+                <div class="text-sm text-base-content/80">
+                  {l "Visible to all members of this instance"}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="flex items-center space-x-2">
-          <div 
-            class="btn btn-outline btn-sm btn-circle opacity-80">
-            <Solid.PlusIcon class="w-5 h-5 " />
-          </div>
-        </div>
-      </label>
-    </li>
-    <li class="flex items-center justify-between flex-1 p-2 mb-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
-      <label 
-        class="flex items-center w-full"
-        phx-click={JS.push("select_boundary", value: %{id: "mentions", name: l "Mentions"}, target: "#smart_input")}>
-        <div class="flex-1">
           <div class="flex items-center space-x-2">
-            <Solid.AtSymbolIcon/> 
-            <div class="text-base font-semibold">{l "Mentions"}</div>
+            <div 
+              class="btn btn-outline btn-sm btn-circle opacity-80">
+              <Solid.PlusIcon class="w-5 h-5 " />
+            </div>
           </div>
-          <div class="text-sm text-base-content/80">
-            {l "Visible only to those mentioned, across the fediverse"}
+        </label>
+      </li>
+      <li class="flex items-center justify-between flex-1 p-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
+        <label 
+          class="flex items-center w-full"
+          phx-click={JS.push("select_boundary", value: %{id: "mentions", name: l "Mentions"}, target: "#smart_input")}>
+          <div class="flex-1">
+            <div class="flex items-start space-x-2">
+              <span class="text-lg">🔔</span>
+              <div class="flex flex-col">
+                <div class="text-base font-semibold">{l "Mentions"}</div>
+                <div class="text-sm text-base-content/80">
+                  {l "Visible only to those mentioned, across the fediverse"}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="flex items-center space-x-2">
-          <div 
-            class="btn btn-outline btn-sm btn-circle opacity-80">
-            <Solid.PlusIcon class="w-5 h-5 " />
+          <div class="flex items-center space-x-2">
+            <div 
+              class="btn btn-outline btn-sm btn-circle opacity-80">
+              <Solid.PlusIcon class="w-5 h-5 " />
+            </div>
           </div>
-        </div>
-      </label>
-    </li>
+        </label>
+      </li>
     </ul> 
 
     <Bonfire.Boundaries.Web.MyAclsListLive
