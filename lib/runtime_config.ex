@@ -13,20 +13,20 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     ### Verbs are like permissions. Each represents some activity or operation that may or may not be able to perform.
     verbs = %{
-      see:     %{id: "0BSERV1NG11ST1NGSEX1STENCE", verb: "See"},     # appear in lists of things or feeds.
-      read:    %{id: "0EAD1NGSVTTER1YFVNDAMENTA1", verb: "Read"},    # read it (if you can find it)/
-      create:  %{id: "4REATE0RP0STBRANDNEW0BJECT", verb: "Create"},  # create a post or other object.
-      edit:    %{id: "4HANG1NGVA1VES0FPR0PERT1ES", verb: "Edit"},    # change the fields of an object.
-      delete:  %{id: "4AKESTVFFG0AWAYPERMANENT1Y", verb: "Delete"},  # delete the object.
-      follow:  %{id: "20SVBSCR1BET0THE0VTPVT0F1T", verb: "Follow"},  # follow a user or thread or whatever.
-      like:    %{id: "11KES1ND1CATEAM11DAPPR0VA1", verb: "Like"},    # like an object.
-      boost:   %{id: "300ST0R0RANN0VCEANACT1V1TY", verb: "Boost"},   # boost an object.
-      flag:    %{id: "71AGSPAM0RVNACCEPTAB1E1TEM", verb: "Flag"},    # flag an object for an administrator to review.
-      reply:   %{id: "71TCREAT1NGA11NKEDRESP0NSE", verb: "Reply"},   # reply to a user's object.
-      mention: %{id: "0EFERENC1NGTH1NGSE1SEWHERE", verb: "Mention"}, # mention a user or object.
-      tag:     %{id: "4ATEG0R1S1NGNGR0VP1NGSTVFF", verb: "Tag"},     # tag a user or object in an object.
-      message: %{id: "40NTACTW1THAPR1VATEMESSAGE", verb: "Message"}, # send a direct message to the user.
-      request: %{id: "1NEEDPERM1SS10NT0D0TH1SN0W", verb: "Request"}, # request to do another verb (eg. request to follow)
+      see:     %{id: "0BSERV1NG11ST1NGSEX1STENCE", verb: "See", icon: Heroicons.Solid.EyeIcon},     # appear in lists of things or feeds.
+      read:    %{id: "0EAD1NGSVTTER1YFVNDAMENTA1", verb: "Read", icon: Boxicon.Solid.BookReader},    # read it (if you can find it)/
+      create:  %{id: "4REATE0RP0STBRANDNEW0BJECT", verb: "Create", icon: Boxicon.Solid.Pen},  # create a post or other object.
+      edit:    %{id: "4HANG1NGVA1VES0FPR0PERT1ES", verb: "Edit", icon: Boxicon.Regular.Highlight},    # change the fields of an object.
+      delete:  %{id: "4AKESTVFFG0AWAYPERMANENT1Y", verb: "Delete", icon: Boxicon.Solid.TrashAlt},  # delete the object.
+      follow:  %{id: "20SVBSCR1BET0THE0VTPVT0F1T", verb: "Follow", icon: Boxicon.Regular.Walk},  # follow a user or thread or whatever.
+      like:    %{id: "11KES1ND1CATEAM11DAPPR0VA1", verb: "Like", icon: Boxicon.Solid.Star},    # like an object.
+      boost:   %{id: "300ST0R0RANN0VCEANACT1V1TY", verb: "Boost", icon: Boxicon.Solid.ShareAlt},   # boost an object.
+      flag:    %{id: "71AGSPAM0RVNACCEPTAB1E1TEM", verb: "Flag", icon: Boxicon.Solid.FlagAlt},    # flag an object for an administrator to review.
+      reply:   %{id: "71TCREAT1NGA11NKEDRESP0NSE", verb: "Reply", icon: Boxicon.Regular.Reply},   # reply to a user's object.
+      mention: %{id: "0EFERENC1NGTH1NGSE1SEWHERE", verb: "Mention", icon: Boxicon.Regular.At}, # mention a user or object.
+      tag:     %{id: "4ATEG0R1S1NGNGR0VP1NGSTVFF", verb: "Tag", icon: Boxicon.Solid.PurchaseTag},     # tag a user or object in an object.
+      message: %{id: "40NTACTW1THAPR1VATEMESSAGE", verb: "Message", icon: Boxicon.Solid.Send}, # send a direct message to the user.
+      request: %{id: "1NEEDPERM1SS10NT0D0TH1SN0W", verb: "Request", icon: Boxicon.Regular.QuestionMark}, # request to do another verb (eg. request to follow)
       # verbs to maybe add: https://github.com/bonfire-networks/bonfire-app/issues/406
     }
 
