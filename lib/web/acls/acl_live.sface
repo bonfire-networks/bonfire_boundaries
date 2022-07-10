@@ -1,8 +1,6 @@
 <div class="">
   <div class="p-3">
-    <!-- <div class="flex items-center justify-center flex-shrink-0 w-24 h-24 text-sm font-medium text-white bg-pink-600 rounded-full shadow-2xl ring-4 ring-white">
-        GA
-    </div> -->
+
     <div class="flex items-center">
         <div class="flex items-center flex-1 space-x-2 text-xl font-bold text-base-content">
 
@@ -10,17 +8,32 @@
             :if={e(assigns, :parent_back, nil)} 
             phx-click="back"
             phx-target={e(assigns, :parent_back, nil)}
-            class="btn btn-ghost btn-sm btn-circle" > 
+            class="btn btn-outline btn-sm btn-circle" > 
             <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
           </div>
 
-          <!-- <Solid.LockClosedIcon class="w-6 h-6 text-base-content/80" /> -->
-          <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</div>
+          <div class="flex space-x-2 items-top">
+            <span class="text-lg" aria-label="boundary icon">🔥</span>
+            <div class="">
+              <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</div>
+              <div class="text-sm font-normal text-base-content/80">Boundary description</div>
+            </div>
+          </div>
         </div>
         <LivePatch
+          :if={@section=="permissions"}
           to={"/settings/acl/#{ulid(@acl)}/settings"}
-          class="text-sm font-medium link">
-          {l "Settings"}
+          class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost">
+          <Outline.CogIcon class="w-4 h-4" />
+          <span>{l "Settings"}</span>
+        </LivePatch>
+
+        <LivePatch
+          :if={@section=="settings"}
+          to={"/settings/acl/#{ulid(@acl)}"}
+          class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost">
+          <Outline.ChevronLeftIcon class="w-4 h-4" />
+          <span>{l "Back"}</span>
         </LivePatch>
         <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
     </div>
@@ -33,15 +46,15 @@
         <div class="flex items-center mt-3 space-x-2">
           <span 
             :for={subject <- @subjects}
-            class="flex items-center space-x-1 badge-lg badge badge-outline">
+            class="inline-flex rounded-full items-center py-0.5 pl-2.5 pr-1 text-sm font-medium bg-info text-info-content">
             <span class="text-sm">{subject_name(subject)}</span>
             <span 
               :if={!@read_only} 
               phx-click="Bonfire.Boundaries:remove_from_acl"
               phx-value-subject_id={ulid(subject)}
               phx-target={@myself}
-              class="btn btn-ghost btn-xs">
-              <Solid.XIcon class="w-4 h-4 stroke-current" />
+              class="flex-shrink-0 ml-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-info-content hover:bg-info-content/30 hover:text-info-content/80 focus:outline-none focus:bg-info-content/80 focus:text-white">
+              <Solid.XIcon class="w-4 h-4" />
             </span>
           </span>
         </div>
@@ -73,7 +86,7 @@
         class={"grid w-full grid-cols-#{columns(assigns)} gap-3 p-3"}>
 
         {#for {{verb_id, l}, i} <- Enum.with_index(e(@list, []))}   
-        <div class={"col-span-1 border border-base-content/30 rounded"}>
+        <div class={"col-span-1 border border-base-content/30 rounded bg-base-200"}>
 
           <div class={"flex-1 text-sm font-semibold rounded "}>
             <div class="flex items-center p-2 space-x-2">
@@ -81,7 +94,7 @@
               {#case Bonfire.Boundaries.Verbs.get(verb_id)}
                 {#match nil}
                 {#match verb}
-                <span class="tooltip" data-tip={e(verb, :summary, nil)}>
+                <span>
                   <Surface.Components.Dynamic.Component 
                     module={e(verb, :icon, Solid.QuestionMarkCircleIcon)}
                     class="w-4 h-4"
@@ -99,13 +112,13 @@
 
           <div 
             :for={%{id: subject_id} = subject <- e(@subjects, [])}
-            class={"flex items-center px-2 py-1 mt-px tooltip"} data-tip={subject_name(subject)}>
-            <div class="flex-1 pr-2 text-left text-sm truncate ellipsis" >
+            class={"flex items-center px-2 py-1 mt-px"}>
+            <div class="flex-1 pr-2 text-sm text-left truncate ellipsis" >
               {subject_name(subject)}
             </div>
-            <div class="flex items-center space-x-1">
-              <form :on-change="edit_grant" class="boundaries-switches">
-                <label class="w-[27px] mx-auto text-center tooltip  tooltip-bottom" data-tip={l "Can"}>
+            <div class="">
+              <form :on-change="edit_grant" class="flex items-center space-x-1 boundaries-switches">
+                <label class="tooltip tooltip-top" data-tip={l "Can"}>
                   <input 
                     class="absolute opacity-0" 
                     name={"subject[#{subject_id}][#{verb_id}]"} 
@@ -120,7 +133,7 @@
                     <Boxicon.Regular.CheckShield class="w-4 h-4" />
                   </div>
                 </label>
-                <label class="w-[27px] mx-auto text-center tooltip tooltip-bottom" data-tip={l "Not specified"}>
+                <label class="tooltip tooltip-top" data-tip={l "Not specified"}>
                   <input 
                     class="absolute opacity-0" 
                     name={"subject[#{subject_id}][#{verb_id}]"} 
@@ -135,7 +148,7 @@
                     <Boxicon.Regular.Shield class="w-4 h-4" />
                   </div>
                 </label>
-                <label class="w-[27px] mx-auto text-center tooltip tooltip-bottom" data-tip={l "Cannot"}>
+                <label class="tooltip tooltip-top" data-tip={l "Cannot"}>
                   <input 
                     class="absolute opacity-0" 
                     name={"subject[#{subject_id}][#{verb_id}]"} 
@@ -156,38 +169,105 @@
         </div>
         {/for}
       </div>
-      <!-- <div class="flex justify-end p-2 bg-base-200">
-        <button 
-          type="button" 
-          class="normal-case btn btn-primary btn-sm btn-wide" 
-          @click="open_boundaries = false">
-          {l "Save"}
-        </button>
-      </div> -->
+   
     </div>
     <section
       :if={@section=="settings"}
+      role="tabpanel"
       class="p-4"
     >
-    test
+    <div class="pb-3 text-lg font-medium">{l "General"}</div>
+      <form class="p-4 border rounded-lg border-base-content/30">
+        
+        
+        <div 
+          x-data="{
+            open: false,
+            close(focusAfter) {
+              if (! this.open) return
+              this.open = false
+              focusAfter && focusAfter.focus()
+            }
+          }"
+          x-on:keydown.escape.prevent.stop="close($refs.button)"
+          class="w-full form-control">
+          <label class="label">
+            <span class="font-semibold label-text">{l "Edit the boundary emoji"}</span>
+          </label>
+          <div class="mt-1 sm:mt-0 sm:col-span-2">
+            <div class="relative flex items-center">
+              <span class="w-12 h-12 overflow-hidden bg-gray-100 rounded-full">
+                <svg class="w-full h-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </span>
+              <button 
+                @click="open = ! open"
+                type="button" 
+                class="ml-2 normal-case btn btn-sm btn-outline">{l "Pick an emoji"}</button>
+              <div 
+                x-ref="panel"
+                x-show="open"
+                x-transition.origin.top.left
+                x-on:click.outside="close($refs.button)"
+                x-show="open" 
+                class="absolute z-40 top-12 left-3"
+                role="tooltip">
+                <div id="boundary-picker"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        
+        <div class="w-full mt-4 form-control">
+          <label class="label">
+            <span class="font-semibold label-text">{l "Edit the boundary name"}</span>
+            </label>
+            <div class="flex items-center">
+              <input type="text" placeholder="Type here" class="w-full input input-bordered" />
+            </div>
+        </div>
+      
+        <div class="w-full mt-4 form-control">
+          <label class="label">
+            <span class="font-semibold label-text">{l "Edit the boundary description"}</span>
+            </label>
+            <div class="flex flex-col space-y-3">
+              <textarea placeholder="A short description to help you remember what this boundary is about" id="boundary_description" name="" rows="3" class="w-full h-24 textarea textarea-bordered"></textarea>
+            </div>
+        </div>
+        <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l "Save"}</button>
+      </form>
+      <div :if={!e(@acl, :stereotyped, nil)} class="pb-3 mt-6 text-lg font-medium">{l "Danger zone"}</div>
+      <div :if={!e(@acl, :stereotyped, nil)} class="p-4 border rounded-lg border-error/30">
+        <div class="flex items-center space-x-8">
+          <div class="flex flex-col">
+            <div class="flex-1 text-base font-bold">{l "Delete this boundary"}</div>
+            <div class="text-sm text-base-content/80">{l "Once you delete a boundary, there is no going back. Please be certain."}</div>
+          </div>
+            <button class="normal-case btn btn-outline btn-error btn-sm">{l "Delete this boundary"}</button>
+        </div>
+      </div>
+
     </section>
   </div>
 
 
 <style>
-.boundaries-switches label div.btn {
-  color: hsl(var(--bc));
-}
-.boundaries-switches label input:checked ~ div.btn-yes {
-  background: hsl(var(--su) / 0.90);
-}
-.boundaries-switches label input:checked ~ div.btn-no {
-  background: hsl(var(--er) / 0.90);
-}
-.boundaries-switches label input:checked ~ div.btn-maybe {
-  background: white;
-  color: black;
-}
+  .boundaries-switches label div.btn {
+    color: hsl(var(--bc));
+  }
+  .boundaries-switches label input:checked ~ div.btn-yes {
+    background: hsl(var(--su) / 0.90);
+  }
+  .boundaries-switches label input:checked ~ div.btn-no {
+    background: hsl(var(--er) / 0.90);
+  }
+  .boundaries-switches label input:checked ~ div.btn-maybe {
+    background: white;
+    color: black;
+  }
 </style>
 
 

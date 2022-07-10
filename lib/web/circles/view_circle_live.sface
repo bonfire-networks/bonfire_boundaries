@@ -1,6 +1,6 @@
 <div class="">
   <div class="">
-      <div class="flex items-center p-4 pb-6 bg-base-content/10 border-base-content/30">
+      <div class="flex items-center p-4 pb-6 bg-base-content/5 border-base-content/30">
         <!-- <div class="flex items-center justify-center flex-shrink-0 w-24 h-24 text-sm font-medium text-white bg-pink-600 rounded-full shadow-2xl ring-4 ring-white">
             GA
         </div> -->
@@ -18,13 +18,15 @@
           <!-- Tab List -->
           <ul
             role="tablist"
-            class="flex items-stretch -mb-px border-b bg-base-content/10 border-base-content/30"
+            class="flex items-stretch -mb-px text-sm font-medium border-b bg-base-content/5 border-base-content/30"
           >
               <!-- Tab -->
             <li>
               <LivePatch
                 to={"/settings/circle/#{ulid(@circle)}/members"}
-                class="inline-flex px-5 py-2.5 "
+                class={
+                  "inline-flex px-5 py-2.5 text-base-content/70",
+                  "border-b-4 border-rounded border-primary !text-base-content": @section == "members"}
                 role="tab">
                 {l "Members"}
               </LivePatch>
@@ -33,14 +35,18 @@
             <li :if={!@read_only}>
               <LivePatch
                 to={"/settings/circle/#{ulid(@circle)}/suggestions"}
-                class="inline-flex px-5 py-2.5"
+                class={
+                  "inline-flex px-5 py-2.5 text-base-content/70",
+                  "border-b-4 border-rounded border-primary !text-base-content": @section == "suggestions"}
                 role="tab">{l "Suggestions"}</LivePatch>
             </li>
 
             <li :if={!@read_only}>
               <LivePatch
                 to={"/settings/circle/#{ulid(@circle)}/settings"}
-                class="inline-flex px-5 py-2.5"
+                class={
+                  "inline-flex px-5 py-2.5 text-base-content/70",
+                  "border-b-4 border-rounded border-primary !text-base-content": @section == "settings"}
                 role="tab">{l "Settings"}</LivePatch>
             </li>
           </ul>
@@ -176,7 +182,7 @@
               <form class="p-4 border rounded-lg border-base-content/30">
                 <div class="w-full form-control">
                   <label class="label">
-                    <span class="font-bold label-text">{l "Edit the circle name"}</span>
+                    <span class="font-semibold label-text">{l "Edit the circle name"}</span>
                     </label>
                     <div class="flex items-center">
                       <input type="text" placeholder="Type here" class="w-full input input-bordered" />
@@ -185,7 +191,7 @@
               
                 <div class="w-full mt-4 form-control">
                   <label class="label">
-                    <span class="font-bold label-text">{l "Edit the circle description"}</span>
+                    <span class="font-semibold label-text">{l "Edit the circle description"}</span>
                     </label>
                     <div class="flex flex-col space-y-3">
                       <textarea placeholder="A short description to help you remember what this circle is about" id="circle_description" name="" rows="3" class="w-full h-24 textarea textarea-bordered"></textarea>
