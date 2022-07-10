@@ -13,20 +13,20 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     ### Verbs are like permissions. Each represents some activity or operation that may or may not be able to perform.
     verbs = %{
-      see:     %{id: "0BSERV1NG11ST1NGSEX1STENCE", verb: "See", icon: Heroicons.Solid.EyeIcon},     # appear in lists of things or feeds.
-      read:    %{id: "0EAD1NGSVTTER1YFVNDAMENTA1", verb: "Read", icon: Boxicon.Solid.BookReader},    # read it (if you can find it)/
-      create:  %{id: "4REATE0RP0STBRANDNEW0BJECT", verb: "Create", icon: Boxicon.Solid.Pen},  # create a post or other object.
-      edit:    %{id: "4HANG1NGVA1VES0FPR0PERT1ES", verb: "Edit", icon: Boxicon.Regular.Highlight},    # change the fields of an object.
-      delete:  %{id: "4AKESTVFFG0AWAYPERMANENT1Y", verb: "Delete", icon: Boxicon.Solid.TrashAlt},  # delete the object.
-      follow:  %{id: "20SVBSCR1BET0THE0VTPVT0F1T", verb: "Follow", icon: Boxicon.Regular.Walk},  # follow a user or thread or whatever.
-      like:    %{id: "11KES1ND1CATEAM11DAPPR0VA1", verb: "Like", icon: Boxicon.Solid.Star},    # like an object.
-      boost:   %{id: "300ST0R0RANN0VCEANACT1V1TY", verb: "Boost", icon: Boxicon.Solid.ShareAlt},   # boost an object.
-      flag:    %{id: "71AGSPAM0RVNACCEPTAB1E1TEM", verb: "Flag", icon: Boxicon.Solid.FlagAlt},    # flag an object for an administrator to review.
-      reply:   %{id: "71TCREAT1NGA11NKEDRESP0NSE", verb: "Reply", icon: Boxicon.Regular.Reply},   # reply to a user's object.
-      mention: %{id: "0EFERENC1NGTH1NGSE1SEWHERE", verb: "Mention", icon: Boxicon.Regular.At}, # mention a user or object.
-      tag:     %{id: "4ATEG0R1S1NGNGR0VP1NGSTVFF", verb: "Tag", icon: Boxicon.Solid.PurchaseTag},     # tag a user or object in an object.
-      message: %{id: "40NTACTW1THAPR1VATEMESSAGE", verb: "Message", icon: Boxicon.Solid.Send}, # send a direct message to the user.
-      request: %{id: "1NEEDPERM1SS10NT0D0TH1SN0W", verb: "Request", icon: Boxicon.Regular.QuestionMark}, # request to do another verb (eg. request to follow)
+      see:     %{id: "0BSERV1NG11ST1NGSEX1STENCE", verb: "See", icon: Heroicons.Solid.EyeIcon, summary: "appear in lists of things or feeds"},     #
+      read:    %{id: "0EAD1NGSVTTER1YFVNDAMENTA1", verb: "Read", icon: Boxicon.Solid.BookReader, summary: "read it (if you can find it)"},
+      create:  %{id: "4REATE0RP0STBRANDNEW0BJECT", verb: "Create", icon: Boxicon.Solid.Pen, summary: "create a post or other object"},
+      edit:    %{id: "4HANG1NGVA1VES0FPR0PERT1ES", verb: "Edit", icon: Boxicon.Regular.Highlight, summary: "change the fields of an existing object"},
+      delete:  %{id: "4AKESTVFFG0AWAYPERMANENT1Y", verb: "Delete", icon: Boxicon.Solid.TrashAlt, summary: "delete the object."},
+      follow:  %{id: "20SVBSCR1BET0THE0VTPVT0F1T", verb: "Follow", icon: Boxicon.Regular.Walk, summary: "follow a user or thread or whatever"},
+      like:    %{id: "11KES1ND1CATEAM11DAPPR0VA1", verb: "Like", icon: Boxicon.Solid.Star, summary: "like an object (and notify the author)"},
+      boost:   %{id: "300ST0R0RANN0VCEANACT1V1TY", verb: "Boost", icon: Boxicon.Solid.ShareAlt, summary: "boost an object"},
+      flag:    %{id: "71AGSPAM0RVNACCEPTAB1E1TEM", verb: "Flag", icon: Boxicon.Solid.FlagAlt, summary: "flag an object for a moderator to review (note that anyone who can see or read something can usually flag it in any case)"},
+      reply:   %{id: "71TCREAT1NGA11NKEDRESP0NSE", verb: "Reply", icon: Boxicon.Regular.Reply, summary: "reply to a user's activity or post"},
+      mention: %{id: "0EFERENC1NGTH1NGSE1SEWHERE", verb: "Mention", icon: Boxicon.Regular.At, summary: "mention a user or object (and notify them of it)"},
+      tag:     %{id: "4ATEG0R1S1NGNGR0VP1NGSTVFF", verb: "Tag", icon: Boxicon.Solid.PurchaseTag, summary: "tag a user or object (and appear in the tag's timeline)"},
+      message: %{id: "40NTACTW1THAPR1VATEMESSAGE", verb: "Message", icon: Boxicon.Solid.Send, summary: "send a message"},
+      request: %{id: "1NEEDPERM1SS10NT0D0TH1SN0W", verb: "Request", icon: Boxicon.Regular.QuestionMark, summary: "request permission for another verb (eg. request to follow)"},
       # verbs to maybe add: https://github.com/bonfire-networks/bonfire-app/issues/406
     }
 

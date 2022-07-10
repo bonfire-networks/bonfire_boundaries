@@ -34,7 +34,7 @@
           <span 
             :for={subject <- @subjects}
             class="flex items-center space-x-1 badge-lg badge badge-outline">
-            <span class="text-sm">{e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) || e(subject, :profile, :name, nil) || e(subject, :character, :username, nil) || e(subject, :name, nil) || ulid(subject)}</span>
+            <span class="text-sm">{subject_name(subject)}</span>
             <span 
               :if={!@read_only} 
               phx-click="Bonfire.Boundaries:remove_from_acl"
@@ -70,35 +70,42 @@
       </div>
       <div 
         :if={Enum.count(e(@subjects, []))>0}
-        class={"grid w-full grid-cols-3 gap-3 p-3"}>
+        class={"grid w-full grid-cols-#{columns(assigns)} gap-3 p-3"}>
 
         {#for {{verb_id, l}, i} <- Enum.with_index(e(@list, []))}   
         <div class={"col-span-1 border border-base-content/30 rounded"}>
 
           <div class={"flex-1 text-sm font-semibold rounded "}>
             <div class="flex items-center p-2 space-x-2">
-              <span>
-                <Surface.Components.Dynamic.Component 
-                  module={e(l, :verb, :icon, Solid.QuestionMarkCircleIcon)}
-                  class="w-4 h-4"
-                  fill={"currentColor"}
-                />
-              </span>
+
+              {#case Bonfire.Boundaries.Verbs.get(verb_id)}
+                {#match nil}
+                {#match verb}
+                <span class="tooltip" data-tip={e(verb, :summary, nil)}>
+                  <Surface.Components.Dynamic.Component 
+                    module={e(verb, :icon, Solid.QuestionMarkCircleIcon)}
+                    class="w-4 h-4"
+                    fill={"currentColor"}
+                  />
+                </span>
+              {/case}
+
               <div class="flex-1">
                 {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
               </div>
+              
             </div>
           </div>
 
           <div 
             :for={%{id: subject_id} = subject <- e(@subjects, [])}
-            class={"flex items-center px-2 py-1 mt-px "}>
-            <span class="flex-1 pr-2 text-sm truncate ellipsis">
-              {e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) || e(subject, :profile, :name, nil) || e(subject, :character, :username, nil) || e(subject, :name, nil) || subject_id}
-            </span>
+            class={"flex items-center px-2 py-1 mt-px tooltip"} data-tip={subject_name(subject)}>
+            <div class="flex-1 pr-2 text-left text-sm truncate ellipsis" >
+              {subject_name(subject)}
+            </div>
             <div class="flex items-center space-x-1">
               <form :on-change="edit_grant" class="boundaries-switches">
-                <label class="w-[27px] mx-auto text-center">
+                <label class="w-[27px] mx-auto text-center tooltip  tooltip-bottom" data-tip={l "Can"}>
                   <input 
                     class="absolute opacity-0" 
                     name={"subject[#{subject_id}][#{verb_id}]"} 
@@ -113,7 +120,7 @@
                     <Boxicon.Regular.CheckShield class="w-4 h-4" />
                   </div>
                 </label>
-                <label class="w-[27px] mx-auto text-center">
+                <label class="w-[27px] mx-auto text-center tooltip tooltip-bottom" data-tip={l "Not specified"}>
                   <input 
                     class="absolute opacity-0" 
                     name={"subject[#{subject_id}][#{verb_id}]"} 
@@ -128,7 +135,7 @@
                     <Boxicon.Regular.Shield class="w-4 h-4" />
                   </div>
                 </label>
-                <label class="w-[27px] mx-auto text-center">
+                <label class="w-[27px] mx-auto text-center tooltip tooltip-bottom" data-tip={l "Cannot"}>
                   <input 
                     class="absolute opacity-0" 
                     name={"subject[#{subject_id}][#{verb_id}]"} 

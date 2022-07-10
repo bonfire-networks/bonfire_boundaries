@@ -5,7 +5,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   prop acl_id, :any
   prop parent_back, :any
-  prop columns, :integer, default: 3
+  prop columns, :integer, default: 1
 
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})
@@ -215,4 +215,11 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   def verb_subject_grant(_), do: %{}
 
+  def subject_name(subject) do
+    e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) || e(subject, :profile, :name, nil) || e(subject, :character, :username, nil) || e(subject, :name, nil) || ulid(subject)
+  end
+
+  def columns(assigns) do
+    if Settings.get([:ui, :compact], false, assigns), do: 3, else: 2
+  end
 end
