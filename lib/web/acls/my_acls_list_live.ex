@@ -1,5 +1,6 @@
 defmodule Bonfire.Boundaries.Web.MyAclsListLive do
   use Bonfire.UI.Common.Web, :stateful_component
+  alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Web.AclLive
   alias Bonfire.Boundaries.Integration
 
@@ -16,10 +17,10 @@ defmodule Bonfire.Boundaries.Web.MyAclsListLive do
   end
 
   def update(assigns, socket) do
-    built_in_ids = Bonfire.Boundaries.Acls.built_in_ids
+    built_in_ids = Acls.built_in_ids()
 
     opts = if e(assigns, :ui_for_setting_boundaries, nil) do
-      Bonfire.Boundaries.Acls.opts_for_dropdown()
+      Acls.opts_for_dropdown()
     else
       extra_ids_to_include = if Integration.is_admin?(current_user(assigns)), do: built_in_ids, else: []
 
@@ -27,7 +28,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsListLive do
     end
 
 
-    acls = Bonfire.Boundaries.Acls.list_my_with_counts(current_user(assigns), opts)
+    acls = Acls.list_my_with_counts(current_user(assigns), opts)
 
     acls = if e(assigns, :hide_breakdown, nil), do: acls, else: acls |> repo().maybe_preload(grants: [:verb, subject: [:named, :profile, encircle_subjects: [:profile], stereotyped: [:named]]])
     debug(acls, "Acls")

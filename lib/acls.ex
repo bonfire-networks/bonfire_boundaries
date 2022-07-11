@@ -11,13 +11,12 @@ defmodule Bonfire.Boundaries.Acls do
   import Bonfire.Boundaries.Queries
 
   alias Bonfire.Data.AccessControl.Acl
-  # alias Bonfire.Data.Identity.Named
+  alias Bonfire.Data.Identity.ExtraInfo
   alias Bonfire.Data.Identity.Caretaker
   alias Bonfire.Boundaries.Stereotyped
   alias Bonfire.Data.AccessControl.{Acl, Controlled, Grant}
-  # alias Bonfire.Data.Identity.User
+  alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries
-  alias Bonfire.Boundaries.Acls
   # alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Verbs
   alias Ecto.Changeset
@@ -163,7 +162,7 @@ defmodule Bonfire.Boundaries.Acls do
         stereo ->
           stereo
           |> Enum.map(&elem(&1, 1).id)
-          |> Acls.find_caretaker_stereotypes(user, ...)
+          |> find_caretaker_stereotypes(user, ...)
           # |> info("stereos")
       end
     Enum.map(globals ++ stereo, &(%{acl_id: &1.id}))
@@ -177,12 +176,12 @@ defmodule Bonfire.Boundaries.Acls do
     case user_default_acl(name) do
 
       nil -> # seems to be a global ACL
-        {:global, Acls.get!(name)}
+        {:global, get!(name)}
 
       default -> # should be a user-level stereotyped ACL
         case default[:stereotype] do
           nil -> raise RuntimeError, message: "Boundaries: Unstereotyped user acl in config: #{inspect(name)}"
-          stereo -> {:stereo, Acls.get!(stereo)}
+          stereo -> {:stereo, get!(stereo)}
         end
     end
   end
@@ -214,18 +213,19 @@ defmodule Bonfire.Boundaries.Acls do
     changeset(:create, attrs, opts, Keyword.fetch!(opts, :current_user))
   end
 
-  defp changeset(:create, attrs, _opts, :system), do: Acls.changeset_cast(attrs)
+  defp changeset(:create, attrs, _opts, :system), do: changeset_cast(attrs)
   defp changeset(:create, attrs, _opts, %{id: id}) do
-    Changeset.cast(%Acl{}, %{caretaker: %{caretaker_id: id}}, [])
+    Changesets.cast(%Acl{}, %{caretaker: %{caretaker_id: id}}, [])
     |> changeset_cast(attrs)
   end
 
-  def changeset_cast(acl \\ %Acl{}, attrs) do
+  defp changeset_cast(acl \\ %Acl{}, attrs) do
     Acl.changeset(acl, attrs)
     # |> IO.inspect(label: "cs")
-    |> Changeset.cast_assoc(:named, [])
-    |> Changeset.cast_assoc(:caretaker)
-    |> Changeset.cast_assoc(:stereotyped)
+    |> Changesets.cast_assoc(:named, with: &Named.changeset/2)
+    |> Changesets.cast_assoc(:extra_info, with: &ExtraInfo.changeset/2)
+    |> Changesets.cast_assoc(:caretaker, with: &Caretaker.changeset/2)
+    |> Changesets.cast_assoc(:stereotyped)
   end
 
   def get_for_caretaker(id, caretaker, opts \\ []) do
@@ -260,7 +260,7 @@ defmodule Bonfire.Boundaries.Acls do
   def list_q(opts \\ []) do
     from(acl in Acl, as: :acl)
     |> boundarise(acl.id, opts)
-    |> proload([:caretaker, :named, stereotyped: {"stereotype_", [:named]}])
+    |> proload([:caretaker, :named, :extra_info, stereotyped: {"stereotype_", [:named]}])
   end
 
   # def list_all do
@@ -341,6 +341,27 @@ defmodule Bonfire.Boundaries.Acls do
       preload: [caretaker: c, stereotyped: s]
     ) |> repo().all()
     # |> debug("stereotype acls")
+  end
+
+  def is_stereotype?(acl) do
+    e(acl, :stereotyped, :stereotype_id, nil) || ulid(acl) in built_in_ids()
+  end
+
+  def edit(%Acl{} = acl, %User{} = user, params) do
+    acl = acl
+    |> repo().maybe_preload([:named, :extra_info])
+
+    params
+    |> input_to_atoms()
+    |> Changesets.put_id_on_mixins([:named, :extra_info], acl)
+    |> changeset_cast(acl, ...)
+    |> repo().update()
+  end
+
+  def edit(id, %User{} = user, params) do
+    with {:ok, acl} <- get_for_caretaker(id, user) do
+      edit(acl, user, params)
+    end
   end
 
 end

@@ -13,15 +13,15 @@
           </div>
 
           <div class="flex space-x-2 items-top">
-            <span class="text-lg" aria-label="boundary icon">🔥</span>
+            <span class="text-xl" aria-label="boundary icon">{e(@acl, :extra_info, :info, :icon, "🛡")}</span>
             <div class="">
               <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</div>
-              <div class="text-sm font-normal text-base-content/80">Boundary description</div>
+              <div class="text-sm font-normal text-base-content/80">{e(@acl, :extra_info, :summary, nil)}</div>
             </div>
           </div>
         </div>
         <LivePatch
-          :if={@section=="permissions"}
+          :if={@section=="permissions" && !@read_only}
           to={"/settings/acl/#{ulid(@acl)}/settings"}
           class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost">
           <Outline.CogIcon class="w-4 h-4" />
@@ -94,7 +94,7 @@
               {#case Bonfire.Boundaries.Verbs.get(verb_id)}
                 {#match nil}
                 {#match verb}
-                <span>
+                <span class="tooltip" data-tip={e(verb, :summary, nil)}>
                   <Surface.Components.Dynamic.Component 
                     module={e(verb, :icon, Solid.QuestionMarkCircleIcon)}
                     class="w-4 h-4"
@@ -113,7 +113,11 @@
           <div 
             :for={%{id: subject_id} = subject <- e(@subjects, [])}
             class={"flex items-center px-2 py-1 mt-px"}>
-            <div class="flex-1 pr-2 text-sm text-left truncate ellipsis" >
+            <div 
+              class={"flex-1 pr-2 text-left truncate ellipsis ",
+                "text-sm": !Settings.get([:ui, :compact], false, assigns),
+                "text-xs": Settings.get([:ui, :compact], false, assigns)
+              }>
               {subject_name(subject)}
             </div>
             <div class="">
@@ -177,8 +181,7 @@
       class="p-4"
     >
     <div class="pb-3 text-lg font-medium">{l "General"}</div>
-      <form class="p-4 border rounded-lg border-base-content/30">
-        
+      <form phx-submit="edit" phx-target={@myself} class="p-4 border rounded-lg border-base-content/30">
         
         <div 
           x-data="{
@@ -193,13 +196,12 @@
           class="w-full form-control">
           <label class="label">
             <span class="font-semibold label-text">{l "Edit the boundary emoji"}</span>
+            <input name="extra_info[info][icon]" value={e(@acl, :extra_info, :info, :icon, "🔥")} type="hidden"/>
           </label>
           <div class="mt-1 sm:mt-0 sm:col-span-2">
             <div class="relative flex items-center">
-              <span class="w-12 h-12 overflow-hidden bg-gray-100 rounded-full">
-                <svg class="w-full h-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
+              <span class="w-10 h-10 text-4xl text-gray-300">
+                {e(@acl, :extra_info, :info, :icon, "🛡")}
               </span>
               <button 
                 @click="open = ! open"
@@ -225,7 +227,7 @@
             <span class="font-semibold label-text">{l "Edit the boundary name"}</span>
             </label>
             <div class="flex items-center">
-              <input type="text" placeholder="Type here" class="w-full input input-bordered" />
+              <input name="named[name]" value={e(@acl, :named, :name, nil)} type="text" placeholder="Type here" class="w-full input input-bordered" />
             </div>
         </div>
       
@@ -234,7 +236,7 @@
             <span class="font-semibold label-text">{l "Edit the boundary description"}</span>
             </label>
             <div class="flex flex-col space-y-3">
-              <textarea placeholder="A short description to help you remember what this boundary is about" id="boundary_description" name="" rows="3" class="w-full h-24 textarea textarea-bordered"></textarea>
+              <textarea name="extra_info[summary]" placeholder="A short description to help you remember what this boundary is about" rows="3" class="w-full h-24 textarea textarea-bordered">{e(@acl, :extra_info, :summary, nil)}</textarea>
             </div>
         </div>
         <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l "Save"}</button>

@@ -1,4 +1,4 @@
-defmodule Bonfire.Boundaries.Web.ViewCircleLive do
+defmodule Bonfire.Boundaries.Web.CircleLive do
   use Bonfire.UI.Common.Web, :stateful_component
   alias Bonfire.Boundaries.Circles
 
@@ -57,9 +57,24 @@ defmodule Bonfire.Boundaries.Web.ViewCircleLive do
         members: members,
         suggestions: suggestions,
         read_only: e(circle, :stereotyped, :stereotype_id, nil) in ["7DAPE0P1E1PERM1TT0F0110WME", "4THEPE0P1ES1CH00SET0F0110W"],
-        settings_section_title: "View " <> e(circle, :named, :name, "Circle name") <> " circle",
+        settings_section_title: "View " <> e(circle, :named, :name, "") <> " circle",
         settings_section_description: l "Create and manage your circle."
       )}
+    end
+  end
+
+  def handle_event("edit", attrs, socket) do
+    debug(attrs)
+    with {:ok, circle} <-  Circles.edit(e(socket.assigns, :circle, nil), current_user(socket), attrs) do
+      {:noreply, socket
+        |> assign_flash(:info, l "Edited!")
+        |> assign(circle: circle)
+      }
+    else other ->
+      error(other)
+      {:noreply, socket
+        |> assign_flash(:error, l "Could not edit circle")
+      }
     end
   end
 
@@ -76,7 +91,7 @@ defmodule Bonfire.Boundaries.Web.ViewCircleLive do
     else other ->
       error(other)
       {:noreply, socket
-        |> assign_flash(:error, "Could not add to circle")
+        |> assign_flash(:error, l "Could not add to circle")
       }
     end
   end
@@ -94,7 +109,7 @@ defmodule Bonfire.Boundaries.Web.ViewCircleLive do
     else other ->
       error(other)
       {:noreply, socket
-        |> assign_flash(:error, "Could not remove from circle")
+        |> assign_flash(:error, l "Could not remove from circle")
       }
     end
   end

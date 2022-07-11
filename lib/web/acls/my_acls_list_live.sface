@@ -20,6 +20,7 @@
           phx-click={if @select_event, do: JS.push(@select_event, value: %{id: acl.id, name: (e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled")}, target: "#smart_input")}>
           <div class="flex-1">
             <div class="flex items-center space-x-2">
+              <span class="text-xl" aria-label="boundary icon">{e(acl, :extra_info, :info, :icon, "🛡")}</span>
               <div class="text-base font-semibold">{ e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled" }</div>
             </div>
             <!-- <div class="text-sm text-base-content/80">
@@ -34,7 +35,12 @@
               class="btn btn-ghost btn-sm btn-circle"
               to={"/settings/acl/"<>acl.id}
             >
-              <Solid.PencilIcon class="w-4 h-4" />
+              {#case Acls.is_stereotype?(acl)}
+              {#match true}
+                <Solid.InformationCircleIcon class="w-4 h-4" />
+              {#match _}
+                <Solid.PencilIcon class="w-4 h-4" />
+              {/case}
             </LiveRedirect>
             <div 
               :if={@ui_for_setting_boundaries}
@@ -43,7 +49,12 @@
               phx-target={@myself}
               phx-value-id={acl.id}
             >
-              <Solid.PencilIcon class="w-4 h-4" />
+              {#case Acls.is_stereotype?(acl)}
+              {#match true}
+                <Solid.InformationCircleIcon class="w-4 h-4" />
+              {#match _}
+                <Solid.PencilIcon class="w-4 h-4" />
+              {/case}
             </div>
             <div 
               :if={@ui_for_setting_boundaries}

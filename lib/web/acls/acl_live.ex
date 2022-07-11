@@ -1,5 +1,6 @@
 defmodule Bonfire.Boundaries.Web.AclLive do
   use Bonfire.UI.Common.Web, :stateful_component
+  alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Grants
   require Integer
 
@@ -25,7 +26,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     id = e(assigns, :acl_id, nil) || e(params, "id", nil)
     # |> debug
 
-    with {:ok, acl} <- Bonfire.Boundaries.Acls.get_for_caretaker(id, current_user) |> repo().maybe_preload(grants: [:verb, subject: [:named, :profile, :character, stereotyped: [:named]]]) do
+    with {:ok, acl} <- Acls.get_for_caretaker(id, current_user) |> repo().maybe_preload(grants: [:verb, subject: [:named, :profile, :character, stereotyped: [:named]]]) do
       debug(acl, "acl")
 
       verbs = Bonfire.Boundaries.Verbs.list(:db, :id)
@@ -65,10 +66,25 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         list: Map.merge(verbs, list),
         subjects: subjects(e(acl, :grants, [])),
         suggestions: suggestions,
-        read_only: e(acl, :stereotyped, :stereotype_id, nil) || acl.id in Bonfire.Boundaries.Acls.built_in_ids,
-        settings_section_title: "View " <> e(acl, :named, :name, "acl name") <> " boundary",
+        read_only: Acls.is_stereotype?(acl),
+        settings_section_title: "View " <> e(acl, :named, :name, "") <> " boundary",
         settings_section_description: l "Create and manage your boundary."
       )}
+    end
+  end
+
+  def handle_event("edit", attrs, socket) do
+    debug(attrs)
+    with {:ok, acl} <-  Acls.edit(e(socket.assigns, :acl, nil), current_user(socket), attrs) do
+      {:noreply, socket
+        |> assign_flash(:info, l "Edited!")
+        |> assign(acl: acl)
+      }
+    else other ->
+      error(other)
+      {:noreply, socket
+        |> assign_flash(:error, l "Could not edit boundary")
+      }
     end
   end
 
@@ -121,7 +137,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     with [ok: grant] <- grant do
       debug(grant)
       {:noreply, socket
-          |> assign_flash(:info, "Permission edited")
+          |> assign_flash(:info, l "Permission edited!")
         # |> assign(
           # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
         # )
@@ -129,7 +145,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     else other ->
       error(other)
       {:noreply, socket
-        |> assign_flash(:error, "Could not edit permission")
+        |> assign_flash(:error, l "Could not edit permission")
       }
     end
   end
@@ -220,6 +236,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def columns(assigns) do
-    if Settings.get([:ui, :compact], false, assigns), do: 3, else: 2
+    # if Settings.get([:ui, :compact], false, assigns), do: 3, else: 2
+    2
   end
 end

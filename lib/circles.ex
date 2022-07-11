@@ -9,11 +9,12 @@ defmodule Bonfire.Boundaries.Circles do
   alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries.Circles
   # alias Bonfire.Boundaries.Stereotyped
+  alias Bonfire.Data.Identity.ExtraInfo
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.AccessControl.{Circle, Encircle}
   alias Bonfire.Data.Identity.Caretaker
   alias Ecto.Changeset
-  alias Pointers.Pointer
+  alias Pointers.{Changesets, Pointer}
 
   @default_q_opts [exclude_stereotypes: ["0KF1NEY0VD0N0TWANTT0HEARME"]] # don't show "others who silenced me" in circles
 
@@ -40,7 +41,7 @@ defmodule Bonfire.Boundaries.Circles do
     end
   end
 
-  def list, do: repo().many(from(u in Circle, left_join: named in assoc(u, :named), preload: [:named]))
+  # def list, do: repo().many(from(u in Circle, left_join: named in assoc(u, :named), preload: [:named]))
   def list_by_ids(ids), do: repo().many(
     from(c in Circle,
       left_join: named in assoc(c, :named),
@@ -90,11 +91,15 @@ defmodule Bonfire.Boundaries.Circles do
   def changeset(circle \\ %Circle{}, attrs)
 
   def changeset(:create, attrs), do: changeset(attrs)
-    |> Changeset.cast_assoc(:caretaker, with: &Caretaker.changeset/2)
+    |> Changesets.cast_assoc(:caretaker, with: &Caretaker.changeset/2)
 
-  def changeset(%Circle{} = circle, attrs), do: Circle.changeset(circle, attrs)
-    |> Changeset.cast_assoc(:named, with: &Named.changeset/2)
-    |> Changeset.cast_assoc(:encircles, with: &Encircle.changeset/2)
+  def changeset(%Circle{} = circle, attrs) do
+    Circle.changeset(circle, attrs)
+    |> Changesets.cast(attrs, [])
+    |> Changesets.cast_assoc(:named, with: &Named.changeset/2)
+    |> Changesets.cast_assoc(:extra_info, with: &ExtraInfo.changeset/2)
+    |> Changesets.cast_assoc(:encircles, with: &Encircle.changeset/2)
+  end
 
   def changeset(:update, circle, params) do
 
@@ -137,7 +142,7 @@ defmodule Bonfire.Boundaries.Circles do
   @doc "query for `list_visible`"
   def list_q(user, opts \\ []) do
     from(circle in Circle, as: :circle)
-    |> proload([:named, :caretaker, stereotyped: {"stereotype_", [:named]}])
+    |> proload([:named, :extra_info, :caretaker, stereotyped: {"stereotype_", [:named]}])
     |> where([stereotyped: stereotyped], is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^e(opts, :exclude_stereotypes, []))
   end
 
@@ -203,9 +208,16 @@ defmodule Bonfire.Boundaries.Circles do
 
   def edit(%Circle{} = circle, %User{} = user, params) do
     circle = circle
-    |> repo().maybe_preload([:encircles])
+    |> repo().maybe_preload([:encircles, :named, :extra_info])
 
-    repo().update(changeset(:update, circle, params))
+    params
+    |> input_to_atoms()
+    |> Changesets.put_id_on_mixins([:named, :extra_info], circle)
+    # |> input_to_atoms()
+    # |> Map.update(:named, nil, &Map.put(&1, :id, ulid(circle)))
+    # |> Map.update(:extra_info, nil, &Map.put(&1, :id, ulid(circle)))
+    |> changeset(:update, circle, ...)
+    |> repo().update()
   end
 
   def edit(id, %User{} = user, params) do

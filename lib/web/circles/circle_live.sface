@@ -9,7 +9,7 @@
           <Solid.UserGroupIcon class="w-6 h-6 text-base-content/80" />
           <div>{ e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) || l "Untitled circle" }</div>
         </div>
-            <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this circle is about."}</p> -->
+            <p class="mt-1 text-base font-regular text-base-content/80">{e(@circle, :extra_info, :summary, nil)}</p>
         </div>
       </div>
       <!-- Tabs -->
@@ -179,13 +179,13 @@
               class="p-4"
             >
             <div class="pb-3 text-lg font-medium">{l "General"}</div>
-              <form class="p-4 border rounded-lg border-base-content/30">
+              <form phx-submit="edit" phx-target={@myself} class="p-4 border rounded-lg border-base-content/30">
                 <div class="w-full form-control">
                   <label class="label">
                     <span class="font-semibold label-text">{l "Edit the circle name"}</span>
                     </label>
                     <div class="flex items-center">
-                      <input type="text" placeholder="Type here" class="w-full input input-bordered" />
+                      <input name="named[name]" value={e(@circle, :named, :name, nil)} type="text" placeholder="Type here" class="w-full input input-bordered" />
                     </div>
                 </div>
               
@@ -194,7 +194,7 @@
                     <span class="font-semibold label-text">{l "Edit the circle description"}</span>
                     </label>
                     <div class="flex flex-col space-y-3">
-                      <textarea placeholder="A short description to help you remember what this circle is about" id="circle_description" name="" rows="3" class="w-full h-24 textarea textarea-bordered"></textarea>
+                      <textarea name="extra_info[summary]" placeholder="A short description to help you remember what this circle is about" rows="3" class="w-full h-24 textarea textarea-bordered">{e(@circle, :extra_info, :summary, nil)}</textarea>
                     </div>
                 </div>
                 <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l "Save"}</button>
