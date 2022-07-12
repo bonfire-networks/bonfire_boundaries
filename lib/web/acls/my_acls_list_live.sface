@@ -37,7 +37,7 @@
             >
               {#case Acls.is_stereotype?(acl)}
               {#match true}
-                <Solid.InformationCircleIcon class="w-4 h-4" />
+                <Outline.InformationCircleIcon class="w-5 h-5" />
               {#match _}
                 <Solid.PencilIcon class="w-4 h-4" />
               {/case}
@@ -51,7 +51,7 @@
             >
               {#case Acls.is_stereotype?(acl)}
               {#match true}
-                <Solid.InformationCircleIcon class="w-4 h-4" />
+                <Outline.InformationCircleIcon class="w-5 h-5" />
               {#match _}
                 <Solid.PencilIcon class="w-4 h-4" />
               {/case}

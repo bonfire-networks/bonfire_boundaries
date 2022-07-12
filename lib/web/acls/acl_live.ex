@@ -73,6 +73,19 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
+  def handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
+    id = ulid!(e(socket.assigns, :acl, nil))
+
+    with {del, _} when is_integer(del) and del >0 <- Grants.remove_subject_from_acl(subject, id) do
+
+      {:noreply,
+        socket
+        |> assign_flash(:info, "OK")
+        |> redirect_to("/settings/acl/#{id}")
+      }
+    end
+  end
+
   def handle_event("edit", attrs, socket) do
     debug(attrs)
     with {:ok, acl} <-  Acls.edit(e(socket.assigns, :acl, nil), current_user(socket), attrs) do
@@ -88,10 +101,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
-  def handle_event("add", attrs, socket) do
-    debug(attrs)
+  def handle_event("add", %{"add" => add} = attrs, socket) do
     id = e(attrs, "add", nil)
     subject = %{id: id, name: e(socket.assigns, :suggestions, id, nil)}
+
     subject_map = %{id=> %{subject: subject}}
     {:noreply, socket
       |> assign(
@@ -238,5 +251,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   def columns(assigns) do
     # if Settings.get([:ui, :compact], false, assigns), do: 3, else: 2
     2
+  end
+
+  def predefined_subjects(subjects) do
+    Enum.map(subjects, fn s -> ulid(s) end)
+    |> Enum.join(", ")
   end
 end

@@ -191,6 +191,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
 
   def handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
+    IO.inspect(subject, label: "ULLID")
     id = ulid!(e(socket.assigns, :acl, nil))
 
     with {del, _} when is_integer(del) and del >0 <- Grants.remove_subject_from_acl(subject, id) do

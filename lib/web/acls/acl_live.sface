@@ -43,7 +43,7 @@
     <div :if={@section=="permissions"}>
       <div class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
         <div class="text-xs font-semibold uppercase text-base-content/70">{l "Users and circles that belong to this boundary"}</div>
-        <div class="flex items-center mt-3 space-x-2">
+        <!-- <div class="flex items-center mt-3 space-x-2">
           <span 
             :for={subject <- @subjects}
             class="inline-flex rounded-full items-center py-0.5 pl-2.5 pr-1 text-sm font-medium bg-info text-info-content">
@@ -57,27 +57,31 @@
               <Solid.XIcon class="w-4 h-4" />
             </span>
           </span>
-        </div>
-
+        </div> -->
         <div :if={!@read_only}>
-          <div class="flex items-center rounded-lg">
-            <form 
+          <div class="flex items-center mt-3">
+            <div 
               class="flex-1"
-              phx-change="ignore"
-              :on-change="add">
+              phx-update="ignore"
+              >
               <div
                 class="flex-1"
                 id={:select_more}
                 phx-hook="InputOrSelectOne"
                 >
-                <input placeholder={l "Add more users or circles"} name="add" class="w-full h-10 mt-3 rounded-full tagify input input-bordered" />
+                <input 
+                  value={predefined_subjects(@subjects)}
+                  placeholder={l "Add more users or circles"} 
+                  name="add" 
+                  id="acl_tagify"
+                  class="w-full tagify--outside tagify" />
                 <select class="tagify hide !text-slate-800">
                   {#for {id, name} <- @suggestions}
                     <option class="!text-slate-800" value={id}>{ name }</option>
                   {/for}
                 </select>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
