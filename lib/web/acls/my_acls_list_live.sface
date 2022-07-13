@@ -10,11 +10,14 @@
   />
 
 {#else}
+
   <ul class="flex flex-col p-2 space-y-2"> 
     {#for acl <- e(assigns, :acls, []) ++ e(assigns, :built_ins, [])  }
 
-      <li class="p-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30">
-
+      <li class={
+        "p-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30",
+        "border-primary bg-primary/10 border-2": Enum.map(e(assigns, :to_boundaries, []), fn b -> elem(b, 1) end) |> Enum.member?(e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled")
+        }>
         <label 
           class="flex items-center w-full" 
           phx-click={if @select_event, do: JS.push(@select_event, value: %{id: acl.id, name: (e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled")}, target: "#smart_input")}>
