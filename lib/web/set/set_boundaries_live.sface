@@ -1,7 +1,7 @@
 
 
 {#if Config.get(:experimental_features_enabled)}
-  <div class="flex items-center p-2 space-x-2 bg-base-content/10">
+  <div class="flex items-center space-x-2 bg-base-content/10">
     <Bonfire.Boundaries.Web.BoundariesSelectionLive
       id="boundaries_selections"
       :if={e(assigns, :thread_mode, nil) != :flat}
