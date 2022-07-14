@@ -73,18 +73,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
-  def handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
-    id = ulid!(e(socket.assigns, :acl, nil))
 
-    with {del, _} when is_integer(del) and del >0 <- Grants.remove_subject_from_acl(subject, id) do
-
-      {:noreply,
-        socket
-        |> assign_flash(:info, "OK")
-        |> redirect_to("/settings/acl/#{id}")
-      }
-    end
-  end
 
   def handle_event("edit", attrs, socket) do
     debug(attrs)
@@ -101,37 +90,14 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
-  def handle_event("add", %{"add" => add} = attrs, socket) do
-    id = e(attrs, "add", nil)
-    subject = %{id: id, name: e(socket.assigns, :suggestions, id, nil)}
 
-    subject_map = %{id=> %{subject: subject}}
-    {:noreply, socket
-      |> assign(
-        subjects: e(socket.assigns, :subjects, []) ++ [subject],
-        list: e(socket.assigns, :list, %{}) |> Enum.map(
-        fn
-          {verb_id, %{verb: verb, subject_grants: subject_grants}} ->
-            {
-              verb_id,
-              %{
-                verb: verb,
-                subject_grants: Map.merge(subject_grants, subject_map)
-              }
-            }
+  def handle_event("tagify_remove", %{"remove" => subject} = _attrs, socket) do
+    Bonfire.Boundaries.LiveHandler.remove_from_acl(subject, socket)
+  end
 
-          {verb_id, %Bonfire.Data.AccessControl.Verb{} = verb} ->
-            {
-              verb_id,
-              %{
-                verb: verb,
-                subject_grants: subject_map
-              }
-            }
-        end) |> Map.new() #|> debug
-        # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
-      )
-    }
+
+  def handle_event("tagify_add", %{"add" => id} = _attrs, socket) do
+    Bonfire.Boundaries.LiveHandler.add_to_acl(id, socket)
   end
 
   def handle_event("edit_grant", attrs, socket) do
@@ -254,7 +220,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def predefined_subjects(subjects) do
-    Enum.map(subjects, fn s -> ulid(s) end)
+    Enum.map(subjects, fn s -> subject_name(s) |> debug() end)
     |> Enum.join(", ")
   end
 end

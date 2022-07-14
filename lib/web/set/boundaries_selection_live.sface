@@ -1,7 +1,29 @@
 
 <div class="flex items-center flex-1 focus:outline-none">
-  <div class="flex flex-wrap gap-1">
-    <span 
+  <div class="flex flex-wrap w-full">
+    <div 
+      class="flex-1"
+      phx-update="ignore"
+      >
+      <div
+        class="flex-1"
+        id={:boundaries_selection}
+        phx-hook="InputOrSelectOne"
+        >
+        <input 
+          value={Enum.map(e(@to_boundaries, nil), fn {id, name} -> name end)}
+          placeholder={l "Add more users or circles"} 
+          name="add" 
+          id="boundaries_selection_tagify"
+          class="w-full tagify" />
+        <select class="tagify hide">
+          <option value={"public"}>{"Public" }</option>
+          <option value={"local"}>{"Local" }</option>
+          <option value={"mentions"}>{"Mentions" }</option>
+        </select>
+      </div>
+    </div>
+    <!-- <span 
       :for={{id, name} <- e(@to_boundaries, nil) |> debug() || [{l("Public"), "public"}]}
       class="inline-flex rounded-full items-center py-0.5 pl-2.5 pr-1 text-sm font-medium bg-accent text-accent-content">
       {name}
@@ -12,6 +34,6 @@
         <span class="sr-only">{l "Remove this boundary"}</span>
         <Solid.XIcon class="w-3 h-3" />
       </button>
-    </span>
+    </span> -->
   </div>
 </div> 

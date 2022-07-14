@@ -1,0 +1,83 @@
+<Bonfire.UI.Common.OpenModalLive
+  id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "new-boundary")} 
+  title_text={e(assigns, :label, l "Create a new boundary")}
+  no_actions
+  >
+  <div class="w-full">
+    <form class="items-center" phx-submit="Bonfire.Boundaries:acl_create">
+       
+        <div 
+          x-data="{
+            open: false,
+            close(focusAfter) {
+              if (! this.open) return
+              this.open = false
+              focusAfter && focusAfter.focus()
+            }
+          }"
+          x-on:keydown.escape.prevent.stop="close($refs.button)"
+          class="w-full form-control">
+          <label class="label">
+            <span class="font-medium label-text">{l "Choose the boundary emoji"}</span>
+            <input name="extra_info[info][icon]" value={"🔥"} type="hidden"/>
+          </label>
+          <div class="mt-1 sm:mt-0 sm:col-span-2">
+            <div class="relative flex items-center">
+              <span class="w-10 h-10 text-4xl text-gray-300">
+                {"🛡"}
+              </span>
+              <button 
+                @click="open = ! open"
+                type="button" 
+                class="ml-2 normal-case btn btn-sm btn-outline">{l "Pick an emoji"}</button>
+              <div 
+                x-ref="panel"
+                x-show="open"
+                x-transition.origin.top.left
+                x-on:click.outside="close($refs.button)"
+                x-show="open" 
+                class="absolute z-40 top-12 left-3"
+                role="tooltip">
+                <div id="boundary-picker"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        
+        <div class="w-full mt-4 form-control">
+          <label class="label">
+            <span class="font-medium label-text">{l "Choose the boundary name"}</span>
+            </label>
+            <div class="flex items-center">
+              <input name="named[name]"
+                type="text" 
+                placeholder={l "Type here"}
+                class="w-full input input-bordered" />
+            </div>
+        </div>
+      
+        <div class="w-full mt-4 form-control">
+          <label class="label">
+            <span class="font-medium label-text">{l "Choose the boundary description"}</span>
+          </label>
+          <div class="flex flex-col space-y-3">
+            <textarea 
+              name="extra_info[summary]" 
+              placeholder="A short description to help you remember what this boundary is about" 
+              rows="3" 
+              class="w-full h-24 textarea textarea-bordered"></textarea>
+          </div>
+        </div>
+        <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l "Create"}</button>
+      
+    </form>
+  </div>
+  <:open_btn>
+    <div 
+      class="normal-case btn btn-outline btn-sm" >
+      {l "Create"}
+    </div>
+  </:open_btn>
+</Bonfire.UI.Common.OpenModalLive>
+

@@ -191,6 +191,10 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
 
   def handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
+    remove_from_acl(subject, socket)
+  end
+
+  def remove_from_acl(subject, socket) do
     IO.inspect(subject, label: "ULLID")
     id = ulid!(e(socket.assigns, :acl, nil))
 
@@ -203,6 +207,38 @@ defmodule Bonfire.Boundaries.LiveHandler do
       }
 
     end
+  end
+
+  def add_to_acl(id, socket) do
+    subject = %{id: id, name: e(socket.assigns, :suggestions, id, nil)}
+    subject_map = %{id=> %{subject: subject}}
+    {:noreply, socket
+      |> assign_flash(:info, "Added to boundary")
+      |> assign(
+        subjects: e(socket.assigns, :subjects, []) ++ [subject],
+        list: e(socket.assigns, :list, %{}) |> Enum.map(
+        fn
+          {verb_id, %{verb: verb, subject_grants: subject_grants}} ->
+            {
+              verb_id,
+              %{
+                verb: verb,
+                subject_grants: Map.merge(subject_grants, subject_map)
+              }
+            }
+
+          {verb_id, %Bonfire.Data.AccessControl.Verb{} = verb} ->
+            {
+              verb_id,
+              %{
+                verb: verb,
+                subject_grants: subject_map
+              }
+            }
+        end) |> Map.new() #|> debug
+        # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
+      )
+    }
   end
 
 

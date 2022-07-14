@@ -58,6 +58,7 @@
             </span>
           </span>
         </div> -->
+
         <div :if={!@read_only}>
           <div class="flex items-center mt-3">
             <div 
@@ -238,10 +239,10 @@
         <div class="w-full mt-4 form-control">
           <label class="label">
             <span class="font-semibold label-text">{l "Edit the boundary description"}</span>
-            </label>
-            <div class="flex flex-col space-y-3">
-              <textarea name="extra_info[summary]" placeholder="A short description to help you remember what this boundary is about" rows="3" class="w-full h-24 textarea textarea-bordered">{e(@acl, :extra_info, :summary, nil)}</textarea>
-            </div>
+          </label>
+          <div class="flex flex-col space-y-3">
+            <textarea name="extra_info[summary]" placeholder="A short description to help you remember what this boundary is about" rows="3" class="w-full h-24 textarea textarea-bordered">{e(@acl, :extra_info, :summary, nil)}</textarea>
+          </div>
         </div>
         <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l "Save"}</button>
       </form>
@@ -252,7 +253,25 @@
             <div class="flex-1 text-base font-bold">{l "Delete this boundary"}</div>
             <div class="text-sm text-base-content/80">{l "Once you delete a boundary, there is no going back. Please be certain."}</div>
           </div>
-            <button class="normal-case btn btn-outline btn-error btn-sm">{l "Delete this boundary"}</button>
+          <Bonfire.UI.Common.OpenModalLive
+            id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "delete-acl")} 
+            title_text={l("Delete this boundary")}
+            >
+            {l "The boundary will be permanently deleted. This action may affect all the activities that included the boundary."} 
+            <:open_btn>
+              <div class="normal-case btn btn-outline btn-error btn-sm">{l "Delete"}</div>
+            </:open_btn>
+            <:action_btns>
+              <button 
+                data-id="delete_boundary"
+                type="submit" 
+                class="normal-case btn btn-error btn-sm">
+                <span class="text-left truncate ellipsis">{l("Delete this boundary")}</span>
+              </button>
+            </:action_btns>
+
+          </Bonfire.UI.Common.OpenModalLive>
+          
         </div>
       </div>
 

@@ -1,8 +1,9 @@
 
 
 {#if Config.get(:experimental_features_enabled)}
-  <div class="flex items-center p-2 bg-base-content/10">
+  <div class="flex items-center p-2 space-x-2 bg-base-content/10">
     <Bonfire.Boundaries.Web.BoundariesSelectionLive
+      id="boundaries_selections"
       :if={e(assigns, :thread_mode, nil) != :flat}
       to_boundaries={e(assigns, :to_boundaries, [])}
       to_circles={e(assigns, :to_circles, [])}
@@ -101,7 +102,7 @@
       </div>
       <:open_btn>
         <div 
-          class="btn btn-ghost btn-sm btn-circle" >
+          class="btn btn-sm btn-ghost btn-square" >
           <span class="sr-only">{l "Edit boundaries"}</span>
           <Solid.ChevronRightIcon class="w-5 h-5 stroke-1" />
         </div>
@@ -111,7 +112,7 @@
       :if={Settings.get([:ui, :smart_input_as], nil, assigns)!=:sidebar}
       type="button" 
       x-show="!open_boundaries"
-      class="btn btn-ghost btn-sm btn-circle" 
+      class="btn btn-sm btn-ghost btn-square" 
       phx-click="open_boundaries"
       phx-target="#smart_input"
       @click="open_boundaries = true">
