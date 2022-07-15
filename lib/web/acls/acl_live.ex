@@ -7,6 +7,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   prop acl_id, :any
   prop parent_back, :any
   prop columns, :integer, default: 1
+  prop selected_tab, :string
 
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})
@@ -16,6 +17,19 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       |> assign(
         section: e(params, "section", "permissions")
       )
+      |> assign(sidebar_widgets: [
+        users: [
+          main: [
+            {Bonfire.UI.Me.SettingsViewLive.SidebarSettingsLive,
+            [
+              selected_tab: "acls",
+              admin_tab: "",
+              current_user: current_user(socket)
+            ]}
+          ],
+          secondary: []
+        ]
+      ])
     }
   end
 
