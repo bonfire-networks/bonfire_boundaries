@@ -5,11 +5,12 @@ defmodule Bonfire.Boundaries.Web.MyAclsListLive do
   alias Bonfire.Boundaries.Integration
 
   prop hide_breakdown, :boolean, default: false
-  prop ui_for_setting_boundaries, :boolean, default: false
+  prop setting_boundaries, :boolean, default: false
   prop click_override, :boolean, default: false
   prop select_event, :string, default: nil
   prop to_boundaries, :list
-  
+  prop to_boundaries_ids, :list, default: []
+
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
 
     {:ok, socket
@@ -20,7 +21,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsListLive do
   def update(assigns, socket) do
     built_in_ids = Acls.built_in_ids()
 
-    opts = if e(assigns, :ui_for_setting_boundaries, nil) do
+    opts = if e(assigns, :setting_boundaries, nil) do
       Acls.opts_for_dropdown()
     else
       extra_ids_to_include = if Integration.is_admin?(current_user(assigns)), do: built_in_ids, else: []

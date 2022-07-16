@@ -7,16 +7,23 @@
     acl_id={e(assigns, :edit_acl_id, nil)} 
     current_user={current_user(assigns)}
     parent_back={@myself}
+    setting_boundaries={@setting_boundaries}
   />
 
 {#else}
+
+<div class="mt-4">
+  <div class="flex items-center px-2 space-x-9">
+    <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "My boundaries"}</h2>
+    <Bonfire.Boundaries.Web.NewAclLive event_target={@myself} setting_boundaries={@setting_boundaries} />
+  </div>
 
   <ul class="flex flex-col p-2 space-y-2"> 
     {#for acl <- e(assigns, :acls, []) ++ e(assigns, :built_ins, [])  }
 
       <li class={
         "p-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30",
-        "border-primary bg-primary/10 border-2": Enum.map(e(assigns, :to_boundaries, []), fn b -> elem(b, 1) end) |> Enum.member?(e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled")
+        "border-primary bg-primary/10 border-2": @to_boundaries_ids |> Enum.member?(ulid(acl))
         }>
         <label 
           class="flex items-center w-full" 
@@ -34,7 +41,7 @@
           <!-- ACTIONS -->
           <div class="flex space-x-2">
             <LiveRedirect 
-              :if={!@ui_for_setting_boundaries}
+              :if={!@setting_boundaries}
               class="btn btn-ghost btn-sm btn-circle"
               to={"/settings/acl/"<>acl.id}
             >
@@ -46,11 +53,12 @@
               {/case}
             </LiveRedirect>
             <div 
-              :if={@ui_for_setting_boundaries}
+              :if={@setting_boundaries}
               class="btn btn-ghost btn-sm btn-circle"
               phx-click="boundary_edit" 
               phx-target={@myself}
               phx-value-id={acl.id}
+              @click="show_boundary_list = false"
             >
               {#case Acls.is_stereotype?(acl)}
               {#match true}
@@ -60,7 +68,7 @@
               {/case}
             </div>
             <div 
-              :if={@ui_for_setting_boundaries}
+              :if={@setting_boundaries}
               class="btn btn-outline btn-sm btn-circle opacity-80">
               <Solid.PlusIcon class="w-5 h-5 " />
             </div>
@@ -97,7 +105,6 @@
       
     {/for}
   </ul>
-
-  
+</div>
 {/if}
 </div>

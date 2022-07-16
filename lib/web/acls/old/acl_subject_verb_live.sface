@@ -47,9 +47,9 @@
                 phx-hook="InputOrSelectOne"
                 >
                 <input placeholder={l "Add more users or circles"} name="add" class="w-full h-10 mt-3 rounded-full tagify input input-bordered" />
-                <select class="tagify hide !text-slate-800">
+                <select class="tagify hide ">
                   {#for {id, name} <- @suggestions}
-                    <option class="!text-slate-800" value={id}>{ name }</option>
+                    <option class="" value={id}>{ name }</option>
                   {/for}
                 </select>
               </div>

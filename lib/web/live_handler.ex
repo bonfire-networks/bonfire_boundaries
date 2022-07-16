@@ -123,14 +123,18 @@ defmodule Bonfire.Boundaries.LiveHandler do
     }
   end
 
-  def handle_event("circle_create", %{"name" => name}, socket) do
-    with {:ok, %{id: id} = _circle} <-
-      Circles.create(current_user(socket), name) do
-          {:noreply,
+  def handle_event("circle_create", attrs, socket) do
+    with {:ok, %{id: id} = circle} <-
+      Circles.create(current_user(socket), attrs) do
+        Bonfire.UI.Common.OpenModalLive.close()
+
+        {:noreply,
           socket
           |> assign_flash(:info, "Circle created!")
-          |> redirect_to("/settings/circle/"<>id)
-          }
+          |> assign(circles: [circle] ++ e(socket.assigns, :circles, []))
+          |> do_add_to_acl(circle)
+          |> maybe_redirect_to("/settings/circle/"<>id, attrs)
+        }
     end
   end
 
@@ -156,7 +160,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
       {:noreply,
         socket
-        |> assign_flash(:info, "OK")
+        |> assign_flash(:info, l "Member was removed")
         |> redirect_to("/settings/circles")
       }
 
@@ -167,25 +171,27 @@ defmodule Bonfire.Boundaries.LiveHandler do
     id = ulid!(e(socket.assigns, :circle, nil))
 
     with {:ok, _circle} <-
-      Circles.delete(id, current_user(socket)) do
+      Circles.delete(id, current_user(socket)) |> debug do
 
       {:noreply,
         socket
-        |> assign_flash(:info, "OK")
+        |> assign_flash(:info, l "Deleted")
         |> redirect_to("/settings/circles")
       }
-
     end
   end
 
-  def handle_event("acl_create", %{"name" => name}, socket) do
-    with {:ok, %{id: id} = _acl} <-
-      Acls.create(%{named: %{name: name}}, current_user: current_user(socket)) do
-          {:noreply,
+  def handle_event("acl_create", attrs, socket) do
+    with {:ok, %{id: id} = acl} <-
+      Acls.create(attrs, current_user: current_user(socket)) do
+        Bonfire.UI.Common.OpenModalLive.close()
+
+        {:noreply,
           socket
-          |> assign_flash(:info, "Boundary created!")
-          |> redirect_to("/settings/acl/"<>id)
-          }
+          |> assign(acls: [acl] ++ e(socket.assigns, :acls, []))
+          |> assign_flash(:info, l "Boundary created!")
+          |> maybe_redirect_to("/settings/acl/"<>id, attrs)
+        }
     end
   end
 
@@ -202,7 +208,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
       {:noreply,
         socket
-        |> assign_flash(:info, "OK")
+        |> assign_flash(:info, l "Removed from boundary")
         |> redirect_to("/settings/acl/#{id}")
       }
 
@@ -210,10 +216,16 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def add_to_acl(id, socket) do
-    subject = %{id: id, name: e(socket.assigns, :suggestions, id, nil)}
-    subject_map = %{id=> %{subject: subject}}
-    {:noreply, socket
-      |> assign_flash(:info, "Added to boundary")
+    {:noreply,
+      do_add_to_acl(socket, %{id: id, name: e(socket.assigns, :suggestions, id, nil)})
+    }
+  end
+
+  defp do_add_to_acl(socket, %{} = subject) do
+    subject_map = %{ulid(subject)=> %{subject: subject}}
+
+    socket
+      |> assign_flash(:info, l "Added to boundary")
       |> assign(
         subjects: e(socket.assigns, :subjects, []) ++ [subject],
         list: e(socket.assigns, :list, %{}) |> Enum.map(
@@ -238,7 +250,6 @@ defmodule Bonfire.Boundaries.LiveHandler do
         end) |> Map.new() #|> debug
         # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
       )
-    }
   end
 
 
@@ -407,6 +418,14 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   defp the_object(assigns) do
     e(assigns, :object, nil) || e(assigns, :activity, :object, nil) || e(assigns, :object_id, nil) || e(assigns, :activity, :object_id, nil)
+  end
+
+  def maybe_redirect_to(socket, _, %{"no_redirect" => r}) when r !="" do
+    socket
+  end
+  def maybe_redirect_to(socket, path, _attrs) do
+    socket
+    |> redirect_to(path)
   end
 
 end

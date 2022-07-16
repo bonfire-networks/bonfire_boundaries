@@ -10,19 +10,27 @@ defmodule Bonfire.Boundaries do
   alias Pointers
   # alias Pointers.Pointer
   import Queries, only: [boundarise: 3]
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query
 
-  def preset(preset) when is_binary(preset), do: preset
-  def preset(opts), do: maybe_from_opts(opts, :boundary, opts) |> debug() |> preset_from_boundaries()
+  # def preset(preset) when is_binary(preset), do: preset
+  def preset(opts), do: maybe_from_opts(opts, :boundary, opts) |> preset_from_boundaries()
   defp preset_from_boundaries(boundaries) when is_list(boundaries) do
-    debug(boundaries)
-    cond do
-      "public" in boundaries -> "public"
+    debug(boundaries, "inputed")
+    cond do # Note: only one applies, in priority from most to least restrictive
+      "mentions" in boundaries -> "mentions"
       "local" in boundaries -> "local"
-      true -> "mentions"
+      "public" in boundaries -> "public"
+      true -> boundaries
     end
+    |> debug("computed")
   end
-  defp preset_from_boundaries(_), do: "mentions"
+  defp preset_from_boundaries(text) when is_binary(text) do
+    text
+    |> String.split(",")
+    |> Enum.map(&String.trim/1)
+    |> preset_from_boundaries()
+  end
+  defp preset_from_boundaries(other), do: other
 
   def acls_from_preset_boundary_names(presets) when is_list(presets), do: Enum.flat_map(presets, &acls_from_preset_boundary_names/1)
   def acls_from_preset_boundary_names(preset) do
@@ -99,14 +107,16 @@ defmodule Bonfire.Boundaries do
       [] -> []
       nil -> []
       ids ->
-        repo().many(load_query(ids, opts))
+        load_query(ids, e(opts, :ids_only, nil), opts)
+        |> repo().many()
     end
   end
   def load_pointers(item, opts) do
     case ulid(item) do
       id when is_binary(id) ->
 
-        repo().one(load_query(id, opts))
+        load_query(id, e(opts, :ids_only, nil), opts)
+        |> repo().one()
 
       _ ->
         error(item, "Expected an object or ULID ID, could not check boundaries for")
@@ -114,7 +124,11 @@ defmodule Bonfire.Boundaries do
     end
   end
 
-  defp load_query(ids, opts) do
+  defp load_query(ids, true, opts) do
+    load_query(ids, nil, opts)
+    |> select([main], [:id])
+  end
+  defp load_query(ids, _, opts) do
     from(p in Pointers.query_base(), where: p.id in ^List.wrap(ids))
     |> boundarise(id, opts)
   end

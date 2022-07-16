@@ -3,7 +3,6 @@
   <div class="flex flex-wrap w-full">
     <div 
       class="flex-1"
-      phx-update="ignore"
       >
       <div
         class="flex-1"
@@ -11,15 +10,13 @@
         phx-hook="InputOrSelectOne"
         >
         <input 
-          value={Enum.map(e(@to_boundaries, nil), fn {id, name} -> name end)}
-          placeholder={l "Add more users or circles"} 
-          name="add" 
+          value={input_value(@to_boundaries)}
+          placeholder={l "Set boundaries"} 
+          name="to_boundaries" 
           id="boundaries_selection_tagify"
           class="w-full tagify" />
         <select class="tagify hide">
-          <option value={"public"}>{"Public" }</option>
-          <option value={"local"}>{"Local" }</option>
-          <option value={"mentions"}>{"Mentions" }</option>
+          <option :for={{k, v} <- presets(@to_boundaries)} value={k}>{v}</option>
         </select>
       </div>
     </div>

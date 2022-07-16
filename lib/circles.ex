@@ -69,16 +69,20 @@ defmodule Bonfire.Boundaries.Circles do
     |> Enum.uniq()
   end
 
-  def create(%{}=attrs) do
-    repo().insert(changeset(:create, attrs))
-  end
+  # def create(%{}=attrs) do
+  #   repo().insert(changeset(:create, attrs))
+  # end
 
   @doc "Create a circle for the provided user (and with the user in the circle?)"
-  def create(%User{}=user, name \\ nil, %{}=attrs \\ %{}) do
+  def create(%User{}=user, name) when is_binary(name) do
+    create(user, %{named: %{name: name}})
+  end
+
+  def create(%User{}=user, %{}=attrs) do
     with {:ok, circle} <- repo().insert(changeset(:create,
     attrs
+      |> input_to_atoms()
       |> deep_merge(%{
-        named: %{name: name},
         caretaker: %{caretaker_id: user.id}
         # encircles: [%{subject_id: user.id}] # add myself to circle?
       })

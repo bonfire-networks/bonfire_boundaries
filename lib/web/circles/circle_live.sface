@@ -6,7 +6,16 @@
         </div> -->
         <div class="flex flex-col">
          <div class="flex items-center space-x-2 text-2xl font-bold text-base-content">
-          <Solid.UserGroupIcon class="w-6 h-6 text-base-content/80" />
+
+          <div 
+            :if={e(assigns, :parent_back, nil)} 
+            phx-click="back"
+            phx-target={e(assigns, :parent_back, nil)}
+            class="btn btn-outline btn-sm btn-circle" > 
+            <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
+          </div>
+          <Solid.UserGroupIcon :if={!e(assigns, :parent_back, nil)}  class="w-6 h-6 text-base-content/80" />
+
           <div>{ e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) || l "Untitled circle" }</div>
         </div>
             <p class="mt-1 text-base font-regular text-base-content/80">{e(@circle, :extra_info, :summary, nil)}</p>
@@ -21,33 +30,42 @@
             class="flex items-stretch -mb-px text-sm font-medium border-b bg-base-content/5 border-base-content/30"
           >
               <!-- Tab -->
-            <li>
-              <LivePatch
+            <li :if={!@setting_boundaries}>
+              <div
                 to={"/settings/circle/#{ulid(@circle)}/members"}
+                phx-click="assign" 
+                phx-value-section="members"
+                phx-target={@myself}
                 class={
-                  "inline-flex px-5 py-2.5 text-base-content/70",
+                  "cursor-pointer inline-flex px-5 py-2.5 text-base-content/70",
                   "border-b-4 border-rounded border-primary !text-base-content": @section == "members"}
                 role="tab">
                 {l "Members"}
-              </LivePatch>
+              </div>
             </li>
 
-            <li :if={!@read_only}>
-              <LivePatch
+            <li :if={!@read_only and !@setting_boundaries}>
+              <div
                 to={"/settings/circle/#{ulid(@circle)}/suggestions"}
+                phx-click="assign" 
+                phx-value-section="suggestions"
+                phx-target={@myself}
                 class={
-                  "inline-flex px-5 py-2.5 text-base-content/70",
+                  "cursor-pointer inline-flex px-5 py-2.5 text-base-content/70",
                   "border-b-4 border-rounded border-primary !text-base-content": @section == "suggestions"}
-                role="tab">{l "Suggestions"}</LivePatch>
+                role="tab">{l "Suggestions"}</div>
             </li>
 
-            <li :if={!@read_only}>
-              <LivePatch
+            <li :if={!@read_only and !@setting_boundaries}>
+              <div
                 to={"/settings/circle/#{ulid(@circle)}/settings"}
+                phx-click="assign" 
+                phx-value-section="settings"
+                phx-target={@myself}
                 class={
-                  "inline-flex px-5 py-2.5 text-base-content/70",
+                  "cursor-pointer inline-flex px-5 py-2.5 text-base-content/70",
                   "border-b-4 border-rounded border-primary !text-base-content": @section == "settings"}
-                role="tab">{l "Settings"}</LivePatch>
+                role="tab">{l "Settings"}</div>
             </li>
           </ul>
 
@@ -73,9 +91,9 @@
                         >
                         <label class="text-sm font-bold">{l "Add a user"}</label>
                         <input name="subject" class="w-full mt-1 tagify input input-bordered" />
-                        <select class="tagify hide !text-slate-800">
+                        <select class="tagify hide">
                           {#for {id, suggested} <- @suggestions}
-                            <option class="!text-slate-800" value={id}>{ e(suggested, :character, :username, nil) }</option>
+                            <option class="" value={id}>{ e(suggested, :character, :username, nil) }</option>
                           {/for}
                         </select>
                       </div>
@@ -217,7 +235,8 @@
                       </:open_btn>
                       <:action_btns>
                        <button 
-                          :on-click="Bonfire.Boundaries:circle_delete"  
+                          :on-click="Bonfire.Boundaries:circle_delete" 
+                          phx-value-go="/settings/circles"
                           class="normal-case btn btn-outline btn-error btn-sm">{l "Delete this circle"}</button>
                       </:action_btns>
 

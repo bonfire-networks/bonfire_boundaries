@@ -2,6 +2,10 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   use Bonfire.UI.Common.Web, :stateful_component
   alias Bonfire.Boundaries.Circles
 
+  prop circle_id, :any
+  prop parent_back, :any
+  prop setting_boundaries, :boolean, default: false
+
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})
 
@@ -17,8 +21,16 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     # FIXME: what's the difference with EditCircleLive?
 
     params = e(assigns, :__context__, :current_params, %{})
-    id = e(params, "id", nil)
-    # |> debug
+    id = ( e(assigns, :circle_id, nil) || e(params, "id", nil) )
+    |> debug
+
+    socket = socket
+      |> assign(assigns)
+      |> assign(
+        loaded: true,
+        section: e(params, "section", "members"),
+        settings_section_description: l "Create and manage your circle."
+      )
 
     with {:ok, circle} <- Circles.get_for_caretaker(id, current_user(assigns)) |> repo().maybe_preload(encircles: [subject: [:profile, :character]]) do
       debug(circle, "circle")
@@ -46,20 +58,28 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
         {u.id, u}
       end)
       |> Map.new()
-      |> debug
+      # |> debug
 
       {:ok, socket
-      |> assign(assigns)
       |> assign(
-        loaded: true,
-        section: e(params, "section", "members"),
         circle: circle |> Map.drop([:encircles]),
         members: members,
         suggestions: suggestions,
         read_only: e(circle, :stereotyped, :stereotype_id, nil) in ["7DAPE0P1E1PERM1TT0F0110WME", "4THEPE0P1ES1CH00SET0F0110W"],
         settings_section_title: "View " <> e(circle, :named, :name, "") <> " circle",
-        settings_section_description: l "Create and manage your circle."
       )}
+    else other ->
+      error(other)
+      {:ok, socket
+        |> assign_flash(:error, l "Could not find circle")
+        |> assign(
+          circle: nil,
+          members: [],
+          suggestions: [],
+          read_only: true
+        )
+        # |> redirect_to("/settings/circles")
+      }
     end
   end
 

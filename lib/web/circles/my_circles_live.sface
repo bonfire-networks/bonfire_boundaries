@@ -1,15 +1,19 @@
 <div class="">
-  <div class="p-4 border-b bg-base-content/10 border-base-content/30">
+  <!-- <div class="p-4 border-b bg-base-content/10 border-base-content/30">
     <form class="flex items-center" phx-submit="Bonfire.Boundaries:circle_create">
       <input class="flex-1 mr-4 input input-bordered" type="text" name="name" placeholder="Circle name"/>
       <button type="submit" class="normal-case btn btn-primary">
       {l "Create a new circle"}</button>
     </form>
-  </div>
+  </div> -->
 
   <div class="p-4 ">
 
-    <h2 class="px-2 mb-3 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "My circles"}</h2>
+    <div class="flex items-center px-2 space-x-9">
+      <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "My circles"}</h2>
+      <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} />
+    </div>
+
     <ul class="mt-3">
       {#for circle <- e(assigns, :circles, []) }
         <li class="flex items-center justify-between flex-1 p-3 mb-3 border rounded hover:bg-base-content/5 border-base-content/30">

@@ -75,11 +75,14 @@ defmodule Bonfire.Boundaries.Acls do
     )
     |> debug("preset ACLs to set")
     |> find_acls(user)
-    |> maybe_add_direct_acl_ids(preset)
+    |> maybe_add_direct_acl_ids(preset, ...)
     |> debug("ACLs to set")
   end
 
-  defp maybe_add_direct_acl_ids(acls, preset) do
+  defp maybe_add_direct_acl_ids(list, acls) when is_list(list) do
+    Enum.reduce(list, acls, &maybe_add_direct_acl_ids/2)
+  end
+  defp maybe_add_direct_acl_ids(preset, acls) do
     if is_ulid?(preset) do
       acls ++ [%{acl_id: preset}]
     else
@@ -290,7 +293,11 @@ defmodule Bonfire.Boundaries.Acls do
 
   def opts_for_dropdown() do
     built_ins = built_ins_for_dropdown()
-    [extra_ids_to_include: built_ins, exclude_ids: @exclude_stereotypes ++ ["71MAYADM1N1STERMY0WNSTVFFS", "0H0STEDCANTSEE0RD0ANYTH1NG", "1S11ENCEDTHEMS0CAN0TP1NGME"]]
+    [
+      extra_ids_to_include: built_ins,
+      exclude_ids: @exclude_stereotypes
+      ++ ["71MAYADM1N1STERMY0WNSTVFFS", "0H0STEDCANTSEE0RD0ANYTH1NG", "1S11ENCEDTHEMS0CAN0TP1NGME"]
+    ]
   end
 
   def for_dropdown(opts) do

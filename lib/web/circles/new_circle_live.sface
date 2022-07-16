@@ -1,12 +1,12 @@
 <Bonfire.UI.Common.OpenModalLive
-  id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "new-boundary")} 
-  title_text={e(assigns, :label, l "Create a new boundary")}
-  form_opts={%{"phx-submit"=> "Bonfire.Boundaries:acl_create", "phx-target"=> e(assigns, :event_target, nil)}}
+  id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "new-circle")} 
+  title_text={e(assigns, :label, l "Create a new circle")}
+  form_opts={%{"phx-submit"=> "Bonfire.Boundaries:circle_create", "phx-target"=> e(assigns, :event_target, nil)}}
   no_actions
   >
-  <div class="w-full">       
+  <div class="w-full">
     <input type="hidden" name="no_redirect" value={if @setting_boundaries, do: "1"} />
-    <div 
+    <!-- <div 
       x-data="{
         open: false,
         close(focusAfter) {
@@ -18,7 +18,7 @@
       x-on:keydown.escape.prevent.stop="close($refs.button)"
       class="w-full form-control">
       <label class="label">
-        <span class="font-medium label-text">{l "Choose the boundary emoji"}</span>
+        <span class="font-medium label-text">{l "Choose the circle emoji"}</span>
         <input name="extra_info[info][icon]" value={"🔥"} type="hidden"/>
       </label>
       <div class="mt-1 sm:mt-0 sm:col-span-2">
@@ -42,12 +42,12 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     
     
     <div class="w-full mt-4 form-control">
       <label class="label">
-        <span class="font-medium label-text">{l "Enter a name for the boundary"}</span>
+        <span class="font-medium label-text">{l "Enter a name for the circle"}</span>
         </label>
         <div class="flex items-center">
           <input name="named[name]"
@@ -64,7 +64,7 @@
       <div class="flex flex-col space-y-3">
         <textarea 
           name="extra_info[summary]" 
-          placeholder={l "A short description to help you remember what this boundary is about"} 
+          placeholder={l "A short description to help you remember what this circle is about" }
           rows="3" 
           class="w-full h-24 textarea textarea-bordered"></textarea>
       </div>
@@ -75,7 +75,7 @@
   <:open_btn>
     <div 
       class="normal-case btn btn-outline btn-sm" >
-      {l "Create"}
+      {@label || l "Create"}
     </div>
   </:open_btn>
 </Bonfire.UI.Common.OpenModalLive>

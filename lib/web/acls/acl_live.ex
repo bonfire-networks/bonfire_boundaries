@@ -7,6 +7,9 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   prop acl_id, :any
   prop parent_back, :any
   prop columns, :integer, default: 1
+  prop setting_boundaries, :boolean, default: false
+
+  @global_circles ["0AND0MSTRANGERS0FF1NTERNET", "3SERSFR0MY0VR10CA11NSTANCE", "7EDERATEDW1THANACT1V1TYPVB"]
 
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})
@@ -44,7 +47,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       followers = Bonfire.Social.Follows.list_my_followers(current_user, paginate: false, exclude_ids: already_seen_ids)
       # |> debug
 
-      circles = Bonfire.Boundaries.Circles.list_my(current_user, extra_ids_to_include: ["0AND0MSTRANGERS0FF1NTERNET", "3SERSFR0MY0VR10CA11NSTANCE", "7EDERATEDW1THANACT1V1TYPVB"])
+      circles = Bonfire.Boundaries.Circles.list_my(current_user, extra_ids_to_include: @global_circles)
 
       suggestions = (for user <- followed ++ followers do
         {e(user, :edge, :object, :id, nil), e(user, :edge, :object, :profile, :name, "")<>" - "<>Bonfire.Me.Characters.display_username(e(user, :edge, :object, nil))}
@@ -66,14 +69,13 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         list: Map.merge(verbs, list),
         subjects: subjects(e(acl, :grants, [])),
         suggestions: suggestions,
+        global_circles: @global_circles,
         read_only: Acls.is_stereotype?(acl),
         settings_section_title: "View " <> e(acl, :named, :name, "") <> " boundary",
         settings_section_description: l "Create and manage your boundary."
       )}
     end
   end
-
-
 
   def handle_event("edit", attrs, socket) do
     debug(attrs)
@@ -91,12 +93,11 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
 
-  def handle_event("tagify_remove", %{"remove" => subject} = _attrs, socket) do
+  def handle_event("tagify_remove", %{"id" => subject} = _attrs, socket) do
     Bonfire.Boundaries.LiveHandler.remove_from_acl(subject, socket)
   end
 
-
-  def handle_event("tagify_add", %{"add" => id} = _attrs, socket) do
+  def handle_event("tagify_add", %{"id" => id} = _attrs, socket) do
     Bonfire.Boundaries.LiveHandler.add_to_acl(id, socket)
   end
 
@@ -127,6 +128,19 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         |> assign_flash(:error, l "Could not edit permission")
       }
     end
+  end
+
+  def handle_event("edit_circle", %{"id"=> id}, socket) do
+    debug(id, "circle_edit")
+    {:noreply, socket
+      |> assign(:edit_circle_id, id)
+    }
+  end
+
+  def handle_event("back", _, socket) do # TODO
+    {:noreply, socket
+      |> assign(:edit_circle_id, nil)
+    }
   end
 
   def handle_event(action, attrs, socket), do: Bonfire.UI.Common.LiveHandlers.handle_event(action, attrs, socket, __MODULE__)
@@ -220,7 +234,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def predefined_subjects(subjects) do
-    Enum.map(subjects, fn s -> subject_name(s) |> debug() end)
-    |> Enum.join(", ")
+    Enum.map(subjects, fn s -> %{"value"=> ulid(s), "text"=> subject_name(s)} end)
+    # |> Enum.join(", ")
+    |> Jason.encode!()
+    |> debug()
+    # [{"value":"good", "text":"The Good, the Bad and the Ugly"}, {"value":"matrix", "text":"The Matrix"}]
   end
 end

@@ -50,8 +50,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         default: verbs_interact_and_reply,
         message: verbs_interact_minus_boost ++ [:reply]
       ],
-      acls_to_present: public_acls, # to show in smart input
-      public_acls_on_objects: public_acls ++ [:guests_may_see,], # what boundaries we can display to everyone when applied on objects
+      acls_to_present: [], # preset ACLs to show in smart input
+      public_acls_on_objects: public_acls ++ [:guests_may_see], # what boundaries we can display to everyone when applied on objects
       preset_acls: %{
         "public"=>     [:guests_may_see_read, :locals_may_reply, :remotes_may_reply],
         "federated"=>  [:locals_may_reply],

@@ -1,4 +1,18 @@
-<div class="">
+
+<div>
+
+{#if e(assigns, :edit_circle_id, nil)}
+
+  <Bonfire.Boundaries.Web.CircleLive
+    id={e(assigns, :edit_circle_id, nil)} 
+    circle_id={e(assigns, :edit_circle_id, nil)} 
+    current_user={current_user(assigns)}
+    parent_back={@myself}
+    setting_boundaries={@setting_boundaries}
+  />
+
+{#else}
+
   <div class="p-3">
 
     <div class="flex items-center">
@@ -8,6 +22,7 @@
             :if={e(assigns, :parent_back, nil)} 
             phx-click="back"
             phx-target={e(assigns, :parent_back, nil)}
+            @click="show_boundary_list = true"
             class="btn btn-outline btn-sm btn-circle" > 
             <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
           </div>
@@ -20,29 +35,38 @@
             </div>
           </div>
         </div>
-        <LivePatch
-          :if={@section=="permissions" && !@read_only}
-          to={"/settings/acl/#{ulid(@acl)}/settings"}
+        <div 
+          :if={@section !="settings" and !@read_only and !@setting_boundaries}
+          href={"/settings/acl/#{ulid(@acl)}/settings"}
+          phx-click="assign" 
+          phx-value-section="settings"
+          phx-target={@myself}
           class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost">
           <Outline.CogIcon class="w-4 h-4" />
           <span>{l "Settings"}</span>
-        </LivePatch>
+        </div>
 
-        <LivePatch
+        <div
           :if={@section=="settings"}
           to={"/settings/acl/#{ulid(@acl)}"}
+          phx-click="assign" 
+          phx-value-section="permissions"
+          phx-target={@myself}
           class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost">
           <Outline.ChevronLeftIcon class="w-4 h-4" />
           <span>{l "Back"}</span>
-        </LivePatch>
+        </div>
         <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
     </div>
   </div>
 
   <div class="">
-    <div :if={@section=="permissions"}>
+    <div :if={@section !="settings"}>
       <div class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
-        <div class="text-xs font-semibold uppercase text-base-content/70">{l "Users and circles that belong to this boundary"}</div>
+        <div class="flex items-center px-2 space-x-9">
+          <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "People and circles in this boundary"}</h2>
+          <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} label={l "New circle"} />
+        </div>
         <!-- <div class="flex items-center mt-3 space-x-2">
           <span 
             :for={subject <- @subjects}
@@ -76,9 +100,9 @@
                   name="add" 
                   id="acl_tagify"
                   class="w-full tagify--outside tagify" />
-                <select class="tagify hide !text-slate-800">
+                <select class="tagify hide">
                   {#for {id, name} <- @suggestions}
-                    <option class="!text-slate-800" value={id}>{ name }</option>
+                    <option class="" value={id}>{ name }</option>
                   {/for}
                 </select>
               </div>
@@ -119,11 +143,21 @@
             :for={%{id: subject_id} = subject <- e(@subjects, [])}
             class={"flex items-center px-2 py-1 mt-px"}>
             <div 
-              class={"flex-1 pr-2 text-left truncate ellipsis ",
+              class={"flex-1 pr-2 text-left truncate ellipsis",
                 "text-sm": !Settings.get([:ui, :compact], false, assigns),
                 "text-xs": Settings.get([:ui, :compact], false, assigns)
               }>
-              {subject_name(subject)}
+              {#if !e(subject, :stereotyped, :stereotype_id, nil) and e(subject, :named, :id, nil) !=nil and subject_id not in e(assigns, :global_circles, [])}
+                <span 
+                  phx-click="edit_circle" 
+                  phx-target={@myself}
+                  phx-value-id={subject_id}
+                  class="cursor-pointer">
+                  {subject_name(subject)}
+                </span>
+              {#else}
+                {subject_name(subject)}
+              {/if}
             </div>
             <div class="">
               <form :on-change="edit_grant" class="flex items-center space-x-1 boundaries-switches">
@@ -279,7 +313,7 @@
   </div>
 
 
-<style>
+  <style>
   .boundaries-switches label div.btn {
     color: hsl(var(--bc));
   }
@@ -293,8 +327,8 @@
     background: white;
     color: black;
   }
-</style>
+  </style>
 
-
+{/if}
 </div>
 

@@ -1,19 +1,31 @@
 defmodule Bonfire.Boundaries.Web.BoundariesSelectionLive do
-  use Bonfire.UI.Common.Web, :stateful_component
+  use Bonfire.UI.Common.Web, :stateless_component
 
   # prop showing_within, :any
-  prop to_boundaries, :list, default: nil
+  prop to_boundaries, :list, default: []
   prop to_circles, :list
   prop thread_mode, :string
 
-
-  def handle_event("tagify_remove", %{"remove" => subject} = _attrs, socket) do
-    Bonfire.Boundaries.LiveHandler.remove_from_acl(subject, socket)
+  def input_value(boundaries) do
+    boundaries
+    |> debug
+    |> Enum.map(fn {id, name} -> %{"value"=> id, "text"=> name} end)
+    |> Jason.encode!()
+    |> debug()
+    # [{"value":"good", "text":"The Good, the Bad and the Ugly"}, {"value":"matrix", "text":"The Matrix"}]
   end
 
-
-  def handle_event("tagify_add", %{"add" => id} = _attrs, socket) do
-    Bonfire.Boundaries.LiveHandler.add_to_acl(id, socket)
+  def presets(to_boundaries) do
+     (
+      # [
+      # {"public", l("Public")},
+      # {"local", l("Local Instance")},
+      # {"mentions", l("Mentions")}
+      # ]
+      # ++
+      to_boundaries
+    )
+    |> Enum.uniq()
+    |> debug()
   end
-
 end
