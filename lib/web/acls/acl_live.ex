@@ -7,6 +7,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   prop acl_id, :any
   prop parent_back, :any
   prop columns, :integer, default: 1
+  prop selected_tab, :string
   prop setting_boundaries, :boolean, default: false
 
   @global_circles ["0AND0MSTRANGERS0FF1NTERNET", "3SERSFR0MY0VR10CA11NSTANCE", "7EDERATEDW1THANACT1V1TYPVB"]
@@ -19,6 +20,19 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       |> assign(
         section: e(params, "section", "permissions")
       )
+      |> assign(sidebar_widgets: [
+        users: [
+          main: [
+            {Bonfire.UI.Me.SettingsViewLive.SidebarSettingsLive,
+            [
+              selected_tab: "acls",
+              admin_tab: "",
+              current_user: current_user(socket)
+            ]}
+          ],
+          secondary: []
+        ]
+      ])
     }
   end
 
