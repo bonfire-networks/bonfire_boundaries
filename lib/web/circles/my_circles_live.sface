@@ -1,4 +1,16 @@
-<div class="">
+<div>
+
+{#if @section=="new"}
+
+  <Bonfire.Boundaries.Web.NewCircleLive
+    current_user={current_user(assigns)}
+    parent_back={@myself}
+    event_target={@myself}
+    setting_boundaries={@setting_boundaries}
+  />
+
+{#else}
+
   <!-- <div class="p-4 border-b bg-base-content/10 border-base-content/30">
     <form class="flex items-center" phx-submit="Bonfire.Boundaries:circle_create">
       <input class="flex-1 mr-4 input input-bordered" type="text" name="name" placeholder="Circle name"/>
@@ -11,7 +23,14 @@
 
     <div class="flex items-center px-2 space-x-9">
       <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "My circles"}</h2>
-      <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} />
+      <!-- <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} /> -->
+      <div 
+        :on-click="assign"
+        phx-value-section="new"
+        class="normal-case btn btn-outline btn-sm" >
+        {l "Create"}
+      </div>
+
     </div>
 
     <ul class="mt-3">
@@ -66,4 +85,6 @@
       {/for}
     </ul>
   </div>
+
+  {/if}
 </div>

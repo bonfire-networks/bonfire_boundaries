@@ -1,11 +1,14 @@
-<Bonfire.UI.Common.OpenModalLive
-  id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "new-circle")} 
-  title_text={e(assigns, :label, l "Create a new circle")}
-  form_opts={%{"phx-submit"=> "Bonfire.Boundaries:circle_create", "phx-target"=> e(assigns, :event_target, nil)}}
-  no_actions
-  >
-  <div class="w-full">
-    <input type="hidden" name="no_redirect" value={if @setting_boundaries, do: "1"} />
+  <div 
+    :if={@parent_back} 
+    phx-click="back"
+    phx-target={@parent_back}
+    class="btn btn-outline btn-sm btn-circle" > 
+    <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
+  </div>
+
+  <div 
+    x-data="{ name: '' }"
+    class="w-full" >
     <!-- <div 
       x-data="{
         open: false,
@@ -50,14 +53,16 @@
         <span class="font-medium label-text">{l "Enter a name for the circle"}</span>
         </label>
         <div class="flex items-center">
-          <input name="named[name]"
+          <input 
+            x-model="name"
+            name="named[name]"
             type="text" 
             placeholder={l "Type here"}
             class="w-full input input-bordered" />
         </div>
     </div>
   
-    <div class="w-full mt-4 form-control">
+    <!-- <div class="w-full mt-4 form-control">
       <label class="label">
         <span class="font-medium label-text">{l "Enter an optional description"}</span>
       </label>
@@ -68,15 +73,14 @@
           rows="3" 
           class="w-full h-24 textarea textarea-bordered"></textarea>
       </div>
-    </div>
-    <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l "Create"}</button>
+    </div> -->
+
+    <button 
+      phx-click="Bonfire.Boundaries:circle_create"
+      phx-target={@event_target}
+      :phx-value-name="name"
+      phx-value-no_redirect={if @setting_boundaries, do: "1"}
+      type="button" 
+      class="w-full mt-3 normal-case btn btn-primary">{l "Create"}</button>
   
   </div>
-  <:open_btn>
-    <div 
-      class="normal-case btn btn-outline btn-sm" >
-      {@label || l "Create"}
-    </div>
-  </:open_btn>
-</Bonfire.UI.Common.OpenModalLive>
-

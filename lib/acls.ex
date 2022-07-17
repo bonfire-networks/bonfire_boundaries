@@ -208,7 +208,9 @@ defmodule Bonfire.Boundaries.Acls do
   ##   will be hidden from the user
 
   def create(attrs \\ %{}, opts) do
-    changeset(:create, attrs, opts)
+    attrs
+    |> input_to_atoms()
+    |> changeset(:create, ..., opts)
     |> repo().insert()
   end
 
@@ -368,6 +370,33 @@ defmodule Bonfire.Boundaries.Acls do
   def edit(id, %User{} = user, params) do
     with {:ok, acl} <- get_for_caretaker(id, user) do
       edit(acl, user, params)
+    end
+  end
+
+  @doc """
+  Fully delete the ACL, including permissions/grants and controlled information. This will affect all objects previously shared with this ACL.
+  """
+  def delete(%Acl{}=acl, opts) do
+    assocs = [:grants, :controlled, :caretaker, :named, :extra_info, :stereotyped]
+
+    Bonfire.Social.Objects.maybe_generic_delete(Acl, acl, current_user: current_user(opts), delete_associations: assocs)
+  end
+  def delete(id, opts) do
+    with {:ok, acl} <- get_for_caretaker(id, current_user(opts)) do
+      delete(acl, opts)
+    end
+  end
+
+  @doc """
+  Soft-delete the ACL, meaning it will not be displayed anymore, but permissions/grants and controlled information will be preserved. This will not affect objects previously shared with this ACL.
+  """
+  def soft_delete(%Acl{}=acl, _opts) do
+    Bonfire.Common.Repo.Delete.soft_delete(acl) # FIXME
+    # acl |> repo().delete()
+  end
+  def soft_delete(id, opts) do
+    with {:ok, acl} <- get_for_caretaker(id, current_user(opts)) do
+      soft_delete(acl, opts)
     end
   end
 

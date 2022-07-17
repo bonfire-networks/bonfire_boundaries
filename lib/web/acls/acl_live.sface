@@ -1,7 +1,16 @@
 
 <div>
 
-{#if e(assigns, :edit_circle_id, nil)}
+{#if @section=="new_circle"}
+
+  <Bonfire.Boundaries.Web.NewCircleLive
+    current_user={current_user(assigns)}
+    parent_back={@myself}
+    event_target={@myself}
+    setting_boundaries={@setting_boundaries}
+  />
+
+{#elseif e(assigns, :edit_circle_id, nil)}
 
   <Bonfire.Boundaries.Web.CircleLive
     id={e(assigns, :edit_circle_id, nil)} 
@@ -65,7 +74,13 @@
       <div class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
         <div class="flex items-center px-2 space-x-9">
           <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "People and circles in this boundary"}</h2>
-          <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} label={l "New circle"} />
+          <!-- <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} label={l "New circle"} /> -->
+          <div 
+            :on-click="assign"
+            phx-value-section="new_circle"
+            class="normal-case btn btn-outline btn-sm" >
+            {l "New circle"}
+          </div>
         </div>
         <!-- <div class="flex items-center mt-3 space-x-2">
           <span 
@@ -144,8 +159,8 @@
             class={"flex items-center px-2 py-1 mt-px"}>
             <div 
               class={"flex-1 pr-2 text-left truncate ellipsis",
-                "text-sm": !Settings.get([:ui, :compact], false, assigns),
-                "text-xs": Settings.get([:ui, :compact], false, assigns)
+                "text-sm": !@ui_compact,
+                "text-xs": @ui_compact
               }>
               {#if !e(subject, :stereotyped, :stereotype_id, nil) and e(subject, :named, :id, nil) !=nil and subject_id not in e(assigns, :global_circles, [])}
                 <span 
@@ -282,31 +297,60 @@
       </form>
       <div :if={!e(@acl, :stereotyped, nil)} class="pb-3 mt-6 text-lg font-medium">{l "Danger zone"}</div>
       <div :if={!e(@acl, :stereotyped, nil)} class="p-4 border rounded-lg border-error/30">
-        <div class="flex items-center space-x-8">
+        
+        <!-- <div class="flex items-center space-x-8">
+          <div class="flex flex-col">
+            <div class="flex-1 text-base font-bold">{l "Archive this boundary"}</div>
+            <div class="text-sm text-base-content/80">{l "If you no longer want to use this boundary, but still want existing permissions using it to be preserved."}</div>
+          </div>
+          <Bonfire.UI.Common.OpenModalLive
+            id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "archive-acl")} 
+            title_text={l("Archive this boundary")}
+            >
+            {l "The boundary will be permanently archived and no longer appear in your list of boundaries."} 
+            <:open_btn>
+              <div class="normal-case btn btn-outline btn-warning btn-sm">{l "Archive"}</div>
+            </:open_btn>
+            <:action_btns>
+              <button 
+                data-id="archive_boundary"
+                type="button" 
+                :on-click="Bonfire.Boundaries:acl_soft_delete" 
+                phx-value-go="/settings/acls"
+                class="normal-case btn btn-outline btn-warning btn-sm">
+                <span class="text-left truncate ellipsis">{l("Archive this boundary")}</span>
+              </button>
+            </:action_btns>
+          </Bonfire.UI.Common.OpenModalLive>
+        </div> -->
+        
+        <div class="flex items-center space-x-8 mt-4">
           <div class="flex flex-col">
             <div class="flex-1 text-base font-bold">{l "Delete this boundary"}</div>
-            <div class="text-sm text-base-content/80">{l "Once you delete a boundary, there is no going back. Please be certain."}</div>
+            <div class="text-sm text-base-content/80">{l "Deleting a boundary means anything shared with users of the local instance using this boundary will no longer be shared. Please be certain."}</div>
           </div>
           <Bonfire.UI.Common.OpenModalLive
             id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "delete-acl")} 
             title_text={l("Delete this boundary")}
             >
-            {l "The boundary will be permanently deleted. This action may affect all the activities that included the boundary."} 
+            {l "The boundary will be permanently deleted. This action will affect everything that was shared on the local instance using the boundary."} 
             <:open_btn>
               <div class="normal-case btn btn-outline btn-error btn-sm">{l "Delete"}</div>
             </:open_btn>
             <:action_btns>
               <button 
                 data-id="delete_boundary"
-                type="submit" 
+                type="button" 
+                :on-click="Bonfire.Boundaries:acl_delete" 
+                phx-value-go="/settings/acls"
                 class="normal-case btn btn-error btn-sm">
                 <span class="text-left truncate ellipsis">{l("Delete this boundary")}</span>
               </button>
             </:action_btns>
 
           </Bonfire.UI.Common.OpenModalLive>
-          
         </div>
+
       </div>
 
     </section>

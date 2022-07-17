@@ -4,10 +4,11 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   alias Bonfire.Boundaries.Grants
   require Integer
 
-  prop acl_id, :any
-  prop parent_back, :any
+  prop acl_id, :any, default: nil
+  prop parent_back, :any, default: nil
   prop columns, :integer, default: 1
-  prop selected_tab, :string
+  prop selected_tab, :string, default: nil
+  prop section, :any, default: nil
   prop setting_boundaries, :boolean, default: false
 
   @global_circles ["0AND0MSTRANGERS0FF1NTERNET", "3SERSFR0MY0VR10CA11NSTANCE", "7EDERATEDW1THANACT1V1TYPVB"]
@@ -20,19 +21,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       |> assign(
         section: e(params, "section", "permissions")
       )
-      |> assign(sidebar_widgets: [
-        users: [
-          main: [
-            {Bonfire.UI.Me.SettingsViewLive.SidebarSettingsLive,
-            [
-              selected_tab: "acls",
-              admin_tab: "",
-              current_user: current_user(socket)
-            ]}
-          ],
-          secondary: []
-        ]
-      ])
     }
   end
 
@@ -86,7 +74,21 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         global_circles: @global_circles,
         read_only: Acls.is_stereotype?(acl),
         settings_section_title: "View " <> e(acl, :named, :name, "") <> " boundary",
-        settings_section_description: l "Create and manage your boundary."
+        settings_section_description: l("Create and manage your boundary."),
+        ui_compact: Settings.get([:ui, :compact], false, assigns),
+        sidebar_widgets: [
+          users: [
+            main: [
+              {Bonfire.UI.Me.SettingsViewLive.SidebarSettingsLive,
+              [
+                selected_tab: "acls",
+                admin_tab: "",
+                current_user: current_user(assigns)
+              ]}
+            ],
+            secondary: []
+          ]
+        ]
       )}
     end
   end
@@ -153,7 +155,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   def handle_event("back", _, socket) do # TODO
     {:noreply, socket
-      |> assign(:edit_circle_id, nil)
+      |> assign(
+        edit_circle_id: nil,
+        section: nil
+      )
     }
   end
 
@@ -248,10 +253,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def predefined_subjects(subjects) do
-    Enum.map(subjects, fn s -> %{"value"=> ulid(s), "text"=> subject_name(s)} end)
+    Enum.map(subjects, fn s -> %{"value"=> ulid(s), "text"=> subject_name(s) || ulid(s)} end)
     # |> Enum.join(", ")
     |> Jason.encode!()
-    |> debug()
+    # |> debug()
     # [{"value":"good", "text":"The Good, the Bad and the Ugly"}, {"value":"matrix", "text":"The Matrix"}]
   end
 end

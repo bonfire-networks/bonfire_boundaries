@@ -123,16 +123,27 @@ defmodule Bonfire.Boundaries.LiveHandler do
     }
   end
 
+  def handle_event("circle_create", %{"name"=>name} = attrs, socket) do
+    circle_create(Map.merge(attrs, %{named: %{name: name}}), socket)
+  end
+
   def handle_event("circle_create", attrs, socket) do
+    circle_create(attrs, socket)
+  end
+
+  def circle_create(attrs, socket) do
     with {:ok, %{id: id} = circle} <-
       Circles.create(current_user(socket), attrs) do
-        Bonfire.UI.Common.OpenModalLive.close()
+        # Bonfire.UI.Common.OpenModalLive.close()
 
         {:noreply,
           socket
           |> assign_flash(:info, "Circle created!")
-          |> assign(circles: [circle] ++ e(socket.assigns, :circles, []))
-          |> do_add_to_acl(circle)
+          |> assign(
+            circles: [circle] ++ e(socket.assigns, :circles, []),
+            section: nil
+          )
+          |> maybe_add_to_acl(circle)
           |> maybe_redirect_to("/settings/circle/"<>id, attrs)
         }
     end
@@ -181,27 +192,79 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
+    def handle_event("circle_soft_delete", _, socket) do
+    id = ulid!(e(socket.assigns, :circle, nil))
+
+    with {:ok, _circle} <-
+      Circles.soft_delete(id, current_user(socket)) |> debug do
+
+      {:noreply,
+        socket
+        |> assign_flash(:info, l "Archived")
+        |> redirect_to("/settings/circles")
+      }
+    end
+  end
+
+  def handle_event("acl_soft_delete", _, socket) do
+    id = ulid!(e(socket.assigns, :acl, nil))
+
+    with {:ok, _} <-
+      Acls.soft_delete(id, current_user(socket)) |> debug do
+
+      {:noreply,
+        socket
+        |> assign_flash(:info, l "Archived")
+        |> redirect_to("/settings/acls")
+      }
+    end
+  end
+
+  def handle_event("acl_delete", _, socket) do
+    id = ulid!(e(socket.assigns, :acl, nil))
+
+    with {:ok, _} <-
+      Acls.delete(id, current_user(socket)) |> debug do
+
+      {:noreply,
+        socket
+        |> assign_flash(:info, l "Deleted")
+        |> redirect_to("/settings/acls")
+      }
+    end
+  end
+
+  def handle_event("acl_create", %{"name"=>name} = attrs, socket) do
+    acl_create(Map.merge(attrs, %{named: %{name: name}}), socket)
+  end
+
   def handle_event("acl_create", attrs, socket) do
+    acl_create(attrs, socket)
+  end
+
+  def acl_create(attrs, socket) do
     with {:ok, %{id: id} = acl} <-
       Acls.create(attrs, current_user: current_user(socket)) do
-        Bonfire.UI.Common.OpenModalLive.close()
+        # Bonfire.UI.Common.OpenModalLive.close()
 
         {:noreply,
           socket
-          |> assign(acls: [acl] ++ e(socket.assigns, :acls, []))
+          |> assign(
+            acls: [acl] ++ e(socket.assigns, :acls, []),
+            section: nil
+            )
           |> assign_flash(:info, l "Boundary created!")
           |> maybe_redirect_to("/settings/acl/"<>id, attrs)
         }
     end
   end
 
-
   def handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
     remove_from_acl(subject, socket)
   end
 
   def remove_from_acl(subject, socket) do
-    IO.inspect(subject, label: "ULLID")
+    # IO.inspect(subject, label: "ULLID")
     id = ulid!(e(socket.assigns, :acl, nil))
 
     with {del, _} when is_integer(del) and del >0 <- Grants.remove_subject_from_acl(subject, id) do
@@ -221,11 +284,18 @@ defmodule Bonfire.Boundaries.LiveHandler do
     }
   end
 
+  defp maybe_add_to_acl(socket, %{} = subject) do
+    if e(socket.assigns, :acl, nil) do
+      do_add_to_acl(socket, subject)
+    else
+      socket
+    end
+  end
+
   defp do_add_to_acl(socket, %{} = subject) do
     subject_map = %{ulid(subject)=> %{subject: subject}}
 
     socket
-      |> assign_flash(:info, l "Added to boundary")
       |> assign(
         subjects: e(socket.assigns, :subjects, []) ++ [subject],
         list: e(socket.assigns, :list, %{}) |> Enum.map(
@@ -250,6 +320,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
         end) |> Map.new() #|> debug
         # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
       )
+      |> assign_flash(:info, l "Added to boundary")
   end
 
 

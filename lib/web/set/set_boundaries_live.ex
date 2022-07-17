@@ -10,6 +10,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   prop open_boundaries, :boolean, default: false
 
   def to_boundaries_ids(to_boundaries) do
-    Enum.map(to_boundaries, fn b -> elem(b, 0) end) |> debug("to_boundaries_ids")
+    Enum.map(to_boundaries, fn b -> elem(b, 0) end)
+    #|> debug("to_boundaries_ids")
   end
 end

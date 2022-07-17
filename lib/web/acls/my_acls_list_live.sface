@@ -1,6 +1,15 @@
 <div>
 
-{#if e(assigns, :edit_acl_id, nil)}
+{#if @section=="new"}
+
+  <Bonfire.Boundaries.Web.NewAclLive
+    current_user={current_user(assigns)}
+    parent_back={@myself}
+    event_target={@myself}
+    setting_boundaries={@setting_boundaries}
+  />
+
+{#elseif e(assigns, :edit_acl_id, nil)}
 
   <Bonfire.Boundaries.Web.AclLive
     id={e(assigns, :edit_acl_id, nil)} 
@@ -15,7 +24,14 @@
 <div class="mt-4">
   <div class="flex items-center px-2 space-x-9">
     <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "My boundaries"}</h2>
-    <Bonfire.Boundaries.Web.NewAclLive event_target={@myself} setting_boundaries={@setting_boundaries} />
+    <!-- <Bonfire.Boundaries.Web.NewAclLive event_target={@myself} setting_boundaries={@setting_boundaries} /> -->
+    <div 
+      :on-click="assign"
+      phx-value-section="new"
+      class="normal-case btn btn-outline btn-sm" >
+      {l "Create"}
+    </div>
+
   </div>
 
   <ul class="flex flex-col p-2 space-y-2"> 
