@@ -324,7 +324,7 @@
           </Bonfire.UI.Common.OpenModalLive>
         </div> -->
         
-        <div class="flex items-center space-x-8 mt-4">
+        <div class="flex items-center mt-4 space-x-8">
           <div class="flex flex-col">
             <div class="flex-1 text-base font-bold">{l "Delete this boundary"}</div>
             <div class="text-sm text-base-content/80">{l "Deleting a boundary means anything shared with users of the local instance using this boundary will no longer be shared. Please be certain."}</div>

@@ -13,6 +13,8 @@
           value={input_value(@to_boundaries)}
           placeholder={l "Set boundaries"} 
           name="to_boundaries" 
+          data-test="123"
+          data-user-input="false"
           id="boundaries_selection_tagify"
           class="w-full tagify" />
         <select class="tagify hide">

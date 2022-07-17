@@ -1,13 +1,14 @@
 <div>
 
 {#if @section=="new"}
-
-  <Bonfire.Boundaries.Web.NewAclLive
-    current_user={current_user(assigns)}
-    parent_back={@myself}
-    event_target={@myself}
-    setting_boundaries={@setting_boundaries}
-  />
+  <div class="p-4">
+    <Bonfire.Boundaries.Web.NewAclLive
+      current_user={current_user(assigns)}
+      parent_back={@myself}
+      event_target={@myself}
+      setting_boundaries={@setting_boundaries}
+    />
+  </div>
 
 {#elseif e(assigns, :edit_acl_id, nil)}
 
@@ -21,8 +22,14 @@
 
 {#else}
 
-<div class="mt-4">
-  <div class="flex items-center px-2 space-x-9">
+<div class={
+  "",
+  "mt-4": !@setting_boundaries}
+>
+  
+  <div 
+    :if={!@setting_boundaries}
+    class="flex items-center px-2 space-x-9">
     <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "My boundaries"}</h2>
     <!-- <Bonfire.Boundaries.Web.NewAclLive event_target={@myself} setting_boundaries={@setting_boundaries} /> -->
     <div 
@@ -39,7 +46,7 @@
 
       <li class={
         "p-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30",
-        "border-primary bg-primary/10 border-2": @to_boundaries_ids |> Enum.member?(ulid(acl))
+        "bg-primary/10": @to_boundaries_ids |> Enum.member?(ulid(acl))
         }>
         <label 
           class="flex items-center w-full" 
@@ -83,11 +90,20 @@
                 <Solid.PencilIcon class="w-4 h-4" />
               {/case}
             </div>
+             
             <div 
-              :if={@setting_boundaries}
+              :if={@setting_boundaries && @to_boundaries_ids |> Enum.member?(ulid(acl)) == false}
               class="btn btn-outline btn-sm btn-circle opacity-80">
               <Solid.PlusIcon class="w-5 h-5 " />
             </div>
+
+            <div 
+              :if={@setting_boundaries && @to_boundaries_ids |> Enum.member?(ulid(acl))}
+              class="btn btn-success btn-sm btn-circle opacity-80">
+              <Solid.CheckIcon class="w-5 h-5 " />
+            </div>
+
+
           </div>
         </label>
         {#if e(acl, :grants_count, 0)>0}
@@ -120,7 +136,26 @@
       </li>
       
     {/for}
+
   </ul>
+  <div 
+    :if={@setting_boundaries}
+    :on-click="assign"
+    @click="show_boundary_list = false"
+    phx-value-section="new"
+    class="flex items-center p-4 space-x-3 border-t cursor-pointer hover:bg-base-content/10 border-base-content/30">
+    <div 
+      class="btn btn-outline btn-sm btn-circle opacity-80">
+      <Solid.PlusIcon class="w-5 h-5 " />
+    </div>
+    <div class="flex-1">
+      <div class="text-base font-semibold">{l "Create a new boundary"}</div>
+    </div>
+    <div 
+      class="btn btn-ghost btn-sm btn-circle opacity-80">
+      <Solid.ChevronRightIcon class="w-5 h-5 " />
+    </div>
+  </div>
 </div>
 {/if}
 </div>
