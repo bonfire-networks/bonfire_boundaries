@@ -39,12 +39,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       # list = subject_verb_grant(e(acl, :grants, []))
       list = verb_subject_grant(e(acl, :grants, []))
 
-      already_set_ids = Map.keys(list)
-
       # # TODO: handle pagination?
-      followed = Bonfire.Social.Follows.list_my_followed(current_user, paginate: false, exclude_ids: already_set_ids)
+      followed = Bonfire.Social.Follows.list_my_followed(current_user, paginate: false)
 
-      already_seen_ids = already_set_ids ++ Enum.map(followed, & &1.edge.object_id)
+      already_seen_ids = Enum.map(followed, & &1.edge.object_id)
       # # |> debug
       followers = Bonfire.Social.Follows.list_my_followers(current_user, paginate: false, exclude_ids: already_seen_ids)
       # |> debug
