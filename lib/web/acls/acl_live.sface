@@ -102,7 +102,6 @@
           <div class="flex items-center mt-3">
             <div 
               class="flex-1"
-              phx-update="ignore"
               >
               <div
                 class="flex-1"

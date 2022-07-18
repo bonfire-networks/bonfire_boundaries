@@ -293,11 +293,13 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   defp do_add_to_acl(socket, %{} = subject) do
-    subject_map = %{ulid(subject)=> %{subject: subject}}
+    id = ulid(subject)
+    subject_map = %{id=> %{subject: subject}}
 
     socket
       |> assign(
         subjects: e(socket.assigns, :subjects, []) ++ [subject],
+        suggestions: Map.put(e(socket.assigns, :suggestions, %{}), id, e(subject, :named, :name, id)), # so tagify doesn't remove it as invalid
         list: e(socket.assigns, :list, %{}) |> Enum.map(
         fn
           {verb_id, %{verb: verb, subject_grants: subject_grants}} ->

@@ -141,7 +141,7 @@
   <div 
     :if={@setting_boundaries}
     :on-click="assign"
-    @click="show_boundary_list = false"
+    @click="show_boundary_list = false" 
     phx-value-section="new"
     class="flex items-center p-4 space-x-3 border-t cursor-pointer hover:bg-base-content/10 border-base-content/30">
     <div 

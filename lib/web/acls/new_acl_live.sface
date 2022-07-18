@@ -1,7 +1,7 @@
 <div 
   :if={@parent_back} 
   phx-click="back"
-  phx-target={@parent_back}
+  phx-target={@parent_back} 
   class="btn btn-outline btn-sm btn-circle" > 
   <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
 </div>
