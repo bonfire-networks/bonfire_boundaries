@@ -3,6 +3,7 @@
   <div class="flex items-center space-x-2">
     <div 
       :if={@parent_back} 
+      x-on:click="show_boundary_list = true"
       phx-click="back"
       phx-target={@parent_back}
       class="btn btn-sm btn-ghost btn-circle" > 
@@ -10,6 +11,7 @@
     </div>
     <span>{l "Back"}</span>
   </div>
+  
   <div 
     x-data="{name: ''}"
     class="w-full p-3 mt-3 border rounded border-base-content/30" >

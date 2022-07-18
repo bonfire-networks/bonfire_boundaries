@@ -78,15 +78,15 @@
           <div 
             :on-click="assign"
             phx-value-section="new_circle"
-            class="normal-case link link-hover" >
-            {l "New circle"}
+            class="normal-case btn btn-secondary btn-sm" >
+            {l "Define a new circle"}
           </div>
         </div>
         <!-- <div class="flex items-center mt-3 space-x-2">
           <span 
             :for={subject <- @subjects}
             class="inline-flex rounded-full items-center py-0.5 pl-2.5 pr-1 text-sm font-medium bg-info text-info-content">
-            <span class="text-sm">{subject_name(subject)}</span>
+            <span class="text-sm">{LiveHandler.subject_name(subject)}</span>
             <span 
               :if={!@read_only} 
               phx-click="Bonfire.Boundaries:remove_from_acl"
@@ -167,10 +167,10 @@
                   phx-target={@myself}
                   phx-value-id={subject_id}
                   class="cursor-pointer">
-                  {subject_name(subject)}
+                  {LiveHandler.subject_name(subject)}
                 </span>
               {#else}
-                {subject_name(subject)}
+                {LiveHandler.subject_name(subject)}
               {/if}
             </div>
             <div class="">

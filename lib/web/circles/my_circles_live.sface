@@ -40,7 +40,7 @@
           <div class="">
             <div class="flex items-center space-x-2">
               <!-- <Solid.UserGroupIcon class="w-5 h-5 text-base-content/80" /> -->
-              <div class="text-base font-semibold">{ e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil) || l "Untitled" }</div>
+              <div class="text-base font-semibold">{ LiveHandler.subject_name(circle) }</div>
             </div>
 
           <Bonfire.Boundaries.Web.CirclePreviewLive

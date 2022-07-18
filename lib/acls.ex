@@ -41,14 +41,16 @@ defmodule Bonfire.Boundaries.Acls do
   def cast(changeset, creator, opts) do
 
     to_boundaries = Boundaries.boundaries_set(maybe_from_opts(opts, :boundary, opts))
+    |> info("to_boundaries")
+
     preset = Boundaries.preset_name(to_boundaries)
-    |> debug("preset_name")
+    |> info("preset_name")
 
     # id = Changeset.get_field(changeset, :id)
     acls = base_acls(creator, preset, opts) # add ACLs based on any boundary presets (eg. public/local/mentions)
     ++ maybe_add_direct_acl_ids(to_boundaries) # add any ACLs directly specified in input
 
-    debug(acls, "existing ACLs to set")
+    debug(acls, "preset + inputted ACLs to set")
 
     case custom_recipients(changeset, preset, opts) do
       [] ->
@@ -61,7 +63,7 @@ defmodule Bonfire.Boundaries.Acls do
           (e(opts, :verbs_to_grant, nil) || Config.get!([:verbs_to_grant, :default]))
           |> debug("verbs_to_grant")
           |> Enum.flat_map(custom_recipients, &grant_to(ulid(&1), acl_id, ...))
-          |> debug("on-the-fly ACLs to create")
+          |> info("on-the-fly ACLs to create")
 
         changeset
         |> Changeset.prepare_changes(fn changeset ->
@@ -80,7 +82,7 @@ defmodule Bonfire.Boundaries.Acls do
       ++
       Boundaries.acls_from_preset_boundary_names(preset)
     )
-    |> debug("preset ACLs to set")
+    |> info("preset ACLs to set (based on preset #{preset}) ")
     |> find_acls(user)
   end
 

@@ -1,6 +1,7 @@
 <div>
 
 {#if @section=="new"}
+  
   <Bonfire.Boundaries.Web.NewAclLive
     current_user={current_user(assigns)}
     parent_back={@myself}
@@ -147,7 +148,7 @@
       <Solid.PlusIcon class="w-5 h-5 " />
     </div>
     <div class="flex-1">
-      <div class="text-base font-normal">{l "Create a new boundary"}</div>
+      <div class="text-base font-normal">{l "Define a new boundary"}</div>
     </div>
     <div 
       class="btn btn-ghost btn-sm btn-circle opacity-80">
@@ -156,4 +157,6 @@
   </div>
 </div>
 {/if}
+
+
 </div>

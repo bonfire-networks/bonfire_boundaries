@@ -251,6 +251,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
           socket
           |> assign(
             acls: [acl] ++ e(socket.assigns, :acls, []),
+            edit_acl_id: id,
             section: nil
             )
           |> assign_flash(:info, l "Boundary created!")
@@ -265,17 +266,24 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def remove_from_acl(subject, socket) do
     # IO.inspect(subject, label: "ULLID")
-    id = ulid!(e(socket.assigns, :acl, nil))
+    acl_id = ulid!(e(socket.assigns, :acl, nil))
+    subject_id = ulid!(subject)
 
-    with {del, _} when is_integer(del) and del >0 <- Grants.remove_subject_from_acl(subject, id) do
-
-      {:noreply,
-        socket
-        |> assign_flash(:info, l "Removed from boundary")
-        |> redirect_to("/settings/acl/#{id}")
-      }
-
+    socket = with {del, _} when is_integer(del) and del >0 <- Grants.remove_subject_from_acl(subject, acl_id) do
+      socket
+      |> assign_flash(:info, l "Removed from boundary")
+      # |> redirect_to("/settings/acl/#{id}")
+    else _ ->
+      socket
+      |> assign_flash(:info, l "No permissions removed from boundary")
     end
+
+    {:noreply,
+        socket
+        |> assign(
+          subjects: Enum.reject(e(socket.assigns, :subjects, []), &( ulid(&1)==subject_id ))
+        )
+      }
   end
 
   def add_to_acl(id, socket) do
@@ -294,12 +302,15 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   defp do_add_to_acl(socket, %{} = subject) do
     id = ulid(subject)
+    |> debug("id")
     subject_map = %{id=> %{subject: subject}}
+    subject_name = subject_name(subject)
+    |> debug("name")
 
     socket
       |> assign(
-        subjects: e(socket.assigns, :subjects, []) ++ [subject],
-        suggestions: Map.put(e(socket.assigns, :suggestions, %{}), id, e(subject, :named, :name, id)), # so tagify doesn't remove it as invalid
+        subjects: ([subject] ++ e(socket.assigns, :subjects, [])) |> Enum.uniq_by(&ulid/1),
+        suggestions: Map.put(e(socket.assigns, :suggestions, %{}), id, subject_name), # so tagify doesn't remove it as invalid
         list: e(socket.assigns, :list, %{}) |> Enum.map(
         fn
           {verb_id, %{verb: verb, subject_grants: subject_grants}} ->
@@ -499,6 +510,10 @@ defmodule Bonfire.Boundaries.LiveHandler do
   def maybe_redirect_to(socket, path, _attrs) do
     socket
     |> redirect_to(path)
+  end
+
+  def subject_name(subject) do
+    e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) || e(subject, :profile, :name, nil) || e(subject, :character, :username, nil) || e(subject, :name, nil) || ulid(subject)
   end
 
 end

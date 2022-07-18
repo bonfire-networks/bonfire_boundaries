@@ -93,7 +93,7 @@
                         <input name="subject" class="w-full mt-1 tagify input input-bordered" />
                         <select class="tagify hide">
                           {#for {id, suggested} <- @suggestions}
-                            <option class="" value={id}>{ e(suggested, :character, :username, nil) }</option>
+                            <option class="" value={id}>{ LiveHandler.subject_name(suggested) }</option>
                           {/for}
                         </select>
                       </div>

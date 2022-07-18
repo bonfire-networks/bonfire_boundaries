@@ -2,6 +2,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   use Bonfire.UI.Common.Web, :stateful_component
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Grants
+  alias Bonfire.Boundaries.LiveHandler
   require Integer
 
   prop acl_id, :any, default: nil
@@ -54,7 +55,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       end
       ++
       for circle <- circles do
-        {e(circle, :id, nil), (e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil) || l "Untitled")<>" "<> l "(circle)" }
+        {e(circle, :id, nil), (e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil) || l "Untitled circle") }
       end)
       |> Map.new
       # |> debug
@@ -241,9 +242,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   def verb_subject_grant(_), do: %{}
 
-  def subject_name(subject) do
-    e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) || e(subject, :profile, :name, nil) || e(subject, :character, :username, nil) || e(subject, :name, nil) || ulid(subject)
-  end
 
   def columns(assigns) do
     # if Settings.get([:ui, :compact], false, assigns), do: 3, else: 2
@@ -251,7 +249,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def predefined_subjects(subjects) do
-    Enum.map(subjects, fn s -> %{"value"=> ulid(s), "text"=> subject_name(s) || ulid(s)} end)
+    Enum.map(subjects, fn s -> %{"value"=> ulid(s), "text"=> LiveHandler.subject_name(s) || ulid(s)} end)
     # |> Enum.join(", ")
     |> Jason.encode!()
     # |> debug()

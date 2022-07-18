@@ -17,6 +17,7 @@ defmodule Bonfire.Boundaries do
     cond do # Note: only one applies, in priority from most to least restrictive
       "mentions" in boundaries -> "mentions"
       "local" in boundaries -> "local"
+      "federated" in boundaries -> "federated"
       "public" in boundaries -> "public"
       true ->
         # debug(boundaries, "No preset boundary set")
