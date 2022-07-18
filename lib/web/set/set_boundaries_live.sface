@@ -1,15 +1,15 @@
 
 
 {#if Config.get(:experimental_features_enabled)}
-  <div class="flex items-center pr-2 space-x-2 bg-base-content/10">
+  <div
+    
+    class="flex items-center pr-2 space-x-2 bg-base-content/10">
     <Bonfire.Boundaries.Web.BoundariesSelectionLive
       to_boundaries={@to_boundaries}
       to_circles={@to_circles}
       thread_mode={@thread_mode}
     />
-
     {#if Settings.get([:ui, :smart_input_as], nil, assigns)==:sidebar and @thread_mode !=:flat}
-
       <Bonfire.UI.Common.OpenModalLive
         id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "set-boundaries")} 
         reusable_modal_id={"boundaries-modal"}
@@ -35,7 +35,6 @@
       </Bonfire.UI.Common.OpenModalLive>
 
     {#else}
-
       <button 
         type="button" 
         x-show="!open_boundaries"
@@ -46,9 +45,7 @@
         <span class="sr-only">{l "Edit boundaries"}</span>
         <Solid.ChevronRightIcon class="w-5 h-5 stroke-1" />
       </button>
-
     {/if}
-
     <button type="button" 
       x-show="open_boundaries"
       class="space-x-1 normal-case btn btn-primary btn-xs" 
@@ -56,7 +53,6 @@
       <Outline.CheckIcon class="w-4 h-4"/>
       <span class="text-sm">{l "Done"}</span>
     </button>
-
   </div>
 
   <Bonfire.UI.Common.ReusableModalLive

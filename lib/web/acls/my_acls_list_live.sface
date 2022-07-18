@@ -1,14 +1,12 @@
 <div>
 
 {#if @section=="new"}
-  <div class="p-4">
-    <Bonfire.Boundaries.Web.NewAclLive
-      current_user={current_user(assigns)}
-      parent_back={@myself}
-      event_target={@myself}
-      setting_boundaries={@setting_boundaries}
-    />
-  </div>
+  <Bonfire.Boundaries.Web.NewAclLive
+    current_user={current_user(assigns)}
+    parent_back={@myself}
+    event_target={@myself}
+    setting_boundaries={@setting_boundaries}
+  />
 
 {#elseif e(assigns, :edit_acl_id, nil)}
 
@@ -93,7 +91,7 @@
              
             <div 
               :if={@setting_boundaries && not Enum.member?(@to_boundaries_ids, acl_id)}
-              class="btn btn-outline btn-sm btn-circle opacity-80">
+              class="btn btn-ghost btn-sm btn-circle opacity-80">
               <Solid.PlusIcon class="w-5 h-5 " />
             </div>
 
@@ -143,13 +141,13 @@
     :on-click="assign"
     @click="show_boundary_list = false" 
     phx-value-section="new"
-    class="flex items-center p-4 space-x-3 border-t cursor-pointer hover:bg-base-content/10 border-base-content/30">
+    class="flex items-center p-4 space-x-3 border-t cursor-pointer bg-base-content/5 hover:bg-base-content/10 border-base-content/10">
     <div 
       class="btn btn-outline btn-sm btn-circle opacity-80">
       <Solid.PlusIcon class="w-5 h-5 " />
     </div>
     <div class="flex-1">
-      <div class="text-base font-semibold">{l "Create a new boundary"}</div>
+      <div class="text-base font-normal">{l "Create a new boundary"}</div>
     </div>
     <div 
       class="btn btn-ghost btn-sm btn-circle opacity-80">

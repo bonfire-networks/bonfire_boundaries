@@ -32,7 +32,7 @@
             phx-click="back"
             phx-target={e(assigns, :parent_back, nil)}
             @click="show_boundary_list = true"
-            class="btn btn-outline btn-sm btn-circle" > 
+            class="btn btn-ghost btn-sm btn-circle" > 
             <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
           </div>
 
@@ -78,7 +78,7 @@
           <div 
             :on-click="assign"
             phx-value-section="new_circle"
-            class="normal-case btn btn-outline btn-sm" >
+            class="normal-case link link-hover" >
             {l "New circle"}
           </div>
         </div>
@@ -113,7 +113,7 @@
                   placeholder={l "Add more users or circles"} 
                   name="add" 
                   id="acl_tagify"
-                  class="w-full tagify--outside tagify" />
+                  class="w-full border tagify--outside tagify !border-base-content/10" />
                 <select class="tagify hide">
                   {#for {id, name} <- @suggestions}
                     <option class="" value={id}>{ name }</option>
