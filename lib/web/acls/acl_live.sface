@@ -39,7 +39,7 @@
           <div class="flex space-x-2 items-top">
             <span class="text-xl" aria-label="boundary icon">{e(@acl, :extra_info, :info, :icon, "🛡")}</span>
             <div class="">
-              <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</div>
+              <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled boundary" }</div>
               <div class="text-sm font-normal text-base-content/80">{e(@acl, :extra_info, :summary, nil)}</div>
             </div>
           </div>

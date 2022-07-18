@@ -15,7 +15,7 @@
           </div>
 
           <!-- <Solid.LockClosedIcon class="w-6 h-6 text-base-content/80" /> -->
-          <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled Acl" }</div>
+          <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled boundary" }</div>
         </div>
         <LivePatch
           to={"#"}
