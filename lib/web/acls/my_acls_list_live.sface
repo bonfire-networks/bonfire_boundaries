@@ -42,15 +42,15 @@
   </div>
 
   <ul class="flex flex-col p-2 space-y-2"> 
-    {#for acl <- e(assigns, :acls, []) ++ e(assigns, :built_ins, [])  }
+    {#for %{id: acl_id} = acl <- e(assigns, :acls, []) ++ e(assigns, :built_ins, [])  }
 
       <li class={
         "p-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30",
-        "bg-primary/10": @to_boundaries_ids |> Enum.member?(ulid(acl))
+        "bg-primary/10": @to_boundaries_ids |> Enum.member?(acl_id)
         }>
         <label 
           class="flex items-center w-full" 
-          phx-click={if @select_event, do: JS.push(@select_event, value: %{id: acl.id, name: (e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled")}, target: "#smart_input")}>
+          phx-click={if @setting_boundaries, do: JS.push((if not Enum.member?(@to_boundaries_ids, acl_id), do: "select_boundary", else: "remove_boundary"), value: %{id: acl_id, name: (e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled")}, target: "#smart_input")}>
           <div class="flex-1">
             <div class="flex items-center space-x-2">
               <span class="text-xl" aria-label="boundary icon">{e(acl, :extra_info, :info, :icon, "🛡")}</span>
@@ -92,15 +92,15 @@
             </div>
              
             <div 
-              :if={@setting_boundaries && @to_boundaries_ids |> Enum.member?(ulid(acl)) == false}
+              :if={@setting_boundaries && not Enum.member?(@to_boundaries_ids, acl_id)}
               class="btn btn-outline btn-sm btn-circle opacity-80">
               <Solid.PlusIcon class="w-5 h-5 " />
             </div>
 
             <div 
-              :if={@setting_boundaries && @to_boundaries_ids |> Enum.member?(ulid(acl))}
+              :if={@setting_boundaries && @to_boundaries_ids |> Enum.member?(acl_id)}
               class="btn btn-success btn-sm btn-circle opacity-80">
-              <Solid.CheckIcon class="w-5 h-5 " />
+              <Solid.MinusIcon class="w-5 h-5 " />
             </div>
 
 

@@ -12,25 +12,35 @@ defmodule Bonfire.Boundaries do
   import Queries, only: [boundarise: 3]
   import Ecto.Query
 
-  # def preset(preset) when is_binary(preset), do: preset
-  def preset(opts), do: maybe_from_opts(opts, :boundary, opts) |> preset_from_boundaries()
-  defp preset_from_boundaries(boundaries) when is_list(boundaries) do
-    debug(boundaries, "inputed")
+  def preset_name(boundaries) when is_list(boundaries) do
+    debug(boundaries, "inputted")
     cond do # Note: only one applies, in priority from most to least restrictive
       "mentions" in boundaries -> "mentions"
       "local" in boundaries -> "local"
       "public" in boundaries -> "public"
-      true -> boundaries
+      true ->
+        # debug(boundaries, "No preset boundary set")
+        nil
     end
     |> debug("computed")
   end
-  defp preset_from_boundaries(text) when is_binary(text) do
+  def preset_name(other) do
+    boundaries_set(other)
+    |> preset_name()
+  end
+
+  def boundaries_set(text) when is_binary(text) do
     text
     |> String.split(",")
     |> Enum.map(&String.trim/1)
-    |> preset_from_boundaries()
   end
-  defp preset_from_boundaries(other), do: other
+  def boundaries_set(list) when is_list(list) do
+    list
+  end
+  def boundaries_set(other) do
+    warn(other, "Invalid boundaries set")
+    []
+  end
 
   def acls_from_preset_boundary_names(presets) when is_list(presets), do: Enum.flat_map(presets, &acls_from_preset_boundary_names/1)
   def acls_from_preset_boundary_names(preset) do

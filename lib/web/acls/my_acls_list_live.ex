@@ -7,7 +7,6 @@ defmodule Bonfire.Boundaries.Web.MyAclsListLive do
   prop hide_breakdown, :boolean, default: false
   prop setting_boundaries, :boolean, default: false
   prop click_override, :boolean, default: false
-  prop select_event, :string, default: nil
   prop to_boundaries, :list, default: []
   prop to_boundaries_ids, :list, default: []
   prop section, :any, default: nil
@@ -61,7 +60,8 @@ defmodule Bonfire.Boundaries.Web.MyAclsListLive do
   def handle_event("back", _, socket) do # TODO
     {:noreply, socket
       |> assign(:edit_acl_id, nil)
-    }
+      |> assign(:section, nil)
+   }
   end
 
   def handle_event(action, attrs, socket), do: Bonfire.UI.Common.LiveHandlers.handle_event(action, attrs, socket, __MODULE__)

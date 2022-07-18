@@ -40,26 +40,33 @@ defmodule Bonfire.Boundaries.Acls do
 
   def cast(changeset, creator, opts) do
 
-    preset = Boundaries.preset(opts)
-    |> debug("preset")
+    to_boundaries = Boundaries.boundaries_set(maybe_from_opts(opts, :boundary, opts))
+    preset = Boundaries.preset_name(to_boundaries)
+    |> debug("preset_name")
 
     # id = Changeset.get_field(changeset, :id)
-    base = base_acls(creator, preset, opts)
+    acls = base_acls(creator, preset, opts) # add ACLs based on any boundary presets (eg. public/local/mentions)
+    ++ maybe_add_direct_acl_ids(to_boundaries) # add any ACLs directly specified in input
+
+    debug(acls, "existing ACLs to set")
+
     case custom_recipients(changeset, preset, opts) do
       [] ->
         changeset
-        |> Changesets.put_assoc(:controlled, base)
-      grants ->
+        |> Changesets.put_assoc(:controlled, acls)
+      custom_recipients ->
         acl_id = ULID.generate()
-        controlled = [%{acl_id: acl_id} | base]
-        grants =
-          (e(opts, :verbs_to_grant, nil) || Config.get!([:verbs_to_grant, :default])) |> debug("verbs_to_grant")
-          |> Enum.flat_map(grants, &grant_to(ulid(&1), acl_id, ...))
+        controlled = [%{acl_id: acl_id} | acls]
+        custom_grants =
+          (e(opts, :verbs_to_grant, nil) || Config.get!([:verbs_to_grant, :default]))
+          |> debug("verbs_to_grant")
+          |> Enum.flat_map(custom_recipients, &grant_to(ulid(&1), acl_id, ...))
+          |> debug("on-the-fly ACLs to create")
 
         changeset
         |> Changeset.prepare_changes(fn changeset ->
           changeset.repo.insert!(%Acl{id: acl_id})
-          changeset.repo.insert_all(Grant, grants)
+          changeset.repo.insert_all(Grant, custom_grants)
           changeset
         end)
         |> Changesets.put_assoc(:controlled, controlled)
@@ -75,32 +82,28 @@ defmodule Bonfire.Boundaries.Acls do
     )
     |> debug("preset ACLs to set")
     |> find_acls(user)
-    |> maybe_add_direct_acl_ids(preset, ...)
-    |> debug("ACLs to set")
   end
 
-  defp maybe_add_direct_acl_ids(list, acls) when is_list(list) do
-    Enum.reduce(list, acls, &maybe_add_direct_acl_ids/2)
+  defp maybe_add_direct_acl_ids(acls) when is_list(acls) do
+    ulids(acls)
+    |> filter_empty([])
+    |> Enum.map(&maybe_add_direct_acl_id/1)
   end
-  defp maybe_add_direct_acl_ids(preset, acls) do
-    if is_ulid?(preset) do
-      acls ++ [%{acl_id: preset}]
-    else
-      acls
-    end
+  defp maybe_add_direct_acl_id(id) when is_binary(id) do
+    %{acl_id: id}
   end
 
   defp custom_recipients(changeset, preset, opts) do
     (
       reply_to_grants(changeset, preset, opts)
       ++ mentions_grants(changeset, preset, opts)
-      ++ maybe_custom_circles_or_users(preset, opts)
+      ++ maybe_custom_circles_or_users(opts)
     )
     |> Enum.uniq()
     |> filter_empty([])
   end
 
-  defp maybe_custom_circles_or_users(_, opts), do: maybe_from_opts(opts, :to_circles, [])
+  defp maybe_custom_circles_or_users(opts), do: maybe_from_opts(opts, :to_circles, [])
 
   defp reply_to_grants(changeset, preset, _opts) do
     reply_to_creator = Utils.e(changeset, :changes, :replied, :changes, :replying_to, :created, :creator, nil)

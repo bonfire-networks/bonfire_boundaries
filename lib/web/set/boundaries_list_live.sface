@@ -8,7 +8,7 @@
         }>
         <label 
             class="flex items-center w-full"
-            phx-click={JS.push("select_boundary", value: %{id: "public", name: l "Public"}, target: "#smart_input")}>
+            phx-click={JS.push((if not Enum.member?(@to_boundaries_ids, "public"), do: "select_boundary", else: "remove_boundary"), value: %{id: "public", name: l "Public"}, target: "#smart_input")}>
             <div class="flex-1">
             <div class="flex items-start space-x-2">
                 <span class="text-lg">🌍</span>
@@ -31,7 +31,7 @@
               <div 
                 :if={@to_boundaries_ids |> Enum.member?("public")}
                 class="btn btn-success btn-sm btn-circle opacity-80">
-                <Solid.CheckIcon class="w-5 h-5 " />
+                <Solid.MinusIcon class="w-5 h-5 " />
               </div>
             </div>
         </label>
@@ -41,7 +41,7 @@
         "bg-primary/10": @to_boundaries_ids |> Enum.member?("local")}>
         <label 
             class="flex items-center w-full"
-            phx-click={JS.push("select_boundary", value: %{id: "local", name: l "Local Instance"}, target: "#smart_input")}>
+            phx-click={JS.push((if not Enum.member?(@to_boundaries_ids, "local"), do: "select_boundary", else: "remove_boundary"), value: %{id: "local", name: l "Local Instance"}, target: "#smart_input")}>
             <div class="flex-1">
             <div class="flex items-start space-x-2">
                 <span class="text-lg">🏠</span>
@@ -63,7 +63,7 @@
               <div 
                 :if={@to_boundaries_ids |> Enum.member?("local")}
                 class="btn btn-success btn-sm btn-circle opacity-80">
-                <Solid.CheckIcon class="w-5 h-5 " />
+                <Solid.MinusIcon class="w-5 h-5 " />
               </div>
             </div>
         </label>
@@ -73,7 +73,7 @@
         "bg-primary/10": @to_boundaries_ids |> Enum.member?("mentions")}>
         <label 
             class="flex items-center w-full"
-            phx-click={JS.push("select_boundary", value: %{id: "mentions", name: l "Mentions"}, target: "#smart_input")}>
+            phx-click={JS.push((if not Enum.member?(@to_boundaries_ids, "mentions"), do: "select_boundary", else: "remove_boundary"), value: %{id: "mentions", name: l "Mentions"}, target: "#smart_input")}>
             <div class="flex-1">
             <div class="flex items-start space-x-2">
                 <span class="text-lg">🔔</span>
@@ -95,7 +95,7 @@
               <div 
                 :if={@to_boundaries_ids |> Enum.member?("mentions")}
                 class="btn btn-success btn-sm btn-circle opacity-80">
-                <Solid.CheckIcon class="w-5 h-5 " />
+                <Solid.MinusIcon class="w-5 h-5 " />
               </div>
             </div>
         </label>
@@ -111,7 +111,6 @@
         hide_breakdown={@hide_breakdown}  
         setting_boundaries={@setting_boundaries}
         click_override={@click_override}
-        select_event={@select_event}
     />
 
 </div>
