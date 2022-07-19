@@ -2,7 +2,6 @@
 
 {#if Config.get(:experimental_features_enabled)}
   <div
-    
     class="flex items-center pr-2 space-x-2 bg-base-content/10">
     <Bonfire.Boundaries.Web.BoundariesSelectionLive
       to_boundaries={@to_boundaries}
@@ -46,6 +45,7 @@
         <Solid.ChevronRightIcon class="w-5 h-5 stroke-1" />
       </button>
     {/if}
+    
     <button type="button" 
       x-show="open_boundaries"
       @click="open_boundaries = false"
@@ -56,9 +56,11 @@
     </button>
   </div>
 
-  <Bonfire.UI.Common.ReusableModalLive
-    id="boundaries-modal" 
-  />
+  <div>
+    <Bonfire.UI.Common.ReusableModalLive
+      id="boundaries-modal" 
+    />
+  </div>
 
   <!-- <Bonfire.Boundaries.Web.BoundariesInfoLive
     to_boundaries={e(assigns, :to_boundaries, [])}
