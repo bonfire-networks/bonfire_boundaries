@@ -35,21 +35,22 @@
       </Bonfire.UI.Common.OpenModalLive>
 
     {#else}
-      <button 
-        type="button" 
+      <button type="button" 
         x-show="!open_boundaries"
-        class="btn btn-sm btn-ghost btn-square" 
+        @click="open_boundaries = true"
         phx-click="open_boundaries"
         phx-target="#smart_input"
-        @click="open_boundaries = true">
+        class="btn btn-sm btn-ghost btn-square" 
+        >
         <span class="sr-only">{l "Edit boundaries"}</span>
         <Solid.ChevronRightIcon class="w-5 h-5 stroke-1" />
       </button>
     {/if}
     <button type="button" 
       x-show="open_boundaries"
+      @click="open_boundaries = false"
       class="space-x-1 normal-case btn btn-primary btn-xs" 
-      @click="open_boundaries = false">
+      >
       <Outline.CheckIcon class="w-4 h-4"/>
       <span class="text-sm">{l "Done"}</span>
     </button>

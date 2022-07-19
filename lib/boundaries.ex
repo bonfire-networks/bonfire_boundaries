@@ -57,7 +57,7 @@ defmodule Bonfire.Boundaries do
     end
   end
 
-  def preset_boundary_name_from_acl(acl) do
+  def preset_boundary_tuple_from_acl(acl) do
     preset_acls = Config.get!(:preset_acls_all)
 
     public_acl_ids = preset_acls["public"]
@@ -69,9 +69,9 @@ defmodule Bonfire.Boundaries do
     acl = ulid(acl)
 
     cond do
-      acl in public_acl_ids -> "public"
-      acl in local_acl_ids -> "local"
-      true -> "mentions"
+      acl in public_acl_ids -> {"public", l "Public"}
+      acl in local_acl_ids -> {"local", l "Local Instance"}
+      true -> {"mentions", l "Mentions"}
     end
   end
 

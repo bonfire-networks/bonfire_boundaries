@@ -1,14 +1,14 @@
 <span>
 {#if not is_atom(@object_boundary) or @object_boundary == :none}
-{#case Bonfire.Boundaries.preset_boundary_name_from_acl(@object_boundary)}
-{#match "public"}
+{#case Bonfire.Boundaries.preset_boundary_tuple_from_acl(@object_boundary)}
+{#match {"public", _}}
   <span 
     data-tip={e(@object_boundary, :name, "Public")}
     class="align-bottom tooltip tooltip-bottom z-20">
     <Solid.GlobeIcon class="w-4 h-4 text-opacity-50 text-base-content" />
   </span>
 
-{#match "local"}
+{#match {"local", _}}
 
   <span 
     data-tip={e(@object_boundary, :name, "Local")}
