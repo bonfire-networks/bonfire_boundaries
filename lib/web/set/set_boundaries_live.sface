@@ -1,4 +1,4 @@
-
+<div>
 
 {#if Config.get(:experimental_features_enabled)}
   <div
@@ -45,7 +45,7 @@
         <Solid.ChevronRightIcon class="w-5 h-5 stroke-1" />
       </button>
     {/if}
-    
+
     <button type="button" 
       x-show="open_boundaries"
       @click="open_boundaries = false"
@@ -94,4 +94,4 @@
 
   {/if}
 
-
+</div>
