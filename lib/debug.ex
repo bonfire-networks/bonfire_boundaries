@@ -50,7 +50,7 @@ defmodule Bonfire.Boundaries.Debug do
   end
 
   def debug_object_acls(thing) do
-    acls = Boundaries.get_object_acls(thing)
+    acls = Boundaries.list_object_acls(thing)
     IO.puts "Object: #{thing.id}"
     debug_acls(acls)
   end
