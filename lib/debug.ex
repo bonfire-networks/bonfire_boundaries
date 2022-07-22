@@ -1,6 +1,7 @@
 defmodule Bonfire.Boundaries.Debug do
   use Arrows
   # import Where
+  alias Bonfire.Boundaries
   alias Bonfire.Boundaries.{Summary, Verbs}
   alias Bonfire.Common.Utils
   alias Bonfire.Boundaries.{Acls, Circles}
@@ -10,12 +11,6 @@ defmodule Bonfire.Boundaries.Debug do
   defp get_user_acls(user) do
     Acls.list(current_user: user, skip_boundary_check: true)
     |> Repo.preload([:grants])
-  end
-
-  defp get_object_acls(object) do
-    Repo.preload(object, [controlled: [acl: [:named, :grants, stereotyped: [:named]]]], force: true).controlled
-    |> Enum.map(&(&1.acl))
-    # |> dump
   end
 
   def debug_user_circles(user) do
@@ -55,7 +50,7 @@ defmodule Bonfire.Boundaries.Debug do
   end
 
   def debug_object_acls(thing) do
-    acls = get_object_acls(thing)
+    acls = Boundaries.get_object_acls(thing)
     IO.puts "Object: #{thing.id}"
     debug_acls(acls)
   end

@@ -497,7 +497,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def boundaries_on_objects(list_of_ids) do
-    Bonfire.Boundaries.Controlleds.list_on_objects(list_of_ids)
+    Bonfire.Boundaries.Controlleds.list_presets_on_objects(list_of_ids)
   end
 
   defp the_object(assigns) do

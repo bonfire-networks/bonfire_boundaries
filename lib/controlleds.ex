@@ -19,23 +19,37 @@ defmodule Bonfire.Boundaries.Controlleds do
     Controlled.changeset(c, attrs)
   end
 
-  def list, do: repo().many(from(
-    u in Controlled,
-    left_join: acl in assoc(u, :acl),
+  def list, do: repo().many(list_q())
+
+  def list_q, do: from(
+    c in Controlled,
+    left_join: acl in assoc(c, :acl),
     left_join: named in assoc(acl, :named),
-    preload: [acl: [:named]]
-  ))
+    order_by: [asc: c.acl_id],
+    preload: [acl: {acl, named: named}]
+  )
 
-  def list_on_object(object), do: list_on_objects([object])
-
-  def list_on_objects(objects) when is_list(objects) do
-    # FIXME: caching ends up with everything appearing as public
-    # Cache.cached_preloads_for_objects("object_acl", objects, &do_list_on_objects/1)
-    do_list_on_objects(objects)
+  @doc """
+  List boundaries applied to an object.
+  Only call this as an admin or curator of the object.
+  """
+  def list_on_object(object) do
+    repo().many(list_q(object))
   end
 
-  defp do_list_on_objects(objects) when is_list(objects) and length(objects) >0 do
-    repo().many(list_on_objects_q(objects))
+  defp list_q(objects) do
+    list_q()
+    |> where([c], c.id in ^Utils.ulids(objects))
+  end
+
+  def list_presets_on_objects(objects) do
+    # FIXME: caching ends up with everything appearing to be public
+    # Cache.cached_preloads_for_objects("object_acl", objects, &do_list_presets_on_objects/1)
+    do_list_presets_on_objects(objects)
+  end
+
+  defp do_list_presets_on_objects(objects) when is_list(objects) and length(objects) >0 do
+    repo().many(list_on_objects_q(objects, filter_acls: [:guests_may_see_read, :locals_may_interact, :locals_may_reply]))
     |> Map.new(fn c ->
       { # Map.new discards duplicates for the same key, which is convenient for now as we only display one ACL (note that the order_by in the `list_on_objects` query matters)
         Utils.e(c, :id, nil),
@@ -45,18 +59,15 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
   defp do_list_on_objects(_), do: %{}
 
-  defp list_on_objects_q(objects) do
+  defp list_on_objects_q(objects, opts \\ []) do
 
-    filter_acls = Config.get(:public_acls_on_objects, [:guests_may_see_read, :locals_may_interact, :locals_may_reply])
+    filter_acls = Config.get(:public_acls_on_objects, Keyword.get(opts, :filter_acls, []))
     |> Enum.map(&Bonfire.Boundaries.Acls.get_id!/1)
 
-    from c in Controlled,
-    left_join: acl in assoc(c, :acl),
-    left_join: named in assoc(acl, :named),
-    where: c.acl_id in ^filter_acls,
-    where: c.id in ^Utils.ulid(objects),
-    order_by: [asc: c.acl_id],
-    preload: [acl: {acl, named: named}]
+    list_q(objects)
+    |> where([c], c.acl_id in ^filter_acls)
   end
+
+
 
 end

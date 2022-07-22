@@ -43,6 +43,12 @@ defmodule Bonfire.Boundaries do
     []
   end
 
+  def get_object_acls(object) do
+    e(repo().maybe_preload(object, [controlled: [acl: [:named, grants: [subject: [:named, :profile, :character]], stereotyped: [:named]]]], force: true), :controlled, [])
+    |> Enum.map(&(&1.acl))
+    # |> dump
+  end
+
   def acls_from_preset_boundary_names(presets) when is_list(presets), do: Enum.flat_map(presets, &acls_from_preset_boundary_names/1)
   def acls_from_preset_boundary_names(preset) do
     case preset do

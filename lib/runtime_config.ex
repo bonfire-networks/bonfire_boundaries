@@ -196,7 +196,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         ### This lets us control access to the user themselves (e.g. to view their profile or mention them)
         controlleds: %{
           SELF: [
-            :guests_may_see_read, :locals_may_interact, :i_may_administer, # positive permissions
+            :locals_may_interact, :remotes_may_interact, :i_may_administer, # positive permissions
+            # note that extra ACLs are added by `Bonfire.Boundaries.Users.default_visibility/0`
           ] ++ negative_grants
         },
       }
