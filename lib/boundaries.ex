@@ -62,6 +62,7 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  def preset_boundary_tuple_from_acl(%{acl: acl}), do: preset_boundary_tuple_from_acl(acl)
   def preset_boundary_tuple_from_acl(acl) do
     preset_acls = Config.get!(:preset_acls_all)
 

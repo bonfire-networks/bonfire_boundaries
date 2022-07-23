@@ -47,6 +47,12 @@ defmodule Bonfire.Boundaries.Controlleds do
     |> where([c], c.id in ^ulids(objects))
   end
 
+  def get_preset_on_object(object) do
+    list_presets_on_objects_q([object])
+    |> limit(1)
+    |> repo().one()
+  end
+
   def list_presets_on_objects(objects) do
     # FIXME: caching ends up with everything appearing to be public
     # Cache.cached_preloads_for_objects("object_acl", objects, &do_list_presets_on_objects/1)
@@ -54,7 +60,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   defp do_list_presets_on_objects(objects) when is_list(objects) and length(objects) >0 do
-    repo().many(list_on_objects_q(objects, filter_acls: [:guests_may_see_read, :locals_may_interact, :locals_may_reply]))
+    repo().many(list_presets_on_objects_q(objects))
     |> Map.new(fn c ->
       { # Map.new discards duplicates for the same key, which is convenient for now as we only display one ACL (note that the order_by in the `list_on_objects` query matters)
         e(c, :id, nil),
@@ -62,11 +68,11 @@ defmodule Bonfire.Boundaries.Controlleds do
       }
     end)
   end
-  defp do_list_on_objects(_), do: %{}
+  defp do_list_presets_on_objects(_), do: %{}
 
-  defp list_on_objects_q(objects, opts \\ []) do
+  defp list_presets_on_objects_q(objects) do
 
-    filter_acls = Config.get(:public_acls_on_objects, Keyword.get(opts, :filter_acls, []))
+    filter_acls = Config.get(:public_acls_on_objects, [:guests_may_see_read, :locals_may_interact, :locals_may_reply])
     |> Enum.map(&Bonfire.Boundaries.Acls.get_id!/1)
 
     list_q(objects)

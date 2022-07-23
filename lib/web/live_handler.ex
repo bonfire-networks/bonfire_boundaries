@@ -462,7 +462,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     # |> debug("current_user")
 
     list_of_objects = list_of_assigns
-    |> Enum.reject(&e(&1, :object_boundary, nil)) # ignore objects for which a boundary is already set (you can also set object_boundary to :skip in your component assigns to not preload them here)
+    |> Enum.reject(&e(&1, :object_boundary, nil)) # ignore objects for which a boundary is already loaded (you can also set object_boundary to :skip in your component assigns to not preload them here)
     |> Enum.map(&the_object/1)
     # |> debug("list_of_objects")
 
