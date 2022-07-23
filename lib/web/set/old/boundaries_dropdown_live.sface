@@ -8,24 +8,15 @@
     "p-1 dropdown",
     "dropdown-top": e(assigns, :thread_mode, nil) == :flat
   }
->
+  x-data={"{
+    to_boundaries: ['#{if is_messaging?(assigns), do: "message", else: "public"}'],
+    to_boundaries_names: ['#{if is_messaging?(assigns), do: "Message", else: "Public"}'], 
+  }"}>
 
   <label
     tabindex="0"
     class="flex items-center focus:outline-none"
     >
-
-    <!-- <noscript>
-      <input 
-      name={:to_boundaries} 
-      type="hidden" 
-      value="local" />
-      <div 
-        class="font-normal normal-case btn btn-ghost btn-xs" >
-        <Solid.LocationMarkerIcon class="w-5 h-5 text-base-content text-opacity-70"/>
-        <span class="ml-2 text-sm font-normal text-base-content text-opacity-70">{l "Local"}</span>
-      </div>
-    </noscript> -->
      
     <div :if={not is_list(@to_boundaries) || length(@to_boundaries)==0}>
       <div
@@ -58,8 +49,7 @@
     <div 
     class="font-normal normal-case btn btn-ghost btn-sm" >
       
-      <span :for={{name, id} <- @to_boundaries || [{l("Public"), "public"}]} class="text-sm badge">
-        {name}
+      <span :for={{id, _name} <- @to_boundaries || [{l("Public"), "public"}]}>
         <input 
           name="to_boundaries[]"
           value={id}

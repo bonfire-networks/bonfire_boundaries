@@ -1,6 +1,6 @@
 <span>
 {#if not is_atom(@object_boundary) or @object_boundary == :none}
-{#case Bonfire.Boundaries.preset_boundary_tuple_from_acl(@object_boundary)}
+{#case Bonfire.Boundaries.preset_boundary_tuple_from_acl(@object_boundary |> debug) |> debug}
 {#match {"public", _}}
   <span 
     data-tip={e(@object_boundary, :name, "Public")}

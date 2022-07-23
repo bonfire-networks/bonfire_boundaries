@@ -43,9 +43,10 @@ defmodule Bonfire.Boundaries.Users do
           subject_id: default_subject_id(circles, user, circle),
         })
       end
+    ### control access to the user themselves (e.g. to view their profile or mention them)
     controlleds =
-      for {:SELF, acls2}  <- Map.fetch!(user_default_boundaries, :controlleds),
-          acl <- acls2 do
+      for {:SELF, acls2} <- Map.fetch!(user_default_boundaries, :controlleds),
+          acl <- acls2 ++ default_profile_visibility() do
         %{id: user.id, acl_id: default_acl_id(acls, acl)}
       end
     circles =
@@ -75,6 +76,14 @@ defmodule Bonfire.Boundaries.Users do
     # * The ACLs and Circles must be deleted when the user is deleted.
     # * Grants will take care of themselves because they have a strong pointer acl_id.
     Boundaries.take_care_of!(acls ++ circles, user)
+  end
+
+  defp default_profile_visibility do
+    if Bonfire.Me.Settings.get([Bonfire.Me.Users, :discoverable], true, :instance) do
+      [:guests_may_see_read]
+    else
+      [:guests_may_read]
+    end
   end
 
   # support for create_default_boundaries/1

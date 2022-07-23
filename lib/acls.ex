@@ -63,7 +63,7 @@ defmodule Bonfire.Boundaries.Acls do
           (e(opts, :verbs_to_grant, nil) || Config.get!([:verbs_to_grant, :default]))
           |> debug("verbs_to_grant")
           |> Enum.flat_map(custom_recipients, &grant_to(ulid(&1), acl_id, ...))
-          |> info("on-the-fly ACLs to create")
+          |> debug("on-the-fly ACLs to create")
 
         changeset
         |> Changeset.prepare_changes(fn changeset ->

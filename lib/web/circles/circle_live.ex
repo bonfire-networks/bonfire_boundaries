@@ -1,6 +1,7 @@
 defmodule Bonfire.Boundaries.Web.CircleLive do
   use Bonfire.UI.Common.Web, :stateful_component
   alias Bonfire.Boundaries.Circles
+  alias Bonfire.Boundaries.LiveHandler
 
   prop circle_id, :any
   prop parent_back, :any

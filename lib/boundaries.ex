@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries do
   # alias Bonfire.Boundaries.Circles
   # alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.Identity.Caretaker
-  alias Bonfire.Boundaries.{Acls, Queries}
+  alias Bonfire.Boundaries.{Acls, Controlleds, Queries}
   alias Pointers
   # alias Pointers.Pointer
   import Queries, only: [boundarise: 3]
@@ -43,6 +43,11 @@ defmodule Bonfire.Boundaries do
     []
   end
 
+  def list_object_acls(object) do
+    Controlleds.list_on_object(object)
+    |> Enum.map(&(&1.acl))
+  end
+
   def acls_from_preset_boundary_names(presets) when is_list(presets), do: Enum.flat_map(presets, &acls_from_preset_boundary_names/1)
   def acls_from_preset_boundary_names(preset) do
     case preset do
@@ -57,6 +62,7 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  def preset_boundary_tuple_from_acl(%{acl: acl}), do: preset_boundary_tuple_from_acl(acl)
   def preset_boundary_tuple_from_acl(acl) do
     preset_acls = Config.get!(:preset_acls_all)
 
