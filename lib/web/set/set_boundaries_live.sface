@@ -56,16 +56,11 @@
     </button>
   </div>
 
+
   <Bonfire.UI.Common.ReusableModalLive
     id="boundaries-modal" 
   />
 
-  <!-- <Bonfire.Boundaries.Web.BoundariesInfoLive
-    to_boundaries={e(assigns, :to_boundaries, [])}
-    to_circles={e(assigns, :to_circles, [])}
-    thread_mode={e(assigns, :thread_mode, nil)}
-    activity_type_or_reply={Bonfire.UI.Common.SmartInputLive.activity_type_or_reply(assigns)}
-  /> -->
      
       <div 
         :if={Settings.get([:ui, :smart_input_as], nil, assigns)!=:sidebar or e(assigns, :thread_mode, nil) ==:flat}
