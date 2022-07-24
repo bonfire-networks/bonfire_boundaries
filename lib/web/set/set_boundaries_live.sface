@@ -64,13 +64,13 @@
 
      
       <div 
-        :if={Settings.get([:ui, :smart_input_as], nil, assigns)!=:sidebar or e(assigns, :thread_mode, nil) ==:flat}
+        :if={Settings.get([:ui, :smart_input_as], nil, assigns)!=:sidebar or e(@thread_mode, nil) ==:flat}
         x-show="open_boundaries">
         
         <Bonfire.Boundaries.Web.BoundariesListLive
-          to_boundaries={e(assigns, :to_boundaries, [])}
-          to_boundaries_ids={to_boundaries_ids(e(assigns, :to_boundaries, []))}
-          to_circles={e(assigns, :to_circles, [])}
+          to_boundaries={e(@to_boundaries, [])}
+          to_boundaries_ids={to_boundaries_ids(e(@to_boundaries, []))}
+          to_circles={e(@to_circles, [])}
           open_boundaries={@open_boundaries}
           hide_breakdown={true}  
           setting_boundaries={true}
@@ -81,9 +81,9 @@
   {#else} <!-- old dropdown -->
 
     <Bonfire.Boundaries.Web.BoundariesDropdownLive
-      to_boundaries={e(assigns, :to_boundaries, [])}
-      to_circles={e(assigns, :to_circles, [])}
-      thread_mode={e(assigns, :thread_mode, nil)}
+      to_boundaries={e(@to_boundaries, [])}
+      to_circles={e(@to_circles, [])}
+      thread_mode={e(@thread_mode, nil)}
     />
 
   {/if}

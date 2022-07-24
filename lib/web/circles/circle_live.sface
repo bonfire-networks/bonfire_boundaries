@@ -8,13 +8,13 @@
          <div class="flex items-center space-x-2 text-2xl font-bold text-base-content">
 
           <div 
-            :if={e(assigns, :parent_back, nil)} 
+            :if={e(@parent_back, nil)} 
             phx-click="back"
-            phx-target={e(assigns, :parent_back, nil)}
+            phx-target={e(@parent_back, nil)}
             class="btn btn-outline btn-sm btn-circle" > 
             <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
           </div>
-          <Solid.UserGroupIcon :if={!e(assigns, :parent_back, nil)}  class="w-6 h-6 text-base-content/80" />
+          <Solid.UserGroupIcon :if={!e(@parent_back, nil)}  class="w-6 h-6 text-base-content/80" />
 
           <div>{ e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) || l "Untitled circle" }</div>
         </div>
@@ -127,8 +127,8 @@
                   {#else}
                     <li id="no-members" class="flex items-center my-12 place-content-center">
                       <Bonfire.UI.Common.EmptyFeed
-                        feedback_title={e(assigns, :feedback_title, l "This circle has no members yet")}
-                        feedback_message={e(assigns, :feedback_message, nil)}
+                        feedback_title={e(@feedback_title, l "This circle has no members yet")}
+                        feedback_message={e(@feedback_message, nil)}
                       /> 
                     </li>
                   {/for}
@@ -180,8 +180,8 @@
                         {#else}
                           <li id="nobody" class="flex items-center my-12 place-content-center">
                             <Bonfire.UI.Common.EmptyFeed
-                              feedback_title={e(assigns, :feedback_title, l "Follow some people first...")}
-                              feedback_message={e(assigns, :feedback_message, nil)}
+                              feedback_title={e(@feedback_title, l "Follow some people first...")}
+                              feedback_message={e(@feedback_message, nil)}
                             /> 
                           </li>
                         {/for}

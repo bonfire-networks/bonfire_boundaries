@@ -4,18 +4,18 @@
 {#if @section=="new_circle"}
 
   <Bonfire.Boundaries.Web.NewCircleLive
-    current_user={current_user(assigns)}
+    current_user={current_user(@__context__)}
     parent_back={@myself}
     event_target={@myself}
     setting_boundaries={@setting_boundaries}
   />
 
-{#elseif e(assigns, :edit_circle_id, nil)}
+{#elseif e(@edit_circle_id, nil)}
 
   <Bonfire.Boundaries.Web.CircleLive
-    id={e(assigns, :edit_circle_id, nil)} 
-    circle_id={e(assigns, :edit_circle_id, nil)} 
-    current_user={current_user(assigns)}
+    id={e(@edit_circle_id, nil)} 
+    circle_id={e(@edit_circle_id, nil)} 
+    current_user={current_user(@__context__)}
     parent_back={@myself}
     setting_boundaries={@setting_boundaries}
   />
@@ -28,9 +28,9 @@
         <div class="flex items-center flex-1 space-x-2 text-xl font-bold text-base-content">
 
           <div 
-            :if={e(assigns, :parent_back, nil)} 
+            :if={e(@parent_back, nil)} 
             phx-click="back"
-            phx-target={e(assigns, :parent_back, nil)}
+            phx-target={e(@parent_back, nil)}
             @click="show_boundary_list = true"
             class="btn btn-ghost btn-sm btn-circle" > 
             <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
@@ -161,7 +161,7 @@
                 "text-sm": !@ui_compact,
                 "text-xs": @ui_compact
               }>
-              {#if !e(subject, :stereotyped, :stereotype_id, nil) and e(subject, :named, :id, nil) !=nil and subject_id not in e(assigns, :global_circles, [])}
+              {#if !e(subject, :stereotyped, :stereotype_id, nil) and e(subject, :named, :id, nil) !=nil and subject_id not in e(@global_circles, [])}
                 <span 
                   phx-click="edit_circle" 
                   phx-target={@myself}

@@ -6,7 +6,7 @@
 <div 
   class={
     "p-1 dropdown",
-    "dropdown-top": e(assigns, :thread_mode, nil) == :flat
+    "dropdown-top": e(@thread_mode, nil) == :flat
   }
   x-data={"{
     to_boundaries: ['#{if is_messaging?(assigns), do: "message", else: "public"}'],
@@ -109,7 +109,7 @@
         <div class="flex-1">
         <div class="text-sm font-medium text-neutral text-opacity-80">{l "Message"}</div>
         <p class="text-xs text-neutral text-opacity-80">{l "Visible only to people included in this message thread:"} 
-        {#for {name, _id} <- e(assigns, :to_circles, [])}
+        {#for {name, _id} <- e(@to_circles, [])}
           <span class="text-xs badge">{name}</span>
         {/for}
         </p>
@@ -118,7 +118,7 @@
 
       <div 
       :if={Config.get(:experimental_features_enabled)}
-      :for={acl <- Bonfire.Boundaries.Acls.for_dropdown(current_user: current_user(assigns))}
+      :for={acl <- Bonfire.Boundaries.Acls.for_dropdown(current_user: current_user(@__context__))}
       @click={"to_boundaries = ['#{ulid(acl)}']; to_boundaries_names = [\"#{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled"}\"]; open_boundaries = false;"} 
       class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
         <Solid.LockOpenIcon/> 

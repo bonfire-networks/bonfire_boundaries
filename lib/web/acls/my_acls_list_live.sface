@@ -3,18 +3,18 @@
 {#if @section=="new"}
   
   <Bonfire.Boundaries.Web.NewAclLive
-    current_user={current_user(assigns)}
+    current_user={current_user(@__context__)}
     parent_back={@myself}
     event_target={@myself}
     setting_boundaries={@setting_boundaries}
   />
 
-{#elseif e(assigns, :edit_acl_id, nil)}
+{#elseif e(@edit_acl_id, nil)}
 
   <Bonfire.Boundaries.Web.AclLive
-    id={e(assigns, :edit_acl_id, nil)} 
-    acl_id={e(assigns, :edit_acl_id, nil)} 
-    current_user={current_user(assigns)}
+    id={e(@edit_acl_id, nil)} 
+    acl_id={e(@edit_acl_id, nil)} 
+    current_user={current_user(@__context__)}
     parent_back={@myself}
     setting_boundaries={@setting_boundaries}
   />
@@ -41,7 +41,7 @@
   </div>
 
   <ul class="flex flex-col p-2 space-y-2"> 
-    {#for %{id: acl_id} = acl <- e(assigns, :acls, []) ++ e(assigns, :built_ins, [])  }
+    {#for %{id: acl_id} = acl <- e(@acls, []) ++ e(@built_ins, [])  }
 
       <li class={
         "p-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/30",

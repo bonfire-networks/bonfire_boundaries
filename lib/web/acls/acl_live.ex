@@ -5,10 +5,11 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   alias Bonfire.Boundaries.LiveHandler
   require Integer
 
-  prop acl_id, :any, default: nil
+  prop acl_id, :string, default: nil
+  prop edit_circle_id, :string, default: nil
   prop parent_back, :any, default: nil
   prop columns, :integer, default: 1
-  prop selected_tab, :string, default: nil
+  prop selected_tab, :any, default: nil
   prop section, :any, default: nil
   prop setting_boundaries, :boolean, default: false
 

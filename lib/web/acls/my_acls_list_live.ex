@@ -9,7 +9,9 @@ defmodule Bonfire.Boundaries.Web.MyAclsListLive do
   prop click_override, :boolean, default: false
   prop to_boundaries, :list, default: []
   prop to_boundaries_ids, :list, default: []
+  prop built_ins, :list, default: []
   prop section, :any, default: nil
+  prop edit_acl_id, :string, default: nil
 
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
 

@@ -3,7 +3,7 @@
 {#if @section=="new"}
 
   <Bonfire.Boundaries.Web.NewCircleLive
-    current_user={current_user(assigns)}
+    current_user={current_user(@__context__)}
     parent_back={@myself}
     event_target={@myself}
     setting_boundaries={@setting_boundaries}
@@ -34,7 +34,7 @@
     </div>
 
     <ul class="mt-3">
-      {#for circle <- e(assigns, :circles, []) }
+      {#for circle <- e(@circles, []) }
         <li class="flex items-center justify-between flex-1 p-3 mb-3 border rounded hover:bg-base-content/5 border-base-content/30">
           <LiveRedirect class="flex-1 w-full" to={"/settings/circle/"<>circle.id}>
           <div class="">

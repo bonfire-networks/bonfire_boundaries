@@ -7,9 +7,9 @@
         <div class="flex items-center flex-1 space-x-2 text-xl font-bold text-base-content">
 
           <div 
-            :if={e(assigns, :parent_back, nil)} 
+            :if={e(@parent_back, nil)} 
             phx-click="back"
-            phx-target={e(assigns, :parent_back, nil)}
+            phx-target={e(@parent_back, nil)}
             class="btn btn-ghost btn-sm btn-circle" > 
             <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
           </div>
