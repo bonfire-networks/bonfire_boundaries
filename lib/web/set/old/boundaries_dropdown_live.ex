@@ -4,6 +4,8 @@ defmodule Bonfire.Boundaries.Web.BoundariesDropdownLive do
   # prop showing_within, :any
   prop to_boundaries, :list, default: []
   prop to_circles, :list
-  prop thread_mode, :string
+  prop thread_mode, :atom
+  prop showing_within, :any, default: nil
+  prop create_activity_type, :any, default: nil
 
 end

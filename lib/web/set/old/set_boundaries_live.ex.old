@@ -39,7 +39,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     to_circles = e(assigns, :to_circles, [])
 
     label = cond do
-      is_list(to_circles) && length(to_circles)==1 && to_circles |> List.first() |> elem(1) == e(current_user(@__context__), :id, nil) ->
+      is_list(to_circles) && length(to_circles)==1 && to_circles |> List.first() |> elem(1) == ulid(current_user(@__context__)) ->
         nobody
 
       e(assigns, :create_activity_type, nil)==:message ->

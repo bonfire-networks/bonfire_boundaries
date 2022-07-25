@@ -1,5 +1,5 @@
 <li 
-  :if={current_user(@__context__) && e(current_user(@__context__), :id, nil) != e(@object, :id, nil)}
+  :if={current_user(@__context__) && ulid(current_user(@__context__)) != ulid(@object)}
   class=" hover:bg-neutral/20">
   <div>
     <Bonfire.Boundaries.Web.BlockButtonLive
@@ -12,13 +12,13 @@
 </li>
 
 <li 
-  :if={current_user(@__context__) && e(peered(assigns), :peer_id, nil)}
+  :if={current_user(@__context__) && e(peered(@object, @peered), :peer_id, nil)}
   class=" hover:bg-neutral hover:bg-opacity-20">
   <div>
     <Bonfire.Boundaries.Web.BlockButtonLive
       with_icon
-      object={e(peered(assigns), :peer_id, nil)}
-      label={URI.parse(e(peered(assigns), :canonical_uri, "#")).host}
+      object={e(peered(@object, @peered), :peer_id, nil)}
+      label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
       class="flex items-center w-full text-sm text-neutral"
     />
   </div>

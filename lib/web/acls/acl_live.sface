@@ -126,7 +126,7 @@
       </div>
       <div 
         :if={Enum.count(e(@subjects, []))>0}
-        class={"grid w-full grid-cols-1 md:grid-cols-#{columns(assigns)} gap-3 p-3"}>
+        class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}>
 
         {#for {{verb_id, l}, i} <- Enum.with_index(e(@list, []))}   
         <div class={"col-span-1 border border-base-content/30 rounded bg-base-200"}>

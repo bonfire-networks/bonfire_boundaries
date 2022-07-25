@@ -244,8 +244,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   def verb_subject_grant(_), do: %{}
 
 
-  def columns(assigns) do
-    # if Settings.get([:ui, :compact], false, assigns), do: 3, else: 2
+  def columns(context) do
+    # if Settings.get([:ui, :compact], false, context), do: 3, else: 2
     2
   end
 

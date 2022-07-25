@@ -8,7 +8,7 @@
       to_circles={@to_circles}
       thread_mode={@thread_mode}
     />
-    {#if Settings.get([:ui, :smart_input_as], nil, assigns)==:sidebar and @thread_mode !=:flat}
+    {#if Settings.get([:ui, :smart_input_as], nil, @__context__)==:sidebar and @thread_mode !=:flat}
       <Bonfire.UI.Common.OpenModalLive
         id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "set-boundaries")} 
         reusable_modal_id={"boundaries-modal"}
@@ -64,7 +64,7 @@
 
      
       <div 
-        :if={Settings.get([:ui, :smart_input_as], nil, assigns)!=:sidebar or e(@thread_mode, nil) ==:flat}
+        :if={Settings.get([:ui, :smart_input_as], nil, @__context__)!=:sidebar or e(@thread_mode, nil) ==:flat}
         x-show="open_boundaries">
         
         <Bonfire.Boundaries.Web.BoundariesListLive
@@ -84,6 +84,8 @@
       to_boundaries={e(@to_boundaries, [])}
       to_circles={e(@to_circles, [])}
       thread_mode={e(@thread_mode, nil)}
+      showing_within={@showing_within}
+      create_activity_type={@create_activity_type}
     />
 
   {/if}

@@ -1,8 +1,8 @@
-{#if !e(assigns, :my_block, nil) }
+{#if !e(@my_block, nil) }
 
 <Bonfire.UI.Common.OpenModalLive
   id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, @object)} 
-  title_text={l("Block")<>" "<>e(assigns, :label, "")}
+  title_text={l("Block")<>" "<>e(@label, "")}
   form_opts={%{"phx-submit"=> "Bonfire.Boundaries:blocks"}}
   >
   <input type="hidden" name="id" value={e(@object, :id, @object)} />
@@ -132,9 +132,9 @@
 
   <:open_btn>
       <div 
-        class={e(assigns, :class, "btn btn-sm btn-outline rounded-full")}>
+        class={e(@class, "btn btn-sm btn-outline rounded-full")}>
         <Solid.BanIcon
-          :if={e(assigns, :with_icon, false)}
+          :if={e(@with_icon, false)}
           class="w-4 h-4 mr-2 shrink-0 text-neutral text-opacity-70" />
           <!-- <svg
           :if={@block_type==:ghost} 
@@ -162,14 +162,14 @@
           </svg> -->
 
           <!-- <Outline.BanIcon 
-              :if={e(assigns, :scope, nil) !="instance_wide"} 
+              :if={e(@scope, nil) !="instance_wide"} 
               class="w-4 h-4 mr-2 shrink-0 text-neutral text-opacity-70" />
           <Outline.LockClosedIcon 
-              :if={e(assigns, :scope, nil)=="instance_wide"} 
+              :if={e(@scope, nil)=="instance_wide"} 
               class="w-4 h-4 mr-2 shrink-0 text-neutral text-opacity-70" /> -->
 
         <span class="text-left truncate ellipsis">
-          {l("Block")<>" "<>e(assigns, :label, "")} 
+          {l("Block")<>" "<>e(@label, "")} 
         </span>
       </div>
     </:open_btn>
@@ -179,7 +179,7 @@
         data-id="block"
         type="submit" 
         class="btn btn-error btn-sm">
-        <span class="text-left truncate ellipsis">{l("Block")<>" "<>e(assigns, :label, "")}</span>
+        <span class="text-left truncate ellipsis">{l("Block")<>" "<>e(@label, "")}</span>
       </button>
     </:action_btns>
 
@@ -192,17 +192,17 @@
         :on-click="Bonfire.Boundaries:unblock" 
         phx-value-id={e(@object, :id, @object)} 
         phx-value-block_type={@block_type}
-        phx-value-scope={e(assigns, :scope, nil)} 
+        phx-value-scope={e(@scope, nil)} 
         type="button" 
-        class={e(assigns, :class, "btn btn-sm btn-outline normal-case rounded-full")}>
+        class={e(@class, "btn btn-sm btn-outline normal-case rounded-full")}>
         <Outline.CheckCircleIcon 
-            :if={e(assigns, :scope, nil) !="instance_wide"} 
+            :if={e(@scope, nil) !="instance_wide"} 
             class="w-4 h-4 mr-2 shrink-0 text-bas-content text-opacity-70" />
         <Outline.LockOpenIcon 
-            :if={e(assigns, :scope, nil)=="instance_wide"} 
+            :if={e(@scope, nil)=="instance_wide"} 
             class="w-4 h-4 mr-2 shrink-0 text-bas-content text-opacity-70" />
 
-         <span class="truncate ellipsis">{ e(assigns, :label, "")}</span>
+         <span class="truncate ellipsis">{ e(@label, "")}</span>
     </button>
     </div>
 {/if}
