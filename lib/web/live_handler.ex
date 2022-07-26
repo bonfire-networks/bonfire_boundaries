@@ -192,7 +192,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
-    def handle_event("circle_soft_delete", _, socket) do
+  def handle_event("circle_soft_delete", _, socket) do
     id = ulid!(e(socket.assigns, :circle, nil))
 
     with {:ok, _circle} <-
