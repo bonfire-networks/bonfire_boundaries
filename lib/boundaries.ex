@@ -128,7 +128,8 @@ defmodule Bonfire.Boundaries do
         |> repo().many()
     end
   end
-  def load_pointers(item, opts) do
+
+  def load_pointer(item, opts) do
     case ulid(item) do
       id when is_binary(id) ->
 

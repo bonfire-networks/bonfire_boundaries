@@ -421,7 +421,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       my_visible_ids = if current_user,
         do: Bonfire.Boundaries.load_pointers(list_of_ids, current_user: current_user)
           |> Enum.map(&ulid/1),
-        else: %{}
+        else: []
 
       debug(my_visible_ids, "my_visible_ids")
 
