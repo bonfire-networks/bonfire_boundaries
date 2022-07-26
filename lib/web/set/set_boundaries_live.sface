@@ -2,7 +2,7 @@
 
 {#if Config.get(:experimental_features_enabled)}
   <div
-    class="flex items-center pr-2 space-x-2 bg-base-content/10">
+    class="flex items-center pr-2 space-x-2 bg-base-content/5">
     <Bonfire.Boundaries.Web.BoundariesSelectionLive
       to_boundaries={@to_boundaries}
       to_circles={@to_circles}
