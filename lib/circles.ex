@@ -19,9 +19,9 @@ defmodule Bonfire.Boundaries.Circles do
   @default_q_opts [exclude_stereotypes: ["0KF1NEY0VD0N0TWANTT0HEARME"]] # don't show "others who silenced me" in circles
 
   # special built-in circles (eg, guest, local, activity_pub)
-  def circles, do: Bonfire.Common.Config.get([:circles])
+  def circles, do: Config.get([:circles])
 
-  def get(slug) when is_atom(slug), do: Bonfire.Common.Config.get([:circles])[slug]
+  def get(slug) when is_atom(slug), do: Config.get([:circles])[slug]
   def get(id) when is_binary(id), do: get_tuple(id) |> elem_or(1, nil)
 
   def get!(slug) when is_atom(slug) do
@@ -33,7 +33,7 @@ defmodule Bonfire.Boundaries.Circles do
   def get_id!(slug) when is_atom(slug), do: get!(slug).id
 
   def get_tuple(slug) when is_atom(slug) do
-    {Bonfire.Common.Config.get!([:circles, slug, :name]), Bonfire.Common.Config.get!([:circles, slug, :id])}
+    {Config.get!([:circles, slug, :name]), Config.get!([:circles, slug, :id])}
   end
   def get_tuple(id) when is_binary(id) do
     Enum.find circles(), fn {_slug, c} ->

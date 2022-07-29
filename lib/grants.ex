@@ -8,7 +8,6 @@ defmodule Bonfire.Boundaries.Grants do
   import Ecto.Query
   # import EctoSparkles
 
-  alias Bonfire.Common.Config
   alias Ecto.Changeset
   alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.Identity.User
@@ -17,7 +16,7 @@ defmodule Bonfire.Boundaries.Grants do
   # alias Bonfire.Boundaries.Accesses
   alias Bonfire.Boundaries.Circles
 
-  def grants, do: Bonfire.Common.Config.get([:grants])
+  def grants, do: Config.get([:grants])
 
     ## invariants:
 

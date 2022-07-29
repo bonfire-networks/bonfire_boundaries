@@ -113,19 +113,13 @@ defmodule Bonfire.Boundaries do
     Config.get!(:user_default_boundaries)
   end
 
-
-  @doc """
-  Loads binaries according to boundaries (which are assumed to be ULID pointer IDs).
-  Lists which are iterated and return a [sub]list with only permitted pointers.
-  """
-  def load_pointers(items, opts) when is_list(items)  do
-    # debug(items, "items")
-    case ulid(items) do
-      [] -> []
-      nil -> []
-      ids ->
-        load_query(ids, e(opts, :ids_only, nil), opts)
-        |> repo().many()
+  def can?(current_user, verbs, object) do
+    case Bonfire.Boundaries.load_pointer(object, current_user: current_user(current_user), verbs: verbs, ids_only: true) do
+      %{id: _} ->
+        true
+      _ ->
+        debug(verbs, "no permission to")
+        false
     end
   end
 
@@ -139,6 +133,21 @@ defmodule Bonfire.Boundaries do
       _ ->
         error(item, "Expected an object or ULID ID, could not check boundaries for")
         nil
+    end
+  end
+
+  @doc """
+  Loads binaries according to boundaries (which are assumed to be ULID pointer IDs).
+  Lists which are iterated and return a [sub]list with only permitted pointers.
+  """
+  def load_pointers(items, opts) when is_list(items)  do
+    # debug(items, "items")
+    case ulid(items) do
+      [] -> []
+      nil -> []
+      ids ->
+        load_query(ids, e(opts, :ids_only, nil), opts)
+        |> repo().many()
     end
   end
 
