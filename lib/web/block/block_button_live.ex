@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Web.BlockButtonLive do
   prop with_icon, :boolean, default: false
   prop my_block, :any
   prop class, :css_class
-  prop label, :string
+  prop label, :string, default: nil
   prop scope, :any # only used for unblock
   prop block_type, :any # only used for unblock
 
