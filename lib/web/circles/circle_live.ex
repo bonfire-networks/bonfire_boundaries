@@ -3,6 +3,8 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.LiveHandler
 
+  @follow_stereotypes ["7DAPE0P1E1PERM1TT0F0110WME", "4THEPE0P1ES1CH00SET0F0110W"]
+
   prop circle_id, :any, default: nil
   prop parent_back, :any, default: nil
   prop setting_boundaries, :boolean, default: false
@@ -69,7 +71,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
         circle: circle |> Map.drop([:encircles]),
         members: members,
         suggestions: suggestions,
-        read_only: e(circle, :stereotyped, :stereotype_id, nil) in ["7DAPE0P1E1PERM1TT0F0110WME", "4THEPE0P1ES1CH00SET0F0110W"],
+        read_only: e(circle, :stereotyped, :stereotype_id, nil) in @follow_stereotypes or ulid(circle) in @follow_stereotypes,
         settings_section_title: "View " <> e(circle, :named, :name, "") <> " circle",
       )}
     # else other ->

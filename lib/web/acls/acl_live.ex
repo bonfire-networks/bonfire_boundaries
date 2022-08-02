@@ -77,7 +77,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         subjects: subjects(e(acl, :grants, [])),
         suggestions: suggestions,
         global_circles: global_circles,
-        read_only: !Integration.is_admin?(current_user) and !Bonfire.Boundaries.can?(current_user, :grant, :instance) and Acls.is_stereotype?(acl),
+        read_only: Acls.is_stereotype?(acl),
         settings_section_title: "View " <> e(acl, :named, :name, "") <> " boundary",
         settings_section_description: l("Create and manage your boundary."),
         ui_compact: Settings.get([:ui, :compact], false, assigns),

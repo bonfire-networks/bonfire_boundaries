@@ -94,8 +94,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         admin:        %{id: "0ADM1NSVSERW1THSVPERP0WERS", name: "Instance Admins"},
 
         ### Stereotypes - placeholders for special per-user circles the system will manage.
-        followers:    %{id: "7DAPE0P1E1PERM1TT0F0110WME", name: "Those who follow me"},
-        followed:     %{id: "4THEPE0P1ES1CH00SET0F0110W", name: "Those I follow"},
+        followers:    %{id: "7DAPE0P1E1PERM1TT0F0110WME", name: "Those who follow me", stereotype: true},
+        followed:     %{id: "4THEPE0P1ES1CH00SET0F0110W", name: "Those I follow", stereotype: true},
         ghost_them:   %{id: "7N010NGERC0NSENTT0Y0VN0WTY", name: "Those I ghosted"},
         silence_them: %{id: "7N010NGERWANTT011STENT0Y0V", name: "Those I silenced"},
         silence_me:   %{id: "0KF1NEY0VD0N0TWANTT0HEARME", name: "Those who silenced me"},
@@ -123,18 +123,17 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         ## ACLs that confer my personal permissions on things i have created
         # i_may_read:            %{id: "71MAYSEEANDREADMY0WNSTVFFS", name: "I may read"},              # not currently used
         # i_may_interact:        %{id: "71MAY1NTERACTW1MY0WNSTVFFS", name: "I may read and interact"}, # not currently used
-        i_may_administer:      %{id: "71MAYADM1N1STERMY0WNSTVFFS", name: "I may administer"},
+        i_may_administer:      %{id: "71MAYADM1N1STERMY0WNSTVFFS", name: "I may administer", stereotype: true},
 
         ## ACLs that confer permissions for people i mention (or reply to, which causes a mention)
-        # TODO: these aren't used right now
-        mentions_may_read:     %{id: "7MENT10NSCANREADTH1STH1NGS", name: "Mentions may read"},
-        mentions_may_interact: %{id: "7MENT10NSCAN1NTERACTW1TH1T", name: "Mentions may read and interact"},
-        mentions_may_reply:    %{id: "7MENT10NSCANEVENREP1YT01TS", name: "Mentions may read, interact and reply"},
+        # mentions_may_read:     %{id: "7MENT10NSCANREADTH1STH1NGS", name: "Mentions may read", stereotype: true},
+        # mentions_may_interact: %{id: "7MENT10NSCAN1NTERACTW1TH1T", name: "Mentions may read and interact", stereotype: true},
+        # mentions_may_reply:    %{id: "7MENT10NSCANEVENREP1YT01TS", name: "Mentions may read, interact and reply", stereotype: true},
 
         ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
-        nobody_can_anything:  %{id: "0H0STEDCANTSEE0RD0ANYTH1NG", name: "People I ghosted cannot see"},
-        nobody_can_reach:     %{id: "1S11ENCEDTHEMS0CAN0TP1NGME", name: "People I silenced aren't discoverable by me"},
-        nobody_can_see:       %{id: "2HEYS11ENCEDMES0CAN0TSEEME", name: "People who silenced me cannot discover me"},
+        nobody_can_anything:  %{id: "0H0STEDCANTSEE0RD0ANYTH1NG", name: "People I ghosted cannot see", stereotype: true},
+        nobody_can_reach:     %{id: "1S11ENCEDTHEMS0CAN0TP1NGME", name: "People I silenced aren't discoverable by me", stereotype: true},
+        nobody_can_see:       %{id: "2HEYS11ENCEDMES0CAN0TSEEME", name: "People who silenced me cannot discover me", stereotype: true},
       },
       ### Grants are the entries of an ACL and define the permissions a user or circle has for content using this ACL.
       ###

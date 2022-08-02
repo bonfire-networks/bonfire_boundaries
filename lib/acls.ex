@@ -291,6 +291,17 @@ defmodule Bonfire.Boundaries.Acls do
     |> Enum.map(& &1.id)
   end
 
+  def stereotype_ids do
+    Config.get(:acls)
+    |> Map.values()
+    |> Enum.filter(&e(&1, :stereotype, nil))
+    |> Enum.map(& &1.id)
+  end
+
+  def is_stereotype?(acl) do
+    ulid(acl) in stereotype_ids()
+  end
+
   def list_built_ins do
     list_q(skip_boundary_check: true)
     |> where([acl], acl.id in ^built_in_ids)
@@ -361,11 +372,6 @@ defmodule Bonfire.Boundaries.Acls do
       preload: [caretaker: c, stereotyped: s]
     ) |> repo().all()
     # |> debug("stereotype acls")
-  end
-
-  def is_stereotype?(acl) do
-    # dump(acl)
-    e(acl, :stereotyped, :stereotype_id, nil) || e(acl, :stereotyped, :named, :id, nil) || ( ulid(acl) in built_in_ids() )
   end
 
   def edit(%Acl{} = acl, %User{} = user, params) do

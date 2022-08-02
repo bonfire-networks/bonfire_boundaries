@@ -16,10 +16,21 @@ defmodule Bonfire.Boundaries.Circles do
   alias Ecto.Changeset
   alias Pointers.{Changesets, Pointer}
 
-  @default_q_opts [exclude_stereotypes: ["0KF1NEY0VD0N0TWANTT0HEARME"]] # don't show "others who silenced me" in circles
+  @default_q_opts [exclude_circles: ["0KF1NEY0VD0N0TWANTT0HEARME"]] # don't show "others who silenced me" in circles
 
   # special built-in circles (eg, guest, local, activity_pub)
   def circles, do: Config.get([:circles])
+
+  def stereotype_ids do
+    circles()
+    |> Map.values()
+    |> Enum.filter(&e(&1, :stereotype, nil))
+    |> Enum.map(& &1.id)
+  end
+
+  def is_stereotype?(acl) do
+    ulid(acl) in stereotype_ids()
+  end
 
   def get(slug) when is_atom(slug), do: Config.get([:circles])[slug]
   def get(id) when is_binary(id), do: get_tuple(id) |> elem_or(1, nil)
@@ -150,9 +161,12 @@ defmodule Bonfire.Boundaries.Circles do
 
   @doc "query for `list_visible`"
   def list_q(user, opts \\ []) do
+
+    exclude_circles = e(opts, :exclude_circles, []) ++ stereotype_ids()
+
     from(circle in Circle, as: :circle)
     |> proload([:named, :extra_info, :caretaker, stereotyped: {"stereotype_", [:named]}])
-    |> where([circle, stereotyped: stereotyped], circle.id not in ^e(opts, :exclude_stereotypes, []) and (is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^e(opts, :exclude_stereotypes, [])))
+    |> where([circle, stereotyped: stereotyped], circle.id not in ^exclude_circles and (is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^exclude_circles))
   end
 
   @doc "query for `list_visible`"

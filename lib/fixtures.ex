@@ -41,7 +41,7 @@ defmodule Bonfire.Boundaries.Fixtures do
     repo().insert_all_or_ignore(Grant,  grants) |> debug("grants added")
 
     # Then the mixins
-    repo().insert_all_or_ignore(Named,  named)
+    repo().insert_all_or_ignore(Named,  Enum.map(named,   &Map.take(&1, [:id, :name])))
 
     # Make the instance admins circle caretaker of global circles and ACLs
     repo().insert_all_or_ignore(Caretaker, Utils.ulids(acls ++ circles) |> Enum.map(& %{id: &1, caretaker_id: admin_circle }))
