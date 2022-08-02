@@ -1,6 +1,6 @@
 <div>
 
-{#if Config.get(:experimental_features_enabled)}
+<!-- {#if Settings.get(:experimental_features_enabled, false, @__context__)} -->
   <div
     class="flex items-center pr-2 space-x-2 bg-base-content/5">
     <Bonfire.Boundaries.Web.BoundariesSelectionLive
@@ -78,7 +78,7 @@
       />
     </div>
 
-  {#else} <!-- old dropdown -->
+  <!-- {#else} 
 
     <Bonfire.Boundaries.Web.BoundariesDropdownLive
       to_boundaries={e(@to_boundaries, [])}
@@ -88,6 +88,6 @@
       create_activity_type={@create_activity_type}
     />
 
-  {/if}
+  {/if} -->
 
 </div>

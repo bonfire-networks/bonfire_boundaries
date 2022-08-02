@@ -133,7 +133,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def circle_create(attrs, socket) do
     with {:ok, %{id: id} = circle} <-
-      Circles.create(current_user(socket), attrs) do
+      Circles.create(e(socket.assigns, :scope, nil) || current_user(socket), attrs) do
         # Bonfire.UI.Common.OpenModalLive.close()
 
         {:noreply,
@@ -244,7 +244,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def acl_create(attrs, socket) do
     with {:ok, %{id: id} = acl} <-
-      Acls.create(attrs, current_user: current_user(socket)) do
+      Acls.create(attrs, current_user: e(socket.assigns, :scope, nil) || current_user(socket)) do
         # Bonfire.UI.Common.OpenModalLive.close()
 
         {:noreply,
@@ -394,32 +394,33 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
 
-  def maybe_preload_and_check_boundaries(list_of_assigns, caller_module \\ nil) do
+  def maybe_preload_and_check_boundaries(list_of_assigns, opts \\ []) do
     list_of_assigns
-    |> maybe_check_boundaries(caller_module)
-    |> maybe_preload_boundaries(caller_module)
+    |> maybe_check_boundaries(opts)
+    |> maybe_preload_boundaries(opts)
   end
 
 
-  def maybe_check_boundaries(list_of_assigns, caller_module \\ nil) do
+  def maybe_check_boundaries(list_of_assigns, opts \\ []) do
     current_user = current_user(List.first(list_of_assigns))
     # |> debug("current_user")
 
     list_of_objects = list_of_assigns
+    |> debug("list_of_assigns")
     |> Enum.reject(&e(&1, :check_object_boundary, nil) !=true) # only check when explicitly asked
     |> Enum.map(&the_object/1)
-    # |> debug("list_of_objects")
+    |> debug("list_of_objects")
 
     list_of_ids = list_of_objects
-    |> Enum.map(&ulid/1)
+    |> Enum.map(&ulid_or_acl/1)
     |> Enum.uniq()
     |> filter_empty(nil)
 
     if list_of_ids do
-      debug(list_of_ids, "list_of_ids (check via #{caller_module})")
+      debug(list_of_ids, "list_of_ids (check via #{opts[:caller_module]})")
 
       my_visible_ids = if current_user,
-        do: Bonfire.Boundaries.load_pointers(list_of_ids, current_user: current_user)
+        do: Bonfire.Boundaries.load_pointers(list_of_ids, current_user: current_user, verbs: e(opts, :verbs, [:read]))
           |> Enum.map(&ulid/1),
         else: []
 
@@ -429,6 +430,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       |> Enum.map(fn assigns ->
         object_id = ulid(the_object(assigns))
         if object_id in list_of_ids and object_id not in my_visible_ids do
+          # not allowed
           assigns
           |> Map.put(
             :activity,
@@ -443,9 +445,13 @@ defmodule Bonfire.Boundaries.LiveHandler do
             :not_visible
           )
         else
-          # avoid checking again
+          # allowed
           assigns
           |> Map.put(
+            :boundary_can,
+            true
+          )
+          |> Map.put( # to avoid checking again
             :check_object_boundary,
             false
           )
@@ -457,7 +463,14 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
-  def maybe_preload_boundaries(list_of_assigns, caller_module \\ nil) do
+  defp ulid_or_acl(:instance) do
+    Bonfire.Boundaries.Fixtures.instance_acl
+  end
+  defp ulid_or_acl(obj) do
+    ulid(obj)
+  end
+
+  def maybe_preload_boundaries(list_of_assigns, opts \\ []) do
     current_user = current_user(List.first(list_of_assigns))
     # |> debug("current_user")
 
@@ -470,7 +483,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     |> Enum.map(&ulid/1)
     |> Enum.uniq()
     |> filter_empty(nil)
-    |> debug("list_of_ids (preload via #{caller_module})")
+    |> debug("list_of_ids (preload via #{opts[:caller_module]})")
 
     my_states = if list_of_ids && current_user,
       do: boundaries_on_objects(list_of_ids),

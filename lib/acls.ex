@@ -224,6 +224,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp changeset(:create, attrs, _opts, :system), do: changeset_cast(attrs)
+  defp changeset(:create, attrs, opts, :instance), do: changeset(:create, attrs, opts, %{id: Bonfire.Boundaries.Fixtures.admin_circle()})
   defp changeset(:create, attrs, _opts, %{id: id}) do
     Changesets.cast(%Acl{}, %{caretaker: %{caretaker_id: id}}, [])
     |> changeset_cast(attrs)
@@ -239,10 +240,15 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def get_for_caretaker(id, caretaker, opts \\ []) do
-    repo().single(get_q(id, caretaker, opts))
+   with {:ok, acl} <- repo().single(get_for_caretaker_q(id, caretaker, opts)) do
+      {:ok, acl}
+    else
+      {:error, :not_found} ->
+        if is_admin?(caretaker), do: repo().single(get_for_caretaker_q(id, Bonfire.Boundaries.Fixtures.admin_circle(), opts)), else: {:error, :not_found}
+    end
   end
 
-  def get_q(id, caretaker, opts \\ []) do
+  def get_for_caretaker_q(id, caretaker, opts \\ []) do
     list_q(opts ++ [skip_boundary_check: true])
     # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
     |> maybe_for_caretaker(id, caretaker)
@@ -358,7 +364,8 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def is_stereotype?(acl) do
-    e(acl, :stereotyped, :stereotype_id, nil) || ulid(acl) in built_in_ids()
+    # dump(acl)
+    e(acl, :stereotyped, :stereotype_id, nil) || e(acl, :stereotyped, :named, :id, nil) || ( ulid(acl) in built_in_ids() )
   end
 
   def edit(%Acl{} = acl, %User{} = user, params) do

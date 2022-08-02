@@ -13,21 +13,32 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     ### Verbs are like permissions. Each represents some activity or operation that may or may not be able to perform.
     verbs = %{
-      see:     %{id: "0BSERV1NG11ST1NGSEX1STENCE", verb: "See", icon: Heroicons.Solid.EyeIcon, summary: "appear in lists of things or feeds"},     #
-      read:    %{id: "0EAD1NGSVTTER1YFVNDAMENTA1", verb: "Read", icon: Boxicon.Solid.BookReader, summary: "read it (if you can find it)"},
-      create:  %{id: "4REATE0RP0STBRANDNEW0BJECT", verb: "Create", icon: Boxicon.Solid.Pen, summary: "create a post or other object"},
-      edit:    %{id: "4HANG1NGVA1VES0FPR0PERT1ES", verb: "Edit", icon: Boxicon.Regular.Highlight, summary: "change the fields of an existing object"},
-      delete:  %{id: "4AKESTVFFG0AWAYPERMANENT1Y", verb: "Delete", icon: Boxicon.Solid.TrashAlt, summary: "delete the object."},
-      follow:  %{id: "20SVBSCR1BET0THE0VTPVT0F1T", verb: "Follow", icon: Boxicon.Regular.Walk, summary: "follow a user or thread or whatever"},
-      like:    %{id: "11KES1ND1CATEAM11DAPPR0VA1", verb: "Like", icon: Boxicon.Solid.Star, summary: "like an object (and notify the author)"},
-      boost:   %{id: "300ST0R0RANN0VCEANACT1V1TY", verb: "Boost", icon: Boxicon.Solid.ShareAlt, summary: "boost an object"},
-      flag:    %{id: "71AGSPAM0RVNACCEPTAB1E1TEM", verb: "Flag", icon: Boxicon.Solid.FlagAlt, summary: "flag an object for a moderator to review (note that anyone who can see or read something can usually flag it in any case)"},
-      reply:   %{id: "71TCREAT1NGA11NKEDRESP0NSE", verb: "Reply", icon: Boxicon.Regular.Reply, summary: "reply to a user's activity or post"},
-      mention: %{id: "0EFERENC1NGTH1NGSE1SEWHERE", verb: "Mention", icon: Boxicon.Regular.At, summary: "mention a user or object (and notify them of it)"},
-      tag:     %{id: "4ATEG0R1S1NGNGR0VP1NGSTVFF", verb: "Tag", icon: Boxicon.Solid.PurchaseTag, summary: "tag a user or object (and appear in the tag's timeline)"},
-      message: %{id: "40NTACTW1THAPR1VATEMESSAGE", verb: "Message", icon: Boxicon.Solid.Send, summary: "send a message"},
-      request: %{id: "1NEEDPERM1SS10NT0D0TH1SN0W", verb: "Request", icon: Boxicon.Regular.QuestionMark, summary: "request permission for another verb (eg. request to follow)"},
-      # verbs to maybe add: https://github.com/bonfire-networks/bonfire-app/issues/406
+      see:     %{id: "0BSERV1NG11ST1NGSEX1STENCE", verb: "See", icon: Heroicons.Solid.EyeIcon, summary: "Discoverable in lists (like feeds)"},     #
+      read:    %{id: "0EAD1NGSVTTER1YFVNDAMENTA1", verb: "Read", icon: Boxicon.Solid.BookReader, summary: "Readable/visible (if you can see or have a direct link)"},
+      create:  %{id: "4REATE0RP0STBRANDNEW0BJECT", verb: "Create", icon: Boxicon.Solid.Pen, summary: "Create a post or other object"},
+      edit:    %{id: "4HANG1NGVA1VES0FPR0PERT1ES", verb: "Edit", icon: Boxicon.Regular.Highlight, summary: "Modify the contents of an existing object"},
+      delete:  %{id: "4AKESTVFFG0AWAYPERMANENT1Y", verb: "Delete", icon: Boxicon.Solid.TrashAlt, summary: "Delete an object"},
+      follow:  %{id: "20SVBSCR1BET0THE0VTPVT0F1T", verb: "Follow", icon: Boxicon.Regular.Walk, summary: "Follow a user or thread or whatever"},
+      like:    %{id: "11KES1ND1CATEAM11DAPPR0VA1", verb: "Like", icon: Boxicon.Solid.Star, summary: "Like an object (and notify the author)"},
+      boost:   %{id: "300ST0R0RANN0VCEANACT1V1TY", verb: "Boost", icon: Boxicon.Regular.Repost, summary: "Boost an object (and notify the author)"},
+      flag:    %{id: "71AGSPAM0RVNACCEPTAB1E1TEM", verb: "Flag", icon: Boxicon.Solid.FlagAlt, summary: "Flag an object for a moderator to review (please note that anyone who can see or read something can flag it anyway)"},
+      reply:   %{id: "71TCREAT1NGA11NKEDRESP0NSE", verb: "Reply", icon: Boxicon.Regular.Reply, summary: "Reply to an activity or post"},
+      mention: %{id: "0EFERENC1NGTH1NGSE1SEWHERE", verb: "Mention", icon: Boxicon.Regular.At, summary: "Mention a user or object (and notify them)"},
+      tag:     %{id: "4ATEG0R1S1NGNGR0VP1NGSTVFF", verb: "Tag", icon: Boxicon.Solid.PurchaseTag, summary: "Tag a user or object, or publish in a topic"},
+      message: %{id: "40NTACTW1THAPR1VATEMESSAGE", verb: "Message", icon: Boxicon.Solid.Send, summary: "Send a message"},
+      request: %{id: "1NEEDPERM1SS10NT0D0TH1SN0W", verb: "Request", icon: Boxicon.Regular.QuestionMark, summary: "Request permission for another verb (eg. request to follow)"},
+
+      # WIP adding verbs, see: https://github.com/bonfire-networks/bonfire-app/issues/406
+
+      toggle: %{id: "1CANENAB1E0RD1SAB1EFEATVRE", verb: "Toggle", icon: Boxicon.Regular.ToggleRight, summary: "enable/disable extensions or features"},
+      describe: %{id: "1CANADD0M0D1FY1NF0METADATA", verb: "Describe", icon: Boxicon.Regular.CommentEdit, summary: "Edit info and metadata, eg. thread titles"},
+      grant: %{id: "1T0ADDED1TREM0VEB0VNDAR1ES", verb: "Grant", icon: Boxicon.Regular.Key, summary: "Add, edit or remove boundaries"},
+      appoint: %{id: "1T0ADDC1RC1ES0RASS1GNR01ES", verb: "Appoint", icon: Boxicon.Solid.UserBadge, summary: "Add to circles or assign roles"},
+      invite: %{id: "11NV1TESPE0P1E0RGRANTENTRY", verb: "Invite", icon: Boxicon.Regular.Gift, summary: "Invite users or grant entry"},
+      mediate: %{id: "1T0SEEF1AGSANDMAKETHEPEACE", verb: "Mediate", icon: Boxicon.Solid.FlagCheckered, summary: "See flags"},
+      block: %{id: "1T0MANAGEB10CKGH0STS11ENCE", verb: "Block", icon: Boxicon.Regular.Block, summary: "Manage blocks"},
+      configure: %{id: "1T0C0NF1GVREGENERA1SETT1NG", verb: "Configure", icon: Heroicons.Solid.AdjustmentsIcon, summary: "Change general settings"}
+
     }
 
     all_verb_names = Enum.map(verbs, &elem(&1, 0))
@@ -37,6 +48,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_interact_minus_boost = [:read, :see, :mention, :tag, :like, :follow, :request]
     verbs_interact_incl_boost = verbs_interact_minus_boost ++ [:boost]
     verbs_interact_and_reply = verbs_interact_incl_boost ++ [:reply]
+    verbs_interact_and_create = verbs_interact_and_reply ++ [:create]
 
     public_acls = [
       :guests_may_see_read, :guests_may_read,
@@ -79,6 +91,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         guest:        %{id: "0AND0MSTRANGERS0FF1NTERNET", name: "Guests"},
         local:        %{id: "3SERSFR0MY0VR10CA11NSTANCE", name: "Local Users"},
         activity_pub: %{id: "7EDERATEDW1THANACT1V1TYPVB", name: "ActivityPub Peers"},
+        admin:        %{id: "0ADM1NSVSERW1THSVPERP0WERS", name: "Instance Admins"},
 
         ### Stereotypes - placeholders for special per-user circles the system will manage.
         followers:    %{id: "7DAPE0P1E1PERM1TT0F0110WME", name: "Those who follow me"},
@@ -91,6 +104,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       ### have one or more ACLs attached and we combine the results of all of them to determine whether a user is permitted
       ### to perform a particular operation.
       acls: %{
+        instance_care:       %{id: "01SETT1NGSF0R10CA11NSTANCE", name: "Local instance roles & boundaries"},
+
         ### Public ACLs that allow basic control over visibility and interactions.
         guests_may_see_read: %{id: "7W1DE1YAVA11AB1ET0SEENREAD", name: "Publicly discoverable and readable"},
         guests_may_see:      %{id: "50VCANF1NDMEBVTCAN0T0PENME", name: "Publicly discoverable, but contents may be hidden"},
@@ -130,6 +145,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       ###   (where values are assumed to be true).
       grants: %{
         ### Public ACLs need their permissions filled out
+        instance_care:        %{admin: all_verb_names, guest: [:read, :see, :request], local: [:read, :see, :request, :create], activity_pub: [:read, :see, :request, :create]}, # admins can care for every aspect of the instance
         guests_may_see_read:  %{guest: [:read, :see, :request]},
         guests_may_see:       %{guest: [:see, :request]},
         guests_may_read:      %{guest: [:read, :request]},

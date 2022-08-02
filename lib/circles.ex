@@ -74,22 +74,27 @@ defmodule Bonfire.Boundaries.Circles do
   # end
 
   @doc "Create a circle for the provided user (and with the user in the circle?)"
-  def create(%User{}=user, name) when is_binary(name) do
-    create(user, %{named: %{name: name}})
-  end
-
-  def create(%User{}=user, %{}=attrs) do
+  def create(user, %{}=attrs) when is_map(user) or is_binary(user) do
     with {:ok, circle} <- repo().insert(changeset(:create,
     attrs
       |> input_to_atoms()
       |> deep_merge(%{
-        caretaker: %{caretaker_id: user.id}
+        caretaker: %{caretaker_id: ulid!(user)}
         # encircles: [%{subject_id: user.id}] # add myself to circle?
       })
     )) do
       # Bonfire.Boundaries.Boundaries.maybe_make_visible_for(user, circle) # make visible to myself - FIXME
       {:ok, circle}
     end
+  end
+
+  def create(:instance, %{}=attrs) do
+    Bonfire.Boundaries.Fixtures.admin_circle()
+    |> create(attrs)
+  end
+
+  def create(user, name) when is_binary(name) do
+    create(user, %{named: %{name: name}})
   end
 
   def changeset(circle \\ %Circle{}, attrs)
@@ -147,7 +152,7 @@ defmodule Bonfire.Boundaries.Circles do
   def list_q(user, opts \\ []) do
     from(circle in Circle, as: :circle)
     |> proload([:named, :extra_info, :caretaker, stereotyped: {"stereotype_", [:named]}])
-    |> where([stereotyped: stereotyped], is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^e(opts, :exclude_stereotypes, []))
+    |> where([circle, stereotyped: stereotyped], circle.id not in ^e(opts, :exclude_stereotypes, []) and (is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^e(opts, :exclude_stereotypes, [])))
   end
 
   @doc "query for `list_visible`"
@@ -188,7 +193,12 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   def get_for_caretaker(id, caretaker, opts \\ []) do
-    repo().single(get_q(id, caretaker, opts ++ @default_q_opts))
+    with {:ok, circle} <- repo().single(get_for_caretaker_q(id, caretaker, opts ++ @default_q_opts)) do
+      {:ok, circle}
+    else
+      {:error, :not_found} ->
+        if is_admin?(caretaker), do: repo().single(get_for_caretaker_q(id, Bonfire.Boundaries.Fixtures.admin_circle(), opts ++ @default_q_opts)), else: {:error, :not_found}
+    end
   end
 
   def get_stereotype_circles(subject, stereotypes) when is_list(stereotypes) do
@@ -204,7 +214,7 @@ defmodule Bonfire.Boundaries.Circles do
   def get_stereotype_circles(subject, stereotype), do: get_stereotype_circles(subject, [stereotype])
 
   @doc "query for `get`"
-  def get_q(id, caretaker, opts \\ []) do
+  def get_for_caretaker_q(id, caretaker, opts \\ []) do
     list_q(caretaker, opts)
     # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
     |> where([circle: circle, caretaker: caretaker], circle.id == ^ulid!(id) and caretaker.caretaker_id == ^ulid!(caretaker))

@@ -4,6 +4,7 @@
 
   <Bonfire.Boundaries.Web.NewCircleLive
     current_user={current_user(@__context__)}
+    scope={@scope}
     parent_back={@myself}
     event_target={@myself}
     setting_boundaries={@setting_boundaries}
@@ -22,7 +23,7 @@
   <div class="p-4 ">
 
     <div class="flex items-center px-2 space-x-9">
-      <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "My circles"}</h2>
+      <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "Circles"}</h2>
       <!-- <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} /> -->
       <div 
         :on-click="assign"

@@ -113,21 +113,25 @@ defmodule Bonfire.Boundaries do
     Config.get!(:user_default_boundaries)
   end
 
-  def can?(current_user, verbs, object) do
-    case Bonfire.Boundaries.load_pointer(object, current_user: current_user(current_user), verbs: verbs, ids_only: true) do
+  def can?(subject, verbs, object) when is_map(object) or is_binary(object) or is_list(object) do
+    case Bonfire.Boundaries.load_pointer(object, current_user: current_user(subject), current_account: current_account(subject), verbs: verbs, ids_only: true) do
       %{id: _} ->
         true
-      _ ->
+      other ->
         debug(verbs, "no permission to")
+        debug(other)
         false
     end
+  end
+  def can?(subject, verbs, :instance) do
+    can?(subject, verbs, Bonfire.Boundaries.Fixtures.instance_acl)
   end
 
   def load_pointer(item, opts) do
     case ulid(item) do
       id when is_binary(id) ->
 
-        load_query(id, e(opts, :ids_only, nil), opts)
+        load_query(id, e(opts, :ids_only, nil), opts ++ [limit: 1])
         |> repo().one()
 
       _ ->

@@ -115,18 +115,6 @@
         </p>
         </div>
       </div>
-
-      <div 
-      :if={Config.get(:experimental_features_enabled)}
-      :for={acl <- Bonfire.Boundaries.Acls.for_dropdown(current_user: current_user(@__context__))}
-      @click={"to_boundaries = ['#{ulid(acl)}']; to_boundaries_names = [\"#{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled"}\"]; open_boundaries = false;"} 
-      class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
-        <Solid.LockOpenIcon/> 
-        <div class="flex-1">
-          <div class="text-sm font-medium text-neutral text-opacity-80">{ e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l "Untitled" }</div>
-          <!-- <p class="text-xs text-neutral text-opacity-80">{l "Visible only to those mentioned, across the fediverse"}</p> -->
-        </div>
-      </div>
       
   </div>
 </div>

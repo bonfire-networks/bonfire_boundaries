@@ -3,6 +3,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Grants
   alias Bonfire.Boundaries.LiveHandler
+  alias Bonfire.Boundaries.Integration
   require Integer
 
   prop acl_id, :string, default: nil
@@ -12,8 +13,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   prop selected_tab, :any, default: nil
   prop section, :any, default: nil
   prop setting_boundaries, :boolean, default: false
+  prop scope, :atom, default: nil
 
-  @global_circles ["0AND0MSTRANGERS0FF1NTERNET", "3SERSFR0MY0VR10CA11NSTANCE", "7EDERATEDW1THANACT1V1TYPVB"]
 
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})
@@ -34,7 +35,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     # |> debug
 
     with {:ok, acl} <- Acls.get_for_caretaker(id, current_user) |> repo().maybe_preload(grants: [:verb, subject: [:named, :profile, :character, stereotyped: [:named]]]) do
-      debug(acl, "acl")
+      # debug(acl, "acl")
 
       verbs = Bonfire.Boundaries.Verbs.list(:db, :id)
 
@@ -49,14 +50,18 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       followers = Bonfire.Social.Follows.list_my_followers(current_user, paginate: false, exclude_ids: already_seen_ids)
       # |> debug
 
-      circles = Bonfire.Boundaries.Circles.list_my(current_user, extra_ids_to_include: @global_circles)
+      global_circles = Bonfire.Boundaries.Fixtures.global_circles
+
+      circles = Bonfire.Boundaries.Circles.list_my(current_user, extra_ids_to_include: global_circles)
+
+      extra_circles = if Integration.is_admin?(current_user) || Bonfire.Boundaries.can?(current_user, :grant, :instance), do: Bonfire.Boundaries.Circles.list_my(Bonfire.Boundaries.Fixtures.admin_circle), else: []
 
       suggestions = (for user <- followed ++ followers do
         {e(user, :edge, :object, :id, nil), e(user, :edge, :object, :profile, :name, "")<>" - "<>Bonfire.Me.Characters.display_username(e(user, :edge, :object, nil))}
       end
       ++
-      for circle <- circles do
-        {e(circle, :id, nil), (e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil) || l "Untitled circle") }
+      for circle <- circles ++ extra_circles do
+        {ulid(circle), (e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil) || l "Untitled circle") }
       end)
       |> Map.new
       # |> debug
@@ -71,8 +76,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         list: Map.merge(verbs, list),
         subjects: subjects(e(acl, :grants, [])),
         suggestions: suggestions,
-        global_circles: @global_circles,
-        read_only: Acls.is_stereotype?(acl),
+        global_circles: global_circles,
+        read_only: !Integration.is_admin?(current_user) and !Bonfire.Boundaries.can?(current_user, :grant, :instance) and Acls.is_stereotype?(acl),
         settings_section_title: "View " <> e(acl, :named, :name, "") <> " boundary",
         settings_section_description: l("Create and manage your boundary."),
         ui_compact: Settings.get([:ui, :compact], false, assigns),
@@ -82,7 +87,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
               {Bonfire.UI.Me.SettingsViewLive.SidebarSettingsLive,
               [
                 selected_tab: "acls",
-                admin_tab: "",
                 current_user: current_user(assigns)
               ]}
             ],

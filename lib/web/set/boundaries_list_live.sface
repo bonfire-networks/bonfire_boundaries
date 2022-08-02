@@ -102,7 +102,7 @@
         </li>
     </ul> 
 
-    <Bonfire.Boundaries.Web.MyAclsListLive
+    <Bonfire.Boundaries.Web.MyAclsLive
         :if={@open_boundaries}
         id="my_boundaries"
         to_boundaries={e(@to_boundaries, [])}

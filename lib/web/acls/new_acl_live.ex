@@ -5,5 +5,6 @@ defmodule Bonfire.Boundaries.Web.NewAclLive do
   prop setting_boundaries, :boolean, default: false
   prop label, :string, default: nil
   prop parent_back, :any, default: nil
+  prop scope, :atom, default: nil
 
 end
