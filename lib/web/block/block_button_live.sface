@@ -102,12 +102,12 @@
   </div>
 
   <div 
-    :if={Bonfire.Me.Users.is_admin?(current_user(@__context__))}
+    :if={Bonfire.Me.Users.is_admin?(current_user(@__context__)) || Bonfire.Boundaries.can?(@__context__, :block, :instance)}
     class="flex flex-col p-2 mt-8 space-y-3 border rounded border-error/30 bg-error/5">
     <div class="">
-      <div class="text-base font-semibold">{l "Admin super powers"}</div>
+      <div class="text-base font-semibold">{l "Super powers"}</div>
       <p class="mt-0 text-sm"> 
-        <em>{l "As an admin you can enforce a block for all users of your instance."}</em>
+        <em>{l "You can enforce a block for all users of your instance."}</em>
       </p>
     </div>
     <div class="form-control">
