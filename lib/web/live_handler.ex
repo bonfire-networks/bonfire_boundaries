@@ -10,10 +10,12 @@ defmodule Bonfire.Boundaries.LiveHandler do
     current_user = current_user(socket)
     opts = [current_user: current_user]
 
+    can_instance_wide = Bonfire.Boundaries.can?(current_user, :block, :instance) || is_admin?(current_user)
+
     with {:ok, a} <- (if attrs["silence"], do: Bonfire.Boundaries.Blocks.block(id, :silence, opts), else: {:ok, nil}),
     {:ok, b} <- (if attrs["ghost"], do: Bonfire.Boundaries.Blocks.block(id, :ghost, opts), else: {:ok, nil}),
-    {:ok, c} <- (if is_admin?(current_user) && attrs["instance_wide"]["silence"], do: Bonfire.Boundaries.Blocks.block(id, :silence, :instance_wide), else: {:ok, nil}),
-    {:ok, d} <- (if is_admin?(current_user) && attrs["instance_wide"]["ghost"], do: Bonfire.Boundaries.Blocks.block(id, :ghost, :instance_wide), else: {:ok, nil}) do
+    {:ok, c} <- (if can_instance_wide && attrs["instance_wide"]["silence"], do: Bonfire.Boundaries.Blocks.block(id, :silence, :instance_wide), else: {:ok, nil}),
+    {:ok, d} <- (if can_instance_wide && attrs["instance_wide"]["ghost"], do: Bonfire.Boundaries.Blocks.block(id, :ghost, :instance_wide), else: {:ok, nil}) do
       Bonfire.UI.Common.OpenModalLive.close()
       {:noreply,
           socket
@@ -23,8 +25,10 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def handle_event("block", %{"id" => id, "scope" => scope} = attrs, socket) when is_binary(id) do
+    current_user = current_user(socket)
+    can_instance_wide = Bonfire.Boundaries.can?(current_user, :block, :instance) || is_admin?(current_user)
     with {:ok, status} <- (
-      if is_admin?(current_user(socket)) do
+      if can_instance_wide do
       Bonfire.Boundaries.Blocks.block(id, maybe_to_atom(attrs["block_type"]), maybe_to_atom(scope) || socket)
     else
       debug("not admin, fallback to user-level block")
@@ -49,9 +53,11 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
-    def handle_event("unblock", %{"id" => id, "scope" => scope} = attrs, socket) when is_binary(id) do
+  def handle_event("unblock", %{"id" => id, "scope" => scope} = attrs, socket) when is_binary(id) do
+    current_user = current_user(socket)
+    can_instance_wide = Bonfire.Boundaries.can?(current_user, :block, :instance) || is_admin?(current_user)
     with {:ok, status} <- (
-      if is_admin?(current_user(socket)) do
+      if can_instance_wide do
       Bonfire.Boundaries.Blocks.unblock(id, maybe_to_atom(attrs["block_type"]), maybe_to_atom(scope) || socket)
     else
       debug("not admin, fallback to user-level block")
