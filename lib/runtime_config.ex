@@ -145,7 +145,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       ###   (where values are assumed to be true).
       grants: %{
         ### Public ACLs need their permissions filled out
-        instance_care:        %{admin: all_verb_names, guest: [:read, :see, :request], local: [:read, :see, :request, :create], activity_pub: [:read, :see, :request, :create]}, # admins can care for every aspect of the instance
+        instance_care:        %{admin: all_verb_names}, # admins can care for every aspect of the instance
         guests_may_see_read:  %{guest: [:read, :see, :request]},
         guests_may_see:       %{guest: [:see, :request]},
         guests_may_read:      %{guest: [:read, :request]},
