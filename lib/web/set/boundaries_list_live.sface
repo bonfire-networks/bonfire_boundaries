@@ -1,17 +1,17 @@
 <div x-data="{show_boundary_list: true}">
 
-    <ul class="p-2 pb-0" x-show="show_boundary_list"> 
+    <ul class="pt-2" x-show="show_boundary_list"> 
         <!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
         <li class={
-        "flex items-center justify-between flex-1 p-2 mb-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/10",
-        "bg-primary/10": @to_boundaries_ids |> Enum.member?("public")
+        "flex items-center justify-between flex-1 p-2 mb-2 rounded hover:bg-base-content/10",
+        "bg-base-content/10": @to_boundaries_ids |> Enum.member?("public")
         }>
         <label 
-            class="flex items-center w-full"
-            phx-click={JS.push((if not Enum.member?(@to_boundaries_ids, "public"), do: "select_boundary", else: "remove_boundary"), value: %{id: "public", name: l "Public"}, target: "#smart_input")}>
-            <div class="flex-1">
-            <div class="flex items-start space-x-2">
-                <span class="text-lg">🌍</span>
+          class="flex items-center w-full"
+          phx-click={JS.push((if not Enum.member?(@to_boundaries_ids, "public"), do: "select_boundary", else: "remove_boundary"), value: %{id: "public", name: l "Public"}, target: "#smart_input")}>
+          <div class="flex-1">
+            <div class="flex items-center space-x-4">
+                <span class="text-2xl">🌍</span>
                 <div class="flex flex-col">
                 <div class="text-base font-semibold">{l "Public"}</div>
                 <div class="text-sm text-base-content/80">
@@ -19,32 +19,32 @@
                 </div>
                 </div>
             </div>
+          </div>
+
+          <div class="flex items-center ml-4 space-x-2">
+            <div 
+              :if={@to_boundaries_ids |> Enum.member?("public") == false}
+              class="btn btn-outline btn-sm btn-circle opacity-80">
+              <Solid.PlusIcon class="w-5 h-5 " />
             </div>
 
-            <div class="flex items-center space-x-2">
-              <div 
-                :if={@to_boundaries_ids |> Enum.member?("public") == false}
-                class="btn btn-outline btn-sm btn-circle opacity-80">
-                <Solid.PlusIcon class="w-5 h-5 " />
-              </div>
-
-              <div 
-                :if={@to_boundaries_ids |> Enum.member?("public")}
-                class="btn btn-success btn-sm btn-circle opacity-80">
-                <Solid.MinusIcon class="w-5 h-5 " />
-              </div>
+            <div 
+              :if={@to_boundaries_ids |> Enum.member?("public")}
+              class="btn btn-success btn-sm btn-circle opacity-80">
+              <Solid.MinusIcon class="w-5 h-5 " />
             </div>
+          </div>
         </label>
         </li>
         <li class={
-        "flex items-center justify-between flex-1 p-2 mb-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/10",
-        "bg-primary/10": @to_boundaries_ids |> Enum.member?("local")}>
+        "flex items-center justify-between flex-1 p-2 mb-2 rounded hover:bg-base-content/10",
+        "bg-base-content/10": @to_boundaries_ids |> Enum.member?("local")}>
         <label 
             class="flex items-center w-full"
             phx-click={JS.push((if not Enum.member?(@to_boundaries_ids, "local"), do: "select_boundary", else: "remove_boundary"), value: %{id: "local", name: l "Local Instance"}, target: "#smart_input")}>
             <div class="flex-1">
-            <div class="flex items-start space-x-2">
-                <span class="text-lg">🏠</span>
+            <div class="flex items-center space-x-4">
+                <span class="text-2xl">🏠</span>
                 <div class="flex flex-col">
                 <div class="text-base font-semibold">{l "Local Instance"}</div>
                 <div class="text-sm text-base-content/80">
@@ -69,14 +69,14 @@
         </label>
         </li>
         <li class={
-        "flex items-center justify-between flex-1 p-2 border rounded bg-base-content/5 hover:bg-base-content/10 border-base-content/10",
-        "bg-primary/10": @to_boundaries_ids |> Enum.member?("mentions")}>
+        "flex items-center justify-between flex-1 p-2 rounded hover:bg-base-content/10",
+        "bg-base-content/10": @to_boundaries_ids |> Enum.member?("mentions")}>
         <label 
             class="flex items-center w-full"
             phx-click={JS.push((if not Enum.member?(@to_boundaries_ids, "mentions"), do: "select_boundary", else: "remove_boundary"), value: %{id: "mentions", name: l "Mentions"}, target: "#smart_input")}>
             <div class="flex-1">
-            <div class="flex items-start space-x-2">
-                <span class="text-lg">🔔</span>
+            <div class="flex items-center space-x-4">
+                <span class="text-2xl">🔔</span>
                 <div class="flex flex-col">
                 <div class="text-base font-semibold">{l "Mentions"}</div>
                 <div class="text-sm text-base-content/80">

@@ -14,6 +14,7 @@
         reusable_modal_id={"boundaries-modal"}
         title_text={l "Set boundaries"}
         no_actions
+        no_header
         >
           <Bonfire.Boundaries.Web.BoundariesListLive
             to_boundaries={@to_boundaries}
@@ -65,7 +66,8 @@
      
       <div 
         :if={Settings.get([:ui, :smart_input_as], nil, @__context__)!=:sidebar or e(@thread_mode, nil) ==:flat}
-        x-show="open_boundaries">
+        x-show="open_boundaries"
+        class="p-3">
         
         <Bonfire.Boundaries.Web.BoundariesListLive
           to_boundaries={e(@to_boundaries, [])}
