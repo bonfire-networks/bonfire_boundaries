@@ -1,6 +1,9 @@
 <div x-data="{show_boundary_list: true}">
 
-    <ul class="pt-2" x-show="show_boundary_list"> 
+    <ul 
+      :if={@open_boundaries}
+      class="pt-2" 
+      x-show="show_boundary_list"> 
         <!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
         <li class={
         "flex items-center justify-between flex-1 p-2 mb-2 rounded hover:bg-base-content/10",

@@ -75,12 +75,12 @@
         <div class="flex items-center px-2 space-x-9">
           <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "People and circles in this boundary"}</h2>
           <!-- <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} label={l "New circle"} /> -->
-          <div 
+          <!-- <div 
             :on-click="assign"
             phx-value-section="new_circle"
             class="normal-case btn btn-secondary btn-sm" >
             {l "Define a new circle"}
-          </div>
+          </div> -->
         </div>
         <!-- <div class="flex items-center mt-3 space-x-2">
           <span 

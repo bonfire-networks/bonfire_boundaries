@@ -1,7 +1,7 @@
 
 <div class="flex items-center flex-1 focus:outline-none">
-  <div class="flex flex-wrap w-full">
-    <div 
+  <div class="flex flex-wrap w-full gap-2 p-2">
+    <!-- <div 
       class="flex-1"
       >
       <div
@@ -21,8 +21,8 @@
           <option :for={{k, v} <- presets(@to_boundaries)} value={k}>{v}</option>
         </select>
       </div>
-    </div>
-    <!-- <span 
+    </div> -->
+    <span 
       :for={{id, name} <- e(@to_boundaries, nil) |> debug() || [{l("Public"), "public"}]}
       class="inline-flex rounded-full items-center py-0.5 pl-2.5 pr-1 text-sm font-medium bg-accent text-accent-content">
       {name}
@@ -33,6 +33,6 @@
         <span class="sr-only">{l "Remove this boundary"}</span>
         <Solid.XIcon class="w-3 h-3" />
       </button>
-    </span> -->
+    </span>
   </div>
 </div> 
