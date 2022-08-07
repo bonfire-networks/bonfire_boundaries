@@ -139,8 +139,8 @@
                 {#match nil}
                 {#match verb}
                 <span class="tooltip" data-tip={e(verb, :summary, nil)}>
-                  <Surface.Components.Dynamic.Component 
-                    module={e(verb, :icon, Solid.QuestionMarkCircleIcon)}
+                  <Icon
+                    iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
                     class="w-4 h-4"
                     fill={"currentColor"}
                   />
