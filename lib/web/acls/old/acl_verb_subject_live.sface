@@ -11,10 +11,10 @@
             phx-click="back"
             phx-target={e(@parent_back, nil)}
             class="btn btn-ghost btn-sm btn-circle" > 
-            <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
+            <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
           </div>
 
-          <!-- <Solid.LockClosedIcon class="w-6 h-6 text-base-content/80" /> -->
+          <!-- <Icon solid="LockClosed" class="w-6 h-6 text-base-content/80" /> -->
           <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled boundary" }</div>
         </div>
         <LivePatch
@@ -33,7 +33,7 @@
         <div class="flex items-center mt-3 space-x-2">
           <span class="flex items-center space-x-1 badge-lg badge badge-outline">
             <span class="text-sm">Alice</span>
-            <Solid.XIcon class="w-4 h-4 stroke-current" />
+            <Icon solid="X" class="w-4 h-4 stroke-current" />
           </span>
         </div>
         <div :if={!@read_only}>
@@ -65,9 +65,9 @@
             <div class="flex items-center p-2">
               <div class="flex-1">{e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}</div>
               <div class="flex items-center space-x-1">
-                <div class="p-1 border rounded bg-base-100 border-base-300"><Boxicon.Regular.CheckShield /></div>
-                <div class="p-1 border rounded bg-base-100 border-base-300"><Boxicon.Regular.Shield /></div>
-                <div class="p-1 border rounded bg-base-100 border-base-300"><Boxicon.Regular.ShieldX /></div>
+                <div class="p-1 border rounded bg-base-100 border-base-300"><Icon iconify="bx:CheckShield" /></div>
+                <div class="p-1 border rounded bg-base-100 border-base-300"><Icon iconify="bx:Shield" /></div>
+                <div class="p-1 border rounded bg-base-100 border-base-300"><Icon iconify="bx:ShieldX" /></div>
               </div>
             </div>
           </div>

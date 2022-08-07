@@ -70,9 +70,9 @@
             >
               {#case Acls.is_stereotype?(acl)}
               {#match true}
-                <Outline.InformationCircleIcon class="w-5 h-5" />
+                <Icon outline="InformationCircle" class="w-5 h-5" />
               {#match _}
-                <Solid.PencilIcon class="w-4 h-4" />
+                <Icon solid="Pencil" class="w-4 h-4" />
               {/case}
             </LiveRedirect>
             <div 
@@ -85,22 +85,22 @@
             >
               {#case Acls.is_stereotype?(acl)}
               {#match true}
-                <Outline.InformationCircleIcon class="w-5 h-5" />
+                <Icon outline="InformationCircle" class="w-5 h-5" />
               {#match _}
-                <Solid.PencilIcon class="w-4 h-4" />
+                <Icon solid="Pencil" class="w-4 h-4" />
               {/case}
             </div>
              
             <div 
               :if={@setting_boundaries && not Enum.member?(@to_boundaries_ids, acl_id)}
               class="btn btn-outline btn-sm btn-circle opacity-80">
-              <Solid.PlusIcon class="w-5 h-5 " />
+              <Icon solid="Plus" class="w-5 h-5 " />
             </div>
 
             <div 
               :if={@setting_boundaries && @to_boundaries_ids |> Enum.member?(acl_id)}
               class="btn btn-success btn-sm btn-circle opacity-80">
-              <Solid.MinusIcon class="w-5 h-5 " />
+              <Icon solid="Minus" class="w-5 h-5 " />
             </div>
 
 
@@ -121,8 +121,8 @@
                           "btn-success": Map.get(grant, :value),
                           "btn-error": !Map.get(grant, :value)}
                         data-tip={(if Map.get(grant, :value), do: l("Can"), else: l("Cannot"))<>" "<>e(verb, :verb, "")}>
-                          <Surface.Components.Dynamic.Component 
-                            module={e(verb, :icon, Solid.QuestionMarkCircleIcon)}
+                          <Icon 
+                            iconify={e(verb, :icon, "heroicons-solid:QuestionMarkCircle")}
                             class="w-4 h-4"
                             fill={"currentColor"}
                           />
@@ -146,14 +146,14 @@
     class="flex items-center p-2 space-x-4 cursor-pointer hover:bg-base-content/10">
     <div 
       class="btn btn-outline btn-sm btn-circle opacity-80">
-      <Solid.PlusIcon class="w-5 h-5 " />
+      <Icon solid="Plus" class="w-5 h-5 " />
     </div>
     <div class="flex-1">
       <div class="text-base font-normal">{l "Define a new boundary"}</div>
     </div>
     <div 
       class="btn btn-ghost btn-sm btn-circle opacity-80">
-      <Solid.ChevronRightIcon class="w-5 h-5 " />
+      <Icon solid="ChevronRight" class="w-5 h-5 " />
     </div>
   </div>
 </div>

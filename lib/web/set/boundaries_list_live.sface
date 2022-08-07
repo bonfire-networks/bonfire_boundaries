@@ -28,13 +28,13 @@
             <div 
               :if={@to_boundaries_ids |> Enum.member?("public") == false}
               class="btn btn-outline btn-sm btn-circle opacity-80">
-              <Solid.PlusIcon class="w-5 h-5 " />
+              <Icon solid="Plus" class="w-5 h-5 " />
             </div>
 
             <div 
               :if={@to_boundaries_ids |> Enum.member?("public")}
               class="btn btn-success btn-sm btn-circle opacity-80">
-              <Solid.MinusIcon class="w-5 h-5 " />
+              <Icon solid="Minus" class="w-5 h-5 " />
             </div>
           </div>
         </label>
@@ -60,13 +60,13 @@
               <div 
                 :if={@to_boundaries_ids |> Enum.member?("local") == false}
                 class="btn btn-outline btn-sm btn-circle opacity-80">
-                <Solid.PlusIcon class="w-5 h-5 " />
+                <Icon solid="Plus" class="w-5 h-5 " />
               </div>
 
               <div 
                 :if={@to_boundaries_ids |> Enum.member?("local")}
                 class="btn btn-success btn-sm btn-circle opacity-80">
-                <Solid.MinusIcon class="w-5 h-5 " />
+                <Icon solid="Minus" class="w-5 h-5 " />
               </div>
             </div>
         </label>
@@ -92,13 +92,13 @@
               <div 
                 :if={@to_boundaries_ids |> Enum.member?("mentions") == false}
                 class="btn btn-outline btn-sm btn-circle opacity-80">
-                <Solid.PlusIcon class="w-5 h-5 " />
+                <Icon solid="Plus" class="w-5 h-5 " />
               </div>
 
               <div 
                 :if={@to_boundaries_ids |> Enum.member?("mentions")}
                 class="btn btn-success btn-sm btn-circle opacity-80">
-                <Solid.MinusIcon class="w-5 h-5 " />
+                <Icon solid="Minus" class="w-5 h-5 " />
               </div>
             </div>
         </label>

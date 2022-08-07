@@ -29,7 +29,7 @@
           <div 
             class="btn btn-sm btn-ghost btn-square" >
             <span class="sr-only">{l "Set boundaries"}</span>
-            <Solid.ChevronRightIcon class="w-5 h-5 stroke-1" />
+            <Icon solid="ChevronRight" class="w-5 h-5 stroke-1" />
           </div>
         </:open_btn>
       </Bonfire.UI.Common.OpenModalLive>
@@ -43,7 +43,7 @@
         class="btn btn-sm btn-ghost btn-square" 
         >
         <span class="sr-only">{l "Edit boundaries"}</span>
-        <Solid.ChevronRightIcon class="w-5 h-5 stroke-1" />
+        <Icon solid="ChevronRight" class="w-5 h-5 stroke-1" />
       </button>
     {/if}
 
@@ -52,7 +52,7 @@
       @click="open_boundaries = false"
       class="space-x-1 normal-case btn btn-primary btn-xs" 
       >
-      <Outline.CheckIcon class="w-4 h-4"/>
+      <Icon outline="Check" class="w-4 h-4"/>
       <span class="text-sm">{l "Done"}</span>
     </button>
   </div>

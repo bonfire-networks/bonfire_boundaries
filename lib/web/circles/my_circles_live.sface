@@ -40,7 +40,7 @@
           <LiveRedirect class="flex-1 w-full" to={"/settings/circle/"<>circle.id}>
           <div class="">
             <div class="flex items-center space-x-2">
-              <!-- <Solid.UserGroupIcon class="w-5 h-5 text-base-content/80" /> -->
+              <!-- <Icon solid="UserGroup" class="w-5 h-5 text-base-content/80" /> -->
               <div class="text-base font-semibold">{ LiveHandler.subject_name(circle) }</div>
             </div>
 
@@ -58,12 +58,12 @@
                   @click="open = !open" aria-haspopup="true" x-bind:aria-expanded="open" aria-expanded="true"
                   class="inline-flex items-center justify-center w-8 h-8 bg-transparent rounded-full bg-base-100 text-base-content opacity-60 hover:text-base-content focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-500">
                   <span class="sr-only">Open options</span>
-                  <Solid.DotsVerticalIcon />
+                  <Icon solid="DotsVertical" />
                 </button>
                 <div x-description="Dropdown menu, show/hide based on menu state." x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-60 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-60 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute right-0 w-56 mt-2 origin-top-right divide-y divide-gray-100 rounded-md shadow-lg bg-base-100 ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                   <div class="py-1" role="none">
                     <a href={"/settings/circle/"<>circle.id} class="flex items-center px-4 py-2 text-sm group text-base-content opacity-70 hover:bg-neutral hover:bg-opacity-30 hover:bg-opacity-75 hover:text-base-content opacity-90" role="menuitem">
-                      <Solid.CollectionIcon />
+                      <Icon solid="Collection" />
                       View/edit members
                     </a>
                     <a href="#" class="flex items-center px-4 py-2 text-sm group text-base-content opacity-70 hover:bg-neutral hover:bg-opacity-30 hover:text-base-content opacity-90" role="menuitem">
@@ -74,7 +74,7 @@
 
                   <div class="py-1" role="none">
                     <a href="#" class="flex items-center px-4 py-2 text-sm group text-base-content opacity-70 hover:bg-neutral hover:bg-opacity-30 hover:text-base-content opacity-90" role="menuitem">
-                      <Solid.TrashIcon />
+                      <Icon solid="Trash" />
                       Delete
                     </a>
                   </div>

@@ -133,7 +133,7 @@
   <:open_btn>
       <div 
         class={e(@class, "btn btn-sm btn-outline rounded-full")}>
-        <Solid.BanIcon
+        <Icon solid="Ban"
           :if={e(@with_icon, false)}
           class="w-4 h-4 mr-2 shrink-0 text-neutral text-opacity-70" />
           <!-- <svg
@@ -161,10 +161,10 @@
           </g>
           </svg> -->
 
-          <!-- <Outline.BanIcon 
+          <!-- <Icon outline="Ban" 
               :if={e(@scope, nil) !="instance_wide"} 
               class="w-4 h-4 mr-2 shrink-0 text-neutral text-opacity-70" />
-          <Outline.LockClosedIcon 
+          <Icon outline="LockClosed" 
               :if={e(@scope, nil)=="instance_wide"} 
               class="w-4 h-4 mr-2 shrink-0 text-neutral text-opacity-70" /> -->
 
@@ -195,10 +195,10 @@
         phx-value-scope={e(@scope, nil)} 
         type="button" 
         class={e(@class, "btn btn-sm btn-outline normal-case rounded-full")}>
-        <Outline.CheckCircleIcon 
+        <Icon outline="CheckCircle" 
             :if={e(@scope, nil) !="instance_wide"} 
             class="w-4 h-4 mr-2 shrink-0 text-bas-content text-opacity-70" />
-        <Outline.LockOpenIcon 
+        <Icon outline="LockOpen" 
             :if={e(@scope, nil)=="instance_wide"} 
             class="w-4 h-4 mr-2 shrink-0 text-bas-content text-opacity-70" />
 

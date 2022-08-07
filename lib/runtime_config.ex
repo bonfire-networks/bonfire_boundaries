@@ -13,31 +13,31 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     ### Verbs are like permissions. Each represents some activity or operation that may or may not be able to perform.
     verbs = %{
-      see:     %{id: "0BSERV1NG11ST1NGSEX1STENCE", verb: "See", icon: Heroicons.Solid.EyeIcon, summary: "Discoverable in lists (like feeds)"},     #
-      read:    %{id: "0EAD1NGSVTTER1YFVNDAMENTA1", verb: "Read", icon: Boxicon.Solid.BookReader, summary: "Readable/visible (if you can see or have a direct link)"},
-      create:  %{id: "4REATE0RP0STBRANDNEW0BJECT", verb: "Create", icon: Boxicon.Solid.Pen, summary: "Create a post or other object"},
-      edit:    %{id: "4HANG1NGVA1VES0FPR0PERT1ES", verb: "Edit", icon: Boxicon.Regular.Highlight, summary: "Modify the contents of an existing object"},
-      delete:  %{id: "4AKESTVFFG0AWAYPERMANENT1Y", verb: "Delete", icon: Boxicon.Solid.TrashAlt, summary: "Delete an object"},
-      follow:  %{id: "20SVBSCR1BET0THE0VTPVT0F1T", verb: "Follow", icon: Boxicon.Regular.Walk, summary: "Follow a user or thread or whatever"},
-      like:    %{id: "11KES1ND1CATEAM11DAPPR0VA1", verb: "Like", icon: Boxicon.Solid.Star, summary: "Like an object (and notify the author)"},
-      boost:   %{id: "300ST0R0RANN0VCEANACT1V1TY", verb: "Boost", icon: Boxicon.Regular.Repost, summary: "Boost an object (and notify the author)"},
-      flag:    %{id: "71AGSPAM0RVNACCEPTAB1E1TEM", verb: "Flag", icon: Boxicon.Solid.FlagAlt, summary: "Flag an object for a moderator to review (please note that anyone who can see or read something can flag it anyway)"},
-      reply:   %{id: "71TCREAT1NGA11NKEDRESP0NSE", verb: "Reply", icon: Boxicon.Regular.Reply, summary: "Reply to an activity or post"},
-      mention: %{id: "0EFERENC1NGTH1NGSE1SEWHERE", verb: "Mention", icon: Boxicon.Regular.At, summary: "Mention a user or object (and notify them)"},
-      tag:     %{id: "4ATEG0R1S1NGNGR0VP1NGSTVFF", verb: "Tag", icon: Boxicon.Solid.PurchaseTag, summary: "Tag a user or object, or publish in a topic"},
-      message: %{id: "40NTACTW1THAPR1VATEMESSAGE", verb: "Message", icon: Boxicon.Solid.Send, summary: "Send a message"},
-      request: %{id: "1NEEDPERM1SS10NT0D0TH1SN0W", verb: "Request", icon: Boxicon.Regular.QuestionMark, summary: "Request permission for another verb (eg. request to follow)"},
+      see:     %{id: "0BSERV1NG11ST1NGSEX1STENCE", verb: "See", icon: "Heroicons-Solid:Eye", summary: "Discoverable in lists (like feeds)"},     #
+      read:    %{id: "0EAD1NGSVTTER1YFVNDAMENTA1", verb: "Read", icon: "bxs:BookReader", summary: "Readable/visible (if you can see or have a direct link)"},
+      create:  %{id: "4REATE0RP0STBRANDNEW0BJECT", verb: "Create", icon: "bxs:Pen", summary: "Create a post or other object"},
+      edit:    %{id: "4HANG1NGVA1VES0FPR0PERT1ES", verb: "Edit", icon: "bx:Highlight", summary: "Modify the contents of an existing object"},
+      delete:  %{id: "4AKESTVFFG0AWAYPERMANENT1Y", verb: "Delete", icon: "bxs:TrashAlt", summary: "Delete an object"},
+      follow:  %{id: "20SVBSCR1BET0THE0VTPVT0F1T", verb: "Follow", icon: "bx:Walk", summary: "Follow a user or thread or whatever"},
+      like:    %{id: "11KES1ND1CATEAM11DAPPR0VA1", verb: "Like", icon: "bxs:Star", summary: "Like an object (and notify the author)"},
+      boost:   %{id: "300ST0R0RANN0VCEANACT1V1TY", verb: "Boost", icon: "bx:Repost", summary: "Boost an object (and notify the author)"},
+      flag:    %{id: "71AGSPAM0RVNACCEPTAB1E1TEM", verb: "Flag", icon: "bxs:FlagAlt", summary: "Flag an object for a moderator to review (please note that anyone who can see or read something can flag it anyway)"},
+      reply:   %{id: "71TCREAT1NGA11NKEDRESP0NSE", verb: "Reply", icon: "bx:Reply", summary: "Reply to an activity or post"},
+      mention: %{id: "0EFERENC1NGTH1NGSE1SEWHERE", verb: "Mention", icon: "bx:At", summary: "Mention a user or object (and notify them)"},
+      tag:     %{id: "4ATEG0R1S1NGNGR0VP1NGSTVFF", verb: "Tag", icon: "bxs:PurchaseTag", summary: "Tag a user or object, or publish in a topic"},
+      message: %{id: "40NTACTW1THAPR1VATEMESSAGE", verb: "Message", icon: "bxs:Send", summary: "Send a message"},
+      request: %{id: "1NEEDPERM1SS10NT0D0TH1SN0W", verb: "Request", icon: "bx:QuestionMark", summary: "Request permission for another verb (eg. request to follow)"},
 
       # WIP adding verbs, see: https://github.com/bonfire-networks/bonfire-app/issues/406
 
-      toggle: %{id: "1CANENAB1E0RD1SAB1EFEATVRE", verb: "Toggle", icon: Boxicon.Regular.ToggleRight, summary: "enable/disable extensions or features"},
-      describe: %{id: "1CANADD0M0D1FY1NF0METADATA", verb: "Describe", icon: Boxicon.Regular.CommentEdit, summary: "Edit info and metadata, eg. thread titles"},
-      grant: %{id: "1T0ADDED1TREM0VEB0VNDAR1ES", verb: "Grant", icon: Boxicon.Regular.Key, summary: "Add, edit or remove boundaries"},
-      appoint: %{id: "1T0ADDC1RC1ES0RASS1GNR01ES", verb: "Appoint", icon: Boxicon.Solid.UserBadge, summary: "Add to circles or assign roles"},
-      invite: %{id: "11NV1TESPE0P1E0RGRANTENTRY", verb: "Invite", icon: Boxicon.Regular.Gift, summary: "Invite users or grant entry"},
-      mediate: %{id: "1T0SEEF1AGSANDMAKETHEPEACE", verb: "Mediate", icon: Boxicon.Solid.FlagCheckered, summary: "See flags"},
-      block: %{id: "1T0MANAGEB10CKGH0STS11ENCE", verb: "Block", icon: Boxicon.Regular.Block, summary: "Manage blocks"},
-      configure: %{id: "1T0C0NF1GVREGENERA1SETT1NG", verb: "Configure", icon: Heroicons.Solid.AdjustmentsIcon, summary: "Change general settings"}
+      toggle: %{id: "1CANENAB1E0RD1SAB1EFEATVRE", verb: "Toggle", icon: "bx:ToggleRight", summary: "enable/disable extensions or features"},
+      describe: %{id: "1CANADD0M0D1FY1NF0METADATA", verb: "Describe", icon: "bx:CommentEdit", summary: "Edit info and metadata, eg. thread titles"},
+      grant: %{id: "1T0ADDED1TREM0VEB0VNDAR1ES", verb: "Grant", icon: "bx:Key", summary: "Add, edit or remove boundaries"},
+      appoint: %{id: "1T0ADDC1RC1ES0RASS1GNR01ES", verb: "Appoint", icon: "bxs:UserBadge", summary: "Add to circles or assign roles"},
+      invite: %{id: "11NV1TESPE0P1E0RGRANTENTRY", verb: "Invite", icon: "bx:Gift", summary: "Invite users or grant entry"},
+      mediate: %{id: "1T0SEEF1AGSANDMAKETHEPEACE", verb: "Mediate", icon: "bxs:FlagCheckered", summary: "See flags"},
+      block: %{id: "1T0MANAGEB10CKGH0STS11ENCE", verb: "Block", icon: "bx:Block", summary: "Manage blocks"},
+      configure: %{id: "1T0C0NF1GVREGENERA1SETT1NG", verb: "Configure", icon: "Heroicons-Solid:Adjustments", summary: "Change general settings"}
 
     }
 

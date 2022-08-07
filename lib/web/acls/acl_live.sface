@@ -33,7 +33,7 @@
             phx-target={e(@parent_back, nil)}
             @click="show_boundary_list = true"
             class="btn btn-ghost btn-sm btn-circle" > 
-            <Solid.ChevronLeftIcon class="w-6 h-6 text-base-content/80" />
+            <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
           </div>
 
           <div class="flex space-x-2 items-top">
@@ -51,7 +51,7 @@
           phx-value-section="settings"
           phx-target={@myself}
           class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost">
-          <Outline.CogIcon class="w-4 h-4" />
+          <Icon outline="Cog" class="w-4 h-4" />
           <span>{l "Settings"}</span>
         </div>
 
@@ -62,7 +62,7 @@
           phx-value-section="permissions"
           phx-target={@myself}
           class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost">
-          <Outline.ChevronLeftIcon class="w-4 h-4" />
+          <Icon outline="ChevronLeft" class="w-4 h-4" />
           <span>{l "Back"}</span>
         </div>
         <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
@@ -93,7 +93,7 @@
               phx-value-subject_id={ulid(subject)}
               phx-target={@myself}
               class="flex-shrink-0 ml-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-info-content hover:bg-info-content/30 hover:text-info-content/80 focus:outline-none focus:bg-info-content/80 focus:text-white">
-              <Solid.XIcon class="w-4 h-4" />
+              <Icon solid="X" class="w-4 h-4" />
             </span>
           </span>
         </div> -->
@@ -188,7 +188,7 @@
                   <div 
                     class={"btn btn-sm btn-outline btn-circle btn-yes",
                     "btn-disabled": @read_only}>
-                    <Boxicon.Regular.CheckShield class="w-4 h-4" />
+                    <Icon iconify="bx:CheckShield" class="w-4 h-4" />
                   </div>
                 </label>
                 <label class="tooltip tooltip-top" data-tip={l "Not specified"}>
@@ -203,7 +203,7 @@
                   <div 
                     class={"btn btn-sm btn-outline btn-circle btn-maybe",
                     "btn-disabled": @read_only}>
-                    <Boxicon.Regular.Shield class="w-4 h-4" />
+                    <Icon iconify="bx:Shield" class="w-4 h-4" />
                   </div>
                 </label>
                 <label class="tooltip tooltip-top" data-tip={l "Cannot"}>
@@ -218,7 +218,7 @@
                   <div 
                     class={"btn btn-sm btn-outline btn-circle btn-no",
                     "btn-disabled": @read_only}>
-                    <Boxicon.Regular.ShieldX class="w-4 h-4" />
+                    <Icon iconify="bx:ShieldX" class="w-4 h-4" />
                   </div>
                 </label>
               </form>

@@ -5,7 +5,7 @@
   <span 
     data-tip={e(@object_boundary, :name, "Public")}
     class="align-bottom tooltip tooltip-bottom z-20">
-    <Solid.GlobeIcon class="w-4 h-4 text-opacity-50 text-base-content" />
+    <Icon solid="Globe" class="w-4 h-4 text-opacity-50 text-base-content" />
   </span>
 
 {#match {"local", _}}
@@ -13,7 +13,7 @@
   <span 
     data-tip={e(@object_boundary, :name, "Local")}
     class="align-bottom tooltip tooltip-bottom z-20">
-    <Solid.LocationMarkerIcon 
+    <Icon solid="LocationMarker" 
       class="w-4 h-4 text-opacity-50 text-base-content" 
     />
   </span>
@@ -23,7 +23,7 @@
   <span 
     data-tip={e(@object_boundary, :name, "Custom Boundaries")}
     class="align-bottom tooltip tooltip-bottom z-20">
-    <Solid.CogIcon 
+    <Icon solid="Cog" 
       class="w-4 h-4 text-opacity-50 text-base-content" 
     />
   </span>

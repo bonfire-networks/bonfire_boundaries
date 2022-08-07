@@ -9,7 +9,7 @@
             <h3 class="text-2xl font-bold text-base-content opacity-80">{ e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) || l "Untitled circle" }</h3>
             <!-- <p class="text-base font-regular text-base-content opacity-80 mt-1">This is a sample description to help remember what this circle is about.</p> -->
             <div :if={!e(@circle, :stereotyped, nil)} class="flex items-center mt-3 space-x-3">
-              <button :on-click="Bonfire.Boundaries:circle_delete" class="btn btn-primary w-max inline-flex items-center"><Solid.TrashIcon />{l "Delete circle"}</button>
+              <button :on-click="Bonfire.Boundaries:circle_delete" class="btn btn-primary w-max inline-flex items-center"><Icon solid="Trash" />{l "Delete circle"}</button>
             </div>
         </div>
       </div>
@@ -67,12 +67,12 @@
                   <span
                     class="to flex items-center"
                     @click="move_item(event, 'circle_members')">
-                    <Solid.PlusCircleIcon />
+                    <Icon solid="PlusCircle" />
                     </span>
                   <span
                     class="from flex items-center"
                     @click="move_item(event, 'circle_suggestions')">
-                      <Solid.MinusCircleIcon />
+                      <Icon solid="MinusCircle" />
                   </span>
                 </div>
               </li>
@@ -130,12 +130,12 @@
                   <span
                     class="to flex items-center button"
                     @click="move_item(event, 'circle_members')">
-                      <Solid.PlusCircleIcon /> 
+                      <Icon solid="PlusCircle" /> 
                     </span>
                   <span
                   class="from flex items-center button"
                   @click="move_item(event, 'circle_suggestions')">
-                    <Solid.MinusCircleIcon /> 
+                    <Icon solid="MinusCircle" /> 
                   </span>
                 </div>
               </li>
@@ -167,12 +167,12 @@
                   <span
                     class="to flex items-center button"
                     @click="move_item(event, 'circle_members')">
-                      <Solid.PlusCircleIcon /> 
+                      <Icon solid="PlusCircle" /> 
                     </span>
                   <span
                   class="from flex items-center button"
                   @click="move_item(event, 'circle_suggestions')">
-                    <Solid.MinusCircleIcon /> 
+                    <Icon solid="MinusCircle" /> 
                   </span>
                 </div>
 
