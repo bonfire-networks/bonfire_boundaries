@@ -105,7 +105,8 @@
               >
               <div
                 class="flex-1"
-                id={:select_more}
+                id={:select_more_acl}
+                phx-update="ignore"
                 phx-hook="InputOrSelectOne"
                 >
                 <input 
