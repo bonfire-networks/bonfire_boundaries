@@ -23,9 +23,10 @@
       </div>
     </div> -->
     <span 
-      :for={{id, name} <- @to_boundaries |> debug() || [{l("Public"), "public"}]}
+      :for={{id, name} <- @to_boundaries || [{l("Public"), "public"}]}
       class="inline-flex rounded-full items-center py-0.5 pl-2.5 pr-1 text-sm font-medium bg-accent text-accent-content">
       {name}
+      <input name="to_boundaries[]" value={id} type="hidden" />
       <button 
         phx-click={JS.push("remove_boundary", value: %{id: id}, target: "#smart_input")}
         type="button" 
