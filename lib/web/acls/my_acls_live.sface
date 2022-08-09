@@ -24,7 +24,7 @@
 
 <div class={
   "",
-  "mt-4": !@setting_boundaries}
+  "m-4": !@setting_boundaries}
 >
   
   <div 
@@ -46,6 +46,7 @@
 
       <li class={
         "p-2 rounded hover:bg-base-content/10",
+        "border border-base-content/10": !@setting_boundaries,
         "bg-base-content/10": @to_boundaries_ids |> Enum.member?(acl_id)
         }>
         <label 
@@ -108,7 +109,7 @@
         </label>
         {#if e(acl, :grants_count, 0)>0}
           {#for {_subject_id, %{subject: subject, verb_grants: verb_grants}} <- AclLive.subject_verb_grant(e(acl, :grants, [])) |> Enum.slice(0..5)}
-            <div class="flex justify-between pt-2 mt-2 -mx-2 text-sm border-t border-base-content/30">
+            <div class="flex justify-between px-2 pt-2 mt-2 -mx-2 text-sm border-t border-base-content/30">
               <span>{e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) || e(subject, :name, nil) || e(subject, :profile, :name, nil) || e(subject, :character, :username, nil) || ulid(subject)}</span>
               <div class="flex items-center space-x-1">
                 {#for {verb_id, grant} <- verb_grants}
