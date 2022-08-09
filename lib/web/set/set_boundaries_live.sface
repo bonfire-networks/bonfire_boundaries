@@ -65,7 +65,7 @@
 
      
       <div 
-        :if={Settings.get([:ui, :smart_input_as], nil, @__context__)!=:sidebar or e(@thread_mode, nil) ==:flat}
+        :if={Settings.get([:ui, :smart_input_as], nil, @__context__)!=:sidebar or @thread_mode ==:flat}
         x-show="open_boundaries"
         class="p-3">
         
@@ -85,7 +85,7 @@
     <Bonfire.Boundaries.Web.BoundariesDropdownLive
       to_boundaries={e(@to_boundaries, [])}
       to_circles={e(@to_circles, [])}
-      thread_mode={e(@thread_mode, nil)}
+      thread_mode={@thread_mode}
       showing_within={@showing_within}
       create_activity_type={@create_activity_type}
     />

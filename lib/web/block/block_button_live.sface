@@ -1,4 +1,4 @@
-{#if !e(@my_block, nil) }
+{#if !@my_block }
 
 <Bonfire.UI.Common.OpenModalLive
   id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, @object)} 
@@ -162,10 +162,10 @@
           </svg> -->
 
           <!-- <Icon outline="Ban" 
-              :if={e(@scope, nil) !="instance_wide"} 
+              :if={@scope !="instance_wide"} 
               class="w-4 h-4 mr-2 shrink-0 text-neutral text-opacity-70" />
           <Icon outline="LockClosed" 
-              :if={e(@scope, nil)=="instance_wide"} 
+              :if={@scope=="instance_wide"} 
               class="w-4 h-4 mr-2 shrink-0 text-neutral text-opacity-70" /> -->
 
         <span class="text-left truncate ellipsis">
@@ -192,14 +192,14 @@
         :on-click="Bonfire.Boundaries:unblock" 
         phx-value-id={e(@object, :id, @object)} 
         phx-value-block_type={@block_type}
-        phx-value-scope={e(@scope, nil)} 
+        phx-value-scope={@scope} 
         type="button" 
         class={e(@class, "btn btn-sm btn-outline normal-case rounded-full")}>
         <Icon outline="CheckCircle" 
-            :if={e(@scope, nil) !="instance_wide"} 
+            :if={@scope !="instance_wide"} 
             class="w-4 h-4 mr-2 shrink-0 text-bas-content text-opacity-70" />
         <Icon outline="LockOpen" 
-            :if={e(@scope, nil)=="instance_wide"} 
+            :if={@scope=="instance_wide"} 
             class="w-4 h-4 mr-2 shrink-0 text-bas-content text-opacity-70" />
 
          <span class="truncate ellipsis">{ e(@label, "")}</span>

@@ -23,7 +23,7 @@
       </div>
     </div> -->
     <span 
-      :for={{id, name} <- e(@to_boundaries, nil) |> debug() || [{l("Public"), "public"}]}
+      :for={{id, name} <- @to_boundaries |> debug() || [{l("Public"), "public"}]}
       class="inline-flex rounded-full items-center py-0.5 pl-2.5 pr-1 text-sm font-medium bg-accent text-accent-content">
       {name}
       <button 

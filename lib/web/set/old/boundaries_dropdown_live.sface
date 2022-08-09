@@ -6,7 +6,7 @@
 <div 
   class={
     "p-1 dropdown",
-    "dropdown-top": e(@thread_mode, nil) == :flat
+    "dropdown-top": @thread_mode == :flat
   }
   x-data={"{
     to_boundaries: ['#{if is_messaging?(%{showing_within: @showing_within, create_activity_type: @create_activity_type}), do: "message", else: "public"}'],

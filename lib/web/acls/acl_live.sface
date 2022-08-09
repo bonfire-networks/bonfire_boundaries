@@ -10,11 +10,11 @@
     setting_boundaries={@setting_boundaries}
   />
 
-{#elseif e(@edit_circle_id, nil)}
+{#elseif @edit_circle_id}
 
   <Bonfire.Boundaries.Web.CircleLive
-    id={e(@edit_circle_id, nil)} 
-    circle_id={e(@edit_circle_id, nil)} 
+    id={@edit_circle_id} 
+    circle_id={@edit_circle_id} 
     current_user={current_user(@__context__)}
     parent_back={@myself}
     setting_boundaries={@setting_boundaries}
@@ -28,9 +28,9 @@
         <div class="flex items-center flex-1 space-x-2 text-xl font-bold text-base-content">
 
           <div 
-            :if={e(@parent_back, nil)} 
+            :if={@parent_back} 
             phx-click="back"
-            phx-target={e(@parent_back, nil)}
+            phx-target={@parent_back}
             @click="show_boundary_list = true"
             class="btn btn-ghost btn-sm btn-circle" > 
             <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />

@@ -8,13 +8,13 @@
          <div class="flex items-center space-x-2 text-2xl font-bold text-base-content">
 
           <div 
-            :if={e(@parent_back, nil)} 
+            :if={@parent_back} 
             phx-click="back"
-            phx-target={e(@parent_back, nil)}
+            phx-target={@parent_back}
             class="btn btn-outline btn-sm btn-circle" > 
             <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
           </div>
-          <Icon solid="UserGroup" :if={!e(@parent_back, nil)}  class="w-6 h-6 text-base-content/80" />
+          <Icon solid="UserGroup" :if={!@parent_back}  class="w-6 h-6 text-base-content/80" />
 
           <div>{ e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) || l "Untitled circle" }</div>
         </div>
@@ -128,7 +128,7 @@
                     <li id="no-members" class="flex items-center my-12 place-content-center">
                       <Bonfire.UI.Common.EmptyFeed
                         feedback_title={e(@feedback_title, l "This circle has no members yet")}
-                        feedback_message={e(@feedback_message, nil)}
+                        feedback_message={@feedback_message}
                       /> 
                     </li>
                   {/for}
@@ -181,7 +181,7 @@
                           <li id="nobody" class="flex items-center my-12 place-content-center">
                             <Bonfire.UI.Common.EmptyFeed
                               feedback_title={e(@feedback_title, l "Follow some people first...")}
-                              feedback_message={e(@feedback_message, nil)}
+                              feedback_message={@feedback_message}
                             /> 
                           </li>
                         {/for}

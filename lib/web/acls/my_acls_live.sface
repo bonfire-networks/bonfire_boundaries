@@ -10,11 +10,11 @@
     setting_boundaries={@setting_boundaries}
   />
 
-{#elseif e(@edit_acl_id, nil)}
+{#elseif @edit_acl_id}
 
   <Bonfire.Boundaries.Web.AclLive
-    id={e(@edit_acl_id, nil)} 
-    acl_id={e(@edit_acl_id, nil)} 
+    id={@edit_acl_id} 
+    acl_id={@edit_acl_id} 
     current_user={current_user(@__context__)}
     parent_back={@myself}
     setting_boundaries={@setting_boundaries}
