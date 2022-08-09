@@ -255,7 +255,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp maybe_for_caretaker(query, id, caretaker) do
-    if id in built_in_ids do
+    if id in built_in_ids() do
       query
       |> where([acl], acl.id == ^ulid!(id))
     else
