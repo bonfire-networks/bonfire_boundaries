@@ -8,6 +8,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   prop showing_within, :any, default: nil
   prop show_select_recipients, :boolean, default: false
   prop open_boundaries, :boolean, default: false
+  prop boundaries_modal_id, :string, default: :sidebar_composer
 
   def to_boundaries_ids(to_boundaries) do
     Enum.map(to_boundaries, fn b -> elem(b, 0) end)
