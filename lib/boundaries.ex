@@ -98,7 +98,7 @@ defmodule Bonfire.Boundaries do
   replacing the existing caretaker, if any.
   """
   def take_care_of!(things, user) when is_list(things) do
-    repo().insert_all(Caretaker, Enum.map(things, &(%{id: Utils.ulid(&1), caretaker_id: Utils.ulid(user)})), on_conflict: :nothing, conflict_target: [:id]) #|> debug
+    repo().insert_all(Caretaker, Enum.map(things, &(%{id: Utils.ulid(&1), caretaker_id: Utils.ulid(user)})), on_conflict: {:replace_all_except, [:id]}) #|> debug
     Enum.map(things, fn thing ->
       case thing do
         %{caretaker: _} ->
