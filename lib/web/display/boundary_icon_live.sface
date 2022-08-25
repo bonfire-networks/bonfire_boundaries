@@ -1,11 +1,18 @@
 <span>
 {#if not is_atom(@object_boundary) or @object_boundary == :none}
-{#case Bonfire.Boundaries.preset_boundary_tuple_from_acl(@object_boundary |> debug) |> debug}
+{#case Bonfire.Boundaries.preset_boundary_tuple_from_acl(@object_boundary)}
 {#match {"public", _}}
   <span 
     data-tip={e(@object_boundary, :name, "Public")}
-    class="align-bottom tooltip tooltip-bottom z-20">
-    <Icon solid="Globe" class="w-4 h-4 text-opacity-50 text-base-content" />
+    class={"align-bottom tooltip tooltip-bottom z-20": e(@with_icon, false)}>
+    <Icon 
+      :if={e(@with_icon, false)}
+      solid="Globe" 
+      class="w-4 h-4 text-opacity-50 text-base-content" />
+    <span
+     :if={e(@with_label, false)}
+     class="text-sm btn btn-xs btn-outline border-base-content/30 normal-case"
+    >{l "Public"}</span>
   </span>
 
 {#match {"local", _}}
