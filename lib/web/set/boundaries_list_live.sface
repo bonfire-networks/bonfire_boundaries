@@ -18,7 +18,7 @@
                 <div class="flex flex-col">
                 <div class="text-base font-semibold">{l "Public"}</div>
                 <div class="text-sm text-base-content/80">
-                    {l "Publicly visible to everyone. People on the fediverse cam see, interact, and reply. Discoveranle by search engines."}
+                    {l "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines."}
                 </div>
                 </div>
             </div>
