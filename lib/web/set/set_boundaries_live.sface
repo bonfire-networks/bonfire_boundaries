@@ -10,7 +10,7 @@
     />
     {#if Settings.get([:ui, :smart_input_as], nil, @__context__)==:sidebar and @thread_mode !=:flat}
       <Bonfire.UI.Common.OpenModalLive
-        id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "set-boundaries")} 
+        id={Pointers.ULID.generate()} 
         reusable_modal_id={@boundaries_modal_id}
         title_text={l "Set boundaries"}
         no_actions

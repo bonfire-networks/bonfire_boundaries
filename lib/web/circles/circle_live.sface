@@ -226,7 +226,7 @@
                     <div class="text-sm text-base-content/80">{l "Once you delete a circle, there is no going back. Please be certain."}</div>
                   </div>
                     <Bonfire.UI.Common.OpenModalLive
-                      id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "delete-circle")} 
+                      id={Pointers.ULID.generate()} 
                       title_text={l("Delete this circle")}
                       >
                       {l "The circle will be permanently deleted. This action may affect all the activities that included this circle."} 

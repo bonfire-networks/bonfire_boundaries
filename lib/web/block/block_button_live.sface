@@ -1,7 +1,7 @@
 {#if !@my_block }
 
 <Bonfire.UI.Common.OpenModalLive
-  id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, @object)} 
+  id={Pointers.ULID.generate()} 
   title_text={l("Block")<>" "<>e(@label, "")}
   form_opts={%{"phx-submit"=> "Bonfire.Boundaries:blocks"}}
   >

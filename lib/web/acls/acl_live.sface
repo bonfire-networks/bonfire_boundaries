@@ -304,7 +304,7 @@
             <div class="text-sm text-base-content/80">{l "If you no longer want to use this boundary, but still want existing permissions using it to be preserved."}</div>
           </div>
           <Bonfire.UI.Common.OpenModalLive
-            id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "archive-acl")} 
+            id={Pointers.ULID.generate()} 
             title_text={l("Archive this boundary")}
             >
             {l "The boundary will be permanently archived and no longer appear in your list of boundaries."} 
@@ -330,7 +330,7 @@
             <div class="text-sm text-base-content/80">{l "Deleting a boundary means anything shared with users of the local instance using this boundary will no longer be shared. Please be certain."}</div>
           </div>
           <Bonfire.UI.Common.OpenModalLive
-            id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "delete-acl")} 
+            id={Pointers.ULID.generate()} 
             title_text={l("Delete this boundary")}
             >
             {l "The boundary will be permanently deleted. This action will affect everything that was shared on the local instance using the boundary."} 
