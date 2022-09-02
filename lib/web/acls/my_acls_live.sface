@@ -3,7 +3,7 @@
 {#if @section=="new"}
   
   <Bonfire.Boundaries.Web.NewAclLive
-    current_user={current_user(@__context__)}
+    
     scope={@scope}
     parent_back={@myself}
     event_target={@myself}
@@ -15,7 +15,7 @@
   <Bonfire.Boundaries.Web.AclLive
     id={@edit_acl_id} 
     acl_id={@edit_acl_id} 
-    current_user={current_user(@__context__)}
+    
     parent_back={@myself}
     setting_boundaries={@setting_boundaries}
   />

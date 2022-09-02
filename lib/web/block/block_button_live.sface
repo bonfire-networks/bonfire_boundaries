@@ -102,7 +102,7 @@
   </div>
 
   <div 
-    :if={Bonfire.Me.Users.is_admin?(current_user(@__context__)) || Bonfire.Boundaries.can?(@__context__, :block, :instance)}
+    :if={Bonfire.Me.Users.is_admin?(@current_user) || Bonfire.Boundaries.can?(@__context__, :block, :instance)}
     class="flex flex-col p-2 mt-8 space-y-3 border rounded border-error/30 bg-error/5">
     <div class="">
       <div class="text-base font-semibold">{l "Super powers"}</div>

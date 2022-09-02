@@ -3,7 +3,7 @@
 {#if @section=="new"}
 
   <Bonfire.Boundaries.Web.NewCircleLive
-    current_user={current_user(@__context__)}
+    
     scope={@scope}
     parent_back={@myself}
     event_target={@myself}

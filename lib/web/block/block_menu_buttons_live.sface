@@ -1,5 +1,5 @@
 <li 
-  :if={current_user(@__context__) && ulid(current_user(@__context__)) != ulid(@object)}
+  :if={@current_user && ulid(@current_user) != ulid(@object)}
   class=" hover:bg-neutral/20">
   <div>
     <Bonfire.Boundaries.Web.BlockButtonLive
@@ -12,7 +12,7 @@
 </li>
 
 <li 
-  :if={current_user(@__context__) && e(peered(@object, @peered), :peer_id, nil)}
+  :if={@current_user && e(peered(@object, @peered), :peer_id, nil)}
   class=" hover:bg-neutral hover:bg-opacity-20">
   <div>
     <Bonfire.Boundaries.Web.BlockButtonLive

@@ -15,13 +15,14 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
   prop scope, :atom, default: nil
 
   def update(%{scope: scope} = assigns, %{assigns: %{loaded: true, scope: existing_scope}} = socket) when scope == existing_scope do
-
+    debug("update1")
     {:ok, socket
       |> assign(assigns)
     }
   end
 
   def update(assigns, socket) do
+    debug("update2")
     current_user = current_user(assigns)
     built_in_ids = Acls.built_in_ids()
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)

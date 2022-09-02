@@ -4,7 +4,7 @@
 {#if @section=="new_circle"}
 
   <Bonfire.Boundaries.Web.NewCircleLive
-    current_user={current_user(@__context__)}
+    
     parent_back={@myself}
     event_target={@myself}
     setting_boundaries={@setting_boundaries}
@@ -15,7 +15,7 @@
   <Bonfire.Boundaries.Web.CircleLive
     id={@edit_circle_id} 
     circle_id={@edit_circle_id} 
-    current_user={current_user(@__context__)}
+    
     parent_back={@myself}
     setting_boundaries={@setting_boundaries}
   />
