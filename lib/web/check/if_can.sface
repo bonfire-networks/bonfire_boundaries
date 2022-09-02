@@ -2,6 +2,6 @@
 {#if @boundary_can}
   <#slot></#slot>
 {#else}
-  <#slot name="if_not">{@if_not_say}</#slot>
+  <#slot {@if_not}>{@if_not_say}</#slot>
 {/if}
 </div>
