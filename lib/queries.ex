@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.Queries do
   providing) the return type of a subquery.
 
   """
-  import Where
+  import Untangle
   import Ecto.Query
   alias Bonfire.Boundaries.{Summary, Verbs}
   alias Bonfire.Common
@@ -41,7 +41,7 @@ defmodule Bonfire.Boundaries.Queries do
     case field_ref do
       {{:., _, [{alia, _, _},_field]}, [{:no_parens, true}|_], []} ->
         quote do
-          require Where
+          require Untangle
           query = unquote(query)
           opts = unquote(opts)
           verbs = List.wrap(Bonfire.Common.Utils.e(opts, :verbs, [:see, :read]))
@@ -50,7 +50,7 @@ defmodule Bonfire.Boundaries.Queries do
             :admins ->
               case Bonfire.Common.Utils.current_user(opts) do
                 %{id: _, instance_admin: %{is_instance_admin: true}} ->
-                  Where.debug("Skipping boundary checks for instance administrator")
+                  Untangle.debug("Skipping boundary checks for instance administrator")
                   query
                 current_user ->
                   vis = Bonfire.Boundaries.Queries.filter_where_not(current_user, verbs)
@@ -65,7 +65,7 @@ defmodule Bonfire.Boundaries.Queries do
                 [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
                 v in subquery(vis), on: unquote(field_ref) == v.object_id
             other ->
-              import Where
+              import Untangle
               error(other, "Weird skip_boundary_check")
               query
           end
@@ -74,7 +74,7 @@ defmodule Bonfire.Boundaries.Queries do
       when is_atom(field) and is_list(meta)
       and (is_nil(args) or args == []) ->
         quote do
-          require Where
+          require Untangle
           query = unquote(query)
           opts = unquote(opts)
           verbs = List.wrap(Bonfire.Common.Utils.e(opts, :verbs, [:see, :read]))
@@ -83,7 +83,7 @@ defmodule Bonfire.Boundaries.Queries do
             :admins ->
               case Bonfire.Common.Utils.current_user(opts) do
                 %{id: _, instance_admin: %{is_instance_admin: true}} ->
-                  Where.debug("Skipping boundary checks for instance administrator")
+                  Untangle.debug("Skipping boundary checks for instance administrator")
                   query
                 current_user ->
                   vis = Bonfire.Boundaries.Queries.filter_where_not(current_user, verbs)
@@ -100,7 +100,7 @@ defmodule Bonfire.Boundaries.Queries do
                 v in subquery(vis),
                 on: unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) == v.object_id
             other ->
-              import Where
+              import Untangle
               error(other, "Weird skip_boundary_check")
               query
           end

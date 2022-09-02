@@ -2,7 +2,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   use Arrows
   import Bonfire.Boundaries.Integration
   import Ecto.Query
-  import Where
+  import Untangle
   import Bonfire.Common.Utils
   alias Bonfire.Common.Config
   alias Bonfire.Common.Cache

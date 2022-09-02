@@ -1,5 +1,5 @@
 defmodule Bonfire.Boundaries.Verbs do
-  # import Where
+  # import Untangle
   import Bonfire.Boundaries.Integration
   # import Ecto.Query
   alias Bonfire.Data.AccessControl.Verb

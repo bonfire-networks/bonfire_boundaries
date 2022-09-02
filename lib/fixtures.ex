@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Fixtures do
 
   import Bonfire.Boundaries.Integration
-  import Where
+  import Untangle
   alias Bonfire.Common.Utils
   alias Bonfire.Data.AccessControl.{Acl, Circle, Grant, Verb}
   alias Bonfire.Data.Identity.{Caretaker, Named}
