@@ -1,0 +1,115 @@
+<section
+  class="bg-base-100">
+
+  {#case @selected_tab}
+
+    {#match "circles"}
+      <Surface.Components.Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
+        module={Bonfire.Boundaries.Web.MyCirclesLive}
+        
+        
+        id={"circles"} 
+        scope={nil}
+      />
+    {#match "circle"}
+      <Surface.Components.Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.CircleLive) and @current_user}
+        module={Bonfire.Boundaries.Web.CircleLive}
+        
+        selected_tab={@selected_tab}
+        
+        id={"view_circle"} 
+      />
+    {#match "acls"}
+      <Surface.Components.Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and @current_user}
+        module={Bonfire.Boundaries.Web.MyAclsLive}
+        
+        
+        selected_tab={"acls"}
+        id={"my_acls"} 
+        scope={nil}
+      />
+    {#match "acl"}
+      <Surface.Components.Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.AclLive) and @current_user}
+        module={Bonfire.Boundaries.Web.AclLive}
+        
+        selected_tab={"acls"}
+        
+        id={"acl"} 
+      />
+
+    {#match "silenced"}
+      <Bonfire.Boundaries.Web.BlocksLive
+        id="blocks"
+        
+        selected_tab={"silenced"}
+      />
+    {#match "ghosted"}
+      <Bonfire.Boundaries.Web.BlocksLive
+        id="blocks"
+        
+        selected_tab={"ghosted"}
+      />
+
+    
+    {#match "instance_silenced"}
+      <Bonfire.Boundaries.Web.BlocksLive
+        scope={:instance_wide}
+        id="blocks"
+        
+        selected_tab={"silenced"}
+      />
+    {#match "instance_ghosted"}
+      <Bonfire.Boundaries.Web.BlocksLive
+        scope={:instance_wide}
+        id="blocks"
+        
+        selected_tab={"ghosted"}
+      />
+
+    {#match "instance_circles"}
+      <Surface.Components.Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
+        module={Bonfire.Boundaries.Web.MyCirclesLive}
+        
+        
+        id={"circles"} 
+        scope={:instance}
+      />
+    {#match "instance_acls"}
+      <Surface.Components.Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and @current_user}
+        module={Bonfire.Boundaries.Web.MyAclsLive}
+        
+        
+        selected_tab={"acls"}
+        id={"my_acls"} 
+        scope={:instance}
+      />
+ 
+    {#match _}
+
+      <Surface.Components.Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and @current_user}
+        module={Bonfire.Boundaries.Web.MyAclsLive}
+        
+        
+        selected_tab={"acls"}
+        id={"my_acls"} 
+        scope={nil}
+      />
+
+      <Surface.Components.Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
+        module={Bonfire.Boundaries.Web.MyCirclesLive}
+        
+        
+        id={"circles"} 
+        scope={nil}
+      />
+      
+  {/case}
+  </section>

@@ -81,18 +81,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         settings_section_title: "View " <> e(acl, :named, :name, "") <> " boundary",
         settings_section_description: l("Create and manage your boundary."),
         ui_compact: Settings.get([:ui, :compact], false, assigns),
-        sidebar_widgets: [
-          users: [
-            main: [
-              {Bonfire.UI.Me.SettingsViewLive.SidebarSettingsLive,
-              [
-                selected_tab: "acls",
-                current_user: current_user(assigns)
-              ]}
-            ],
-            secondary: []
-          ]
-        ]
+        selected_tab: "acls"
       )}
     end
   end
