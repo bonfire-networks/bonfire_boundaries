@@ -4,19 +4,19 @@ defmodule Bonfire.Boundaries.Web.Routes do
     quote do
 
       pipeline :guest_only do
-        plug Bonfire.Boundaries.Web.Plugs.GuestOnly
+        plug Bonfire.UI.Me.Plugs.GuestOnly
       end
 
       pipeline :account_required do
-        plug Bonfire.Boundaries.Web.Plugs.AccountRequired
+        plug Bonfire.UI.Me.Plugs.AccountRequired
       end
 
       pipeline :user_required do
-        plug Bonfire.Boundaries.Web.Plugs.UserRequired
+        plug Bonfire.UI.Me.Plugs.UserRequired
       end
 
       pipeline :admin_required do
-        plug Bonfire.Boundaries.Web.Plugs.AdminRequired
+        plug Bonfire.UI.Me.Plugs.AdminRequired
       end
 
       # pages anyone can view
