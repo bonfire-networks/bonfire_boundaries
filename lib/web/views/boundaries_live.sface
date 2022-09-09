@@ -4,7 +4,7 @@
   {#case @selected_tab}
 
     {#match "circles"}
-      <Surface.Components.Dynamic.LiveComponent
+      <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
         module={Bonfire.Boundaries.Web.MyCirclesLive}
         
@@ -13,7 +13,7 @@
         scope={nil}
       />
     {#match "circle"}
-      <Surface.Components.Dynamic.LiveComponent
+      <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.CircleLive) and @current_user}
         module={Bonfire.Boundaries.Web.CircleLive}
         
@@ -22,7 +22,7 @@
         id={"view_circle"} 
       />
     {#match "acls"}
-      <Surface.Components.Dynamic.LiveComponent
+      <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and @current_user}
         module={Bonfire.Boundaries.Web.MyAclsLive}
         
@@ -32,7 +32,7 @@
         scope={nil}
       />
     {#match "acl"}
-      <Surface.Components.Dynamic.LiveComponent
+      <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.AclLive) and @current_user}
         module={Bonfire.Boundaries.Web.AclLive}
         
@@ -71,7 +71,7 @@
       />
 
     {#match "instance_circles"}
-      <Surface.Components.Dynamic.LiveComponent
+      <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
         module={Bonfire.Boundaries.Web.MyCirclesLive}
         
@@ -80,7 +80,7 @@
         scope={:instance}
       />
     {#match "instance_acls"}
-      <Surface.Components.Dynamic.LiveComponent
+      <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and @current_user}
         module={Bonfire.Boundaries.Web.MyAclsLive}
         
@@ -92,7 +92,7 @@
  
     {#match _}
 
-      <Surface.Components.Dynamic.LiveComponent
+      <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and @current_user}
         module={Bonfire.Boundaries.Web.MyAclsLive}
         
@@ -102,7 +102,7 @@
         scope={nil}
       />
 
-      <Surface.Components.Dynamic.LiveComponent
+      <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
         module={Bonfire.Boundaries.Web.MyCirclesLive}
         
