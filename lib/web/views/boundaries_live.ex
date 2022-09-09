@@ -1,9 +1,8 @@
 defmodule Bonfire.Boundaries.Web.BoundariesLive do
   use Bonfire.UI.Common.Web, :surface_live_view
   import Untangle
-  import Bonfire.UI.Me.Integration, only: [is_admin?: 1]
+  import Bonfire.Boundaries.Integration, only: [is_admin?: 1]
   alias Bonfire.UI.Me.LivePlugs
-
 
   declare_extension("Boundaries & Circles", icon: "heroicons-solid:LockClosed")
 
