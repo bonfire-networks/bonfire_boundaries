@@ -1,6 +1,6 @@
 <div>
   <!-- {#if Settings.get(:experimental_features_enabled, false, @__context__)} -->
-  <div class="flex items-center pr-2 space-x-2 bg-base-content/5">
+  <div class="flex items-center pr-2 space-x-2 border-t bg-base-100 border-base-content/10">
     <Bonfire.Boundaries.Web.BoundariesSelectionLive
       to_boundaries={@to_boundaries}
       to_circles={@to_circles}
@@ -62,7 +62,7 @@
   <div
     :if={Settings.get([:ui, :smart_input_as], nil, @__context__) != :sidebar or @thread_mode == :flat}
     x-show="open_boundaries"
-    class="p-3"
+    class="p-3 bg-base-100"
   >
     <Bonfire.Boundaries.Web.BoundariesListLive
       to_boundaries={e(@to_boundaries, [])}
