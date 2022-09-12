@@ -7,5 +7,4 @@ defmodule Bonfire.Boundaries.Web.BoundariesDropdownLive do
   prop thread_mode, :atom
   prop showing_within, :any, default: nil
   prop create_activity_type, :atom, default: nil
-
 end

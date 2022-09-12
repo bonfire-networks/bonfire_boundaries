@@ -6,5 +6,4 @@ defmodule Bonfire.Boundaries.Web.NewCircleLive do
   prop label, :string, default: nil
   prop parent_back, :any, default: nil
   prop scope, :atom, default: nil
-
 end

@@ -1,18 +1,13 @@
 <div>
-
-{#if @section=="new"}
-
-  <Bonfire.Boundaries.Web.NewCircleLive
-    
-    scope={@scope}
-    parent_back={@myself}
-    event_target={@myself}
-    setting_boundaries={@setting_boundaries}
-  />
-
-{#else}
-
-  <!-- <div class="p-4 border-b bg-base-content/10 border-base-content/30">
+  {#if @section == "new"}
+    <Bonfire.Boundaries.Web.NewCircleLive
+      scope={@scope}
+      parent_back={@myself}
+      event_target={@myself}
+      setting_boundaries={@setting_boundaries}
+    />
+  {#else}
+    <!-- <div class="p-4 border-b bg-base-content/10 border-base-content/30">
     <form class="flex items-center" phx-submit="Bonfire.Boundaries:circle_create">
       <input class="flex-1 mr-4 input input-bordered" type="text" name="name" placeholder="Circle name"/>
       <button type="submit" class="normal-case btn btn-primary">
@@ -20,39 +15,34 @@
     </form>
   </div> -->
 
-  <div class="p-4 ">
-
-    <div class="flex items-center px-2 space-x-9">
-      <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "Circles"}</h2>
-      <!-- <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} /> -->
-      <div 
-        :on-click="assign"
-        phx-value-section="new"
-        class="normal-case btn btn-outline btn-sm" >
-        {l "Create"}
+    <div class="p-4">
+      <div class="flex items-center px-2 space-x-9">
+        <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("Circles")}</h2>
+        <!-- <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} /> -->
+        <div :on-click="assign" phx-value-section="new" class="normal-case btn btn-outline btn-sm">
+          {l("Create")}
+        </div>
       </div>
 
-    </div>
+      <ul class="mt-3">
+        {#for circle <- e(@circles, [])}
+          <li class="flex items-center justify-between flex-1 p-3 mb-3 border rounded hover:bg-base-content/5 border-base-content/30">
+            <LiveRedirect class="flex-1 w-full" to={"/settings/circle/" <> circle.id}>
+              <div class="">
+                <div class="flex items-center space-x-2">
+                  <!-- <Icon solid="UserGroup" class="w-5 h-5 text-base-content/80" /> -->
+                  <div class="text-base font-semibold">{LiveHandler.subject_name(circle)}</div>
+                </div>
 
-    <ul class="mt-3">
-      {#for circle <- e(@circles, []) }
-        <li class="flex items-center justify-between flex-1 p-3 mb-3 border rounded hover:bg-base-content/5 border-base-content/30">
-          <LiveRedirect class="flex-1 w-full" to={"/settings/circle/"<>circle.id}>
-          <div class="">
-            <div class="flex items-center space-x-2">
-              <!-- <Icon solid="UserGroup" class="w-5 h-5 text-base-content/80" /> -->
-              <div class="text-base font-semibold">{ LiveHandler.subject_name(circle) }</div>
-            </div>
+                <Bonfire.Boundaries.Web.CirclePreviewLive
+                  members={e(circle, :encircles, [])}
+                  count={e(circle, :encircles_count, 0)}
+                />
 
-          <Bonfire.Boundaries.Web.CirclePreviewLive
-            members={e(circle, :encircles, [])}
-            count={e(circle, :encircles_count, 0)}
-          />
-
-            <!-- <div class="text-sm text-base-content/80">{e(circle, :encircles_count, 0)} members</div> -->
-            <div class="text-sm text-base-content/80">{e(circle, :extra_info, :summary, nil)}</div>
-          </div>
-            <!-- <div class="flex-shrink-0 pr-2">
+                <!-- <div class="text-sm text-base-content/80">{e(circle, :encircles_count, 0)} members</div> -->
+                <div class="text-sm text-base-content/80">{e(circle, :extra_info, :summary, nil)}</div>
+              </div>
+              <!-- <div class="flex-shrink-0 pr-2">
               <div x-cloak x-data="{ open: false }" @keydown.escape.stop="open = false" @click.outside="open = false" class="relative inline-block text-left">
                 <button
                   @click="open = !open" aria-haspopup="true" x-bind:aria-expanded="open" aria-expanded="true"
@@ -81,11 +71,10 @@
                 </div>
               </div>
             </div> -->
-         </LiveRedirect>
-        </li>
-      {/for}
-    </ul>
-  </div>
-
+            </LiveRedirect>
+          </li>
+        {/for}
+      </ul>
+    </div>
   {/if}
 </div>

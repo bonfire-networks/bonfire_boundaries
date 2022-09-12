@@ -8,6 +8,12 @@ defmodule Bonfire.Boundaries.Web.BlockMenuButtonsLive do
     peered || e(object, :peered, nil) || e(object, :character, :peered, nil)
   end
 
-  def handle_event(action, attrs, socket), do: Bonfire.UI.Common.LiveHandlers.handle_event(action, attrs, socket, __MODULE__)
-
+  def handle_event(action, attrs, socket),
+    do:
+      Bonfire.UI.Common.LiveHandlers.handle_event(
+        action,
+        attrs,
+        socket,
+        __MODULE__
+      )
 end

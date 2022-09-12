@@ -4,32 +4,31 @@
         GA
     </div> -->
     <div class="flex items-center">
-        <div class="flex items-center flex-1 space-x-2 text-xl font-bold text-base-content">
-
-          <div 
-            :if={@parent_back} 
-            phx-click="back"
-            phx-target={@parent_back}
-            class="btn btn-ghost btn-sm btn-circle" > 
-            <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
-          </div>
-
-          <!-- <Icon solid="LockClosed" class="w-6 h-6 text-base-content/80" /> -->
-          <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled boundary" }</div>
+      <div class="flex items-center flex-1 space-x-2 text-xl font-bold text-base-content">
+        <div
+          :if={@parent_back}
+          phx-click="back"
+          phx-target={@parent_back}
+          class="btn btn-ghost btn-sm btn-circle"
+        >
+          <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
         </div>
-        <LivePatch
-          to={"#"}
-          class="text-sm font-medium link">
-          {l "Settings"}
-        </LivePatch>
-        <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
+
+        <!-- <Icon solid="LockClosed" class="w-6 h-6 text-base-content/80" /> -->
+        <div>{e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) ||
+            l("Untitled boundary")}</div>
+      </div>
+      <LivePatch to="#" class="text-sm font-medium link">
+        {l("Settings")}
+      </LivePatch>
+      <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
     </div>
   </div>
 
   <div class="">
-    <div :if={@section=="permissions"}>
+    <div :if={@section == "permissions"}>
       <div class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
-        <div class="text-xs font-semibold uppercase text-base-content/70">{l "Users and circles that belong to this boundary"}</div>
+        <div class="text-xs font-semibold uppercase text-base-content/70">{l("Users and circles that belong to this boundary")}</div>
         <div class="flex items-center mt-3 space-x-2">
           <span class="flex items-center space-x-1 badge-lg badge badge-outline">
             <span class="text-sm">Alice</span>
@@ -38,18 +37,16 @@
         </div>
         <div :if={!@read_only}>
           <div class="flex items-center rounded-lg">
-            <form 
-              class="flex-1"
-              :on-change="add">
-              <div
-                class="flex-1"
-                id={:select_more}
-                phx-hook="InputOrSelectOne"
-                >
-                <input placeholder={l "Add more users or circles"} name="add" class="w-full h-10 mt-3 rounded-full tagify input input-bordered" />
-                <select class="tagify hide ">
+            <form class="flex-1" :on-change="add">
+              <div class="flex-1" id={:select_more} phx-hook="InputOrSelectOne">
+                <input
+                  placeholder={l("Add more users or circles")}
+                  name="add"
+                  class="w-full h-10 mt-3 rounded-full tagify input input-bordered"
+                />
+                <select class="tagify hide">
                   {#for {id, name} <- @suggestions}
-                    <option class="" value={id}>{ name }</option>
+                    <option class="" value={id}>{name}</option>
                   {/for}
                 </select>
               </div>
@@ -58,9 +55,7 @@
         </div>
       </div>
       <div class="grid max-h-[400px] w-full grid-cols-3 gap-3 p-3 overflow-x-auto">
-        <div 
-          :for={{verb_id, grant} <- @verbs} 
-          class="">
+        <div :for={{verb_id, grant} <- @verbs} class="">
           <div class="flex-1 col-span-1 text-sm font-semibold rounded bg-base-200">
             <div class="flex items-center p-2">
               <div class="flex-1">{e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}</div>
@@ -75,13 +70,13 @@
             <span class="flex-1 pr-2 text-sm truncate ellipsis">Alice</span>
             <div class="flex items-center space-x-1">
               <div class="w-[27px] mx-auto text-center">
-                <input type="radio" name="radio-1" class="radio radio-sm" checked />
+                <input type="radio" name="radio-1" class="radio radio-sm" checked>
               </div>
               <div class="w-[27px] mx-auto text-center">
-                <input type="radio" name="radio-1" class="radio radio-sm" />
+                <input type="radio" name="radio-1" class="radio radio-sm">
               </div>
               <div class="w-[27px] mx-auto text-center">
-                <input type="radio" name="radio-1" class="radio radio-sm" />
+                <input type="radio" name="radio-1" class="radio radio-sm">
               </div>
             </div>
           </div>
@@ -89,18 +84,17 @@
             <span class="flex-1 pr-2 text-sm truncate ellipsis">Alice destorsiocantivos</span>
             <div class="flex items-center space-x-1">
               <div class="w-[27px] mx-auto text-center">
-                <input type="radio" name="radio-1" class="radio radio-sm" checked />
+                <input type="radio" name="radio-1" class="radio radio-sm" checked>
               </div>
               <div class="w-[27px] mx-auto text-center">
-                <input type="radio" name="radio-1" class="radio radio-sm" />
+                <input type="radio" name="radio-1" class="radio radio-sm">
               </div>
               <div class="w-[27px] mx-auto text-center">
-                <input type="radio" name="radio-1" class="radio radio-sm" />
+                <input type="radio" name="radio-1" class="radio radio-sm">
               </div>
             </div>
           </div>
         </div>
-        
       </div>
       <!-- <div class="flex justify-end p-2 bg-base-200">
         <button 
@@ -111,21 +105,14 @@
         </button>
       </div> -->
     </div>
-    <section
-      :if={@section=="settings"}
-      class="p-4"
-    >
-    test
+    <section :if={@section == "settings"} class="p-4">
+      test
     </section>
   </div>
 
-
-<style>
-.switch-toggle input:checked ~ span {
-  border: 2px solid orange;
-}
-</style>
-
-
+  <style>
+    .switch-toggle input:checked ~ span {
+    border: 2px solid orange;
+    }
+  </style>
 </div>
-

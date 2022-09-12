@@ -5,5 +5,4 @@ defmodule Bonfire.Boundaries.Web.CirclePreviewLive do
   prop members, :list
   prop count, :integer, default: nil
   prop size, :integer, default: 12
-
 end

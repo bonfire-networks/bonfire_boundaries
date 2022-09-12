@@ -1,7 +1,11 @@
 defmodule Bonfire.Boundaries.Migrations do
-
   # alias Bonfire.Boundaries.Verbs
-  alias Bonfire.Data.AccessControl.{Circle, Controlled, Encircle, Grant, Verb}
+  alias Bonfire.Data.AccessControl.Circle
+  alias Bonfire.Data.AccessControl.Controlled
+  alias Bonfire.Data.AccessControl.Encircle
+  alias Bonfire.Data.AccessControl.Grant
+  alias Bonfire.Data.AccessControl.Verb
+
   alias Pointers.Pointer
 
   @create_add_perms """
@@ -33,12 +37,12 @@ defmodule Bonfire.Boundaries.Migrations do
     Ecto.Migration.execute(@create_agg_perms, @drop_add_perms)
   end
 
-  @circle_table     Circle.__schema__(:source)
+  @circle_table Circle.__schema__(:source)
   @controlled_table Controlled.__schema__(:source)
-  @encircle_table   Encircle.__schema__(:source)
-  @grant_table      Grant.__schema__(:source)
-  @pointer_table    Pointer.__schema__(:source)
-  @verb_table       Verb.__schema__(:source)
+  @encircle_table Encircle.__schema__(:source)
+  @grant_table Grant.__schema__(:source)
+  @pointer_table Pointer.__schema__(:source)
+  @verb_table Verb.__schema__(:source)
 
   @create_summary_view """
   create or replace view bonfire_boundaries_summary as
@@ -80,14 +84,15 @@ defmodule Bonfire.Boundaries.Migrations do
       require Bonfire.Data.AccessControl.Verb.Migration
       require Bonfire.Boundaries.Stereotyped.Migration
 
-
       Bonfire.Data.AccessControl.Acl.Migration.migrate_acl()
       Bonfire.Data.AccessControl.Circle.Migration.migrate_circle()
       Bonfire.Data.AccessControl.Controlled.Migration.migrate_controlled()
       Bonfire.Data.AccessControl.Encircle.Migration.migrate_encircle()
       Bonfire.Data.AccessControl.Verb.Migration.migrate_verb()
       Bonfire.Data.AccessControl.Grant.Migration.migrate_grant()
+
       Bonfire.Data.AccessControl.InstanceAdmin.Migration.migrate_instance_admin()
+
       Bonfire.Boundaries.Stereotyped.Migration.migrate_stereotype()
 
       Ecto.Migration.flush()
@@ -112,7 +117,9 @@ defmodule Bonfire.Boundaries.Migrations do
       Bonfire.Boundaries.Migrations.migrate_functions()
 
       Bonfire.Boundaries.Stereotyped.Migration.migrate_stereotype()
+
       Bonfire.Data.AccessControl.InstanceAdmin.Migration.migrate_instance_admin()
+
       Bonfire.Data.AccessControl.Grant.Migration.migrate_grant()
       Bonfire.Data.AccessControl.Verb.Migration.migrate_verb()
       Bonfire.Data.AccessControl.Encircle.Migration.migrate_encircle()
@@ -122,7 +129,6 @@ defmodule Bonfire.Boundaries.Migrations do
     end
   end
 
-
   defmacro migrate_boundaries() do
     quote do
       if Ecto.Migration.direction() == :up,
@@ -130,6 +136,7 @@ defmodule Bonfire.Boundaries.Migrations do
         else: unquote(mb(:down))
     end
   end
+
   defmacro migrate_boundaries(dir), do: mb(dir)
 
   # retrieves a ULID in UUID format
@@ -142,5 +149,4 @@ defmodule Bonfire.Boundaries.Migrations do
   #     |> Pointers.ULID.dump()
   #   Pointers.UUID.cast!(id)
   # end
-
 end

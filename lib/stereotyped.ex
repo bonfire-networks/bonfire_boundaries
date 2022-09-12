@@ -12,7 +12,7 @@ defmodule Bonfire.Boundaries.Stereotyped do
   alias Pointers.Pointer
 
   mixin_schema do
-    belongs_to :stereotype, Pointer
+    belongs_to(:stereotype, Pointer)
   end
 
   def changeset(stereotype \\ %Stereotyped{}, params) do
@@ -28,10 +28,9 @@ defmodule Bonfire.Boundaries.Stereotyped do
       do: changeset,
       else: Changeset.apply_action(changeset, :ignore)
   end
-
 end
-defmodule Bonfire.Boundaries.Stereotyped.Migration do
 
+defmodule Bonfire.Boundaries.Stereotyped.Migration do
   use Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Boundaries.Stereotyped
@@ -43,16 +42,23 @@ defmodule Bonfire.Boundaries.Stereotyped.Migration do
   defp make_stereotype_table(exprs) do
     quote do
       require Pointers.Migration
-      Pointers.Migration.create_mixin_table(Bonfire.Boundaries.Stereotyped) do
-        Ecto.Migration.add :stereotype_id,
-          Pointers.Migration.strong_pointer(), null: false
+
+      Pointers.Migration.create_mixin_table Bonfire.Boundaries.Stereotyped do
+        Ecto.Migration.add(
+          :stereotype_id,
+          Pointers.Migration.strong_pointer(),
+          null: false
+        )
+
         unquote_splicing(exprs)
       end
     end
   end
 
   defmacro create_stereotype_table(), do: make_stereotype_table([])
-  defmacro create_stereotype_table([do: {_, _, body}]), do: make_stereotype_table(body)
+
+  defmacro create_stereotype_table(do: {_, _, body}),
+    do: make_stereotype_table(body)
 
   # drop_stereotype_table/0
 
@@ -63,18 +69,23 @@ defmodule Bonfire.Boundaries.Stereotyped.Migration do
   defp make_stereotype_stereotype_index(opts) do
     quote do
       Ecto.Migration.create_if_not_exists(
-        Ecto.Migration.index(unquote(@stereotype_table), [:stereotype_id], unquote(opts))
+        Ecto.Migration.index(
+          unquote(@stereotype_table),
+          [:stereotype_id],
+          unquote(opts)
+        )
       )
     end
   end
 
   defmacro create_stereotype_stereotype_index(opts \\ [])
-  defmacro create_stereotype_stereotype_index(opts), do: make_stereotype_stereotype_index(opts)
+
+  defmacro create_stereotype_stereotype_index(opts),
+    do: make_stereotype_stereotype_index(opts)
 
   def drop_stereotype_stereotype_index(opts \\ []) do
     drop_if_exists(index(@stereotype_table, [:stereotype_id], opts))
   end
-
 
   # migrate_stereotype/{0,1}
 
@@ -84,6 +95,7 @@ defmodule Bonfire.Boundaries.Stereotyped.Migration do
       unquote(make_stereotype_stereotype_index([]))
     end
   end
+
   defp ms(:down) do
     quote do
       Bonfire.Boundaries.Stereotyped.Migration.drop_stereotype_stereotype_index()
@@ -98,6 +110,6 @@ defmodule Bonfire.Boundaries.Stereotyped.Migration do
         else: unquote(ms(:down))
     end
   end
-  defmacro migrate_stereotype(dir), do: ms(dir)
 
+  defmacro migrate_stereotype(dir), do: ms(dir)
 end

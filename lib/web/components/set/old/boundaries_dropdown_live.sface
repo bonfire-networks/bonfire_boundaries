@@ -3,7 +3,7 @@
   type="hidden" 
   x-text="to_boundaries" /> -->
 
-<div 
+<div
   class={
     "p-1 dropdown",
     "dropdown-top": @thread_mode == :flat
@@ -11,110 +11,107 @@
   x-data={"{
     to_boundaries: ['#{if is_messaging?(%{showing_within: @showing_within, create_activity_type: @create_activity_type}), do: "message", else: "public"}'],
     to_boundaries_names: ['#{if is_messaging?(%{showing_within: @showing_within, create_activity_type: @create_activity_type}), do: "Message", else: "Public"}'], 
-  }"}>
-
-  <label
-    tabindex="0"
-    class="flex items-center focus:outline-none"
-    >
-     
-    <div :if={not is_list(@to_boundaries) || length(@to_boundaries)==0}>
+  }"}
+>
+  <label tabindex="0" class="flex items-center focus:outline-none">
+    <div :if={not is_list(@to_boundaries) || length(@to_boundaries) == 0}>
       <div
         x-show="to_boundaries.length==0 || (to_boundaries.length==1 && to_boundaries[0] == 'public')"
         style="display: none"
-        class="font-normal normal-case btn btn-ghost btn-xs" 
+        class="font-normal normal-case btn btn-ghost btn-xs"
       >
-        <Icon solid="Globe" class="w-4 h-4 text-base-content text-opacity-70"/>
+        <Icon solid="Globe" class="w-4 h-4 text-base-content text-opacity-70" />
       </div>
-      <div 
+      <div
         x-show="to_boundaries.length==1 && to_boundaries[0] == 'local'"
         style="display: none"
-        class="font-normal normal-case btn btn-ghost btn-xs" >
-        <Icon solid="LocationMarker" class="w-4 h-4 text-base-content text-opacity-70"/>
+        class="font-normal normal-case btn btn-ghost btn-xs"
+      >
+        <Icon solid="LocationMarker" class="w-4 h-4 text-base-content text-opacity-70" />
       </div>
-      <div 
+      <div
         x-show="to_boundaries.length==1 && to_boundaries[0] == 'mentions'"
         style="display: none"
-        class="font-normal normal-case btn btn-ghost btn-xs" >
-        <Icon solid="AtSymbol" class="w-4 h-4 text-base-content text-opacity-70"/>
+        class="font-normal normal-case btn btn-ghost btn-xs"
+      >
+        <Icon solid="AtSymbol" class="w-4 h-4 text-base-content text-opacity-70" />
       </div>
-      <div 
+      <div
         x-show="to_boundaries.length==1 && to_boundaries[0] == 'message'"
         style="display: none"
-        class="font-normal normal-case btn btn-ghost btn-xs" >
-        <Icon solid="Chat-alt-2" class="w-4 h-4 text-base-content text-opacity-70"/>
+        class="font-normal normal-case btn btn-ghost btn-xs"
+      >
+        <Icon solid="Chat-alt-2" class="w-4 h-4 text-base-content text-opacity-70" />
       </div>
     </div>
 
-    <div 
-    class="font-normal normal-case btn btn-ghost btn-sm" >
-      
+    <div class="font-normal normal-case btn btn-ghost btn-sm">
       <span :for={{id, _name} <- @to_boundaries || [{l("Public"), "public"}]}>
-        <input 
-          name="to_boundaries[]"
-          value={id}
-          type="hidden" />
+        <input name="to_boundaries[]" value={id} type="hidden">
       </span>
 
       <template x-for="name in to_boundaries_names">
         <span x-text="name" class="text-sm badge badge-outline">
-          
         </span>
       </template>
       <template x-for="id in to_boundaries">
-        <input 
-          name="to_boundaries[]"
-          x-model="id"
-          type="hidden" />
+        <input name="to_boundaries[]" x-model="id" type="hidden">
       </template>
-
     </div>
-  </label> 
+  </label>
 
   <div
     tabindex="0"
     class="rounded shadow w-52 menu dropdown-content bg-neutral-content"
     role="menu"
     aria-orientation="vertical"
-    aria-labelledby="user-profile-menu">
-      <div x-show="to_boundaries != ['message']">
-      <div 
-      @click="to_boundaries = ['public']; to_boundaries_names = ['Public']; open_boundaries = false;" 
-      class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-neutral rounded-t-md hover:bg-neutral hover:bg-opacity-30 ">
-        <Icon solid="Globe"/>
+    aria-labelledby="user-profile-menu"
+  >
+    <div x-show="to_boundaries != ['message']">
+      <div
+        @click="to_boundaries = ['public']; to_boundaries_names = ['Public']; open_boundaries = false;"
+        class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-neutral rounded-t-md hover:bg-neutral hover:bg-opacity-30"
+      >
+        <Icon solid="Globe" />
         <div class="flex-1">
-          <div class="text-sm font-medium text-neutral text-opacity-80">{l "Public"}</div>
-          <p class="text-xs text-neutral text-opacity-80">{l "Publicly visible to everyone on the fediverse and in search engines"}</p>
+          <div class="text-sm font-medium text-neutral text-opacity-80">{l("Public")}</div>
+          <p class="text-xs text-neutral text-opacity-80">{l("Publicly visible to everyone on the fediverse and in search engines")}</p>
         </div>
       </div>
-      <div @click="to_boundaries = ['local']; to_boundaries_names = ['Local']; open_boundaries = false;" class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
-        <Icon solid="LocationMarker"/>
+      <div
+        @click="to_boundaries = ['local']; to_boundaries_names = ['Local']; open_boundaries = false;"
+        class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30"
+      >
+        <Icon solid="LocationMarker" />
         <div class="flex-1">
-          <div class="text-sm font-medium text-neutral text-opacity-80">{l "Local Instance"}</div>
-          <p class="text-xs text-neutral text-opacity-80">{l "Visible to all members of this instance"}</p>
+          <div class="text-sm font-medium text-neutral text-opacity-80">{l("Local Instance")}</div>
+          <p class="text-xs text-neutral text-opacity-80">{l("Visible to all members of this instance")}</p>
         </div>
       </div>
-      <div 
-        @click="to_boundaries = ['mentions']; to_boundaries_names = ['Mentions']; open_boundaries = false;" 
-        class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
-        <Icon solid="AtSymbol"/> 
+      <div
+        @click="to_boundaries = ['mentions']; to_boundaries_names = ['Mentions']; open_boundaries = false;"
+        class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30"
+      >
+        <Icon solid="AtSymbol" />
         <div class="flex-1">
-          <div class="text-sm font-medium text-neutral text-opacity-80">{l "Mentions"}</div>
-          <p class="text-xs text-neutral text-opacity-80">{l "Visible only to those mentioned, across the fediverse"}</p>
-          </div>
+          <div class="text-sm font-medium text-neutral text-opacity-80">{l("Mentions")}</div>
+          <p class="text-xs text-neutral text-opacity-80">{l("Visible only to those mentioned, across the fediverse")}</p>
         </div>
       </div>
-      <div x-show="to_boundaries.length==1 && to_boundaries[0] == 'message'" class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30 ">
-        <Icon solid="Chat-alt-2"/> 
-        <div class="flex-1">
-        <div class="text-sm font-medium text-neutral text-opacity-80">{l "Message"}</div>
-        <p class="text-xs text-neutral text-opacity-80">{l "Visible only to people included in this message thread:"} 
-        {#for {name, _id} <- e(@to_circles, [])}
-          <span class="text-xs badge">{name}</span>
-        {/for}
+    </div>
+    <div
+      x-show="to_boundaries.length==1 && to_boundaries[0] == 'message'"
+      class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30"
+    >
+      <Icon solid="Chat-alt-2" />
+      <div class="flex-1">
+        <div class="text-sm font-medium text-neutral text-opacity-80">{l("Message")}</div>
+        <p class="text-xs text-neutral text-opacity-80">{l("Visible only to people included in this message thread:")}
+          {#for {name, _id} <- e(@to_circles, [])}
+            <span class="text-xs badge">{name}</span>
+          {/for}
         </p>
-        </div>
       </div>
-      
+    </div>
   </div>
 </div>

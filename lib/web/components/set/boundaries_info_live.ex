@@ -3,5 +3,4 @@ defmodule Bonfire.Boundaries.Web.BoundariesInfoLive do
 
   prop to_boundaries, :list, default: []
   prop activity_type_or_reply, :any
-
 end

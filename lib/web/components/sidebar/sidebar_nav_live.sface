@@ -5,66 +5,89 @@
   </span>
 </li> -->
 
-<li
+<li>
+  <LivePatch
+    to="/boundaries/circles"
+    class={
+      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
+      "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "circles"
+    }
   >
-  <LivePatch 
-    to={"/boundaries/circles"}
-    class={"flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",  "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "circles"}>
     <Icon iconify="bx:ShapeCircle" class="inline-block w-5 h-5 mr-2" />
-    {l "Circles"}
+    {l("Circles")}
   </LivePatch>
 </li>
 
-<li
+<li>
+  <LivePatch
+    to="/boundaries/acls"
+    class={
+      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
+      "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "acls"
+    }
   >
-  <LivePatch 
-    to={"/boundaries/acls"}
-    class={"flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",  "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "acls"}>
-    <Icon solid="LockClosed" class={"mr-2 w-4 h-4 text-base-content/80", "!text-primary": @selected_tab == "acls"} />
-    {l "Boundaries"}
-  </LivePatch>
-</li>
-
-
-
-<li class="!mt-1  menu-title">
-  <span class="!text-base !font-medium capitalize">
-    {l "Safety"}
-  </span>
-</li>
-
-
-<li>
-  <LivePatch 
-    to={"/boundaries/ghosted"}
-    class={"flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",  "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "ghosted"}>
-    <Icon solid="MinusCircle" class={"inline-block w-4 h-4 mr-2 stroke-current", "!text-primary": @selected_tab == "ghosted"} />
-    {l "Ghosted"}
-  </LivePatch>
-</li>
-<li>
-  <LivePatch 
-    to={"/boundaries/silenced"}
-    class={"flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",  "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "silenced"}>
-    <Icon solid="VolumeOff" class={"inline-block w-4 h-4 mr-2 stroke-current", "!text-primary": @selected_tab == "silenced"} />
-    {l "Silenced"}
+    <Icon
+      solid="LockClosed"
+      class={"mr-2 w-4 h-4 text-base-content/80", "!text-primary": @selected_tab == "acls"}
+    />
+    {l("Boundaries")}
   </LivePatch>
 </li>
 
 <li class="!mt-1  menu-title">
   <span class="!text-base !font-medium capitalize">
-    {l "Instance"}
+    {l("Safety")}
   </span>
 </li>
 
-<li
-  :if={Bonfire.Boundaries.can?(@__context__, :appoint, :instance)}
+<li>
+  <LivePatch
+    to="/boundaries/ghosted"
+    class={
+      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
+      "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "ghosted"
+    }
   >
-  <LivePatch 
-    to={"/boundaries/instance_circles"}
-    class={"flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",  "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "instance_circles"}>
+    <Icon
+      solid="MinusCircle"
+      class={"inline-block w-4 h-4 mr-2 stroke-current", "!text-primary": @selected_tab == "ghosted"}
+    />
+    {l("Ghosted")}
+  </LivePatch>
+</li>
+<li>
+  <LivePatch
+    to="/boundaries/silenced"
+    class={
+      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
+      "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "silenced"
+    }
+  >
+    <Icon
+      solid="VolumeOff"
+      class={"inline-block w-4 h-4 mr-2 stroke-current", "!text-primary": @selected_tab == "silenced"}
+    />
+    {l("Silenced")}
+  </LivePatch>
+</li>
+
+<li class="!mt-1  menu-title">
+  <span class="!text-base !font-medium capitalize">
+    {l("Instance")}
+  </span>
+</li>
+
+<li :if={Bonfire.Boundaries.can?(@__context__, :appoint, :instance)}>
+  <LivePatch
+    to="/boundaries/instance_circles"
+    class={
+      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
+      "!text-primary hover:!border-current border-current font-semibold":
+        @selected_tab == "instance_circles"
+    }
+  >
     <Icon iconify="bx:ShapeCircle" class="inline-block w-5 h-5 mr-2" />
-    {l "Instance Roles / Circles"}
+    {l("Instance Roles / Circles")}
   </LivePatch>
 </li>
 
@@ -80,28 +103,51 @@
 </li> -->
 
 <li>
-  <LivePatch 
-    to={"/boundaries/acl/01SETT1NGSF0R10CA11NSTANCE"}
-    class={"flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",  "!text-primary hover:!border-current border-current font-semibold": @id == "01SETT1NGSF0R10CA11NSTANCE"}>
-    <Icon iconify="bxs:EditLocation" class={"mr-2 w-4 h-4 text-base-content/80", "!text-primary": @selected_tab == "feed"} />
-    {l "Instance Boundaries"}
+  <LivePatch
+    to="/boundaries/acl/01SETT1NGSF0R10CA11NSTANCE"
+    class={
+      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
+      "!text-primary hover:!border-current border-current font-semibold":
+        @id == "01SETT1NGSF0R10CA11NSTANCE"
+    }
+  >
+    <Icon
+      iconify="bxs:EditLocation"
+      class={"mr-2 w-4 h-4 text-base-content/80", "!text-primary": @selected_tab == "feed"}
+    />
+    {l("Instance Boundaries")}
   </LivePatch>
 </li>
 
 <li :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)}>
-  <LivePatch 
-    to={"/boundaries/instance_ghosted"}
-    class={"flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",  "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "instance_ghosted"}>
-    <Icon solid="MinusCircle" class={"inline-block w-4 h-4 mr-2 stroke-current", "!text-primary": @selected_tab == "extensions"} />
-    {l "Ghosted instance-wide"}
+  <LivePatch
+    to="/boundaries/instance_ghosted"
+    class={
+      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
+      "!text-primary hover:!border-current border-current font-semibold":
+        @selected_tab == "instance_ghosted"
+    }
+  >
+    <Icon
+      solid="MinusCircle"
+      class={"inline-block w-4 h-4 mr-2 stroke-current", "!text-primary": @selected_tab == "extensions"}
+    />
+    {l("Ghosted instance-wide")}
   </LivePatch>
 </li>
 <li :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)}>
-  <LivePatch 
-    to={"/boundaries/instance_silenced"}
-    class={"flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",  "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "instance_silenced"}>
-    <Icon solid="VolumeOff" class={"inline-block w-4 h-4 mr-2 stroke-current", "!text-primary": @selected_tab == "extensions"} />
-    {l "Silenced instance-wide"}
+  <LivePatch
+    to="/boundaries/instance_silenced"
+    class={
+      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
+      "!text-primary hover:!border-current border-current font-semibold":
+        @selected_tab == "instance_silenced"
+    }
+  >
+    <Icon
+      solid="VolumeOff"
+      class={"inline-block w-4 h-4 mr-2 stroke-current", "!text-primary": @selected_tab == "extensions"}
+    />
+    {l("Silenced instance-wide")}
   </LivePatch>
 </li>
-

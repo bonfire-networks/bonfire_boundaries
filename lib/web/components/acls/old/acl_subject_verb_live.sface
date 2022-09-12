@@ -4,32 +4,31 @@
         GA
     </div> -->
     <div class="flex items-center">
-        <div class="flex items-center flex-1 space-x-2 text-xl font-bold text-base-content">
-
-          <div 
-            :if={@parent_back} 
-            phx-click="back"
-            phx-target={@parent_back}
-            class="btn btn-ghost btn-sm btn-circle" > 
-            <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
-          </div>
-
-          <!-- <Icon solid="LockClosed" class="w-6 h-6 text-base-content/80" /> -->
-          <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled boundary" }</div>
+      <div class="flex items-center flex-1 space-x-2 text-xl font-bold text-base-content">
+        <div
+          :if={@parent_back}
+          phx-click="back"
+          phx-target={@parent_back}
+          class="btn btn-ghost btn-sm btn-circle"
+        >
+          <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
         </div>
-        <LivePatch
-          to={"#"}
-          class="text-sm font-medium link">
-          {l "Settings"}
-        </LivePatch>
-        <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
+
+        <!-- <Icon solid="LockClosed" class="w-6 h-6 text-base-content/80" /> -->
+        <div>{e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) ||
+            l("Untitled boundary")}</div>
+      </div>
+      <LivePatch to="#" class="text-sm font-medium link">
+        {l("Settings")}
+      </LivePatch>
+      <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
     </div>
   </div>
 
   <div class="">
-    <div :if={@section=="permissions"}>
+    <div :if={@section == "permissions"}>
       <div class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
-        <div class="text-xs font-semibold uppercase text-base-content/70">{l "Users and circles that belong to this boundary"}</div>
+        <div class="text-xs font-semibold uppercase text-base-content/70">{l("Users and circles that belong to this boundary")}</div>
         <div class="flex items-center mt-3 space-x-2">
           <span class="flex items-center space-x-1 badge-lg badge badge-outline">
             <span class="text-sm">Alice</span>
@@ -38,18 +37,16 @@
         </div>
         <div :if={!@read_only}>
           <div class="flex items-center rounded-lg">
-            <form 
-              class="flex-1"
-              :on-change="add">
-              <div
-                class="flex-1"
-                id={:select_more_verb}
-                phx-hook="InputOrSelectOne"
-                >
-                <input placeholder={l "Add more users or circles"} name="add" class="w-full h-10 mt-3 rounded-full tagify input input-bordered" />
-                <select class="tagify hide ">
+            <form class="flex-1" :on-change="add">
+              <div class="flex-1" id={:select_more_verb} phx-hook="InputOrSelectOne">
+                <input
+                  placeholder={l("Add more users or circles")}
+                  name="add"
+                  class="w-full h-10 mt-3 rounded-full tagify input input-bordered"
+                />
+                <select class="tagify hide">
                   {#for {id, name} <- @suggestions}
-                    <option class="" value={id}>{ name }</option>
+                    <option class="" value={id}>{name}</option>
                   {/for}
                 </select>
               </div>
@@ -58,18 +55,26 @@
         </div>
       </div>
       <div class="grid max-h-[400px] w-full grid-cols-3 gap-3 p-3 overflow-x-auto">
-        
-        <div 
-          x-data={"{active: #{Enum.count(e(l, :verb_grants, %{}))<1}}"}
+        <div
+          x-data={"{active: #{Enum.count(e(l, :verb_grants, %{})) < 1}}"}
           role="region"
-          :for={{id, l} <- e(@list, [])} class="p-4 pb-2">
-          <div 
+          :for={{id, l} <- e(@list, [])}
+          class="p-4 pb-2"
+        >
+          <div
             :class="!active ? '!border-b !rounded-b' : ''"
-            class="flex p-3 space-x-5 border border-b-0 rounded rounded-b-none items-top border-base-content/30">
+            class="flex p-3 space-x-5 border border-b-0 rounded rounded-b-none items-top border-base-content/30"
+          >
             <div class="flex flex-col flex-1">
               <div class="flex items-center flex-1 space-x-2">
-                <Bonfire.UI.Common.AvatarLive :if={e(l, :subject, :profile, :id, nil)} user={e(l, :subject, nil)} />
-                <div class="font-bold">{e(l, :subject, :named, :name, nil) || e(l, :subject, :stereotyped, :named, :name, nil) || e(l, :subject, :profile, :name, nil) || e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
+                <Bonfire.UI.Common.AvatarLive
+                  :if={e(l, :subject, :profile, :id, nil)}
+                  user={e(l, :subject, nil)}
+                />
+                <div class="font-bold">{e(l, :subject, :named, :name, nil) ||
+                    e(l, :subject, :stereotyped, :named, :name, nil) ||
+                    e(l, :subject, :profile, :name, nil) ||
+                    e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
               </div>
               <div class="flex flex-wrap gap-2 mt-2" x-show="!active">
                 {#for verb <- can(e(l, :verb_grants, %{}))}
@@ -77,91 +82,86 @@
                     <Icon outline="Check" class="w-4 h-4 mr-1" />
                     {verb}</span>
                 {/for}
-                  {#for verb <- cannot(e(l, :verb_grants, %{}))}
+                {#for verb <- cannot(e(l, :verb_grants, %{}))}
                   <span class="badge badge-error">
                     <Icon outline="X" class="w-4 h-4 mr-1" />
                     {verb}</span>
                 {/for}
               </div>
             </div>
-            <button 
+            <button
               type="button"
               x-on:click="active = ! active"
               :aria-expanded="active"
-              class="normal-case btn btn-outline btn-sm">
-              <span x-show="!active">{l "Edit permissions"}</span>
-              <span x-show="active">{l "Hide details"}</span>
+              class="normal-case btn btn-outline btn-sm"
+            >
+              <span x-show="!active">{l("Edit permissions")}</span>
+              <span x-show="active">{l("Hide details")}</span>
               <span x-show="active" aria-hidden="true" class="ml-2">&minus;</span>
               <span x-show="!active" aria-hidden="true" class="ml-2">&plus;</span>
             </button>
-
-            
-
           </div>
 
-
-          <div 
-            x-show="active" 
+          <div
+            x-show="active"
             x-collapse
-            class="border divide-y rounded rounded-t-none border-base-content/30 divide-base-content/30">
-            <div :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :verb_grants, %{}))} class="flex items-center p-3 space-x-3 ">
+            class="border divide-y rounded rounded-t-none border-base-content/30 divide-base-content/30"
+          >
+            <div
+              :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :verb_grants, %{}))}
+              class="flex items-center p-3 space-x-3"
+            >
               <div class="flex-1 text-base font-semibold">
                 {e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}
               </div>
               <div class="flex items-center space-x-3 switch-toggle">
-              <form :on-change="edit_grant">
+                <form :on-change="edit_grant">
+                  <label>
+                    <input
+                      class="absolute opacity-0"
+                      name={"subject[#{id}][#{verb_id}]"}
+                      type="radio"
+                      value="1"
+                      checked={Map.get(grant, :value, nil) == true}
+                      disabled={@read_only}
+                    />
+                    <span class={"btn btn-sm btn-circle btn-ghost", "btn-disabled": @read_only}>
+                      👍
+                    </span>
+                  </label>
 
-                <label>
-                  <input 
-                  class="absolute opacity-0" 
-                  name={"subject[#{id}][#{verb_id}]"} 
-                  type="radio" 
-                  value="1"
-                  checked={Map.get(grant, :value, nil)==true} 
-                  disabled={@read_only} />
-                  <span 
-                    class={"btn btn-sm btn-circle btn-ghost",
-                    "btn-disabled": @read_only}>
-                    👍
-                  </span>
-                </label>
+                  <label>
+                    <input
+                      class="absolute opacity-0"
+                      name={"subject[#{id}][#{verb_id}]"}
+                      type="radio"
+                      value=""
+                      checked={is_nil(Map.get(grant, :value, nil))}
+                      disabled={@read_only}
+                    />
+                    <span class={"btn btn-sm btn-circle btn-ghost", "btn-disabled": @read_only}>
+                      🤔
+                    </span>
+                  </label>
 
-                <label>
-                  <input 
-                  class="absolute opacity-0" 
-                  name={"subject[#{id}][#{verb_id}]"} 
-                  type="radio" 
-                  value=""
-                  checked={is_nil(Map.get(grant, :value, nil))} 
-                  disabled={@read_only} />
-                  <span 
-                    class={"btn btn-sm btn-circle btn-ghost",
-                    "btn-disabled": @read_only}>
-                    🤔
-                  </span>
-                </label>
-                
-                <label>
-                  <input 
-                  class="absolute opacity-0" 
-                  name={"subject[#{id}][#{verb_id}]"} 
-                  type="radio" 
-                  value="0"
-                  checked={Map.get(grant, :value, nil)==false} 
-                  disabled={@read_only} />
-                  <span 
-                    class={"btn btn-sm btn-circle btn-ghost",
-                    "btn-disabled": @read_only}>
-                    👎
-                  </span>
-                </label>
-
-              </form>
+                  <label>
+                    <input
+                      class="absolute opacity-0"
+                      name={"subject[#{id}][#{verb_id}]"}
+                      type="radio"
+                      value="0"
+                      checked={Map.get(grant, :value, nil) == false}
+                      disabled={@read_only}
+                    />
+                    <span class={"btn btn-sm btn-circle btn-ghost", "btn-disabled": @read_only}>
+                      👎
+                    </span>
+                  </label>
+                </form>
               </div>
             </div>
           </div>
         </div>
-        
       </div>
       <!-- <div class="flex justify-end p-2 bg-base-200">
         <button 
@@ -172,21 +172,14 @@
         </button>
       </div> -->
     </div>
-    <section
-      :if={@section=="settings"}
-      class="p-4"
-    >
-    test
+    <section :if={@section == "settings"} class="p-4">
+      test
     </section>
   </div>
 
-
-<style>
-.switch-toggle input:checked ~ span {
-  border: 2px solid orange;
-}
-</style>
-
-
+  <style>
+    .switch-toggle input:checked ~ span {
+    border: 2px solid orange;
+    }
+  </style>
 </div>
-

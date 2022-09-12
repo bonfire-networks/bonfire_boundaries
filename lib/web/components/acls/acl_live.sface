@@ -1,87 +1,81 @@
-
 <div>
-
-{#if @section=="new_circle"}
-
-  <Bonfire.Boundaries.Web.NewCircleLive
-    
-    parent_back={@myself}
-    event_target={@myself}
-    setting_boundaries={@setting_boundaries}
-  />
-
-{#elseif @edit_circle_id}
-
-  <Bonfire.Boundaries.Web.CircleLive
-    id={@edit_circle_id} 
-    circle_id={@edit_circle_id} 
-    
-    parent_back={@myself}
-    setting_boundaries={@setting_boundaries}
-  />
-
-{#else}
-
-  <div class="p-3">
-
-    <div class="flex items-center">
+  {#if @section == "new_circle"}
+    <Bonfire.Boundaries.Web.NewCircleLive
+      parent_back={@myself}
+      event_target={@myself}
+      setting_boundaries={@setting_boundaries}
+    />
+  {#elseif @edit_circle_id}
+    <Bonfire.Boundaries.Web.CircleLive
+      id={@edit_circle_id}
+      circle_id={@edit_circle_id}
+      parent_back={@myself}
+      setting_boundaries={@setting_boundaries}
+    />
+  {#else}
+    <div class="p-3">
+      <div class="flex items-center">
         <div class="flex items-center flex-1 space-x-2 text-xl font-bold text-base-content">
-
-          <div 
-            :if={@parent_back} 
+          <div
+            :if={@parent_back}
             phx-click="back"
             phx-target={@parent_back}
             @click="show_boundary_list = true"
-            class="btn btn-ghost btn-sm btn-circle" > 
+            class="btn btn-ghost btn-sm btn-circle"
+          >
             <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
           </div>
 
           <div class="flex space-x-2 items-top">
             <span class="text-xl" aria-label="boundary icon">{e(@acl, :extra_info, :info, :icon, "🛡")}</span>
             <div class="">
-              <div>{ e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) || l "Untitled boundary" }</div>
+              <div>{e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) ||
+                  l("Untitled boundary")}</div>
               <div class="text-sm font-normal text-base-content/80">{e(@acl, :extra_info, :summary, nil)}</div>
             </div>
           </div>
         </div>
-        <div 
-          :if={@section !="settings" and !@read_only and !@setting_boundaries}
+        <div
+          :if={@section != "settings" and !@read_only and !@setting_boundaries}
           href={"/settings/acl/#{ulid(@acl)}/settings"}
-          phx-click="assign" 
+          phx-click="assign"
           phx-value-section="settings"
           phx-target={@myself}
-          class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost">
+          class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
+        >
           <Icon outline="Cog" class="w-4 h-4" />
-          <span>{l "Settings"}</span>
+          <span>{l("Settings")}</span>
         </div>
 
         <div
-          :if={@section=="settings"}
+          :if={@section == "settings"}
           to={"/settings/acl/#{ulid(@acl)}"}
-          phx-click="assign" 
+          phx-click="assign"
           phx-value-section="permissions"
           phx-target={@myself}
-          class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost">
+          class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
+        >
           <Icon outline="ChevronLeft" class="w-4 h-4" />
-          <span>{l "Back"}</span>
+          <span>{l("Back")}</span>
         </div>
         <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
+      </div>
     </div>
-  </div>
 
-  <div class="">
-    <div :if={@section !="settings"}>
-      <div :if={!@read_only} class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
-        <div class="flex items-center px-2 space-x-9">
-          <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l "People and circles in this boundary"}</h2>
-          <div 
-            :on-click="assign"
-            phx-value-section="new_circle"
-            class="normal-case btn btn-secondary btn-sm" >
-            {l "Define a new circle"}
+    <div class="">
+      <div :if={@section != "settings"}>
+        <div :if={!@read_only} class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
+          <div class="flex items-center px-2 space-x-9">
+            <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("People and circles in this boundary")}</h2>
+            <div
+              :on-click="assign"
+              phx-value-section="new_circle"
+              class="normal-case btn btn-secondary btn-sm"
+            >
+              {l("Define a new circle")}
+            </div>
           </div>
-        </div>
-        <!-- <div class="flex items-center mt-3 space-x-2">
+          <!-- <div class="flex items-center mt-3 space-x-2">
           <span 
             :for={subject <- @subjects}
             class="inline-flex rounded-full items-center py-0.5 pl-2.5 pr-1 text-sm font-medium bg-info text-info-content">
@@ -97,148 +91,126 @@
           </span>
         </div> -->
 
-        <div>
-          <div class="flex items-center mt-3">
-            <div 
-              class="flex-1"
-              >
-              <div
-                class="flex-1"
-                id={:select_more_acl}
-                phx-update="ignore"
-                phx-hook="InputOrSelectOne"
-                >
-                <input 
-                  value={predefined_subjects(@subjects)}
-                  placeholder={l "Add more users or circles"} 
-                  name="add" 
-                  id="acl_tagify"
-                  class="w-full border tagify--outside tagify !border-base-content/10" />
-                <select class="tagify hide">
-                  {#for {id, name} <- @suggestions}
-                    <option class="" value={id}>{ name }</option>
-                  {/for}
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div 
-        :if={Enum.count(e(@subjects, []))>0}
-        class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}>
-
-        {#for {{verb_id, l}, i} <- Enum.with_index(e(@list, []))}   
-        <div class={"col-span-1 border border-base-content/30 rounded bg-base-200"}>
-
-          <div class={"flex-1 text-sm font-semibold rounded "}>
-            <div class="flex items-center p-2 space-x-2">
-
-              {#case Bonfire.Boundaries.Verbs.get(verb_id)}
-                {#match nil}
-                {#match verb}
-                <span class="tooltip" data-tip={e(verb, :summary, nil)}>
-                  <Icon
-                    iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
-                    class="w-4 h-4"
-                    fill={"currentColor"}
-                  />
-                </span>
-              {/case}
-
+          <div>
+            <div class="flex items-center mt-3">
               <div class="flex-1">
-                {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
+                <div class="flex-1" id={:select_more_acl} phx-update="ignore" phx-hook="InputOrSelectOne">
+                  <input
+                    value={predefined_subjects(@subjects)}
+                    placeholder={l("Add more users or circles")}
+                    name="add"
+                    id="acl_tagify"
+                    class="w-full border tagify--outside tagify !border-base-content/10"
+                  />
+                  <select class="tagify hide">
+                    {#for {id, name} <- @suggestions}
+                      <option class="" value={id}>{name}</option>
+                    {/for}
+                  </select>
+                </div>
               </div>
-              
             </div>
           </div>
-
-          <div 
-            :for={%{id: subject_id} = subject <- e(@subjects, [])}
-            class={"flex items-center px-2 py-1 mt-px"}>
-            <div 
-              class={"flex-1 pr-2 text-left truncate ellipsis",
-                "text-sm": !@ui_compact,
-                "text-xs": @ui_compact
-              }>
-              {#if !e(subject, :stereotyped, :stereotype_id, nil) and e(subject, :named, :id, nil) !=nil and subject_id not in e(@global_circles, [])}
-                <span 
-                  phx-click="edit_circle" 
-                  phx-target={@myself}
-                  phx-value-id={subject_id}
-                  class="cursor-pointer">
-                  {LiveHandler.subject_name(subject)}
-                </span>
-              {#else}
-                {LiveHandler.subject_name(subject)}
-              {/if}
-            </div>
-            <div class="">
-              <form :on-change="edit_grant" class="flex items-center space-x-1 boundaries-switches">
-                <label class="tooltip tooltip-top" data-tip={l "Can"}>
-                  <input 
-                    class="absolute opacity-0" 
-                    name={"subject[#{subject_id}][#{verb_id}]"} 
-                    type="radio" 
-                    value="1"
-                    checked={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil)==true} 
-                    disabled={@read_only}
-                    />
-                  <div 
-                    class={"btn btn-sm btn-outline btn-circle btn-yes",
-                    "btn-disabled": @read_only}>
-                    <Icon iconify="bx:CheckShield" class="w-4 h-4" />
-                  </div>
-                </label>
-                <label class="tooltip tooltip-top" data-tip={l "Not specified"}>
-                  <input 
-                    class="absolute opacity-0" 
-                    name={"subject[#{subject_id}][#{verb_id}]"} 
-                    type="radio" 
-                    value=""
-                    checked={is_nil(Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil))} 
-                    disabled={@read_only}
-                    />
-                  <div 
-                    class={"btn btn-sm btn-outline btn-circle btn-maybe",
-                    "btn-disabled": @read_only}>
-                    <Icon iconify="bx:Shield" class="w-4 h-4" />
-                  </div>
-                </label>
-                <label class="tooltip tooltip-top" data-tip={l "Cannot"}>
-                  <input 
-                    class="absolute opacity-0" 
-                    name={"subject[#{subject_id}][#{verb_id}]"} 
-                    type="radio" 
-                    value="0"
-                    checked={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil)==false} 
-                    disabled={@read_only}
-                    />
-                  <div 
-                    class={"btn btn-sm btn-outline btn-circle btn-no",
-                    "btn-disabled": @read_only}>
-                    <Icon iconify="bx:ShieldX" class="w-4 h-4" />
-                  </div>
-                </label>
-              </form>
-            </div>
-          </div>  
         </div>
-        {/for}
+
+        <div
+          :if={Enum.count(e(@subjects, [])) > 0}
+          class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}
+        >
+          {#for {{verb_id, l}, i} <- Enum.with_index(e(@list, []))}
+            <div class="col-span-1 border border-base-content/30 rounded bg-base-200">
+              <div class="flex-1 text-sm font-semibold rounded">
+                <div class="flex items-center p-2 space-x-2">
+                  {#case Bonfire.Boundaries.Verbs.get(verb_id)}
+                    {#match nil}
+                    {#match verb}
+                      <span class="tooltip" data-tip={e(verb, :summary, nil)}>
+                        <Icon
+                          iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+                          class="w-4 h-4"
+                          fill="currentColor"
+                        />
+                      </span>
+                  {/case}
+
+                  <div class="flex-1">
+                    {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                :for={%{id: subject_id} = subject <- e(@subjects, [])}
+                class="flex items-center px-2 py-1 mt-px"
+              >
+                <div class={"flex-1 pr-2 text-left truncate ellipsis", "text-sm": !@ui_compact, "text-xs": @ui_compact}>
+                  {#if !e(subject, :stereotyped, :stereotype_id, nil) and e(subject, :named, :id, nil) != nil and
+                      subject_id not in e(@global_circles, [])}
+                    <span
+                      phx-click="edit_circle"
+                      phx-target={@myself}
+                      phx-value-id={subject_id}
+                      class="cursor-pointer"
+                    >
+                      {LiveHandler.subject_name(subject)}
+                    </span>
+                  {#else}
+                    {LiveHandler.subject_name(subject)}
+                  {/if}
+                </div>
+                <div class="">
+                  <form :on-change="edit_grant" class="flex items-center space-x-1 boundaries-switches">
+                    <label class="tooltip tooltip-top" data-tip={l("Can")}>
+                      <input
+                        class="absolute opacity-0"
+                        name={"subject[#{subject_id}][#{verb_id}]"}
+                        type="radio"
+                        value="1"
+                        checked={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil) == true}
+                        disabled={@read_only}
+                      />
+                      <div class={"btn btn-sm btn-outline btn-circle btn-yes", "btn-disabled": @read_only}>
+                        <Icon iconify="bx:CheckShield" class="w-4 h-4" />
+                      </div>
+                    </label>
+                    <label class="tooltip tooltip-top" data-tip={l("Not specified")}>
+                      <input
+                        class="absolute opacity-0"
+                        name={"subject[#{subject_id}][#{verb_id}]"}
+                        type="radio"
+                        value=""
+                        checked={is_nil(Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil))}
+                        disabled={@read_only}
+                      />
+                      <div class={"btn btn-sm btn-outline btn-circle btn-maybe", "btn-disabled": @read_only}>
+                        <Icon iconify="bx:Shield" class="w-4 h-4" />
+                      </div>
+                    </label>
+                    <label class="tooltip tooltip-top" data-tip={l("Cannot")}>
+                      <input
+                        class="absolute opacity-0"
+                        name={"subject[#{subject_id}][#{verb_id}]"}
+                        type="radio"
+                        value="0"
+                        checked={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil) == false}
+                        disabled={@read_only}
+                      />
+                      <div class={"btn btn-sm btn-outline btn-circle btn-no", "btn-disabled": @read_only}>
+                        <Icon iconify="bx:ShieldX" class="w-4 h-4" />
+                      </div>
+                    </label>
+                  </form>
+                </div>
+              </div>
+            </div>
+          {/for}
+        </div>
       </div>
-   
-    </div>
-    <section
-      :if={@section=="settings"}
-      role="tabpanel"
-      class="p-4"
-    >
-    <div class="pb-3 text-lg font-medium">{l "General"}</div>
-      <form phx-submit="edit" phx-target={@myself} class="p-4 border rounded-lg border-base-content/30">
-        
-        <div 
-          x-data="{
+      <section :if={@section == "settings"} role="tabpanel" class="p-4">
+        <div class="pb-3 text-lg font-medium">{l("General")}</div>
+        <form phx-submit="edit" phx-target={@myself} class="p-4 border rounded-lg border-base-content/30">
+          <div
+            x-data="{
             open: false,
             close(focusAfter) {
               if (! this.open) return
@@ -246,59 +218,71 @@
               focusAfter && focusAfter.focus()
             }
           }"
-          x-on:keydown.escape.prevent.stop="close($refs.button)"
-          class="w-full form-control">
-          <label class="label">
-            <span class="font-semibold label-text">{l "Edit the boundary emoji"}</span>
-            <input name="extra_info[info][icon]" value={e(@acl, :extra_info, :info, :icon, "🔥")} type="hidden"/>
-          </label>
-          <div class="mt-1 sm:mt-0 sm:col-span-2">
-            <div class="relative flex items-center">
-              <span class="w-10 h-10 text-4xl text-gray-300">
-                {e(@acl, :extra_info, :info, :icon, "🛡")}
-              </span>
-              <button 
-                @click="open = ! open"
-                type="button" 
-                class="ml-2 normal-case btn btn-sm btn-outline">{l "Pick an emoji"}</button>
-              <div 
-                x-ref="panel"
-                x-show="open"
-                x-transition.origin.top.left
-                x-on:click.outside="close($refs.button)"
-                x-show="open" 
-                class="absolute z-40 top-12 left-3"
-                role="tooltip">
-                <div id="boundary-picker"></div>
+            x-on:keydown.escape.prevent.stop="close($refs.button)"
+            class="w-full form-control"
+          >
+            <label class="label">
+              <span class="font-semibold label-text">{l("Edit the boundary emoji")}</span>
+              <input
+                name="extra_info[info][icon]"
+                value={e(@acl, :extra_info, :info, :icon, "🔥")}
+                type="hidden"
+              />
+            </label>
+            <div class="mt-1 sm:mt-0 sm:col-span-2">
+              <div class="relative flex items-center">
+                <span class="w-10 h-10 text-4xl text-gray-300">
+                  {e(@acl, :extra_info, :info, :icon, "🛡")}
+                </span>
+                <button @click="open = ! open" type="button" class="ml-2 normal-case btn btn-sm btn-outline">{l("Pick an emoji")}</button>
+                <div
+                  x-ref="panel"
+                  x-show="open"
+                  x-transition.origin.top.left
+                  x-on:click.outside="close($refs.button)"
+                  x-show="open"
+                  class="absolute z-40 top-12 left-3"
+                  role="tooltip"
+                >
+                  <div id="boundary-picker" />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        
-        
-        <div class="w-full mt-4 form-control">
-          <label class="label">
-            <span class="font-semibold label-text">{l "Edit the boundary name"}</span>
+
+          <div class="w-full mt-4 form-control">
+            <label class="label">
+              <span class="font-semibold label-text">{l("Edit the boundary name")}</span>
             </label>
             <div class="flex items-center">
-              <input name="named[name]" value={e(@acl, :named, :name, nil)} type="text" placeholder="Type here" class="w-full input input-bordered" />
+              <input
+                name="named[name]"
+                value={e(@acl, :named, :name, nil)}
+                type="text"
+                placeholder="Type here"
+                class="w-full input input-bordered"
+              />
             </div>
-        </div>
-      
-        <div class="w-full mt-4 form-control">
-          <label class="label">
-            <span class="font-semibold label-text">{l "Edit the boundary description"}</span>
-          </label>
-          <div class="flex flex-col space-y-3">
-            <textarea name="extra_info[summary]" placeholder="A short description to help you remember what this boundary is about" rows="3" class="w-full h-24 textarea textarea-bordered">{e(@acl, :extra_info, :summary, nil)}</textarea>
           </div>
-        </div>
-        <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l "Save"}</button>
-      </form>
-      <div :if={!e(@acl, :stereotyped, nil)} class="pb-3 mt-6 text-lg font-medium">{l "Danger zone"}</div>
-      <div :if={!e(@acl, :stereotyped, nil)} class="p-4 border rounded-lg border-error/30">
-        
-        <!-- <div class="flex items-center space-x-8">
+
+          <div class="w-full mt-4 form-control">
+            <label class="label">
+              <span class="font-semibold label-text">{l("Edit the boundary description")}</span>
+            </label>
+            <div class="flex flex-col space-y-3">
+              <textarea
+                name="extra_info[summary]"
+                placeholder="A short description to help you remember what this boundary is about"
+                rows="3"
+                class="w-full h-24 textarea textarea-bordered"
+              >{e(@acl, :extra_info, :summary, nil)}</textarea>
+            </div>
+          </div>
+          <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
+        </form>
+        <div :if={!e(@acl, :stereotyped, nil)} class="pb-3 mt-6 text-lg font-medium">{l("Danger zone")}</div>
+        <div :if={!e(@acl, :stereotyped, nil)} class="p-4 border rounded-lg border-error/30">
+          <!-- <div class="flex items-center space-x-8">
           <div class="flex flex-col">
             <div class="flex-1 text-base font-bold">{l "Archive this boundary"}</div>
             <div class="text-sm text-base-content/80">{l "If you no longer want to use this boundary, but still want existing permissions using it to be preserved."}</div>
@@ -323,56 +307,55 @@
             </:action_btns>
           </Bonfire.UI.Common.OpenModalLive>
         </div> -->
-        
-        <div class="flex items-center space-x-8">
-          <div class="flex flex-col">
-            <div class="flex-1 text-base font-bold">{l "Delete this boundary"}</div>
-            <div class="text-sm text-base-content/80">{l "Deleting a boundary means anything shared with users of the local instance using this boundary will no longer be shared. Please be certain."}</div>
-          </div>
-          <Bonfire.UI.Common.OpenModalLive
-            id={Pointers.ULID.generate()} 
-            title_text={l("Delete this boundary")}
+
+          <div class="flex items-center space-x-8">
+            <div class="flex flex-col">
+              <div class="flex-1 text-base font-bold">{l("Delete this boundary")}</div>
+              <div class="text-sm text-base-content/80">{l(
+                  "Deleting a boundary means anything shared with users of the local instance using this boundary will no longer be shared. Please be certain."
+                )}</div>
+            </div>
+            <Bonfire.UI.Common.OpenModalLive
+              id={Pointers.ULID.generate()}
+              title_text={l("Delete this boundary")}
             >
-            {l "The boundary will be permanently deleted. This action will affect everything that was shared on the local instance using the boundary."} 
-            <:open_btn>
-              <div class="normal-case btn btn-outline btn-error btn-sm">{l "Delete"}</div>
-            </:open_btn>
-            <:action_btns>
-              <button 
-                data-id="delete_boundary"
-                type="button" 
-                :on-click="Bonfire.Boundaries:acl_delete" 
-                phx-value-go="/settings/acls"
-                class="normal-case btn btn-error btn-sm">
-                <span class="text-left truncate ellipsis">{l("Delete this boundary")}</span>
-              </button>
-            </:action_btns>
-
-          </Bonfire.UI.Common.OpenModalLive>
+              {l(
+                "The boundary will be permanently deleted. This action will affect everything that was shared on the local instance using the boundary."
+              )}
+              <:open_btn>
+                <div class="normal-case btn btn-outline btn-error btn-sm">{l("Delete")}</div>
+              </:open_btn>
+              <:action_btns>
+                <button
+                  data-id="delete_boundary"
+                  type="button"
+                  :on-click="Bonfire.Boundaries:acl_delete"
+                  phx-value-go="/settings/acls"
+                  class="normal-case btn btn-error btn-sm"
+                >
+                  <span class="text-left truncate ellipsis">{l("Delete this boundary")}</span>
+                </button>
+              </:action_btns>
+            </Bonfire.UI.Common.OpenModalLive>
+          </div>
         </div>
+      </section>
+    </div>
 
-      </div>
-
-    </section>
-  </div>
-
-
-  <style>
-  .boundaries-switches label div.btn {
-    color: hsl(var(--bc));
-  }
-  .boundaries-switches label input:checked ~ div.btn-yes {
-    background: hsl(var(--su) / 0.90);
-  }
-  .boundaries-switches label input:checked ~ div.btn-no {
-    background: hsl(var(--er) / 0.90);
-  }
-  .boundaries-switches label input:checked ~ div.btn-maybe {
-    background: white;
-    color: black;
-  }
-  </style>
-
-{/if}
+    <style>
+      .boundaries-switches label div.btn {
+      color: hsl(var(--bc));
+      }
+      .boundaries-switches label input:checked ~ div.btn-yes {
+      background: hsl(var(--su) / 0.90);
+      }
+      .boundaries-switches label input:checked ~ div.btn-no {
+      background: hsl(var(--er) / 0.90);
+      }
+      .boundaries-switches label input:checked ~ div.btn-maybe {
+      background: white;
+      color: black;
+      }
+    </style>
+  {/if}
 </div>
-

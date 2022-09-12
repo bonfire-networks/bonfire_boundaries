@@ -7,9 +7,17 @@ defmodule Bonfire.Boundaries.Web.BlockButtonLive do
   prop my_block, :any
   prop class, :css_class
   prop label, :string, default: nil
-  prop scope, :any # only used for unblock
-  prop block_type, :any # only used for unblock
+  # only used for unblock
+  prop scope, :any
+  # only used for unblock
+  prop block_type, :any
 
-  def handle_event(action, attrs, socket), do: Bonfire.UI.Common.LiveHandlers.handle_event(action, attrs, socket, __MODULE__)
-
+  def handle_event(action, attrs, socket),
+    do:
+      Bonfire.UI.Common.LiveHandlers.handle_event(
+        action,
+        attrs,
+        socket,
+        __MODULE__
+      )
 end

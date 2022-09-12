@@ -1,84 +1,79 @@
 <div>
-
-<!-- {#if Settings.get(:experimental_features_enabled, false, @__context__)} -->
-  <div
-    class="flex items-center pr-2 space-x-2 bg-base-content/5">
+  <!-- {#if Settings.get(:experimental_features_enabled, false, @__context__)} -->
+  <div class="flex items-center pr-2 space-x-2 bg-base-content/5">
     <Bonfire.Boundaries.Web.BoundariesSelectionLive
       to_boundaries={@to_boundaries}
       to_circles={@to_circles}
       thread_mode={@thread_mode}
     />
-    {#if Settings.get([:ui, :smart_input_as], nil, @__context__)==:sidebar and @thread_mode !=:flat}
+    {#if Settings.get([:ui, :smart_input_as], nil, @__context__) == :sidebar and @thread_mode != :flat}
       <Bonfire.UI.Common.OpenModalLive
-        id={Pointers.ULID.generate()} 
+        id={Pointers.ULID.generate()}
         reusable_modal_id={@boundaries_modal_id}
-        title_text={l "Set boundaries"}
+        title_text={l("Set boundaries")}
         no_actions
         no_header
-        >
-          <Bonfire.Boundaries.Web.BoundariesListLive
-            to_boundaries={@to_boundaries}
-            to_boundaries_ids={to_boundaries_ids(@to_boundaries)}
-            to_circles={@to_circles}
-            open_boundaries={true}
-            hide_breakdown={true}  
-            setting_boundaries={true}
-            click_override={true}
-          />
+      >
+        <Bonfire.Boundaries.Web.BoundariesListLive
+          to_boundaries={@to_boundaries}
+          to_boundaries_ids={to_boundaries_ids(@to_boundaries)}
+          to_circles={@to_circles}
+          open_boundaries
+          hide_breakdown
+          setting_boundaries
+          click_override
+        />
         <:open_btn>
-          <div 
-            class="btn btn-sm btn-ghost btn-square" >
-            <span class="sr-only">{l "Set boundaries"}</span>
+          <div class="btn btn-sm btn-ghost btn-square">
+            <span class="sr-only">{l("Set boundaries")}</span>
             <Icon solid="ChevronRight" class="w-5 h-5 stroke-1" />
           </div>
         </:open_btn>
       </Bonfire.UI.Common.OpenModalLive>
-
     {#else}
-      <button type="button" 
+      <button
+        type="button"
         x-show="!open_boundaries"
         @click="open_boundaries = true"
         phx-click="open_boundaries"
         phx-target="#smart_input"
-        class="btn btn-sm btn-ghost btn-square" 
-        >
-        <span class="sr-only">{l "Edit boundaries"}</span>
+        class="btn btn-sm btn-ghost btn-square"
+      >
+        <span class="sr-only">{l("Edit boundaries")}</span>
         <Icon solid="ChevronRight" class="w-5 h-5 stroke-1" />
       </button>
     {/if}
 
-    <button type="button" 
+    <button
+      type="button"
       x-show="open_boundaries"
       @click="open_boundaries = false"
-      class="space-x-1 normal-case btn btn-primary btn-xs" 
-      >
-      <Icon outline="Check" class="w-4 h-4"/>
-      <span class="text-sm">{l "Done"}</span>
+      class="space-x-1 normal-case btn btn-primary btn-xs"
+    >
+      <Icon outline="Check" class="w-4 h-4" />
+      <span class="text-sm">{l("Done")}</span>
     </button>
   </div>
 
   <div>
-    <Bonfire.UI.Common.ReusableModalLive
-      id={@boundaries_modal_id}
-    />
+    <Bonfire.UI.Common.ReusableModalLive id={@boundaries_modal_id} />
   </div>
 
-     
-      <div 
-        :if={Settings.get([:ui, :smart_input_as], nil, @__context__)!=:sidebar or @thread_mode ==:flat}
-        x-show="open_boundaries"
-        class="p-3">
-        
-        <Bonfire.Boundaries.Web.BoundariesListLive
-          to_boundaries={e(@to_boundaries, [])}
-          to_boundaries_ids={to_boundaries_ids(e(@to_boundaries, []))}
-          to_circles={e(@to_circles, [])}
-          open_boundaries={@open_boundaries}
-          hide_breakdown={true}  
-          setting_boundaries={true}
-          click_override={true}
-      />
-    </div>
+  <div
+    :if={Settings.get([:ui, :smart_input_as], nil, @__context__) != :sidebar or @thread_mode == :flat}
+    x-show="open_boundaries"
+    class="p-3"
+  >
+    <Bonfire.Boundaries.Web.BoundariesListLive
+      to_boundaries={e(@to_boundaries, [])}
+      to_boundaries_ids={to_boundaries_ids(e(@to_boundaries, []))}
+      to_circles={e(@to_circles, [])}
+      open_boundaries={@open_boundaries}
+      hide_breakdown
+      setting_boundaries
+      click_override
+    />
+  </div>
 
   <!-- {#else} 
 
@@ -91,5 +86,4 @@
     />
 
   {/if} -->
-
 </div>

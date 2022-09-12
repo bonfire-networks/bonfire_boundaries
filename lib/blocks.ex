@@ -9,12 +9,15 @@ defmodule Bonfire.Boundaries.Blocks do
   def types_blocked(types) when is_list(types) do
     Enum.flat_map(types, &types_blocked/1) |> Enum.uniq()
   end
+
   def types_blocked(type) when type in [:ghost, :ghost_them] do
     [:ghost_them]
   end
+
   def types_blocked(type) when type in [:silence, :silence_them] do
     [:silence_them]
   end
+
   def types_blocked(_) do
     [:silence_them, :ghost_them]
   end
@@ -34,31 +37,66 @@ defmodule Bonfire.Boundaries.Blocks do
     mutate(:unblock, user_or_instance_to_block, block_type, opts)
   end
 
-  defp mutate(block_or_unblock, user_or_instance_to_block, block_type, :instance_wide) when block_type in [:silence, :silence_them] do
+  defp mutate(
+         block_or_unblock,
+         user_or_instance_to_block,
+         block_type,
+         :instance_wide
+       )
+       when block_type in [:silence, :silence_them] do
     instance_wide_circles([:silence_me])
     |> info("instance_wide_circles_silenced")
     |> do_mutate_blocklists(block_or_unblock, user_or_instance_to_block, ...)
   end
 
-  defp mutate(block_or_unblock, user_or_instance_to_block, block_type, :instance_wide) do
+  defp mutate(
+         block_or_unblock,
+         user_or_instance_to_block,
+         block_type,
+         :instance_wide
+       ) do
     instance_wide_circles(types_blocked(block_type))
     |> info("instance_wide_circles_blocked")
     |> do_mutate_blocklists(block_or_unblock, user_or_instance_to_block, ...)
   end
 
-  #@doc "Block something for the current user (current_user should be passed in opts)"
-  defp mutate(block_or_unblock, user_or_instance_to_block, block_type, opts) when block_type in [:silence, :silence_them] do
+  # @doc "Block something for the current user (current_user should be passed in opts)"
+  defp mutate(block_or_unblock, user_or_instance_to_block, block_type, opts)
+       when block_type in [:silence, :silence_them] do
     current_user = Utils.current_user(opts)
     silence_them = types_blocked(block_type)
-    debug("add silence block to both users' circles, one to my #{inspect silence_them} and the other to their :silence_me")
-    with {:ok, _ret} <- mutate_blocklists(block_or_unblock, user_or_instance_to_block, silence_them, current_user), # my list of people I've silenced
-    {:ok, ret} <- mutate_blocklists(block_or_unblock, current_user, [:silence_me], user_or_instance_to_block) do # their list of people who silenced them (this list isn't meant to be visible to them, but is used so queries can filter stuff using `Bonfire.Boundaries.Queries`)
+
+    debug(
+      "add silence block to both users' circles, one to my #{inspect(silence_them)} and the other to their :silence_me"
+    )
+
+    # my list of people I've silenced
+    with {:ok, _ret} <-
+           mutate_blocklists(
+             block_or_unblock,
+             user_or_instance_to_block,
+             silence_them,
+             current_user
+           ),
+         # their list of people who silenced them (this list isn't meant to be visible to them, but is used so queries can filter stuff using `Bonfire.Boundaries.Queries`)
+         {:ok, ret} <-
+           mutate_blocklists(
+             block_or_unblock,
+             current_user,
+             [:silence_me],
+             user_or_instance_to_block
+           ) do
       {:ok, ret}
     end
   end
 
   defp mutate(block_or_unblock, user_or_instance_to_block, block_type, opts) do
-    mutate_blocklists(block_or_unblock, user_or_instance_to_block, types_blocked(block_type), Utils.current_user(opts))
+    mutate_blocklists(
+      block_or_unblock,
+      user_or_instance_to_block,
+      types_blocked(block_type),
+      Utils.current_user(opts)
+    )
   end
 
   @doc """
@@ -75,16 +113,27 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   def is_blocked?(user_or_instance, block_type, opts) do
-    info(opts, "check if blocked #{inspect block_type} instance-wide or per-user, if any has/have been provided in opts")
-    is_blocked?(user_or_instance, block_type, :instance_wide)
-      ||
-    is_blocked_by?(user_or_instance, block_type, opts[:user_ids] || current_user(opts))
+    info(
+      opts,
+      "check if blocked #{inspect(block_type)} instance-wide or per-user, if any has/have been provided in opts"
+    )
+
+    is_blocked?(user_or_instance, block_type, :instance_wide) ||
+      is_blocked_by?(
+        user_or_instance,
+        block_type,
+        opts[:user_ids] || current_user(opts)
+      )
   end
 
-  def list(block_type, :instance_wide) do # only for admins
+  # only for admins
+  def list(block_type, :instance_wide) do
     instance_wide_circles(types_blocked(block_type))
     |> Bonfire.Boundaries.Circles.list_by_ids()
-    |> repo().maybe_preload(caretaker: [:profile], encircles: [:peer, subject: [:profile, :character]])
+    |> repo().maybe_preload(
+      caretaker: [:profile],
+      encircles: [:peer, subject: [:profile, :character]]
+    )
   end
 
   def list(block_type, opts) do
@@ -94,28 +143,40 @@ defmodule Bonfire.Boundaries.Blocks do
 
   ###
 
-  defp mutate_blocklists(block_or_unblock, user_or_instance_add, block_type, circle_caretaker) do
+  defp mutate_blocklists(
+         block_or_unblock,
+         user_or_instance_add,
+         block_type,
+         circle_caretaker
+       ) do
     circle_caretaker
     |> per_user_circles(..., block_type)
-    |> repo().maybe_preload(caretaker: [caretaker: [:profile]]) #|> info("user:circles_to_block")
+    # |> info("user:circles_to_block")
+    |> repo().maybe_preload(caretaker: [caretaker: [:profile]])
     |> do_mutate_blocklists(block_or_unblock, user_or_instance_add, ...)
   end
 
   defp do_mutate_blocklists(:block, user_or_instance_to_block, circles) do
-    with done when is_list(done) <- Circles.add_to_circles(user_or_instance_to_block, circles) do # TODO: properly validate the inserts
-        {:ok, "Blocked"}
-    else e ->
-      error(e)
-      {:error, "Could not block"}
+    # TODO: properly validate the inserts
+    with done when is_list(done) <-
+           Circles.add_to_circles(user_or_instance_to_block, circles) do
+      {:ok, "Blocked"}
+    else
+      e ->
+        error(e)
+        {:error, "Could not block"}
     end
   end
 
   defp do_mutate_blocklists(:unblock, user_or_instance_to_unblock, circles) do
-    with {deleted, _} when deleted > 0 <- Circles.remove_from_circles(user_or_instance_to_unblock, circles) do # TODO: properly validate the inserts
-        {:ok, "Unblocked"}
-    else e ->
-      error(e)
-      {:error, "Could not unblock"}
+    # TODO: properly validate the inserts
+    with {deleted, _} when deleted > 0 <-
+           Circles.remove_from_circles(user_or_instance_to_unblock, circles) do
+      {:ok, "Unblocked"}
+    else
+      e ->
+        error(e)
+        {:error, "Could not unblock"}
     end
   end
 
@@ -127,7 +188,8 @@ defmodule Bonfire.Boundaries.Blocks do
     Circles.get_stereotype_circles(current_user, block_types)
   end
 
-  defp is_blocked_by?(%{} = user_or_peer, block_type, current_user_ids) when is_list(current_user_ids) and length(current_user_ids)>0 do
+  defp is_blocked_by?(%{} = user_or_peer, block_type, current_user_ids)
+       when is_list(current_user_ids) and length(current_user_ids) > 0 do
     # info(user_or_peer, "user_or_peer to check")
     info(current_user_ids, "current_user_ids")
 
@@ -139,16 +201,27 @@ defmodule Bonfire.Boundaries.Blocks do
     # |> info("user_block_circles")
     |> Bonfire.Boundaries.Circles.is_encircled_by?(user_or_peer, ...)
   end
-  defp is_blocked_by?(user_or_peer, block_type, user_id) when is_binary(user_id) do
+
+  defp is_blocked_by?(user_or_peer, block_type, user_id)
+       when is_binary(user_id) do
     is_blocked_by?(user_or_peer, block_type, [user_id])
   end
+
   defp is_blocked_by?(user_or_peer, block_type, %{} = user) do
     is_blocked_by?(user_or_peer, block_type, [user])
   end
+
   defp is_blocked_by?(user_or_peer, _block_types, current_user_ids) do
-    error(user_or_peer, "no pattern found for user_or_peer (or current_user/current_user_ids)")
-    error(current_user_ids, "no pattern found for current_user/current_user_ids (or user_or_peer)")
+    error(
+      user_or_peer,
+      "no pattern found for user_or_peer (or current_user/current_user_ids)"
+    )
+
+    error(
+      current_user_ids,
+      "no pattern found for current_user/current_user_ids (or user_or_peer)"
+    )
+
     nil
   end
-
 end

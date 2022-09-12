@@ -12,5 +12,4 @@ defmodule Bonfire.Boundaries.Web.BoundariesListLive do
   prop hide_breakdown, :boolean, default: false
   prop setting_boundaries, :boolean, default: false
   prop click_override, :boolean, default: false
-
 end

@@ -9,7 +9,8 @@ defmodule Bonfire.Boundaries.Integration do
     if Map.get(user, :instance_admin) do
       Map.get(user.instance_admin, :is_instance_admin)
     else
-      false # FIXME
+      # FIXME
+      false
     end
   end
 
@@ -18,5 +19,4 @@ defmodule Bonfire.Boundaries.Integration do
       Bonfire.Federate.ActivityPub.Utils.is_local?(thing)
     end
   end
-
 end

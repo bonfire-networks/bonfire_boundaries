@@ -1,7 +1,7 @@
 <div>
-{#if @boundary_can}
-  <#slot></#slot>
-{#else}
-  <#slot {@if_not}>{@if_not_say}</#slot>
-{/if}
+  {#if @boundary_can}
+    <#slot />
+  {#else}
+    <#slot {@if_not}>{@if_not_say}</#slot>
+  {/if}
 </div>

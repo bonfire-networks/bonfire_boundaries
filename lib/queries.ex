@@ -15,15 +15,14 @@ defmodule Bonfire.Boundaries.Queries do
   """
   import Untangle
   import Ecto.Query
-  alias Bonfire.Boundaries.{Summary, Verbs}
+  alias Bonfire.Boundaries.Summary
+  alias Bonfire.Boundaries.Verbs
+
   alias Bonfire.Common
 
   # defmacro can_see?(controlled, user), do: can(controlled, user, :see)
-
   # defmacro can_edit?(controlled, user), do: can(controlled, user, :edit)
-
   # defmacro can_delete?(controlled, user), do: can(controlled, user, :delete)
-
   # defmacro can?(controlled, user, verb \\ :see), do: can(controlled, user, verb)
 
   def user_and_circle_ids(user) do
@@ -39,72 +38,118 @@ defmodule Bonfire.Boundaries.Queries do
 
   defp boundarise_impl(query, field_ref, opts) do
     case field_ref do
-      {{:., _, [{alia, _, _},_field]}, [{:no_parens, true}|_], []} ->
+      {{:., _, [{alia, _, _}, _field]}, [{:no_parens, true} | _], []} ->
         quote do
           require Untangle
           query = unquote(query)
           opts = unquote(opts)
           verbs = List.wrap(Bonfire.Common.Utils.e(opts, :verbs, [:see, :read]))
+
           case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
-            true -> query
+            true ->
+              query
+
             :admins ->
               case Bonfire.Common.Utils.current_user(opts) do
                 %{id: _, instance_admin: %{is_instance_admin: true}} ->
                   Untangle.debug("Skipping boundary checks for instance administrator")
+
                   query
+
                 current_user ->
-                  vis = Bonfire.Boundaries.Queries.filter_where_not(current_user, verbs)
-                  join unquote(query), :inner,
+                  vis =
+                    Bonfire.Boundaries.Queries.filter_where_not(
+                      current_user,
+                      verbs
+                    )
+
+                  join(
+                    unquote(query),
+                    :inner,
                     [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
-                    v in subquery(vis), on: unquote(field_ref) == v.object_id
+                    v in subquery(vis),
+                    on: unquote(field_ref) == v.object_id
+                  )
               end
+
             false ->
               user = Bonfire.Common.Utils.current_user(opts)
               vis = Bonfire.Boundaries.Queries.filter_where_not(user, verbs)
-              join unquote(query), :inner,
+
+              join(
+                unquote(query),
+                :inner,
                 [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
-                v in subquery(vis), on: unquote(field_ref) == v.object_id
+                v in subquery(vis),
+                on: unquote(field_ref) == v.object_id
+              )
+
             other ->
               import Untangle
               error(other, "Weird skip_boundary_check")
               query
           end
         end
-      {field, meta, args}=field_ref
-      when is_atom(field) and is_list(meta)
-      and (is_nil(args) or args == []) ->
+
+      {field, meta, args} = field_ref
+      when is_atom(field) and is_list(meta) and
+             (is_nil(args) or args == []) ->
         quote do
           require Untangle
           query = unquote(query)
           opts = unquote(opts)
           verbs = List.wrap(Bonfire.Common.Utils.e(opts, :verbs, [:see, :read]))
+
           case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
-            true -> query
+            true ->
+              query
+
             :admins ->
               case Bonfire.Common.Utils.current_user(opts) do
                 %{id: _, instance_admin: %{is_instance_admin: true}} ->
                   Untangle.debug("Skipping boundary checks for instance administrator")
+
                   query
+
                 current_user ->
-                  vis = Bonfire.Boundaries.Queries.filter_where_not(current_user, verbs)
-                  join unquote(query), :inner,
+                  vis =
+                    Bonfire.Boundaries.Queries.filter_where_not(
+                      current_user,
+                      verbs
+                    )
+
+                  join(
+                    unquote(query),
+                    :inner,
                     [unquote(Macro.var(:root, __MODULE__))],
                     v in subquery(vis),
-                    on: unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) == v.object_id
+                    on:
+                      unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) ==
+                        v.object_id
+                  )
               end
+
             false ->
               user = Bonfire.Common.Utils.current_user(opts)
               vis = Bonfire.Boundaries.Queries.filter_where_not(user, verbs)
-              join unquote(query), :inner,
+
+              join(
+                unquote(query),
+                :inner,
                 [unquote(Macro.var(:root, __MODULE__))],
                 v in subquery(vis),
-                on: unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) == v.object_id
+                on:
+                  unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) ==
+                    v.object_id
+              )
+
             other ->
               import Untangle
               error(other, "Weird skip_boundary_check")
               query
           end
         end
+
       _ ->
         raise RuntimeError,
           message: """
@@ -128,21 +173,25 @@ defmodule Bonfire.Boundaries.Queries do
   def filter_where_not(user, verbs \\ [:see, :read]) do
     ids = user_and_circle_ids(user)
     verbs = Verbs.ids(verbs)
-    from summary in Summary,
+
+    from(summary in Summary,
       where: summary.subject_id in ^ids and summary.verb_id in ^verbs,
       group_by: summary.object_id,
       having: fragment("agg_perms(?)", summary.value),
       select: %{
         subjects: count(summary.subject_id),
-        object_id: summary.object_id,
+        object_id: summary.object_id
       }
+    )
   end
 
   def permitted(user), do: permitted(user, Verbs.slugs())
+
   def permitted(user, verbs) do
     ids = user_and_circle_ids(user)
     verbs = Verbs.ids(verbs)
-    from summary in Summary,
+
+    from(summary in Summary,
       where: summary.subject_id in ^ids,
       where: summary.verb_id in ^verbs,
       group_by: [summary.object_id],
@@ -152,6 +201,7 @@ defmodule Bonfire.Boundaries.Queries do
         object_id: summary.object_id,
         verbs: fragment("array_agg(?)", summary.verb_id)
       }
+    )
   end
 
   @doc "Call the `add_perms(bool?, bool?)` postgres function for combining permissions."
@@ -171,20 +221,19 @@ defmodule Bonfire.Boundaries.Queries do
       agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
 
       vis = filter_where_not(agent, Common.Utils.e(opts, :verbs, [:see, :read]))
-      join q, :inner, [main_object: main_object],
-        v in subquery(vis),
+
+      join(q, :inner, [main_object: main_object], v in subquery(vis),
         on: main_object.id == v.object_id
+      )
     end
   end
 
   def skip_boundary_check?(opts, object \\ nil) do
     agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
 
-    (Common.Config.get(:env) != :prod && Common.Config.get(:skip_all_boundary_checks))
-    ||
-    (is_list(opts) && Keyword.get(opts, :skip_boundary_check, false))
-    ||
-    (not is_nil(object) && Common.Utils.ulid(object) !=agent)
+    (Common.Config.get(:env) != :prod &&
+       Common.Config.get(:skip_all_boundary_checks)) ||
+      (is_list(opts) && Keyword.get(opts, :skip_boundary_check, false)) ||
+      (not is_nil(object) && Common.Utils.ulid(object) != agent)
   end
-
 end

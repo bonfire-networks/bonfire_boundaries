@@ -10,14 +10,20 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
   def update(assigns, socket) do
     current_user = current_user(assigns)
     tab = e(assigns, :selected_tab, nil)
-    scope = if Integration.is_admin?(current_user) || Bonfire.Boundaries.can?(current_user, :block, :instance), do: e(assigns, :scope, nil)
 
-    block_type = (if tab=="ghosted", do: :ghost, else: :silence)
+    scope =
+      if Integration.is_admin?(current_user) ||
+           Bonfire.Boundaries.can?(current_user, :block, :instance),
+         do: e(assigns, :scope, nil)
 
-    circle = Bonfire.Boundaries.Blocks.list(block_type, (scope || current_user))
-    # |> dump
+    block_type = if tab == "ghosted", do: :ghost, else: :silence
+
+    circle = Bonfire.Boundaries.Blocks.list(block_type, scope || current_user)
+
+    # |> debug
 
     blocks = e(circle, :encircles, [])
+
     # |> debug
 
     # blocks = for block <- blocks, do: %{activity:
@@ -27,17 +33,19 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
     #   |> Map.put(:subject, e(block, :caretaker, nil))
     # } #|> debug
 
-    {:ok, socket
-    |> assign(
-      scope: scope, # user or instance-wide?
-      page: tab,
-      selected_tab: tab,
-      block_type: block_type,
-      # page_title: l("Blocks")<>" - #{scope} #{tab}",
-      current_user: current_user,
-      blocks: blocks
-      # page_info: e(q, :page_info, [])
-      )}
-  end
+    {:ok,
+     assign(
+       socket,
+       # user or instance-wide?
+       scope: scope,
+       page: tab,
+       selected_tab: tab,
+       block_type: block_type,
+       # page_title: l("Blocks")<>" - #{scope} #{tab}",
+       current_user: current_user,
+       blocks: blocks
 
+       # page_info: e(q, :page_info, [])
+     )}
+  end
 end

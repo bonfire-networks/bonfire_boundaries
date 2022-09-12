@@ -8,38 +8,58 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
   prop parent_back, :any, default: nil
   prop scope, :atom, default: nil
 
-  def update(%{scope: scope} = assigns, %{assigns: %{loaded: true, scope: existing_scope}} = socket) when scope == existing_scope do
-
-    {:ok, socket
-      |> assign(assigns)
-    }
+  def update(
+        %{scope: scope} = assigns,
+        %{assigns: %{loaded: true, scope: existing_scope}} = socket
+      )
+      when scope == existing_scope do
+    {:ok,
+     assign(
+       socket,
+       assigns
+     )}
   end
 
   def update(assigns, socket) do
     current_user = current_user(assigns)
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
 
-    user = if scope==:instance and ( Integration.is_admin?(current_user) || Bonfire.Boundaries.can?(current_user, :appoint, :instance) ), do: Bonfire.Boundaries.Fixtures.admin_circle(), else: current_user
+    user =
+      if scope == :instance and
+           (Integration.is_admin?(current_user) ||
+              Bonfire.Boundaries.can?(current_user, :appoint, :instance)),
+         do: Bonfire.Boundaries.Fixtures.admin_circle(),
+         else: current_user
 
-    circles = Bonfire.Boundaries.Circles.list_my_with_counts(user) |> repo().maybe_preload(encircles: [subject: [:profile]]) #|> IO.inspect
+    # |> IO.inspect
+    circles =
+      Bonfire.Boundaries.Circles.list_my_with_counts(user)
+      |> repo().maybe_preload(encircles: [subject: [:profile]])
+
     debug(circles, "Circles")
 
-    {:ok, socket
-      |> assign(assigns)
-      |> assign(
-      loaded: true,
-      circles: circles,
-      settings_section_title: "Create and manage your circles",
-      settings_section_description: "Create and manage your circles."
-      )}
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(
+       loaded: true,
+       circles: circles,
+       settings_section_title: "Create and manage your circles",
+       settings_section_description: "Create and manage your circles."
+     )}
   end
 
-  def handle_event("back", _, socket) do # TODO
-    {:noreply, socket
-      |> assign(:section, nil)
-    }
+  # TODO
+  def handle_event("back", _, socket) do
+    {:noreply, assign(socket, :section, nil)}
   end
 
-  def handle_event(action, attrs, socket), do: Bonfire.UI.Common.LiveHandlers.handle_event(action, attrs, socket, __MODULE__)
-
+  def handle_event(action, attrs, socket),
+    do:
+      Bonfire.UI.Common.LiveHandlers.handle_event(
+        action,
+        attrs,
+        socket,
+        __MODULE__
+      )
 end

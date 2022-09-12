@@ -1,119 +1,145 @@
 <div x-data="{show_boundary_list: true}">
-
-    <ul 
-      :if={@open_boundaries}
-      class="pt-2" 
-      x-show="show_boundary_list"> 
-        <!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
-        <li class={
-        "flex items-center justify-between flex-1 p-2 mb-2 rounded hover:bg-base-content/10",
-        "bg-base-content/10": @to_boundaries_ids |> Enum.member?("public")
-        }>
-        <label 
-          class="flex items-center w-full"
-          phx-click={JS.push((if not Enum.member?(@to_boundaries_ids, "public"), do: "select_boundary", else: "remove_boundary"), value: %{id: "public", name: l "Public"}, target: "#smart_input")}>
-          <div class="flex-1">
-            <div class="flex items-center space-x-4">
-                <span class="text-2xl">🌍</span>
-                <div class="flex flex-col">
-                <div class="text-base font-semibold">{l "Public"}</div>
-                <div class="text-sm text-base-content/80">
-                    {l "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines."}
-                </div>
-                </div>
+  <ul :if={@open_boundaries} class="pt-2" x-show="show_boundary_list">
+    <!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
+    <li class={
+      "flex items-center justify-between flex-1 p-2 mb-2 rounded hover:bg-base-content/10",
+      "bg-base-content/10": @to_boundaries_ids |> Enum.member?("public")
+    }>
+      <label
+        class="flex items-center w-full"
+        phx-click={JS.push(
+          if(not Enum.member?(@to_boundaries_ids, "public"),
+            do: "select_boundary",
+            else: "remove_boundary"
+          ),
+          value: %{id: "public", name: l("Public")},
+          target: "#smart_input"
+        )}
+      >
+        <div class="flex-1">
+          <div class="flex items-center space-x-4">
+            <span class="text-2xl">🌍</span>
+            <div class="flex flex-col">
+              <div class="text-base font-semibold">{l("Public")}</div>
+              <div class="text-sm text-base-content/80">
+                {l(
+                  "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines."
+                )}
+              </div>
             </div>
           </div>
+        </div>
 
-          <div class="flex items-center ml-4 space-x-2">
-            <div 
-              :if={@to_boundaries_ids |> Enum.member?("public") == false}
-              class="btn btn-outline btn-sm btn-circle opacity-80">
-              <Icon solid="Plus" class="w-5 h-5 " />
-            </div>
+        <div class="flex items-center ml-4 space-x-2">
+          <div
+            :if={@to_boundaries_ids |> Enum.member?("public") == false}
+            class="btn btn-outline btn-sm btn-circle opacity-80"
+          >
+            <Icon solid="Plus" class="w-5 h-5" />
+          </div>
 
-            <div 
-              :if={@to_boundaries_ids |> Enum.member?("public")}
-              class="btn btn-success btn-sm btn-circle opacity-80">
-              <Icon solid="Minus" class="w-5 h-5 " />
+          <div
+            :if={@to_boundaries_ids |> Enum.member?("public")}
+            class="btn btn-success btn-sm btn-circle opacity-80"
+          >
+            <Icon solid="Minus" class="w-5 h-5" />
+          </div>
+        </div>
+      </label>
+    </li>
+    <li class={
+      "flex items-center justify-between flex-1 p-2 mb-2 rounded hover:bg-base-content/10",
+      "bg-base-content/10": @to_boundaries_ids |> Enum.member?("local")
+    }>
+      <label
+        class="flex items-center w-full"
+        phx-click={JS.push(
+          if(not Enum.member?(@to_boundaries_ids, "local"), do: "select_boundary", else: "remove_boundary"),
+          value: %{id: "local", name: l("Local Instance")},
+          target: "#smart_input"
+        )}
+      >
+        <div class="flex-1">
+          <div class="flex items-center space-x-4">
+            <span class="text-2xl">🏠</span>
+            <div class="flex flex-col">
+              <div class="text-base font-semibold">{l("Local Instance")}</div>
+              <div class="text-sm text-base-content/80">
+                {l("Everyone on this instance will be able to see, interact, and reply")}
+              </div>
             </div>
           </div>
-        </label>
-        </li>
-        <li class={
-        "flex items-center justify-between flex-1 p-2 mb-2 rounded hover:bg-base-content/10",
-        "bg-base-content/10": @to_boundaries_ids |> Enum.member?("local")}>
-        <label 
-            class="flex items-center w-full"
-            phx-click={JS.push((if not Enum.member?(@to_boundaries_ids, "local"), do: "select_boundary", else: "remove_boundary"), value: %{id: "local", name: l "Local Instance"}, target: "#smart_input")}>
-            <div class="flex-1">
-            <div class="flex items-center space-x-4">
-                <span class="text-2xl">🏠</span>
-                <div class="flex flex-col">
-                <div class="text-base font-semibold">{l "Local Instance"}</div>
-                <div class="text-sm text-base-content/80">
-                    {l "Everyone on this instance will be able to see, interact, and reply"}
-                </div>
-                </div>
-            </div>
-            </div>
-            <div class="flex items-center space-x-2">
-              <div 
-                :if={@to_boundaries_ids |> Enum.member?("local") == false}
-                class="btn btn-outline btn-sm btn-circle opacity-80">
-                <Icon solid="Plus" class="w-5 h-5 " />
-              </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div
+            :if={@to_boundaries_ids |> Enum.member?("local") == false}
+            class="btn btn-outline btn-sm btn-circle opacity-80"
+          >
+            <Icon solid="Plus" class="w-5 h-5" />
+          </div>
 
-              <div 
-                :if={@to_boundaries_ids |> Enum.member?("local")}
-                class="btn btn-success btn-sm btn-circle opacity-80">
-                <Icon solid="Minus" class="w-5 h-5 " />
-              </div>
-            </div>
-        </label>
-        </li>
-        <li class={
-        "flex items-center justify-between flex-1 p-2 rounded hover:bg-base-content/10",
-        "bg-base-content/10": @to_boundaries_ids |> Enum.member?("mentions")}>
-        <label 
-            class="flex items-center w-full"
-            phx-click={JS.push((if not Enum.member?(@to_boundaries_ids, "mentions"), do: "select_boundary", else: "remove_boundary"), value: %{id: "mentions", name: l "Mentions"}, target: "#smart_input")}>
-            <div class="flex-1">
-            <div class="flex items-center space-x-4">
-                <span class="text-2xl">🔔</span>
-                <div class="flex flex-col">
-                <div class="text-base font-semibold">{l "Mentions"}</div>
-                <div class="text-sm text-base-content/80">
-                    {l "Anyone mentioned will be able to see, interact, and reply (across the fediverse)"}
-                </div>
-                </div>
-            </div>
-            </div>
-            <div class="flex items-center space-x-2">
-              <div 
-                :if={@to_boundaries_ids |> Enum.member?("mentions") == false}
-                class="btn btn-outline btn-sm btn-circle opacity-80">
-                <Icon solid="Plus" class="w-5 h-5 " />
-              </div>
-
-              <div 
-                :if={@to_boundaries_ids |> Enum.member?("mentions")}
-                class="btn btn-success btn-sm btn-circle opacity-80">
-                <Icon solid="Minus" class="w-5 h-5 " />
+          <div
+            :if={@to_boundaries_ids |> Enum.member?("local")}
+            class="btn btn-success btn-sm btn-circle opacity-80"
+          >
+            <Icon solid="Minus" class="w-5 h-5" />
+          </div>
+        </div>
+      </label>
+    </li>
+    <li class={
+      "flex items-center justify-between flex-1 p-2 rounded hover:bg-base-content/10",
+      "bg-base-content/10": @to_boundaries_ids |> Enum.member?("mentions")
+    }>
+      <label
+        class="flex items-center w-full"
+        phx-click={JS.push(
+          if(not Enum.member?(@to_boundaries_ids, "mentions"),
+            do: "select_boundary",
+            else: "remove_boundary"
+          ),
+          value: %{id: "mentions", name: l("Mentions")},
+          target: "#smart_input"
+        )}
+      >
+        <div class="flex-1">
+          <div class="flex items-center space-x-4">
+            <span class="text-2xl">🔔</span>
+            <div class="flex flex-col">
+              <div class="text-base font-semibold">{l("Mentions")}</div>
+              <div class="text-sm text-base-content/80">
+                {l("Anyone mentioned will be able to see, interact, and reply (across the fediverse)")}
               </div>
             </div>
-        </label>
-        </li>
-    </ul> 
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <div
+            :if={@to_boundaries_ids |> Enum.member?("mentions") == false}
+            class="btn btn-outline btn-sm btn-circle opacity-80"
+          >
+            <Icon solid="Plus" class="w-5 h-5" />
+          </div>
 
-    <Bonfire.Boundaries.Web.MyAclsLive
-        :if={@open_boundaries}
-        id="my_boundaries"
-        to_boundaries={e(@to_boundaries, [])}
-        to_boundaries_ids={@to_boundaries_ids}
-        to_circles={e(@to_circles, [])}
-        hide_breakdown={@hide_breakdown}  
-        setting_boundaries={@setting_boundaries}
-        click_override={@click_override}
-    />
+          <div
+            :if={@to_boundaries_ids |> Enum.member?("mentions")}
+            class="btn btn-success btn-sm btn-circle opacity-80"
+          >
+            <Icon solid="Minus" class="w-5 h-5" />
+          </div>
+        </div>
+      </label>
+    </li>
+  </ul>
 
+  <Bonfire.Boundaries.Web.MyAclsLive
+    :if={@open_boundaries}
+    id="my_boundaries"
+    to_boundaries={e(@to_boundaries, [])}
+    to_boundaries_ids={@to_boundaries_ids}
+    to_circles={e(@to_circles, [])}
+    hide_breakdown={@hide_breakdown}
+    setting_boundaries={@setting_boundaries}
+    click_override={@click_override}
+  />
 </div>

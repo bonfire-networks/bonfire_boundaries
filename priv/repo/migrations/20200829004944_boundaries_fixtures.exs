@@ -4,5 +4,4 @@ defmodule Bonfire.Boundaries.Repo.Migrations.BoundariesFixtures do
   import Bonfire.Boundaries.Fixtures
 
   def up, do: Bonfire.Boundaries.Fixtures.insert()
-
 end
