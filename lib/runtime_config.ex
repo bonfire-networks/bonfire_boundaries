@@ -87,6 +87,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "bxs:PurchaseTag",
         summary: "Tag a user or object, or publish in a topic"
       },
+      label: %{
+        id: "7PDATETHESTATVS0FS0METH1NG",
+        verb: "Label",
+        icon: "fluent:status-16-filled",
+        summary: "Set/update a status or label"
+      },
       message: %{
         id: "40NTACTW1THAPR1VATEMESSAGE",
         verb: "Message",
@@ -99,6 +105,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "bx:QuestionMark",
         summary: "Request permission for another verb (eg. request to follow)"
       },
+      schedule: %{
+        id: "7SCHEDV1EF1XEDDES1REDDATES",
+        verb: "Schedule",
+        icon: "akar-icons:schedule",
+        summary: "Set an expected or desired date"
+      },
 
       # WIP adding verbs, see: https://github.com/bonfire-networks/bonfire-app/issues/406
 
@@ -106,7 +118,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         id: "1CANENAB1E0RD1SAB1EFEATVRE",
         verb: "Toggle",
         icon: "bx:ToggleRight",
-        summary: "enable/disable extensions or features"
+        summary: "Enable/disable extensions or features"
       },
       describe: %{
         id: "1CANADD0M0D1FY1NF0METADATA",
@@ -120,11 +132,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "bx:Key",
         summary: "Add, edit or remove boundaries"
       },
-      appoint: %{
+      assign: %{
         id: "1T0ADDC1RC1ES0RASS1GNR01ES",
-        verb: "Appoint",
+        verb: "Assign",
         icon: "bxs:UserBadge",
-        summary: "Add to circles or assign roles"
+        summary: "Assign roles or tasks"
       },
       invite: %{
         id: "11NV1TESPE0P1E0RGRANTENTRY",

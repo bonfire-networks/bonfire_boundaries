@@ -77,7 +77,7 @@
   </span>
 </li>
 
-<li :if={Bonfire.Boundaries.can?(@__context__, :appoint, :instance)}>
+<li :if={Bonfire.Boundaries.can?(@__context__, :assign, :instance)}>
   <LivePatch
     to="/boundaries/instance_circles"
     class={

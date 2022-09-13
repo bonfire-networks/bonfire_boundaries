@@ -27,7 +27,7 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
     user =
       if scope == :instance and
            (Integration.is_admin?(current_user) ||
-              Bonfire.Boundaries.can?(current_user, :appoint, :instance)),
+              Bonfire.Boundaries.can?(current_user, :assign, :instance)),
          do: Bonfire.Boundaries.Fixtures.admin_circle(),
          else: current_user
 

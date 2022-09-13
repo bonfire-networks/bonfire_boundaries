@@ -109,7 +109,7 @@ defmodule Bonfire.Boundaries do
     with {:ok, _pointer} <-
            Ecto.Changeset.cast(%Pointers.Pointer{id: ulid(object)}, %{}, [])
            |> Bonfire.Boundaries.Acls.cast(creator, opts)
-           |> debug("ACL it")
+           #  |> debug("ACL it")
            |> repo().update() do
       # debug(one_grant: grant)
       {:ok, :granted}
