@@ -4,7 +4,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
   import Bonfire.Boundaries.Integration, only: [is_admin?: 1]
   alias Bonfire.UI.Me.LivePlugs
 
-  declare_extension("Boundaries & Circles", icon: "heroicons-solid:LockClosed")
+  declare_extension("Boundaries & Circles", icon: "twemoji:handshake")
 
   def mount(params, session, socket) do
     live_plug(params, session, socket, [
