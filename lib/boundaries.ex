@@ -168,7 +168,22 @@ defmodule Bonfire.Boundaries do
   end
 
   def can?(subject, verbs, :instance) do
-    can?(subject, verbs, Bonfire.Boundaries.Fixtures.instance_acl())
+    # cache needed for eg. for extension page
+    key =
+      "can:#{ulid(current_user(subject) || current_account(subject))}:#{inspect(verbs)}:instance"
+
+    with :not_set <- Process.get(key, :not_set) |> debug("from cache?") do
+      do_can_instance(subject, verbs, key)
+    end
+  end
+
+  defp do_can_instance(subject, verbs, key) do
+    val =
+      can?(subject, verbs, Bonfire.Boundaries.Fixtures.instance_acl())
+      |> debug("put in cache")
+
+    Process.put(key, val)
+    val
   end
 
   def load_pointer(item, opts) do

@@ -104,11 +104,11 @@
 
 <li>
   <LivePatch
-    to="/boundaries/acl/01SETT1NGSF0R10CA11NSTANCE"
+    to={"/boundaries/acl/#{Bonfire.Boundaries.Fixtures.instance_acl()}"}
     class={
       "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
       "!text-primary hover:!border-current border-current font-semibold":
-        @id == "01SETT1NGSF0R10CA11NSTANCE"
+        @id == Bonfire.Boundaries.Fixtures.instance_acl()
     }
   >
     <Icon
