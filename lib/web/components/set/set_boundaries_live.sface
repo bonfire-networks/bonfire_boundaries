@@ -6,7 +6,7 @@
       to_circles={@to_circles}
       thread_mode={@thread_mode}
     />
-    {#if Settings.get([:ui, :smart_input_as], nil, @__context__) == :sidebar and @thread_mode != :flat}
+    <!-- {#if Settings.get([:ui, :smart_input_as], nil, @__context__) == :sidebar and @thread_mode != :flat}
       <Bonfire.UI.Common.OpenModalLive
         id={Pointers.ULID.generate()}
         reusable_modal_id={@boundaries_modal_id}
@@ -30,19 +30,19 @@
           </div>
         </:open_btn>
       </Bonfire.UI.Common.OpenModalLive>
-    {#else}
-      <button
-        type="button"
-        x-show="!open_boundaries"
-        @click="open_boundaries = true"
-        phx-click="open_boundaries"
-        phx-target="#smart_input"
-        class="btn btn-sm btn-ghost btn-square"
-      >
-        <span class="sr-only">{l("Edit boundaries")}</span>
-        <Icon solid="ChevronRight" class="w-5 h-5 stroke-1" />
-      </button>
-    {/if}
+    {#else} -->
+    <button
+      type="button"
+      x-show="!open_boundaries"
+      @click="open_boundaries = true"
+      phx-click="open_boundaries"
+      phx-target="#smart_input"
+      class="btn btn-sm btn-ghost btn-square"
+    >
+      <span class="sr-only">{l("Edit boundaries")}</span>
+      <Icon solid="ChevronRight" class="w-5 h-5 stroke-1" />
+    </button>
+    <!-- {/if} -->
 
     <button
       type="button"
@@ -59,11 +59,8 @@
     <Bonfire.UI.Common.ReusableModalLive id={@boundaries_modal_id} />
   </div>
 
-  <div
-    :if={Settings.get([:ui, :smart_input_as], nil, @__context__) != :sidebar or @thread_mode == :flat}
-    x-show="open_boundaries"
-    class="p-3 bg-base-100"
-  >
+  <!-- :if={Settings.get([:ui, :smart_input_as], nil, @__context__) != :sidebar or @thread_mode == :flat} -->
+  <div x-show="open_boundaries" class="p-3 bg-base-100">
     <Bonfire.Boundaries.Web.BoundariesListLive
       to_boundaries={e(@to_boundaries, [])}
       to_boundaries_ids={to_boundaries_ids(e(@to_boundaries, []))}
@@ -82,7 +79,7 @@
       to_circles={e(@to_circles, [])}
       thread_mode={@thread_mode}
       showing_within={@showing_within}
-      create_activity_type={@create_activity_type}
+      create_object_type={@create_object_type}
     />
 
   {/if} -->

@@ -42,7 +42,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
       is_list(to_circles) && length(to_circles)==1 && to_circles |> List.first() |> elem(1) == ulid(@current_user) ->
         nobody
 
-      e(assigns, :create_activity_type, nil)==:message ->
+      e(assigns, :create_object_type, nil)==:message ->
 
           if length(to_circles)>0 do
             "Send a message to "

@@ -110,7 +110,6 @@ defmodule Bonfire.Boundaries.Circles do
                |> input_to_atoms()
                |> deep_merge(%{
                  caretaker: %{caretaker_id: ulid!(user)}
-
                  # encircles: [%{subject_id: user.id}] # add myself to circle?
                })
              )
