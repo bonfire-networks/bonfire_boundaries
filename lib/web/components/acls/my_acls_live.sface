@@ -16,7 +16,7 @@
   {#else}
     <div class={
       "",
-      "m-4": !@setting_boundaries
+      "p-4": !@setting_boundaries
     }>
       <div :if={!@setting_boundaries} class="flex items-center px-2 space-x-9">
         <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("Boundaries")}</h2>

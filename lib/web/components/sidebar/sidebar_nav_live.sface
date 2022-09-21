@@ -1,16 +1,9 @@
-<!-- 
-<li class="!mt-1  menu-title">
-  <span class="!text-base !font-medium capitalize">
-    {l "User"}
-  </span>
-</li> -->
-
 <li>
   <LivePatch
     to="/boundaries/circles"
     class={
-      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
-      "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "circles"
+      "",
+      "active": @selected_tab == "circles"
     }
   >
     <Icon iconify="bx:ShapeCircle" class="inline-block w-5 h-5 mr-2" />
@@ -22,8 +15,8 @@
   <LivePatch
     to="/boundaries/acls"
     class={
-      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
-      "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "acls"
+      "",
+      "active": @selected_tab == "acls"
     }
   >
     <Icon
@@ -44,8 +37,8 @@
   <LivePatch
     to="/boundaries/ghosted"
     class={
-      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
-      "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "ghosted"
+      "",
+      "active": @selected_tab == "ghosted"
     }
   >
     <Icon
@@ -59,8 +52,8 @@
   <LivePatch
     to="/boundaries/silenced"
     class={
-      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
-      "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "silenced"
+      "",
+      "active": @selected_tab == "silenced"
     }
   >
     <Icon
@@ -73,7 +66,7 @@
 
 <li class="!mt-1  menu-title">
   <span class="!text-base !font-medium capitalize">
-    {l("Instance")}
+    {l("Instance wide")}
   </span>
 </li>
 
@@ -81,8 +74,8 @@
   <LivePatch
     to="/boundaries/instance_circles"
     class={
-      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
-      "!text-primary hover:!border-current border-current font-semibold":
+      "",
+      "active":
         @selected_tab == "instance_circles"
     }
   >
@@ -96,7 +89,7 @@
   >
   <LivePatch 
     to={"/boundaries/instance_acls"}
-    class={"flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",  "!text-primary hover:!border-current border-current font-semibold": @selected_tab == "instance_acls"}>
+    class={"",  "active": @selected_tab == "instance_acls"}>
     <Icon solid="LockClosed" class={"mr-2 w-4 h-4 text-base-content/80", "!text-primary": @selected_tab == "feed"} />
     {l "Local Boundaries"}
   </LivePatch>
@@ -106,8 +99,8 @@
   <LivePatch
     to={"/boundaries/acl/#{Bonfire.Boundaries.Fixtures.instance_acl()}"}
     class={
-      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
-      "!text-primary hover:!border-current border-current font-semibold":
+      "",
+      "active":
         @id == Bonfire.Boundaries.Fixtures.instance_acl()
     }
   >
@@ -123,8 +116,8 @@
   <LivePatch
     to="/boundaries/instance_ghosted"
     class={
-      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
-      "!text-primary hover:!border-current border-current font-semibold":
+      "",
+      "active":
         @selected_tab == "instance_ghosted"
     }
   >
@@ -139,8 +132,8 @@
   <LivePatch
     to="/boundaries/instance_silenced"
     class={
-      "flex items-center border-l pl-4 -ml-px border-transparent hover:border-base-content text-base-content/70 hover:text-base-content",
-      "!text-primary hover:!border-current border-current font-semibold":
+      "",
+      "active":
         @selected_tab == "instance_silenced"
     }
   >

@@ -80,7 +80,7 @@
         <!-- Panel -->
         <section :if={@section == "members"} role="tabpanel" class="">
           <div class="">
-            <div :if={!@read_only} class="m-4">
+            <div :if={!@read_only} class="p-4">
               <div class="flex items-center rounded-lg">
                 <form class="flex-1" :on-change="add">
                   <div class="flex-1" id={:select_more_circle} phx-hook="InputOrSelectOne">
