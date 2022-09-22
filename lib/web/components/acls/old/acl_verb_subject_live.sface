@@ -18,9 +18,9 @@
         <div>{e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) ||
             l("Untitled boundary")}</div>
       </div>
-      <LivePatch to="#" class="text-sm font-medium link">
+      <!-- <LivePatch to="#" class="text-sm font-medium link">
         {l("Settings")}
-      </LivePatch>
+      </LivePatch> -->
       <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
     </div>
   </div>
