@@ -3,7 +3,7 @@
     to="/boundaries/circles"
     class={
       "",
-      "active": @selected_tab == "circles"
+      active: @selected_tab == "circles"
     }
   >
     <Icon iconify="bx:ShapeCircle" class="inline-block w-5 h-5 mr-2" />
@@ -16,7 +16,7 @@
     to="/boundaries/acls"
     class={
       "",
-      "active": @selected_tab == "acls"
+      active: @selected_tab == "acls"
     }
   >
     <Icon
@@ -38,7 +38,7 @@
     to="/boundaries/ghosted"
     class={
       "",
-      "active": @selected_tab == "ghosted"
+      active: @selected_tab == "ghosted"
     }
   >
     <Icon
@@ -53,7 +53,7 @@
     to="/boundaries/silenced"
     class={
       "",
-      "active": @selected_tab == "silenced"
+      active: @selected_tab == "silenced"
     }
   >
     <Icon
@@ -75,8 +75,7 @@
     to="/boundaries/instance_circles"
     class={
       "",
-      "active":
-        @selected_tab == "instance_circles"
+      active: @selected_tab == "instance_circles"
     }
   >
     <Icon iconify="bx:ShapeCircle" class="inline-block w-5 h-5 mr-2" />
@@ -100,8 +99,7 @@
     to={"/boundaries/acl/#{Bonfire.Boundaries.Fixtures.instance_acl()}"}
     class={
       "",
-      "active":
-        @id == Bonfire.Boundaries.Fixtures.instance_acl()
+      active: @id == Bonfire.Boundaries.Fixtures.instance_acl()
     }
   >
     <Icon
@@ -117,8 +115,7 @@
     to="/boundaries/instance_ghosted"
     class={
       "",
-      "active":
-        @selected_tab == "instance_ghosted"
+      active: @selected_tab == "instance_ghosted"
     }
   >
     <Icon
@@ -133,8 +130,7 @@
     to="/boundaries/instance_silenced"
     class={
       "",
-      "active":
-        @selected_tab == "instance_silenced"
+      active: @selected_tab == "instance_silenced"
     }
   >
     <Icon
