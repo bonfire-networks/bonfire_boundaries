@@ -55,9 +55,9 @@
     </button>
   </div>
 
-  <div>
+  <!-- <div>
     <Bonfire.UI.Common.ReusableModalLive id={@boundaries_modal_id} />
-  </div>
+  </div> -->
 
   <!-- :if={Settings.get([:ui, :smart_input_as], nil, @__context__) != :sidebar or @thread_mode == :flat} -->
   <div x-show="open_boundaries" class="p-3 bg-base-100">
