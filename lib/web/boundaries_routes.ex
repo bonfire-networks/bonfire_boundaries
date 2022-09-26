@@ -1,22 +1,6 @@
 defmodule Bonfire.Boundaries.Web.Routes do
   defmacro __using__(_) do
     quote do
-      pipeline :guest_only do
-        plug(Bonfire.UI.Me.Plugs.GuestOnly)
-      end
-
-      pipeline :account_required do
-        plug(Bonfire.UI.Me.Plugs.AccountRequired)
-      end
-
-      pipeline :user_required do
-        plug(Bonfire.UI.Me.Plugs.UserRequired)
-      end
-
-      pipeline :admin_required do
-        plug(Bonfire.UI.Me.Plugs.AdminRequired)
-      end
-
       # pages anyone can view
       scope "/", Bonfire.Boundaries.Web do
         pipe_through(:browser)
