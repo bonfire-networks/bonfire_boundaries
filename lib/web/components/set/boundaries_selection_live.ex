@@ -3,8 +3,8 @@ defmodule Bonfire.Boundaries.Web.BoundariesSelectionLive do
 
   # prop showing_within, :any
   prop to_boundaries, :list, default: []
-  prop to_circles, :list
-  prop thread_mode, :atom
+  prop to_circles, :list, default: []
+  prop thread_mode, :atom, default: nil
 
   def input_value(boundaries) do
     boundaries

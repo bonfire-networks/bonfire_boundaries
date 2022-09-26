@@ -3,8 +3,8 @@ defmodule Bonfire.Boundaries.Web.BoundariesDropdownLive do
 
   # prop showing_within, :any
   prop to_boundaries, :list, default: []
-  prop to_circles, :list
-  prop thread_mode, :atom
+  prop to_circles, :list, default: []
+  prop thread_mode, :atom, default: nil
   prop showing_within, :any, default: nil
   prop create_object_type, :atom, default: nil
 end
