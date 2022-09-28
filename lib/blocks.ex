@@ -63,7 +63,7 @@ defmodule Bonfire.Boundaries.Blocks do
   # @doc "Block something for the current user (current_user should be passed in opts)"
   defp mutate(block_or_unblock, user_or_instance_to_block, block_type, opts)
        when block_type in [:silence, :silence_them] do
-    current_user = Utils.current_user(opts)
+    current_user = Utils.current_user_required(opts)
     silence_them = types_blocked(block_type)
 
     debug(

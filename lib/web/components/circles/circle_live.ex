@@ -116,7 +116,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     with {:ok, circle} <-
            Circles.edit(
              e(socket.assigns, :circle, nil),
-             current_user(socket),
+             current_user_required(socket),
              attrs
            ) do
       {:noreply,

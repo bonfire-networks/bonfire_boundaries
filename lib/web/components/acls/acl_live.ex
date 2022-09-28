@@ -118,7 +118,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     debug(attrs)
 
     with {:ok, acl} <-
-           Acls.edit(e(socket.assigns, :acl, nil), current_user(socket), attrs) do
+           Acls.edit(e(socket.assigns, :acl, nil), current_user_required(socket), attrs) do
       {:noreply,
        socket
        |> assign_flash(:info, l("Edited!"))
@@ -141,7 +141,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   def handle_event("edit_grant", attrs, socket) do
     # debug(attrs)
-    current_user = current_user(socket)
+    current_user = current_user_required(socket)
     edit_grant = e(attrs, "subject", nil)
     acl = e(socket.assigns, :acl, nil)
     # verb_value = List.first(Map.values(edit_grant))
