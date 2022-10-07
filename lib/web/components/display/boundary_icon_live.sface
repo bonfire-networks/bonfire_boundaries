@@ -13,20 +13,20 @@
           />
           <span
             :if={e(@with_label, false)}
-            class="text-sm btn btn-xs btn-outline border-base-content/30 normal-case"
+            class="text-sm normal-case btn btn-sm btn-outline border-base-content/30"
           >{l("Public")}</span>
         </span>
       {#match {"local", _}}
         <span
           data-tip={e(@object_boundary, :name, "Local")}
-          class="align-bottom tooltip tooltip-bottom z-20"
+          class="z-20 align-bottom tooltip tooltip-bottom"
         >
           <Icon solid="LocationMarker" class="w-4 h-4 text-opacity-50 text-base-content" />
         </span>
       {#match _}
         <span
           data-tip={e(@object_boundary, :name, "Custom Boundaries")}
-          class="align-bottom tooltip tooltip-bottom z-20"
+          class="z-20 align-bottom tooltip tooltip-bottom"
         >
           <Icon solid="Cog" class="w-4 h-4 text-opacity-50 text-base-content" />
         </span>
