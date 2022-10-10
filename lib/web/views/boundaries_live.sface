@@ -1,4 +1,6 @@
-<section class="bg-base-100">
+<Bonfire.UI.Common.PageTitleLive page_title={@page_title} />
+
+<section class="rounded-md shadow bg-base-100">
   {#case @selected_tab}
     {#match "circles"}
       <Dynamic.LiveComponent
@@ -61,11 +63,11 @@
         scope={nil}
       />
 
-      <Dynamic.LiveComponent
+      <!-- <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
         module={Bonfire.Boundaries.Web.MyCirclesLive}
         id="circles"
         scope={nil}
-      />
+      /> -->
   {/case}
 </section>
