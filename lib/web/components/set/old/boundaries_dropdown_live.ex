@@ -6,5 +6,5 @@ defmodule Bonfire.Boundaries.Web.BoundariesDropdownLive do
   prop to_circles, :list, default: []
   prop thread_mode, :atom, default: nil
   prop showing_within, :any, default: nil
-  prop create_object_type, :atom, default: nil
+  prop create_object_type, :any, default: nil
 end

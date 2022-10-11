@@ -2,7 +2,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesListLive do
   use Bonfire.UI.Common.Web, :stateless_component
   use Bonfire.Common.Utils
 
-  prop create_object_type, :atom, default: nil
+  prop create_object_type, :any, default: nil
   prop to_boundaries, :list, default: nil
   prop to_boundaries_ids, :list, default: []
   prop to_circles, :list, default: []
