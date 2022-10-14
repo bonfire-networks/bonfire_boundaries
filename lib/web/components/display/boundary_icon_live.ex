@@ -8,6 +8,8 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconLive do
   prop with_icon, :boolean, default: false
   prop with_label, :boolean, default: false
 
+  prop class, :css_class, default: nil
+
   def preload(list_of_assigns),
     do:
       Bonfire.Boundaries.LiveHandler.maybe_preload_boundaries(list_of_assigns,
