@@ -151,12 +151,16 @@ defmodule Bonfire.Boundaries do
 
   def can?(subject, verbs, object)
       when is_map(object) or is_binary(object) or is_list(object) do
-    case Bonfire.Boundaries.load_pointer(object,
-           current_user: current_user(subject),
-           current_account: current_account(subject),
-           verbs: verbs,
-           ids_only: true
-         ) do
+    current_user = current_user(subject)
+    current_user_id = ulid(current_user)
+
+    case (not is_nil(current_user_id) and e(object, :created, :creator_id, nil) == current_user_id) or
+           Bonfire.Boundaries.load_pointer(object,
+             current_user: current_user,
+             current_account: current_account(subject),
+             verbs: verbs,
+             ids_only: true
+           ) do
       %{id: _} ->
         true
 

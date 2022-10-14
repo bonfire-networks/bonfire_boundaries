@@ -111,6 +111,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "akar-icons:schedule",
         summary: "Set an expected or desired date"
       },
+      pin: %{
+        id: "1P1NN1NNG1S11KEH1GH11GHT1T",
+        verb: "Pin",
+        icon: "eos-icons:pin",
+        summary: "Pin something to highlight it"
+      },
 
       # WIP adding verbs, see: https://github.com/bonfire-networks/bonfire-app/issues/406
 
@@ -180,7 +186,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       :request
     ]
 
-    verbs_interact_incl_boost = verbs_interact_minus_boost ++ [:boost]
+    verbs_interact_incl_boost = verbs_interact_minus_boost ++ [:boost, :pin]
     verbs_interact_and_reply = verbs_interact_incl_boost ++ [:reply]
     verbs_interact_and_create = verbs_interact_and_reply ++ [:create]
 
