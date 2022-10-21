@@ -23,7 +23,7 @@ defmodule Bonfire.Boundaries.Circles do
   @default_q_opts [exclude_circles: ["0KF1NEY0VD0N0TWANTT0HEARME"]]
 
   # special built-in circles (eg, guest, local, activity_pub)
-  def circles, do: Config.get([:circles])
+  def circles, do: Config.get([:circles], %{})
 
   def stereotype_ids do
     circles()

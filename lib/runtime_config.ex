@@ -1,4 +1,5 @@
 defmodule Bonfire.Boundaries.RuntimeConfig do
+  @behaviour Bonfire.Common.ConfigModule
   def config_module, do: true
 
   @doc """
