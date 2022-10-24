@@ -3,7 +3,7 @@ defmodule Bonfire.Boundaries.Integration do
   # alias Bonfire.Common.Utils
   # import Untangle
 
-  def repo, do: Config.get!(:repo_module)
+  def repo, do: Config.repo()
 
   def is_admin?(user) do
     if is_map(user) and Map.get(user, :instance_admin) do

@@ -36,12 +36,12 @@ defmodule Bonfire.Boundaries.Circles do
     ulid(acl) in stereotype_ids()
   end
 
-  def get(slug) when is_atom(slug), do: Config.get([:circles])[slug]
+  def get(slug) when is_atom(slug), do: circles()[slug]
   def get(id) when is_binary(id), do: get_tuple(id) |> elem_or(1, nil)
 
   def get!(slug) when is_atom(slug) do
     get(slug) ||
-      raise RuntimeError, message: "Missing default circle: #{inspect(slug)}"
+      raise RuntimeError, message: "Missing built-in circle: #{inspect(slug)}"
   end
 
   def get_id(slug), do: Map.get(circles(), slug, %{})[:id]
@@ -56,6 +56,13 @@ defmodule Bonfire.Boundaries.Circles do
     Enum.find(circles(), fn {_slug, c} ->
       c[:id] == id
     end)
+  end
+
+  def list_built_ins() do
+    Enum.map(circles(), fn {_slug, %{id: id}} ->
+      id
+    end)
+    |> list_by_ids()
   end
 
   # def list, do: repo().many(from(u in Circle, left_join: named in assoc(u, :named), preload: [:named]))

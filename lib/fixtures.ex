@@ -74,6 +74,7 @@ defmodule Bonfire.Boundaries.Fixtures do
       Utils.ulids(acls ++ circles)
       |> Enum.map(&%{id: &1, caretaker_id: admin_circle})
     )
+    |> info("Init built-in verbs and boundaries")
 
     # make the instance ACL control the instance object (which are the same)
     Bonfire.Boundaries.Controlleds.add_acls(instance_acl, instance_acl)

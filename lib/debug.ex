@@ -9,16 +9,16 @@ defmodule Bonfire.Boundaries.Debug do
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Circles
 
-  alias Bonfire.Common.Repo
+  import Bonfire.Boundaries.Integration
   import Ecto.Query, only: [from: 2]
 
   defp get_user_acls(user) do
     Acls.list(current_user: user, skip_boundary_check: true)
-    |> Repo.preload([:grants])
+    |> repo().preload([:grants])
   end
 
   def debug_user_circles(user) do
-    user = Repo.preload(user, [encircles: [circle: [:named]]], force: true)
+    user = repo().preload(user, [encircles: [circle: [:named]]], force: true)
     IO.puts("User: #{user.id}")
 
     for encircle <- user.encircles do
@@ -75,7 +75,7 @@ defmodule Bonfire.Boundaries.Debug do
       where: s.subject_id in ^Utils.ulid(users),
       where: s.object_id in ^Utils.ulid(things)
     )
-    |> Repo.all()
+    |> repo().all()
     |> Enum.group_by(&{&1.subject_id, &1.object_id, &1.value})
     |> for({_k, [v | _] = vs} <- ...) do
       Map.put(v, :verbs, Enum.sort(Enum.map(vs, &Verbs.get!(&1.verb_id).verb)))
