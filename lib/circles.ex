@@ -226,6 +226,12 @@ defmodule Bonfire.Boundaries.Circles do
   def list_my(user, opts \\ []),
     do: repo().many(list_my_q(user, opts ++ @default_q_opts))
 
+  def list_my_with_global(user, opts \\ []) do
+    list_my(user,
+      extra_ids_to_include: opts[:global_circles] || Bonfire.Boundaries.Fixtures.global_circles()
+    )
+  end
+
   def list_my_with_counts(user, opts \\ []) do
     list_my_q(user, opts ++ @default_q_opts)
     |> join(

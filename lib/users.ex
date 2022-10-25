@@ -98,9 +98,9 @@ defmodule Bonfire.Boundaries.Users do
   end
 
   defp default_profile_visibility do
-    if Bonfire.Common.Config.get(
-         [Bonfire.Me.Users, :discoverable],
-         true
+    if !Bonfire.Common.Config.get(
+         [Bonfire.Me.Users, :undiscoverable],
+         false
        ) do
       [:guests_may_see_read]
     else
