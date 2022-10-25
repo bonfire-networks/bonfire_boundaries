@@ -169,6 +169,9 @@ defmodule Bonfire.Boundaries.Circles do
   def is_encircled_by?(subject, circle) when not is_list(circle),
     do: is_encircled_by?(subject, [circle])
 
+  def is_encircled_by?(subject, circle) when is_nil(subject) or is_nil(circle) or circle == [],
+    do: nil
+
   def is_encircled_by?(subject, circles),
     do: repo().exists?(is_encircled_by_q(subject, circles))
 
