@@ -8,7 +8,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   def handle_event("blocks", %{"id" => id} = attrs, socket)
       when is_binary(id) do
     info(attrs)
-    current_user = current_user_required(socket)
+    current_user = current_user_required!(socket)
     opts = [current_user: current_user]
 
     can_instance_wide =
@@ -43,7 +43,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("block", %{"id" => id, "scope" => scope} = attrs, socket)
       when is_binary(id) do
-    current_user = current_user_required(socket)
+    current_user = current_user_required!(socket)
 
     can_instance_wide =
       Bonfire.Boundaries.can?(current_user, :block, :instance) ||
@@ -86,7 +86,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("unblock", %{"id" => id, "scope" => scope} = attrs, socket)
       when is_binary(id) do
-    current_user = current_user_required(socket)
+    current_user = current_user_required!(socket)
 
     can_instance_wide =
       Bonfire.Boundaries.can?(current_user, :block, :instance) ||
@@ -185,7 +185,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   def circle_create(attrs, socket) do
     with {:ok, %{id: id} = circle} <-
            Circles.create(
-             e(socket.assigns, :scope, nil) || current_user_required(socket),
+             e(socket.assigns, :scope, nil) || current_user_required!(socket),
              attrs
            ) do
       # Bonfire.UI.Common.OpenModalLive.close()
@@ -207,7 +207,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     id = ulid!(e(socket.assigns, :circle, nil))
 
     with {:ok, _circle} <-
-           Circles.edit(id, current_user_required(socket), %{
+           Circles.edit(id, current_user_required!(socket), %{
              encircles: e(circle_params, "encircle", [])
            }) do
       {:noreply, assign_flash(socket, :info, "OK")}
@@ -230,7 +230,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     id = ulid!(e(socket.assigns, :circle, nil))
 
     with {:ok, _circle} <-
-           Circles.delete(id, current_user_required(socket)) |> debug() do
+           Circles.delete(id, current_user_required!(socket)) |> debug() do
       {:noreply,
        socket
        |> assign_flash(:info, l("Deleted"))
@@ -242,7 +242,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     id = ulid!(e(socket.assigns, :circle, nil))
 
     with {:ok, _circle} <-
-           Circles.soft_delete(id, current_user_required(socket)) |> debug() do
+           Circles.soft_delete(id, current_user_required!(socket)) |> debug() do
       {:noreply,
        socket
        |> assign_flash(:info, l("Archived"))
@@ -254,7 +254,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     id = ulid!(e(socket.assigns, :acl, nil))
 
     with {:ok, _} <-
-           Acls.soft_delete(id, current_user_required(socket)) |> debug() do
+           Acls.soft_delete(id, current_user_required!(socket)) |> debug() do
       {:noreply,
        socket
        |> assign_flash(:info, l("Archived"))
@@ -266,7 +266,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     id = ulid!(e(socket.assigns, :acl, nil))
 
     with {:ok, _} <-
-           Acls.delete(id, current_user_required(socket)) |> debug() do
+           Acls.delete(id, current_user_required!(socket)) |> debug() do
       {:noreply,
        socket
        |> assign_flash(:info, l("Deleted"))
@@ -285,7 +285,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   def acl_create(attrs, socket) do
     with {:ok, %{id: id} = acl} <-
            Acls.create(attrs,
-             current_user: e(socket.assigns, :scope, nil) || current_user_required(socket)
+             current_user: e(socket.assigns, :scope, nil) || current_user_required!(socket)
            ) do
       # Bonfire.UI.Common.OpenModalLive.close()
 
