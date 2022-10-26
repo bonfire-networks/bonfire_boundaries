@@ -1,0 +1,23 @@
+<div class="divide-y divide-base-300">
+  <div x-data="{open: false}" class="p-3 rounded-t shadow bg-base-100">
+    <div class="flex items-center justify-between">
+      <div class="flex flex-col gap-1">
+        <div class="text-sm font-bold">{l("Editor")}</div>
+        <div class="text-sm font-light text-base-content/70">{l("Identify this topic")}</div>
+      </div>
+      <button type="button" @click="open = !open" class="normal-case btn btn-sm">{l("Expand")}</button>
+    </div>
+    <div x-show="open" x-collapse>
+    </div>
+  </div>
+  <div x-data="{open: false}" class="p-3 rounded-t shadow bg-base-100">
+    <div class="flex items-center justify-between">
+      <div class="flex flex-col gap-1">
+        <div class="text-sm font-bold">{l("Reviewer")}</div>
+      </div>
+      <button type="button" @click="open = !open" class="normal-case btn btn-sm">{l("Expand")}</button>
+    </div>
+    <div x-show="open" x-collapse>
+    </div>
+  </div>
+</div>
