@@ -212,12 +212,12 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   defp is_blocked_by?(user_or_peer, _block_types, current_user_ids) do
-    error(
+    warn(
       user_or_peer,
       "no pattern found for user_or_peer (or current_user/current_user_ids)"
     )
 
-    error(
+    warn(
       current_user_ids,
       "no pattern found for current_user/current_user_ids (or user_or_peer)"
     )
