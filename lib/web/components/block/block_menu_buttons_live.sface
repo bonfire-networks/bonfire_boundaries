@@ -2,15 +2,12 @@
   <Bonfire.Boundaries.Web.BlockButtonLive
     object={@object}
     with_icon
-    label={""}
+    label=""
     class="flex items-center w-full text-sm text-neutral-content/80"
   />
 </li>
 
-<li
-  :if={@current_user && e(peered(@object, @peered), :peer_id, nil)}
-  class=""
->
+<li :if={@current_user && e(peered(@object, @peered), :peer_id, nil)} class="">
   <Bonfire.Boundaries.Web.BlockButtonLive
     with_icon
     object={e(peered(@object, @peered), :peer_id, nil)}

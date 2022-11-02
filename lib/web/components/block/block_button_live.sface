@@ -3,7 +3,7 @@
     id={Pointers.ULID.generate()}
     title_text={l("Block") <> " " <> e(@label, "")}
     form_opts={%{"phx-submit" => "Bonfire.Boundaries:blocks"}}
-    >
+  >
     <input type="hidden" name="id" value={e(@object, :id, @object)}>
     <div class="mt-3 text-sm">{l(
         "When you feel unsafe, or you tried discussing or flagging problematic people or content and it went nowhere, or you simply came across spam or trolls, you can always resort to blocking."
