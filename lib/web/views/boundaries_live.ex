@@ -4,7 +4,12 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
   import Bonfire.Boundaries.Integration, only: [is_admin?: 1]
   alias Bonfire.UI.Me.LivePlugs
 
-  # declare_extension("Boundaries", icon: "twemoji:handshake")
+  declare_extension("Boundaries", icon: "twemoji:handshake", exclude_from_nav: true)
+
+  declare_settings_nav_link(:extension,
+    # verb: :tag,
+    scopes: [:user, :instance]
+  )
 
   def mount(params, session, socket) do
     live_plug(params, session, socket, [
