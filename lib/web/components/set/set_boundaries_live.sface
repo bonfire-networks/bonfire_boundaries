@@ -1,6 +1,6 @@
 <div>
   <!-- {#if Settings.get(:experimental_features_enabled, false, @__context__)} -->
-  <div class="flex items-center pr-2 space-x-2 bg-base-100 border-base-content/10">
+  <div class="flex items-center mx-2 my-1.5 gap-2 bg-base-100 border-base-content/10">
     <Bonfire.Boundaries.Web.BoundariesSelectionLive
       to_boundaries={@to_boundaries}
       to_circles={@to_circles}
@@ -37,10 +37,10 @@
       @click="open_boundaries = true"
       phx-click="open_boundaries"
       phx-target="#smart_input"
-      class="btn btn-sm btn-ghost btn-square"
+      class="btn btn-sm opacity-70 btn-circle"
     >
       <span class="sr-only">{l("Edit boundaries")}</span>
-      <Icon solid="ChevronRight" class="w-5 h-5 stroke-1" />
+      <Icon iconify="fluent:people-edit-20-filled" class="w-4 h-4" />
     </button>
     <!-- {/if} -->
 
