@@ -83,7 +83,7 @@ defmodule Bonfire.Boundaries.Acls do
           changeset.repo.insert_all(Grant, custom_grants)
           changeset
         end)
-        |> Changesets.put_assoc(:controlled, controlled)
+        |> Changesets.put_assoc!(:controlled, controlled)
     end
   end
 
