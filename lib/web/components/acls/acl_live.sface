@@ -49,7 +49,7 @@
 
         <div
           :if={@section == "settings"}
-          to={"/settings/acl/#{ulid(@acl)}"}
+          to={~p"/settings/acl/#{ulid(@acl)}"}
           phx-click="assign"
           phx-value-section="permissions"
           phx-target={@myself}

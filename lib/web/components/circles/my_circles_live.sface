@@ -27,7 +27,7 @@
       <ul class="mt-3">
         {#for circle <- e(@circles, [])}
           <li class="flex items-center justify-between flex-1 p-3 mb-3 border rounded hover:bg-base-content/5 border-base-content/30">
-            <LiveRedirect class="flex-1 w-full" to={"/settings/circle/" <> circle.id}>
+            <LiveRedirect class="flex-1 w-full" to={~p"/settings/circle/" <> circle.id}>
               <div class="">
                 <div class="flex items-center space-x-2">
                   <!-- <Icon solid="UserGroup" class="w-5 h-5 text-base-content/80" /> -->

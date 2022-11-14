@@ -32,7 +32,7 @@
         <!-- Tab -->
         <li :if={!@setting_boundaries}>
           <div
-            to={"/settings/circle/#{ulid(@circle)}/members"}
+            to={~p"/settings/circle/#{ulid(@circle)}/members"}
             phx-click="assign"
             phx-value-section="members"
             phx-target={@myself}
@@ -48,7 +48,7 @@
 
         <li :if={!@read_only and !@setting_boundaries}>
           <div
-            to={"/settings/circle/#{ulid(@circle)}/suggestions"}
+            to={~p"/settings/circle/#{ulid(@circle)}/suggestions"}
             phx-click="assign"
             phx-value-section="suggestions"
             phx-target={@myself}
@@ -62,7 +62,7 @@
 
         <li :if={!@read_only and !@setting_boundaries}>
           <div
-            to={"/settings/circle/#{ulid(@circle)}/settings"}
+            to={~p"/settings/circle/#{ulid(@circle)}/settings"}
             phx-click="assign"
             phx-value-section="settings"
             phx-target={@myself}
