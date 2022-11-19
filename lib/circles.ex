@@ -163,14 +163,14 @@ defmodule Bonfire.Boundaries.Circles do
   @doc """
   Lists the circles that we are permitted to see.
   """
-  def is_encircled_by?(subject, circle) when is_atom(circle),
+  def is_encircled_by?(subject, circle) when is_nil(subject) or is_nil(circle) or circle == [],
+    do: nil
+
+  def is_encircled_by?(subject, circle) when is_atom(circle) and not is_nil(circle),
     do: is_encircled_by?(subject, [get_id!(circle)])
 
   def is_encircled_by?(subject, circle) when not is_list(circle),
     do: is_encircled_by?(subject, [circle])
-
-  def is_encircled_by?(subject, circle) when is_nil(subject) or is_nil(circle) or circle == [],
-    do: nil
 
   def is_encircled_by?(subject, circles),
     do: repo().exists?(is_encircled_by_q(subject, circles))

@@ -155,12 +155,15 @@ defmodule Bonfire.Boundaries do
     current_user_id = ulid(current_user)
 
     case (not is_nil(current_user_id) and e(object, :created, :creator_id, nil) == current_user_id) or
-           Bonfire.Boundaries.load_pointer(object,
+           pointer_permitted?(object,
              current_user: current_user,
              current_account: current_account(subject),
              verbs: verbs,
              ids_only: true
            ) do
+      true ->
+        true
+
       %{id: _} ->
         true
 
@@ -190,6 +193,22 @@ defmodule Bonfire.Boundaries do
     val
   end
 
+  def pointer_permitted?(item, opts) do
+    case ulid(item) do
+      id when is_binary(id) ->
+        load_query(id, e(opts, :ids_only, nil), opts ++ [limit: 1])
+        |> repo().exists?()
+
+      _ ->
+        error(
+          item,
+          "Expected an object or ULID ID, could not check boundaries"
+        )
+
+        nil
+    end
+  end
+
   def load_pointer(item, opts) do
     case ulid(item) do
       id when is_binary(id) ->
@@ -199,7 +218,7 @@ defmodule Bonfire.Boundaries do
       _ ->
         error(
           item,
-          "Expected an object or ULID ID, could not check boundaries for"
+          "Expected an object or ULID ID, could not check boundaries"
         )
 
         nil
