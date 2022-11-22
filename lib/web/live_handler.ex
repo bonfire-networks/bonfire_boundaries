@@ -562,7 +562,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
         do: boundaries_on_objects(list_of_ids),
         else: %{}
 
-    debug(my_states, "boundaries")
+    # debug(my_states, "boundaries")
 
     Enum.map(list_of_assigns, fn assigns ->
       object_id = ulid(the_object(assigns))
