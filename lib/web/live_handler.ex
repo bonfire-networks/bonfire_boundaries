@@ -464,11 +464,12 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
     list_of_objects =
       list_of_assigns
-      |> debug("list_of_assigns")
+      # |> debug("list_of_assigns")
       # only check when explicitly asked
       |> Enum.reject(&(e(&1, :check_object_boundary, nil) != true))
       |> Enum.map(&the_object/1)
-      |> debug("list_of_objects")
+
+    # |> debug("list_of_objects")
 
     list_of_ids =
       list_of_objects

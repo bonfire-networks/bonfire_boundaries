@@ -11,13 +11,4 @@ defmodule Bonfire.Boundaries.Web.BlockButtonLive do
   prop scope, :any
   # only used for unblock
   prop block_type, :any
-
-  def handle_event(action, attrs, socket),
-    do:
-      Bonfire.UI.Common.LiveHandlers.handle_event(
-        action,
-        attrs,
-        socket,
-        __MODULE__
-      )
 end

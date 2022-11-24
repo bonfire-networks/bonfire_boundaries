@@ -110,7 +110,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
-  def handle_event("edit", attrs, socket) do
+  def do_handle_event("edit", attrs, socket) do
     debug(attrs)
 
     with {:ok, circle} <-
@@ -131,7 +131,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
-  def handle_event("add", attrs, socket) do
+  def do_handle_event("add", attrs, socket) do
     # debug(attrs)
     with id when is_binary(id) <- e(attrs, "subject", nil),
          {:ok, _} <- Circles.add_to_circles(id, e(socket.assigns, :circle, nil)) do
@@ -154,7 +154,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
-  def handle_event("remove", attrs, socket) do
+  def do_handle_event("remove", attrs, socket) do
     # debug(attrs)
     with id when is_binary(id) <- e(attrs, "subject", nil),
          {1, _} <-
@@ -171,14 +171,19 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
-  def handle_event(action, attrs, socket),
-    do:
-      Bonfire.UI.Common.LiveHandlers.handle_event(
+  def handle_event(
         action,
         attrs,
-        socket,
-        __MODULE__
-      )
+        socket
+      ),
+      do:
+        Bonfire.UI.Common.LiveHandlers.handle_event(
+          action,
+          attrs,
+          socket,
+          __MODULE__,
+          &do_handle_event/3
+        )
 
   def f(%{edge: %{object: %{profile: _} = user}}), do: user
   def f(%{edge: %{subject: %{profile: _} = user}}), do: user

@@ -114,7 +114,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
-  def handle_event("edit", attrs, socket) do
+  def do_handle_event("edit", attrs, socket) do
     debug(attrs)
 
     with {:ok, acl} <-
@@ -131,15 +131,15 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
-  def handle_event("tagify_remove", %{"id" => subject} = _attrs, socket) do
+  def do_handle_event("tagify_remove", %{"id" => subject} = _attrs, socket) do
     Bonfire.Boundaries.LiveHandler.remove_from_acl(subject, socket)
   end
 
-  def handle_event("tagify_add", %{"id" => id} = _attrs, socket) do
+  def do_handle_event("tagify_add", %{"id" => id} = _attrs, socket) do
     Bonfire.Boundaries.LiveHandler.add_to_acl(id, socket)
   end
 
-  def handle_event("edit_grant", attrs, socket) do
+  def do_handle_event("edit_grant", attrs, socket) do
     # debug(attrs)
     current_user = current_user_required!(socket)
     edit_grant = e(attrs, "subject", nil)
@@ -176,14 +176,14 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
-  def handle_event("edit_circle", %{"id" => id}, socket) do
+  def do_handle_event("edit_circle", %{"id" => id}, socket) do
     debug(id, "circle_edit")
 
     {:noreply, assign(socket, :edit_circle_id, id)}
   end
 
   # TODO
-  def handle_event("back", _, socket) do
+  def do_handle_event("back", _, socket) do
     {:noreply,
      assign(
        socket,
@@ -192,14 +192,19 @@ defmodule Bonfire.Boundaries.Web.AclLive do
      )}
   end
 
-  def handle_event(action, attrs, socket),
-    do:
-      Bonfire.UI.Common.LiveHandlers.handle_event(
+  def handle_event(
         action,
         attrs,
-        socket,
-        __MODULE__
-      )
+        socket
+      ),
+      do:
+        Bonfire.UI.Common.LiveHandlers.handle_event(
+          action,
+          attrs,
+          socket,
+          __MODULE__,
+          &do_handle_event/3
+        )
 
   def can(grants) do
     grants

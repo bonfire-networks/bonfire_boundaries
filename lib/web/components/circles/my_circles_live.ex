@@ -50,16 +50,21 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
   end
 
   # TODO
-  def handle_event("back", _, socket) do
+  def do_handle_event("back", _, socket) do
     {:noreply, assign(socket, :section, nil)}
   end
 
-  def handle_event(action, attrs, socket),
-    do:
-      Bonfire.UI.Common.LiveHandlers.handle_event(
+  def handle_event(
         action,
         attrs,
-        socket,
-        __MODULE__
-      )
+        socket
+      ),
+      do:
+        Bonfire.UI.Common.LiveHandlers.handle_event(
+          action,
+          attrs,
+          socket,
+          __MODULE__,
+          &do_handle_event/3
+        )
 end
