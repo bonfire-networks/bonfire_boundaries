@@ -1,0 +1,144 @@
+digraph "xref graph" {
+  "lib/acls.ex"
+  "lib/acls.ex" -> "lib/boundaries.ex"
+  "lib/boundaries.ex" -> "lib/acls.ex"
+  "lib/boundaries.ex" -> "lib/controlleds.ex"
+  "lib/controlleds.ex" -> "lib/acls.ex"
+  "lib/controlleds.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/boundaries.ex" -> "lib/fixtures.ex"
+  "lib/fixtures.ex" -> "lib/acls.ex"
+  "lib/fixtures.ex" -> "lib/circles.ex"
+  "lib/circles.ex" -> "lib/fixtures.ex"
+  "lib/circles.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/circles.ex" -> "lib/queries.ex" [label="(compile)"]
+  "lib/queries.ex" -> "lib/circles.ex"
+  "lib/queries.ex" -> "lib/summary.ex"
+  "lib/queries.ex" -> "lib/verbs.ex"
+  "lib/verbs.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/fixtures.ex" -> "lib/controlleds.ex"
+  "lib/fixtures.ex" -> "lib/grants.ex"
+  "lib/grants.ex" -> "lib/circles.ex"
+  "lib/grants.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/grants.ex" -> "lib/queries.ex" [label="(compile)"]
+  "lib/fixtures.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/fixtures.ex" -> "lib/verbs.ex"
+  "lib/boundaries.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/boundaries.ex" -> "lib/queries.ex" [label="(compile)"]
+  "lib/acls.ex" -> "lib/fixtures.ex"
+  "lib/acls.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/acls.ex" -> "lib/queries.ex" [label="(compile)"]
+  "lib/acls.ex" -> "lib/stereotyped.ex"
+  "lib/acls.ex" -> "lib/verbs.ex"
+  "lib/blocks.ex"
+  "lib/blocks.ex" -> "lib/circles.ex"
+  "lib/blocks.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/boundaries.ex"
+  "lib/circles.ex"
+  "lib/controlleds.ex"
+  "lib/debug.ex"
+  "lib/debug.ex" -> "lib/acls.ex"
+  "lib/debug.ex" -> "lib/boundaries.ex"
+  "lib/debug.ex" -> "lib/circles.ex"
+  "lib/debug.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/debug.ex" -> "lib/summary.ex"
+  "lib/debug.ex" -> "lib/verbs.ex"
+  "lib/fixtures.ex"
+  "lib/grants.ex"
+  "lib/integration.ex"
+  "lib/migrations.ex"
+  "lib/queries.ex"
+  "lib/runtime_config.ex"
+  "lib/stereotyped.ex"
+  "lib/summary.ex"
+  "lib/users.ex"
+  "lib/users.ex" -> "lib/acls.ex"
+  "lib/users.ex" -> "lib/boundaries.ex"
+  "lib/users.ex" -> "lib/circles.ex"
+  "lib/users.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/users.ex" -> "lib/stereotyped.ex"
+  "lib/users.ex" -> "lib/verbs.ex"
+  "lib/verbs.ex"
+  "lib/web/boundaries_routes.ex"
+  "lib/web/components/acls/acl_live.ex"
+  "lib/web/components/acls/acl_live.ex" -> "lib/acls.ex"
+  "lib/web/components/acls/acl_live.ex" -> "lib/boundaries.ex"
+  "lib/web/components/acls/acl_live.ex" -> "lib/circles.ex"
+  "lib/web/components/acls/acl_live.ex" -> "lib/fixtures.ex"
+  "lib/web/components/acls/acl_live.ex" -> "lib/grants.ex"
+  "lib/web/components/acls/acl_live.ex" -> "lib/integration.ex"
+  "lib/web/components/acls/acl_live.ex" -> "lib/verbs.ex"
+  "lib/web/components/acls/acl_live.ex" -> "lib/web/components/circles/circle_live.ex" [label="(export)"]
+  "lib/web/components/circles/circle_live.ex" -> "lib/circles.ex"
+  "lib/web/components/circles/circle_live.ex" -> "lib/web/live_handler.ex"
+  "lib/web/live_handler.ex" -> "lib/acls.ex"
+  "lib/web/live_handler.ex" -> "lib/blocks.ex"
+  "lib/web/live_handler.ex" -> "lib/boundaries.ex"
+  "lib/web/live_handler.ex" -> "lib/circles.ex"
+  "lib/web/live_handler.ex" -> "lib/controlleds.ex"
+  "lib/web/live_handler.ex" -> "lib/fixtures.ex"
+  "lib/web/live_handler.ex" -> "lib/grants.ex"
+  "lib/web/live_handler.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/web/components/acls/acl_live.ex" -> "lib/web/components/circles/new_circle_live.ex" [label="(export)"]
+  "lib/web/components/acls/acl_live.ex" -> "lib/web/live_handler.ex"
+  "lib/web/components/acls/my_acls_live.ex"
+  "lib/web/components/acls/my_acls_live.ex" -> "lib/acls.ex"
+  "lib/web/components/acls/my_acls_live.ex" -> "lib/boundaries.ex"
+  "lib/web/components/acls/my_acls_live.ex" -> "lib/fixtures.ex"
+  "lib/web/components/acls/my_acls_live.ex" -> "lib/integration.ex"
+  "lib/web/components/acls/my_acls_live.ex" -> "lib/verbs.ex"
+  "lib/web/components/acls/my_acls_live.ex" -> "lib/web/components/acls/acl_live.ex" [label="(export)"]
+  "lib/web/components/acls/my_acls_live.ex" -> "lib/web/components/acls/new_acl_live.ex" [label="(export)"]
+  "lib/web/components/acls/new_acl_live.ex"
+  "lib/web/components/block/block_button_live.ex"
+  "lib/web/components/block/block_button_live.ex" -> "lib/boundaries.ex"
+  "lib/web/components/block/block_menu_buttons_live.ex"
+  "lib/web/components/block/block_menu_buttons_live.ex" -> "lib/web/components/block/block_button_live.ex" [label="(export)"]
+  "lib/web/components/blocks/blocks_live.ex"
+  "lib/web/components/blocks/blocks_live.ex" -> "lib/blocks.ex"
+  "lib/web/components/blocks/blocks_live.ex" -> "lib/boundaries.ex"
+  "lib/web/components/blocks/blocks_live.ex" -> "lib/integration.ex"
+  "lib/web/components/blocks/blocks_live.ex" -> "lib/web/components/block/block_button_live.ex" [label="(export)"]
+  "lib/web/components/check/if_can_live.ex"
+  "lib/web/components/check/if_can_live.ex" -> "lib/web/live_handler.ex"
+  "lib/web/components/circles/circle_live.ex"
+  "lib/web/components/circles/circle_preview_live.ex"
+  "lib/web/components/circles/drag_drop_WIP/edit_circle_live.ex"
+  "lib/web/components/circles/drag_drop_WIP/edit_circle_live.ex" -> "lib/circles.ex"
+  "lib/web/components/circles/my_circles_live.ex"
+  "lib/web/components/circles/my_circles_live.ex" -> "lib/boundaries.ex"
+  "lib/web/components/circles/my_circles_live.ex" -> "lib/circles.ex"
+  "lib/web/components/circles/my_circles_live.ex" -> "lib/fixtures.ex"
+  "lib/web/components/circles/my_circles_live.ex" -> "lib/integration.ex"
+  "lib/web/components/circles/my_circles_live.ex" -> "lib/web/components/circles/circle_preview_live.ex" [label="(export)"]
+  "lib/web/components/circles/my_circles_live.ex" -> "lib/web/components/circles/new_circle_live.ex" [label="(export)"]
+  "lib/web/components/circles/my_circles_live.ex" -> "lib/web/live_handler.ex"
+  "lib/web/components/circles/new_circle_live.ex"
+  "lib/web/components/display/boundary_icon_live.ex"
+  "lib/web/components/display/boundary_icon_live.ex" -> "lib/boundaries.ex"
+  "lib/web/components/display/boundary_icon_live.ex" -> "lib/web/live_handler.ex"
+  "lib/web/components/roles/roles_live.ex"
+  "lib/web/components/set/boundaries_info_live.ex"
+  "lib/web/components/set/boundaries_list_live.ex"
+  "lib/web/components/set/boundaries_list_live.ex" -> "lib/web/components/acls/my_acls_live.ex" [label="(export)"]
+  "lib/web/components/set/boundaries_selection_live.ex"
+  "lib/web/components/set/old/boundaries_dropdown_live.ex"
+  "lib/web/components/set/set_boundaries_live.ex"
+  "lib/web/components/set/set_boundaries_live.ex" -> "lib/web/components/set/boundaries_list_live.ex" [label="(export)"]
+  "lib/web/components/set/set_boundaries_live.ex" -> "lib/web/components/set/boundaries_selection_live.ex" [label="(export)"]
+  "lib/web/components/sidebar/sidebar_live.ex"
+  "lib/web/components/sidebar/sidebar_live.ex" -> "lib/web/components/sidebar/sidebar_mobile_live.ex" [label="(export)"]
+  "lib/web/components/sidebar/sidebar_mobile_live.ex" -> "lib/web/components/sidebar/sidebar_nav_live.ex" [label="(export)"]
+  "lib/web/components/sidebar/sidebar_nav_live.ex" -> "lib/boundaries.ex"
+  "lib/web/components/sidebar/sidebar_nav_live.ex" -> "lib/fixtures.ex"
+  "lib/web/components/sidebar/sidebar_live.ex" -> "lib/web/components/sidebar/sidebar_nav_live.ex" [label="(export)"]
+  "lib/web/components/sidebar/sidebar_mobile_live.ex"
+  "lib/web/components/sidebar/sidebar_nav_live.ex"
+  "lib/web/live_handler.ex"
+  "lib/web/views/boundaries_live.ex"
+  "lib/web/views/boundaries_live.ex" -> "lib/integration.ex" [label="(export)"]
+  "lib/web/views/boundaries_live.ex" -> "lib/web/components/acls/acl_live.ex"
+  "lib/web/views/boundaries_live.ex" -> "lib/web/components/acls/my_acls_live.ex"
+  "lib/web/views/boundaries_live.ex" -> "lib/web/components/blocks/blocks_live.ex" [label="(export)"]
+  "lib/web/views/boundaries_live.ex" -> "lib/web/components/circles/circle_live.ex"
+  "lib/web/views/boundaries_live.ex" -> "lib/web/components/circles/my_circles_live.ex"
+}
