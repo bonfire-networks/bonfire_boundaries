@@ -1,5 +1,10 @@
-<ul role="navigation" class="hidden md:block space-y-4">
-  <Bonfire.Boundaries.Web.SidebarNavLive selected_tab={@selected_tab} id={@id} />
-</ul>
+<Bonfire.Boundaries.Web.SidebarNavLive
+  class="class="
+  hidden
+  md:block
+  space-y-4"
+  selected_tab={@selected_tab}
+  id={@id}
+/>
 
-<Bonfire.Boundaries.Web.SidebarMobileLive selected_tab={@selected_tab} id={@id} />
+<!-- <Bonfire.Boundaries.Web.SidebarMobileLive selected_tab={@selected_tab} id={@id} /> -->

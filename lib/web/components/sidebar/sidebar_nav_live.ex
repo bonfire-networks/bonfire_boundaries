@@ -4,6 +4,8 @@ defmodule Bonfire.Boundaries.Web.SidebarNavLive do
   prop selected_tab, :string
   prop id, :string, default: nil
 
+  prop class, :css_class, default: "menu"
+
   declare_nav_component("Links to boundaries & circles management pages")
   # declare_settings_nav_component("Links to boundaries & circles management pages")
 end

@@ -32,9 +32,9 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
         selected_tab: "user",
         show_less_menu_items: true,
         page_title: l("Boundaries & Circles"),
-        page_header_aside: [
-          {Bonfire.UI.Me.SettingsViewsLive.HeaderAsideMobileMenuLive, []}
-        ],
+        # page_header_aside: [
+        #   {Bonfire.UI.Me.SettingsViewsLive.HeaderAsideMobileMenuLive, []}
+        # ],
         id: nil,
         page: "boundaries"
       )

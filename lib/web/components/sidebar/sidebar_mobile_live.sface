@@ -63,9 +63,11 @@
       </div>
       <div class="flex flex-col h-full overflow-y-auto shadow-xl bg-base-100">
         <div class="relative flex flex-col flex-1 p-4">
-          <ul role="navigation" class="menu bg-base-100 mb-12">
-            <Bonfire.Boundaries.Web.SidebarNavLive selected_tab={@selected_tab} id={@id} />
-          </ul>
+          <Bonfire.Boundaries.Web.SidebarNavLive
+            class="menu bg-base-100 mb-12"
+            selected_tab={@selected_tab}
+            id={@id}
+          />
         </div>
       </div>
     </div>
