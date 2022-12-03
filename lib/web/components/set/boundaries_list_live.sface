@@ -135,7 +135,7 @@
   <Bonfire.Boundaries.Web.MyAclsLive
     :if={@open_boundaries}
     id="my_boundaries"
-    to_boundaries={e(@to_boundaries, [])}
+    to_boundaries={@to_boundaries}
     to_boundaries_ids={@to_boundaries_ids}
     to_circles={@to_circles}
     hide_breakdown={@hide_breakdown}

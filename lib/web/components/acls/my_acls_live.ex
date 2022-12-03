@@ -7,7 +7,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
   prop hide_breakdown, :boolean, default: false
   prop setting_boundaries, :boolean, default: false
   prop click_override, :boolean, default: false
-  prop to_boundaries, :list, default: []
+  prop to_boundaries, :any, default: nil
   prop to_boundaries_ids, :list, default: []
   prop built_ins, :list, default: []
   prop section, :any, default: nil

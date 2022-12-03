@@ -62,8 +62,8 @@
   <!-- :if={Settings.get([:ui, :smart_input_as], nil, @__context__) != :sidebar or @thread_mode == :flat} -->
   <div x-show="open_boundaries" class="p-3 bg-base-100">
     <Bonfire.Boundaries.Web.BoundariesListLive
-      to_boundaries={e(@to_boundaries, [])}
-      to_boundaries_ids={to_boundaries_ids(e(@to_boundaries, []))}
+      to_boundaries={@to_boundaries}
+      to_boundaries_ids={to_boundaries_ids(@to_boundaries)}
       to_circles={@to_circles}
       open_boundaries={@open_boundaries}
       hide_breakdown
@@ -75,7 +75,7 @@
   <!-- {#else} 
 
     <Bonfire.Boundaries.Web.BoundariesDropdownLive
-      to_boundaries={e(@to_boundaries, [])}
+      to_boundaries={@to_boundaries}
       to_circles={@to_circles}
       thread_mode={@thread_mode}
       showing_within={@showing_within}
