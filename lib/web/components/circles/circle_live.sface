@@ -5,7 +5,7 @@
             GA
         </div> -->
       <div class="flex flex-col">
-        <div class="flex items-center space-x-2 text-2xl font-bold text-base-content">
+        <div class="flex items-center space-x-2 text-xl font-bold text-base-content">
           <div
             :if={@parent_back}
             phx-click="back"
@@ -14,12 +14,10 @@
           >
             <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
           </div>
-          <Icon solid="UserGroup" :if={!@parent_back} class="w-6 h-6 text-base-content/80" />
-
           <div>{e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) ||
               l("Untitled circle")}</div>
         </div>
-        <p class="mt-1 text-base font-regular text-base-content/80">{e(@circle, :extra_info, :summary, nil)}</p>
+        <p class="mt-1 text-sm font-regular text-base-content/80">{e(@circle, :extra_info, :summary, nil)}</p>
       </div>
     </div>
     <!-- Tabs -->

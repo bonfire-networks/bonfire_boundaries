@@ -1,0 +1,42 @@
+<div class="p-4">
+  <div class="flex items-center space-x-2">
+    <div
+      :if={@parent_back}
+      phx-click="back"
+      phx-target={@parent_back}
+      class="btn btn-sm btn-ghost btn-circle"
+    >
+      <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
+    </div>
+    <span>{l("Back")}</span>
+  </div>
+
+  <div x-data="{ name: '' }" class="w-full p-3 mt-3 border rounded border-base-content/30">
+
+    <div class="w-full form-control">
+      <label class="label">
+        <span class="font-medium label-text">{l("Enter a name for the role")}</span>
+      </label>
+      <div class="flex items-center">
+        <input
+          x-model="name"
+          name="named[name]"
+          type="text"
+          placeholder={l("Type here")}
+          class="w-full input input-bordered"
+        />
+      </div>
+    </div>
+
+    <button
+      phx-click="Bonfire.Boundaries:circle_create"
+      phx-target={@event_target}
+      :phx-value-name="name"
+      phx-value-no_redirect={if @setting_boundaries, do: "1"}
+      type="button"
+      class="w-full mt-3 normal-case btn btn-primary"
+    >
+      {l("Create")}
+    </button>
+  </div>
+</div>
