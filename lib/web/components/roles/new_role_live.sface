@@ -12,7 +12,6 @@
   </div>
 
   <div x-data="{ name: '' }" class="w-full p-3 mt-3 border rounded border-base-content/30">
-
     <div class="w-full form-control">
       <label class="label">
         <span class="font-medium label-text">{l("Enter a name for the role")}</span>
