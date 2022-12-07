@@ -34,7 +34,7 @@ defmodule Bonfire.Boundaries.Fixtures do
     # eg, guest, local, activity_pub
     circles = Map.values(Circles.circles())
     # eg, read, see, create...
-    verbs = Map.values(Verbs.verbs())
+    verbs = Keyword.values(Verbs.verbs())
     named = Enum.filter(acls ++ circles, & &1[:name])
 
     grants =

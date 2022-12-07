@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       disabled: false
 
     ### Verbs are like permissions. Each represents some activity or operation that may or may not be able to perform.
-    verbs = %{
+    verbs = [
       #
       see: %{
         id: "0BSERV1NG11ST1NGSEX1STENCE",
@@ -169,13 +169,17 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "Heroicons-Solid:Adjustments",
         summary: "Change general settings"
       }
-    }
+    ]
 
     all_verb_names = Enum.map(verbs, &elem(&1, 0))
     # |> IO.inspect()
     verbs_negative = fn verbs ->
       Enum.reduce(verbs, %{}, &Map.put(&2, &1, false))
     end
+
+    verbs_see_request = [:see, :request]
+    verbs_read_request = [:read, :request]
+    verbs_see_read_request = [:read, :see, :request]
 
     verbs_interact_minus_boost = [
       :read,
@@ -187,9 +191,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       :request
     ]
 
+    verbs_interact_reply_minus_boost = verbs_interact_minus_boost ++ [:reply]
+
     verbs_interact_incl_boost = verbs_interact_minus_boost ++ [:boost, :pin]
     verbs_interact_and_reply = verbs_interact_incl_boost ++ [:reply]
-    verbs_interact_and_create = verbs_interact_and_reply ++ [:create]
+    verbs_interact_and_contribute = verbs_interact_and_reply ++ [:create]
 
     public_acls = [
       :guests_may_see_read,
@@ -203,9 +209,15 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     config :bonfire,
       verbs: verbs,
+      role_verbs: [
+        read: verbs_see_read_request,
+        interact: verbs_interact_incl_boost,
+        participate: verbs_interact_and_reply,
+        contribute: verbs_interact_and_contribute
+      ],
       verbs_to_grant: [
         default: verbs_interact_and_reply,
-        message: verbs_interact_minus_boost ++ [:reply]
+        message: verbs_interact_reply_minus_boost
       ],
       # preset ACLs to show in smart input
       acls_to_present: [],
@@ -361,14 +373,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         ### Public ACLs need their permissions filled out
         # admins can care for every aspect of the instance
         instance_care: %{admin: all_verb_names},
-        guests_may_see_read: %{guest: [:read, :see, :request]},
-        guests_may_see: %{guest: [:see, :request]},
-        guests_may_read: %{guest: [:read, :request]},
+        guests_may_see_read: %{guest: verbs_see_read_request},
+        guests_may_see: %{guest: verbs_see_request},
+        guests_may_read: %{guest: verbs_read_request},
         # interact but not reply
         remotes_may_interact: %{activity_pub: verbs_interact_incl_boost},
         # interact and reply
         remotes_may_reply: %{activity_pub: verbs_interact_and_reply},
-        locals_may_read: %{local: [:read, :see, :request]},
+        locals_may_read: %{local: verbs_see_read_request},
         # interact but not reply
         locals_may_interact: %{local: verbs_interact_incl_boost},
         # interact and reply
