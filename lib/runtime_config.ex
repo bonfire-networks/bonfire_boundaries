@@ -181,12 +181,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_read_request = [:read, :request]
     verbs_see_read_request = [:read, :see, :request]
 
-    verbs_interact_minus_boost = verbs_see_read_request ++ [
-      :mention,
-      :tag,
-      :like,
-      :follow
-    ]
+    verbs_interact_minus_boost =
+      verbs_see_read_request ++
+        [
+          :mention,
+          :tag,
+          :like,
+          :follow
+        ]
 
     verbs_interact_reply_minus_boost = verbs_interact_minus_boost ++ [:reply]
 
