@@ -27,8 +27,7 @@ defmodule Bonfire.Boundaries.Verbs do
         message: "Missing default verb: #{inspect(id_or_name)}"
   end
 
-  def get_id(slug), do: Map.get(verbs(), slug, %{})[:id]
-
+  def get_id(slug), do: verbs()[slug][:id]
   def get_id!(slug), do: get!(slug)[:id]
 
   def ids(verbs) when is_list(verbs),
