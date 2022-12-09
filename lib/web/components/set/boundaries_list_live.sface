@@ -1,7 +1,7 @@
 <!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
 <div x-data="{show_boundary_list: true}">
   <div class="justify-between mb-4 flex items-center">
-    <div class="text-lg font-medium text-base-content">{l "Share the activity"}</div>
+    <div class="text-lg font-medium text-base-content">{l("Share the activity")}</div>
     <div class="flex items-center gap-3">
       <div class="btn normal-case opacity-80 btn-ghost btn-circle btn-sm">
         <Icon iconify="carbon:help" class="w-5 h-5" />
@@ -19,19 +19,13 @@
     <option>Share with specific circles/users</option>
   </select>
   <!-- <div class="link font-medium text-base-content/80 text-xs mt-2">{l "Add circles/users"}</div> -->
-  <div class="text-base mt-6 font-normal text-base-content/70">{l "Boundaries"}</div>
+  <div class="text-base mt-6 font-normal text-base-content/70">{l("Boundaries")}</div>
   <div class="flex flex-col gap-3 mt-3">
     <div class="flex justify-between">
       <Bonfire.UI.Common.ProfileItemLive user={current_user(@current_user)} />
-      <div
-        aria-haspopup="true"
-        class="dropdown dropdown-end"
-        >
-        <label
-          tabindex="0"
-          class="btn rounded normal-case btn-sm flex items-center gap-2"
-        >
-          <span>{l "Contribute"}</span>
+      <div aria-haspopup="true" class="dropdown dropdown-end">
+        <label tabindex="0" class="btn rounded normal-case btn-sm flex items-center gap-2">
+          <span>{l("Contribute")}</span>
           <!-- <Icon solid="ChevronDown" class="w-4 h-4" /> -->
         </label>
         <!-- <ul
@@ -48,8 +42,8 @@
       </div>
     </div>
   </div>
-  <div class="text-base mt-6 font-normal text-base-content/70">{l "General access"}</div>
-  <div class={"flex items-center justify-between flex-1 p-2 mb-4 mt-2"}>
+  <div class="text-base mt-6 font-normal text-base-content/70">{l("General access")}</div>
+  <div class="flex items-center justify-between flex-1 p-2 mb-4 mt-2">
     <label
       class="flex gap-16 items-center w-full"
       phx-click={JS.push(
@@ -67,14 +61,8 @@
           <div class="flex flex-col gap-1">
             <div class="flex items-center gap-2">
               <div class="text-sm font-semibold">{l("Public")}</div>
-              <div
-                aria-haspopup="true"
-                class="dropdown"
-                >
-                <label
-                  tabindex="0"
-                  class="btn btn-xs btn-ghost btn-circle"
-                >
+              <div aria-haspopup="true" class="dropdown">
+                <label tabindex="0" class="btn btn-xs btn-ghost btn-circle">
                   <Icon solid="ChevronDown" class="w-4 h-4" />
                 </label>
                 <ul
@@ -88,7 +76,6 @@
                   <li><a>Mentions only</a></li>
                 </ul>
               </div>
-
             </div>
             <div class="text-xs text-base-content/80">
               {l(
@@ -98,16 +85,10 @@
           </div>
         </div>
       </div>
-      
-      <div
-        aria-haspopup="true"
-        class="dropdown dropdown-end"
-        >
-        <label
-          tabindex="0"
-          class="btn rounded normal-case btn-sm flex items-center gap-2"
-        >
-          <span>{l "Participate"}</span>
+
+      <div aria-haspopup="true" class="dropdown dropdown-end">
+        <label tabindex="0" class="btn rounded normal-case btn-sm flex items-center gap-2">
+          <span>{l("Participate")}</span>
           <Icon solid="ChevronDown" class="w-4 h-4" />
         </label>
         <ul
@@ -116,13 +97,12 @@
           aria-orientation="vertical"
           class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
         >
-           <li><a>Read</a></li>
-           <li><a>Interact</a></li>
-           <li><a>Participate</a></li>
-           <li><a>Contribute</a></li>
+          <li><a>Read</a></li>
+          <li><a>Interact</a></li>
+          <li><a>Participate</a></li>
+          <li><a>Contribute</a></li>
         </ul>
       </div>
-
 
       <!-- <div class="flex items-center ml-4 space-x-2">
         <div
@@ -142,7 +122,7 @@
     </label>
   </div>
   <div class="flex justify-between items-center mt-4">
-    <div></div>
+    <div />
     <button
       type="button"
       x-show="open_boundaries"
@@ -154,7 +134,6 @@
     </button>
   </div>
 </div>
-
 
 <!-- <div x-data="{show_boundary_list: true}">
   <ul :if={@open_boundaries != false} class="pt-2" x-show="show_boundary_list">
