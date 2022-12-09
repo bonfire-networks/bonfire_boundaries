@@ -1,86 +1,19 @@
 <div>
-  <!-- {#if Settings.get(:experimental_features_enabled, false, @__context__)} -->
-  <div class="flex items-center mx-2 my-1.5 gap-2 bg-base-100 border-base-content/10">
-    <Bonfire.Boundaries.Web.BoundariesSelectionLive
+  <div x-show="!open_boundaries" class="flex items-center mx gap-2">
+    <!-- <Bonfire.Boundaries.Web.BoundariesSelectionLive
       to_boundaries={@to_boundaries}
       to_circles={@to_circles}
       thread_mode={@thread_mode}
-    />
-    <!-- {#if Settings.get([:ui, :smart_input_as], nil, @__context__) == :sidebar and @thread_mode != :flat}
-      <Bonfire.UI.Common.OpenModalLive
-        id={Pointers.ULID.generate()}
-        reusable_modal_id={@boundaries_modal_id}
-        title_text={l("Set boundaries")}
-        no_actions
-        no_header
-      >
-        <Bonfire.Boundaries.Web.BoundariesListLive
-          to_boundaries={@to_boundaries}
-          to_boundaries_ids={to_boundaries_ids(@to_boundaries)}
-          to_circles={@to_circles}
-          open_boundaries
-          hide_breakdown
-          setting_boundaries
-          click_override
-        />
-        <:open_btn>
-          <div class="btn btn-sm btn-ghost btn-square">
-            <span class="sr-only">{l("Set boundaries")}</span>
-            <Icon solid="ChevronRight" class="w-5 h-5 stroke-1" />
-          </div>
-        </:open_btn>
-      </Bonfire.UI.Common.OpenModalLive>
-    {#else} -->
+    /> -->
     <button
       type="button"
-      x-show="!open_boundaries"
       @click="open_boundaries = true"
       phx-click="open_boundaries"
       phx-target="#smart_input"
-      class="btn btn-sm opacity-70 btn-circle"
+      class="flex items-center btn-sm min-h-0 h-[28px] normal-case btn  rounded-full opacity-90"
     >
-      <span class="sr-only">{l("Edit boundaries")}</span>
-      <Icon iconify="fluent:people-edit-20-filled" class="w-4 h-4" />
-    </button>
-    <!-- {/if} -->
-
-    <button
-      type="button"
-      x-show="open_boundaries"
-      @click="open_boundaries = false"
-      class="space-x-1 normal-case btn btn-primary btn-xs"
-    >
-      <Icon outline="Check" class="w-4 h-4" />
-      <span class="text-sm">{l("Done")}</span>
+      <span class="">{l(" Public")}</span>
+      <!-- <Icon iconify="fluent:people-edit-20-filled" class="w-4 h-4 text-base-content/70" /> -->
     </button>
   </div>
-
-  <!-- <div>
-    <Bonfire.UI.Common.ReusableModalLive id={@boundaries_modal_id} />
-  </div> -->
-
-  <!-- :if={Settings.get([:ui, :smart_input_as], nil, @__context__) != :sidebar or @thread_mode == :flat} -->
-  <div x-show="open_boundaries" class="p-3 bg-base-100">
-    <Bonfire.Boundaries.Web.BoundariesListLive
-      to_boundaries={@to_boundaries}
-      to_boundaries_ids={to_boundaries_ids(@to_boundaries)}
-      to_circles={@to_circles}
-      open_boundaries={@open_boundaries}
-      hide_breakdown
-      setting_boundaries
-      click_override
-    />
-  </div>
-
-  <!-- {#else} 
-
-    <Bonfire.Boundaries.Web.BoundariesDropdownLive
-      to_boundaries={@to_boundaries}
-      to_circles={@to_circles}
-      thread_mode={@thread_mode}
-      showing_within={@showing_within}
-      create_object_type={@create_object_type}
-    />
-
-  {/if} -->
 </div>
