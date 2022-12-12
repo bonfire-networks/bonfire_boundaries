@@ -2,8 +2,8 @@
   <div>
     <div class="form-control">
       <label class="label gap-2 cursor-pointer">
-        <input type="checkbox" class="checkbox" />
-        <span class="label-text text-sm text-base-content/70">{"Set as default boundary"}</span> 
+        <input type="checkbox" class="checkbox">
+        <span class="label-text text-sm text-base-content/70">{"Set as default boundary"}</span>
       </label>
     </div>
   </div>

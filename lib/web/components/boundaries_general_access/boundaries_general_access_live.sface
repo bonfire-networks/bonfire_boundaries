@@ -1,4 +1,4 @@
-<div class={"flex items-center justify-between flex-1  mb-8 mt-4"}>
+<div class="flex items-center justify-between flex-1  mb-8 mt-4">
   <label
     class="flex gap-16 items-center w-full"
     phx-click={JS.push(
@@ -10,56 +10,56 @@
       target: "#smart_input"
     )}
   >
-      <div class="flex-1">
-        <div class="flex items-start gap-4">
-          <span class="text-xl">🌍</span>
-          <div class="flex flex-col">
-            <div class="flex items-center gap-2">
-              <div class="text-sm font-semibold">{l("Public")}</div>
-              <div aria-haspopup="true" class="dropdown">
-                <label tabindex="0" class="btn btn-xs btn-ghost btn-circle">
-                  <Icon solid="ChevronDown" class="w-4 h-4" />
-                </label>
-                <ul
-                  tabindex="0"
-                  role="menu"
-                  aria-orientation="vertical"
-                  class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
-                >
-                  <li><a>{l "Public"}</a></li>
-                  <li><a>{l "Local instance"}</a></li>
-                  <li><a>{l "Mentions only"}</a></li>
-                </ul>
-              </div>
+    <div class="flex-1">
+      <div class="flex items-start gap-4">
+        <span class="text-xl">🌍</span>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2">
+            <div class="text-sm font-semibold">{l("Public")}</div>
+            <div aria-haspopup="true" class="dropdown">
+              <label tabindex="0" class="btn btn-xs btn-ghost btn-circle">
+                <Icon solid="ChevronDown" class="w-4 h-4" />
+              </label>
+              <ul
+                tabindex="0"
+                role="menu"
+                aria-orientation="vertical"
+                class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
+              >
+                <li><a>{l("Public")}</a></li>
+                <li><a>{l("Local instance")}</a></li>
+                <li><a>{l("Mentions only")}</a></li>
+              </ul>
             </div>
-            <div class="text-xs text-base-content/80">
-              {l(
-                "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines."
-              )}
-            </div>
+          </div>
+          <div class="text-xs text-base-content/80">
+            {l(
+              "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines."
+            )}
           </div>
         </div>
       </div>
+    </div>
 
-      <div  aria-haspopup="true" class="dropdown dropdown-top dropdown-end">
-        <label tabindex="0" class="btn rounded normal-case btn-sm flex items-center gap-2">
-          <span>{l("Participate")}</span>
-          <Icon solid="ChevronDown" class="w-4 h-4" />
-        </label>
-        <ul
-          tabindex="0"
-          role="menu"
-          aria-orientation="vertical"
-          class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
-        >
-          <li><a>Read</a></li>
-          <li><a>Interact</a></li>
-          <li><a>Participate</a></li>
-          <li><a>Contribute</a></li>
-        </ul>
-      </div>
+    <div aria-haspopup="true" class="dropdown dropdown-top dropdown-end">
+      <label tabindex="0" class="btn rounded normal-case btn-sm flex items-center gap-2">
+        <span>{l("Participate")}</span>
+        <Icon solid="ChevronDown" class="w-4 h-4" />
+      </label>
+      <ul
+        tabindex="0"
+        role="menu"
+        aria-orientation="vertical"
+        class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
+      >
+        <li><a>Read</a></li>
+        <li><a>Interact</a></li>
+        <li><a>Participate</a></li>
+        <li><a>Contribute</a></li>
+      </ul>
+    </div>
 
-      <!-- <div class="flex items-center ml-4 space-x-2">
+    <!-- <div class="flex items-center ml-4 space-x-2">
         <div
           :if={@to_boundaries_ids |> Enum.member?("public") == false}
           class="btn btn-outline btn-sm btn-circle opacity-80"
@@ -74,10 +74,8 @@
           <Icon solid="Minus" class="w-5 h-5" />
         </div>
       </div> -->
-    </label>
-  </div>
-
-
+  </label>
+</div>
 
 <!-- <div x-data="{show_boundary_list: true}">
   <ul :if={@open_boundaries != false} class="pt-2" x-show="show_boundary_list">

@@ -1,6 +1,6 @@
 <div class="flex items-center justify-between">
   <div class="flex items-center gap-3">
-    <div class="w-10 h-10 rounded bg-base-content/5"></div>
+    <div class="w-10 h-10 rounded bg-base-content/5" />
     <div class="text-sm font-medium text-base-content">Memes</div>
   </div>
 
@@ -18,8 +18,6 @@
         <Bonfire.Boundaries.Web.BoundaryDetailsModalLive />
       </li>
       <li><button>Delete</button></li>
-    
     </ul>
   </div>
-
-  </div>
+</div>

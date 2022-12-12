@@ -133,7 +133,7 @@
                       </span>
                   {/case}
 
-                  <div class="flex-1 font-medium ">
+                  <div class="flex-1 font-medium">
                     {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
                   </div>
                 </div>

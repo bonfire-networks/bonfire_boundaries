@@ -2,11 +2,8 @@
 <div x-data="{show_boundary_list: true}">
   <div class="justify-between mb-4 flex items-center">
     <div class="flex items-center gap-1">
-      <span 
-        class="btn btn-circle btn-ghost btn-sm"
-        @click="open_boundaries = false"
-        >
-      <Icon solid="ChevronLeft" class="w-5 h-5 text-base-content/70" />
+      <span class="btn btn-circle btn-ghost btn-sm" @click="open_boundaries = false">
+        <Icon solid="ChevronLeft" class="w-5 h-5 text-base-content/70" />
       </span>
       <div class="text-lg font-medium text-base-content">{l("Share the activity")}</div>
     </div>
@@ -23,7 +20,7 @@
         id="set_boundaries"
         preloaded_options={[]}
         selected_options={e(to_circles, [])}
-        label={"Select one or more boundaries or circles"}
+        label="Select one or more boundaries or circles"
         form_input_name="circles[]"
         pick_event="Bonfire.Boundaries:select"
         remove_event="Bonfire.Boundaries:deselect"
@@ -41,10 +38,10 @@
         </label>
       </div>
     </div>
-    <!-- Next choosen boundaries or Circles/Users-->
+    <!-- Next choosen boundaries or Circles/Users -->
     <Bonfire.Boundaries.Web.BoundaryItemLive />
   </div>
-  <div class="text-xs uppercase mt-6 font-semibold tracking-wider text-base-content/80">{l "General access"}</div>
+  <div class="text-xs uppercase mt-6 font-semibold tracking-wider text-base-content/80">{l("General access")}</div>
   <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive to_boundaries_ids={@to_boundaries_ids} />
   <Bonfire.Boundaries.Web.BoundaryComposerActionsLive />
 </div>
