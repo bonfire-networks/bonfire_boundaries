@@ -118,22 +118,22 @@
           class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}
         >
           {#for {{verb_id, l}, i} <- Enum.with_index(e(@list, []))}
-            <div class="col-span-1 border border-base-content/30 rounded bg-base-200">
-              <div class="flex-1 text-sm font-semibold rounded">
-                <div class="flex items-center p-2 space-x-2">
+            <div class="col-span-1 border-base-content/10 shadow-lg rounded bg-base-content/5">
+              <div class="flex-1 rounded">
+                <div class="flex items-center p-2 space-x-2 bg-base-content/5">
                   {#case Bonfire.Boundaries.Verbs.get(verb_id)}
                     {#match nil}
                     {#match verb}
                       <span class="tooltip" data-tip={e(verb, :summary, nil)}>
                         <Icon
                           iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
-                          class="w-4 h-4"
+                          class="w-4 h-4 text-base-content/70"
                           fill="currentColor"
                         />
                       </span>
                   {/case}
 
-                  <div class="flex-1">
+                  <div class="flex-1 font-medium ">
                     {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
                   </div>
                 </div>
@@ -169,8 +169,8 @@
                         checked={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil) == true}
                         disabled={@read_only}
                       />
-                      <div class={"btn btn-sm btn-outline btn-circle btn-yes", "btn-disabled": @read_only}>
-                        <Icon iconify="bx:CheckShield" class="w-4 h-4" />
+                      <div class={"btn btn-square btn-xs btn-yes", "btn-disabled": @read_only}>
+                        <Icon solid="Check" class="w-4 h-4" />
                       </div>
                     </label>
                     <label class="tooltip tooltip-top" data-tip={l("Not specified")}>
@@ -182,8 +182,8 @@
                         checked={is_nil(Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil))}
                         disabled={@read_only}
                       />
-                      <div class={"btn btn-sm btn-outline btn-circle btn-maybe", "btn-disabled": @read_only}>
-                        <Icon iconify="bx:Shield" class="w-4 h-4" />
+                      <div class={"btn btn-square btn-xs btn-maybe", "btn-disabled": @read_only}>
+                        <Icon solid="Minus" class="w-4 h-4" />
                       </div>
                     </label>
                     <label class="tooltip tooltip-top" data-tip={l("Cannot")}>
@@ -195,8 +195,8 @@
                         checked={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil) == false}
                         disabled={@read_only}
                       />
-                      <div class={"btn btn-sm btn-outline btn-circle btn-no", "btn-disabled": @read_only}>
-                        <Icon iconify="bx:ShieldX" class="w-4 h-4" />
+                      <div class={"btn btn-square btn-xs btn-no", "btn-disabled": @read_only}>
+                        <Icon solid="X" class="w-4 h-4" />
                       </div>
                     </label>
                   </form>

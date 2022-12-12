@@ -26,41 +26,62 @@
             <li class="flex items-center justify-between gap-8 p-4">
               <div class="flex flex-col gap-0">
                 <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
+                
               </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
-              </div>
-            </li>
-
-            <li class="flex items-center justify-between gap-8 p-4">
-              <div class="flex flex-col gap-0">
-                <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
-              </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
-              </div>
-            </li>
-
-            <li class="flex items-center justify-between gap-8 p-4">
-              <div class="flex flex-col gap-0">
-                <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
-              </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
+              
+              <div x-data="{ toggle: 'state1' }">
+                <button class="btn btn-square btn-xs"
+                  x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+                  <Icon solid="Check" class="w-4 h-4" />
+                </button>
+                <button class="btn btn-square btn-xs"
+                  x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+                  <Icon solid="Minus" class="w-4 h-4" />
+                </button>
+                <button class="btn btn-square btn-xs"
+                  x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+                  <Icon solid="X" class="w-4 h-4" />
+                </button>
               </div>
             </li>
 
             <li class="flex items-center justify-between gap-8 p-4">
               <div class="flex flex-col gap-0">
                 <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
+                
               </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
+              <div x-data="{ toggle: 'state1' }">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+    
+  </button>
+</div>
+            </li>
+
+            <li class="flex items-center justify-between gap-8 p-4">
+              <div class="flex flex-col gap-0">
+                <div class="text-sm font-semibold">Edit</div>
+                
               </div>
+              <div x-data="{ toggle: 'state1' }">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+    
+  </button>
+</div>
+            </li>
+
+            <li class="flex items-center justify-between gap-8 p-4">
+              <div class="flex flex-col gap-0">
+                <div class="text-sm font-semibold">Edit</div>
+                
+              </div>
+              <div x-data="{ toggle: 'state1' }">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+    
+  </button>
+</div>
             </li>
           </ul>
         </div>
@@ -85,41 +106,53 @@
             <li class="flex items-center justify-between gap-8 p-4">
               <div class="flex flex-col gap-0">
                 <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
+                
               </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
-              </div>
+              <div x-data="{ toggle: 'state1' }">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+    
+  </button>
+</div>
             </li>
 
             <li class="flex items-center justify-between gap-8 p-4">
               <div class="flex flex-col gap-0">
                 <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
+                
               </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
-              </div>
+              <div x-data="{ toggle: 'state1' }">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+    
+  </button>
+</div>
             </li>
 
             <li class="flex items-center justify-between gap-8 p-4">
               <div class="flex flex-col gap-0">
                 <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
+                
               </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
-              </div>
+              <div x-data="{ toggle: 'state1' }">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+    
+  </button>
+</div>
             </li>
 
             <li class="flex items-center justify-between gap-8 p-4">
               <div class="flex flex-col gap-0">
                 <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
+                
               </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
-              </div>
+              <div x-data="{ toggle: 'state1' }">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+    
+  </button>
+</div>
             </li>
           </ul>
         </div>
@@ -144,41 +177,53 @@
             <li class="flex items-center justify-between gap-8 p-4">
               <div class="flex flex-col gap-0">
                 <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
+                
               </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
-              </div>
+              <div x-data="{ toggle: 'state1' }">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+    
+  </button>
+</div>
             </li>
 
             <li class="flex items-center justify-between gap-8 p-4">
               <div class="flex flex-col gap-0">
                 <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
+                
               </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
-              </div>
+              <div x-data="{ toggle: 'state1' }">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+    
+  </button>
+</div>
             </li>
 
             <li class="flex items-center justify-between gap-8 p-4">
               <div class="flex flex-col gap-0">
                 <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
+                
               </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
-              </div>
+              <div x-data="{ toggle: 'state1' }">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+    
+  </button>
+</div>
             </li>
 
             <li class="flex items-center justify-between gap-8 p-4">
               <div class="flex flex-col gap-0">
                 <div class="text-sm font-semibold">Edit</div>
-                <div class="text-xs text-base-content/80">Publicly visible to everyone and discoverable by search engines.</div>
+                
               </div>
-              <div class="w-[100px]">
-                <input type="range" min="0" max="2" value="1" class="range range-accent range-sm" step="1">
-              </div>
+              <div x-data="{ toggle: 'state1' }">
+  <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+    x-on:click="toggle = (toggle === 'state1') ? 'state2' : (toggle === 'state2') ? 'state3' : 'state1'">
+    
+  </button>
+</div>
             </li>
           </ul>
         </div>
