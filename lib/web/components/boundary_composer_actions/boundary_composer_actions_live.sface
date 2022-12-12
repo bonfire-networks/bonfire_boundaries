@@ -1,0 +1,17 @@
+<div class="flex justify-between items-center mt-4 border-t border-base-content/10 pt-3">
+  <div>
+    <div class="form-control">
+      <label class="label gap-2 cursor-pointer">
+        <input type="checkbox" class="checkbox" />
+        <span class="label-text text-sm text-base-content/70">{"Set as default boundary"}</span> 
+      </label>
+    </div>
+  </div>
+  <button
+    type="button"
+    @click="open_boundaries = false"
+    class="gap-2 normal-case rounded btn btn-sm btn-primary"
+  >
+    <span class="">{l("Done")}</span>
+  </button>
+</div>

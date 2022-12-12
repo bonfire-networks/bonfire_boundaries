@@ -1,0 +1,142 @@
+<Bonfire.UI.Common.OpenModalLive
+  reusable_modal_id="persistent_modal"
+  id={Pointers.ULID.generate()}
+  title_text={l("Boundary details")}
+  >
+    <div class="mt-4">
+
+    <Context get={to_circles: to_circles}>
+        <div class="mb-6">
+          <Bonfire.UI.Common.MultiselectLive
+            implementation={:live_select}
+            id="Edit_boundaries"
+            preloaded_options={[]}
+            selected_options={e(to_circles, [])}
+            label={"Select a circle or user"}
+            form_input_name="circles[]"
+            pick_event="Bonfire.Boundaries:select"
+            remove_event="Bonfire.Boundaries:deselect"
+          />
+        </div>
+      </Context>
+
+
+      <ul class="flex flex-col gap-4">
+      
+        <li class="flex justify-between items-center">
+          <Bonfire.UI.Common.ProfileItemLive user={current_user(@current_user)} show_controls={[]} />
+          <div class="flex items-center gap-2">
+            <div aria-haspopup="true" class="dropdown dropdown-end">
+              <label tabindex="0" class="btn rounded normal-case btn-sm flex items-center gap-2">
+                <span>{l("Participate")}</span>
+                <Icon solid="ChevronDown" class="w-5 h-5" />
+              </label>
+              <ul
+                tabindex="0"
+                role="menu"
+                aria-orientation="vertical"
+                class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
+              >
+                <li><a>Read</a></li>
+                <li><a>Interact</a></li>
+                <li><a>Participate</a></li>
+                <li><a>Contribute</a></li>
+              </ul>
+            </div>
+            <div class="btn btn-sm btn-circle btn-ghost">
+              <Icon solid="Trash" class="w-4 h-4 text-error"/>
+            </div>
+          </div>
+        </li>
+
+        <li class="flex justify-between items-center">
+          <Bonfire.UI.Common.ProfileItemLive user={current_user(@current_user)} show_controls={[]} />
+          <div class="flex items-center gap-2">
+            <div aria-haspopup="true" class="dropdown dropdown-end">
+              <label tabindex="0" class="btn rounded normal-case btn-sm flex items-center gap-2">
+                <span>{l("Participate")}</span>
+                <Icon solid="ChevronDown" class="w-5 h-5" />
+              </label>
+              <ul
+                tabindex="0"
+                role="menu"
+                aria-orientation="vertical"
+                class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
+              >
+                <li><a>Read</a></li>
+                <li><a>Interact</a></li>
+                <li><a>Participate</a></li>
+                <li><a>Contribute</a></li>
+              </ul>
+            </div>
+            <div class="btn btn-sm btn-circle btn-ghost">
+              <Icon solid="Trash" class="w-4 h-4 text-error"/>
+            </div>
+          </div>
+        </li>
+
+        <li class="flex justify-between items-center">
+          <Bonfire.UI.Common.ProfileItemLive user={current_user(@current_user)} show_controls={[]} />
+          <div class="flex items-center gap-2">
+            <div aria-haspopup="true" class="dropdown dropdown-end">
+              <label tabindex="0" class="btn rounded normal-case btn-sm flex items-center gap-2">
+                <span>{l("Participate")}</span>
+                <Icon solid="ChevronDown" class="w-5 h-5" />
+              </label>
+              <ul
+                tabindex="0"
+                role="menu"
+                aria-orientation="vertical"
+                class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
+              >
+                <li><a>Read</a></li>
+                <li><a>Interact</a></li>
+                <li><a>Participate</a></li>
+                <li><a>Contribute</a></li>
+              </ul>
+            </div>
+            <div class="btn btn-sm btn-circle btn-ghost">
+              <Icon solid="Trash" class="w-4 h-4 text-error"/>
+            </div>
+          </div>
+        </li>
+
+        <li class="flex justify-between items-center">
+          <Bonfire.UI.Common.ProfileItemLive user={current_user(@current_user)} show_controls={[]} />
+          <div class="flex items-center gap-2">
+            <div aria-haspopup="true" class="dropdown dropdown-end">
+              <label tabindex="0" class="btn rounded normal-case btn-sm flex items-center gap-2">
+                <span>{l("Participate")}</span>
+                <Icon solid="ChevronDown" class="w-5 h-5" />
+              </label>
+              <ul
+                tabindex="0"
+                role="menu"
+                aria-orientation="vertical"
+                class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
+              >
+                <li><a>Read</a></li>
+                <li><a>Interact</a></li>
+                <li><a>Participate</a></li>
+                <li><a>Contribute</a></li>
+              </ul>
+            </div>
+            <div class="btn btn-sm btn-circle btn-ghost">
+              <Icon solid="Trash" class="w-4 h-4 text-error"/>
+            </div>
+          </div>
+        </li>
+
+      </ul>
+    </div>
+    <:open_btn>
+      <button type="button" class="">
+        {l("Details")}
+      </button>
+    </:open_btn>
+    <:action_btns>
+      <button class="btn rounded btn-sm normal-case btn-primary">
+        {l("Save")}
+      </button>
+    </:action_btns>
+  </Bonfire.UI.Common.OpenModalLive>
