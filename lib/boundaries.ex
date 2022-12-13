@@ -5,7 +5,10 @@ defmodule Bonfire.Boundaries do
   # alias Bonfire.Data.Identity.User
   # alias Bonfire.Boundaries.Circles
   # alias Bonfire.Data.AccessControl.Grant
+  alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.Identity.Caretaker
+  alias Bonfire.Boundaries.Summary
+  alias Bonfire.Boundaries.Verbs
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Boundaries.Queries
@@ -62,6 +65,26 @@ defmodule Bonfire.Boundaries do
     |> Enum.map(& &1.acl)
   end
 
+  def my_grants_on(user, things) when not is_list(user),
+    do: my_grants_on([user], things)
+
+  def my_grants_on(users, thing) when not is_list(thing),
+    do: my_grants_on(users, [thing])
+
+  def my_grants_on(users, things) do
+    from(s in Summary,
+      where: s.subject_id in ^Utils.ulid(users),
+      where: s.object_id in ^Utils.ulid(things)
+    )
+    |> repo().all()
+    |> Enum.group_by(&{&1.subject_id, &1.object_id, &1.value})
+    |> for({_k, [v | _] = vs} <- ...) do
+      Map.put(v, :verbs, Enum.sort(Enum.map(vs, &Verbs.get!(&1.verb_id).verb)))
+    end
+
+    # |> Enum.map(&Map.take(&1, [:subject_id, :object_id, :verbs, :value]))
+  end
+
   def acls_from_preset_boundary_names(presets) when is_list(presets),
     do: Enum.flat_map(presets, &acls_from_preset_boundary_names/1)
 
@@ -84,7 +107,12 @@ defmodule Bonfire.Boundaries do
   def preset_boundary_tuple_from_acl(%{acl: acl}),
     do: preset_boundary_tuple_from_acl(acl)
 
-  def preset_boundary_tuple_from_acl(acl) do
+  def preset_boundary_tuple_from_acl([acl]),
+    do: preset_boundary_tuple_from_acl(acl)
+
+  def preset_boundary_tuple_from_acl(%Acl{} = acl) do
+    debug(acl)
+
     preset_acls = Config.get!(:preset_acls_all)
 
     public_acl_ids =
@@ -95,12 +123,21 @@ defmodule Bonfire.Boundaries do
       preset_acls["local"]
       |> Enum.map(&Acls.get_id!/1)
 
-    acl = ulid(acl)
+    acl_id = ulid(acl)
 
     cond do
-      acl in public_acl_ids -> {"public", l("Public")}
-      acl in local_acl_ids -> {"local", l("Local Instance")}
+      acl_id in public_acl_ids -> {"public", l("Public")}
+      acl_id in local_acl_ids -> {"local", l("Local Instance")}
       true -> {"mentions", l("Mentions")}
+    end
+  end
+
+  def preset_boundary_tuple_from_acl(%{verbs: verbs} = summary) do
+    debug(summary)
+
+    cond do
+      Enum.count(verbs) == Verbs.verbs_count() -> {l("Caretaker"), verbs}
+      true -> {l("Custom"), verbs}
     end
   end
 

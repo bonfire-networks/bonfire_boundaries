@@ -6,6 +6,8 @@ defmodule Bonfire.Boundaries.Verbs do
 
   def verbs, do: Bonfire.Common.Config.get!(:verbs)
 
+  def verbs_count, do: Enum.count(verbs)
+
   def slugs, do: Keyword.keys(verbs())
 
   def get(slug) when is_atom(slug), do: verbs()[slug]

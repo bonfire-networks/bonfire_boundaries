@@ -32,6 +32,16 @@ defmodule Bonfire.Boundaries.Acls do
   # special built-in acls (eg, guest, local, activity_pub)
   def acls, do: Config.get(:acls)
 
+  def preset_acl_ids do
+    filter_acls =
+      Config.get(:public_acls_on_objects, [
+        :guests_may_see_read,
+        :locals_may_interact,
+        :locals_may_reply
+      ])
+      |> Enum.map(&get_id!/1)
+  end
+
   def get(slug) when is_atom(slug), do: acls()[slug]
 
   def get!(slug) when is_atom(slug) do

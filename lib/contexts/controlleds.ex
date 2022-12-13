@@ -2,10 +2,12 @@ defmodule Bonfire.Boundaries.Controlleds do
   use Arrows
   import Bonfire.Boundaries.Integration
   import Ecto.Query
+  import EctoSparkles
   import Untangle
   import Bonfire.Common.Utils
   alias Bonfire.Common.Config
   alias Bonfire.Common.Cache
+  alias Bonfire.Boundaries.Acls
   alias Bonfire.Data.AccessControl.Controlled
 
   def create(%{} = attrs) when not is_struct(attrs) do
@@ -19,20 +21,44 @@ defmodule Bonfire.Boundaries.Controlleds do
     Controlled.changeset(c, attrs)
   end
 
-  def list, do: repo().many(list_q())
-
   def list_q,
     do:
       from(
         c in Controlled,
         left_join: acl in assoc(c, :acl),
-        left_join: named in assoc(acl, :named),
+        as: :acl,
+        # left_join: named in assoc(acl, :named),
         order_by: [asc: c.acl_id],
-        preload: [acl: {acl, named: named}]
+        # preload: [acl: {acl, named: named}]
+        preload: [acl: acl]
       )
 
+  # WIP: instead of preloading named from DB we can use names from Config
+
+  defp list_q(objects) do
+    where(list_q(), [c], c.id in ^ulids(objects))
+  end
+
+  defp list_on_objects_by_subject_q(objects, current_user) do
+    list_q(objects)
+    |> proload(acl: [:stereotyped, :grants])
+    |> where(
+      [c, grants: grants],
+      grants.subject_id == ^ulid(current_user) and c.acl_id not in ^Acls.preset_acl_ids()
+    )
+  end
+
+  def list_on_objects_by_subject(objects, current_user) do
+    repo().many(list_on_objects_by_subject_q(objects, current_user))
+    |> Enum.reduce(%{}, fn c, acc ->
+      id = ulid(c)
+      # TODO: better
+      Map.put(acc, id, Map.get(acc, id, []) ++ [e(c, :acl, nil)])
+    end)
+  end
+
   @doc """
-  List all boundaries applied to an object.
+  List ALL boundaries applied to an object.
   Only call this as an admin or curator of the object.
   """
   def list_on_object(%{} = object) do
@@ -57,13 +83,11 @@ defmodule Bonfire.Boundaries.Controlleds do
     # |> debug
   end
 
-  # def list_on_object(object) do
-  #   repo().many(list_q(object))
-  # end
-
-  defp list_q(objects) do
-    where(list_q(), [c], c.id in ^ulids(objects))
+  def list_on_object(object) do
+    repo().many(list_q(object))
   end
+
+  # def list_all, do: repo().many(list_q())
 
   def get_preset_on_object(object) do
     list_presets_on_objects_q([object])
@@ -72,7 +96,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   def list_presets_on_objects(objects) do
-    # FIXME: caching ends up with everything appearing to be public
+    # FIXME: caching currently ends up with everything appearing to be public...
     # Cache.cached_preloads_for_objects("object_acl", objects, &do_list_presets_on_objects/1)
     do_list_presets_on_objects(objects)
   end
@@ -92,16 +116,8 @@ defmodule Bonfire.Boundaries.Controlleds do
   defp do_list_presets_on_objects(_), do: %{}
 
   defp list_presets_on_objects_q(objects) do
-    filter_acls =
-      Config.get(:public_acls_on_objects, [
-        :guests_may_see_read,
-        :locals_may_interact,
-        :locals_may_reply
-      ])
-      |> Enum.map(&Bonfire.Boundaries.Acls.get_id!/1)
-
     list_q(objects)
-    |> where([c], c.acl_id in ^filter_acls)
+    |> where([c], c.acl_id in ^Acls.preset_acl_ids())
   end
 
   def remove_acls(object, acls)

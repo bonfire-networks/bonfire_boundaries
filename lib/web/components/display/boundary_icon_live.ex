@@ -12,7 +12,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconLive do
 
   def preload(list_of_assigns),
     do:
-      Bonfire.Boundaries.LiveHandler.maybe_preload_boundaries(list_of_assigns,
+      Bonfire.Boundaries.LiveHandler.preload(list_of_assigns,
         caller_module: __MODULE__
       )
 

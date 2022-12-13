@@ -454,7 +454,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   def maybe_preload_and_check_boundaries(list_of_assigns, opts \\ []) do
     list_of_assigns
     |> maybe_check_boundaries(opts)
-    |> maybe_preload_boundaries(opts)
+    |> preload(opts)
   end
 
   def maybe_check_boundaries(list_of_assigns, opts \\ []) do
@@ -538,58 +538,60 @@ defmodule Bonfire.Boundaries.LiveHandler do
     ulid(obj)
   end
 
-  def maybe_preload_boundaries(list_of_assigns, opts \\ []) do
-    current_user = current_user(List.first(list_of_assigns))
+  def preload(list_of_assigns, opts \\ []) do
+    preload_assigns_async(
+      list_of_assigns,
+      &assigns_to_params/1,
+      &do_preload/3,
+      opts ++ [skip_if_set: :object_boundary]
+    )
+  end
 
-    # |> debug("current_user")
+  defp assigns_to_params(assigns) do
+    object = the_object(assigns)
 
-    list_of_objects =
-      list_of_assigns
-      # ignore objects for which a boundary is already loaded (you can also set object_boundary to :skip in your component assigns to not preload them here)
-      |> Enum.reject(&e(&1, :object_boundary, nil))
-      |> Enum.map(&the_object/1)
+    %{
+      component_id: assigns.id,
+      object: object,
+      object_id: ulid(object),
+      previous_value: e(assigns, :object_boundary, nil)
+    }
+  end
 
-    # |> debug("list_of_objects")
-
-    list_of_ids =
-      list_of_objects
-      |> Enum.map(&ulid/1)
-      |> Enum.uniq()
-      |> filter_empty(nil)
-      |> debug("list_of_ids (preload via #{opts[:caller_module]})")
-
+  defp do_preload(list_of_components, list_of_ids, current_user) do
     my_states =
-      if list_of_ids && current_user,
-        do: boundaries_on_objects(list_of_ids),
+      if is_list(list_of_ids) and list_of_ids != [],
+        do: boundaries_on_objects(list_of_ids, current_user),
         else: %{}
 
-    # debug(my_states, "boundaries")
+    debug(my_states, "boundaries_on_objects")
 
-    Enum.map(list_of_assigns, fn assigns ->
-      object_id = ulid(the_object(assigns))
-      previous_value = e(assigns, :object_boundary, nil)
-
-      # |> Map.put(
-      #   :object_boundaries,
-      #   Map.get(my_states, object_id)
-      # )
-      # |> debug("previous_value")
-
-      Map.put(
-        assigns,
-        :object_boundary,
-        e(my_states, object_id, :named, nil) || previous_value || :none
-      )
+    list_of_components
+    |> Map.new(fn component ->
+      {component.component_id,
+       %{
+         object_boundary:
+           Map.get(my_states, component.object_id) || component.previous_value || false
+       }}
     end)
   end
 
-  def boundaries_on_objects(list_of_ids) do
-    Bonfire.Boundaries.Controlleds.list_presets_on_objects(list_of_ids)
-  end
+  def boundaries_on_objects(list_of_ids, current_user) do
+    if not is_nil(current_user) do
+      # WIP: show user's computed permission instead of preset if we have current_user
+      # case Bonfire.Boundaries.Controlleds.list_on_objects_by_subject(list_of_ids, current_user) do
+      case Bonfire.Boundaries.my_grants_on(current_user, list_of_ids) do
+        custom when custom != %{} and custom != [] ->
+          custom
+          |> Map.new(&{&1.object_id, Map.take(&1, [:verbs, :value])})
+          |> debug("my_grants_on")
 
-  defp the_object(assigns) do
-    e(assigns, :object, nil) || e(assigns, :activity, :object, nil) ||
-      e(assigns, :object_id, nil) || e(assigns, :activity, :object_id, nil)
+        _empty ->
+          Bonfire.Boundaries.Controlleds.list_presets_on_objects(list_of_ids)
+      end
+    else
+      Bonfire.Boundaries.Controlleds.list_presets_on_objects(list_of_ids)
+    end
   end
 
   def maybe_redirect_to(socket, _, %{"no_redirect" => r}) when r != "" do

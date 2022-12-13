@@ -64,22 +64,8 @@ defmodule Bonfire.Boundaries.Debug do
     debug_acls(acls)
   end
 
-  def debug_my_grants_on(user, things) when not is_list(user),
-    do: debug_my_grants_on([user], things)
-
-  def debug_my_grants_on(users, thing) when not is_list(thing),
-    do: debug_my_grants_on(users, [thing])
-
   def debug_my_grants_on(users, things) do
-    from(s in Summary,
-      where: s.subject_id in ^Utils.ulid(users),
-      where: s.object_id in ^Utils.ulid(things)
-    )
-    |> repo().all()
-    |> Enum.group_by(&{&1.subject_id, &1.object_id, &1.value})
-    |> for({_k, [v | _] = vs} <- ...) do
-      Map.put(v, :verbs, Enum.sort(Enum.map(vs, &Verbs.get!(&1.verb_id).verb)))
-    end
+    Boundaries.my_grants_on(users, things)
     |> Enum.map(&Map.take(&1, [:subject_id, :object_id, :verbs, :value]))
     |> Scribe.print()
   end
