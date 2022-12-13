@@ -145,7 +145,8 @@ defmodule Bonfire.Boundaries do
                verbs ==
                  Enum.map(role_verbs, &Map.get(Verbs.get(&1), :verb))
                  |> Enum.sort()
-                 |> debug
+
+               #  |> debug
              end) do
           [{role, _verbs}] -> {String.capitalize(to_string(role)), verbs}
           _ -> {l("Custom"), verbs}
