@@ -209,6 +209,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     config :bonfire,
       verbs: verbs,
       role_verbs: [
+        # Boost, Follow, Like, Mention, Pin, Read, Reply, Request, See, Tag
         read: verbs_see_read_request,
         interact: verbs_interact_incl_boost,
         participate: verbs_interact_and_reply,

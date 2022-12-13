@@ -136,8 +136,20 @@ defmodule Bonfire.Boundaries do
     debug(summary)
 
     cond do
-      Enum.count(verbs) == Verbs.verbs_count() -> {l("Caretaker"), verbs}
-      true -> {l("Custom"), verbs}
+      Enum.count(verbs) == Verbs.verbs_count() ->
+        {l("Caretaker"), l("Full permissions")}
+
+      true ->
+        case Config.get(:role_verbs)
+             |> Enum.filter(fn {_role, role_verbs} ->
+               verbs ==
+                 Enum.map(role_verbs, &Map.get(Verbs.get(&1), :verb))
+                 |> Enum.sort()
+                 |> debug
+             end) do
+          [{role, _verbs}] -> {String.capitalize(to_string(role)), verbs}
+          _ -> {l("Custom"), verbs}
+        end
     end
   end
 

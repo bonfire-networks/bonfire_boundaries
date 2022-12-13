@@ -37,6 +37,20 @@
             class={"text-xs", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
           >{name}</span>
         </span>
+      {#match {name, extra} when is_binary(name)}
+        <span
+          data-tip={extra}
+          class={
+            "flex items-center gap-1 tooltip tooltip-bottom normal-case",
+            "align-bottom z-20": @with_label != true
+          }
+        >
+          <!-- <Icon :if={@with_icon} solid="Cog" class="w-4 h-4" /> -->
+          <span
+            :if={@with_label}
+            class={"text-xs", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
+          >{name}</span>
+        </span>
       {#match _}
         <span
           data-tip={e(@object_boundary, :name, "Custom Boundaries")}
