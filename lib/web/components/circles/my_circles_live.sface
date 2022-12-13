@@ -19,7 +19,7 @@
       <ul class="grid grid-cols-1 gap-3 mt-3 lg:grid-cols-3 md:grid-cols-2">
         {#for circle <- e(@circles, [])}
           <li class="relative flex h-[200px] bg-base-content/5 shadow-2xl rounded-xl items-center justify-between flex-1 p-3  hover:bg-base-content/5">
-            <LiveRedirect class="flex-1 w-full" to={~p"/settings/circle/" <> circle.id}>
+            <LiveRedirect class="flex-1 w-full" to={~p"/boundaries/circle/" <> circle.id}>
               <div class="h-[60px]" />
               <div class="absolute flex flex-col gap-2 left-2 right-2 bottom-3">
                 <div class="flex flex-col gap-1">

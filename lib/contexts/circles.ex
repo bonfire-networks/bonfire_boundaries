@@ -21,6 +21,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   # don't show "others who silenced me" in circles
   @default_q_opts [exclude_circles: ["0KF1NEY0VD0N0TWANTT0HEARME"]]
+  # @exclude_stereotypes ["7N010NGERWANTT011STENT0Y0V", "7N010NGERC0NSENTT0Y0VN0WTY", "4THEPE0P1ES1CH00SET0F0110W", "7DAPE0P1E1PERM1TT0F0110WME"]
 
   # special built-in circles (eg, guest, local, activity_pub)
   def circles, do: Config.get([:circles], %{})
@@ -198,7 +199,9 @@ defmodule Bonfire.Boundaries.Circles do
 
   @doc "query for `list_visible`"
   def list_q(user, opts \\ []) do
-    exclude_circles = e(opts, :exclude_circles, []) ++ stereotype_ids()
+    exclude_circles =
+      e(opts, :exclude_circles, []) ++
+        if e(opts, :exclude_stereotypes, nil), do: stereotype_ids(), else: []
 
     from(circle in Circle, as: :circle)
     |> proload([

@@ -14,6 +14,18 @@
 
   <li>
     <LivePatch
+      to={~p"/boundaries/roles"}
+      class={"rounded-md", "bg-base-content/10 ": @selected_tab == "account"}
+    >
+      <span class="rounded bg-gradient-to-b from-cyan-500 to-blue-500 w-[28px] flex place-content-center h-[28px] items-center shadow-lg">
+        <Icon solid="Key" class={"w-4 h-4 font-normal ", "": @selected_tab == "account"} />
+      </span>
+      {l("Roles")}
+    </LivePatch>
+  </li>
+
+  <li>
+    <LivePatch
       to={~p"/boundaries/acls"}
       class={
         "",

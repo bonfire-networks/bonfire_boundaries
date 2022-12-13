@@ -18,11 +18,14 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
 
     block_type = if tab == "ghosted", do: :ghost, else: :silence
 
-    circle = Bonfire.Boundaries.Blocks.list(block_type, scope || current_user)
+    circle =
+      Bonfire.Boundaries.Blocks.user_block_circles(current_user, block_type)
+      |> List.first()
+      |> debug("ccircle")
 
-    # |> debug
+    # circle = Bonfire.Boundaries.Blocks.list(block_type, scope || current_user)
 
-    blocks = e(circle, :encircles, [])
+    # blocks = e(circle, :encircles, [])
 
     # |> debug
 
@@ -43,7 +46,9 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
        block_type: block_type,
        # page_title: l("Blocks")<>" - #{scope} #{tab}",
        current_user: current_user,
-       blocks: blocks
+       circle_id: ulid(circle)
+       #  circle: circle
+       #  blocks: blocks
 
        # page_info: e(q, :page_info, [])
      )}

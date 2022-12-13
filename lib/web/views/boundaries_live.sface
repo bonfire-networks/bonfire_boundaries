@@ -1,4 +1,4 @@
-<Bonfire.UI.Common.PageTitleLive page_title={@page_title} />
+<!-- <Bonfire.UI.Common.PageTitleLive page_title={@page_title} /> -->
 
 <section class="rounded-md shadow bg-base-100">
   {#case @selected_tab}
@@ -53,6 +53,13 @@
         selected_tab="acls"
         id="my_acls"
         scope={:instance}
+      />
+    {#match "roles"}
+      <Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.RolesLive) and @current_user}
+        module={Bonfire.Boundaries.Web.RolesLive}
+        id="roles"
+        scope={nil}
       />
     {#match _}
       <Dynamic.LiveComponent

@@ -275,14 +275,16 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: "Those I follow",
           stereotype: true
         },
-        ghost_them: %{id: "7N010NGERC0NSENTT0Y0VN0WTY", name: "Those I ghosted"},
+        ghost_them: %{id: "7N010NGERC0NSENTT0Y0VN0WTY", name: "Those I ghosted", stereotype: true},
         silence_them: %{
           id: "7N010NGERWANTT011STENT0Y0V",
-          name: "Those I silenced"
+          name: "Those I silenced",
+          stereotype: true
         },
         silence_me: %{
           id: "0KF1NEY0VD0N0TWANTT0HEARME",
-          name: "Those who silenced me"
+          name: "Those who silenced me",
+          stereotype: true
         }
       },
       ### ACLs (Access Control Lists) are reusable lists of permissions assigned to users and circles. Objects in bonfire

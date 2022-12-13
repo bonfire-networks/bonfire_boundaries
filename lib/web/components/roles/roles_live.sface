@@ -1,7 +1,10 @@
 <div class="">
   <div class="flex items-center px-3 py-4">
     <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("Roles")}</h2>
-    <button class="normal-case btn btn-secondary btn-sm">
+    <button
+      class="normal-case btn btn-primary btn-sm tooltip tooltip-warning tooltip-bottom"
+      data-tip="Coming soon"
+    >
       {l("New role")}
     </button>
   </div>

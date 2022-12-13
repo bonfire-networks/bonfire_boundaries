@@ -198,7 +198,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
          section: nil
        )
        |> maybe_add_to_acl(circle)
-       |> maybe_redirect_to("/settings/circle/" <> id, attrs)}
+       |> maybe_redirect_to("/boundaries/circle/" <> id, attrs)}
     end
   end
 
@@ -222,7 +222,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       {:noreply,
        socket
        |> assign_flash(:info, l("Member was removed"))
-       |> redirect_to("/settings/circles")}
+       |> redirect_to("/boundaries/circles")}
     end
   end
 
@@ -234,7 +234,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       {:noreply,
        socket
        |> assign_flash(:info, l("Deleted"))
-       |> redirect_to("/settings/circles")}
+       |> redirect_to("/boundaries/circles")}
     end
   end
 
@@ -246,7 +246,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       {:noreply,
        socket
        |> assign_flash(:info, l("Archived"))
-       |> redirect_to("/settings/circles")}
+       |> redirect_to("/boundaries/circles")}
     end
   end
 
@@ -258,7 +258,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       {:noreply,
        socket
        |> assign_flash(:info, l("Archived"))
-       |> redirect_to("/settings/acls")}
+       |> redirect_to("/boundaries/acls")}
     end
   end
 
@@ -270,7 +270,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       {:noreply,
        socket
        |> assign_flash(:info, l("Deleted"))
-       |> redirect_to("/settings/acls")}
+       |> redirect_to("/boundaries/acls")}
     end
   end
 
@@ -297,7 +297,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
          section: nil
        )
        |> assign_flash(:info, l("Boundary created!"))
-       |> maybe_redirect_to("/settings/acl/" <> id, attrs)}
+       |> maybe_redirect_to("/boundaries/acl/" <> id, attrs)}
     end
   end
 
@@ -315,7 +315,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
              Grants.remove_subject_from_acl(subject, acl_id) do
         assign_flash(socket, :info, l("Removed from boundary"))
 
-        # |> redirect_to("/settings/acl/#{id}")
+        # |> redirect_to("/boundaries/acl/#{id}")
       else
         _ ->
           assign_flash(socket, :info, l("No permissions removed from boundary"))

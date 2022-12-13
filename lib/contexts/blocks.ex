@@ -188,6 +188,12 @@ defmodule Bonfire.Boundaries.Blocks do
     Circles.get_stereotype_circles(current_user, block_types)
   end
 
+  def user_block_circles(current_user, block_type) do
+    types_blocked(block_type)
+    |> debug()
+    |> per_user_circles(current_user, ...)
+  end
+
   defp is_blocked_by?(%{} = user_or_peer, block_type, current_user_ids)
        when is_list(current_user_ids) and length(current_user_ids) > 0 do
     # info(user_or_peer, "user_or_peer to check")

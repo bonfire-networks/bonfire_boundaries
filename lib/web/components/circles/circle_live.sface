@@ -30,7 +30,7 @@
         <!-- Tab -->
         <li :if={!@setting_boundaries}>
           <div
-            to={~p"/settings/circle/#{ulid(@circle)}/members"}
+            to={~p"/boundaries/circle/#{ulid(@circle)}/members"}
             phx-click="assign"
             phx-value-section="members"
             phx-target={@myself}
@@ -46,7 +46,7 @@
 
         <li :if={!@read_only and !@setting_boundaries}>
           <div
-            to={~p"/settings/circle/#{ulid(@circle)}/suggestions"}
+            to={~p"/boundaries/circle/#{ulid(@circle)}/suggestions"}
             phx-click="assign"
             phx-value-section="suggestions"
             phx-target={@myself}
@@ -58,9 +58,9 @@
           >{l("Suggestions")}</div>
         </li>
 
-        <li :if={!@read_only and !@setting_boundaries}>
+        <li :if={!@read_only and !@setting_boundaries and !@stereotype_id}>
           <div
-            to={~p"/settings/circle/#{ulid(@circle)}/settings"}
+            to={~p"/boundaries/circle/#{ulid(@circle)}/settings"}
             phx-click="assign"
             phx-value-section="settings"
             phx-target={@myself}
@@ -239,7 +239,7 @@
                   <button
                     type="button"
                     :on-click="Bonfire.Boundaries:circle_delete"
-                    phx-value-go="/settings/circles"
+                    phx-value-go="/boundaries/circles"
                     class="normal-case btn btn-outline btn-error btn-sm"
                   >{l("Delete this circle")}</button>
                 </:action_btns>

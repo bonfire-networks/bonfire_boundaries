@@ -33,7 +33,7 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
 
     # |> IO.inspect
     circles =
-      Bonfire.Boundaries.Circles.list_my_with_counts(user)
+      Bonfire.Boundaries.Circles.list_my_with_counts(user, exclude_stereotypes: true)
       |> repo().maybe_preload(encircles: [subject: [:profile]])
 
     debug(circles, "Circles")

@@ -30,7 +30,7 @@ defmodule Bonfire.Boundaries.Acls do
   @exclude_stereotypes ["2HEYS11ENCEDMES0CAN0TSEEME"]
 
   # special built-in acls (eg, guest, local, activity_pub)
-  def acls, do: Bonfire.Common.Config.get([:acls])
+  def acls, do: Config.get(:acls)
 
   def get(slug) when is_atom(slug), do: acls()[slug]
 
@@ -347,19 +347,25 @@ defmodule Bonfire.Boundaries.Acls do
   # end
 
   def built_in_ids do
-    Config.get(:acls)
+    acls()
     |> Map.values()
     |> Enum.map(& &1.id)
   end
 
   def stereotype_ids do
-    Config.get(:acls)
+    acls()
     |> Map.values()
     |> Enum.filter(&e(&1, :stereotype, nil))
     |> Enum.map(& &1.id)
   end
 
+  def is_stereotype?(%{stereotyped: %{stereotype_id: stereotype_id}} = _acl)
+      when is_binary(stereotype_id) do
+    true
+  end
+
   def is_stereotype?(acl) do
+    # debug(acl)
     ulid(acl) in stereotype_ids()
   end
 
@@ -373,7 +379,7 @@ defmodule Bonfire.Boundaries.Acls do
   defp built_ins_for_dropdown do
     filter = Config.get(:acls_to_present)
 
-    Config.get(:acls)
+    acls()
     |> Enum.filter(fn {name, acl} -> name in filter end)
     |> Enum.map(fn {name, acl} -> acl.id end)
   end

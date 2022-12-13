@@ -83,14 +83,17 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
       # |> debug
 
+      stereotype_id = e(circle, :stereotyped, :stereotype_id, nil)
+
       {:ok,
        assign(
          socket,
          circle: Map.drop(circle, [:encircles]),
          members: members,
          suggestions: suggestions,
+         stereotype_id: stereotype_id,
          read_only:
-           e(circle, :stereotyped, :stereotype_id, nil) in @follow_stereotypes or
+           stereotype_id in @follow_stereotypes or
              ulid(circle) in @follow_stereotypes,
          settings_section_title: "View " <> e(circle, :named, :name, "") <> " circle"
        )}
@@ -105,7 +108,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
       #       suggestions: [],
       #       read_only: true
       #     )
-      #     # |> redirect_to("/settings/circles")
+      #     # |> redirect_to("/boundaries/circles")
       #   }
     end
   end
