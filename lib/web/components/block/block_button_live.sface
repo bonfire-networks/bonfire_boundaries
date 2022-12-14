@@ -12,12 +12,12 @@
       <div class="form-control">
         <label class="items-start justify-start pb-1 cursor-pointer label">
           <input name="silence" type="checkbox" checked="checked" class="checkbox">
-          <div class="ml-2 label-text">
-            <div class="text-base font-semibold">{l("Silence") <> " " <> @label}</div>
+          <div class="ml-4 label-text">
+            <div class="text-lg font-semibold">{l("Silence") <> " " <> @label}</div>
             <div class="text-sm">{l("Stop seeing things they publish")}</div>
           </div>
         </label>
-        <div x-data="{active: false}" role="region" class="ml-9">
+        <div x-data="{active: false}" role="region" class="ml-11 text-base-content/70">
           <button
             type="button"
             x-on:click="active = ! active"
@@ -55,12 +55,12 @@
       <div class="form-control">
         <label class="items-start justify-start pb-1 cursor-pointer label">
           <input name="ghost" type="checkbox" checked="checked" class="checkbox">
-          <div class="ml-2 label-text">
-            <div class="text-base font-semibold">{l("Ghost") <> " " <> @label}</div>
+          <div class="ml-4 label-text">
+            <div class="text-lg font-semibold">{l("Ghost") <> " " <> @label}</div>
             <div class="text-sm">{l("Prevent them from seeing or interacting with you or your content")}</div>
           </div>
         </label>
-        <div x-data="{active: false}" role="region" class="ml-9">
+        <div x-data="{active: false}" role="region" class="ml-11 text-base-content/70">
           <button
             type="button"
             x-on:click="active = ! active"
