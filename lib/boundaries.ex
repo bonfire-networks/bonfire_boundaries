@@ -110,8 +110,8 @@ defmodule Bonfire.Boundaries do
   def preset_boundary_tuple_from_acl([acl]),
     do: preset_boundary_tuple_from_acl(acl)
 
-  def preset_boundary_tuple_from_acl(%Acl{} = acl) do
-    debug(acl)
+  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl) do
+    # debug(acl)
 
     preset_acls = Config.get!(:preset_acls_all)
 
@@ -123,8 +123,6 @@ defmodule Bonfire.Boundaries do
       preset_acls["local"]
       |> Enum.map(&Acls.get_id!/1)
 
-    acl_id = ulid(acl)
-
     cond do
       acl_id in public_acl_ids -> {"public", l("Public")}
       acl_id in local_acl_ids -> {"local", l("Local Instance")}
@@ -132,15 +130,32 @@ defmodule Bonfire.Boundaries do
     end
   end
 
-  def preset_boundary_tuple_from_acl(%{verbs: verbs} = summary) do
-    debug(summary)
+  def preset_boundary_tuple_from_acl(
+        %{verbs: verbs, __typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = summary
+      ) do
+    {preset_boundary_tuple_from_acl(%{verbs: verbs}),
+     preset_boundary_tuple_from_acl(%Acl{id: acl_id})}
+    |> debug("merged ACL + verbs")
+  end
+
+  def role_verbs, do: Config.get(:role_verbs)
+  def roles, do: role_verbs |> Keyword.keys()
+
+  def role_names do
+    for role <- roles() do
+      {role, String.capitalize(to_string(role))}
+    end
+  end
+
+  def preset_boundary_tuple_from_acl(%{verbs: verbs} = _summary) do
+    # debug(summary)
 
     cond do
       Enum.count(verbs) == Verbs.verbs_count() ->
         {l("Caretaker"), l("Full permissions")}
 
       true ->
-        case Config.get(:role_verbs)
+        case role_verbs()
              |> Enum.filter(fn {_role, role_verbs} ->
                verbs ==
                  Enum.map(role_verbs, &Map.get(Verbs.get(&1), :verb))

@@ -1,19 +1,38 @@
-<div>
-  <div x-show="!open_boundaries" class="flex items-center mx gap-2">
-    <!-- <Bonfire.Boundaries.Web.BoundariesSelectionLive
+<!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
+<div x-data="{show_boundary_list: true}">
+  <div class="justify-between mb-4 flex items-center">
+    <div class="flex items-center gap-1">
+      <span class="btn btn-circle btn-ghost btn-sm" @click="open_boundaries = false">
+        <Icon solid="ChevronLeft" class="w-5 h-5 text-base-content/70" />
+      </span>
+      <div class="text-lg font-medium text-base-content">{l("Share the activity")}</div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="btn normal-case opacity-60 btn-ghost btn-circle btn-sm">
+        <Icon iconify="carbon:help" class="w-5 h-5" />
+      </div>
+    </div>
+  </div>
+  <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={@preset_boundary} />
+  <div class="mb-2">
+    <Bonfire.UI.Common.MultiselectLive
+      implementation={:live_select}
+      form_input_name={__MODULE__}
+      label="Select one or more boundaries, circles, or people"
+    />
+    <!-- id="set_boundaries"
+      preloaded_options={[]}
+      selected_options={@to_circles || []}
+      pick_event="Bonfire.Boundaries:select"
+      remove_event="Bonfire.Boundaries:deselect" -->
+  </div>
+  <div class="text-xs uppercase mt-6 font-semibold tracking-wider text-base-content/80">{l("Boundaries")}</div>
+  <div class="flex flex-col gap-3 mt-4">
+    <!-- Next choosen boundaries or Circles/Users -->
+    <Bonfire.Boundaries.Web.BoundaryItemsLive
       to_boundaries={@to_boundaries}
       to_circles={@to_circles}
-      thread_mode={@thread_mode}
-    /> -->
-    <button
-      type="button"
-      @click="open_boundaries = true"
-      phx-click="open_boundaries"
-      phx-target="#smart_input"
-      class="flex items-center btn-sm min-h-0 h-[28px] normal-case btn  rounded-full opacity-90"
-    >
-      <span class="">{l(" Public")}</span>
-      <!-- <Icon iconify="fluent:people-edit-20-filled" class="w-4 h-4 text-base-content/70" /> -->
-    </button>
+    />
   </div>
+  <Bonfire.Boundaries.Web.BoundaryComposerActionsLive />
 </div>

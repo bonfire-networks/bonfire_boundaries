@@ -1,67 +1,8 @@
 <span>
-  <span :if={not is_atom(@object_boundary) or @object_boundary == false} class={@class}>
-    {#case Bonfire.Boundaries.preset_boundary_tuple_from_acl(@object_boundary)}
-      {#match {"public", _}}
-        <span
-          data-tip={e(@object_boundary, :name, "Public")}
-          class={"flex items-center gap-1", "align-bottom tooltip tooltip-bottom z-20": @with_label != true}
-        >
-          <Icon :if={@with_icon} solid="Globe" class="w-4 h-4" />
-          <span
-            :if={@with_label}
-            class={"text-xs normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
-          >{l("Public")}</span>
-        </span>
-      {#match {"local", _}}
-        <span
-          data-tip={e(@object_boundary, :name, "Local")}
-          class={"flex items-center gap-1", "align-bottom tooltip tooltip-bottom z-20": @with_label != true}
-        >
-          <Icon :if={@with_icon} solid="LocationMarker" class="w-4 h-4" />
-          <span
-            :if={@with_label}
-            class={"text-xs normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
-          >{l("Local")}</span>
-        </span>
-      {#match {name, verbs} when is_list(verbs)}
-        <span
-          data-tip={Enum.join(verbs, ", ")}
-          class={
-            "flex items-center gap-1 tooltip tooltip-bottom normal-case",
-            "align-bottom z-20": @with_label != true
-          }
-        >
-          <!-- <Icon :if={@with_icon} solid="Cog" class="w-4 h-4" /> -->
-          <span
-            :if={@with_label}
-            class={"text-xs", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
-          >{name}</span>
-        </span>
-      {#match {name, extra} when is_binary(name)}
-        <span
-          data-tip={extra}
-          class={
-            "flex items-center gap-1 tooltip tooltip-bottom normal-case",
-            "align-bottom z-20": @with_label != true
-          }
-        >
-          <!-- <Icon :if={@with_icon} solid="Cog" class="w-4 h-4" /> -->
-          <span
-            :if={@with_label}
-            class={"text-xs", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
-          >{name}</span>
-        </span>
-      {#match _}
-        <span
-          data-tip={e(@object_boundary, :name, "Custom Boundaries")}
-          class={"flex items-center gap-1", "align-bottom tooltip tooltip-bottom z-20": @with_label != true}
-        >
-          <Icon :if={@with_icon} solid="Cog" class="w-4 h-4" />
-          <span
-            :if={@with_label}
-            class={"text-xs normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
-          >{l("Custom Boundaries")}</span>
-        </span>
-    {/case}
-  </span>
+  <Bonfire.Boundaries.Web.BoundaryIconStatelessLive
+    object_boundary={@object_boundary}
+    with_icon={@with_icon}
+    with_label={@with_label}
+    class={@class}
+  />
 </span>

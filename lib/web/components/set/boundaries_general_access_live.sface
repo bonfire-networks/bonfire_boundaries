@@ -1,0 +1,58 @@
+<div class="flex items-center justify-between flex-1  mb-8 mt-4">
+  <label class="flex gap-16 items-center w-full">
+    <div aria-haspopup="true" class="dropdown dropdown-bottom">
+      <label tabindex="0" class="btn rounded normal-case btn-sm flex items-center gap-2">
+        <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} />
+        <Icon solid="ChevronDown" class="w-4 h-4" />
+      </label>
+      <ul
+        tabindex="0"
+        role="menu"
+        aria-orientation="vertical"
+        class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
+      >
+        <li phx-click={JS.push("select_boundary",
+          value: %{id: "public", name: l("Public")},
+          target: "#smart_input"
+        )}><a><span class="text-xl">🌍</span><span>{l("Public")}</span></a></li>
+        <li phx-click={JS.push("select_boundary",
+          value: %{id: "local", name: l("Local instance")},
+          target: "#smart_input"
+        )}><a><span class="text-xl">🏠</span> {l("Local instance")}</a></li>
+        <li phx-click={JS.push("select_boundary",
+          value: %{id: "mentions", name: l("Mentions")},
+          target: "#smart_input"
+        )}><a><span class="text-xl">﹫</span> {l("Mentions")}</a></li>
+        <li phx-click={JS.push("select_boundary",
+          value: %{id: "custom", name: l("Custom")},
+          target: "#smart_input"
+        )}><a><span class="text-xl">⛭</span> {l("Custom")}</a></li>
+      </ul>
+    </div>
+
+    <div class="flex-1">
+      <div class="flex items-start gap-4">
+        <div class="flex flex-col">
+          <div class="text-xs text-base-content/80">
+            {#case @preset_boundary}
+              {#match {"public", _}}
+                {l(
+                  "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines. This is in addition to any boundaries you set below."
+                )}
+              {#match {"local", _}}
+                {l(
+                  "Everyone on this instance will be able to see, interact, and reply, in addition to any boundaries you set below."
+                )}
+              {#match {"mentions", _}}
+                {l(
+                  "Anyone mentioned will be able to see, interact, and reply (across the fediverse), in addition to any boundaries you set below."
+                )}
+              {#match _}
+                {l("Specify custom boundaries below.")}
+            {/case}
+          </div>
+        </div>
+      </div>
+    </div>
+  </label>
+</div>

@@ -54,6 +54,9 @@ defmodule Bonfire.Boundaries.Acls do
   def get_id!(slug), do: get!(slug)[:id]
 
   def cast(changeset, creator, opts) do
+    opts
+    |> info("opts")
+
     to_boundaries =
       Boundaries.boundaries_set(maybe_from_opts(opts, :boundary, opts))
       |> info("to_boundaries")
@@ -83,7 +86,7 @@ defmodule Bonfire.Boundaries.Acls do
           (e(opts, :verbs_to_grant, nil) ||
              Config.get!([:verbs_to_grant, :default]))
           |> debug("verbs_to_grant")
-          |> Enum.flat_map(custom_recipients, &grant_to(ulid(&1), acl_id, ...))
+          |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ...))
 
         # |> debug("on-the-fly ACLs to create")
 
@@ -243,10 +246,31 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
+  defp grant_to({subject_id, role}, acl_id, default_verbs) do
+    role_verbs = Bonfire.Boundaries.role_verbs()
+    roles = role_verbs |> Keyword.keys()
+
+    role =
+      role
+      |> maybe_to_atom()
+      |> debug
+
+    if is_atom(role) and not is_nil(role) and role in roles do
+      grant_to(subject_id, acl_id, role_verbs[role])
+    else
+      case ulid(subject_id) do
+        nil -> nil
+        id -> grant_to(id, acl_id, default_verbs)
+      end
+    end
+  end
+
   defp grant_to(user_etc, acl_id, verbs) when is_list(verbs),
     do: Enum.map(verbs, &grant_to(user_etc, acl_id, &1))
 
   defp grant_to(user_etc, acl_id, verb) do
+    debug(user_etc)
+
     %{
       id: ULID.generate(),
       acl_id: acl_id,
@@ -348,7 +372,21 @@ defmodule Bonfire.Boundaries.Acls do
       :extra_info,
       stereotyped: {"stereotype_", [:named]}
     ])
+    |> maybe_search(opts[:search])
   end
+
+  def maybe_search(query, text) when is_binary(text) and text != "" do
+    query
+    |> where(
+      [named: named, stereotype_named: stereotype_named],
+      ilike(named.name, ^"#{text}%") or
+        ilike(named.name, ^"% #{text}%") or
+        ilike(stereotype_named.name, ^"#{text}%") or
+        ilike(stereotype_named.name, ^"% #{text}%")
+    )
+  end
+
+  def maybe_search(query, _), do: query
 
   # def list_all do
   #   from(u in Acl, as: :acl)

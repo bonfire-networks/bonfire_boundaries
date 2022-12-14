@@ -53,11 +53,11 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
         epic
 
       changeset.action == :insert ->
-        boundary = epic.assigns[:options][:boundary]
+        # boundary = epic.assigns[:options][:boundary]
         maybe_debug(epic, act, "boundaries", "Casting")
 
         changeset
-        |> Acls.cast(current_user, boundary)
+        |> Acls.cast(current_user, epic.assigns[:options])
         |> Epic.assign(epic, on, ...)
 
       changeset.action == :delete ->

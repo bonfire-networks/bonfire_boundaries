@@ -1,8 +1,8 @@
-<div class="flex items-center focus:outline-none">
-  <div class="flex flex-wrap w-full gap-2">
-    <span :for={{id, name} <- @to_boundaries || [{l("Public"), "public"}]} class="badge">
-      {name}
-      <input name="to_boundaries[]" value={id} type="hidden">
-    </span>
-  </div>
-</div>
+{#for {id, data} <- @to_boundaries || []}
+  <input
+    name="to_boundaries[]"
+    value={id}
+    label={e(data, :name, if(is_binary(data), do: data))}
+    type="hidden"
+  />
+{/for}

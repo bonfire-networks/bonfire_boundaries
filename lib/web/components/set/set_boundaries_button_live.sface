@@ -1,0 +1,14 @@
+<div>
+  <div x-show="!open_boundaries" class="flex items-center mx gap-2">
+    <button
+      type="button"
+      @click="open_boundaries = true"
+      phx-click="open_boundaries"
+      phx-target="#smart_input"
+      class="flex items-center btn-sm min-h-0 h-[28px] normal-case btn rounded-full opacity-90 gap-2"
+    >
+      <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} />
+      <!-- <Icon iconify="fluent:people-edit-20-filled" class="w-4 h-4 text-base-content/70" /> -->
+    </button>
+  </div>
+</div>

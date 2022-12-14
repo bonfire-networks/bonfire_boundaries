@@ -1,23 +1,21 @@
 <Bonfire.UI.Common.OpenModalLive
-  reusable_modal_id="persistent_modal"
+  reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
   id={Pointers.ULID.generate()}
-  title_text={l("Boundary details")}
+  title_text={l("Boundary details:") <> " #{@name}"}
 >
   <div class="mt-4">
-    <Context get={to_circles: to_circles}>
-      <div class="mb-6">
-        <Bonfire.UI.Common.MultiselectLive
-          implementation={:live_select}
-          id="Edit_boundaries"
-          preloaded_options={[]}
-          selected_options={e(to_circles, [])}
-          label="Select a circle or user"
-          form_input_name="circles[]"
-          pick_event="Bonfire.Boundaries:select"
-          remove_event="Bonfire.Boundaries:deselect"
-        />
-      </div>
-    </Context>
+    <div class="mb-6">
+      <Bonfire.UI.Common.MultiselectLive
+        implementation={:live_select}
+        id="edit_boundary"
+        preloaded_options={[]}
+        selected_options={[]}
+        label={l("Select a circle or user to add")}
+        form_input_name={:circles}
+        pick_event="Bonfire.Boundaries:select"
+        remove_event="Bonfire.Boundaries:deselect"
+      />
+    </div>
 
     <ul class="flex flex-col gap-4">
       <li class="flex justify-between items-center">
@@ -126,8 +124,8 @@
     </ul>
   </div>
   <:open_btn>
-    <button type="button" class="">
-      {l("Details")}
+    <button type="button" class="btn btn-success btn-sm btn-circle opacity-80">
+      <Icon iconify="material-symbols:edit-note" class="w-5 h-5" />
     </button>
   </:open_btn>
   <:action_btns>

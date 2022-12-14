@@ -210,10 +210,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       verbs: verbs,
       role_verbs: [
         # Boost, Follow, Like, Mention, Pin, Read, Reply, Request, See, Tag
+        none: [],
         read: verbs_see_read_request,
         interact: verbs_interact_incl_boost,
         participate: verbs_interact_and_reply,
-        contribute: verbs_interact_and_contribute
+        contribute: verbs_interact_and_contribute,
+        caretaker: all_verb_names
       ],
       verbs_to_grant: [
         default: verbs_interact_and_reply,

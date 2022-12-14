@@ -216,7 +216,21 @@ defmodule Bonfire.Boundaries.Circles do
         (is_nil(stereotyped.id) or
            stereotyped.stereotype_id not in ^exclude_circles)
     )
+    |> maybe_search(opts[:search])
   end
+
+  def maybe_search(query, text) when is_binary(text) and text != "" do
+    query
+    |> where(
+      [named: named, stereotype_named: stereotype_named],
+      ilike(named.name, ^"#{text}%") or
+        ilike(named.name, ^"% #{text}%") or
+        ilike(stereotype_named.name, ^"#{text}%") or
+        ilike(stereotype_named.name, ^"% #{text}%")
+    )
+  end
+
+  def maybe_search(query, _), do: query
 
   @doc "query for `list_visible`"
   def list_visible_q(user, opts \\ []) do

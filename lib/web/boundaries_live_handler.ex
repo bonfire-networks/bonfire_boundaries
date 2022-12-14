@@ -577,6 +577,10 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def boundaries_on_objects(list_of_ids, current_user) do
+    presets =
+      Bonfire.Boundaries.Controlleds.list_presets_on_objects(list_of_ids)
+      |> debug("presets")
+
     if not is_nil(current_user) do
       # WIP: show user's computed permission instead of preset if we have current_user
       # case Bonfire.Boundaries.Controlleds.list_on_objects_by_subject(list_of_ids, current_user) do
@@ -585,12 +589,14 @@ defmodule Bonfire.Boundaries.LiveHandler do
           custom
           |> Map.new(&{&1.object_id, Map.take(&1, [:verbs, :value])})
           |> debug("my_grants_on")
+          |> deep_merge(presets)
+          |> debug("merged")
 
         _empty ->
-          Bonfire.Boundaries.Controlleds.list_presets_on_objects(list_of_ids)
+          presets
       end
     else
-      Bonfire.Boundaries.Controlleds.list_presets_on_objects(list_of_ids)
+      presets
     end
   end
 
