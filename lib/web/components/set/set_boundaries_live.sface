@@ -8,7 +8,7 @@
       <div class="font-medium text-base-content/70">{l("Share the activity")}</div>
     </div>
     <div class="flex items-center gap-3">
-      <div title={l "help"} class="normal-case btn opacity-60 btn-ghost btn-circle btn-sm">
+      <div title={l("help")} class="normal-case btn opacity-60 btn-ghost btn-circle btn-sm">
         <Icon outline="QuestionMarkCircle" class="w-5 h-5" />
       </div>
     </div>

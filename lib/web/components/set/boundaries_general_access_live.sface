@@ -1,48 +1,55 @@
 <div class="p-3 mt-4 rounded-lg shadow bg-base-300/60">
-  <div class="p-3 py-2 mb-2 -m-3 text-xs font-semibold tracking-wider uppercase rounded-t-lg bg-base-300/70 text-base-content/80">{l "General permissions"}</div>
+  <div class="p-3 py-2 mb-2 -m-3 text-xs font-semibold tracking-wider uppercase rounded-t-lg bg-base-300/70 text-base-content/80">{l("General permissions")}</div>
   <label class="flex flex-col w-full gap-1">
     <div class="flex items-center gap-2">
-    <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} />
-    <div aria-haspopup="true" class="dropdown dropdown-bottom">
-      <label tabindex="0" class="flex items-center gap-2 normal-case btn btn-circle btn-xs btn-ghost opacity-70">
-        <Icon solid="ChevronDown" class="w-5 h-5" />
-      </label>
-      <ul
-        role="menu"
-        aria-orientation="vertical"
-        class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
+      <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} />
+      <div aria-haspopup="true" class="dropdown dropdown-bottom">
+        <label
+          tabindex="0"
+          class="flex items-center gap-2 normal-case btn btn-circle btn-xs btn-ghost opacity-70"
         >
-        <li>
-          <button 
-             phx-click={JS.push("select_boundary",
-              value: %{id: "public", name: l("Public")},
-              target: "#smart_input"
-            )}
-            type="button">
-            <span class="text-xl">🌍</span>
-            <span>{l("Public")}</span>
-          </button>
-        </li>
-        <li ><button 
-          phx-click={JS.push("select_boundary",
-          value: %{id: "local", name: l("Local instance")},
-          target: "#smart_input"
-        )}  
-          type="button"><span class="text-xl">🏠</span> {l("Local instance")}</button></li>
-        <li ><button 
-          phx-click={JS.push("select_boundary",
-          value: %{id: "mentions", name: l("Mentions")},
-          target: "#smart_input"
-        )}  
-          type="button"><span class="text-xl">﹫</span> {l("Mentions")}</button></li>
-        <li ><button 
-          phx-click={JS.push("select_boundary",
-          value: %{id: "custom", name: l("Custom")},
-          target: "#smart_input"
-        )}  
-          type="button"><span class="text-xl">⛭</span> {l("Custom")}</button></li>
-      </ul>
-    </div>
+          <Icon solid="ChevronDown" class="w-5 h-5" />
+        </label>
+        <ul
+          role="menu"
+          aria-orientation="vertical"
+          class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
+        >
+          <li>
+            <button
+              phx-click={JS.push("select_boundary",
+                value: %{id: "public", name: l("Public")},
+                target: "#smart_input"
+              )}
+              type="button"
+            >
+              <span class="text-xl">🌍</span>
+              <span>{l("Public")}</span>
+            </button>
+          </li>
+          <li><button
+              phx-click={JS.push("select_boundary",
+                value: %{id: "local", name: l("Local instance")},
+                target: "#smart_input"
+              )}
+              type="button"
+            ><span class="text-xl">🏠</span> {l("Local instance")}</button></li>
+          <li><button
+              phx-click={JS.push("select_boundary",
+                value: %{id: "mentions", name: l("Mentions")},
+                target: "#smart_input"
+              )}
+              type="button"
+            ><span class="text-xl">﹫</span> {l("Mentions")}</button></li>
+          <li><button
+              phx-click={JS.push("select_boundary",
+                value: %{id: "custom", name: l("Custom")},
+                target: "#smart_input"
+              )}
+              type="button"
+            ><span class="text-xl">⛭</span> {l("Custom")}</button></li>
+        </ul>
+      </div>
     </div>
 
     <div class="flex-1">

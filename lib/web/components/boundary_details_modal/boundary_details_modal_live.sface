@@ -125,7 +125,7 @@
   </div>
   <:open_btn>
     <button type="button" class="normal-case btn btn-ghost btn-sm opacity-80">
-      {l "Details"}
+      {l("Details")}
     </button>
   </:open_btn>
   <:action_btns>
