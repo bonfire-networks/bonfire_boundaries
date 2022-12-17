@@ -85,10 +85,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        ui_compact: Settings.get([:ui, :compact], false, assigns),
        selected_tab: "acls"
      )
-     |> assign_updated_grants()}
+     |> assign_updated()}
   end
 
-  def assign_updated_grants(socket) do
+  def assign_updated(socket) do
     current_user = current_user(socket)
 
     acl_id = e(socket.assigns, :acl_id, nil)
@@ -115,7 +115,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         acl: acl,
         list_by_subject: list_by_subject,
         list_by_verb: Map.merge(verbs, list_by_verb),
-        subjects: subjects(e(acl, :grants, [])),
+        # subjects: subjects(e(acl, :grants, [])),
         read_only:
           Acls.is_stereotype?(acl) or
             (acl_id in Acls.built_in_ids() and
@@ -141,12 +141,24 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
+  def do_handle_event("add_to_acl", %{"id" => id} = _attrs, socket) do
+    add_to_acl(id, socket)
+  end
+
+  def handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
+    remove_from_acl(subject, socket)
+  end
+
   def do_handle_event("tagify_remove", %{"id" => subject} = _attrs, socket) do
-    Bonfire.Boundaries.LiveHandler.remove_from_acl(subject, socket)
+    remove_from_acl(subject, socket)
   end
 
   def do_handle_event("tagify_add", %{"id" => id} = _attrs, socket) do
-    Bonfire.Boundaries.LiveHandler.add_to_acl(id, socket)
+    add_to_acl(id, socket)
+  end
+
+  def do_handle_event("multi_select", %{data: data, text: text}, socket) do
+    add_to_acl(data |> Enum.into(%{name: text}), socket)
   end
 
   def do_handle_event("edit_grant_verb", %{"subject" => subjects} = attrs, socket) do
@@ -173,7 +185,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         :noreply,
         socket
         |> assign_flash(:info, l("Permission edited!"))
-        |> assign_updated_grants()
+        |> assign_updated()
 
         # |> assign(
         # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
@@ -193,9 +205,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     acl = e(socket.assigns, :acl, nil)
 
     grants =
-      Enum.flat_map(subjects, fn {subject_id, role_name} ->
+      Enum.map(subjects, fn {subject_id, role_name} ->
         Grants.grant_role(subject_id, acl, role_name, current_user: current_user)
       end)
+      |> List.flatten()
       |> debug("done")
 
     with [:ok] <- Keyword.keys(grants) |> Enum.uniq() |> debug("done") do
@@ -203,7 +216,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         :noreply,
         socket
         |> assign_flash(:info, l("Permission edited!"))
-        |> assign_updated_grants()
+        |> assign_updated()
         # |> assign(
         # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
         # )
@@ -246,6 +259,101 @@ defmodule Bonfire.Boundaries.Web.AclLive do
           &do_handle_event/3
         )
 
+  def handle_info(%LiveSelect.ChangeMsg{text: search} = change_msg, socket) do
+    current_user = current_user(socket)
+
+    (Bonfire.Boundaries.Circles.list_my(current_user, search: search) ++
+       Bonfire.Me.Users.search(search))
+    |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
+    |> LiveSelect.update_options(change_msg, ...)
+
+    {:noreply, socket}
+  end
+
+  def add_to_acl(id, socket) when is_binary(id) do
+    {:noreply,
+     do_add_to_acl(
+       %{
+         id: id,
+         name: e(socket.assigns, :suggestions, id, nil)
+       },
+       socket
+     )}
+  end
+
+  def add_to_acl(subject, socket) do
+    {:noreply, do_add_to_acl(subject, socket)}
+  end
+
+  defp do_add_to_acl(subject, socket) do
+    id =
+      ulid(subject)
+      |> debug("id")
+
+    subject_map = %{id => %{subject: subject}}
+
+    subject_name =
+      LiveHandler.subject_name(subject)
+      |> debug("name")
+
+    socket
+    |> assign(
+      # subjects: ([subject] ++ e(socket.assigns, :subjects, [])) |> Enum.uniq_by(&ulid/1),
+      # so tagify doesn't remove it as invalid
+      # suggestions: Map.put(e(socket.assigns, :suggestions, %{}), id, subject_name),
+      list_by_subject: e(socket.assigns, :list_by_subject, %{}) |> Map.merge(subject_map),
+      list_by_verb:
+        e(socket.assigns, :list_by_verb, %{})
+        |> Enum.map(fn
+          {verb_id, %{verb: verb, subject_grants: subject_grants}} ->
+            {
+              verb_id,
+              %{
+                verb: verb,
+                subject_grants: Map.merge(subject_grants, subject_map)
+              }
+            }
+
+          {verb_id, %Bonfire.Data.AccessControl.Verb{} = verb} ->
+            {
+              verb_id,
+              %{
+                verb: verb,
+                subject_grants: subject_map
+              }
+            }
+        end)
+        # |> debug
+        |> Map.new()
+
+      # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
+    )
+    |> assign_flash(
+      :info,
+      l("Select a role (or custom permissions) to finish adding it to the boundary.")
+    )
+
+    # |> assign_updated()
+  end
+
+  def remove_from_acl(subject, socket) do
+    # IO.inspect(subject, label: "ULLID")
+    acl_id = ulid!(e(socket.assigns, :acl, nil))
+    subject_id = ulid!(subject)
+
+    {:noreply,
+     with {del, _} when is_integer(del) and del > 0 <-
+            Grants.remove_subject_from_acl(subject, acl_id) do
+       assign_flash(socket, :info, l("Removed from boundary"))
+       |> assign_updated()
+
+       # |> redirect_to("/boundaries/acl/#{id}")
+     else
+       _ ->
+         assign_flash(socket, :info, l("No permissions removed from boundary"))
+     end}
+  end
+
   def can(grants) do
     grants
     |> Enum.filter(fn {_, grant} -> e(grant, :value, nil) == true end)
@@ -277,15 +385,15 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     nil
   end
 
-  def subjects(grants) when is_list(grants) and length(grants) > 0 do
-    # TODO: rewrite this whole thing tbh
-    Enum.reduce(grants, [], fn grant, subjects_acc ->
-      subjects_acc ++ [grant.subject]
-    end)
-    |> Enum.uniq()
-  end
+  # def subjects(grants) when is_list(grants) and length(grants) > 0 do
+  #   # TODO: rewrite this whole thing tbh
+  #   Enum.reduce(grants, [], fn grant, subjects_acc ->
+  #     subjects_acc ++ [grant.subject]
+  #   end)
+  #   |> Enum.uniq()
+  # end
 
-  def subjects(_), do: %{}
+  # def subjects(_), do: %{}
 
   def subject_verb_grant(grants) when is_list(grants) and length(grants) > 0 do
     # TODO: rewrite this whole thing tbh
@@ -313,7 +421,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         end
       )
     end)
-    |> debug
+
+    # |> debug
   end
 
   def subject_verb_grant(_), do: %{}

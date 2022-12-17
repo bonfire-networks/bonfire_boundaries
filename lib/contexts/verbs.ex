@@ -80,17 +80,17 @@ defmodule Bonfire.Boundaries.Verbs do
       |> Utils.maybe_to_atom()
       |> debug("role")
 
-    if is_atom(role) and not is_nil(role) do
+    if is_atom(role) do
       role_verbs = role_verbs()
       roles = role_verbs |> Keyword.keys()
 
-      if role in roles do
-        {:ok, role_verbs[role] || []}
-      else
-        {:error, l("This role is not defined.")}
+      cond do
+        role in roles -> {:ok, role_verbs[role] || []}
+        role in [nil, :none, :custom] -> {:ok, []}
+        true -> error(role, l("This role is not defined."))
       end
     else
-      {:error, l("This is not a valid role.")}
+      error(role, l("This is not a valid role."))
     end
   end
 

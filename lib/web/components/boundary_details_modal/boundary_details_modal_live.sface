@@ -4,9 +4,8 @@
   title_text={l("Boundary details:") <> " #{@name}"}
 >
   <div class="mt-4">
-    <div class="mb-6">
+    <!-- <div class="mb-6">
       <Bonfire.UI.Common.MultiselectLive
-        form_input_name={:circles}
         implementation={:live_select}
         form_input_name={__MODULE__}
         label={l("Select a circle or user to add")}
@@ -27,7 +26,9 @@
           </div>
         </div>
       </li>
-    </ul>
+    </ul> -->
+
+    <Bonfire.Boundaries.Web.AclLive id={@id} acl_id={@id} setting_boundaries />
   </div>
   <:open_btn>
     <button type="button" class="normal-case btn btn-ghost btn-sm opacity-80">

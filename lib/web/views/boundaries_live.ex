@@ -87,4 +87,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
           __MODULE__
           # &do_handle_event/3
         )
+
+  def handle_info(info, socket),
+    do: Bonfire.UI.Common.LiveHandlers.handle_info(info, socket, __MODULE__)
 end

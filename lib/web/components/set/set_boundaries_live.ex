@@ -46,77 +46,64 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   def handle_info(%LiveSelect.ChangeMsg{text: search} = change_msg, socket) do
     current_user = current_user(socket)
 
-    results =
-      (Bonfire.Boundaries.Acls.list_my(current_user, search: search) ++
-         Bonfire.Boundaries.Circles.list_my(current_user, search: search) ++
-         Bonfire.Me.Users.search(search))
-      |> debug
-      |> Enum.map(fn
-        %Bonfire.Data.AccessControl.Acl{} = acl ->
-          {e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil),
-           %{id: e(acl, :id, nil), field: :to_boundaries}}
-
-        %Bonfire.Data.AccessControl.Circle{} = circle ->
-          {e(circle, :named, :name, nil) || e(circle, :sterotyped, :named, :name, nil),
-           %{id: e(circle, :id, nil), field: :to_circles}}
-
-        user ->
-          {e(user, :profile, :name, nil),
-           %{
-             id: e(user, :id, nil),
-             field: :to_circles,
-             icon: e(user, :profile, :icon, nil),
-             username: e(user, :character, :username, nil)
-           }}
-      end)
-      |> debug
-
-    LiveSelect.update_options(change_msg, results)
+    (Bonfire.Boundaries.Acls.list_my(current_user, search: search) ++
+       Bonfire.Boundaries.Circles.list_my(current_user, search: search) ++
+       Bonfire.Me.Users.search(search))
+    |> results_for_multiselect()
+    |> LiveSelect.update_options(change_msg, ...)
 
     {:noreply, socket}
   end
 
-  def handle_event(
-        "change",
-        %{"#{@form_input_name}" => "", "#{@form_input_name}_text_input" => _} = _params,
-        socket
-      ) do
-    # empty
-    {:noreply, socket}
+  def results_for_multiselect(results) do
+    results
+    |> Enum.map(fn
+      %Bonfire.Data.AccessControl.Acl{} = acl ->
+        {e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil),
+         %{id: e(acl, :id, nil), field: :to_boundaries}}
+
+      %Bonfire.Data.AccessControl.Circle{} = circle ->
+        {e(circle, :named, :name, nil) || e(circle, :sterotyped, :named, :name, nil),
+         %{id: e(circle, :id, nil), field: :to_circles}}
+
+      user ->
+        {e(user, :profile, :name, nil),
+         %{
+           id: e(user, :id, nil),
+           field: :to_circles,
+           icon: e(user, :profile, :icon, nil),
+           username: e(user, :character, :username, nil)
+         }}
+    end)
+    |> debug
   end
 
   def handle_event(
-        "change",
-        %{"#{@form_input_name}" => data, "#{@form_input_name}_text_input" => text} = _params,
+        "multi_select",
+        %{data: data, text: text},
         socket
       ) do
-    with {:ok, data} <- Jason.decode(data) do
-      debug(data, text)
+    # debug(data, text)
 
-      field = maybe_to_atom(e(data, "field", :to_boundaries))
+    field = maybe_to_atom(e(data, "field", :to_boundaries))
 
-      appended_data =
-        case field do
-          :to_boundaries ->
-            e(socket.assigns, field, [{"public", l("Public")}]) ++
-              [{data["id"], data |> Enum.into(%{name: text})}]
+    appended_data =
+      case field do
+        :to_boundaries ->
+          e(socket.assigns, field, [{"public", l("Public")}]) ++
+            [{data["id"], data |> Enum.into(%{name: text})}]
 
-          _ ->
-            e(socket.assigns, field, []) ++ [{data |> Enum.into(%{name: text}), data["id"]}]
-        end
-        |> Enum.uniq()
+        _ ->
+          e(socket.assigns, field, []) ++ [{data |> Enum.into(%{name: text}), data["id"]}]
+      end
+      |> Enum.uniq()
 
-      {:noreply,
-       socket
-       |> assign(
-         field,
-         appended_data
-       )}
-    else
-      e ->
-        error(e)
-        {:noreply, socket}
-    end
+    {:noreply,
+     socket
+     |> assign(
+       field,
+       appended_data
+     )}
   end
 
   def handle_event("tagify_add", attrs, socket) do

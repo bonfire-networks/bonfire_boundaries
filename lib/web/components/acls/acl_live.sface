@@ -82,7 +82,7 @@
             <span class="text-sm">{LiveHandler.subject_name(subject)}</span>
             <span 
               :if={!@read_only} 
-              phx-click="Bonfire.Boundaries:remove_from_acl"
+              phx-click="remove_from_acl"
               phx-value-subject_id={ulid(subject)}
               phx-target={@myself}
               class="flex-shrink-0 ml-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-info-content hover:bg-info-content/30 hover:text-info-content/80 focus:outline-none focus:bg-info-content/80 focus:text-white">
@@ -94,7 +94,13 @@
           <div>
             <div class="flex items-center mt-3">
               <div class="flex-1">
-                <div class="flex-1" id={:select_more_acl} phx-update="ignore" phx-hook="InputOrSelectOne">
+                <form :on-change="select">
+                  <Bonfire.UI.Common.MultiselectLive
+                    implementation={:live_select}
+                    form_input_name={__MODULE__}
+                    label={l("Search for circles or users to add")}
+                  /></form>
+                <!-- <div class="flex-1" id={:select_more_acl} phx-update="ignore" phx-hook="InputOrSelectOne">
                   <input
                     value={predefined_subjects(@subjects)}
                     placeholder={l("Add more users or circles")}
@@ -102,18 +108,18 @@
                     id="acl_tagify"
                     class="w-full border tagify--outside tagify !border-base-content/10"
                   />
-                  <!-- <select class="tagify hide">
+                   <select class="tagify hide">
                     {#for {id, name} <- @suggestions}
                       <option class="" value={id}>{name}</option>
                     {/for}
-                  </select> -->
-                </div>
+                  </select>
+                </div> -->
               </div>
             </div>
           </div>
         </div>
 
-        {#if is_list(@subjects) and @subjects != []}
+        {#if is_list(@list_by_subject) or (is_map(@list_by_subject) and not Enum.empty?(@list_by_subject))}
           <div class="collapse-title text-xl font-medium">
             Role per circle or person
           </div>
@@ -144,7 +150,7 @@
                     extra_roles={[{:custom, l("Custom")}]}
                   />
                   <div
-                    phx-click="Bonfire.Boundaries:remove_from_acl"
+                    phx-click="remove_from_acl"
                     phx-value-subject_id={subject_id}
                     phx-target={@myself}
                     class="btn btn-xs btn-circle btn-error"
@@ -186,7 +192,7 @@
                     </div>
 
                     <div
-                      :for={%{id: subject_id} = subject <- e(@subjects, [])}
+                      :for={{subject_id, %{subject: subject}} <- e(@list_by_subject, [])}
                       class="flex items-center px-2 py-1 mt-px"
                     >
                       <div class={"flex-1 pr-2 text-left truncate ellipsis", "text-sm": !@ui_compact, "text-xs": @ui_compact}>

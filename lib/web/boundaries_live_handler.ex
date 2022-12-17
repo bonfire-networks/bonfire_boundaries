@@ -309,10 +309,6 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
-  def handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
-    remove_from_acl(subject, socket)
-  end
-
   def circle_create(attrs, socket) do
     with {:ok, %{id: id} = circle} <-
            Circles.create(
@@ -321,104 +317,23 @@ defmodule Bonfire.Boundaries.LiveHandler do
            ) do
       # Bonfire.UI.Common.OpenModalLive.close()
 
-      {:noreply,
-       socket
-       |> assign_flash(:info, "Circle created!")
-       |> assign(
-         circles: [circle] ++ e(socket.assigns, :circles, []),
-         section: nil
-       )
-       |> maybe_add_to_acl(circle)
-       |> maybe_redirect_to("/boundaries/circle/" <> id, attrs)}
-    end
-  end
-
-  def remove_from_acl(subject, socket) do
-    # IO.inspect(subject, label: "ULLID")
-    acl_id = ulid!(e(socket.assigns, :acl, nil))
-    subject_id = ulid!(subject)
-
-    socket =
-      with {del, _} when is_integer(del) and del > 0 <-
-             Grants.remove_subject_from_acl(subject, acl_id) do
-        assign_flash(socket, :info, l("Removed from boundary"))
-
-        # |> redirect_to("/boundaries/acl/#{id}")
-      else
-        _ ->
-          assign_flash(socket, :info, l("No permissions removed from boundary"))
-      end
-
-    {:noreply,
-     assign(
-       socket,
-       subjects:
-         Enum.reject(
-           e(socket.assigns, :subjects, []),
-           &(ulid(&1) == subject_id)
-         )
-     )}
-  end
-
-  def add_to_acl(id, socket) do
-    {:noreply,
-     do_add_to_acl(socket, %{
-       id: id,
-       name: e(socket.assigns, :suggestions, id, nil)
-     })}
-  end
-
-  defp maybe_add_to_acl(socket, %{} = subject) do
-    if e(socket.assigns, :acl, nil) do
-      do_add_to_acl(socket, subject)
-    else
       socket
+      |> assign_flash(:info, "Circle created!")
+      |> assign(
+        circles: [circle] ++ e(socket.assigns, :circles, []),
+        section: nil
+      )
+      |> maybe_redirect_to("/boundaries/circle/" <> id, attrs)
+      |> maybe_add_to_acl(circle)
     end
   end
 
-  defp do_add_to_acl(socket, %{} = subject) do
-    id =
-      ulid(subject)
-      |> debug("id")
-
-    subject_map = %{id => %{subject: subject}}
-
-    subject_name =
-      subject_name(subject)
-      |> debug("name")
-
-    socket
-    |> assign(
-      subjects: ([subject] ++ e(socket.assigns, :subjects, [])) |> Enum.uniq_by(&ulid/1),
-      # so tagify doesn't remove it as invalid
-      suggestions: Map.put(e(socket.assigns, :suggestions, %{}), id, subject_name),
-      list:
-        e(socket.assigns, :list, %{})
-        |> Enum.map(fn
-          {verb_id, %{verb: verb, subject_grants: subject_grants}} ->
-            {
-              verb_id,
-              %{
-                verb: verb,
-                subject_grants: Map.merge(subject_grants, subject_map)
-              }
-            }
-
-          {verb_id, %Bonfire.Data.AccessControl.Verb{} = verb} ->
-            {
-              verb_id,
-              %{
-                verb: verb,
-                subject_grants: subject_map
-              }
-            }
-        end)
-        # |> debug
-        |> Map.new()
-
-      # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
-    )
-    |> assign_flash(:info, l("Added to boundary"))
+  defp maybe_add_to_acl(socket, subject) do
+    if e(socket.assigns, :acl, nil) do
+      Bonfire.Boundaries.Web.AclLive.add_to_acl(subject, socket)
+    else
+      {:noreply, socket}
+    end
   end
 
   def set_circles(selected_circles, previous_circles, add_to_previous \\ false) do
