@@ -80,8 +80,13 @@
           <div class="">
             <div :if={!@read_only} class="p-4">
               <div class="flex items-center rounded-lg">
-                <form class="flex-1" :on-change="add">
-                  <div class="flex-1" id={:select_more_circle} phx-hook="InputOrSelectOne">
+                <form class="flex-1" :on-change="select">
+                  <Bonfire.UI.Common.MultiselectLive
+                    implementation={:live_select}
+                    form_input_name={__MODULE__}
+                    label={l("Search for users to add")}
+                  />
+                  <!-- <div class="flex-1" id={:select_more_circle} phx-hook="InputOrSelectOne">
                     <label class="text-sm font-bold">{l("Add a user")}</label>
                     <input name="subject" class="w-full mt-1 tagify input input-bordered">
                     <select class="tagify hide">
@@ -89,7 +94,7 @@
                         <option class="" value={id}>{LiveHandler.subject_name(suggested)}</option>
                       {/for}
                     </select>
-                  </div>
+                  </div> -->
                 </form>
               </div>
             </div>
@@ -106,8 +111,8 @@
                   <div class="flex-1">
                     <Bonfire.UI.Common.ProfileItemLive
                       show_controls={[]}
-                      profile={e(member, :subject, :profile, nil) || e(member, :profile, nil)}
-                      character={e(member, :subject, :character, nil) || e(member, :character, nil)}
+                      profile={e(member, :subject, :profile, nil) || e(member, :profile, nil) || member}
+                      character={e(member, :subject, :character, nil) || e(member, :character, nil) || member}
                     />
                   </div>
                   <div :if={!@read_only} class="flex">

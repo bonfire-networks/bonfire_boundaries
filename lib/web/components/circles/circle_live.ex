@@ -80,8 +80,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
           {ulid(u), u}
         end)
         |> Map.new()
-
-      # |> debug
+        |> debug
 
       stereotype_id = e(circle, :stereotyped, :stereotype_id, nil)
 
@@ -134,27 +133,13 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
-  def do_handle_event("add", attrs, socket) do
-    # debug(attrs)
-    with id when is_binary(id) <- e(attrs, "subject", nil),
-         {:ok, _} <- Circles.add_to_circles(id, e(socket.assigns, :circle, nil)) do
-      {:noreply,
-       socket
-       |> assign_flash(:info, l("Added to circle!"))
-       |> assign(
-         members:
-           Map.merge(
-             %{id => e(socket.assigns, :suggestions, %{})[id]},
-             e(socket.assigns, :members, %{})
-           )
-           |> debug()
-       )}
-    else
-      other ->
-        error(other)
+  def do_handle_event("multi_select", %{data: data, text: text}, socket) do
+    add_member(data |> Enum.into(%{name: text}), socket)
+  end
 
-        {:noreply, assign_flash(socket, :error, l("Could not add to circle"))}
-    end
+  def do_handle_event("select", %{"id" => id}, socket) do
+    # debug(attrs)
+    add_member(e(socket.assigns, :suggestions, %{})[id] || id, socket)
   end
 
   def do_handle_event("remove", attrs, socket) do
@@ -187,6 +172,39 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
           __MODULE__,
           &do_handle_event/3
         )
+
+  def handle_info(%LiveSelect.ChangeMsg{text: search} = change_msg, socket) do
+    current_user = current_user(socket)
+
+    Bonfire.Me.Users.search(search)
+    |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
+    |> LiveSelect.update_options(change_msg, ...)
+
+    {:noreply, socket}
+  end
+
+  def add_member(subject, socket) do
+    # debug(attrs)
+    with id when is_binary(id) <- ulid(subject),
+         {:ok, _} <- Circles.add_to_circles(id, e(socket.assigns, :circle, nil)) do
+      {:noreply,
+       socket
+       |> assign_flash(:info, l("Added to circle!"))
+       |> assign(
+         members:
+           Map.merge(
+             %{id => subject},
+             e(socket.assigns, :members, %{})
+           )
+           |> debug()
+       )}
+    else
+      other ->
+        error(other)
+
+        {:noreply, assign_flash(socket, :error, l("Could not add to circle"))}
+    end
+  end
 
   def f(%{edge: %{object: %{profile: _} = user}}), do: user
   def f(%{edge: %{subject: %{profile: _} = user}}), do: user

@@ -111,7 +111,12 @@ defmodule Bonfire.Boundaries.Verbs do
     end)
   end
 
-  def list(:code, _), do: verbs()
+  def list(:instance, :id), do: list(:instance, nil) |> Enum.map(&(elem(&1, 1) |> ulid()))
+
+  def list(:instance, _),
+    do: verbs() |> Enum.filter(&(elem(&1, 1) |> e(:scope, nil) == :instance))
+
+  def list(_, _), do: verbs()
 
   def list_verbs_debug() do
     Enum.concat(list_verbs_db_vs_code(), list_verbs_code_vs_db())

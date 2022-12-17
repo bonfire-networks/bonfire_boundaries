@@ -125,49 +125,57 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         id: "1CANENAB1E0RD1SAB1EFEATVRE",
         verb: "Toggle",
         icon: "bx:ToggleRight",
-        summary: "Enable/disable extensions or features"
+        summary: "Enable/disable extensions or features",
+        scope: :instance
       },
       describe: %{
         id: "1CANADD0M0D1FY1NF0METADATA",
         verb: "Describe",
         icon: "bx:CommentEdit",
-        summary: "Edit info and metadata, eg. thread titles"
+        summary: "Edit info and metadata, eg. thread titles",
+        scope: :instance
       },
       grant: %{
         id: "1T0ADDED1TREM0VEB0VNDAR1ES",
         verb: "Grant",
         icon: "bx:Key",
-        summary: "Add, edit or remove boundaries"
+        summary: "Add, edit or remove boundaries",
+        scope: :instance
       },
       assign: %{
         id: "1T0ADDC1RC1ES0RASS1GNR01ES",
         verb: "Assign",
         icon: "bxs:UserBadge",
-        summary: "Assign roles or tasks"
+        summary: "Assign roles or tasks",
+        scope: :instance
       },
       invite: %{
         id: "11NV1TESPE0P1E0RGRANTENTRY",
         verb: "Invite",
         icon: "bx:Gift",
-        summary: "Invite users or grant entry"
+        summary: "Invite users or grant entry",
+        scope: :instance
       },
       mediate: %{
         id: "1T0SEEF1AGSANDMAKETHEPEACE",
         verb: "Mediate",
         icon: "bxs:FlagCheckered",
-        summary: "See flags"
+        summary: "See flags",
+        scope: :instance
       },
       block: %{
         id: "1T0MANAGEB10CKGH0STS11ENCE",
         verb: "Block",
         icon: "bx:Block",
-        summary: "Manage blocks"
+        summary: "Manage blocks",
+        scope: :instance
       },
       configure: %{
         id: "1T0C0NF1GVREGENERA1SETT1NG",
         verb: "Configure",
         icon: "Heroicons-Solid:Adjustments",
-        summary: "Change general settings"
+        summary: "Change general settings",
+        scope: :instance
       }
     ]
 
@@ -184,17 +192,15 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_interact_minus_boost =
       verbs_see_read_request ++
         [
-          :mention,
-          :tag,
           :like,
           :follow
         ]
 
-    verbs_interact_reply_minus_boost = verbs_interact_minus_boost ++ [:reply]
+    verbs_interact_reply_minus_boost = verbs_interact_minus_boost ++ [:reply, :mention, :message]
 
     verbs_interact_incl_boost = verbs_interact_minus_boost ++ [:boost, :pin]
-    verbs_interact_and_reply = verbs_interact_incl_boost ++ [:reply]
-    verbs_interact_and_contribute = verbs_interact_and_reply ++ [:create]
+    verbs_interact_and_reply = verbs_interact_incl_boost ++ [:reply, :mention, :message]
+    verbs_interact_and_contribute = verbs_interact_and_reply ++ [:create, :tag]
 
     public_acls = [
       :guests_may_see_read,
@@ -376,7 +382,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       grants: %{
         ### Public ACLs need their permissions filled out
         # admins can care for every aspect of the instance
-        instance_care: %{admin: all_verb_names},
+        instance_care: %{
+          admin: all_verb_names,
+          local: verbs_interact_and_contribute,
+          activity_pub: verbs_interact_incl_boost,
+          guest: verbs_see_read_request
+        },
         guests_may_see_read: %{guest: verbs_see_read_request},
         guests_may_see: %{guest: verbs_see_request},
         guests_may_read: %{guest: verbs_read_request},

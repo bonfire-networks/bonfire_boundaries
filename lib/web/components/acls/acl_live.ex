@@ -29,8 +29,22 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     params = e(assigns, :__context__, :current_params, %{})
 
     acl_id = e(assigns, :acl_id, nil) || e(socket.assigns, :acl_id, nil) || e(params, "id", nil)
+    scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
 
     verbs = Bonfire.Boundaries.Verbs.list(:db, :id)
+
+    verbs =
+      if scope != :instance do
+        instance_verbs =
+          Bonfire.Boundaries.Verbs.list(:instance, :id)
+          |> debug
+
+        verbs
+        |> Enum.reject(&(elem(&1, 0) in instance_verbs))
+        |> debug
+      else
+        verbs
+      end
 
     global_circles = Bonfire.Boundaries.Fixtures.global_circles()
 
@@ -209,9 +223,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         Grants.grant_role(subject_id, acl, role_name, current_user: current_user)
       end)
       |> List.flatten()
-      |> debug("done")
 
-    with [:ok] <- Keyword.keys(grants) |> Enum.uniq() |> debug("done") do
+    # |> debug("done")
+
+    with [:ok] <- Keyword.keys(grants) |> Enum.uniq() do
       {
         :noreply,
         socket
@@ -286,15 +301,13 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   defp do_add_to_acl(subject, socket) do
-    id =
-      ulid(subject)
-      |> debug("id")
+    id = ulid(subject)
+    # |> debug("id")
 
     subject_map = %{id => %{subject: subject, verb_grants: nil}}
 
-    subject_name =
-      LiveHandler.subject_name(subject)
-      |> debug("name")
+    subject_name = LiveHandler.subject_name(subject)
+    # |> debug("name")
 
     socket
     |> assign(

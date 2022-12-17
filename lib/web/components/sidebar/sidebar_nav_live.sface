@@ -92,7 +92,7 @@
       }
     >
       <Icon iconify="bx:ShapeCircle" class="inline-block w-5 h-5 mr-2" />
-      {l("Instance Roles / Circles")}
+      {l("Instance Circles")}
     </LivePatch>
   </li>
 
