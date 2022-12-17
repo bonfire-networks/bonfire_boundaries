@@ -39,8 +39,8 @@
                 do:
                   JS.push(
                     if(not Enum.member?(@to_boundaries_ids, acl_id),
-                      do: "select_boundary",
-                      else: "remove_boundary"
+                      do: "Bonfire.Boundaries:select_boundary",
+                      else: "Bonfire.Boundaries:remove_boundary"
                     ),
                     value: %{
                       id: acl_id,

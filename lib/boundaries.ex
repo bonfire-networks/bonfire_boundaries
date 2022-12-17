@@ -138,34 +138,11 @@ defmodule Bonfire.Boundaries do
     |> debug("merged ACL + verbs")
   end
 
-  def role_verbs, do: Config.get(:role_verbs)
-  def roles, do: role_verbs |> Keyword.keys()
-
-  def role_names do
-    for role <- roles() do
-      {role, String.capitalize(to_string(role))}
-    end
-  end
-
   def preset_boundary_tuple_from_acl(%{verbs: verbs} = _summary) do
     # debug(summary)
-
-    cond do
-      Enum.count(verbs) == Verbs.verbs_count() ->
-        {l("Caretaker"), l("Full permissions")}
-
-      true ->
-        case role_verbs()
-             |> Enum.filter(fn {_role, role_verbs} ->
-               verbs ==
-                 Enum.map(role_verbs, &Map.get(Verbs.get(&1), :verb))
-                 |> Enum.sort()
-
-               #  |> debug
-             end) do
-          [{role, _verbs}] -> {String.capitalize(to_string(role)), verbs}
-          _ -> {l("Custom"), verbs}
-        end
+    case Verbs.role_from_verb_names(verbs) do
+      :caretaker -> {l("Caretaker"), l("Full permissions")}
+      role -> {String.capitalize(to_string(role)), verbs}
     end
   end
 

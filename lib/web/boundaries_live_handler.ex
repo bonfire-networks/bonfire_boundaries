@@ -124,6 +124,51 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
+  def handle_event("circle_create", %{"name" => name} = attrs, socket) do
+    circle_create(Map.merge(attrs, %{named: %{name: name}}), socket)
+  end
+
+  def handle_event("circle_create", attrs, socket) do
+    circle_create(attrs, socket)
+  end
+
+  def handle_event("open_boundaries", _params, socket) do
+    debug("open_boundaries")
+    {:noreply, assign(socket, :open_boundaries, true)}
+  end
+
+  def handle_event("close_boundaries", _params, socket) do
+    debug("close_boundaries")
+    {:noreply, assign(socket, :open_boundaries, false)}
+  end
+
+  def handle_event("select_boundary", %{"id" => acl_id} = params, socket) do
+    debug(acl_id, "select_boundary")
+
+    {:noreply,
+     assign(
+       socket,
+       :to_boundaries,
+       Bonfire.Boundaries.Web.SetBoundariesLive.set_clean_boundaries(
+         e(socket.assigns, :to_boundaries, []),
+         acl_id,
+         e(params, "name", acl_id)
+       )
+     )}
+  end
+
+  def handle_event("remove_boundary", %{"id" => id} = _params, socket) do
+    debug(id, "remove_boundary")
+
+    {:noreply,
+     assign(
+       socket,
+       :to_boundaries,
+       e(socket.assigns, :to_boundaries, [])
+       |> Keyword.drop([id])
+     )}
+  end
+
   # def handle_event("input", %{"circles" => selected_circles} = _attrs, socket) when is_list(selected_circles) and length(selected_circles)>0 do
   #   previous_circles = e(socket, :assigns, :to_circles, []) #|> Enum.uniq()
   #   new_circles = set_circles(selected_circles, previous_circles)
@@ -145,61 +190,24 @@ defmodule Bonfire.Boundaries.LiveHandler do
   #   }
   # end
 
-  def handle_event("select", %{"id" => selected} = _attrs, socket)
-      when is_binary(selected) do
-    # |> IO.inspect
-    previous_circles = e(socket, :assigns, :to_circles, [])
-
-    # |> IO.inspect
-    new_circles = set_circles([selected], previous_circles, true)
-
+  def handle_event(action, %{"id" => selected} = _attrs, socket)
+      when action in ["select", "select_circle"] and is_binary(selected) do
     {:noreply,
-     assign_global(socket,
-       to_circles: new_circles
+     assign(socket,
+       to_circles: set_circles([selected], e(socket, :assigns, :to_circles, []), true)
      )}
   end
 
-  def handle_event("deselect", %{"id" => deselected} = _attrs, socket)
-      when is_binary(deselected) do
-    # |> IO.inspect
-    new_circles =
-      remove_from_circle_tuples(
-        [deselected],
-        e(socket, :assigns, :to_circles, [])
-      )
-
+  def handle_event(action, %{"id" => deselected} = _attrs, socket)
+      when action in ["deselect", "remove_circle"] and is_binary(deselected) do
     {:noreply,
-     assign_global(socket,
-       to_circles: new_circles
+     assign(socket,
+       to_circles:
+         remove_from_circle_tuples(
+           [deselected],
+           e(socket, :assigns, :to_circles, [])
+         )
      )}
-  end
-
-  def handle_event("circle_create", %{"name" => name} = attrs, socket) do
-    circle_create(Map.merge(attrs, %{named: %{name: name}}), socket)
-  end
-
-  def handle_event("circle_create", attrs, socket) do
-    circle_create(attrs, socket)
-  end
-
-  def circle_create(attrs, socket) do
-    with {:ok, %{id: id} = circle} <-
-           Circles.create(
-             e(socket.assigns, :scope, nil) || current_user_required!(socket),
-             attrs
-           ) do
-      # Bonfire.UI.Common.OpenModalLive.close()
-
-      {:noreply,
-       socket
-       |> assign_flash(:info, "Circle created!")
-       |> assign(
-         circles: [circle] ++ e(socket.assigns, :circles, []),
-         section: nil
-       )
-       |> maybe_add_to_acl(circle)
-       |> maybe_redirect_to("/boundaries/circle/" <> id, attrs)}
-    end
   end
 
   def handle_event("circle_edit", %{"circle" => circle_params}, socket) do
@@ -303,6 +311,26 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
     remove_from_acl(subject, socket)
+  end
+
+  def circle_create(attrs, socket) do
+    with {:ok, %{id: id} = circle} <-
+           Circles.create(
+             e(socket.assigns, :scope, nil) || current_user_required!(socket),
+             attrs
+           ) do
+      # Bonfire.UI.Common.OpenModalLive.close()
+
+      {:noreply,
+       socket
+       |> assign_flash(:info, "Circle created!")
+       |> assign(
+         circles: [circle] ++ e(socket.assigns, :circles, []),
+         section: nil
+       )
+       |> maybe_add_to_acl(circle)
+       |> maybe_redirect_to("/boundaries/circle/" <> id, attrs)}
+    end
   end
 
   def remove_from_acl(subject, socket) do

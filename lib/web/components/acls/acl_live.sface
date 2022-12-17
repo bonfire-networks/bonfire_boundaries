@@ -102,110 +102,160 @@
                     id="acl_tagify"
                     class="w-full border tagify--outside tagify !border-base-content/10"
                   />
-                  <select class="tagify hide">
+                  <!-- <select class="tagify hide">
                     {#for {id, name} <- @suggestions}
                       <option class="" value={id}>{name}</option>
                     {/for}
-                  </select>
+                  </select> -->
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div
-          :if={Enum.count(e(@subjects, [])) > 0}
-          class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}
-        >
-          {#for {{verb_id, l}, i} <- Enum.with_index(e(@list, []))}
-            <div class="col-span-1 border-base-content/10 shadow-lg rounded bg-base-content/5">
-              <div class="flex-1 rounded">
-                <div class="flex items-center p-2 space-x-2 bg-base-content/5">
-                  {#case Bonfire.Boundaries.Verbs.get(verb_id)}
-                    {#match nil}
-                    {#match verb}
-                      <span class="tooltip" data-tip={e(verb, :summary, nil)}>
-                        <Icon
-                          iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
-                          class="w-4 h-4 text-base-content/70"
-                          fill="currentColor"
-                        />
-                      </span>
-                  {/case}
+        {#if is_list(@subjects) and @subjects != []}
+          <div class="collapse-title text-xl font-medium">
+            Role per circle or person
+          </div>
+          <form :on-change="edit_grant_role">
+            <ul class="flex flex-col gap-4">
+              <li
+                :for={{{subject_id, l}, i} <- Enum.with_index(@list_by_subject || [])}
+                class="flex items-center justify-between"
+              >
+                {#if e(l, :subject, :profile, :id, nil)}
+                  <Bonfire.UI.Common.ProfileItemLive
+                    profile={e(l, :subject, :profile, nil)}
+                    character={e(l, :subject, :character, nil)}
+                    show_controls={[]}
+                  />
+                {#else}
+                  <span class="flex items-center w-10 h-10 rounded place-content-center bg-base-content/5">
+                    <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
+                  </span>
+                  {LiveHandler.subject_name(e(l, :subject, nil))}
+                {/if}
 
-                  <div class="flex-1 font-medium">
-                    {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
+                <div class="flex items-center gap-2" :if={!@read_only}>
+                  <Bonfire.Boundaries.Web.RolesDropdownLive
+                    circle_id={subject_id}
+                    role={Bonfire.Boundaries.Verbs.role_from_verb_ids(Map.keys(e(l, :verb_grants, %{})))
+                    |> debug("role_from_verbs")}
+                    extra_roles={[{:custom, l("Custom")}]}
+                  />
+                  <div
+                    phx-click="Bonfire.Boundaries:remove_from_acl"
+                    phx-value-subject_id={subject_id}
+                    phx-target={@myself}
+                    class="btn btn-xs btn-circle btn-error"
+                  >
+                    <Icon solid="Minus" class="w-4 h-4" />
                   </div>
                 </div>
-              </div>
+              </li>
+            </ul>
+          </form>
 
-              <div
-                :for={%{id: subject_id} = subject <- e(@subjects, [])}
-                class="flex items-center px-2 py-1 mt-px"
-              >
-                <div class={"flex-1 pr-2 text-left truncate ellipsis", "text-sm": !@ui_compact, "text-xs": @ui_compact}>
-                  {#if !e(subject, :stereotyped, :stereotype_id, nil) and e(subject, :named, :id, nil) != nil and
-                      subject_id not in e(@global_circles, [])}
-                    <span
-                      phx-click="edit_circle"
-                      phx-target={@myself}
-                      phx-value-id={subject_id}
-                      class="cursor-pointer"
+          <div tabindex="0" class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box">
+            <input type="checkbox">
+            <div class="collapse-title text-xl font-medium">
+              Detailed permissions
+            </div>
+            <div class="collapse-content">
+              <div class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}>
+                {#for {{verb_id, l}, i} <- Enum.with_index(@list_by_verb || [])}
+                  <div class="col-span-1 border-base-content/10 shadow-lg rounded bg-base-content/5">
+                    <div class="flex-1 rounded">
+                      <div class="flex items-center p-2 space-x-2 bg-base-content/5">
+                        {#case Bonfire.Boundaries.Verbs.get(verb_id)}
+                          {#match nil}
+                          {#match verb}
+                            <span class="tooltip" data-tip={e(verb, :summary, nil)}>
+                              <Icon
+                                iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+                                class="w-4 h-4 text-base-content/70"
+                                fill="currentColor"
+                              />
+                            </span>
+                        {/case}
+
+                        <div class="flex-1 font-medium">
+                          {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      :for={%{id: subject_id} = subject <- e(@subjects, [])}
+                      class="flex items-center px-2 py-1 mt-px"
                     >
-                      {LiveHandler.subject_name(subject)}
-                    </span>
-                  {#else}
-                    {LiveHandler.subject_name(subject)}
-                  {/if}
-                </div>
-                <div class="">
-                  <form :on-change="edit_grant" class="flex items-center space-x-1 boundaries-switches">
-                    <label class="tooltip tooltip-top" data-tip={l("Can")}>
-                      <input
-                        class="absolute opacity-0"
-                        name={"subject[#{subject_id}][#{verb_id}]"}
-                        type="radio"
-                        value="1"
-                        checked={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil) == true}
-                        disabled={@read_only}
-                      />
-                      <div class={"btn btn-square btn-xs btn-yes", "btn-disabled": @read_only}>
-                        <Icon solid="Check" class="w-4 h-4" />
+                      <div class={"flex-1 pr-2 text-left truncate ellipsis", "text-sm": !@ui_compact, "text-xs": @ui_compact}>
+                        {#if !e(subject, :stereotyped, :stereotype_id, nil) and e(subject, :named, :id, nil) != nil and
+                            subject_id not in e(@global_circles, [])}
+                          <span
+                            phx-click="edit_circle"
+                            phx-target={@myself}
+                            phx-value-id={subject_id}
+                            class="cursor-pointer"
+                          >
+                            {LiveHandler.subject_name(subject)}
+                          </span>
+                        {#else}
+                          {LiveHandler.subject_name(subject)}
+                        {/if}
                       </div>
-                    </label>
-                    <label class="tooltip tooltip-top" data-tip={l("Not specified")}>
-                      <input
-                        class="absolute opacity-0"
-                        name={"subject[#{subject_id}][#{verb_id}]"}
-                        type="radio"
-                        value=""
-                        checked={is_nil(Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil))}
-                        disabled={@read_only}
-                      />
-                      <div class={"btn btn-square btn-xs btn-maybe", "btn-disabled": @read_only}>
-                        <Icon solid="Minus" class="w-4 h-4" />
+                      <div class="">
+                        <form :on-change="edit_grant_verb" class="flex items-center space-x-1 boundaries-switches">
+                          <label class="tooltip tooltip-top" data-tip={l("Can")}>
+                            <input
+                              class="absolute opacity-0"
+                              name={"subject[#{subject_id}][#{verb_id}]"}
+                              type="radio"
+                              value="1"
+                              checked={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil) == true}
+                              disabled={@read_only}
+                            />
+                            <div class={"btn btn-square btn-xs btn-yes", "btn-disabled": @read_only}>
+                              <Icon solid="Check" class="w-4 h-4" />
+                            </div>
+                          </label>
+                          <label class="tooltip tooltip-top" data-tip={l("Not specified")}>
+                            <input
+                              class="absolute opacity-0"
+                              name={"subject[#{subject_id}][#{verb_id}]"}
+                              type="radio"
+                              value=""
+                              checked={is_nil(Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil))}
+                              disabled={@read_only}
+                            />
+                            <div class={"btn btn-square btn-xs btn-maybe", "btn-disabled": @read_only}>
+                              <Icon solid="Minus" class="w-4 h-4" />
+                            </div>
+                          </label>
+                          <label class="tooltip tooltip-top" data-tip={l("Cannot")}>
+                            <input
+                              class="absolute opacity-0"
+                              name={"subject[#{subject_id}][#{verb_id}]"}
+                              type="radio"
+                              value="0"
+                              checked={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil) == false}
+                              disabled={@read_only}
+                            />
+                            <div class={"btn btn-square btn-xs btn-no", "btn-disabled": @read_only}>
+                              <Icon solid="X" class="w-4 h-4" />
+                            </div>
+                          </label>
+                        </form>
                       </div>
-                    </label>
-                    <label class="tooltip tooltip-top" data-tip={l("Cannot")}>
-                      <input
-                        class="absolute opacity-0"
-                        name={"subject[#{subject_id}][#{verb_id}]"}
-                        type="radio"
-                        value="0"
-                        checked={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil) == false}
-                        disabled={@read_only}
-                      />
-                      <div class={"btn btn-square btn-xs btn-no", "btn-disabled": @read_only}>
-                        <Icon solid="X" class="w-4 h-4" />
-                      </div>
-                    </label>
-                  </form>
-                </div>
+                    </div>
+                  </div>
+                {/for}
               </div>
             </div>
-          {/for}
-        </div>
+          </div>
+        {/if}
       </div>
+
       <section :if={@section == "settings"} role="tabpanel" class="p-4">
         <div class="pb-3 text-lg font-medium">{l("General")}</div>
         <form phx-submit="edit" phx-target={@myself} class="p-4 border rounded-lg border-base-content/30">

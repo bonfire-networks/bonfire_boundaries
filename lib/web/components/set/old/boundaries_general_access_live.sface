@@ -28,8 +28,8 @@
         class="flex items-center w-full"
         phx-click={JS.push(
           if(not Enum.member?(@to_boundaries_ids, "public"),
-            do: "select_boundary",
-            else: "remove_boundary"
+            do: "Bonfire.Boundaries:select_boundary",
+            else: "Bonfire.Boundaries:remove_boundary"
           ),
           value: %{id: "public", name: l("Public")},
           target: "#smart_input"
@@ -74,7 +74,7 @@
       <label
         class="flex items-center w-full"
         phx-click={JS.push(
-          if(not Enum.member?(@to_boundaries_ids, "local"), do: "select_boundary", else: "remove_boundary"),
+          if(not Enum.member?(@to_boundaries_ids, "local"), do: "Bonfire.Boundaries:select_boundary", else: "Bonfire.Boundaries:remove_boundary"),
           value: %{id: "local", name: l("Local Instance")},
           target: "#smart_input"
         )}
@@ -115,8 +115,8 @@
         class="flex items-center w-full"
         phx-click={JS.push(
           if(not Enum.member?(@to_boundaries_ids, "mentions"),
-            do: "select_boundary",
-            else: "remove_boundary"
+            do: "Bonfire.Boundaries:select_boundary",
+            else: "Bonfire.Boundaries:remove_boundary"
           ),
           value: %{id: "mentions", name: l("Mentions")},
           target: "#smart_input"

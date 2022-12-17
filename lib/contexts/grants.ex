@@ -15,7 +15,7 @@ defmodule Bonfire.Boundaries.Grants do
   # alias Bonfire.Data.AccessControl.Accesses
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Grants
-  # alias Bonfire.Boundaries.Accesses
+  alias Bonfire.Boundaries.Verbs
   alias Bonfire.Boundaries.Circles
 
   def grants, do: Config.get([:grants])
@@ -136,9 +136,19 @@ defmodule Bonfire.Boundaries.Grants do
     nil
   end
 
+  def grant_role(subject_id, acl_id, role, opts \\ []) do
+    with {:ok, role_verbs} <- Verbs.verbs_for_role(role) do
+      # first remove all existing grants to this subject
+      remove_subject_from_acl(subject_id, acl_id)
+
+      # then re-add based on role
+      grant(subject_id, acl_id, role_verbs, true, opts)
+    end
+  end
+
   def remove_subject_from_acl(subject, acls)
       when is_nil(acls) or (is_list(acls) and length(acls) == 0),
-      do: error("No circle ID provided, so could not remove")
+      do: error("No boundary ID provided, so could not remove.")
 
   def remove_subject_from_acl(subject, acls) when is_list(acls) do
     from(e in Grant,

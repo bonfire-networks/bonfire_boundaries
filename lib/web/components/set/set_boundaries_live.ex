@@ -81,6 +81,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
         %{"#{@form_input_name}" => "", "#{@form_input_name}_text_input" => _} = _params,
         socket
       ) do
+    # empty
     {:noreply, socket}
   end
 
@@ -116,5 +117,13 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
         error(e)
         {:noreply, socket}
     end
+  end
+
+  def handle_event("tagify_add", attrs, socket) do
+    handle_event("select_boundary", attrs, socket)
+  end
+
+  def handle_event("tagify_remove", attrs, socket) do
+    handle_event("remove_boundary", attrs, socket)
   end
 end

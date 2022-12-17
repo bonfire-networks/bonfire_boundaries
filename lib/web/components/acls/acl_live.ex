@@ -28,12 +28,73 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     current_user = current_user(assigns)
     params = e(assigns, :__context__, :current_params, %{})
 
-    id = e(assigns, :acl_id, nil) || e(params, "id", nil)
+    acl_id = e(assigns, :acl_id, nil) || e(socket.assigns, :acl_id, nil) || e(params, "id", nil)
+
+    verbs = Bonfire.Boundaries.Verbs.list(:db, :id)
+
+    global_circles = Bonfire.Boundaries.Fixtures.global_circles()
+
+    # circles =
+    #   Bonfire.Boundaries.Circles.list_my_with_global(current_user,
+    #     global_circles: global_circles
+    #   )
+
+    # extra_circles =
+    #   if Integration.is_admin?(current_user) ||
+    #        Bonfire.Boundaries.can?(current_user, :grant, :instance),
+    #      do: Bonfire.Boundaries.Circles.list_my(Bonfire.Boundaries.Fixtures.admin_circle()),
+    #      else: []
+
+    # # TODO: handle pagination?
+    # followed = Bonfire.Social.Follows.list_my_followed(current_user, paginate: false)
+    # already_seen_ids = Enum.map(followed, & &1.edge.object_id)
+    # followers =
+    #   Bonfire.Social.Follows.list_my_followers(current_user,
+    #     paginate: false,
+    #     exclude_ids: already_seen_ids
+    #   )
+
+    # suggestions =
+    #   (for user <- followed ++ followers do
+    #      {e(user, :edge, :object, :id, nil),
+    #       e(user, :edge, :object, :profile, :name, "") <>
+    #         " - " <>
+    #         Bonfire.Me.Characters.display_username(e(user, :edge, :object, nil))}
+    #    end ++
+    #      for circle <- circles ++ extra_circles do
+    #        {ulid(circle),
+    #         e(circle, :named, :name, nil) ||
+    #           e(circle, :stereotyped, :named, :name, nil) ||
+    #           l("Untitled circle")}
+    #      end)
+    #   |> Map.new()
 
     # |> debug
 
+    {:ok,
+     socket
+     |> assign(assigns)
+     |> assign(
+       section: e(params, "section", "permissions"),
+       verbs: verbs,
+       acl_id: acl_id,
+       #  suggestions: suggestions,
+       global_circles: global_circles,
+       settings_section_title: "View boundary",
+       settings_section_description: l("Create and manage your boundary."),
+       ui_compact: Settings.get([:ui, :compact], false, assigns),
+       selected_tab: "acls"
+     )
+     |> assign_updated_grants()}
+  end
+
+  def assign_updated_grants(socket) do
+    current_user = current_user(socket)
+
+    acl_id = e(socket.assigns, :acl_id, nil)
+
     with {:ok, acl} <-
-           Acls.get_for_caretaker(id, current_user)
+           Acls.get_for_caretaker(acl_id, current_user)
            |> repo().maybe_preload(
              grants: [
                :verb,
@@ -42,75 +103,24 @@ defmodule Bonfire.Boundaries.Web.AclLive do
            ) do
       # debug(acl, "acl")
 
-      verbs = Bonfire.Boundaries.Verbs.list(:db, :id)
+      verbs = e(socket.assigns, :verbs, [])
 
-      # list = subject_verb_grant(e(acl, :grants, []))
-      list = verb_subject_grant(e(acl, :grants, []))
+      list_by_subject = subject_verb_grant(e(acl, :grants, []))
+      list_by_verb = verb_subject_grant(e(acl, :grants, []))
 
-      # # TODO: handle pagination?
-      followed = Bonfire.Social.Follows.list_my_followed(current_user, paginate: false)
-
-      already_seen_ids = Enum.map(followed, & &1.edge.object_id)
-      # # |> debug
-      followers =
-        Bonfire.Social.Follows.list_my_followers(current_user,
-          paginate: false,
-          exclude_ids: already_seen_ids
-        )
-
-      # |> debug
-
-      global_circles = Bonfire.Boundaries.Fixtures.global_circles()
-
-      circles =
-        Bonfire.Boundaries.Circles.list_my_with_global(current_user,
-          global_circles: global_circles
-        )
-
-      extra_circles =
-        if Integration.is_admin?(current_user) ||
-             Bonfire.Boundaries.can?(current_user, :grant, :instance),
-           do: Bonfire.Boundaries.Circles.list_my(Bonfire.Boundaries.Fixtures.admin_circle()),
-           else: []
-
-      suggestions =
-        (for user <- followed ++ followers do
-           {e(user, :edge, :object, :id, nil),
-            e(user, :edge, :object, :profile, :name, "") <>
-              " - " <>
-              Bonfire.Me.Characters.display_username(e(user, :edge, :object, nil))}
-         end ++
-           for circle <- circles ++ extra_circles do
-             {ulid(circle),
-              e(circle, :named, :name, nil) ||
-                e(circle, :stereotyped, :named, :name, nil) ||
-                l("Untitled circle")}
-           end)
-        |> Map.new()
-
-      # |> debug
-
-      {:ok,
-       socket
-       |> assign(assigns)
-       |> assign(
-         loaded: true,
-         section: e(params, "section", "permissions"),
-         # verbs: verbs,
-         acl: acl,
-         list: Map.merge(verbs, list),
-         subjects: subjects(e(acl, :grants, [])),
-         suggestions: suggestions,
-         global_circles: global_circles,
-         read_only:
-           Acls.is_stereotype?(acl) or
-             (ulid(acl) in Acls.built_in_ids() and
-                !Bonfire.Boundaries.can?(current_user, :grant, :instance)),
-         settings_section_title: "View " <> e(acl, :named, :name, "") <> " boundary",
-         settings_section_description: l("Create and manage your boundary."),
-         ui_compact: Settings.get([:ui, :compact], false, assigns),
-         selected_tab: "acls"
-       )}
+      socket
+      |> assign(
+        loaded: true,
+        settings_section_title: "View " <> e(acl, :named, :name, "") <> " boundary",
+        acl: acl,
+        list_by_subject: list_by_subject,
+        list_by_verb: Map.merge(verbs, list_by_verb),
+        subjects: subjects(e(acl, :grants, [])),
+        read_only:
+          Acls.is_stereotype?(acl) or
+            (acl_id in Acls.built_in_ids() and
+               !Bonfire.Boundaries.can?(current_user, :grant, :instance))
+      )
     end
   end
 
@@ -139,14 +149,13 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     Bonfire.Boundaries.LiveHandler.add_to_acl(id, socket)
   end
 
-  def do_handle_event("edit_grant", attrs, socket) do
+  def do_handle_event("edit_grant_verb", %{"subject" => subjects} = attrs, socket) do
     # debug(attrs)
     current_user = current_user_required!(socket)
-    edit_grant = e(attrs, "subject", nil)
     acl = e(socket.assigns, :acl, nil)
-    # verb_value = List.first(Map.values(edit_grant))
+    # verb_value = List.first(Map.values(subjects))
     grant =
-      Enum.flat_map(edit_grant, fn {subject_id, verb_value} ->
+      Enum.flat_map(subjects, fn {subject_id, verb_value} ->
         Enum.flat_map(verb_value, fn {verb, value} ->
           debug(acl, "#{subject_id} -- #{verb} = #{value}")
 
@@ -162,7 +171,9 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
       {
         :noreply,
-        assign_flash(socket, :info, l("Permission edited!"))
+        socket
+        |> assign_flash(:info, l("Permission edited!"))
+        |> assign_updated_grants()
 
         # |> assign(
         # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
@@ -172,7 +183,36 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       other ->
         error(other)
 
-        {:noreply, assign_flash(socket, :error, l("Could not edit permission"))}
+        {:noreply, assign_error(socket, l("Could not edit permission"))}
+    end
+  end
+
+  def do_handle_event("edit_grant_role", %{"to_circles" => subjects} = attrs, socket) do
+    # debug(attrs)
+    current_user = current_user_required!(socket)
+    acl = e(socket.assigns, :acl, nil)
+
+    grants =
+      Enum.flat_map(subjects, fn {subject_id, role_name} ->
+        Grants.grant_role(subject_id, acl, role_name, current_user: current_user)
+      end)
+      |> debug("done")
+
+    with [:ok] <- Keyword.keys(grants) |> Enum.uniq() |> debug("done") do
+      {
+        :noreply,
+        socket
+        |> assign_flash(:info, l("Permission edited!"))
+        |> assign_updated_grants()
+        # |> assign(
+        # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
+        # )
+      }
+    else
+      other ->
+        error(other)
+
+        {:noreply, assign_error(socket, l("Could not edit permission"))}
     end
   end
 
@@ -243,8 +283,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       subjects_acc ++ [grant.subject]
     end)
     |> Enum.uniq()
-
-    # |> debug
   end
 
   def subjects(_), do: %{}
@@ -275,8 +313,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         end
       )
     end)
-
-    # |> debug
+    |> debug
   end
 
   def subject_verb_grant(_), do: %{}

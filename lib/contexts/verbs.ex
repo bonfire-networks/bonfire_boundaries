@@ -1,5 +1,5 @@
 defmodule Bonfire.Boundaries.Verbs do
-  # import Untangle
+  use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
   # import Ecto.Query
   alias Bonfire.Data.AccessControl.Verb
@@ -36,6 +36,63 @@ defmodule Bonfire.Boundaries.Verbs do
     do: Enum.map(verbs, &get_id/1) |> Enum.reject(&is_nil/1)
 
   def ids(verb) when is_atom(verb), do: ids([verb])
+
+  def role_verbs, do: Config.get(:role_verbs)
+  def roles, do: role_verbs |> Keyword.keys()
+
+  def role_names do
+    for role <- roles() do
+      {role, String.capitalize(to_string(role))}
+    end
+  end
+
+  def role_from_verb_names(verbs) do
+    role_from_verb(verbs, :verb)
+  end
+
+  def role_from_verb_ids(verbs) do
+    role_from_verb(verbs, :id)
+  end
+
+  def role_from_verb(verbs, field \\ :verb) do
+    cond do
+      Enum.count(verbs) == verbs_count() ->
+        :caretaker
+
+      true ->
+        case role_verbs()
+             |> Enum.filter(fn {_role, role_verbs} ->
+               verbs ==
+                 Enum.map(role_verbs, &Map.get(get(&1), field))
+                 |> Enum.sort()
+
+               # |> debug
+             end) do
+          [{role, _verbs}] -> role
+          _ -> :custom
+        end
+    end
+  end
+
+  def verbs_for_role(role) do
+    role =
+      role
+      |> Utils.maybe_to_atom()
+      |> debug("role")
+
+    if is_atom(role) and not is_nil(role) do
+      role_verbs = role_verbs()
+      roles = role_verbs |> Keyword.keys()
+
+      if role in roles do
+        {:ok, role_verbs[role] || []}
+      else
+        {:error, l("This role is not defined.")}
+      end
+    else
+      {:error, l("This is not a valid role.")}
+    end
+  end
 
   def create(%{} = attrs) when not is_struct(attrs) do
     repo().insert(changeset(attrs))

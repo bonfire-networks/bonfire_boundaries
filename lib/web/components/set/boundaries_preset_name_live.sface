@@ -1,12 +1,12 @@
 {#case @preset_boundary}
   {#match {"public", _}}
-    <span class="text-lg">🌍</span>{l("Public")}
+    <span class="text-lg">🌍</span> <span>{l("Public")}</span>
   {#match {"local", _}}
-    <span class="text-lg">🏠</span> {l("Local instance")}
+    <span class="text-lg">🏠</span> <span>{l("Local instance")}</span>
   {#match {"mentions", _}}
-    <span class="text-lg">﹫</span> {l("Mentions")}
+    <span class="text-lg">﹫</span> <span>{l("Mentions")}</span>
   {#match {_, name}}
-    <span class="text-lg">⛭</span> {name}
+    <span class="text-lg">⛭</span> <span>{name}</span>
   {#match _}
-    <span class="text-lg">⛭</span> {l("Custom")}
+    <span class="text-lg">⛭</span> <span>{l("Custom")}</span>
 {/case}

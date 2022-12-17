@@ -247,21 +247,12 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp grant_to({subject_id, role}, acl_id, default_verbs) do
-    role_verbs = Bonfire.Boundaries.role_verbs()
-    roles = role_verbs |> Keyword.keys()
-
-    role =
-      role
-      |> maybe_to_atom()
-      |> debug
-
-    if is_atom(role) and not is_nil(role) and role in roles do
-      grant_to(subject_id, acl_id, role_verbs[role])
+    with {:ok, role_verbs} <- Verbs.verbs_for_role(role) do
+      grant_to(subject_id, acl_id, role_verbs)
     else
-      case ulid(subject_id) do
-        nil -> nil
-        id -> grant_to(id, acl_id, default_verbs)
-      end
+      e ->
+        error(e)
+        nil
     end
   end
 

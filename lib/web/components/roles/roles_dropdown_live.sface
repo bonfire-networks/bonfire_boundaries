@@ -1,0 +1,7 @@
+<select name={"to_circles[#{@circle_id}]"} class="select select-bordered select-sm">
+  <option
+    :for={{id, name} <- Bonfire.Boundaries.Verbs.role_names() ++ @extra_roles}
+    value={id}
+    selected={if @role == id or (is_nil(@role) and id == :participate), do: true}
+  >{name}</option>
+</select>

@@ -3,7 +3,7 @@
     <button
       type="button"
       @click="open_boundaries = true"
-      phx-click="open_boundaries"
+      phx-click="Bonfire.Boundaries:open_boundaries"
       phx-target="#smart_input"
       class="flex items-center btn-sm  normal-case btn rounded-full opacity-90 gap-2"
     >
