@@ -126,82 +126,29 @@
           <form :on-change="edit_grant_role">
             <ul class="flex flex-col gap-4">
               <li
-                :for={{{subject_id, %{subject: subject, verb_grants: verb_grants} = subject_verb_grant}, i} <-
-                  Enum.with_index(@list_by_subject || [])}
+                :for={{{subject_id, l}, i} <- Enum.with_index(@list_by_subject || [])}
                 class="flex items-center justify-between"
               >
-                {#if e(subject, :profile, :id, nil)}
+                {#if e(l, :subject, :profile, :id, nil)}
                   <Bonfire.UI.Common.ProfileItemLive
-                    profile={e(subject, :profile, nil)}
-                    character={e(subject, :character, nil)}
+                    profile={e(l, :subject, :profile, nil)}
+                    character={e(l, :subject, :character, nil)}
                     show_controls={[]}
                   />
                 {#else}
                   <span class="flex items-center w-10 h-10 rounded place-content-center bg-base-content/5">
                     <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
                   </span>
-                  {LiveHandler.subject_name(subject)}
+                  {LiveHandler.subject_name(e(l, :subject, nil))}
                 {/if}
 
                 <div class="flex items-center gap-2" :if={!@read_only}>
                   <Bonfire.Boundaries.Web.RolesDropdownLive
                     circle_id={subject_id}
-                    role={Bonfire.Boundaries.Verbs.role_from_verb_ids(Map.keys(verb_grants || %{}))
+                    role={Bonfire.Boundaries.Verbs.role_from_verb_ids(Map.keys(e(l, :verb_grants, %{})))
                     |> debug("role_from_verbs")}
                     extra_roles={[{:custom, l("Custom")}]}
                   />
-
-                  <Bonfire.UI.Common.OpenModalLive
-                    reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
-                    id={"modal-verbs-#{subject_id}"}
-                    title_text={l("Role details (or customise permissions)")}
-                  >
-                    <div class="mt-4">
-                      <div class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}>
-                        {#for {verb_id, l} <- Enum.concat(verb_grants || [], @verbs || []) |> Enum.uniq_by(&elem(&1, 0))}
-                          <div class="col-span-1 border-base-content/10 shadow-lg rounded bg-base-content/5">
-                            <div class="flex-1 rounded">
-                              <div class="flex items-center p-2 space-x-2 bg-base-content/5">
-                                {#case Bonfire.Boundaries.Verbs.get(verb_id)}
-                                  {#match nil}
-                                  {#match verb}
-                                    <span class="tooltip" data-tip={e(verb, :summary, nil)}>
-                                      <Icon
-                                        iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
-                                        class="w-4 h-4 text-base-content/70"
-                                        fill="currentColor"
-                                      />
-                                    </span>
-                                {/case}
-
-                                <div class="flex-1 font-medium">
-                                  {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
-                                </div>
-                              </div>
-                            </div>
-
-                            <div class="flex items-end px-2 py-1 mt-px">
-                              <Bonfire.Boundaries.Web.YesMaybeFalseLive
-                                value={e(l, :value, nil)}
-                                field_name={"subject[#{subject_id}][#{verb_id}]"}
-                                event_target={@myself}
-                              />
-                            </div>
-                          </div>
-                        {/for}
-                      </div>
-                    </div>
-                    <:open_btn>
-                      <button type="button" class="normal-case btn btn-sm opacity-80">
-                        {l("Details")}
-                      </button>
-                    </:open_btn>
-                    <:action_btns>
-                      <button class="normal-case rounded btn btn-sm btn-primary">
-                        {l("Done")}
-                      </button>
-                    </:action_btns>
-                  </Bonfire.UI.Common.OpenModalLive>
 
                   <div
                     phx-click="remove_from_acl"
@@ -215,6 +162,65 @@
               </li>
             </ul>
           </form>
+
+          <div tabindex="0" class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box">
+            <input type="checkbox">
+            <div class="collapse-title text-xl font-medium">
+              Detailed permissions
+            </div>
+            <div class="collapse-content">
+              <div class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}>
+                {#for {{verb_id, l}, i} <- Enum.with_index(@list_by_verb || [])}
+                  <div class="col-span-1 border-base-content/10 shadow-lg rounded bg-base-content/5">
+                    <div class="flex-1 rounded">
+                      <div class="flex items-center p-2 space-x-2 bg-base-content/5">
+                        {#case Bonfire.Boundaries.Verbs.get(verb_id)}
+                          {#match nil}
+                          {#match verb}
+                            <span class="tooltip" data-tip={e(verb, :summary, nil)}>
+                              <Icon
+                                iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+                                class="w-4 h-4 text-base-content/70"
+                                fill="currentColor"
+                              />
+                            </span>
+                        {/case}
+
+                        <div class="flex-1 font-medium">
+                          {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      :for={{subject_id, %{subject: subject}} <- e(@list_by_subject, [])}
+                      class="flex items-center px-2 py-1 mt-px"
+                    >
+                      <div class={"flex-1 pr-2 text-left truncate ellipsis", "text-sm": !@ui_compact, "text-xs": @ui_compact}>
+                        {#if !e(subject, :stereotyped, :stereotype_id, nil) and e(subject, :named, :id, nil) != nil and
+                            subject_id not in e(@global_circles, [])}
+                          <span
+                            phx-click="edit_circle"
+                            phx-target={@myself}
+                            phx-value-id={subject_id}
+                            class="cursor-pointer"
+                          >
+                            {LiveHandler.subject_name(subject)}
+                          </span>
+                        {#else}
+                          {LiveHandler.subject_name(subject)}
+                        {/if}
+                      </div>
+                      <Bonfire.Boundaries.Web.YesMaybeFalseLive
+                        value={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil)}
+                        field_name={"subject[#{subject_id}][#{verb_id}]"}
+                      />
+                    </div>
+                  </div>
+                {/for}
+              </div>
+            </div>
+          </div>
         {/if}
       </div>
 

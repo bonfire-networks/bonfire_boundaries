@@ -106,7 +106,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       verbs = e(socket.assigns, :verbs, [])
 
       list_by_subject = subject_verb_grant(e(acl, :grants, []))
-      list_by_verb = verb_subject_grant(e(acl, :grants, []))
+      # list_by_verb = verb_subject_grant(e(acl, :grants, []))
 
       socket
       |> assign(
@@ -114,7 +114,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         settings_section_title: "View " <> e(acl, :named, :name, "") <> " boundary",
         acl: acl,
         list_by_subject: list_by_subject,
-        list_by_verb: Map.merge(verbs, list_by_verb),
+        # list_by_verb: Map.merge(verbs, list_by_verb),
         # subjects: subjects(e(acl, :grants, [])),
         read_only:
           Acls.is_stereotype?(acl) or
@@ -290,7 +290,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       ulid(subject)
       |> debug("id")
 
-    subject_map = %{id => %{subject: subject}}
+    subject_map = %{id => %{subject: subject, verb_grants: nil}}
 
     subject_name =
       LiveHandler.subject_name(subject)
@@ -301,30 +301,30 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       # subjects: ([subject] ++ e(socket.assigns, :subjects, [])) |> Enum.uniq_by(&ulid/1),
       # so tagify doesn't remove it as invalid
       # suggestions: Map.put(e(socket.assigns, :suggestions, %{}), id, subject_name),
-      list_by_subject: e(socket.assigns, :list_by_subject, %{}) |> Map.merge(subject_map),
-      list_by_verb:
-        e(socket.assigns, :list_by_verb, %{})
-        |> Enum.map(fn
-          {verb_id, %{verb: verb, subject_grants: subject_grants}} ->
-            {
-              verb_id,
-              %{
-                verb: verb,
-                subject_grants: Map.merge(subject_grants, subject_map)
-              }
-            }
+      list_by_subject: e(socket.assigns, :list_by_subject, %{}) |> Map.merge(subject_map)
+      # list_by_verb:
+      #   e(socket.assigns, :list_by_verb, %{})
+      #   |> Enum.map(fn
+      #     {verb_id, %{verb: verb, subject_grants: subject_grants}} ->
+      #       {
+      #         verb_id,
+      #         %{
+      #           verb: verb,
+      #           subject_grants: Map.merge(subject_grants, subject_map)
+      #         }
+      #       }
 
-          {verb_id, %Bonfire.Data.AccessControl.Verb{} = verb} ->
-            {
-              verb_id,
-              %{
-                verb: verb,
-                subject_grants: subject_map
-              }
-            }
-        end)
-        # |> debug
-        |> Map.new()
+      #     {verb_id, %Bonfire.Data.AccessControl.Verb{} = verb} ->
+      #       {
+      #         verb_id,
+      #         %{
+      #           verb: verb,
+      #           subject_grants: subject_map
+      #         }
+      #       }
+      #   end)
+      #   # |> debug
+      #   |> Map.new()
 
       # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
     )

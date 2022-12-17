@@ -55,7 +55,7 @@
         scope={:instance}
       />
     {#match "roles"}
-      <Dynamic.LiveComponent
+      <Dynamic.Component
         :if={module_enabled?(Bonfire.Boundaries.Web.RolesLive) and @current_user}
         module={Bonfire.Boundaries.Web.RolesLive}
         id="roles"
@@ -63,18 +63,25 @@
       />
     {#match _}
       <Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
+        module={Bonfire.Boundaries.Web.MyCirclesLive}
+        id="circles"
+        scope={nil}
+      />
+
+      <Dynamic.Component
+        :if={module_enabled?(Bonfire.Boundaries.Web.RolesLive) and @current_user}
+        module={Bonfire.Boundaries.Web.RolesLive}
+        id="roles"
+        scope={nil}
+      />
+
+      <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and @current_user}
         module={Bonfire.Boundaries.Web.MyAclsLive}
         selected_tab="acls"
         id="my_acls"
         scope={nil}
       />
-
-      <!-- <Dynamic.LiveComponent
-        :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
-        module={Bonfire.Boundaries.Web.MyCirclesLive}
-        id="circles"
-        scope={nil}
-      /> -->
   {/case}
 </section>

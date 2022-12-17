@@ -1,0 +1,43 @@
+<div class="boundaries-switches">
+  <form :on-change="edit_grant_verb" phx-target={@event_target} class="flex items-center space-x-1">
+    <label class="tooltip tooltip-top" data-tip={l("Can")}>
+      <input
+        class="absolute opacity-0"
+        name={@field_name}
+        type="radio"
+        value="1"
+        checked={@value == true}
+        disabled={@read_only}
+      />
+      <div class={"btn btn-square btn-xs btn-yes", "btn-disabled": @read_only}>
+        <Icon solid="Check" class="w-4 h-4" />
+      </div>
+    </label>
+    <label class="tooltip tooltip-top" data-tip={l("Not specified")}>
+      <input
+        class="absolute opacity-0"
+        name={@field_name}
+        type="radio"
+        value=""
+        checked={is_nil(@value)}
+        disabled={@read_only}
+      />
+      <div class={"btn btn-square btn-xs btn-maybe", "btn-disabled": @read_only}>
+        <Icon solid="Minus" class="w-4 h-4" />
+      </div>
+    </label>
+    <label class="tooltip tooltip-top" data-tip={l("Cannot")}>
+      <input
+        class="absolute opacity-0"
+        name={@field_name}
+        type="radio"
+        value="0"
+        checked={@value == false}
+        disabled={@read_only}
+      />
+      <div class={"btn btn-square btn-xs btn-no", "btn-disabled": @read_only}>
+        <Icon solid="X" class="w-4 h-4" />
+      </div>
+    </label>
+  </form>
+</div>

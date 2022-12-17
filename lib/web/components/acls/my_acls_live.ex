@@ -1,6 +1,7 @@
 defmodule Bonfire.Boundaries.Web.MyAclsLive do
   use Bonfire.UI.Common.Web, :stateful_component
   alias Bonfire.Boundaries.Acls
+  alias Bonfire.Boundaries.Verbs
   alias Bonfire.Boundaries.Web.AclLive
   alias Bonfire.Boundaries.Integration
 
@@ -46,7 +47,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
             [extra_ids_to_include: built_in_ids]
           ]
         else
-          [current_user]
+          [current_user, Acls.opts_for_list()]
         end
       end
 

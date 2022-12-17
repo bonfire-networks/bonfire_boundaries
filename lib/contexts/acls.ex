@@ -424,10 +424,14 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def opts_for_dropdown() do
-    built_ins = built_ins_for_dropdown()
+    opts_for_list() ++
+      [
+        extra_ids_to_include: built_ins_for_dropdown()
+      ]
+  end
 
+  def opts_for_list() do
     [
-      extra_ids_to_include: built_ins,
       exclude_ids:
         @exclude_stereotypes ++
           [

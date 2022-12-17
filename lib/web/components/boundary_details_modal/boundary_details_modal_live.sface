@@ -1,6 +1,6 @@
 <Bonfire.UI.Common.OpenModalLive
   reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
-  id={Pointers.ULID.generate()}
+  id={"modal-boundary-#{@id}"}
   title_text={l("Boundary details:") <> " #{@name}"}
 >
   <div class="mt-4">
@@ -31,7 +31,7 @@
     <Bonfire.Boundaries.Web.AclLive id={@id} acl_id={@id} setting_boundaries />
   </div>
   <:open_btn>
-    <button type="button" class="normal-case btn btn-ghost btn-sm opacity-80">
+    <button type="button" class="normal-case btn btn-sm opacity-80">
       {l("Details")}
     </button>
   </:open_btn>

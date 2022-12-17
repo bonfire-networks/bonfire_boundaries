@@ -54,16 +54,16 @@ defmodule Bonfire.Boundaries.Verbs do
     role_from_verb(verbs, :id)
   end
 
-  def role_from_verb(verbs, field \\ :verb) do
+  def role_from_verb(verbs, field \\ :verb, all_role_verbs \\ role_verbs()) do
     cond do
       Enum.count(verbs) == verbs_count() ->
         :caretaker
 
       true ->
-        case role_verbs()
-             |> Enum.filter(fn {_role, role_verbs} ->
+        case all_role_verbs
+             |> Enum.filter(fn {_role, a_role_verbs} ->
                verbs ==
-                 Enum.map(role_verbs, &Map.get(get(&1), field))
+                 Enum.map(a_role_verbs, &Map.get(get(&1), field))
                  |> Enum.sort()
 
                # |> debug
