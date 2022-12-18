@@ -19,7 +19,11 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
     block_type = if tab == "ghosted", do: :ghost, else: :silence
 
     circle =
-      Bonfire.Boundaries.Blocks.user_block_circles(current_user, block_type)
+      if scope == :instance_wide do
+        Bonfire.Boundaries.Blocks.instance_wide_circles(block_type)
+      else
+        Bonfire.Boundaries.Blocks.user_block_circles(scope || current_user, block_type)
+      end
       |> List.first()
       |> debug("ccircle")
 

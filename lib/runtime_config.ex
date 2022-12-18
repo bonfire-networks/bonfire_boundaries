@@ -103,7 +103,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       request: %{
         id: "1NEEDPERM1SS10NT0D0TH1SN0W",
         verb: "Request",
-        icon: "bx:QuestionMark",
+        icon: "humbleicons:user-asking",
         summary: "Request permission for another verb (eg. request to follow)"
       },
       schedule: %{

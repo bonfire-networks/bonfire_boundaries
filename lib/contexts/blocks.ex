@@ -184,13 +184,18 @@ defmodule Bonfire.Boundaries.Blocks do
     Enum.map(block_types, &Bonfire.Boundaries.Circles.get_id/1)
   end
 
+  def instance_wide_circles(block_type) do
+    types_blocked(block_type)
+    |> instance_wide_circles()
+  end
+
   defp per_user_circles(current_user, block_types) when is_list(block_types) do
     Circles.get_stereotype_circles(current_user, block_types)
   end
 
   def user_block_circles(current_user, block_type) do
     types_blocked(block_type)
-    |> debug()
+    # |> debug()
     |> per_user_circles(current_user, ...)
   end
 

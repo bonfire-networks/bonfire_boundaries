@@ -12,6 +12,7 @@
   <div class="divide-y divide-base-300">
     <div
       :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()}
+      :if={verbs != []}
       x-data="{open: false}"
       class="p-3 rounded-t shadow bg-base-100"
     >
