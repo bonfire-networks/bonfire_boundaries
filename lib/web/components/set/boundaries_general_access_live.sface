@@ -1,13 +1,13 @@
 <div class="p-3 mt-4 rounded-lg shadow bg-base-300/60">
   <div class="p-3 py-2 mb-2 -m-3 text-xs font-semibold tracking-wider uppercase rounded-t-lg bg-base-300/70 text-base-content/80">{l("General permissions")}</div>
-  <div class="flex flex-col w-full gap-1">
+  <div class="flex flex-col w-full gap-3">
     <div aria-haspopup="true" class="dropdown dropdown-bottom">
       <label
         tabindex="0"
-        class="flex flex-nowrap w-full max-w-[180px] items-center gap-2 normal-case btn btn-circle btn-sm btn-ghost opacity-70"
+        class="flex items-center justify-start gap-2 normal-case w-fit btn btn-sm opacity-70"
       >
         <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} />
-        <Icon solid="ChevronDown" class="w-5 h-5" />
+        <Icon solid="ChevronDown" class="inline w-5 h-5" />
       </label>
       <ul
         role="menu"
@@ -28,11 +28,11 @@
         </li>
         <li><button
             phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-              value: %{id: "local", name: l("Local instance")},
+              value: %{id: "local", name: l("Local")},
               target: "#smart_input"
             )}
             type="button"
-          ><span class="text-xl">🏠</span> {l("Local instance")}</button></li>
+          ><span class="text-xl">🏠</span> {l("Local")}</button></li>
         <li><button
             phx-click={JS.push("Bonfire.Boundaries:select_boundary",
               value: %{id: "mentions", name: l("Mentions")},

@@ -75,7 +75,9 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
            username: e(user, :character, :username, nil)
          }}
     end)
-    |> debug
+    # Filter to remove any nils
+    |> Enum.filter(fn {name, _} -> name != nil end)
+    |> debug()
   end
 
   def handle_event(

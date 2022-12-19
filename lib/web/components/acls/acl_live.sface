@@ -13,16 +13,18 @@
       setting_boundaries={@setting_boundaries}
     />
   {#else}
-    <div class="p-3">
+    <div
+      :if={!@setting_boundaries}
+      class="">
       <div class="flex items-center">
-        <div class="flex items-center flex-1 space-x-2 text-xl font-bold text-base-content">
+       <div class="flex items-center flex-1 space-x-2 text-lg font-medium text-base-content">
           <div
             :if={@parent_back}
             phx-click="back"
             phx-target={@parent_back}
             @click="show_boundary_list = true"
             class="btn btn-ghost btn-sm btn-circle"
-          >
+            >
             <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
           </div>
 
@@ -34,15 +36,15 @@
               <div class="text-sm font-normal text-base-content/80">{e(@acl, :extra_info, :summary, nil)}</div>
             </div>
           </div>
-        </div>
-        <div
-          :if={@section != "settings" and !@read_only and !@setting_boundaries}
+        </div> 
+       <div
+          :if={@section != "settings" and !@read_only}
           href={"/boundaries/acl/#{ulid(@acl)}/settings"}
           phx-click="assign"
           phx-value-section="settings"
           phx-target={@myself}
           class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
-        >
+          >
           <Icon outline="Cog" class="w-4 h-4" />
           <span>{l("Settings")}</span>
         </div>
@@ -54,27 +56,26 @@
           phx-value-section="permissions"
           phx-target={@myself}
           class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
-        >
+          >
           <Icon outline="ChevronLeft" class="w-4 h-4" />
           <span>{l("Back")}</span>
-        </div>
-        <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
+        </div> 
       </div>
     </div>
 
-    <div class="">
+    <div class="mt-4">
       <div :if={@section != "settings"}>
-        <div :if={!@read_only} class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
-          <div class="flex items-center px-2 space-x-9">
-            <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("People and circles in this boundary")}</h2>
+        <div :if={!@read_only} class="">
+          <!-- <div class="flex items-center justify-between">
+            <h2 class="flex-1 text-xs font-medium tracking-wider uppercase text-base-content/80">{l("Permissions")}</h2>
             <div
               :on-click="assign"
               phx-value-section="new_circle"
               class="normal-case btn btn-secondary btn-sm"
-            >
+              >
               {l("Define a new circle")}
             </div>
-          </div>
+          </div> -->
           <!-- <div class="flex items-center mt-3 space-x-2">
           <span 
             :for={subject <- @subjects}
@@ -92,7 +93,7 @@
         </div> -->
 
           <div>
-            <div class="flex items-center mt-3">
+            <div class="flex items-center my-4">
               <div class="flex-1">
                 <form :on-change="select">
                   <Bonfire.UI.Common.MultiselectLive
@@ -120,10 +121,11 @@
         </div>
 
         {#if is_list(@list_by_subject) or (is_map(@list_by_subject) and not Enum.empty?(@list_by_subject))}
-          <div class="collapse-title text-xl font-medium">
+          <!-- <div class="text-xl font-medium collapse-title">
             Role per circle or person
-          </div>
+          </div> -->
           <form :on-change="edit_grant_role">
+            <h2 class="flex-1 my-4 text-xs font-medium tracking-wider uppercase text-base-content/80">{l("Permissions")}</h2>
             <ul class="flex flex-col gap-4">
               <li
                 :for={{{subject_id, %{subject: subject, verb_grants: verb_grants} = subject_verb_grant}, i} <-
@@ -137,10 +139,12 @@
                     show_controls={[]}
                   />
                 {#else}
+                <div class="flex items-center gap-3">
                   <span class="flex items-center w-10 h-10 rounded place-content-center bg-base-content/5">
                     <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
                   </span>
-                  {LiveHandler.subject_name(subject)}
+                  <div class="text-sm font-medium text-base-content">{LiveHandler.subject_name(subject)}</div>
+                </div>
                 {/if}
 
                 <div class="flex items-center gap-2" :if={!@read_only}>
@@ -151,62 +155,72 @@
                     extra_roles={[{:custom, l("Custom")}]}
                     no_actions
                   />
+                  <div class="dropdown dropdown-end">
+                    <label tabindex="0" class="btn btn-square btn-ghost btn-sm">
+                      <Icon solid="DotsHorizontal" class="w-4 h-4" />
+                    </label>
+                    <ul tabindex="0" class="p-2 shadow dropdown-content menu menu-compact bg-neutral rounded-box w-52">
+                      <!-- <li>
+                        <Bonfire.UI.Common.OpenModalLive
+                          reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
+                          id={"modal-verbs-#{subject_id}"}
+                          title_text={l("Role details (or customise permissions)")}
+                          >
+                          <div class="mt-4">
+                            <div class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}>
+                              {#for {verb_id, l} <- Enum.concat(verb_grants || [], @verbs || []) |> Enum.uniq_by(&elem(&1, 0))}
+                                <div class="col-span-1 rounded shadow-lg border-base-content/10 bg-base-content/5">
+                                  <div class="flex-1 rounded">
+                                    <div class="flex items-center p-2 space-x-2 bg-base-content/5">
+                                      {#case Bonfire.Boundaries.Verbs.get(verb_id)}
+                                        {#match nil}
+                                        {#match verb}
+                                          <span class="tooltip" data-tip={e(verb, :summary, nil)}>
+                                            <Icon
+                                              iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+                                              class="w-4 h-4 text-base-content/70"
+                                              fill="currentColor"
+                                            />
+                                          </span>
+                                      {/case}
 
-                  <Bonfire.UI.Common.OpenModalLive
-                    reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
-                    id={"modal-verbs-#{subject_id}"}
-                    title_text={l("Role details (or customise permissions)")}
-                  >
-                    <div class="mt-4">
-                      <div class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}>
-                        {#for {verb_id, l} <- Enum.concat(verb_grants || [], @verbs || []) |> Enum.uniq_by(&elem(&1, 0))}
-                          <div class="col-span-1 border-base-content/10 shadow-lg rounded bg-base-content/5">
-                            <div class="flex-1 rounded">
-                              <div class="flex items-center p-2 space-x-2 bg-base-content/5">
-                                {#case Bonfire.Boundaries.Verbs.get(verb_id)}
-                                  {#match nil}
-                                  {#match verb}
-                                    <span class="tooltip" data-tip={e(verb, :summary, nil)}>
-                                      <Icon
-                                        iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
-                                        class="w-4 h-4 text-base-content/70"
-                                        fill="currentColor"
-                                      />
-                                    </span>
-                                {/case}
+                                      <div class="flex-1 font-medium">
+                                        {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
+                                      </div>
+                                    </div>
+                                  </div>
 
-                                <div class="flex-1 font-medium">
-                                  {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
+                                  <div class="flex items-end px-2 py-1 mt-px">
+                                    <Bonfire.Boundaries.Web.YesMaybeFalseLive
+                                      value={e(l, :value, nil)}
+                                      field_name={"subject[#{subject_id}][#{verb_id}]"}
+                                      event_target={@myself}
+                                    />
+                                  </div>
                                 </div>
-                              </div>
-                            </div>
-
-                            <div class="flex items-end px-2 py-1 mt-px">
-                              <Bonfire.Boundaries.Web.YesMaybeFalseLive
-                                value={e(l, :value, nil)}
-                                field_name={"subject[#{subject_id}][#{verb_id}]"}
-                                event_target={@myself}
-                              />
+                              {/for}
                             </div>
                           </div>
-                        {/for}
-                      </div>
-                    </div>
-                    <:open_btn>
-                      <button type="button" class="normal-case btn btn-sm opacity-80">
-                        {l("Details")}
-                      </button>
-                    </:open_btn>
-                  </Bonfire.UI.Common.OpenModalLive>
-
-                  <div
-                    phx-click="remove_from_acl"
-                    phx-value-subject_id={subject_id}
-                    phx-target={@myself}
-                    class="btn btn-xs btn-circle btn-error"
-                  >
-                    <Icon solid="Minus" class="w-4 h-4" />
+                          <:open_btn>
+                            <button type="button" class="text-neutral-content">
+                              {l("Details")}
+                            </button>
+                          </:open_btn>
+                        </Bonfire.UI.Common.OpenModalLive>
+                      </li> -->
+                      <li>
+                        <button
+                          phx-click="remove_from_acl"
+                          phx-value-subject_id={subject_id}
+                          phx-target={@myself}
+                          class="text-neutral-content"
+                          >
+                          {l("Remove")}
+                        </button>
+                      </li>
+                    </ul>
                   </div>
+                  
                 </div>
               </li>
             </ul>
@@ -216,8 +230,8 @@
 
       <section :if={@section == "settings"} role="tabpanel" class="p-4">
         <div class="pb-3 text-lg font-medium">{l("General")}</div>
-        <form phx-submit="edit" phx-target={@myself} class="p-4 border rounded-lg border-base-content/30">
-          <div
+        <form phx-submit="edit" phx-target={@myself} class="p-4 border rounded-lg border-base-content/10">
+          <!-- <div
             x-data="{
             open: false,
             close(focusAfter) {
@@ -256,9 +270,9 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> -->
 
-          <div class="w-full mt-4 form-control">
+          <div class="w-full form-control">
             <label class="label">
               <span class="font-semibold label-text">{l("Edit the boundary name")}</span>
             </label>
@@ -289,7 +303,7 @@
           <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
         </form>
         <div :if={!e(@acl, :stereotyped, nil)} class="pb-3 mt-6 text-lg font-medium">{l("Danger zone")}</div>
-        <div :if={!e(@acl, :stereotyped, nil)} class="p-4 border rounded-lg border-error/30">
+        <div :if={!e(@acl, :stereotyped, nil)} class="p-4 border rounded-lg bg-error/5 border-error/30">
           <!-- <div class="flex items-center space-x-8">
           <div class="flex flex-col">
             <div class="flex-1 text-base font-bold">{l "Archive this boundary"}</div>
@@ -319,7 +333,7 @@
           <div class="flex items-center space-x-8">
             <div class="flex flex-col">
               <div class="flex-1 text-base font-bold">{l("Delete this boundary")}</div>
-              <div class="text-sm text-base-content/80">{l(
+              <div class="mt-2 text-sm text-base-content/80">{l(
                   "Deleting a boundary means anything shared with users of the local instance using this boundary will no longer be shared. Please be certain."
                 )}</div>
             </div>

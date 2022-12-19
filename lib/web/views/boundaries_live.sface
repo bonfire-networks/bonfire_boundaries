@@ -1,6 +1,6 @@
 <!-- <Bonfire.UI.Common.PageTitleLive page_title={@page_title} /> -->
 
-<section class="rounded-md shadow bg-base-100">
+<section class="p-4">
   {#case @selected_tab}
     {#match "circles"}
       <Dynamic.LiveComponent
@@ -28,6 +28,7 @@
       <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.AclLive) and @current_user}
         module={Bonfire.Boundaries.Web.AclLive}
+        setting_boundaries={false}
         selected_tab="acls"
         id="acl"
       />
