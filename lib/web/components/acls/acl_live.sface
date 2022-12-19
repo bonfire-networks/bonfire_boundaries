@@ -160,7 +160,7 @@
                       <Icon solid="DotsHorizontal" class="w-4 h-4" />
                     </label>
                     <ul tabindex="0" class="p-2 shadow dropdown-content menu menu-compact bg-neutral rounded-box w-52">
-                      <!-- <li>
+                      <li :if={!@setting_boundaries}>
                         <Bonfire.UI.Common.OpenModalLive
                           reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
                           id={"modal-verbs-#{subject_id}"}
@@ -207,13 +207,14 @@
                             </button>
                           </:open_btn>
                         </Bonfire.UI.Common.OpenModalLive>
-                      </li> -->
+                      </li>
                       <li>
                         <button
                           phx-click="remove_from_acl"
                           phx-value-subject_id={subject_id}
                           phx-target={@myself}
                           class="text-neutral-content"
+                          type="button"
                           >
                           {l("Remove")}
                         </button>

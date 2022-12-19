@@ -19,7 +19,7 @@
         )}
         class="btn btn-error btn-sm btn-square opacity-80"
       >
-        <Icon solid="Trash" class="w-4 h-4" />
+        <Icon solid="Minus" class="w-4 h-4" />
       </div>
     </div>
   </div>
@@ -46,7 +46,7 @@
         )}
         class="btn btn-error btn-sm btn-square opacity-80"
       >
-        <Icon solid="Trash" class="w-4 h-4" />
+        <Icon solid="Minus" class="w-4 h-4" />
       </div>
     </div>
     <!-- <div aria-haspopup="true" class="dropdown dropdown-top dropdown-end">
