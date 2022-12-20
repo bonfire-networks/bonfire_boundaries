@@ -229,7 +229,7 @@
         {/if}
       </div>
 
-      <section :if={@section == "settings"} role="tabpanel" class="p-4">
+      <section :if={@section == "settings"} role="tabpanel" >
         <div class="pb-3 text-lg font-medium">{l("General")}</div>
         <form phx-submit="edit" phx-target={@myself} class="p-4 border rounded-lg border-base-content/10">
           <!-- <div
