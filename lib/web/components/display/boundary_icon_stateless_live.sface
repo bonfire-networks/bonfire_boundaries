@@ -1,19 +1,20 @@
-<span
+
+<div
   :if={not is_atom(@object_boundary) or @object_boundary == false or not is_nil(@boundary_tuple)}
   class={@class}
 >
   {#case @boundary_tuple || Bonfire.Boundaries.preset_boundary_tuple_from_acl(@object_boundary)}
     {#match {"public", _}}
       <span
-        data-tip={l("Public")}
+        title={l("Public")}
         class={
           "flex items-center gap-1",
-          "align-bottom tooltip tooltip-bottom z-20": @with_label != true,
-          "flex items-center gap-2 font-medium rounded-full opacity-70 btn btn-sm btn-ghost":
+          "align-bottom": @with_label != true,
+          "flex items-center gap-2":
             @with_label == true
         }
       >
-        <Icon :if={@with_icon} solid="Globe" class="w-4 h-4" />
+        <Icon :if={@with_icon} solid="Globe" class="w-4 h-4 text-base-content/50" />
         <span
           :if={@with_label}
           class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
@@ -21,63 +22,87 @@
       </span>
     {#match {"local", _}}
       <span
-        data-tip={l("Local")}
+        title={l("Local")}
         class={
           "flex items-center gap-1",
-          "align-bottom tooltip tooltip-bottom z-20": @with_label != true,
-          "flex items-center gap-2 font-medium rounded-full opacity-70 btn btn-sm btn-ghost":
+          "align-bottom": @with_label != true,
+          "flex items-center gap-2":
             @with_label == true
         }
       >
-        <Icon :if={@with_icon} solid="LocationMarker" class="w-4 h-4" />
+        <Icon :if={@with_icon} solid="Home" class="w-4 h-4 text-base-content/50" />
         <span
           :if={@with_label}
           class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
         >{l("Local")}</span>
       </span>
     {#match {{name, extra}, {_, _} = preset_boundary}}
-      <span
-        data-tip={if is_list(extra), do: Enum.join(extra, ", "), else: extra}
-        class={
-          "flex items-center gap-1 tooltip tooltip-bottom normal-case",
-          "align-bottom z-20": @with_label != true,
-          "flex items-center gap-2 font-medium rounded-full opacity-70 btn btn-sm btn-ghost":
-            @with_label == true
-        }
+      <div
+        class={"flex items-center gap-2 normal-case"}
       >
         <Bonfire.Boundaries.Web.BoundaryIconStatelessLive
           boundary_tuple={preset_boundary}
           with_icon
           with_label={false}
         />
-        <span
-          :if={@with_label}
-          class={"text-sm", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
-        >{name}</span>
-      </span>
+
+        <div id={Pointers.ULID.generate()} phx-hook="Popup">
+          <div class="text-sm tippy bg-gradient-to-r from-accent to-accent/60 text-accent-content px-2 py-0.5 rounded shadow font-medium">{name}</div>
+          <div class="template" style="display: none;">
+
+            <div class="flex p-2 bg-neutral rounded shadow max-w-[200px] items-start gap-2" >
+              <div class="flex items-start gap-2">
+                <Icon iconify="noto-v1:check-mark" class="w-4 h-4" />
+                <div class="flex flex-col gap-1">
+                  <div class="text-xs">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div>
+                  <div class="normal-case rounded btn btn-xs">read more</div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+     
+      </div>
     {#match {name, extra}}
-      <span
-        data-tip={if is_list(extra), do: Enum.join(extra, ", "), else: extra}
-        class={
-          "flex items-center gap-1 tooltip tooltip-bottom normal-case",
-          "align-bottom z-20": @with_label != true,
-          "flex items-center gap-2 font-medium rounded-full opacity-70 btn btn-sm btn-ghost":
-            @with_label == true
-        }
-      >
+      <div class={"flex items-center gap-2  normal-case"}>
         <!-- <Icon :if={@with_icon} solid="Cog" class="w-4 h-4" /> -->
-        <span
-          :if={@with_label}
-          class={"text-sm", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
-        >{name}</span>
-      </span>
+        <div id={Pointers.ULID.generate()} phx-hook="Popup">
+          <div class="text-sm tippy">{name}</div>
+          <div class="template" style="display: none;">
+            <div class="flex p-2 bg-neutral rounded shadow max-w-[200px] items-start gap-2">
+              <Icon iconify="noto-v1:check-mark" class="w-4 h-4" />
+              <div class="flex flex-col gap-1">
+                <div class="text-xs">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div>
+
+              <Bonfire.UI.Common.OpenModalLive
+                id={Pointers.ULID.generate()}
+                title_text={l("Delete this circle")}
+              >
+                {l(
+                  "The circle will be permanently deleted. This action may affect all the activities that included this circle."
+                )}
+                <:open_btn>
+                  <button class="normal-case rounded btn btn-xs">read more</button>
+                </:open_btn>
+              </Bonfire.UI.Common.OpenModalLive>
+
+
+               
+                </div>
+            </div>
+          </div>
+        </div>
+
+        
+      </div>
     {#match _}
       <span
-        data-tip={e(@object_boundary, :name, "Custom Boundaries")}
+        title={e(@object_boundary, :name, "Custom Boundaries")}
         class={
           "flex items-center gap-1",
           "align-bottom tooltip tooltip-bottom z-20": @with_label != true,
-          "flex items-center gap-2 font-medium rounded-full opacity-70 btn btn-sm btn-ghost":
+          "flex items-center gap-2":
             @with_label == true
         }
       >
@@ -88,4 +113,4 @@
         >{l("Custom Boundaries")}</span>
       </span>
   {/case}
-</span>
+</div>
