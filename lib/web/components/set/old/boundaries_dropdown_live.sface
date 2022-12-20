@@ -69,7 +69,7 @@
   >
     <div x-show="to_boundaries != ['message']">
       <div
-        @click="to_boundaries = ['public']; to_boundaries_names = ['Public']; open_boundaries = false;"
+        x-on:click="to_boundaries = ['public']; to_boundaries_names = ['Public']; open_boundaries = false;"
         class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-neutral rounded-t-md hover:bg-neutral hover:bg-opacity-30"
       >
         <Icon solid="Globe" />
@@ -79,7 +79,7 @@
         </div>
       </div>
       <div
-        @click="to_boundaries = ['local']; to_boundaries_names = ['Local']; open_boundaries = false;"
+        x-on:click="to_boundaries = ['local']; to_boundaries_names = ['Local']; open_boundaries = false;"
         class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30"
       >
         <Icon solid="LocationMarker" />
@@ -89,7 +89,7 @@
         </div>
       </div>
       <div
-        @click="to_boundaries = ['mentions']; to_boundaries_names = ['Mentions']; open_boundaries = false;"
+        x-on:click="to_boundaries = ['mentions']; to_boundaries_names = ['Mentions']; open_boundaries = false;"
         class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30"
       >
         <Icon solid="AtSymbol" />

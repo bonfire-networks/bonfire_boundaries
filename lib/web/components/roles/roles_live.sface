@@ -22,7 +22,7 @@
         </div>
         <button
           type="button"
-          @click="open = !open"
+          x-on:click="open = !open"
           x-text="open ? 'Collapse' : 'Expand'"
           class="normal-case btn btn-sm"
         >{l("Expand")}</button>

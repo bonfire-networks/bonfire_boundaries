@@ -167,7 +167,7 @@
         <button 
           type="button" 
           class="normal-case btn btn-primary btn-sm btn-wide" 
-          @click="open_boundaries = false">
+          x-on:click="open_boundaries = false">
           {l "Save"}
         </button>
       </div> -->

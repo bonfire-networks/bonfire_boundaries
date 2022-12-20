@@ -13,18 +13,16 @@
       setting_boundaries={@setting_boundaries}
     />
   {#else}
-    <div
-      :if={!@setting_boundaries}
-      class="">
+    <div :if={!@setting_boundaries} class="">
       <div class="flex items-center">
-       <div class="flex items-center flex-1 space-x-2 text-lg font-medium text-base-content">
+        <div class="flex items-center flex-1 space-x-2 text-lg font-medium text-base-content">
           <div
             :if={@parent_back}
             phx-click="back"
             phx-target={@parent_back}
-            @click="show_boundary_list = true"
+            x-on:click="show_boundary_list = true"
             class="btn btn-ghost btn-sm btn-circle"
-            >
+          >
             <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
           </div>
 
@@ -36,15 +34,15 @@
               <div class="text-sm font-normal text-base-content/80">{e(@acl, :extra_info, :summary, nil)}</div>
             </div>
           </div>
-        </div> 
-       <div
+        </div>
+        <div
           :if={@section != "settings" and !@read_only}
           href={"/boundaries/acl/#{ulid(@acl)}/settings"}
           phx-click="assign"
           phx-value-section="settings"
           phx-target={@myself}
           class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
-          >
+        >
           <Icon outline="Cog" class="w-4 h-4" />
           <span>{l("Settings")}</span>
         </div>
@@ -56,10 +54,10 @@
           phx-value-section="permissions"
           phx-target={@myself}
           class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
-          >
+        >
           <Icon outline="ChevronLeft" class="w-4 h-4" />
           <span>{l("Back")}</span>
-        </div> 
+        </div>
       </div>
     </div>
 
@@ -139,12 +137,12 @@
                     show_controls={[]}
                   />
                 {#else}
-                <div class="flex items-center gap-3">
-                  <span class="flex items-center w-10 h-10 rounded place-content-center bg-base-content/5">
-                    <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
-                  </span>
-                  <div class="text-sm font-medium text-base-content">{LiveHandler.subject_name(subject)}</div>
-                </div>
+                  <div class="flex items-center gap-3">
+                    <span class="flex items-center w-10 h-10 rounded place-content-center bg-base-content/5">
+                      <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
+                    </span>
+                    <div class="text-sm font-medium text-base-content">{LiveHandler.subject_name(subject)}</div>
+                  </div>
                 {/if}
 
                 <div class="flex items-center gap-2" :if={!@read_only}>
@@ -159,13 +157,16 @@
                     <label tabindex="0" class="btn btn-square btn-ghost btn-sm">
                       <Icon solid="DotsHorizontal" class="w-4 h-4" />
                     </label>
-                    <ul tabindex="0" class="p-2 shadow dropdown-content menu menu-compact bg-neutral rounded-box w-52">
+                    <ul
+                      tabindex="0"
+                      class="p-2 shadow dropdown-content menu menu-compact bg-neutral rounded-box w-52"
+                    >
                       <li :if={!@setting_boundaries}>
                         <Bonfire.UI.Common.OpenModalLive
                           reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
                           id={"modal-verbs-#{subject_id}"}
                           title_text={l("Role details (or customise permissions)")}
-                          >
+                        >
                           <div class="mt-4">
                             <div class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}>
                               {#for {verb_id, l} <- Enum.concat(verb_grants || [], @verbs || []) |> Enum.uniq_by(&elem(&1, 0))}
@@ -215,13 +216,12 @@
                           phx-target={@myself}
                           class="text-neutral-content"
                           type="button"
-                          >
+                        >
                           {l("Remove")}
                         </button>
                       </li>
                     </ul>
                   </div>
-                  
                 </div>
               </li>
             </ul>
@@ -257,7 +257,7 @@
                 <span class="w-10 h-10 text-4xl text-gray-300">
                   {e(@acl, :extra_info, :info, :icon, "🛡")}
                 </span>
-                <button @click="open = ! open" type="button" class="ml-2 normal-case btn btn-sm btn-outline">{l("Pick an emoji")}</button>
+                <button x-on:click="open = ! open" type="button" class="ml-2 normal-case btn btn-sm btn-outline">{l("Pick an emoji")}</button>
                 <div
                   x-ref="panel"
                   x-show="open"

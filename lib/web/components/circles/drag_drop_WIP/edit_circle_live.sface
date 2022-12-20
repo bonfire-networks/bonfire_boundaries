@@ -74,10 +74,10 @@
                   />
                 </div>
                 <div :if={!@read_only} class="flex mr-1">
-                  <span class="to flex items-center" @click="move_item(event, 'circle_members')">
+                  <span class="to flex items-center" x-on:click="move_item(event, 'circle_members')">
                     <Icon solid="PlusCircle" />
                   </span>
-                  <span class="from flex items-center" @click="move_item(event, 'circle_suggestions')">
+                  <span class="from flex items-center" x-on:click="move_item(event, 'circle_suggestions')">
                     <Icon solid="MinusCircle" />
                   </span>
                 </div>
@@ -140,10 +140,10 @@
                 </div>
 
                 <div :if={!@read_only} class="flex mr-1">
-                  <span class="to flex items-center button" @click="move_item(event, 'circle_members')">
+                  <span class="to flex items-center button" x-on:click="move_item(event, 'circle_members')">
                     <Icon solid="PlusCircle" />
                   </span>
-                  <span class="from flex items-center button" @click="move_item(event, 'circle_suggestions')">
+                  <span class="from flex items-center button" x-on:click="move_item(event, 'circle_suggestions')">
                     <Icon solid="MinusCircle" />
                   </span>
                 </div>
@@ -184,10 +184,10 @@
                 </div>
 
                 <div :if={!@read_only} class="flex mr-1">
-                  <span class="to flex items-center button" @click="move_item(event, 'circle_members')">
+                  <span class="to flex items-center button" x-on:click="move_item(event, 'circle_members')">
                     <Icon solid="PlusCircle" />
                   </span>
-                  <span class="from flex items-center button" @click="move_item(event, 'circle_suggestions')">
+                  <span class="from flex items-center button" x-on:click="move_item(event, 'circle_suggestions')">
                     <Icon solid="MinusCircle" />
                   </span>
                 </div>

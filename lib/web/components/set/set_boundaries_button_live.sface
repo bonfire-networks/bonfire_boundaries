@@ -2,7 +2,7 @@
   <div x-show="!open_boundaries" class="flex items-center mx gap-2">
     <button
       type="button"
-      @click="open_boundaries = true"
+      x-on:click="open_boundaries = true"
       phx-click="Bonfire.Boundaries:open_boundaries"
       phx-target="#smart_input"
       class="flex items-center btn-sm  normal-case btn rounded-full opacity-90 gap-2"

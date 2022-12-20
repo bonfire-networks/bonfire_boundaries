@@ -83,7 +83,7 @@
                       phx-click="boundary_edit"
                       phx-target={@myself}
                       phx-value-id={acl.id}
-                      @click="show_boundary_list = false"
+                      x-on:click="show_boundary_list = false"
                     >
                       {#case Acls.is_stereotype?(acl)}
                         {#match true}
@@ -151,7 +151,7 @@
           <div
             :if={@setting_boundaries}
             :on-click="assign"
-            @click="show_boundary_list = false"
+            x-on:click="show_boundary_list = false"
             phx-value-section="new"
             class="flex items-center p-2 space-x-4 cursor-pointer hover:bg-base-content/10"
           >

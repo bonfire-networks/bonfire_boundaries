@@ -2,7 +2,7 @@
 <div x-data="{show_boundary_list: true}">
   <div class="flex items-center justify-between pb-2 mb-4 border-b border-base-content/10">
     <div class="flex items-center gap-1">
-      <span class="btn btn-circle btn-ghost btn-sm" @click="open_boundaries = false">
+      <span class="btn btn-circle btn-ghost btn-sm" x-on:click="open_boundaries = false">
         <Icon solid="ChevronLeft" class="w-5 h-5 text-base-content/70" />
       </span>
       <div class="font-medium text-base-content/70">{l("Share the activity")}</div>

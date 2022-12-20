@@ -9,7 +9,7 @@
   </div>
   <button
     type="button"
-    @click="open_boundaries = false"
+    x-on:click="open_boundaries = false"
     class="gap-2 normal-case rounded btn btn-sm btn-primary"
   >
     <span class="">{l("Done")}</span>

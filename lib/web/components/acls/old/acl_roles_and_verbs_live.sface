@@ -20,7 +20,7 @@
             :if={@parent_back}
             phx-click="back"
             phx-target={@parent_back}
-            @click="show_boundary_list = true"
+            x-on:click="show_boundary_list = true"
             class="btn btn-ghost btn-sm btn-circle"
           >
             <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
@@ -252,7 +252,7 @@
                 <span class="w-10 h-10 text-4xl text-gray-300">
                   {e(@acl, :extra_info, :info, :icon, "🛡")}
                 </span>
-                <button @click="open = ! open" type="button" class="ml-2 normal-case btn btn-sm btn-outline">{l("Pick an emoji")}</button>
+                <button x-on:click="open = ! open" type="button" class="ml-2 normal-case btn btn-sm btn-outline">{l("Pick an emoji")}</button>
                 <div
                   x-ref="panel"
                   x-show="open"

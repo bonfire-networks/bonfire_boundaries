@@ -35,7 +35,7 @@
           {"🛡"}
         </span>
         <button 
-          @click="open = ! open"
+          x-on:click="open = ! open"
           type="button" 
           class="ml-2 normal-case btn btn-sm btn-outline">{l "Pick an emoji"}</button>
         <div 
@@ -82,7 +82,7 @@
 
     <button
       phx-click="Bonfire.Boundaries:acl_create"
-      @click="show_boundary_list = true"
+      x-on:click="show_boundary_list = true"
       phx-target={@event_target}
       :phx-value-name="name"
       phx-value-no_redirect={if @setting_boundaries, do: "1"}

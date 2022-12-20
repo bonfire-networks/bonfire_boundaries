@@ -33,7 +33,7 @@
             {"🛡"}
           </span>
           <button 
-            @click="open = ! open"
+            x-on:click="open = ! open"
             type="button" 
             class="ml-2 normal-case btn btn-sm btn-outline">{l "Pick an emoji"}</button>
           <div 
