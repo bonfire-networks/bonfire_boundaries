@@ -104,13 +104,13 @@ defmodule Bonfire.Boundaries do
     end
   end
 
-  def preset_boundary_tuple_from_acl(%{acl: acl}),
-    do: preset_boundary_tuple_from_acl(acl)
+  def preset_boundary_from_acl(%{acl: acl}),
+    do: preset_boundary_from_acl(acl)
 
-  def preset_boundary_tuple_from_acl([acl]),
-    do: preset_boundary_tuple_from_acl(acl)
+  def preset_boundary_from_acl([acl]),
+    do: preset_boundary_from_acl(acl)
 
-  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl) do
+  def preset_boundary_from_acl(%Acl{id: acl_id} = _acl) do
     # debug(acl)
 
     preset_acls = Config.get!(:preset_acls_all)
@@ -130,19 +130,25 @@ defmodule Bonfire.Boundaries do
     end
   end
 
-  def preset_boundary_tuple_from_acl(
+  def preset_boundary_from_acl(
         %{verbs: verbs, __typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = summary
       ) do
-    {preset_boundary_tuple_from_acl(%{verbs: verbs}),
-     preset_boundary_tuple_from_acl(%Acl{id: acl_id})}
+    {preset_boundary_from_acl(%{verbs: verbs}), preset_boundary_from_acl(%Acl{id: acl_id})}
     |> debug("merged ACL + verbs")
   end
 
-  def preset_boundary_tuple_from_acl(%{verbs: verbs} = _summary) do
+  def preset_boundary_from_acl(%{verbs: verbs} = _summary) do
     # debug(summary)
     case Verbs.role_from_verb_names(verbs) do
       :caretaker -> {l("Caretaker"), l("Full permissions")}
       role -> {String.capitalize(to_string(role)), verbs}
+    end
+  end
+
+  def preset_boundary_tuple_from_acl(summary_or_acl) do
+    case preset_boundary_from_acl(summary_or_acl) do
+      {a, {b, c}} -> {b, c}
+      b_c -> b_c
     end
   end
 
@@ -191,10 +197,18 @@ defmodule Bonfire.Boundaries do
     Config.get!(:user_default_boundaries)
   end
 
+  def can?(subject, can_verbs?, %{verbs: can_verbs!, value: true} = object_boundary)
+      when is_list(can_verbs!) do
+    warn(object_boundary, "WIP for preloaded object_boundary")
+    Enum.all?(List.wrap(can_verbs?), &Enum.member?(can_verbs!, Verbs.get(&1)[:verb]))
+  end
+
   def can?(subject, verbs, object)
       when is_map(object) or is_binary(object) or is_list(object) do
+    debug(object, "check object")
     current_user = current_user(subject)
     current_user_id = ulid(current_user)
+    creator_id = e(object, :created, :creator_id, nil) || e(object, :creator_id, nil)
 
     case (not is_nil(current_user_id) and e(object, :created, :creator_id, nil) == current_user_id) or
            pointer_permitted?(object,
@@ -214,6 +228,11 @@ defmodule Bonfire.Boundaries do
         debug(other)
         false
     end
+  end
+
+  def can?(subject, verbs, nil) do
+    debug("object is nil")
+    nil
   end
 
   def can?(subject, verbs, :instance) do

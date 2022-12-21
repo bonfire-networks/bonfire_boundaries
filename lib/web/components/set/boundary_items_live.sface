@@ -7,14 +7,17 @@
       <span class="flex items-center w-10 h-10 rounded place-content-center bg-base-content/5">
         <Icon solid="LockClosed" class="inline-block w-5 h-5 text-base-content/70" />
       </span>
-      <div class="text-sm font-medium text-base-content">{e(data, :name, data)}</div>
+      <div class="text-sm font-medium text-base-content">{e(data, :name, nil) || if is_tuple(data), do: elem(data, 1), else: data}</div>
     </div>
 
     <div class="flex items-center gap-2">
-      <Bonfire.Boundaries.Web.BoundaryDetailsModalLive id={id} name={e(data, :name, data)} />
+      <Bonfire.Boundaries.Web.BoundaryDetailsModalLive
+        id={id}
+        name={e(data, :name, nil) || if is_tuple(data), do: elem(data, 1), else: data}
+      />
       <div
         phx-click={JS.push("Bonfire.Boundaries:remove_boundary",
-          value: %{id: id, name: e(data, :name, data)},
+          value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
           target: "#smart_input"
         )}
         class="btn btn-error btn-sm btn-square opacity-80"
@@ -41,7 +44,7 @@
 
       <div
         phx-click={JS.push("Bonfire.Boundaries:remove_circle",
-          value: %{id: id, name: e(data, :name, data)},
+          value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
           target: "#smart_input"
         )}
         class="btn btn-error btn-sm btn-square opacity-80"
