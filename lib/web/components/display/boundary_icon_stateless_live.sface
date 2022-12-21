@@ -40,6 +40,18 @@
           with_icon
           with_label={false}
         />
+        {#case name}
+          {#match "caretaker"}
+          <Icon iconify="mdi:administrator" class="w-4 h-4 text-accent" />
+          {#match "read"}
+          <Icon iconify="ic:baseline-remove-red-eye" class="w-4 h-4 text-accent" />
+          {#match "interact"}
+          <Icon iconify="mdi:administrator" class="w-4 h-4 text-accent" />
+          {#match "custom"}
+          <Icon iconify="mdi:gear" class="w-4 h-4 text-accent" />
+          {#match _}
+          <Icon iconify="mdi:gear" class="w-4 h-4 text-accent" />
+        {/case}
 
         <div id={Pointers.ULID.generate()} phx-hook="Popup">
           <div class="text-sm tippy bg-gradient-to-r from-accent to-accent/60 text-accent-content px-2 py-0.5 rounded shadow font-medium">{name}</div>
@@ -57,7 +69,7 @@
         </div>
       </div>
     {#match {name, extra}}
-      <div class="flex items-center gap-2  normal-case">
+      <div class="flex items-center gap-2 normal-case">
         <!-- <Icon :if={@with_icon} solid="Cog" class="w-4 h-4" /> -->
         <div id={Pointers.ULID.generate()} phx-hook="Popup">
           <div class="text-sm tippy">{name}</div>
