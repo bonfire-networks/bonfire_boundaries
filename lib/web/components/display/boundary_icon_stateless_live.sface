@@ -42,15 +42,15 @@
         />
         {#case name}
           {#match "caretaker"}
-          <Icon iconify="mdi:administrator" class="w-4 h-4 text-accent" />
+            <Icon iconify="mdi:administrator" class="w-4 h-4 text-accent" />
           {#match "read"}
-          <Icon iconify="ic:baseline-remove-red-eye" class="w-4 h-4 text-accent" />
+            <Icon iconify="ic:baseline-remove-red-eye" class="w-4 h-4 text-accent" />
           {#match "interact"}
-          <Icon iconify="mdi:administrator" class="w-4 h-4 text-accent" />
+            <Icon iconify="mdi:administrator" class="w-4 h-4 text-accent" />
           {#match "custom"}
-          <Icon iconify="mdi:gear" class="w-4 h-4 text-accent" />
+            <Icon iconify="mdi:gear" class="w-4 h-4 text-accent" />
           {#match _}
-          <Icon iconify="mdi:gear" class="w-4 h-4 text-accent" />
+            <Icon iconify="mdi:gear" class="w-4 h-4 text-accent" />
         {/case}
 
         <div id={Pointers.ULID.generate()} phx-hook="Popup">
