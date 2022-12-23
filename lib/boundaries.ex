@@ -145,6 +145,10 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  def preset_boundary_from_acl(_) do
+    nil
+  end
+
   def preset_boundary_tuple_from_acl(summary_or_acl) do
     case preset_boundary_from_acl(summary_or_acl) do
       {a, {b, c}} -> {b, c}

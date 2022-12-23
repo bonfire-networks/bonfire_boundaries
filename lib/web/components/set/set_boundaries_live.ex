@@ -18,10 +18,11 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
 
   def presets, do: @presets
 
-  def reject_presets(to_boundaries) when is_list(to_boundaries),
-    do: Keyword.drop(to_boundaries, presets())
+  def reject_presets(to_boundaries)
+      when is_list(to_boundaries) and to_boundaries != [] and to_boundaries != [nil],
+      do: Keyword.drop(to_boundaries, presets())
 
-  # def reject_presets(to_boundaries) when is_tuple(to_boundaries), do: Keyword.drop(to_boundaries, presets())
+  def reject_presets(_), do: []
 
   def boundaries_to_preset(to_boundaries) do
     to_boundaries
