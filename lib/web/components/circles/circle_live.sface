@@ -1,6 +1,6 @@
-<div class="">
+<div class="-m-4">
   <div class="">
-    <div class="flex items-center p-4 pb-6 bg-base-content/5 border-base-content/30">
+    <div class="flex items-center p-4 pb-6 bg-base-content/5">
       <!-- <div class="flex items-center justify-center flex-shrink-0 w-24 h-24 text-sm font-medium text-white bg-pink-600 rounded-full shadow-2xl ring-4 ring-white">
             GA
         </div> -->
@@ -25,7 +25,7 @@
       <!-- Tab List -->
       <ul
         role="tablist"
-        class="flex items-stretch -mb-px text-sm font-medium border-b bg-base-content/5 border-base-content/30"
+        class="flex items-stretch -mb-px text-sm font-medium border-b bg-base-content/5 border-base-content/10"
       >
         <!-- Tab -->
         <li :if={!@setting_boundaries}>

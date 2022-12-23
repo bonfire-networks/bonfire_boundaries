@@ -1,5 +1,5 @@
 {#if (@count || Enum.count(@members)) > 0}
-  <div class="avatar-group flex gap-1">
+  <div class="flex gap-1 avatar-group">
     <Bonfire.UI.Common.AvatarLive
       :for={member <- @members |> Enum.slice(0..2)}
       user={e(member, :subject, nil) || member}
