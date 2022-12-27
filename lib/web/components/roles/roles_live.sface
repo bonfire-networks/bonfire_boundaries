@@ -1,54 +1,56 @@
 <div class="">
-  <div class="flex items-center px-3 py-4">
-    <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("Roles")}</h2>
-    <button
+  <div class="flex flex-col pt-3 pb-6">
+    <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("Default Roles")}</h2>
+    <p class="mt-1 text-sm text-base-content/70">{l("Roles are a way to group permissions together. You can assign roles to users and circles.")}</p>
+    <!-- <button
       class="normal-case btn btn-primary btn-sm tooltip tooltip-warning tooltip-bottom"
       data-tip="Coming soon"
-    >
+      > 
       {l("New role")}
-    </button>
+    </button> -->
   </div>
 
-  <div class="divide-y divide-base-300">
+  <div class="divide-y rounded-lg bg-base-content/5 divide-base-300">
     <div
       :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()}
       :if={verbs != []}
       x-data="{open: false}"
-      class="p-3 rounded-t shadow bg-base-100"
+      class="p-3"
     >
       <div class="flex items-center justify-between">
         <div class="flex flex-col gap-1">
-          <div class="text-base font-bold capitalize">{name}</div>
+          <div class="text-sm font-bold capitalize">{name}</div>
         </div>
         <button
           type="button"
           x-on:click="open = !open"
-          x-text="open ? 'Collapse' : 'Expand'"
+          x-text="open ? 'Hide details' : 'See details'"
           class="normal-case btn btn-sm"
         >{l("Expand")}</button>
       </div>
       <div x-cloak x-show="open" x-collapse>
         <div class="mt-3 rounded-xl bg-base-300">
-          <span class="block px-4 pt-2 text-xs font-medium tracking-wide uppercase rounded-t-xl bg-base-300 text-base-content/70">{l("Permissions")}</span>
+          <!-- <span class="block px-4 pt-2 text-xs font-medium tracking-wide uppercase rounded-t-xl bg-base-300 text-base-content/70">{l("Permissions")}</span> -->
           <ul class="flex flex-col divide-y divide-base-content/10">
-            <li :for={verb <- verbs} class="flex items-center justify-between gap-8 p-4">
-              <div class="flex gap-2">
+            <li :for={verb <- verbs} class="flex items-center justify-between gap-8 p-3">
+              <div class="flex flex-col gap-0.5">
                 {#case Bonfire.Boundaries.Verbs.get(verb)}
                   {#match nil}
-                    <div class="flex-1 font-semibold capitalize">
+                    <div class="flex-1 text-sm font-semibold capitalize">
                       {verb}
                     </div>
                   {#match verb_details}
-                    <span class="tooltip" data-tip={e(verb_details, :summary, nil)}>
-                      <Icon
-                        iconify={e(verb_details, :icon, "Heroicons-Solid:QuestionMarkCircle")}
-                        class="w-4 h-4 text-base-content/70"
-                        fill="currentColor"
-                      />
-                    </span>
-                    <div class="flex-1 font-semibold capitalize">
+                  <div class="flex items-center gap-2">
+                    <!-- <Icon
+                      iconify={e(verb_details, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+                      class="w-4 h-4 text-base-content/70"
+                      fill="currentColor"
+                    /> -->
+                    <div class="flex-1 text-sm font-semibold capitalize">
                       {e(verb_details, :verb, nil) || verb}
                     </div>
+                  </div>
+                  <div class="text-xs text-base-content/70">{e(verb_details, :summary, nil)}</div>
                 {/case}
               </div>
 
@@ -61,18 +63,18 @@
   </div>
 
   <style>
-    .boundaries-switches label div.btn {
-    color: hsl(var(--bc));
-    }
-    .boundaries-switches label input:checked ~ div.btn-yes {
-    background: hsl(var(--su) / 0.90);
-    }
-    .boundaries-switches label input:checked ~ div.btn-no {
-    background: hsl(var(--er) / 0.90);
-    }
-    .boundaries-switches label input:checked ~ div.btn-maybe {
-    background: white;
-    color: black;
-    }
-  </style>
+      .boundaries-switches label div.btn {
+      color: hsl(var(--bc));
+      }
+      .boundaries-switches label input:checked ~ div.btn-yes {
+      color: hsl(var(--su) / 0.90);
+      }
+      .boundaries-switches label input:checked ~ div.btn-no {
+      color: hsl(var(--er) / 0.90);
+      }
+      .boundaries-switches label input:checked ~ div.btn-maybe {
+      background: white;
+      color: black;
+      }
+    </style>
 </div>

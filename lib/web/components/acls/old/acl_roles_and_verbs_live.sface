@@ -120,7 +120,7 @@
         </div>
 
         {#if is_list(@list_by_subject) or (is_map(@list_by_subject) and not Enum.empty?(@list_by_subject))}
-          <div class="collapse-title text-xl font-medium">
+          <div class="text-xl font-medium collapse-title">
             Role per circle or person
           </div>
           <form :on-change="edit_grant_role">
@@ -163,15 +163,15 @@
             </ul>
           </form>
 
-          <div tabindex="0" class="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box">
+          <div tabindex="0" class="border collapse collapse-arrow border-base-300 bg-base-100 rounded-box">
             <input type="checkbox">
-            <div class="collapse-title text-xl font-medium">
+            <div class="text-xl font-medium collapse-title">
               Detailed permissions
             </div>
             <div class="collapse-content">
               <div class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}>
                 {#for {{verb_id, l}, i} <- Enum.with_index(@list_by_verb || [])}
-                  <div class="col-span-1 border-base-content/10 shadow-lg rounded bg-base-content/5">
+                  <div class="col-span-1 rounded shadow-lg border-base-content/10 bg-base-content/5">
                     <div class="flex-1 rounded">
                       <div class="flex items-center p-2 space-x-2 bg-base-content/5">
                         {#case Bonfire.Boundaries.Verbs.get(verb_id)}
@@ -360,15 +360,15 @@
       </section>
     </div>
 
-    <style>
+   <style>
       .boundaries-switches label div.btn {
       color: hsl(var(--bc));
       }
       .boundaries-switches label input:checked ~ div.btn-yes {
-      background: hsl(var(--su) / 0.90);
+      color: hsl(var(--su) / 0.90);
       }
       .boundaries-switches label input:checked ~ div.btn-no {
-      background: hsl(var(--er) / 0.90);
+      color: hsl(var(--er) / 0.90);
       }
       .boundaries-switches label input:checked ~ div.btn-maybe {
       background: white;

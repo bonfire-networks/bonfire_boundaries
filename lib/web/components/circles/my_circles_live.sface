@@ -1,97 +1,57 @@
-<div>
-  {#if @section == "new"}
-    <Bonfire.Boundaries.Web.NewCircleLive
-      scope={@scope}
-      parent_back={@myself}
-      event_target={@myself}
-      setting_boundaries={@setting_boundaries}
-    />
-  {#else}
-    <div class="">
-      <div class="flex items-center">
-        <h2 class="flex-1 text-xs font-medium tracking-wide uppercase text-base-content/80">{l("Your Circles")}</h2>
-        <!-- <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} /> -->
-        <div :on-click="assign" phx-value-section="new" class="normal-case rounded btn btn-secondary btn-sm">
+
+
+<div class="">
+  <div class="flex gap-8 pt-3 items-top">
+    <div class="flex flex-col flex-1 pb-3">
+      <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("Your Circles")}</h2>
+      <p class="mt-1 text-sm text-base-content/70">{l("Circles are a way for users to organize their connections and relationships with other users. Circles can be used to group people together based on shared interests, affiliations, or other factors.")}</p>
+    </div>
+    <!-- <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} /> -->
+    <Bonfire.UI.Common.OpenModalLive
+      id={Pointers.ULID.generate()}
+      title_text={l("Create a new circle")}
+    >
+      <Bonfire.Boundaries.Web.NewCircleLive
+        scope={@scope}
+        parent_back={@myself}
+        event_target={@myself}
+        setting_boundaries={@setting_boundaries}
+      />
+      <:open_btn>
+        <div class="normal-case rounded btn btn-outline border-base-content/70 btn-sm">
           {l("New circle")}
         </div>
-      </div>
+      </:open_btn>
+    </Bonfire.UI.Common.OpenModalLive>
+    
+  </div>
 
 
-      <div class="mt-6 overflow-hidden shadow bg-base-300 sm:rounded-md">
-        <ul role="list" class="divide-y divide-base-content/10">
-          {#for circle <- e(@circles, [])}
-          <li>
-            <LiveRedirect class="block hover:bg-base-200" to={~p"/boundaries/circle/" <> circle.id}>
-              <div class="flex items-center px-4 py-4 sm:px-6">
-                <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
-                  <div class="truncate">
-                    <div class="flex text-sm">
-                      <p class="font-medium truncate text-primary">{LiveHandler.subject_name(circle)}</p>
-                    </div>
-                    <div class="flex mt-2">
-                      <div class="flex items-center text-sm text-base-content/80">
-                        <!-- Heroicon name: mini/calendar -->
-                        <svg class="mr-1.5 h-5 w-5 flex-shrink-0 text-base-content/80" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                          <path fill-rule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd" />
-                        </svg>
-                        <p>
-                          {e(circle, :extra_info, :summary, nil)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <Bonfire.Boundaries.Web.CirclePreviewLive
-                    members={e(circle, :encircles, [])}
-                    count={e(circle, :encircles_count, 0)}
-                    size={8}
-                  />
-                  <!-- <div class="flex-shrink-0 mt-4 sm:mt-0 sm:ml-5">
-                    <div class="flex -space-x-1 overflow-hidden">
-                      <img class="inline-block w-6 h-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Dries Vincent">
-
-                      <img class="inline-block w-6 h-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Lindsay Walton">
-
-                      <img class="inline-block w-6 h-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Courtney Henry">
-
-                      <img class="inline-block w-6 h-6 rounded-full ring-2 ring-white" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="Tom Cook">
-                    </div>
-                  </div> -->
-                </div>
-                <div class="flex-shrink-0 ml-5">
-                  <!-- Heroicon name: mini/chevron-right -->
-                  <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-                  </svg>
+  <div class="mt-4">
+    <ul role="list" class="divide-y rounded-lg bg-base-content/5 divide-base-300">
+      {#for circle <- e(@circles, [])}
+      <li>
+        <LiveRedirect class="block hover:bg-base-content/5" to={~p"/boundaries/circle/" <> circle.id}>
+          <div class="flex items-center p-3">
+            <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
+              <div class="truncate">
+                <div class="flex text-sm ">
+                  <p class="text-sm font-bold capitalize truncate">{LiveHandler.subject_name(circle)}</p>
                 </div>
               </div>
-            </LiveRedirect>
-          </li>
-          {/for}
-        </ul>
-      </div>
-
-
-      <!-- <ul class="grid grid-cols-1 gap-3 mt-3 lg:grid-cols-3 md:grid-cols-2">
-        {#for circle <- e(@circles, [])}
-          <li class="relative flex h-[200px] bg-base-content/5 shadow-2xl rounded-xl items-center justify-between flex-1 p-3  hover:bg-base-content/5">
-            <LiveRedirect class="flex-1 w-full" to={~p"/boundaries/circle/" <> circle.id}>
-              <div class="h-[60px]" />
-              <div class="absolute flex flex-col gap-2 left-2 right-2 bottom-3">
-                <div class="flex flex-col gap-1">
-                  <div class="text-sm font-semibold">{LiveHandler.subject_name(circle)}</div>
-                  <div class="text-sm line-clamp-2 text-base-content/70">{e(circle, :extra_info, :summary, nil)}</div>
-                </div>
-                <Bonfire.Boundaries.Web.CirclePreviewLive
-                  members={e(circle, :encircles, [])}
-                  count={e(circle, :encircles_count, 0)}
-                  size={8}
-                />
-
-              </div>
-            </LiveRedirect>
-          </li>
-        {/for}
-      </ul> -->
-    </div>
-  {/if}
+              <Bonfire.Boundaries.Web.CirclePreviewLive
+                members={e(circle, :encircles, [])}
+                count={e(circle, :encircles_count, 0)}
+                size={8}
+              />
+            </div>
+            <div class="flex-shrink-0 ml-5">
+              <Icon solid="ChevronRight" class="w-5 h-5 text-base-content/50" />
+            </div>
+          </div>
+        </LiveRedirect>
+      </li>
+      {/for}
+    </ul>
+  </div>
 </div>

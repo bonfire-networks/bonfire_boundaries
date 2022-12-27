@@ -1,5 +1,5 @@
-<div class="p-4">
-  <div class="flex items-center space-x-2">
+<div class="">
+  <!-- <div class="flex items-center space-x-2">
     <div
       :if={@parent_back}
       phx-click="back"
@@ -9,9 +9,9 @@
       <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
     </div>
     <span>{l("Back")}</span>
-  </div>
+  </div> -->
 
-  <div x-data="{ name: '' }" class="w-full p-3 mt-3 border rounded border-base-content/30">
+  <div x-data="{ name: '' }" class="w-full p-3 mt-6 border rounded border-base-content/10">
     <!-- <div 
       x-data="{
         open: false,

@@ -1,7 +1,15 @@
 <!-- <Bonfire.UI.Common.PageTitleLive page_title={@page_title} /> -->
 
-<section class="p-4">
+<section class="flex flex-col p-4">
   {#case @selected_tab}
+    {#match "acl"}
+      <Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.AclLive) and @current_user}
+        module={Bonfire.Boundaries.Web.AclLive}
+        setting_boundaries={false}
+        selected_tab="acls"
+        id="acl"
+      />
     {#match "circles"}
       <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
@@ -24,14 +32,7 @@
         id="my_acls"
         scope={nil}
       />
-    {#match "acl"}
-      <Dynamic.LiveComponent
-        :if={module_enabled?(Bonfire.Boundaries.Web.AclLive) and @current_user}
-        module={Bonfire.Boundaries.Web.AclLive}
-        setting_boundaries={false}
-        selected_tab="acls"
-        id="acl"
-      />
+    
     {#match "silenced"}
       <Bonfire.Boundaries.Web.BlocksLive id="blocks" selected_tab="silenced" />
     {#match "ghosted"}
@@ -63,26 +64,30 @@
         scope={nil}
       />
     {#match _}
-      <Dynamic.LiveComponent
-        :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
-        module={Bonfire.Boundaries.Web.MyCirclesLive}
-        id="circles"
-        scope={nil}
-      />
-
-      <Dynamic.Component
-        :if={module_enabled?(Bonfire.Boundaries.Web.RolesLive) and @current_user}
-        module={Bonfire.Boundaries.Web.RolesLive}
-        id="roles"
-        scope={nil}
-      />
-
-      <Dynamic.LiveComponent
-        :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and @current_user}
-        module={Bonfire.Boundaries.Web.MyAclsLive}
-        selected_tab="acls"
-        id="my_acls"
-        scope={nil}
-      />
+      <div class="flex flex-col gap-8 divide-y divide-base-300">
+        <Dynamic.LiveComponent
+          :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and @current_user}
+          module={Bonfire.Boundaries.Web.MyAclsLive}
+          selected_tab="acls"
+          id="my_acls"
+          scope={nil}
+        />
+        <div class="pt-4">
+          <Dynamic.LiveComponent
+            :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}
+            module={Bonfire.Boundaries.Web.MyCirclesLive}
+            id="circles"
+            scope={nil}
+          />
+        </div>
+        <div class="pt-4">
+          <Dynamic.Component
+            :if={module_enabled?(Bonfire.Boundaries.Web.RolesLive) and @current_user}
+            module={Bonfire.Boundaries.Web.RolesLive}
+            id="roles"
+            scope={nil}
+          />
+        </div>
+      </div>
   {/case}
 </section>
