@@ -20,9 +20,9 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
     {:ok,
      socket
-      |> assign(assigns)
-      |> assign(page_title: l("Circle"))
-      |> assign(section: e(params, "section", "members"))}
+     |> assign(assigns)
+     |> assign(page_title: l("Circle"))
+     |> assign(section: e(params, "section", "members"))}
   end
 
   def update(assigns, socket) do
@@ -39,7 +39,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
       |> assign(assigns)
       |> assign(
         loaded: true,
-page_title: l("Circle"),
+        page_title: l("Circle"),
         section: e(params, "section", "members"),
         settings_section_description: l("Create and manage your circle.")
       )
@@ -92,7 +92,6 @@ page_title: l("Circle"),
          circle: Map.drop(circle, [:encircles]),
          members: members,
          page_title: l("Circle"),
-
          suggestions: suggestions,
          stereotype_id: stereotype_id,
          read_only:

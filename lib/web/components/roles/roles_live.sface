@@ -40,17 +40,17 @@
                       {verb}
                     </div>
                   {#match verb_details}
-                  <div class="flex items-center gap-2">
-                    <!-- <Icon
+                    <div class="flex items-center gap-2">
+                      <!-- <Icon
                       iconify={e(verb_details, :icon, "Heroicons-Solid:QuestionMarkCircle")}
                       class="w-4 h-4 text-base-content/70"
                       fill="currentColor"
                     /> -->
-                    <div class="flex-1 text-sm font-semibold capitalize">
-                      {e(verb_details, :verb, nil) || verb}
+                      <div class="flex-1 text-sm font-semibold capitalize">
+                        {e(verb_details, :verb, nil) || verb}
+                      </div>
                     </div>
-                  </div>
-                  <div class="text-xs text-base-content/70">{e(verb_details, :summary, nil)}</div>
+                    <div class="text-xs text-base-content/70">{e(verb_details, :summary, nil)}</div>
                 {/case}
               </div>
 
@@ -63,18 +63,18 @@
   </div>
 
   <style>
-      .boundaries-switches label div.btn {
-      color: hsl(var(--bc));
-      }
-      .boundaries-switches label input:checked ~ div.btn-yes {
-      color: hsl(var(--su) / 0.90);
-      }
-      .boundaries-switches label input:checked ~ div.btn-no {
-      color: hsl(var(--er) / 0.90);
-      }
-      .boundaries-switches label input:checked ~ div.btn-maybe {
-      background: white;
-      color: black;
-      }
-    </style>
+    .boundaries-switches label div.btn {
+    color: hsl(var(--bc));
+    }
+    .boundaries-switches label input:checked ~ div.btn-yes {
+    color: hsl(var(--su) / 0.90);
+    }
+    .boundaries-switches label input:checked ~ div.btn-no {
+    color: hsl(var(--er) / 0.90);
+    }
+    .boundaries-switches label input:checked ~ div.btn-maybe {
+    background: white;
+    color: black;
+    }
+  </style>
 </div>

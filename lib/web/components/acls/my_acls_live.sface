@@ -11,16 +11,14 @@
       {#match all_role_verbs}
         <div>
           <div :if={!@setting_boundaries} class="flex items-center">
-
             <div class="flex gap-12 pt-3 items-top">
               <div class="flex flex-col flex-1 pb-3">
-                <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("My boundaries")}</h2>
-                <p class="mt-1 text-sm text-base-content/70">{l("Boundaries are used to define and enforce rules around access and permissions for various types of content and functionality for one or more users and circles.")}</p>
+                <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("Boundaries")}</h2>
+                <p class="mt-1 text-sm text-base-content/70">{l(
+                    "Boundaries are used to define and enforce rules around access and permissions to content or functionality. A boundary can apply to one or more users and circles."
+                  )}</p>
               </div>
-              <Bonfire.UI.Common.OpenModalLive
-                id={Pointers.ULID.generate()}
-                title_text={l("New boundary")}
-              >
+              <Bonfire.UI.Common.OpenModalLive id={Pointers.ULID.generate()} title_text={l("New boundary")}>
                 <Bonfire.Boundaries.Web.NewAclLive
                   scope={@scope}
                   parent_back={@myself}
@@ -32,11 +30,8 @@
                     {l("New boundary")}
                   </div>
                 </:open_btn>
-            </Bonfire.UI.Common.OpenModalLive>
-
-
+              </Bonfire.UI.Common.OpenModalLive>
             </div>
-            
           </div>
 
           <ul class="mt-4 divide-y rounded-lg bg-base-content/5 divide-base-300">
@@ -45,7 +40,7 @@
                 "block p-3",
                 "": !@setting_boundaries,
                 "bg-base-content/10": @to_boundaries_ids |> Enum.member?(acl_id)
-                }>
+              }>
                 <label
                   class="flex items-center w-full"
                   phx-click={if @setting_boundaries,
@@ -73,28 +68,31 @@
                   <!-- ACTIONS -->
                   <div class="flex ml-4 space-x-2">
                     {#if !@setting_boundaries}
-                    {#if e(acl, :grants_count, 0) > 0}
-                      <div class="flex gap-1 avatar-group">
-                      {#for {_subject_id, %{subject: subject, verb_grants: verb_grants}} <-
-                        AclLive.subject_verb_grant(e(acl, :grants, [])) |> Enum.slice(0..2)} 
-                          {#if e(subject, :profile, :id, nil)}
-                          <Bonfire.UI.Common.AvatarLive
-                            user={e(subject, nil)}
-                            title={e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) ||
-                              e(subject, :name, nil) || e(subject, :profile, :name, nil) ||
-                              e(subject, :character, :username, nil) || ulid(subject)}
-                            class={"w-8 h-8 bg-base-content/5 rounded-xl"}
-                          />
-                          {#else}
-                          <div class="flex items-center gap-3">
-                            <span title={e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) ||
-                              e(subject, :name, nil) || e(subject, :profile, :name, nil) ||
-                              e(subject, :character, :username, nil) || ulid(subject)} class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-                              <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
-                            </span>
-                          </div>
-                          {/if}
-                          <!-- <div class="flex items-center space-x-1 capitalize">
+                      {#if e(acl, :grants_count, 0) > 0}
+                        <div class="flex gap-1 avatar-group">
+                          {#for {_subject_id, %{subject: subject, verb_grants: verb_grants}} <-
+                              AclLive.subject_verb_grant(e(acl, :grants, [])) |> Enum.slice(0..2)}
+                            {#if e(subject, :profile, :id, nil)}
+                              <Bonfire.UI.Common.AvatarLive
+                                user={e(subject, nil)}
+                                title={e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) ||
+                                  e(subject, :name, nil) || e(subject, :profile, :name, nil) ||
+                                  e(subject, :character, :username, nil) || ulid(subject)}
+                                class="w-8 h-8 bg-base-content/5 rounded-xl"
+                              />
+                            {#else}
+                              <div class="flex items-center gap-3">
+                                <span
+                                  title={e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) ||
+                                    e(subject, :name, nil) || e(subject, :profile, :name, nil) ||
+                                    e(subject, :character, :username, nil) || ulid(subject)}
+                                  class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5"
+                                >
+                                  <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
+                                </span>
+                              </div>
+                            {/if}
+                            <!-- <div class="flex items-center space-x-1 capitalize">
                             {#case Verbs.role_from_verb(Map.keys(verb_grants), :id, all_role_verbs)}
                               {#match :custom}
                                 {#for {verb_id, grant} <- verb_grants}
@@ -121,57 +119,51 @@
                                 {role}
                             {/case}
                           </div> -->
-                      {/for}
+                          {/for}
+                        </div>
+                      {/if}
+                      <div class="flex items-center gap-3">
+                        <LiveRedirect class="btn btn-ghost btn-sm btn-circle" to={~p"/boundaries/acl/" <> acl.id}>
+                          {#case Acls.is_stereotype?(acl)}
+                            {#match true}
+                              <Icon outline="InformationCircle" class="w-5 h-5" />
+                            {#match _}
+                              <Icon solid="ChevronRight" class="w-5 h-5 text-base-content/50" />
+                          {/case}
+                        </LiveRedirect>
                       </div>
-                    {/if}
-                    <div  
-                      class="flex items-center gap-3">
-                      <LiveRedirect
+                    {#else}
+                      <div
                         class="btn btn-ghost btn-sm btn-circle"
-                        to={~p"/boundaries/acl/" <> acl.id}
-                        >
+                        phx-click="boundary_edit"
+                        phx-target={@myself}
+                        phx-value-id={acl.id}
+                        x-on:click="show_boundary_list = false"
+                      >
                         {#case Acls.is_stereotype?(acl)}
                           {#match true}
                             <Icon outline="InformationCircle" class="w-5 h-5" />
                           {#match _}
-                            <Icon solid="ChevronRight" class="w-5 h-5 text-base-content/50" />
+                            <Icon solid="Pencil" class="w-4 h-4" />
                         {/case}
-                      </LiveRedirect>
-                    
-                    </div>
-                    {#else}
-                    <div
-                      class="btn btn-ghost btn-sm btn-circle"
-                      phx-click="boundary_edit"
-                      phx-target={@myself}
-                      phx-value-id={acl.id}
-                      x-on:click="show_boundary_list = false"
-                    >
-                      {#case Acls.is_stereotype?(acl)}
-                        {#match true}
-                          <Icon outline="InformationCircle" class="w-5 h-5" />
-                        {#match _}
-                          <Icon solid="Pencil" class="w-4 h-4" />
-                      {/case}
-                    </div>
+                      </div>
 
-                    <div
-                      :if={not Enum.member?(@to_boundaries_ids, acl_id)}
-                      class="btn btn-outline btn-sm btn-circle opacity-80"
-                    >
-                      <Icon solid="Plus" class="w-5 h-5" />
-                    </div>
+                      <div
+                        :if={not Enum.member?(@to_boundaries_ids, acl_id)}
+                        class="btn btn-outline btn-sm btn-circle opacity-80"
+                      >
+                        <Icon solid="Plus" class="w-5 h-5" />
+                      </div>
 
-                    <div
-                      :if={@to_boundaries_ids |> Enum.member?(acl_id)}
-                      class="btn btn-success btn-sm btn-circle opacity-80"
-                    >
-                      <Icon solid="Minus" class="w-5 h-5" />
-                    </div>
+                      <div
+                        :if={@to_boundaries_ids |> Enum.member?(acl_id)}
+                        class="btn btn-success btn-sm btn-circle opacity-80"
+                      >
+                        <Icon solid="Minus" class="w-5 h-5" />
+                      </div>
                     {/if}
                   </div>
                 </label>
-                
               </li>
             {/for}
           </ul>

@@ -360,7 +360,7 @@
       </section>
     </div>
 
-   <style>
+    <style>
       .boundaries-switches label div.btn {
       color: hsl(var(--bc));
       }

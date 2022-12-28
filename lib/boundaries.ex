@@ -104,13 +104,32 @@ defmodule Bonfire.Boundaries do
     end
   end
 
-  def preset_boundary_from_acl(%{acl: acl}),
-    do: preset_boundary_from_acl(acl)
+  def preset_boundary_from_acl(
+        %{verbs: verbs, __typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = _summary
+      ) do
+    {preset_boundary_role_from_acl(%{verbs: verbs}),
+     preset_boundary_tuple_from_acl(%Acl{id: acl_id})}
 
-  def preset_boundary_from_acl([acl]),
-    do: preset_boundary_from_acl(acl)
+    # |> debug("merged ACL + verbs")
+  end
 
-  def preset_boundary_from_acl(%Acl{id: acl_id} = _acl) do
+  def preset_boundary_from_acl(%{verbs: verbs} = _summary) do
+    preset_boundary_role_from_acl(%{verbs: verbs})
+  end
+
+  def preset_boundary_from_acl(acl) do
+    preset_boundary_tuple_from_acl(acl)
+  end
+
+  def preset_boundary_role_from_acl(%{verbs: verbs} = _summary) do
+    # debug(summary)
+    case Verbs.role_from_verb_names(verbs) do
+      :caretaker -> {l("Caretaker"), l("Full permissions")}
+      role -> {String.capitalize(to_string(role)), verbs}
+    end
+  end
+
+  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl) do
     # debug(acl)
 
     preset_acls = Config.get!(:preset_acls_all)
@@ -130,30 +149,21 @@ defmodule Bonfire.Boundaries do
     end
   end
 
-  def preset_boundary_from_acl(
-        %{verbs: verbs, __typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = summary
+  def preset_boundary_tuple_from_acl(
+        %{__typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = _summary
       ) do
-    {preset_boundary_from_acl(%{verbs: verbs}), preset_boundary_from_acl(%Acl{id: acl_id})}
-    |> debug("merged ACL + verbs")
+    preset_boundary_tuple_from_acl(%Acl{id: acl_id})
   end
 
-  def preset_boundary_from_acl(%{verbs: verbs} = _summary) do
-    # debug(summary)
-    case Verbs.role_from_verb_names(verbs) do
-      :caretaker -> {l("Caretaker"), l("Full permissions")}
-      role -> {String.capitalize(to_string(role)), verbs}
-    end
-  end
+  def preset_boundary_tuple_from_acl(%{acl: acl}),
+    do: preset_boundary_tuple_from_acl(acl)
 
-  def preset_boundary_from_acl(_) do
+  def preset_boundary_tuple_from_acl([acl]),
+    do: preset_boundary_tuple_from_acl(acl)
+
+  def preset_boundary_tuple_from_acl(other) do
+    warn(other, "No pattern matched")
     nil
-  end
-
-  def preset_boundary_tuple_from_acl(summary_or_acl) do
-    case preset_boundary_from_acl(summary_or_acl) do
-      {a, {b, c}} -> {b, c}
-      b_c -> b_c
-    end
   end
 
   def set_boundaries(creator, object, opts)

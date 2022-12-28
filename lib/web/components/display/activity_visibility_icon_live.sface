@@ -2,10 +2,12 @@
   :if={not is_atom(@object_boundary) or @object_boundary == false or not is_nil(@boundary_tuple)}
   class={@class}
 >
-  {#case @boundary_tuple || Bonfire.Boundaries.preset_boundary_from_acl(@object_boundary)}
+  {#case @boundary_tuple ||
+      Bonfire.Boundaries.preset_boundary_tuple_from_acl(@object_boundary)
+      |> debug("preset_boundary_tuple_from_acl")}
     {#match {"public", _}}
       <span
-        title={l("Public")}
+        title={l("Public: visible to everyone. People on the fediverse can see, interact, and reply.")}
         class={
           "flex items-center gap-1",
           "align-bottom": @with_label != true,
@@ -17,10 +19,11 @@
           :if={@with_label}
           class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
         >{l("Public")}</span>
+        <span :if={!@with_label} class="sr-only">{l("Public")}</span>
       </span>
     {#match {"local", _}}
       <span
-        title={l("Local")}
+        title={l("Local: everyone on this instance can see, interact, and reply.")}
         class={
           "flex items-center gap-1",
           "align-bottom": @with_label != true,
@@ -32,22 +35,14 @@
           :if={@with_label}
           class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
         >{l("Local")}</span>
+        <span :if={!@with_label} class="sr-only">{l("Local")}</span>
       </span>
-    {#match {{name, extra}, {_, _} = preset_boundary}}
-      <div class="flex items-center gap-3 normal-case">
-        <Bonfire.Boundaries.Web.BoundaryIconStatelessLive
-          boundary_tuple={preset_boundary}
-          with_icon
-          with_label={false}
-        />
-      </div>
-      
     {#match _}
       <span
         title={e(@object_boundary, :name, "Custom Boundaries")}
         class={
           "flex items-center gap-1",
-          "align-bottom tooltip tooltip-bottom z-20": @with_label != true,
+          "align-bottom": @with_label != true,
           "flex items-center gap-2": @with_label == true
         }
       >

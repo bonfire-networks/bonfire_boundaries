@@ -1,10 +1,10 @@
-
-
 <div class="">
   <div class="flex gap-8 pt-3 items-top">
     <div class="flex flex-col flex-1 pb-3">
-      <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("Your Circles")}</h2>
-      <p class="mt-1 text-sm text-base-content/70">{l("Circles are a way for users to organize their connections and relationships with other users. Circles can be used to group people together based on shared interests, affiliations, or other factors.")}</p>
+      <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("Circles")}</h2>
+      <p class="mt-1 text-sm text-base-content/70">{l(
+          "Circles are a way to organize your connections and relationships with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors."
+        )}</p>
     </div>
     <!-- <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} /> -->
     <Bonfire.UI.Common.OpenModalLive
@@ -23,34 +23,32 @@
         </div>
       </:open_btn>
     </Bonfire.UI.Common.OpenModalLive>
-    
   </div>
-
 
   <div class="mt-4">
     <ul role="list" class="divide-y rounded-lg bg-base-content/5 divide-base-300">
       {#for circle <- e(@circles, [])}
-      <li>
-        <LiveRedirect class="block hover:bg-base-content/5" to={~p"/boundaries/circle/" <> circle.id}>
-          <div class="flex items-center p-3">
-            <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
-              <div class="truncate">
-                <div class="flex text-sm ">
-                  <p class="text-sm font-bold capitalize truncate">{LiveHandler.subject_name(circle)}</p>
+        <li>
+          <LiveRedirect class="block hover:bg-base-content/5" to={~p"/boundaries/circle/" <> circle.id}>
+            <div class="flex items-center p-3">
+              <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
+                <div class="truncate">
+                  <div class="flex text-sm">
+                    <p class="text-sm font-bold capitalize truncate">{LiveHandler.subject_name(circle)}</p>
+                  </div>
                 </div>
+                <Bonfire.Boundaries.Web.CirclePreviewLive
+                  members={e(circle, :encircles, [])}
+                  count={e(circle, :encircles_count, 0)}
+                  size={8}
+                />
               </div>
-              <Bonfire.Boundaries.Web.CirclePreviewLive
-                members={e(circle, :encircles, [])}
-                count={e(circle, :encircles_count, 0)}
-                size={8}
-              />
+              <div class="flex-shrink-0 ml-5">
+                <Icon solid="ChevronRight" class="w-5 h-5 text-base-content/50" />
+              </div>
             </div>
-            <div class="flex-shrink-0 ml-5">
-              <Icon solid="ChevronRight" class="w-5 h-5 text-base-content/50" />
-            </div>
-          </div>
-        </LiveRedirect>
-      </li>
+          </LiveRedirect>
+        </li>
       {/for}
     </ul>
   </div>

@@ -32,7 +32,6 @@
         id="my_acls"
         scope={nil}
       />
-    
     {#match "silenced"}
       <Bonfire.Boundaries.Web.BlocksLive id="blocks" selected_tab="silenced" />
     {#match "ghosted"}
