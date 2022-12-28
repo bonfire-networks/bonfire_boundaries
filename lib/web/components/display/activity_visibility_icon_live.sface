@@ -1,0 +1,61 @@
+<div
+  :if={not is_atom(@object_boundary) or @object_boundary == false or not is_nil(@boundary_tuple)}
+  class={@class}
+>
+  {#case @boundary_tuple || Bonfire.Boundaries.preset_boundary_from_acl(@object_boundary)}
+    {#match {"public", _}}
+      <span
+        title={l("Public")}
+        class={
+          "flex items-center gap-1",
+          "align-bottom": @with_label != true,
+          "flex items-center gap-2": @with_label == true
+        }
+      >
+        <Icon :if={@with_icon} solid="Globe" class="w-4 h-4 text-base-content/50" />
+        <span
+          :if={@with_label}
+          class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
+        >{l("Public")}</span>
+      </span>
+    {#match {"local", _}}
+      <span
+        title={l("Local")}
+        class={
+          "flex items-center gap-1",
+          "align-bottom": @with_label != true,
+          "flex items-center gap-2": @with_label == true
+        }
+      >
+        <Icon :if={@with_icon} solid="Home" class="w-4 h-4 text-base-content/50" />
+        <span
+          :if={@with_label}
+          class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
+        >{l("Local")}</span>
+      </span>
+    {#match {{name, extra}, {_, _} = preset_boundary}}
+      <div class="flex items-center gap-3 normal-case">
+        <Bonfire.Boundaries.Web.BoundaryIconStatelessLive
+          boundary_tuple={preset_boundary}
+          with_icon
+          with_label={false}
+        />
+      </div>
+      
+    {#match _}
+      <span
+        title={e(@object_boundary, :name, "Custom Boundaries")}
+        class={
+          "flex items-center gap-1",
+          "align-bottom tooltip tooltip-bottom z-20": @with_label != true,
+          "flex items-center gap-2": @with_label == true
+        }
+      >
+        <Icon :if={@with_icon} solid="Cog" class="w-4 h-4 text-base-content/50" />
+        <span
+          :if={@with_label}
+          class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
+        >{l("Custom Boundaries")}</span>
+      </span>
+  {/case}
+</div>

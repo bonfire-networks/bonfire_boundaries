@@ -289,7 +289,7 @@
                 name="extra_info[summary]"
                 placeholder="A short description to help you remember what this boundary is about"
                 rows="3"
-                class="w-full h-24 textarea textarea-bordered"
+                class="w-full h-24 text-sm textarea textarea-bordered"
               >{e(@acl, :extra_info, :summary, nil)}</textarea>
             </div>
           </div>

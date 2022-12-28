@@ -204,7 +204,7 @@
                   name="extra_info[summary]"
                   placeholder="A short description to help you remember what this circle is about"
                   rows="3"
-                  class="w-full h-24 textarea textarea-bordered"
+                  class="w-full h-24 text-sm textarea textarea-bordered"
                 >{e(@circle, :extra_info, :summary, nil)}</textarea>
               </div>
             </div>
