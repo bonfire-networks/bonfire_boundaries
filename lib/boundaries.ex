@@ -129,6 +129,11 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  def preset_boundary_role_from_acl(other) do
+    warn(other, "No pattern matched")
+    nil
+  end
+
   def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl) do
     # debug(acl)
 
