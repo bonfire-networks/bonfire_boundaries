@@ -31,12 +31,19 @@
     {#case data}
       {#match %{"icon" => _}}
         <Bonfire.UI.Common.ProfileItemLive profile={data} character={data} show_controls={[]} />
+      {#match _ when is_binary(data)}
+        <div class="flex items-center gap-3 grow">
+          <span class="flex items-center w-10 h-10 rounded place-content-center bg-base-content/5">
+            <Icon iconify="bxs:user-circle" class="inline-block w-5 h-5 text-base-content/70" />
+          </span>
+          <div class="text-sm font-medium text-base-content">{data}</div>
+        </div>
       {#match _}
         <div class="flex items-center gap-3 grow">
           <span class="flex items-center w-10 h-10 rounded place-content-center bg-base-content/5">
             <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
           </span>
-          <div class="text-sm font-medium text-base-content">{e(data, :name, l("Untitled circle"))}</div>
+          <div class="text-sm font-medium text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
         </div>
     {/case}
     <div class="flex items-center gap-2">
