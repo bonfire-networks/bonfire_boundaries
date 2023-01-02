@@ -33,6 +33,9 @@ defmodule Bonfire.Boundaries do
       "public" in boundaries ->
         "public"
 
+      "admins" in boundaries ->
+        "admins"
+
       true ->
         # debug(boundaries, "No preset boundary set")
         nil
