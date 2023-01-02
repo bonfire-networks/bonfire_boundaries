@@ -119,15 +119,20 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp custom_recipients(changeset, preset, opts) do
-    (reply_to_grants(changeset, preset, opts) ++
-       mentions_grants(changeset, preset, opts) ++
-       maybe_custom_circles_or_users(opts))
+    (List.wrap(reply_to_grants(changeset, preset, opts)) ++
+       List.wrap(mentions_grants(changeset, preset, opts)) ++
+       List.wrap(maybe_custom_circles_or_users(opts)))
+    |> debug("custom_recipients")
     |> Enum.uniq()
     |> filter_empty([])
   end
 
-  defp maybe_custom_circles_or_users(opts),
-    do: maybe_from_opts(opts, :to_circles, [])
+  defp maybe_custom_circles_or_users(opts) do
+    Enum.map(maybe_from_opts(opts, :to_circles, []), fn
+      {key, val} -> ulid(key) || ulid(val)
+      val -> ulid(val)
+    end)
+  end
 
   defp reply_to_grants(changeset, preset, _opts) do
     reply_to_creator =
@@ -147,11 +152,11 @@ defmodule Bonfire.Boundaries.Acls do
 
       case preset do
         "public" ->
-          [ulid(reply_to_creator)]
+          ulid(reply_to_creator)
 
         "local" ->
           if is_local?(reply_to_creator),
-            do: [ulid(reply_to_creator)],
+            do: ulid(reply_to_creator),
             else: []
 
         _ ->

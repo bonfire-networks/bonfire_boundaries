@@ -254,6 +254,11 @@ defmodule Bonfire.Boundaries do
     nil
   end
 
+  def can?(subject, verbs, :skip) do
+    debug("no object boundary data")
+    nil
+  end
+
   def can?(subject, verbs, :instance) do
     # cache needed for eg. for extension page
     key =
