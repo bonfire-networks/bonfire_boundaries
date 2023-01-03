@@ -11,7 +11,7 @@
     <span>{l("Back")}</span>
   </div> -->
 
-  <div x-data="{ name: '' }" class="w-full p-3 mt-6 border rounded border-base-content/10">
+  <div x-data="{ name: '' }" class="w-full mt-3">
     <!-- <div 
       x-data="{
         open: false,
@@ -51,15 +51,15 @@
     </div> -->
 
     <div class="w-full form-control">
-      <label class="label">
+      <!-- <label class="label">
         <span class="font-medium label-text">{l("Enter a name for the circle")}</span>
-      </label>
+      </label> -->
       <div class="flex items-center">
         <input
           x-model="name"
           name="named[name]"
           type="text"
-          placeholder={l("Type here")}
+          placeholder={l("Type the circle name")}
           class="w-full input input-bordered"
         />
       </div>

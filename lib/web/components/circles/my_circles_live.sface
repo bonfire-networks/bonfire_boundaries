@@ -10,6 +10,7 @@
     <Bonfire.UI.Common.OpenModalLive
       id={Pointers.ULID.generate()}
       title_text={l("Create a new circle")}
+      no_actions
     >
       <Bonfire.Boundaries.Web.NewCircleLive
         scope={@scope}
