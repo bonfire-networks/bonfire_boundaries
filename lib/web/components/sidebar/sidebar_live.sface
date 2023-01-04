@@ -1,8 +1,5 @@
 <Bonfire.Boundaries.Web.SidebarNavLive
-  class="class="
-  hidden
-  md:block
-  space-y-4"
+  class="hidden space-y-4 md:block"
   selected_tab={@selected_tab}
   id={@id}
 />
