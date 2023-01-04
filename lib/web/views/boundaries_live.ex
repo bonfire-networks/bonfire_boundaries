@@ -5,14 +5,15 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
   alias Bonfire.UI.Me.LivePlugs
 
   declare_extension(
-    "Boundaries", 
-    icon: "twemoji:handshake", 
-    exclude_from_nav: true)
-
-  declare_settings_nav_link(:extension,
-    # verb: :tag,
-    scopes: [:user, :instance]
+    "Boundaries",
+    icon: "twemoji:handshake",
+    exclude_from_nav: true
   )
+
+  # declare_settings_nav_link(:extension,
+  #   # verb: :tag,
+  #   scopes: [:user, :instance]
+  # )
 
   def mount(params, session, socket) do
     live_plug(params, session, socket, [
@@ -35,6 +36,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
         selected_tab: "user",
         show_less_menu_items: true,
         page_title: l("Boundaries & Circles"),
+        nav_items: [Bonfire.UI.Common.SidebarSettingsNavLive.declared_nav()],
         # page_header_aside: [
         #   {Bonfire.UI.Me.SettingsViewsLive.HeaderAsideMobileMenuLive, []}
         # ],

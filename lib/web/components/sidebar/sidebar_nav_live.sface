@@ -1,6 +1,6 @@
 <ul role="navigation" class={@class}>
   <li>
-    <LivePatch
+    <LiveRedirect
       to={~p"/boundaries/circles"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2",
@@ -9,21 +9,27 @@
     >
       <Icon iconify="bx:ShapeCircle" class="w-5 h-5 font-normal text-base-content/80" />
       <span class="text-sm text-base-content/80">{l("Circles")}</span>
-    </LivePatch>
+    </LiveRedirect>
   </li>
 
   <li>
-    <LivePatch
+    <LiveRedirect
       to={~p"/boundaries/roles"}
-      class={"flex items-center gap-3 rounded-md py-2 px-2", "bg-base-content/10 ": @selected_tab == "account"}
+      class={
+        "flex items-center gap-3 rounded-md py-2 px-2",
+        "bg-base-content/10 ": @selected_tab == "account"
+      }
     >
-      <Icon solid="Key" class={"w-5 h-5 font-normal text-base-content/80 ", "": @selected_tab == "account"} />
+      <Icon
+        solid="Key"
+        class={"w-5 h-5 font-normal text-base-content/80 ", "": @selected_tab == "account"}
+      />
       <span class="text-sm text-base-content/80">{l("Roles")}</span>
-    </LivePatch>
+    </LiveRedirect>
   </li>
 
   <li>
-    <LivePatch
+    <LiveRedirect
       to={~p"/boundaries/acls"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2",
@@ -35,11 +41,11 @@
         class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "acls"}
       />
       <span class="text-sm text-base-content/80">{l("Boundaries")}</span>
-    </LivePatch>
+    </LiveRedirect>
   </li>
 
   <li>
-    <LivePatch
+    <LiveRedirect
       to={~p"/boundaries/ghosted"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2",
@@ -51,10 +57,10 @@
         class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "ghosted"}
       />
       <span class="text-sm text-base-content/80">{l("Ghosted")}</span>
-    </LivePatch>
+    </LiveRedirect>
   </li>
   <li>
-    <LivePatch
+    <LiveRedirect
       to={~p"/boundaries/silenced"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2",
@@ -66,11 +72,11 @@
         class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "silenced"}
       />
       <span class="text-sm text-base-content/80">{l("Silenced")}</span>
-    </LivePatch>
+    </LiveRedirect>
   </li>
 
   <li :if={Bonfire.Boundaries.can?(@__context__, :assign, :instance)}>
-    <LivePatch
+    <LiveRedirect
       to={~p"/boundaries/instance_circles"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2",
@@ -79,22 +85,22 @@
     >
       <Icon iconify="bx:ShapeCircle" class="w-5 h-5 font-normal text-base-content/80" />
       <span class="text-sm text-base-content/80">{l("Instance Circles")}</span>
-    </LivePatch>
+    </LiveRedirect>
   </li>
 
   <!-- <li
   :if={Settings.get(:experimental_features_enabled, false, @__context__)}
   >
-  <LivePatch 
+  <LiveRedirect 
     to={~p"/boundaries/instance_acls"}
     class={"",  ""bg-base-content/10"": @selected_tab == "instance_acls"}>
     <Icon solid="LockClosed" class={"w-5 h-5 font-normal text-base-content/80", "!text-primary": @selected_tab == "feed"} />
     {l "Local Boundaries"}
-  </LivePatch>
+  </LiveRedirect>
 </li> -->
 
   <li :if={Bonfire.Boundaries.can?(@__context__, :configure, :instance)}>
-    <LivePatch
+    <LiveRedirect
       to={~p"/boundaries/acl/#{Bonfire.Boundaries.Fixtures.instance_acl()}"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2",
@@ -106,11 +112,11 @@
         class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "feed"}
       />
       <span class="text-sm text-base-content/80">{l("Instance Boundaries")}</span>
-    </LivePatch>
+    </LiveRedirect>
   </li>
 
   <li :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)}>
-    <LivePatch
+    <LiveRedirect
       to={~p"/boundaries/instance_ghosted"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2",
@@ -122,10 +128,10 @@
         class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "extensions"}
       />
       <span class="text-sm text-base-content/80">{l("Ghosted instance-wide")}</span>
-    </LivePatch>
+    </LiveRedirect>
   </li>
   <li :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)}>
-    <LivePatch
+    <LiveRedirect
       to={~p"/boundaries/instance_silenced"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2",
@@ -137,6 +143,6 @@
         class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "extensions"}
       />
       <span class="text-sm text-base-content/80">{l("Silenced instance-wide")}</span>
-    </LivePatch>
+    </LiveRedirect>
   </li>
 </ul>

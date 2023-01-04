@@ -35,8 +35,9 @@
             )}
             type="button"
           ><span class="text-xl">
-            <Icon iconify="noto:house-with-garden" class="w-5 h-5" />
-          </span> {l("Local")}</button></li>
+              <Icon iconify="noto:house-with-garden" class="w-5 h-5" />
+            </span>
+            {l("Local")}</button></li>
         <li><button
             phx-click={JS.push("Bonfire.Boundaries:select_boundary",
               value: %{id: "mentions", name: l("Mentions")},
@@ -51,8 +52,9 @@
             )}
             type="button"
           ><span class="text-xl">
-            <Icon iconify="noto:gear" class="w-5 h-5" />
-          </span> {l("Custom")}</button></li>
+              <Icon iconify="noto:gear" class="w-5 h-5" />
+            </span>
+            {l("Custom")}</button></li>
       </ul>
     </div>
 

@@ -18,10 +18,11 @@
                     "Boundaries are used to define and enforce rules around access and permissions to content or functionality. A boundary can apply to one or more users and circles."
                   )}</p>
               </div>
-              <Bonfire.UI.Common.OpenModalLive 
-                id={Pointers.ULID.generate()} 
+              <Bonfire.UI.Common.OpenModalLive
+                id={Pointers.ULID.generate()}
                 no_actions
-                title_text={l("New boundary")}>
+                title_text={l("New boundary")}
+              >
                 <Bonfire.Boundaries.Web.NewAclLive
                   scope={@scope}
                   parent_back={@myself}
