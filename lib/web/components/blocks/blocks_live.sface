@@ -61,7 +61,6 @@
       <Bonfire.Boundaries.Web.CircleLive
         id={@circle_id}
         circle_id={@circle_id}
-        parent_back={@myself}
         setting_boundaries={false}
       />
     </div>
@@ -131,7 +130,6 @@
       <Bonfire.Boundaries.Web.CircleLive
         id={@circle_id}
         circle_id={@circle_id}
-        parent_back={@myself}
         setting_boundaries={false}
       />
     </div>
