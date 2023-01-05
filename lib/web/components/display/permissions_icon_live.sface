@@ -8,7 +8,7 @@
         <div class="tippy">
           {#case name}
             {#match "Caretaker"}
-              <Icon iconify="material-symbols:vpn-key-rounded" class="w-4 h-4 text-base-content/50" />
+              <!-- <Icon iconify="material-symbols:vpn-key-rounded" class="w-4 h-4 text-base-content/50" /> -->
             {#match "Read"}
               <Icon iconify="ic:baseline-remove-red-eye" class="w-4 h-4 text-base-content/50" />
             {#match "Interact"}
