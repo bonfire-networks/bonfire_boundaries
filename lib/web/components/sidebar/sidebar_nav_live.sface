@@ -3,7 +3,7 @@
     <LiveRedirect
       to={~p"/boundaries/circles"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2",
+        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
         "bg-base-content/10": @selected_tab == "circles"
       }
     >
@@ -16,7 +16,7 @@
     <LiveRedirect
       to={~p"/boundaries/roles"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2",
+        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
         "bg-base-content/10 ": @selected_tab == "account"
       }
     >
@@ -32,7 +32,7 @@
     <LiveRedirect
       to={~p"/boundaries/acls"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2",
+        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
         "bg-base-content/10": @selected_tab == "acls"
       }
     >
@@ -48,7 +48,7 @@
     <LiveRedirect
       to={~p"/boundaries/ghosted"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2",
+        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
         "bg-base-content/10": @selected_tab == "ghosted"
       }
     >
@@ -63,7 +63,7 @@
     <LiveRedirect
       to={~p"/boundaries/silenced"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2",
+        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
         "bg-base-content/10": @selected_tab == "silenced"
       }
     >
@@ -79,7 +79,7 @@
     <LiveRedirect
       to={~p"/boundaries/instance_circles"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2",
+        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
         "bg-base-content/10": @selected_tab == "instance_circles"
       }
     >
@@ -103,7 +103,7 @@
     <LiveRedirect
       to={~p"/boundaries/acl/#{Bonfire.Boundaries.Fixtures.instance_acl()}"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2",
+        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
         "bg-base-content/10": @id == Bonfire.Boundaries.Fixtures.instance_acl()
       }
     >
@@ -119,7 +119,7 @@
     <LiveRedirect
       to={~p"/boundaries/instance_ghosted"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2",
+        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
         "bg-base-content/10": @selected_tab == "instance_ghosted"
       }
     >
@@ -134,7 +134,7 @@
     <LiveRedirect
       to={~p"/boundaries/instance_silenced"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2",
+        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
         "bg-base-content/10": @selected_tab == "instance_silenced"
       }
     >
