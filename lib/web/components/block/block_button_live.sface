@@ -13,7 +13,7 @@
         <label class="items-start justify-start pb-1 cursor-pointer label">
           <input name="silence" type="checkbox" checked="checked" class="checkbox">
           <div class="ml-4 label-text">
-            <div class="text-lg font-semibold">{l("Silence") <> " " <> @label}</div>
+            <div class="text-sm font-semibold">{l("Silence") <> " " <> @label}</div>
             <div class="text-sm">{l("Stop seeing things they publish")}</div>
           </div>
         </label>
@@ -56,7 +56,7 @@
         <label class="items-start justify-start pb-1 cursor-pointer label">
           <input name="ghost" type="checkbox" checked="checked" class="checkbox">
           <div class="ml-4 label-text">
-            <div class="text-lg font-semibold">{l("Ghost") <> " " <> @label}</div>
+            <div class="text-sm font-semibold">{l("Ghost") <> " " <> @label}</div>
             <div class="text-sm">{l("Prevent them from seeing or interacting with you or your content")}</div>
           </div>
         </label>
@@ -105,17 +105,17 @@
       class="flex flex-col p-2 mt-8 space-y-3 border rounded border-error/30 bg-error/5"
     >
       <div class="">
-        <div class="text-base font-semibold">{l("Super powers")}</div>
-        <p class="mt-0 text-sm">
-          <em>{l("You can enforce a block for all users of your instance.")}</em>
+        <div class="text-base font-semibold text-error-content">{l("Super powers")}</div>
+        <p class="mt-0 text-sm text-error-content">
+          {l("You can enforce a block for all users of your instance.")}
         </p>
       </div>
       <div class="form-control">
         <label class="items-start justify-start pb-1 cursor-pointer label">
           <input name="instance_wide[silence]" type="checkbox" class="checkbox">
           <div class="ml-2 label-text">
-            <div class="text-sm font-semibold">{l("Silence instance-wide")}</div>
-            <div class="text-sm">{l("Stop all local users from seeing %{user_or_instance_name} or their content",
+            <div class="text-sm font-semibold text-error-content">{l("Silence instance-wide")}</div>
+            <div class="text-sm text-error-content">{l("Stop all local users from seeing %{user_or_instance_name} or their content",
                 user_or_instance_name: @label
               )}</div>
           </div>
@@ -125,8 +125,8 @@
         <label class="items-start justify-start pb-1 cursor-pointer label">
           <input name="instance_wide[ghost]" type="checkbox" class="checkbox">
           <div class="ml-2 label-text">
-            <div class="text-sm font-semibold">{l("Ghost instance-wide")}</div>
-            <div class="text-sm">{l(
+            <div class="text-sm font-semibold text-error-content">{l("Ghost instance-wide")}</div>
+            <div class="text-sm text-error-content">{l(
                 "Prevent %{user_or_instance_name} from seeing or interacting with all local users",
                 user_or_instance_name: @label
               )}</div>
@@ -149,8 +149,8 @@
     </:open_btn>
 
     <:action_btns>
-      <button data-id="block" type="submit" class="btn btn-error btn-sm">
-        <span class="text-left truncate ellipsis">{l("Block") <> " " <> e(@label, "")}</span>
+      <button data-id="block" type="submit" class="normal-case rounded btn btn-error btn-sm">
+        <span class="text-left truncate ellipsis">{l("Block")}</span>
       </button>
     </:action_btns>
   </Bonfire.UI.Common.OpenModalLive>

@@ -1,8 +1,8 @@
 {#if @selected_tab == "silenced"}
-  <div class="p-3">
+  <div>
     <!-- TODO: consolidate this view and the boundary editing one (so you can directly add people/circles here as well) -->
 
-    <div class="shadow-lg alert alert-info">
+    <!-- <div class="shadow-lg alert alert-info">
       <div class="flex items-start">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -54,19 +54,18 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
-  <div class="px-3">
-    <div class="flex flex-col">
-      <Bonfire.Boundaries.Web.CircleLive
-        id={@circle_id}
-        circle_id={@circle_id}
-        setting_boundaries={false}
-      />
-    </div>
-  </div>
+    </div> -->
+  <Bonfire.Boundaries.Web.CircleLive
+    id={@circle_id}
+    title={l("Silenced users")}
+    description={if @scope == :instance_wide, do: l("Nobody on this instance will receive any updates from the users or instances on this list"), else: l("You will not receive any updates from the users or instances on this list")}
+    circle_id={@circle_id}
+    setting_boundaries={false}
+  />
+</div>
 {#else}
-  <div class="p-3">
+<div>
+  <!-- <div class="p-3">
     <div class="shadow-lg alert alert-info">
       <div class="flex items-start">
         <svg
@@ -124,14 +123,17 @@
         </div>
       </div>
     </div>
-  </div>
-  <div class="px-3">
-    <div class="flex flex-col">
+  </div> -->
+  <!-- <div class="px-3">
+    <div class="flex flex-col"> -->
       <Bonfire.Boundaries.Web.CircleLive
         id={@circle_id}
         circle_id={@circle_id}
         setting_boundaries={false}
+         title={l("Ghosted users")}
+        description={if @scope == :instance_wide, do: l("Users or instances on this list will not be able to see or interact with anyone on this instance"), else: l("Users or instances on this list will not be able to see or interact with you or your content")}
       />
-    </div>
+    <!-- </div>
+  </div> -->
   </div>
 {/if}

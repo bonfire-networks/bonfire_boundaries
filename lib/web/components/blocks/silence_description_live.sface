@@ -1,0 +1,38 @@
+<div class="flex flex-col">
+  <div :if={@scope == :instance_wide} class="text-sm">{l("Nobody on this instance will receive any updates from the users or instances on this list")}</div>
+  <div :if={@scope != :instance_wide} class="text-sm">{l("You will not receive any updates from the users or instances on this list")}</div>
+  <div x-data="{active_silence: false}" role="region" class="">
+    <button
+      type="button"
+      x-on:click="active_silence = ! active_silence"
+      :aria-expanded="active_silence"
+      class="flex items-center w-full text-sm"
+    >
+      <span x-show="!active_silence" class="underline">{l("Read more")}</span>
+      <span x-show="active_silence" class="underline">{l("Read less")}</span>
+      <span x-show="active_silence" aria-hidden="true" class="ml-2">&minus;</span>
+      <span x-show="!active_silence" aria-hidden="true" class="ml-2">&plus;</span>
+    </button>
+    <div x-show="active_silence" x-collapse>
+      <div class="block mt-3">
+        <ul class="block pl-4 mt-1 prose-sm list-disc">
+          <li>
+            {l("You won't see anything they write/create in feeds.")}
+          </li>
+          <li>
+            {l("You will still be able to view their profile or read their posts using direct links.")}
+          </li>
+          <li>
+            {l("You won't see any @ mentions or messages they send you.")}
+          </li>
+          <li>
+            {l("You won't be able to follow them.")}
+          </li>
+          <li>
+            {l("You will be able to undo this later but may not be able to see any activities you missed.")}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

@@ -34,14 +34,20 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
       assign(
         socket,
         selected_tab: "user",
-        show_less_menu_items: true,
         page_title: l("Boundaries & Circles"),
         nav_items: [Bonfire.UI.Common.SidebarSettingsNavLive.declared_nav()],
-        # page_header_aside: [
-        #   {Bonfire.UI.Me.SettingsViewsLive.HeaderAsideMobileMenuLive, []}
-        # ],
         id: nil,
-        page: "boundaries"
+        page: "boundaries",
+        sidebar_widgets: [
+         users: [
+           secondary: [
+             {Bonfire.Tag.Web.WidgetTagsLive, []}
+           ]
+         ],
+         guests: [
+           secondary: nil
+         ]
+       ]
       )
     }
 
