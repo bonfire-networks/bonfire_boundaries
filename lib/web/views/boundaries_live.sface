@@ -55,6 +55,15 @@
         id="my_acls"
         scope={:instance}
       />
+    {#match "instance_acl"}
+      <Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.AclLive) and @current_user}
+        module={Bonfire.Boundaries.Web.AclLive}
+        setting_boundaries={false}
+        selected_tab="acls"
+        id="acl"
+        acl_id={Bonfire.Boundaries.Fixtures.instance_acl()}
+      />
     {#match "roles"}
       <Dynamic.Component
         :if={module_enabled?(Bonfire.Boundaries.Web.RolesLive) and @current_user}

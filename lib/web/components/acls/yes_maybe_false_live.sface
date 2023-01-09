@@ -1,6 +1,6 @@
 <div class="boundaries-switches">
   <form :on-change="edit_grant_verb" phx-target={@event_target} class="flex items-center space-x-1">
-    <label class="tooltip tooltip-top" data-tip={l("Can")}>
+    <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Can")}>
       <input
         class="absolute opacity-0"
         name={@field_name}
@@ -13,7 +13,7 @@
         <Icon solid="Check" class="w-4 h-4" />
       </div>
     </label>
-    <label class="tooltip tooltip-top" data-tip={l("Not specified")}>
+    <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Not specified")}>
       <input
         class="absolute opacity-0"
         name={@field_name}
@@ -26,7 +26,7 @@
         <Icon solid="Minus" class="w-4 h-4" />
       </div>
     </label>
-    <label class="tooltip tooltip-top" data-tip={l("Cannot")}>
+    <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Cannot")}>
       <input
         class="absolute opacity-0"
         name={@field_name}

@@ -1,7 +1,0 @@
-<Bonfire.Boundaries.Web.SidebarNavLive
-  class="hidden space-y-4 md:block"
-  selected_tab={@selected_tab}
-  id={@id}
-/>
-
-<!-- <Bonfire.Boundaries.Web.SidebarMobileLive selected_tab={@selected_tab} id={@id} /> -->

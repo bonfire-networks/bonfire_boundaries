@@ -12,7 +12,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
 
   # declare_settings_nav_link(:extension,
   #   # verb: :tag,
-  #   scopes: [:user, :instance]
+  #   scope: :user
   # )
 
   def mount(params, session, socket) do
@@ -35,30 +35,38 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
         socket,
         selected_tab: "user",
         page_title: l("Boundaries & Circles"),
-        nav_items: [Bonfire.UI.Common.SidebarSettingsNavLive.declared_nav()],
+        nav_items: nav_items(),
         id: nil,
         page: "boundaries",
         sidebar_widgets: [
-         users: [
-           secondary: [
-             {Bonfire.Tag.Web.WidgetTagsLive, []}
-           ]
-         ],
-         guests: [
-           secondary: nil
-         ]
-       ]
+          users: [
+            secondary: [
+              {Bonfire.Tag.Web.WidgetTagsLive, []}
+            ]
+          ],
+          guests: [
+            secondary: nil
+          ]
+        ]
       )
     }
 
     # |> IO.inspect
   end
 
+  defp nav_items(tab \\ nil)
+
+  defp nav_items("instance" <> _),
+    do: [Bonfire.UI.Common.InstanceSidebarSettingsNavLive.declared_nav()]
+
+  defp nav_items(_), do: [Bonfire.UI.Common.SidebarSettingsNavLive.declared_nav()]
+
   def do_handle_params(%{"tab" => tab, "id" => id}, _url, socket) do
     # debug(id)
     {:noreply,
      assign(socket,
        selected_tab: tab,
+       nav_items: nav_items(tab),
        id: id
      )}
   end
@@ -67,7 +75,8 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
     {:noreply,
      assign(
        socket,
-       selected_tab: tab
+       selected_tab: tab,
+       nav_items: nav_items(tab)
      )}
   end
 

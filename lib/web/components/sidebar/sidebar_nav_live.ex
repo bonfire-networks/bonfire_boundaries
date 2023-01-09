@@ -7,5 +7,5 @@ defmodule Bonfire.Boundaries.Web.SidebarNavLive do
   prop class, :css_class, default: "gap-1 my-2 menu !flex"
 
   declare_nav_component("Links to boundaries & circles management pages")
-  declare_settings_nav_component("Links to boundaries & circles management pages")
+  declare_settings_nav_component("Links to boundaries & circles management pages", scope: :user)
 end

@@ -1,78 +1,69 @@
-<div
-  class="flex items-center gap-2"
->
+<div class="flex items-center gap-2">
   <Bonfire.UI.Common.OpenModalLive
-    id={"add_members"}
+    id="add_members"
     title_text={l("Add members")}
     form_opts={%{"phx-change" => "select"}}
   >
-  <div class="pb-4 mt-4 border-b border-base-content/10">
-    <div class="flex items-center rounded-lg">
+    <div class="pb-4 mt-4 border-b border-base-content/10">
+      <div class="flex items-center rounded-lg">
         <Bonfire.UI.Common.MultiselectLive
           implementation={:live_select}
           form_input_name={Bonfire.Boundaries.Web.CircleLive}
           label={l("Search for users to add")}
         />
-    </div>
-  </div>
-  <div class="p-4 my-4 mb-0 rounded-md bg-info/10">
-    <div class="flex">
-      <div class="flex-shrink-0">
-        <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-      </div>
-      <div class="flex-1 ml-3 md:flex md:justify-between">
-        <p class="text-sm text-info">
-          {l("This is a list of people you follow and who follow you.")}</p>
       </div>
     </div>
-  </div>
-  <ul id="circle_suggestions" class="flex flex-col divide-y divide-base-300">    
-    {#for {id, suggested} <- @suggestions}
-      <li id={"item-" <> id} class="flex items-center py-3">
-        <div class="flex-1">
-          <Bonfire.UI.Common.ProfileItemLive
-            show_controls={[]}
-            profile={e(suggested, :profile, nil)}
-            character={e(suggested, :character, nil)}
+    <div class="p-4 my-4 mb-0 rounded-md bg-info/10">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+        </div>
+        <div class="flex-1 ml-3 md:flex md:justify-between">
+          <p class="text-sm text-info">
+            {l("This is a list of people you follow and who follow you.")}</p>
+        </div>
+      </div>
+    </div>
+    <ul id="circle_suggestions" class="flex flex-col divide-y divide-base-300">
+      {#for {id, suggested} <- @suggestions}
+        <li id={"item-" <> id} class="flex items-center py-3">
+          <div class="flex-1">
+            <Bonfire.UI.Common.ProfileItemLive
+              show_controls={[]}
+              profile={e(suggested, :profile, nil)}
+              character={e(suggested, :character, nil)}
+            />
+          </div>
+
+          <div :if={!@read_only} class="flex mr-1">
+            <button
+              class="flex items-center normal-case rounded btn btn-primary btn-sm"
+              phx-value-subject={id}
+              :on-click="add"
+            >
+              <!-- <Icon solid="Minus" class="mr-2" /> -->
+              <span>{l("Add")}</span>
+            </button>
+          </div>
+        </li>
+      {#else}
+        <li id="nobody" class="flex items-center my-12 place-content-center">
+          <Bonfire.UI.Common.EmptyFeed
+            feedback_title={e(@feedback_title, l("Follow some people first..."))}
+            feedback_message={@feedback_message}
           />
-        </div>
+        </li>
+      {/for}
+    </ul>
+    <:open_btn>
+      <div class="rounded btn btn-xs btn-square btn-ghost">
+        <Icon iconify="heroicons:user-plus-20-solid" class="w-4 h-4 text-info" />
+      </div>
+    </:open_btn>
+  </Bonfire.UI.Common.OpenModalLive>
 
-        <div :if={!@read_only} class="flex mr-1">
-          <button
-            class="flex items-center normal-case rounded btn btn-primary btn-sm"
-            phx-value-subject={id}
-            :on-click="add"
-          >
-            <!-- <Icon solid="Minus" class="mr-2" /> -->
-            <span>{l("Add")}</span>
-          </button>
-        </div>
-      </li>
-    {#else}
-      <li id="nobody" class="flex items-center my-12 place-content-center">
-        <Bonfire.UI.Common.EmptyFeed
-          feedback_title={e(@feedback_title, l("Follow some people first..."))}
-          feedback_message={@feedback_message}
-        />
-      </li>
-    {/for}
-  </ul>
-  <:open_btn>
-    <div class="rounded btn btn-xs btn-square btn-ghost">
-      <Icon iconify="heroicons:user-plus-20-solid" class="w-4 h-4 text-info" />
-    </div>
-  </:open_btn>
-</Bonfire.UI.Common.OpenModalLive>
-
-  <div
-    :if={!@read_only and !@stereotype_id}
-    aria-haspopup="true"
-    class="dropdown dropdown-end"
-  >
-    <label
-      tabindex="0"
-      class="rounded btn btn-xs btn-square "
-    >
+  <div :if={!@read_only and !@stereotype_id} aria-haspopup="true" class="dropdown dropdown-end">
+    <label tabindex="0" class="rounded btn btn-xs btn-square">
       <Icon solid="DotsHorizontal" class="w-4 h-4" />
     </label>
     <ul
@@ -83,26 +74,26 @@
     >
       <li>
         <Bonfire.UI.Common.OpenModalLive
-          id={"edit_name"}
+          id="edit_name"
           title_text={l("Edit circle name")}
           form_opts={%{"phx-submit" => "edit"}}
-          >
-            <div class="w-full form-control">
-              <!-- <label class="label">
+        >
+          <div class="w-full form-control">
+            <!-- <label class="label">
                 <span class="text-xs font-semibold tracking-wider text-base-content/70">{l("Edit the circle name")}</span>
               </label> -->
-              <div class="flex items-center">
-                <input
-                  name="named[name]"
-                  value={e(@circle, :named, :name, nil)}
-                  type="text"
-                  placeholder="Type here"
-                  class="w-full input input-bordered"
-                />
-              </div>
+            <div class="flex items-center">
+              <input
+                name="named[name]"
+                value={e(@circle, :named, :name, nil)}
+                type="text"
+                placeholder="Type here"
+                class="w-full input input-bordered"
+              />
             </div>
+          </div>
 
-            <!-- <div class="w-full mt-4 form-control">
+          <!-- <div class="w-full mt-4 form-control">
               <label class="label">
                 <span class="text-xs font-semibold tracking-wider text-base-content/70">{l("Edit the circle description")}</span>
               </label>
@@ -115,14 +106,14 @@
                 >{e(@circle, :extra_info, :summary, nil)}</textarea>
               </div>
             </div> -->
-            <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
-        <:open_btn>
-          <div>{l "Edit name"}</div>
-        </:open_btn>
-      </Bonfire.UI.Common.OpenModalLive>
+          <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
+          <:open_btn>
+            <div>{l("Edit name")}</div>
+          </:open_btn>
+        </Bonfire.UI.Common.OpenModalLive>
       </li>
       <li>
-        <div>{l "Delete circle"}</div>
+        <div>{l("Delete circle")}</div>
       </li>
     </ul>
   </div>

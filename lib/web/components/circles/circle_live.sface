@@ -1,37 +1,35 @@
 <div id="circle_preview" class="">
-
-  <div class="text-xs font-medium tracking-wider uppercase text-base-content/70">{l "Members"}</div>
+  <div class="text-xs font-medium tracking-wider uppercase text-base-content/70">{l("Members")}</div>
   <ul id="circle_members" class="divide-y divide-base-300">
-            <!-- check if @members is greater than 0 -->
-    {#if Enum.count(@members) > 0} 
-    
-    {#for {id, member} <- @members}
-      <li id={"item-" <> id} class="flex items-center py-3">
-        <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
-        <input
-          type="hidden"
-          name={"circle[encircle][#{id}][subject_id]"}
-          value={e(member, :subject_id, "")}
-        />
-        <div class="flex-1">
-          <Bonfire.UI.Common.ProfileItemLive
-            show_controls={[]}
-            profile={e(member, :subject, :profile, nil) || e(member, :profile, nil) || member}
-            character={e(member, :subject, :character, nil) || e(member, :character, nil) || member}
+    <!-- check if @members is greater than 0 -->
+    {#if Enum.count(@members) > 0}
+      {#for {id, member} <- @members}
+        <li id={"item-" <> id} class="flex items-center py-3">
+          <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
+          <input
+            type="hidden"
+            name={"circle[encircle][#{id}][subject_id]"}
+            value={e(member, :subject_id, "")}
           />
-        </div>
-        <div :if={!@read_only} class="flex">
-          <button
-            class="flex items-center normal-case rounded btn btn-error btn-xs"
-            phx-value-subject={id}
-            :on-click="remove"
-          >
-            <!-- <Icon solid="Minus" class="mr-2" /> -->
-            <span>{l("Remove")}</span>
-          </button>
-        </div>
-      </li>
-    {/for}
+          <div class="flex-1">
+            <Bonfire.UI.Common.ProfileItemLive
+              show_controls={[]}
+              profile={e(member, :subject, :profile, nil) || e(member, :profile, nil) || member}
+              character={e(member, :subject, :character, nil) || e(member, :character, nil) || member}
+            />
+          </div>
+          <div :if={!@read_only} class="flex">
+            <button
+              class="flex items-center normal-case rounded btn btn-error btn-xs"
+              phx-value-subject={id}
+              :on-click="remove"
+            >
+              <!-- <Icon solid="Minus" class="mr-2" /> -->
+              <span>{l("Remove")}</span>
+            </button>
+          </div>
+        </li>
+      {/for}
     {#else}
       <li id="no-members" class="flex items-center place-content-center">
         <Bonfire.UI.Common.EmptyFeed
@@ -41,7 +39,6 @@
       </li>
     {/if}
   </ul>
-
 
   <!-- <div class="rounded-lg bg-base-content/5">
     <div class="flex items-center p-4">
@@ -218,4 +215,4 @@
       
     </div>
   </div> -->
-</div> 
+</div>
