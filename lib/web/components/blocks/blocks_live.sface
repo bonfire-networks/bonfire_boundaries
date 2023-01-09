@@ -2,7 +2,7 @@
   <div>
     <!-- TODO: consolidate this view and the boundary editing one (so you can directly add people/circles here as well) -->
 
-    <!-- <div class="shadow-lg alert alert-info">
+    <div class="shadow-lg alert alert-info">
       <div class="flex items-start">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +54,7 @@
           </div>
         </div>
       </div>
-    </div> -->
+    </div>
   <Bonfire.Boundaries.Web.CircleLive
     id={@circle_id}
     title={l("Silenced users")}
@@ -65,7 +65,7 @@
 </div>
 {#else}
 <div>
-  <!-- <div class="p-3">
+  <div class="p-3">
     <div class="shadow-lg alert alert-info">
       <div class="flex items-start">
         <svg
@@ -123,7 +123,7 @@
         </div>
       </div>
     </div>
-  </div> -->
+  </div>
   <!-- <div class="px-3">
     <div class="flex flex-col"> -->
       <Bonfire.Boundaries.Web.CircleLive
