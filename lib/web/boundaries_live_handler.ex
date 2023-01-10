@@ -258,6 +258,26 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
+
+def handle_event("edit", attrs, socket) do
+    with {:ok, circle} <-
+           Circles.edit(
+              e(socket.assigns, :circle, nil),
+             current_user_required!(socket),
+             attrs
+           ) do
+      {:noreply,
+       socket
+       |> assign_flash(:info, l("Edited!"))
+       |> assign(circle: circle)}
+    else
+      other ->
+        error(other)
+
+        {:noreply, assign_flash(socket, :error, l("Could not edit circle"))}
+    end
+  end
+  
   def handle_event("acl_soft_delete", _, socket) do
     id = ulid!(e(socket.assigns, :acl, nil))
 

@@ -37,7 +37,7 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
       |> repo().maybe_preload(encircles: [subject: [:profile]])
 
     # debug(circles, "Circles")
-
+    
     {:ok,
      socket
      |> assign(assigns)

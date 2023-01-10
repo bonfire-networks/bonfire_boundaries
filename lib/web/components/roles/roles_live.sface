@@ -1,16 +1,19 @@
 <div class="">
-  <div class="flex flex-col pt-3 pb-6">
-    <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("Default Roles")}</h2>
-    <p class="mt-1 text-sm text-base-content/70">{l("Roles are a way to group permissions together. You can assign roles to users and circles.")}</p>
-    <!-- <button
-      class="normal-case btn btn-primary btn-sm tooltip tooltip-warning tooltip-bottom"
-      data-tip="Coming soon"
-      > 
-      {l("New role")}
-    </button> -->
+
+  <div class="p-4 mb-0 rounded-md bg-info/10">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+      </div>
+      <div class="flex-1 ml-3 md:flex md:justify-between">
+        <p class="text-sm text-info">
+          {l("Roles are a way to group permissions together. You can assign roles to users and circles.")}</p>
+      </div>
+    </div>
   </div>
 
-  <div class="divide-y rounded-lg bg-base-content/5 divide-base-300">
+
+  <div class="mt-4 divide-y rounded-lg bg-base-content/5 divide-base-300">
     <div
       :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()}
       :if={verbs != []}

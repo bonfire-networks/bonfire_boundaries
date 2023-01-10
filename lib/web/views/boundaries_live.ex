@@ -3,6 +3,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
   import Untangle
   import Bonfire.Boundaries.Integration, only: [is_admin?: 1]
   alias Bonfire.UI.Me.LivePlugs
+  alias Bonfire.Boundaries.Circles
 
   declare_extension(
     "Boundaries",
@@ -71,7 +72,54 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      )}
   end
 
+def do_handle_params(%{"tab" => "circles" = tab}, _url, socket) do
+    {:noreply,
+     assign(
+       socket,
+       selected_tab: tab,
+       page_title: l("My circles"),
+       page_header_aside: [
+         {Bonfire.Boundaries.Web.NewCircleButtonLive,
+          [
+            scope: :user,
+            myself: e(socket, :myself, nil),
+            setting_boundaries: false
+           ]}
+       ],
+       nav_items: nav_items(tab)
+     )}
+  end
+
+  def do_handle_params(%{"tab" => "acls" = tab}, _url, socket) do
+    {:noreply,
+     assign(
+       socket,
+       selected_tab: tab,
+       page_title: l("My boundaries"),
+       page_header_aside: [
+         {Bonfire.Boundaries.Web.NewAclButtonLive,
+          [
+            scope: :user,
+            myself: e(socket, :myself, nil),
+            setting_boundaries: false
+           ]}
+       ],
+       nav_items: nav_items(tab)
+     )}
+  end
+
+  def do_handle_params(%{"tab" => "roles" = tab}, _url, socket) do
+    {:noreply,
+     assign(
+       socket,
+       selected_tab: tab,
+       page_title: l("Default roles"),
+       nav_items: nav_items(tab)
+     )}
+  end
+
   def do_handle_params(%{"tab" => tab}, _url, socket) do
+
     {:noreply,
      assign(
        socket,

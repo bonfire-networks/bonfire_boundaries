@@ -1,31 +1,17 @@
 <div class="">
-  <div class="flex gap-8 pt-3 items-top">
-    <div class="flex flex-col flex-1 pb-3">
-      <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("Circles")}</h2>
-      <p class="mt-1 text-sm text-base-content/70">{l(
-          "Circles are a way to organize your connections and relationships with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors."
-        )}</p>
+  
+  <div class="p-4 mb-0 rounded-md bg-info/10">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+      </div>
+      <div class="flex-1 ml-3 md:flex md:justify-between">
+        <p class="text-sm text-info">
+          {l("Circles are a way to organize your connections and relationships with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors.")}</p>
+      </div>
     </div>
-    <!-- <Bonfire.Boundaries.Web.NewCircleLive event_target={@myself} setting_boundaries={@setting_boundaries} /> -->
-    <Bonfire.UI.Common.OpenModalLive
-      id={Pointers.ULID.generate()}
-      title_text={l("Create a new circle")}
-      no_actions
-    >
-      <Bonfire.Boundaries.Web.NewCircleLive
-        scope={@scope}
-        parent_back={@myself}
-        event_target={@myself}
-        setting_boundaries={@setting_boundaries}
-      />
-      <:open_btn>
-        <div class="normal-case rounded btn btn-outline border-base-content/70 btn-sm">
-          {l("New circle")}
-        </div>
-      </:open_btn>
-    </Bonfire.UI.Common.OpenModalLive>
   </div>
-
+  
   <div class="mt-4">
     <ul role="list" class="divide-y rounded-lg bg-base-content/5 divide-base-300">
       {#for circle <- e(@circles, [])}

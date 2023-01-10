@@ -1,0 +1,17 @@
+<Bonfire.UI.Common.OpenModalLive
+  id={Pointers.ULID.generate()}
+  title_text={l("Create a new circle")}
+  no_actions
+  >
+  <Bonfire.Boundaries.Web.NewCircleLive
+    scope={@scope}
+    parent_back={@myself}
+    event_target={@myself}
+    setting_boundaries={@setting_boundaries}
+  />
+  <:open_btn>
+    <div class="normal-case rounded btn btn-primary btn-xs">
+      {l("New circle")}
+    </div>
+  </:open_btn>
+</Bonfire.UI.Common.OpenModalLive>

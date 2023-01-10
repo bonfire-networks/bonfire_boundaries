@@ -1,15 +1,15 @@
-<div class="flex justify-between items-center mt-4 border-t border-base-content/10 pt-3">
+<div class="flex items-center justify-between pt-3 mt-4 border-t border-base-content/10">
   <div>
-    <div class="form-control">
-      <label class="label gap-2 cursor-pointer">
+    <!-- <div class="form-control">
+      <label class="gap-2 cursor-pointer label">
         <input type="checkbox" class="checkbox">
-        <span class="label-text text-sm text-base-content/70">{"Set as default boundary"}</span>
+        <span class="text-sm label-text text-base-content/70">{"Set as default boundary"}</span>
       </label>
-    </div>
+    </div> -->
   </div>
   <button
     type="button"
-    x-on:click="open_boundaries = false"
+    x-on:click="open_boundaries = false, smart_input_title_text = 'New post'"
     class="gap-2 normal-case rounded btn btn-sm btn-primary"
   >
     <span class="">{l("Done")}</span>

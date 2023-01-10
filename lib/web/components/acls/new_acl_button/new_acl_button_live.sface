@@ -1,0 +1,17 @@
+<Bonfire.UI.Common.OpenModalLive
+  id={Pointers.ULID.generate()}
+  no_actions
+  title_text={l("New boundary")}
+  >
+  <Bonfire.Boundaries.Web.NewAclLive
+    scope={@scope}
+    parent_back={@myself}
+    event_target={@myself}
+    setting_boundaries={@setting_boundaries}
+  />
+  <:open_btn>
+    <div class="normal-case rounded btn btn-primary btn-xs">
+      {l("New boundary")}
+    </div>
+  </:open_btn>
+</Bonfire.UI.Common.OpenModalLive>

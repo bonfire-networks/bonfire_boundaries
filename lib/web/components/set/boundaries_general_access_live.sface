@@ -1,5 +1,5 @@
-<div class="p-3 mt-4 rounded-lg shadow bg-base-300/60">
-  <div class="p-3 py-2 mb-2 -m-3 text-xs font-semibold tracking-wider uppercase rounded-t-lg bg-base-300/70 text-base-content/80">{l("General permissions")}</div>
+<div class="">
+  <div class="pb-3 text-xs font-semibold tracking-wider uppercase text-base-content/80">{l("General permissions")}</div>
   <div class="flex flex-col w-full gap-3">
     <div aria-haspopup="true" class="dropdown dropdown-bottom">
       <label
@@ -61,24 +61,36 @@
     <div class="flex-1">
       <div class="flex items-start gap-4">
         <div class="flex flex-col">
-          <div class="text-sm text-base-content/60">
-            {#case @preset_boundary}
-              {#match {"public", _}}
-                {l(
-                  "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines. This is in addition to any boundaries you set below."
-                )}
-              {#match {"local", _}}
-                {l(
-                  "Everyone on this instance will be able to see, interact, and reply, in addition to any boundaries you set below."
-                )}
-              {#match {"mentions", _}}
-                {l(
-                  "Anyone mentioned will be able to see, interact, and reply (across the fediverse), in addition to any boundaries you set below."
-                )}
-              {#match _}
-                {l("Specify custom boundaries below.")}
-            {/case}
+          <div class="p-4 mb-0 rounded-md bg-info/10">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+              </div>
+              <div class="flex-1 ml-3 md:flex md:justify-between">
+                <p class="text-sm text-info">
+                  {#case @preset_boundary}
+                    {#match {"public", _}}
+                      {l(
+                        "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines. This is in addition to any boundaries you set below."
+                      )}
+                    {#match {"local", _}}
+                      {l(
+                        "Everyone on this instance will be able to see, interact, and reply, in addition to any boundaries you set below."
+                      )}
+                    {#match {"mentions", _}}
+                      {l(
+                        "Anyone mentioned will be able to see, interact, and reply (across the fediverse), in addition to any boundaries you set below."
+                      )}
+                    {#match _}
+                      {l("Specify custom boundaries below.")}
+                  {/case}  
+                </p>
+              </div>
+            </div>
           </div>
+          <!-- <div class="text-sm text-base-content/60">
+            
+          </div> -->
         </div>
       </div>
     </div>
