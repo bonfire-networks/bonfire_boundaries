@@ -1,92 +1,125 @@
 <div class="">
-  <div class="pb-3 text-xs font-semibold tracking-wider uppercase text-base-content/80">{l("General permissions")}</div>
+  <div class="pb-3 text-xs font-medium tracking-wider uppercase text-base-content/70">{l("General permissions")}</div>
   <div class="flex flex-col w-full gap-3">
-    <div aria-haspopup="true" class="dropdown dropdown-bottom">
-      <label
-        tabindex="0"
-        class="flex items-center justify-start gap-2 normal-case w-fit btn btn-sm opacity-70"
-      >
-        <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} />
-        <Icon solid="ChevronDown" class="inline w-5 h-5" />
-      </label>
-      <ul
-        role="menu"
-        aria-orientation="vertical"
-        class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
-      >
-        <li>
-          <button
-            phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-              value: %{id: "public", name: l("Public")},
-              target: "#smart_input"
-            )}
-            type="button"
-          >
-            <span class="text-xl">
-              <Icon iconify="noto:globe-showing-europe-africa" class="w-5 h-5" />
-            </span>
-            <span>{l("Public")}</span>
-          </button>
-        </li>
-        <li><button
-            phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-              value: %{id: "local", name: l("Local")},
-              target: "#smart_input"
-            )}
-            type="button"
-          ><span class="text-xl">
-              <Icon iconify="noto:house-with-garden" class="w-5 h-5" />
-            </span>
-            {l("Local")}</button></li>
-        <li><button
-            phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-              value: %{id: "mentions", name: l("Mentions")},
-              target: "#smart_input"
-            )}
-            type="button"
-          ><span class="text-xl">﹫</span> {l("Mentions")}</button></li>
-        <li><button
-            phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-              value: %{id: "custom", name: l("Custom")},
-              target: "#smart_input"
-            )}
-            type="button"
-          ><span class="text-xl">
-              <Icon iconify="noto:gear" class="w-5 h-5" />
-            </span>
-            {l("Custom")}</button></li>
-      </ul>
-    </div>
 
     <div class="flex-1">
       <div class="flex items-start gap-4">
-        <div class="flex flex-col">
-          <div class="p-4 mb-0 rounded-md bg-info/10">
-            <div class="flex">
-              <div class="flex-shrink-0">
-                <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-              </div>
-              <div class="flex-1 ml-3 md:flex md:justify-between">
-                <p class="text-sm text-info">
-                  {#case @preset_boundary}
-                    {#match {"public", _}}
-                      {l(
-                        "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines. This is in addition to any boundaries you set below."
-                      )}
-                    {#match {"local", _}}
-                      {l(
-                        "Everyone on this instance will be able to see, interact, and reply, in addition to any boundaries you set below."
-                      )}
-                    {#match {"mentions", _}}
-                      {l(
-                        "Anyone mentioned will be able to see, interact, and reply (across the fediverse), in addition to any boundaries you set below."
-                      )}
-                    {#match _}
-                      {l("Specify custom boundaries below.")}
-                  {/case}  
-                </p>
-              </div>
+        <div class="flex flex-col w-full">
+          <div class="flex items-center justify-between w-full gap-6 p-4 mb-0 rounded-md bg-base-content/5">
+            {#case @preset_boundary}
+              {#match {"public", _}}
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <span class="text-xl">
+                      <Icon iconify="noto:globe-showing-europe-africa" class="w-5 h-5" />
+                    </span>
+                  </div>
+                  <div class="flex flex-col gap-1 ml-3">
+                    <div class="text-sm font-semibold">{l "Public"}</div>
+                      <p class="text-xs text-base-content/70">
+                        {l(
+                          "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines. This is in addition to any boundaries you set below."
+                        )}
+                      </p>
+                  </div>
+                </div>
+                  {#match {"local", _}}
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                      <span class="text-xl">
+                        <Icon iconify="noto:house-with-garden" class="w-5 h-5" />
+                      </span>
+                    </div>
+                    <div class="flex flex-col gap-1 ml-3">
+                      <div class="text-sm font-semibold">{l "Local"}</div>
+                        <p class="text-xs text-base-content/70">
+                          {l(
+                          "Everyone on this instance will be able to see, interact, and reply, in addition to any boundaries you set below."
+                          )}
+                        </p>
+                    </div>
+                  </div>
+                   
+                  {#match {"mentions", _}}
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                      <span class="text-xl">﹫</span> 
+                    </div>
+                    <div class="flex flex-col gap-1 ml-3">
+                      <div class="text-sm font-semibold">{l "Mentions"}</div>
+                      <p class="text-xs text-base-content/70">
+                         {l(
+                          "Anyone mentioned will be able to see, interact, and reply (across the fediverse), in addition to any boundaries you set below."
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                   
+                  {#match _}
+                  <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                      <span class="text-xl">
+                        <Icon iconify="noto:gear" class="w-5 h-5" />
+                      </span>
+                    </div>
+                    <div class="flex flex-col gap-1 ml-3">
+                      <div class="text-sm font-semibold">{l "Custom"}</div>
+                      <p class="text-xs text-base-content/70">{l("Specify custom boundaries below.")}</p>
+                    </div>
+                  </div>
+            {/case}  
+          
+            <div aria-haspopup="true" class="flex-shrink-0 dropdown dropdown-end dropdown-top">
+              <label
+                tabindex="0"
+                class="flex items-center justify-start gap-2 normal-case w-fit btn-ghost btn btn-sm opacity-70"
+              >
+                {l "Edit"}
+                <!-- <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} /> -->
+                <Icon solid="ChevronDown" class="inline w-5 h-5" />
+              </label>
+              <ul
+                role="menu"
+                aria-orientation="vertical"
+                class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
+              >
+                <li>
+                  <button
+                    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+                      value: %{id: "public", name: l("Public")},
+                      target: "#smart_input"
+                    )}
+                    type="button"
+                  >
+                    <span>{l("Public")}</span>
+                  </button>
+                </li>
+                <li><button
+                    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+                      value: %{id: "local", name: l("Local")},
+                      target: "#smart_input"
+                    )}
+                    type="button"
+                  >
+                    {l("Local")}</button></li>
+                <li><button
+                    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+                      value: %{id: "mentions", name: l("Mentions")},
+                      target: "#smart_input"
+                    )}
+                    type="button"
+                  >{l("Mentions")}</button></li>
+                <li><button
+                    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+                      value: %{id: "custom", name: l("Custom")},
+                      target: "#smart_input"
+                    )}
+                    type="button"
+                  >
+                    {l("Custom")}</button></li>
+              </ul>
             </div>
+          
           </div>
           <!-- <div class="text-sm text-base-content/60">
             
@@ -94,5 +127,8 @@
         </div>
       </div>
     </div>
+
+
+    
   </div>
 </div>

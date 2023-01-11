@@ -1,21 +1,7 @@
 <!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
 <div x-data="{show_boundary_list: true}">
-  <!-- <div class="flex items-center justify-between pb-2 mb-4 border-b border-base-content/10">
-    <div class="flex items-center gap-1">
-      <span class="btn btn-circle btn-ghost btn-sm" x-on:click="open_boundaries = false">
-        <Icon solid="ChevronLeft" class="w-5 h-5 text-base-content/70" />
-      </span>
-      <div class="font-medium text-base-content/70">{l("Share the activity")}</div>
-    </div>
-    <div class="flex items-center gap-3">
-      <div title={l("help")} class="normal-case btn opacity-60 btn-ghost btn-circle btn-sm">
-        <Icon outline="QuestionMarkCircle" class="w-5 h-5" />
-      </div>
-    </div>
-  </div> -->
-  <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={@preset_boundary} />
-  <div class="flex flex-col gap-3 mt-6 mb-3">
-    <div class="text-xs font-semibold tracking-wider uppercase text-base-content/80">{l("Specific Boundaries")}</div>
+  <div class="flex flex-col gap-3 mt-1 mb-6">
+    <div class="text-xs font-medium tracking-wider uppercase text-base-content/70">{l("Specific Boundaries")}</div>
     <Bonfire.UI.Common.MultiselectLive
       implementation={:live_select}
       form_input_name={__MODULE__}
@@ -27,5 +13,6 @@
       to_circles={@to_circles}
     />
   </div>
+  <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={@preset_boundary} />
   <Bonfire.Boundaries.Web.BoundaryComposerActionsLive />
 </div>
