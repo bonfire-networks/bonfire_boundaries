@@ -6,12 +6,11 @@
   >
     <div class="pb-4 mt-4 border-b border-base-content/10">
       <div class="flex items-center rounded-lg">
-        <input type="text" />
-        <!-- <Bonfire.UI.Common.MultiselectLive
+        <Bonfire.UI.Common.MultiselectLive
           implementation={:live_select}
           form_input_name={Bonfire.Boundaries.Web.CircleLive}
           label={l("Search for users to add")}
-        /> -->
+        />
       </div>
     </div>
     <div class="p-4 my-4 mb-0 rounded-md bg-info/10">
