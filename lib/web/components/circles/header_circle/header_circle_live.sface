@@ -71,7 +71,7 @@
       tabindex="0"
       role="menu"
       aria-orientation="vertical"
-      class="!block mt-1 rounded shadow dropdown_actions w-48 menu menu-compact dropdown-content bg-neutral"
+      class="!block mt-1 rounded shadow dropdown_actions w-60 md:w-48 menu md:menu-compact dropdown-content bg-neutral"
     >
       <li>
         <Bonfire.UI.Common.OpenModalLive

@@ -12,7 +12,7 @@
                 <:open_btn>
                   <div class="flex items-center w-full gap-2">
                     <Icon iconify="material-symbols:vpn-key-rounded" class="w-4 h-4 text-neutral-content/80" />
-                    <span class="text-sm text-neutral-content/80">{l "Caretaker"}</span>
+                    <span class="">{l "Caretaker"}</span>
                   </div>
                 </:open_btn>
               </Bonfire.UI.Common.OpenModalLive>
@@ -22,7 +22,7 @@
                 <:open_btn>
                   <div class="flex items-center w-full gap-2">
                     <Icon iconify="ic:baseline-remove-red-eye" class="w-4 h-4 text-neutral-content/80" />
-                    <span class="text-sm text-neutral-content/80">{l "Reader"}</span>
+                    <span class="">{l "Reader"}</span>
                   </div>
                 </:open_btn>
               </Bonfire.UI.Common.OpenModalLive>
@@ -33,7 +33,7 @@
                 <:open_btn>
                   <div class="flex items-center w-full gap-2">
                     <Icon iconify="ic:baseline-remove-red-eye" class="w-4 h-4 text-neutral-content/80" />
-                    <span class="text-sm text-neutral-content/80">{l "Participant"}</span>
+                    <span class="">{l "Participant"}</span>
                   </div>
                 </:open_btn>
               </Bonfire.UI.Common.OpenModalLive>
@@ -44,7 +44,7 @@
                 <:open_btn>
                  <div class="flex items-center w-full gap-2">
                     <Icon iconify="heroicons:chat-bubble-left-right-solid" class="w-4 h-4 text-neutral-content/80" />
-                    <span class="text-sm text-neutral-content/80">{l "Interact"}</span>
+                    <span class="">{l "Interact"}</span>
                 </div>
                 </:open_btn>
               </Bonfire.UI.Common.OpenModalLive>
@@ -55,7 +55,7 @@
                 <:open_btn>
                  <div class="flex items-center w-full gap-2">
                   <Icon iconify="material-symbols:settings" class="w-4 h-4 text-neutral-content/80" />
-                  <span class="text-sm text-neutral-content/80">{l "Custom"}</span>
+                  <span class="">{l "Custom"}</span>
                 </div>
                 </:open_btn>
               </Bonfire.UI.Common.OpenModalLive>
@@ -66,7 +66,7 @@
                 <:open_btn>
                  <div class="flex items-center w-full gap-2">
                     <Icon iconify="material-symbols:settings" class="w-4 h-4 text-neutral-content/80" />
-                    <span class="text-sm text-neutral-content/80">{l "Custom"}</span>
+                    <span class="">{l "Custom"}</span>
                 </div>
                 </:open_btn>
               </Bonfire.UI.Common.OpenModalLive>
