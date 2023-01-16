@@ -117,11 +117,11 @@
         <Bonfire.UI.Common.OpenModalLive
           id={Pointers.ULID.generate()}
           title_text={l("Delete this circle")}
-          >
+        >
           <div class="mt-4 prose-sm prose">
-          <p>{l(
-            "The circle will be permanently deleted. This action may affect all the activities that included this circle."
-          )}</p>
+            <p>{l(
+                "The circle will be permanently deleted. This action may affect all the activities that included this circle."
+              )}</p>
           </div>
           <:open_btn>
             <div class="text-error">{l("Delete circle")}</div>

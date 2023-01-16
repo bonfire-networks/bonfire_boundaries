@@ -95,7 +95,6 @@
 
     <div class="mt-4">
       <div :if={@section != "settings"}>
-       
         <div :if={!@read_only} class="mb-6">
           <form :on-change="select">
             <Bonfire.UI.Common.MultiselectLive
@@ -144,10 +143,7 @@
                     <label tabindex="0" class="btn btn-square btn-ghost btn-xs">
                       <Icon solid="DotsVertical" class="w-4 h-4" />
                     </label>
-                    <ul
-                      tabindex="0"
-                      class="w-48 p-1 rounded shadow dropdown-content menu menu-compact bg-neutral"
-                    >
+                    <ul tabindex="0" class="w-48 p-1 rounded shadow dropdown-content menu menu-compact bg-neutral">
                       <li :if={!@setting_boundaries}>
                         <Bonfire.UI.Common.OpenModalLive
                           reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}

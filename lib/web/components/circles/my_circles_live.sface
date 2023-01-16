@@ -1,5 +1,4 @@
 <div class="">
-  
   <div class="p-4 mb-0 rounded-md bg-info/10">
     <div class="flex">
       <div class="flex-shrink-0">
@@ -7,11 +6,13 @@
       </div>
       <div class="flex-1 ml-3 md:flex md:justify-between">
         <p class="text-sm text-info">
-          {l("Circles are a way to organize your connections and relationships with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors.")}</p>
+          {l(
+            "Circles are a way to organize your connections and relationships with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors."
+          )}</p>
       </div>
     </div>
   </div>
-  
+
   <div class="mt-4">
     <ul role="list" class="divide-y rounded-lg bg-base-content/5 divide-base-300">
       {#for circle <- e(@circles, [])}

@@ -72,7 +72,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      )}
   end
 
-def do_handle_params(%{"tab" => "circles" = tab}, _url, socket) do
+  def do_handle_params(%{"tab" => "circles" = tab}, _url, socket) do
     {:noreply,
      assign(
        socket,
@@ -84,7 +84,7 @@ def do_handle_params(%{"tab" => "circles" = tab}, _url, socket) do
             scope: :user,
             myself: e(socket, :myself, nil),
             setting_boundaries: false
-           ]}
+          ]}
        ],
        nav_items: nav_items(tab)
      )}
@@ -102,7 +102,7 @@ def do_handle_params(%{"tab" => "circles" = tab}, _url, socket) do
             scope: :user,
             myself: e(socket, :myself, nil),
             setting_boundaries: false
-           ]}
+          ]}
        ],
        nav_items: nav_items(tab)
      )}
@@ -119,7 +119,6 @@ def do_handle_params(%{"tab" => "circles" = tab}, _url, socket) do
   end
 
   def do_handle_params(%{"tab" => tab}, _url, socket) do
-
     {:noreply,
      assign(
        socket,

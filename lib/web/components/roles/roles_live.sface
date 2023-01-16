@@ -1,5 +1,4 @@
 <div class="">
-
   <div class="p-4 mb-0 rounded-md bg-info/10">
     <div class="flex">
       <div class="flex-shrink-0">
@@ -11,7 +10,6 @@
       </div>
     </div>
   </div>
-
 
   <div class="mt-4 divide-y rounded-lg bg-base-content/5 divide-base-300">
     <div
@@ -57,7 +55,6 @@
                 {/case}
               </div>
               <Bonfire.Boundaries.Web.YesMaybeFalseLive value read_only />
-
             </li>
           </ul>
         </div>

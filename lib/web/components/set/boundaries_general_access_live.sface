@@ -1,7 +1,6 @@
 <div class="">
   <div class="pb-3 text-xs font-medium tracking-wider uppercase text-base-content/70">{l("General permissions")}</div>
   <div class="flex flex-col w-full gap-3">
-
     <div class="flex-1">
       <div class="flex items-start gap-4">
         <div class="flex flex-col w-full">
@@ -15,66 +14,64 @@
                     </span>
                   </div>
                   <div class="flex flex-col gap-1 ml-3">
-                    <div class="text-sm font-semibold">{l "Public"}</div>
-                      <p class="text-xs text-base-content/70">
-                        {l(
-                          "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines. This is in addition to any boundaries you set below."
-                        )}
-                      </p>
+                    <div class="text-sm font-semibold">{l("Public")}</div>
+                    <p class="text-xs text-base-content/70">
+                      {l(
+                        "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines. This is in addition to any boundaries you set below."
+                      )}
+                    </p>
                   </div>
                 </div>
-                  {#match {"local", _}}
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                      <span class="text-xl">
-                        <Icon iconify="noto:house-with-garden" class="w-5 h-5" />
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-1 ml-3">
-                      <div class="text-sm font-semibold">{l "Local"}</div>
-                        <p class="text-xs text-base-content/70">
-                          {l(
-                          "Everyone on this instance will be able to see, interact, and reply, in addition to any boundaries you set below."
-                          )}
-                        </p>
-                    </div>
+              {#match {"local", _}}
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <span class="text-xl">
+                      <Icon iconify="noto:house-with-garden" class="w-5 h-5" />
+                    </span>
                   </div>
-                   
-                  {#match {"mentions", _}}
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                      <span class="text-xl">﹫</span> 
-                    </div>
-                    <div class="flex flex-col gap-1 ml-3">
-                      <div class="text-sm font-semibold">{l "Mentions"}</div>
-                      <p class="text-xs text-base-content/70">
-                         {l(
-                          "Anyone mentioned will be able to see, interact, and reply (across the fediverse), in addition to any boundaries you set below."
-                        )}
-                      </p>
-                    </div>
+                  <div class="flex flex-col gap-1 ml-3">
+                    <div class="text-sm font-semibold">{l("Local")}</div>
+                    <p class="text-xs text-base-content/70">
+                      {l(
+                        "Everyone on this instance will be able to see, interact, and reply, in addition to any boundaries you set below."
+                      )}
+                    </p>
                   </div>
-                   
-                  {#match _}
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                      <span class="text-xl">
-                        <Icon iconify="noto:gear" class="w-5 h-5" />
-                      </span>
-                    </div>
-                    <div class="flex flex-col gap-1 ml-3">
-                      <div class="text-sm font-semibold">{l "Custom"}</div>
-                      <p class="text-xs text-base-content/70">{l("Specify custom boundaries below.")}</p>
-                    </div>
+                </div>
+              {#match {"mentions", _}}
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <span class="text-xl">﹫</span>
                   </div>
-            {/case}  
-          
+                  <div class="flex flex-col gap-1 ml-3">
+                    <div class="text-sm font-semibold">{l("Mentions")}</div>
+                    <p class="text-xs text-base-content/70">
+                      {l(
+                        "Anyone mentioned will be able to see, interact, and reply (across the fediverse), in addition to any boundaries you set below."
+                      )}
+                    </p>
+                  </div>
+                </div>
+              {#match _}
+                <div class="flex items-center">
+                  <div class="flex-shrink-0">
+                    <span class="text-xl">
+                      <Icon iconify="noto:gear" class="w-5 h-5" />
+                    </span>
+                  </div>
+                  <div class="flex flex-col gap-1 ml-3">
+                    <div class="text-sm font-semibold">{l("Custom")}</div>
+                    <p class="text-xs text-base-content/70">{l("Specify custom boundaries below.")}</p>
+                  </div>
+                </div>
+            {/case}
+
             <div aria-haspopup="true" class="flex-shrink-0 dropdown dropdown-end dropdown-top">
               <label
                 tabindex="0"
                 class="flex items-center justify-start gap-2 normal-case w-fit btn-ghost btn btn-sm opacity-70"
               >
-                {l "Edit"}
+                {l("Edit")}
                 <!-- <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} /> -->
                 <Icon solid="ChevronDown" class="inline w-5 h-5" />
               </label>
@@ -119,7 +116,6 @@
                     {l("Custom")}</button></li>
               </ul>
             </div>
-          
           </div>
           <!-- <div class="text-sm text-base-content/60">
             
@@ -127,8 +123,5 @@
         </div>
       </div>
     </div>
-
-
-    
   </div>
 </div>

@@ -35,6 +35,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     id =
       (e(assigns, :circle_id, nil) || e(params, "id", nil))
       |> debug()
+
     socket =
       socket
       |> assign(assigns)
@@ -67,8 +68,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
         )
 
       already_seen_ids = member_ids ++ Enum.map(followed, & &1.edge.object_id)
-      
-      
 
       # |> debug
       followers =
@@ -86,26 +85,26 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
         end)
         |> Map.new()
         |> debug
-      
+
       stereotype_id = e(circle, :stereotyped, :stereotype_id, nil)
-      
-      send_self( 
-        [
-        page_title: e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil), 
+
+      send_self(
+        page_title: e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil),
         circle: circle,
         page_header_aside: [
-         {Bonfire.Boundaries.Web.HeaderCircleLive,
-          [
-            circle: circle,
-            myself: e(socket, :myself, nil),
-            stereotype_id: stereotype_id, 
-            suggestions: suggestions,
-            read_only:
-              e(circle, :stereotyped, :stereotype_id, nil) in @follow_stereotypes or
-                ulid(circle) in @follow_stereotypes 
+          {Bonfire.Boundaries.Web.HeaderCircleLive,
+           [
+             circle: circle,
+             myself: e(socket, :myself, nil),
+             stereotype_id: stereotype_id,
+             suggestions: suggestions,
+             read_only:
+               e(circle, :stereotyped, :stereotype_id, nil) in @follow_stereotypes or
+                 ulid(circle) in @follow_stereotypes
            ]}
-       ]]
+        ]
       )
+
       {:ok,
        assign(
          socket,
@@ -135,9 +134,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
-
-  
-
   def do_handle_event("multi_select", %{data: data, text: text}, socket) do
     add_member(data |> Enum.into(%{name: text}), socket)
   end
@@ -146,9 +142,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     # debug(attrs)
     add_member(e(socket.assigns, :suggestions, %{})[id] || id, socket)
   end
-
-
-
 
   def do_handle_event("remove", attrs, socket) do
     # debug(attrs)
@@ -181,8 +174,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
           &do_handle_event/3
         )
 
-
-
   def handle_info(%LiveSelect.ChangeMsg{text: search} = change_msg, socket) do
     current_user = current_user(socket)
 
@@ -192,7 +183,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
     {:noreply, socket}
   end
-
 
   def add_member(subject, socket) do
     # debug(attrs)

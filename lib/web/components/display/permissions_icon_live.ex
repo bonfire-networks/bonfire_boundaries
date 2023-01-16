@@ -8,5 +8,7 @@ defmodule Bonfire.Boundaries.Web.PermissionsIconLive do
   prop with_icon, :boolean, default: false
   prop with_label, :boolean, default: false
 
-  prop class, :css_class, default: "text-base md:text-sm text-neutral-content/80 border-b border-neutral-content/5 bg-base-content/5"
+  prop class, :css_class,
+    default:
+      "text-base md:text-sm text-neutral-content/80 border-b border-neutral-content/5 bg-base-content/5"
 end
