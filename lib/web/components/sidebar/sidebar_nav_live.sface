@@ -1,7 +1,12 @@
-<ul role="navigation" class={if @showing_within != :dashboard, do: @class, else: "grid grid-cols-1 gap-3 mt-4"}>
+<ul
+  role="navigation"
+  class={if @showing_within != :dashboard, do: @class, else: "grid grid-cols-1 gap-3 mt-4"}
+>
   <li class={
     "",
-    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group": @showing_within == :dashboard}>
+    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
+      @showing_within == :dashboard
+  }>
     <LiveRedirect
       to={~p"/boundaries/circles"}
       class={
@@ -13,16 +18,18 @@
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/80",
-          "font-semibold": @showing_within == :dashboard}>{l("Circles")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l "Circles are user defined group of users that shares similar characteristic"}</p>
+          "font-semibold": @showing_within == :dashboard
+        }>{l("Circles")}</span>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
       </div>
     </LiveRedirect>
   </li>
 
-  <li
-    class={
+  <li class={
     "",
-    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group": @showing_within == :dashboard}>
+    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
+      @showing_within == :dashboard
+  }>
     <LiveRedirect
       to={~p"/boundaries/roles"}
       class={
@@ -37,17 +44,18 @@
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/80",
-          "font-semibold": @showing_within == :dashboard}>{l("Roles")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l "Circles are user defined group of users that shares similar characteristic"}</p>
-
+          "font-semibold": @showing_within == :dashboard
+        }>{l("Roles")}</span>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
       </div>
     </LiveRedirect>
   </li>
 
-  <li
-    class={
+  <li class={
     "",
-    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group": @showing_within == :dashboard}>
+    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
+      @showing_within == :dashboard
+  }>
     <LiveRedirect
       to={~p"/boundaries/acls"}
       class={
@@ -62,17 +70,18 @@
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/80",
-          "font-semibold": @showing_within == :dashboard}>{l("Boundaries")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l "Circles are user defined group of users that shares similar characteristic"}</p>
-
+          "font-semibold": @showing_within == :dashboard
+        }>{l("Boundaries")}</span>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
       </div>
     </LiveRedirect>
   </li>
 
-  <li
-    class={
+  <li class={
     "",
-    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group": @showing_within == :dashboard}>
+    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
+      @showing_within == :dashboard
+  }>
     <LiveRedirect
       to={~p"/boundaries/ghosted"}
       class={
@@ -87,16 +96,17 @@
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/80",
-          "font-semibold": @showing_within == :dashboard}>{l("Ghosted")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l "Circles are user defined group of users that shares similar characteristic"}</p>
-
+          "font-semibold": @showing_within == :dashboard
+        }>{l("Ghosted")}</span>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
       </div>
     </LiveRedirect>
   </li>
-  <li
-    class={
+  <li class={
     "",
-    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group": @showing_within == :dashboard}>
+    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
+      @showing_within == :dashboard
+  }>
     <LiveRedirect
       to={~p"/boundaries/silenced"}
       class={
@@ -111,9 +121,9 @@
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/80",
-          "font-semibold": @showing_within == :dashboard}>{l("Silenced")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l "Circles are user defined group of users that shares similar characteristic"}</p>
-
+          "font-semibold": @showing_within == :dashboard
+        }>{l("Silenced")}</span>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
       </div>
     </LiveRedirect>
   </li>
