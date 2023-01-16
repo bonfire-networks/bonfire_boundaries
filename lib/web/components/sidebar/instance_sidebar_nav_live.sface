@@ -1,5 +1,10 @@
-<ul role="navigation" class={@class}>
-  <li :if={Bonfire.Boundaries.can?(@__context__, :assign, :instance)}>
+<ul role="navigation" class={if @showing_within != :dashboard, do: @class, else: "grid grid-cols-1 gap-3 mt-4"}>
+  <li 
+    class={
+    "",
+    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group": @showing_within == :dashboard}
+    :if={Bonfire.Boundaries.can?(@__context__, :assign, :instance)}>
+    
     <LiveRedirect
       to={~p"/boundaries/instance_circles"}
       class={
@@ -8,11 +13,21 @@
       }
     >
       <Icon iconify="bx:ShapeCircle" class="w-5 h-5 font-normal text-base-content/80" />
-      <span class="text-sm text-base-content/80">{l("Instance Circles")}</span>
+      <div class="flex flex-col">
+      <span class={
+        "text-sm text-base-content/80",
+        "font-semibold": @showing_within == :dashboard}>{l("Instance Circles")}</span>
+                <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l "Circles are user defined group of users that shares similar characteristic"}</p>
+
+      </div>
     </LiveRedirect>
   </li>
 
-  <li :if={Settings.get(:experimental_features_enabled, false, @__context__)}>
+  <li 
+    class={
+    "",
+    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group": @showing_within == :dashboard}
+    :if={Settings.get(:experimental_features_enabled, false, @__context__)}>
     <LiveRedirect
       to={~p"/boundaries/instance_acls"}
       class={
@@ -24,11 +39,21 @@
         solid="LockClosed"
         class={"w-5 h-5 font-normal text-base-content/80", "!text-primary": @selected_tab == "instance_acls"}
       />
-      <span class="text-sm text-base-content/80">{l("Local Boundaries")}</span>
+      <div class="flex flex-col">
+      <span class={
+        "text-sm text-base-content/80",
+        "font-semibold": @showing_within == :dashboard}>{l("Local Boundaries")}</span>
+                <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l "Circles are user defined group of users that shares similar characteristic"}</p>
+
+      </div>
     </LiveRedirect>
   </li>
 
-  <li :if={Bonfire.Boundaries.can?(@__context__, :configure, :instance)}>
+  <li
+    class={
+    "",
+    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group": @showing_within == :dashboard}
+    :if={Bonfire.Boundaries.can?(@__context__, :configure, :instance)}>
     <LiveRedirect
       to={~p"/boundaries/instance_acl"}
       class={
@@ -40,11 +65,21 @@
         iconify="bxs:EditLocation"
         class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "instance_acl"}
       />
-      <span class="text-sm text-base-content/80">{l("Instance Boundaries")}</span>
+      <div class="flex flex-col">
+      <span class={
+        "text-sm text-base-content/80",
+        "font-semibold": @showing_within == :dashboard}>{l("Instance Boundaries")}</span>
+                <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l "Circles are user defined group of users that shares similar characteristic"}</p>
+
+      </div>
     </LiveRedirect>
   </li>
 
-  <li :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)}>
+  <li
+    class={
+    "",
+    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group": @showing_within == :dashboard}
+    :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)}>
     <LiveRedirect
       to={~p"/boundaries/instance_ghosted"}
       class={
@@ -56,10 +91,20 @@
         solid="MinusCircle"
         class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "instance_ghosted"}
       />
-      <span class="text-sm text-base-content/80">{l("Ghosted instance-wide")}</span>
+      <div class="flex flex-col">
+      <span class={
+        "text-sm text-base-content/80",
+        "font-semibold": @showing_within == :dashboard}>{l("Ghosted instance-wide")}</span>
+                <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l "Circles are user defined group of users that shares similar characteristic"}</p>
+
+      </div>
     </LiveRedirect>
   </li>
-  <li :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)}>
+  <li 
+    class={
+    "",
+    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group": @showing_within == :dashboard}
+    :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)}>
     <LiveRedirect
       to={~p"/boundaries/instance_silenced"}
       class={
@@ -71,7 +116,13 @@
         solid="VolumeOff"
         class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "instance_silenced"}
       />
-      <span class="text-sm text-base-content/80">{l("Silenced instance-wide")}</span>
+      <div class="flex flex-col">
+      <span class={
+        "text-sm text-base-content/80",
+        "font-semibold": @showing_within == :dashboard}>{l("Silenced instance-wide")}</span>
+                <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l "Circles are user defined group of users that shares similar characteristic"}</p>
+
+      </div>
     </LiveRedirect>
   </li>
 </ul>
