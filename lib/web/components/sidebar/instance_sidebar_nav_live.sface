@@ -102,7 +102,7 @@
       }
     >
       <Icon
-        solid="MinusCircle"
+        iconify="mingcute:ghost-fill"
         class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "instance_ghosted"}
       />
       <div class="flex flex-col">

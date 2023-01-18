@@ -13,29 +13,12 @@
       setting_boundaries={@setting_boundaries}
     />
   {#else}
-    <div :if={!@setting_boundaries} class="rounded-lg bg-base-content/5">
-      <div class="flex items-center p-4 pb-6">
-        <div
-          :if={@parent_back}
-          phx-click="back"
-          phx-target={@parent_back}
-          x-on:click="show_boundary_list = true"
-          class="btn btn-ghost btn-sm btn-circle"
-        >
-          <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
-        </div>
+    <div :if={!@setting_boundaries} class="">
+      <div 
+        :if={e(@acl, :extra_info, :summary, nil)} 
+        class="pb-3 text-sm font-normal text-base-content/80">{e(@acl, :extra_info, :summary, nil)}</div>
 
-        <div class="flex space-x-2 items-top">
-          <!-- <span class="text-xl" aria-label="boundary icon">{e(@acl, :extra_info, :info, :icon, "🛡")}</span> -->
-          <div class="flex flex-col gap-1">
-            <div class="text-xl font-medium">{e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) ||
-                l("Untitled boundary")}</div>
-            <div class="text-sm font-normal text-base-content/80">{e(@acl, :extra_info, :summary, nil)}</div>
-          </div>
-        </div>
-      </div>
-
-      <ul role="tablist" class="flex items-stretch text-sm font-medium rounded-b-lg bg-base-content/5">
+      <ul role="tablist" class="flex items-stretch gap-3 -mx-4 text-sm font-medium border-b border-base-content/10">
         <!-- Tab -->
         <li>
           <div
@@ -44,8 +27,8 @@
             phx-value-section="permissions"
             phx-target={@myself}
             class={
-              "cursor-pointer border-b-4 border-transparent hover:bg-base-content/5 inline-flex px-5 py-2.5 text-base-content/60",
-              "border-b-4 border-rounded border-primary !text-base-content": @section == "permissions"
+              "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-5 py-2.5 text-base-content/60",
+              "border-primary !text-base-content": @section == "permissions"
             }
             role="tab"
           >
@@ -60,8 +43,8 @@
             phx-value-section="settings"
             phx-target={@myself}
             class={
-              "cursor-pointer border-b-4 border-transparent hover:bg-base-content/5 inline-flex px-5 py-2.5 text-base-content/60",
-              "border-rounded border-primary !text-base-content": @section == "settings"
+              "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-5 py-2.5 text-base-content/60",
+              "border-primary !text-base-content": @section == "settings"
             }
             role="tab"
           >{l("Settings")}</div>
@@ -124,7 +107,7 @@
                   />
                 {#else}
                   <div class="flex items-center gap-3">
-                    <span class="flex items-center w-10 h-10 rounded place-content-center bg-base-content/5">
+                    <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
                       <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
                     </span>
                     <div class="text-sm truncate max-w-[160px] font-medium text-base-content">{LiveHandler.subject_name(subject)}</div>

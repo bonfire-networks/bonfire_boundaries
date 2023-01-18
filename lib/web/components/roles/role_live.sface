@@ -1,0 +1,15 @@
+<div>
+<!-- {#case @verb}
+    {#match nil}
+      <div class="flex-1 text-sm font-semibold capitalize">
+        {@verb}
+      </div>
+    {#match verb_details}
+      <div class="flex items-center gap-2">
+        <div class="flex-1 text-sm font-semibold capitalize">
+          {e(verb_details, :verb, nil) || @verb}
+        </div>
+      </div>
+      <div class="text-xs text-base-content/70">{e(verb_details, :summary, nil)}</div>
+  {/case} -->
+</div>

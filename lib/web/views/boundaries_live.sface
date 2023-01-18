@@ -71,6 +71,13 @@
         id="roles"
         scope={nil}
       />
+    {#match "role"}
+      <Dynamic.Component
+        :if={module_enabled?(Bonfire.Boundaries.Web.RoleLive) and @current_user}
+        module={Bonfire.Boundaries.Web.RoleLive}
+        id="roles"
+        scope={nil}
+      />
     {#match _}
       <div class="flex flex-col gap-8 divide-y divide-base-300">
         <Dynamic.LiveComponent

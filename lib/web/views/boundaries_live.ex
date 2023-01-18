@@ -77,6 +77,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      assign(
        socket,
        selected_tab: tab,
+        page_header_icon: "material-symbols:group-work",
        page_title: l("My circles"),
        page_header_aside: [
          {Bonfire.Boundaries.Web.NewCircleButtonLive,

@@ -14,7 +14,7 @@
         "bg-base-content/10": @selected_tab == "circles"
       }
     >
-      <Icon iconify="bx:ShapeCircle" class="w-5 h-5 font-normal text-base-content/80" />
+      <Icon iconify="material-symbols:group-work" class="w-5 h-5 font-normal text-base-content/80" />
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/80",
@@ -38,7 +38,7 @@
       }
     >
       <Icon
-        solid="Key"
+        iconify="ri:shield-user-fill"
         class={"w-5 h-5 font-normal text-base-content/80 ", "": @selected_tab == "account"}
       />
       <div class="flex flex-col">
@@ -90,7 +90,7 @@
       }
     >
       <Icon
-        solid="MinusCircle"
+        iconify="mingcute:ghost-fill"
         class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "ghosted"}
       />
       <div class="flex flex-col">

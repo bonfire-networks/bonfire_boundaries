@@ -48,6 +48,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
     global_circles = Bonfire.Boundaries.Fixtures.global_circles()
 
+    
     # circles =
     #   Bonfire.Boundaries.Circles.list_my_with_global(current_user,
     #     global_circles: global_circles
@@ -116,6 +117,12 @@ defmodule Bonfire.Boundaries.Web.AclLive do
              ]
            ) do
       # debug(acl, "acl")
+      send_self(
+        page_header_icon: "ri:shield-user-fill",
+        page_title: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil),
+        acl: acl,
+        page_header_aside: []
+      )
 
       verbs = e(socket.assigns, :verbs, [])
 

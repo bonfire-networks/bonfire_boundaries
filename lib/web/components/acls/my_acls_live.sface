@@ -24,7 +24,58 @@
             </div>
           </div>
 
-          <ul class="mt-4 divide-y rounded-lg bg-base-content/5 divide-base-300">
+
+          <div class="mt-4 overflow-x-auto">
+            <table class="table w-full">
+              <!-- head -->
+              <thead>
+                <tr>
+                  <th>{l "Name"}</th>
+                  <th>{l "Members"}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr :for={%{id: acl_id} = acl <- e(@acls, []) ++ e(@built_ins, [])}>
+                  <td class="flex items-center gap-2 text-sm font-medium capitalize text-base-content/90">
+                    <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-base-content/70" /> 
+                    <span>{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l("Untitled")}</span></td>
+                  <td>
+                    {#if e(acl, :grants_count, 0) > 0}
+                        <div class="flex gap-1 avatar-group">
+                          {#for {_subject_id, %{subject: subject, verb_grants: verb_grants}} <-
+                              AclLive.subject_verb_grant(e(acl, :grants, [])) |> Enum.slice(0..2)}
+                            {#if e(subject, :profile, :id, nil)}
+                              <Bonfire.UI.Common.AvatarLive
+                                user={e(subject, nil)}
+                                title={e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) ||
+                                  e(subject, :name, nil) || e(subject, :profile, :name, nil) ||
+                                  e(subject, :character, :username, nil) || ulid(subject)}
+                                class="w-8 h-8 bg-base-content/5 rounded-xl"
+                              />
+                            {#else}
+                              <div class="flex items-center gap-3">
+                                <span
+                                  title={e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) ||
+                                    e(subject, :name, nil) || e(subject, :profile, :name, nil) ||
+                                    e(subject, :character, :username, nil) || ulid(subject)}
+                                  class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5"
+                                >
+                                  <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
+                                </span>
+                              </div>
+                            {/if}
+                          {/for}
+                        </div>
+                      {/if}
+                  </td>
+                  <td class="flex justify-end"><LiveRedirect class="normal-case rounded btn btn-sm" to={~p"/boundaries/acl/" <> acl.id}>{l "Details"}</LiveRedirect></td>
+                </tr>
+          
+              </tbody>
+            </table>
+          </div>
+          <!-- <ul class="mt-4 divide-y rounded-lg bg-base-content/5 divide-base-300">
             {#for %{id: acl_id} = acl <- e(@acls, []) ++ e(@built_ins, [])}
               <li class={
                 "block p-3",
@@ -50,12 +101,10 @@
                 >
                   <div class="flex-1">
                     <div class="flex items-center space-x-4">
-                      <!-- <span class="text-2xl" aria-label="boundary icon">{e(acl, :extra_info, :info, :icon, "🛡")}</span> -->
                       <div class="text-sm font-bold capitalize">{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) ||
                           l("Untitled")}</div>
                     </div>
                   </div>
-                  <!-- ACTIONS -->
                   <div class="flex ml-4 space-x-2">
                     {#if !@setting_boundaries}
                       {#if e(acl, :grants_count, 0) > 0}
@@ -82,33 +131,7 @@
                                 </span>
                               </div>
                             {/if}
-                            <!-- <div class="flex items-center space-x-1 capitalize">
-                            {#case Verbs.role_from_verb(Map.keys(verb_grants), :id, all_role_verbs)}
-                              {#match :custom}
-                                {#for {verb_id, grant} <- verb_grants}
-                                  {#case Bonfire.Boundaries.Verbs.get(verb_id)}
-                                    {#match nil}
-                                    {#match verb}
-                                      <div
-                                        class={
-                                          "flex items-center normal-case btn btn-outline place-content-center btn-xs btn-square tooltip tooltip-top cursor-normal",
-                                          "btn-success": Map.get(grant, :value),
-                                          "btn-error": !Map.get(grant, :value)
-                                        }
-                                        data-tip={if(Map.get(grant, :value), do: l("Can"), else: l("Cannot")) <> " " <> e(verb, :verb, "")}
-                                      >
-                                        <Icon
-                                          iconify={e(verb, :icon, "heroicons-solid:QuestionMarkCircle")}
-                                          class="w-4 h-4"
-                                          fill="currentColor"
-                                        />
-                                      </div>
-                                  {/case}
-                                {/for}
-                              {#match role}
-                                {role}
-                            {/case}
-                          </div> -->
+                            
                           {/for}
                         </div>
                       {/if}
@@ -156,7 +179,7 @@
                 </label>
               </li>
             {/for}
-          </ul>
+          </ul> -->
           <div
             :if={@setting_boundaries}
             :on-click="assign"

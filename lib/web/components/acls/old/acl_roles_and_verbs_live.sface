@@ -136,7 +136,7 @@
                     show_controls={[]}
                   />
                 {#else}
-                  <span class="flex items-center w-10 h-10 rounded place-content-center bg-base-content/5">
+                  <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
                     <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
                   </span>
                   {LiveHandler.subject_name(e(l, :subject, nil))}

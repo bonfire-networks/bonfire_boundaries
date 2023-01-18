@@ -11,8 +11,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   prop circle_id, :any, default: nil
   prop parent_back, :any, default: nil
   prop setting_boundaries, :boolean, default: false
-  prop title, :string, default: nil
-  prop description, :string, default: nil
   prop scope, :atom, default: nil
   prop feedback_title, :string, default: nil
   prop feedback_message, :string, default: nil
@@ -90,6 +88,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
       send_self(
         page_title: e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil),
+        back: true,
         circle: circle,
         page_header_aside: [
           {Bonfire.Boundaries.Web.HeaderCircleLive,
