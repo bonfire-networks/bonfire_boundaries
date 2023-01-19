@@ -1,47 +1,44 @@
 <div id="circle_preview" class="-m-4">
-
-
   <div class="overflow-x-auto">
-  <table class="table w-full">
-    <!-- head -->
-    <thead>
-      <tr>
-        <th>Members</th>
-        <th class="text-right">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr :for={{id, member} <- @members}>
-        <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
-        <input
-          type="hidden"
-          name={"circle[encircle][#{id}][subject_id]"}
-          value={e(member, :subject_id, "")}
-        />
-        <th>
-          <Bonfire.UI.Common.ProfileItemLive
-            show_controls={[]}
-            lg
-            profile={e(member, :subject, :profile, nil) || e(member, :profile, nil) || member}
-            character={e(member, :subject, :character, nil) || e(member, :character, nil) || member}
+    <table class="table w-full">
+      <!-- head -->
+      <thead>
+        <tr>
+          <th>Members</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr :for={{id, member} <- @members}>
+          <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
+          <input
+            type="hidden"
+            name={"circle[encircle][#{id}][subject_id]"}
+            value={e(member, :subject_id, "")}
           />
-        </th>
-        <td class="flex items-end">
-          <button
-            :if={!@read_only}
-            class="flex items-center normal-case rounded btn btn-error btn-xs"
-            phx-value-subject={id}
-            :on-click="remove"
-          >
-            <!-- <Icon solid="Minus" class="mr-2" /> -->
-            <span>{l("Remove")}</span>
-          </button>
-        </td>
-      </tr>
-      
-    </tbody>
-  </table>
-</div>
+          <th>
+            <Bonfire.UI.Common.ProfileItemLive
+              show_controls={[]}
+              lg
+              profile={e(member, :subject, :profile, nil) || e(member, :profile, nil) || member}
+              character={e(member, :subject, :character, nil) || e(member, :character, nil) || member}
+            />
+          </th>
+          <td class="flex items-end">
+            <button
+              :if={!@read_only}
+              class="flex items-center normal-case rounded btn btn-error btn-xs"
+              phx-value-subject={id}
+              :on-click="remove"
+            >
+              <!-- <Icon solid="Minus" class="mr-2" /> -->
+              <span>{l("Remove")}</span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <!-- <div class="text-xs font-medium tracking-wider uppercase text-base-content/70">{l("Members")}</div>
   <ul id="circle_members" class="divide-y divide-base-300">

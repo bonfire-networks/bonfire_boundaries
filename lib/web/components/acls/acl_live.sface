@@ -14,11 +14,15 @@
     />
   {#else}
     <div :if={!@setting_boundaries} class="">
-      <div 
-        :if={e(@acl, :extra_info, :summary, nil)} 
-        class="pb-3 text-sm font-normal text-base-content/80">{e(@acl, :extra_info, :summary, nil)}</div>
+      <div
+        :if={e(@acl, :extra_info, :summary, nil)}
+        class="pb-3 text-sm font-normal text-base-content/80"
+      >{e(@acl, :extra_info, :summary, nil)}</div>
 
-      <ul role="tablist" class="flex items-stretch gap-3 -mx-4 text-sm font-medium border-b border-base-content/10">
+      <ul
+        role="tablist"
+        class="flex items-stretch gap-3 -mx-4 text-sm font-medium border-b border-base-content/10"
+      >
         <!-- Tab -->
         <li>
           <div

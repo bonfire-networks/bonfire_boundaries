@@ -10,7 +10,6 @@
       </div>
     </div>
   </div>
-  
 
   <div class="mt-4 overflow-x-auto">
     <table class="table w-full">
@@ -19,22 +18,21 @@
         <tr>
           <th>Role</th>
           <th>Members</th>
-          <th></th>
+          <th />
         </tr>
       </thead>
       <tbody>
-        <tr 
-          :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()}
-          :if={verbs != []}>
+        <tr :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()} :if={verbs != []}>
           <td class="flex items-center gap-2 capitalize text-base-content/90"><Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-base-content/70" /> <span>{name}</span></td>
           <td>0</td>
-          <td class="flex justify-end"><LiveRedirect class="text-sm link link-primary" to={~p"/boundaries/role/" <> Atom.to_string(name)}>{l "Details"}</LiveRedirect></td>
+          <td class="flex justify-end"><LiveRedirect
+              class="text-sm link link-primary"
+              to={~p"/boundaries/role/" <> Atom.to_string(name)}
+            >{l("Details")}</LiveRedirect></td>
         </tr>
-  
       </tbody>
     </table>
   </div>
-
 
   <!-- <div class="mt-4 divide-y rounded-lg bg-base-content/5 divide-base-300">
     <div

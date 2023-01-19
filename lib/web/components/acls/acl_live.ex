@@ -48,7 +48,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
     global_circles = Bonfire.Boundaries.Fixtures.global_circles()
 
-    
     # circles =
     #   Bonfire.Boundaries.Circles.list_my_with_global(current_user,
     #     global_circles: global_circles

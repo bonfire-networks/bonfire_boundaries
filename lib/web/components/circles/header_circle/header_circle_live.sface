@@ -58,7 +58,7 @@
     <:open_btn>
       <div class="flex items-center gap-2 normal-case rounded text-info btn btn-xs btn-ghost">
         <Icon iconify="heroicons:user-plus-20-solid" class="w-4 h-4 text-info" />
-        <span>{l "Add member"}</span>
+        <span>{l("Add member")}</span>
       </div>
     </:open_btn>
   </Bonfire.UI.Common.OpenModalLive>

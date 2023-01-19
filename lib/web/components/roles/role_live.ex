@@ -4,7 +4,6 @@ defmodule Bonfire.Boundaries.Web.RoleLive do
   alias Bonfire.Boundaries.LiveHandler
 
   prop role, :any
-  
 
   def update(assigns, socket) do
     params = e(assigns, :__context__, :current_params, %{})
@@ -17,13 +16,13 @@ defmodule Bonfire.Boundaries.Web.RoleLive do
      |> assign(section: e(params, "section", "members"))}
   end
 
-
   def update(assigns, socket) do
     current_user = current_user(assigns)
     IO.inspect("QUIII")
     params = e(assigns, :__context__, :current_params, %{})
 
-    id = e(params, "id", nil)
+    id =
+      e(params, "id", nil)
       |> debug()
 
     socket =
@@ -39,18 +38,17 @@ defmodule Bonfire.Boundaries.Web.RoleLive do
            Bonfire.Boundaries.Verbs.get(id) do
       debug(role, "role")
 
-     
-
       send_self(
         page_title: l("Role - ") <> id,
-        role: role,
+        role: role
       )
 
       {:ok,
        assign(
          socket,
          role: role,
-         page_title: l("role"))}
+         page_title: l("role")
+       )}
 
       # else other ->
       #   error(other)
@@ -66,6 +64,4 @@ defmodule Bonfire.Boundaries.Web.RoleLive do
       #   }
     end
   end
-
-
 end

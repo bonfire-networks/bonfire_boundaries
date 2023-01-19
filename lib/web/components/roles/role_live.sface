@@ -1,5 +1,5 @@
 <div>
-<!-- {#case @verb}
+  <!-- {#case @verb}
     {#match nil}
       <div class="flex-1 text-sm font-semibold capitalize">
         {@verb}
