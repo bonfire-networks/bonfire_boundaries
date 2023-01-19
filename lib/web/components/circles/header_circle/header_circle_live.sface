@@ -1,5 +1,5 @@
 <div class="flex items-center gap-2">
-  <Bonfire.UI.Common.OpenModalLive
+  <!-- <Bonfire.UI.Common.OpenModalLive
     id="add_members"
     title_text={l("Add members")}
     form_opts={%{"phx-change" => "select"}}
@@ -41,7 +41,6 @@
               phx-value-subject={id}
               :on-click="add"
             >
-              <!-- <Icon solid="Minus" class="mr-2" /> -->
               <span>{l("Add")}</span>
             </button>
           </div>
@@ -61,7 +60,7 @@
         <span>{l("Add member")}</span>
       </div>
     </:open_btn>
-  </Bonfire.UI.Common.OpenModalLive>
+  </Bonfire.UI.Common.OpenModalLive> -->
 
   <div :if={!@read_only and !@stereotype_id} aria-haspopup="true" class="dropdown dropdown-end">
     <label tabindex="0" class="rounded btn btn-xs btn-ghost btn-square">

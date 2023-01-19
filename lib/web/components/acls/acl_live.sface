@@ -14,14 +14,14 @@
     />
   {#else}
     <div :if={!@setting_boundaries} class="">
-      <div
+      <!-- <div
         :if={e(@acl, :extra_info, :summary, nil)}
         class="pb-3 text-sm font-normal text-base-content/80"
-      >{e(@acl, :extra_info, :summary, nil)}</div>
+      >{e(@acl, :extra_info, :summary, nil)}</div> -->
 
       <ul
         role="tablist"
-        class="flex items-stretch gap-3 -mx-4 text-sm font-medium border-b border-base-content/10"
+        class="flex items-stretch gap-3 pt-2 mb-4 -m-4 text-sm font-medium border-b bg-base-200 border-base-content/10"
       >
         <!-- Tab -->
         <li>
@@ -82,7 +82,7 @@
 
     <div class="mt-4">
       <div :if={@section != "settings"}>
-        <div :if={!@read_only} class="mb-6">
+        <div :if={!@read_only} class="mb-2">
           <form :on-change="select">
             <Bonfire.UI.Common.MultiselectLive
               implementation={:live_select}
@@ -97,11 +97,11 @@
             Role per circle or person
           </div> -->
           <form :on-change="edit_grant_role">
-            <ul class="flex flex-col gap-4">
+            <ul class="flex flex-col divide-y divide-base-300">
               <li
                 :for={{{subject_id, %{subject: subject, verb_grants: verb_grants} = subject_verb_grant}, i} <-
                   Enum.with_index(@list_by_subject || [])}
-                class="flex items-center justify-between"
+                class="flex items-center justify-between py-4"
               >
                 {#if e(subject, :profile, :id, nil)}
                   <Bonfire.UI.Common.ProfileItemLive
@@ -112,7 +112,7 @@
                 {#else}
                   <div class="flex items-center gap-3">
                     <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-                      <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
+                      <Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
                     </span>
                     <div class="text-sm truncate max-w-[160px] font-medium text-base-content">{LiveHandler.subject_name(subject)}</div>
                   </div>
@@ -127,57 +127,18 @@
                     no_actions
                   />
                   <div class="dropdown dropdown-end">
-                    <label tabindex="0" class="btn btn-square btn-ghost btn-xs">
+                    <label tabindex="0" class="rounded btn btn-square btn-ghost btn-sm">
                       <Icon solid="DotsVertical" class="w-4 h-4" />
                     </label>
                     <ul tabindex="0" class="w-48 p-1 rounded shadow dropdown-content menu menu-compact bg-neutral">
                       <li :if={!@setting_boundaries}>
-                        <Bonfire.UI.Common.OpenModalLive
-                          reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
-                          id={"modal-verbs-#{subject_id}"}
-                          title_text={l("Role details (or customise permissions)")}
-                        >
-                          <div class="mt-4">
-                            <div class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}>
-                              {#for {verb_id, l} <- Enum.concat(verb_grants || [], @verbs || []) |> Enum.uniq_by(&elem(&1, 0))}
-                                <div class="col-span-1 rounded shadow-lg border-base-content/10 bg-base-content/5">
-                                  <div class="flex-1 rounded">
-                                    <div class="flex items-center p-2 space-x-2 bg-base-content/5">
-                                      {#case Bonfire.Boundaries.Verbs.get(verb_id)}
-                                        {#match nil}
-                                        {#match verb}
-                                          <span class="tooltip" data-tip={e(verb, :summary, nil)}>
-                                            <Icon
-                                              iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
-                                              class="w-4 h-4 text-base-content/70"
-                                              fill="currentColor"
-                                            />
-                                          </span>
-                                      {/case}
-
-                                      <div class="flex-1 font-medium">
-                                        {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div class="flex items-end px-2 py-1 mt-px">
-                                    <Bonfire.Boundaries.Web.YesMaybeFalseLive
-                                      value={e(l, :value, nil)}
-                                      field_name={"subject[#{subject_id}][#{verb_id}]"}
-                                      event_target={@myself}
-                                    />
-                                  </div>
-                                </div>
-                              {/for}
-                            </div>
-                          </div>
-                          <:open_btn>
-                            <button type="button" class="text-neutral-content">
-                              {l("Details")}
-                            </button>
-                          </:open_btn>
-                        </Bonfire.UI.Common.OpenModalLive>
+                        <Bonfire.Boundaries.Web.AclModalLive 
+                          subject_id={subject_id}
+                          role_title={Bonfire.Boundaries.Verbs.role_from_verb_ids(Map.keys(verb_grants || %{}))}
+                          verb_grants={verb_grants}
+                          verbs={@verbs}
+                          myself={@myself}
+                        />
                       </li>
                       <li>
                         <button

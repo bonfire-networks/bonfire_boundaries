@@ -65,7 +65,7 @@
         acl_id={Bonfire.Boundaries.Fixtures.instance_acl()}
       />
     {#match "roles"}
-      <Dynamic.Component
+      <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.RolesLive) and @current_user}
         module={Bonfire.Boundaries.Web.RolesLive}
         id="roles"
@@ -76,7 +76,6 @@
         :if={module_enabled?(Bonfire.Boundaries.Web.RoleLive) and @current_user}
         module={Bonfire.Boundaries.Web.RoleLive}
         id="roles"
-        scope={nil}
       />
     {#match _}
       <div class="flex flex-col gap-8 divide-y divide-base-300">

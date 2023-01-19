@@ -48,43 +48,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
     global_circles = Bonfire.Boundaries.Fixtures.global_circles()
 
-    # circles =
-    #   Bonfire.Boundaries.Circles.list_my_with_global(current_user,
-    #     global_circles: global_circles
-    #   )
-
-    # extra_circles =
-    #   if Integration.is_admin?(current_user) ||
-    #        Bonfire.Boundaries.can?(current_user, :grant, :instance),
-    #      do: Bonfire.Boundaries.Circles.list_my(Bonfire.Boundaries.Fixtures.admin_circle()),
-    #      else: []
-
-    # # TODO: handle pagination?
-    # followed = Bonfire.Social.Follows.list_my_followed(current_user, paginate: false)
-    # already_seen_ids = Enum.map(followed, & &1.edge.object_id)
-    # followers =
-    #   Bonfire.Social.Follows.list_my_followers(current_user,
-    #     paginate: false,
-    #     exclude_ids: already_seen_ids
-    #   )
-
-    # suggestions =
-    #   (for user <- followed ++ followers do
-    #      {e(user, :edge, :object, :id, nil),
-    #       e(user, :edge, :object, :profile, :name, "") <>
-    #         " - " <>
-    #         Bonfire.Me.Characters.display_username(e(user, :edge, :object, nil))}
-    #    end ++
-    #      for circle <- circles ++ extra_circles do
-    #        {ulid(circle),
-    #         e(circle, :named, :name, nil) ||
-    #           e(circle, :stereotyped, :named, :name, nil) ||
-    #           l("Untitled circle")}
-    #      end)
-    #   |> Map.new()
-
-    # |> debug
-
     {:ok,
      socket
      |> assign(assigns)
@@ -117,7 +80,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
            ) do
       # debug(acl, "acl")
       send_self(
-        page_header_icon: "ri:shield-user-fill",
+        back: true,
         page_title: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil),
         acl: acl,
         page_header_aside: []

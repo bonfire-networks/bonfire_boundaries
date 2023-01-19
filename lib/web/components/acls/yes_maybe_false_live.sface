@@ -1,6 +1,44 @@
-<div class="boundaries-switches">
-  <form :on-change="edit_grant_verb" phx-target={@event_target} class="flex items-center space-x-1">
-    <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Can")}>
+<div class="flex items-center gap-3 boundaries-switches">
+  
+  <form :on-change="edit_grant_verb" phx-target={@event_target} class="flex items-center gap-3">
+
+    <input 
+      :if={@value != nil}
+      value={if @value == true, do: "1", else: "0"}
+      type="checkbox" 
+      name={@field_name} 
+      disabled={@read_only} 
+      class={"toggle toggle-md", "!toggle-success": @value == true, "!border-error !bg-error !text-error": @value == false} 
+      checked={@value} 
+    />
+    <label :if={@value != nil && !@read_only}>
+      <input
+        class="absolute opacity-0"
+        name={@field_name}
+        type="radio"
+        value=""
+        checked={is_nil(@value)}
+        disabled={@read_only}
+      />
+      <div class={"btn btn-circle btn-xs"}>
+        <Icon solid="X" class="w-4 h-4" />
+      </div>
+    </label>
+    <button 
+      :if={@value == nil && !@read_only}
+      class={
+        "normal-case rounded btn btn-xs",
+        "btn-disabled": @read_only}>
+      {l "Edit"}
+    </button>
+    <button 
+      :if={@value == nil && @read_only}
+      class={
+        "normal-case rounded btn btn-xs",
+        "btn-disabled": @read_only}>
+      {l "Not specified"}
+    </button>
+    <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Can")}>
       <input
         class="absolute opacity-0"
         name={@field_name}
@@ -12,8 +50,8 @@
       <div class={"btn btn-square btn-xs btn-yes", "btn-disabled": @read_only}>
         <Icon solid="Check" class="w-4 h-4" />
       </div>
-    </label>
-    <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Not specified")}>
+    </label> -->
+    <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Not specified")}>
       <input
         class="absolute opacity-0"
         name={@field_name}
@@ -25,8 +63,8 @@
       <div class={"btn btn-square btn-xs btn-maybe", "btn-disabled": @read_only}>
         <Icon solid="Minus" class="w-4 h-4" />
       </div>
-    </label>
-    <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Cannot")}>
+    </label> -->
+    <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Cannot")}>
       <input
         class="absolute opacity-0"
         name={@field_name}
@@ -38,6 +76,6 @@
       <div class={"btn btn-square btn-xs btn-no", "btn-disabled": @read_only}>
         <Icon solid="X" class="w-4 h-4" />
       </div>
-    </label>
+    </label> -->
   </form>
 </div>

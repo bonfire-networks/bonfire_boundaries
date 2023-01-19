@@ -10,23 +10,24 @@
     {#case Verbs.role_verbs()}
       {#match all_role_verbs}
         <div>
-          <div :if={!@setting_boundaries} class="p-4 mb-0 rounded-md bg-info/10">
-            <div class="flex">
-              <div class="flex-shrink-0">
-                <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-              </div>
-              <div class="flex-1 ml-3 md:flex md:justify-between">
-                <p class="text-sm text-info">
-                  {l(
-                    "Boundaries are used to define and enforce rules around access and permissions to content or functionality. A boundary can apply to one or more users and circles."
-                  )}</p>
+          <div :if={!@setting_boundaries} class="p-4 -m-4 bg-base-200">
+            <div class="p-4 mb-0 rounded-md bg-info/10">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+                </div>
+                <div class="flex-1 ml-3 md:flex md:justify-between">
+                  <p class="text-sm text-info">
+                    {l(
+                      "Boundaries are used to define and enforce rules around access and permissions to content or functionality. A boundary can apply to one or more users and circles."
+                    )}</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="mt-4 overflow-x-auto">
+          <!-- <div class="mt-4 -mx-4 overflow-x-auto">
             <table class="table w-full">
-              <!-- head -->
               <thead>
                 <tr>
                   <th>{l("Name")}</th>
@@ -39,7 +40,7 @@
                   <td class="flex items-center gap-2 text-sm font-medium capitalize text-base-content/90">
                     <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-base-content/70" />
                     <span>{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) || l("Untitled")}</span></td>
-                  <td>
+                  <td class="py-0">
                     {#if e(acl, :grants_count, 0) > 0}
                       <div class="flex gap-1 avatar-group">
                         {#for {_subject_id, %{subject: subject, verb_grants: verb_grants}} <-
@@ -60,7 +61,7 @@
                                   e(subject, :character, :username, nil) || ulid(subject)}
                                 class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5"
                               >
-                                <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
+                                <Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
                               </span>
                             </div>
                           {/if}
@@ -68,20 +69,21 @@
                       </div>
                     {/if}
                   </td>
-                  <td class="flex justify-end"><LiveRedirect class="normal-case rounded btn btn-sm" to={~p"/boundaries/acl/" <> acl.id}>{l("Details")}</LiveRedirect></td>
+                  <td class="flex justify-end py-2"><LiveRedirect class="normal-case rounded btn btn-sm" to={~p"/boundaries/acl/" <> acl.id}>{l("Details")}</LiveRedirect></td>
                 </tr>
               </tbody>
             </table>
-          </div>
-          <!-- <ul class="mt-4 divide-y rounded-lg bg-base-content/5 divide-base-300">
+          </div> -->
+          <ul class="mt-4 divide-y rounded-lg bg-base-content/5 divide-base-300">
             {#for %{id: acl_id} = acl <- e(@acls, []) ++ e(@built_ins, [])}
               <li class={
-                "block p-3",
+                "",
                 "": !@setting_boundaries,
                 "bg-base-content/10": @to_boundaries_ids |> Enum.member?(acl_id)
               }>
+              <LiveRedirect class="block p-3 hover:bg-base-content/5" to={~p"/boundaries/acl/" <> acl.id}>
                 <label
-                  class="flex items-center w-full"
+                  class="flex items-center w-full gap-3 cursor-pointer"
                   phx-click={if @setting_boundaries,
                     do:
                       JS.push(
@@ -97,6 +99,7 @@
                         target: "#smart_input"
                       )}
                 >
+                  <Icon solid="LockClosed" class="w-5 h-5 text-base-content/80" />
                   <div class="flex-1">
                     <div class="flex items-center space-x-4">
                       <div class="text-sm font-bold capitalize">{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) ||
@@ -125,7 +128,7 @@
                                     e(subject, :character, :username, nil) || ulid(subject)}
                                   class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5"
                                 >
-                                  <Icon iconify="bx:shape-circle" class="inline-block w-5 h-5 text-base-content/70" />
+                                  <Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
                                 </span>
                               </div>
                             {/if}
@@ -134,14 +137,12 @@
                         </div>
                       {/if}
                       <div class="flex items-center gap-3">
-                        <LiveRedirect class="btn btn-ghost btn-sm btn-circle" to={~p"/boundaries/acl/" <> acl.id}>
                           {#case Acls.is_stereotype?(acl)}
                             {#match true}
                               <Icon outline="InformationCircle" class="w-5 h-5" />
                             {#match _}
                               <Icon solid="ChevronRight" class="w-5 h-5 text-base-content/50" />
                           {/case}
-                        </LiveRedirect>
                       </div>
                     {#else}
                       <div
@@ -175,9 +176,10 @@
                     {/if}
                   </div>
                 </label>
+                </LiveRedirect>
               </li>
             {/for}
-          </ul> -->
+          </ul>
           <div
             :if={@setting_boundaries}
             :on-click="assign"

@@ -1,0 +1,58 @@
+<Bonfire.UI.Common.OpenModalLive
+  reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
+  id={"modal-verbs-#{@subject_id}"}
+  title_text={l("Edit Role") <> " - " <> Atom.to_string(@role_title)}
+>
+  <div class="mt-4 overflow-x-hidden">
+    <div class="p-4 mb-4 rounded-md bg-info/10">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+        </div>
+        <div class="flex-1 ml-3 md:flex md:justify-between">
+          <p class="text-sm text-info">
+            {l(
+              "You can explicitly enable or disable a verb from this role to grant or forbid a specific permission. 
+              By removing the verb from the list, the user will inherit that permission from the other boundaries applied.
+              If no other boundaries are present the default will be false."
+            )}</p>
+        </div>
+      </div>
+    </div>
+    <div class={"flex flex-col divide-y divide-base-300"}>
+      {#for {verb_id, l} <- Enum.concat(@verb_grants || [], @verbs || []) |> Enum.uniq_by(&elem(&1, 0))}
+        <div 
+          class={
+            "flex items-center justify-between gap-6 py-5 px-3",
+            "bg-base-content/5": e(l, :value, nil) == nil,
+          }>
+          <div class="flex-1">
+            <div class="flex flex-col">
+              <div class="flex-1 text-sm font-medium">
+                {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
+              </div>
+              {#case Bonfire.Boundaries.Verbs.get(verb_id)}
+                {#match nil}
+                {#match verb}
+                  <p class="text-xs text-base-content/80">{e(verb, :summary, nil)}</p>
+              {/case}
+            </div>
+          </div>
+
+          <div class="flex items-end px-2 py-1 mt-px">
+            <Bonfire.Boundaries.Web.YesMaybeFalseLive
+              value={e(l, :value, nil)}
+              field_name={"subject[#{@subject_id}][#{verb_id}]"}
+              event_target={@myself}
+            />
+          </div>
+        </div>
+      {/for}
+    </div>
+  </div>
+  <:open_btn>
+    <button type="button" class="text-neutral-content">
+      {l("Details")}
+    </button>
+  </:open_btn>
+</Bonfire.UI.Common.OpenModalLive>

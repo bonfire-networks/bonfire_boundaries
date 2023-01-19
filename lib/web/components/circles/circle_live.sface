@@ -1,4 +1,13 @@
 <div id="circle_preview" class="-m-4">
+  <div class="p-4 bg-base-200">
+    <form :on-change="select">
+      <Bonfire.UI.Common.MultiselectLive
+        implementation={:live_select}
+        form_input_name={Bonfire.Boundaries.Web.CircleLive}
+        label={l("Search for users to add")}
+      />
+    </form>
+  </div>
   <div class="overflow-x-auto">
     <table class="table w-full">
       <!-- head -->

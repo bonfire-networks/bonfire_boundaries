@@ -17,7 +17,7 @@
         "bg-base-content/10": @selected_tab == "instance_circles"
       }
     >
-      <Icon iconify="bx:ShapeCircle" class="w-5 h-5 font-normal text-base-content/80" />
+      <Icon iconify="material-symbols:group-work" class="w-5 h-5 font-normal text-base-content/80" />
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/80",
