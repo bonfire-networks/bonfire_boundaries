@@ -5,8 +5,7 @@ defmodule Bonfire.Boundaries.Web.RoleLive do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(page_title: l("Role"))
-    }
+     |> assign(page_title: l("Role"))}
   end
 
   # def update(assigns, socket) do
@@ -27,34 +26,34 @@ defmodule Bonfire.Boundaries.Web.RoleLive do
   #       section: e(params, "section", "members")
   #     )
 
-    # with {:ok, role} <-
-    #        Bonfire.Boundaries.Verbs.get(id) do
-    #   debug(role, "role")
+  # with {:ok, role} <-
+  #        Bonfire.Boundaries.Verbs.get(id) do
+  #   debug(role, "role")
 
-    #   send_self(
-    #     page_title: l("Role - ") <> id,
-    #     role: role
-    #   )
+  #   send_self(
+  #     page_title: l("Role - ") <> id,
+  #     role: role
+  #   )
 
-    #   {:ok,
-    #    assign(
-    #      socket,
-    #      role: role,
-    #      page_title: l("role")
-    #    )}
+  #   {:ok,
+  #    assign(
+  #      socket,
+  #      role: role,
+  #      page_title: l("role")
+  #    )}
 
-      # else other ->
-      #   error(other)
-      #   {:ok, socket
-      #     |> assign_flash(:error, l "Could not find circle")
-      #     |> assign(
-      #       circle: nil,
-      #       members: [],
-      #       suggestions: [],
-      #       read_only: true
-      #     )
-      #     # |> redirect_to("/boundaries/circles")
-      #   }
-    # end
+  # else other ->
+  #   error(other)
+  #   {:ok, socket
+  #     |> assign_flash(:error, l "Could not find circle")
+  #     |> assign(
+  #       circle: nil,
+  #       members: [],
+  #       suggestions: [],
+  #       read_only: true
+  #     )
+  #     # |> redirect_to("/boundaries/circles")
+  #   }
+  # end
   # end
 end

@@ -1,15 +1,17 @@
 <div class="flex items-center gap-3 boundaries-switches">
-  
   <form :on-change="edit_grant_verb" phx-target={@event_target} class="flex items-center gap-3">
-
-    <input 
+    <input
       :if={@value != nil}
       value={if @value == true, do: "1", else: "0"}
-      type="checkbox" 
-      name={@field_name} 
-      disabled={@read_only} 
-      class={"toggle toggle-md", "!toggle-success": @value == true, "!border-error !bg-error !text-error": @value == false} 
-      checked={@value} 
+      type="checkbox"
+      name={@field_name}
+      disabled={@read_only}
+      class={
+        "toggle toggle-md",
+        "!toggle-success": @value == true,
+        "!border-error !bg-error !text-error": @value == false
+      }
+      checked={@value}
     />
     <label :if={@value != nil && !@read_only}>
       <input
@@ -20,23 +22,27 @@
         checked={is_nil(@value)}
         disabled={@read_only}
       />
-      <div class={"btn btn-circle btn-xs"}>
+      <div class="btn btn-circle btn-xs">
         <Icon solid="X" class="w-4 h-4" />
       </div>
     </label>
-    <button 
+    <button
       :if={@value == nil && !@read_only}
       class={
         "normal-case rounded btn btn-xs",
-        "btn-disabled": @read_only}>
-      {l "Edit"}
+        "btn-disabled": @read_only
+      }
+    >
+      {l("Edit")}
     </button>
-    <button 
+    <button
       :if={@value == nil && @read_only}
       class={
         "normal-case rounded btn btn-xs",
-        "btn-disabled": @read_only}>
-      {l "Not specified"}
+        "btn-disabled": @read_only
+      }
+    >
+      {l("Not specified")}
     </button>
     <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Can")}>
       <input

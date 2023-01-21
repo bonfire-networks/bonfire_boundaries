@@ -3,11 +3,11 @@
   <div class="flex flex-col mt-1 mb-6">
     <div class="mb-3 text-xs font-medium tracking-wider uppercase text-base-content/70">{l("Specific Boundaries")}</div>
     <div class="mb-6">
-    <Bonfire.UI.Common.MultiselectLive
-      implementation={:live_select}
-      form_input_name={__MODULE__}
-      label="Select one or more boundaries, circles, or people"
-    />
+      <Bonfire.UI.Common.MultiselectLive
+        implementation={:live_select}
+        form_input_name={__MODULE__}
+        label="Select one or more boundaries, circles, or people"
+      />
     </div>
     <!-- Next choosen boundaries or Circles/Users -->
     <Bonfire.Boundaries.Web.BoundaryItemsLive
