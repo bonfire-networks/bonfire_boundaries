@@ -87,42 +87,12 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("unblock", %{"id" => id, "scope" => scope} = attrs, socket)
       when is_binary(id) do
-    current_user = current_user_required!(socket)
-
-    can_instance_wide =
-      Bonfire.Boundaries.can?(current_user, :block, :instance) ||
-        is_admin?(current_user)
-
-    with {:ok, status} <-
-           (if can_instance_wide do
-              Bonfire.Boundaries.Blocks.unblock(
-                id,
-                maybe_to_atom(attrs["block_type"]),
-                maybe_to_atom(scope) || socket
-              )
-            else
-              debug("not admin, fallback to user-level block")
-
-              Bonfire.Boundaries.Blocks.unblock(
-                id,
-                maybe_to_atom(attrs["block_type"]),
-                socket
-              )
-            end) do
-      {:noreply, assign_flash(socket, :info, status)}
-    end
+    unblock(id, maybe_to_atom(attrs["block_type"]), scope, socket)
   end
 
   def handle_event("unblock", %{"id" => id} = attrs, socket)
       when is_binary(id) do
-    with {:ok, status} <-
-           Bonfire.Boundaries.Blocks.unblock(
-             id,
-             maybe_to_atom(attrs["block_type"]),
-             socket
-           ) do
-      {:noreply, assign_flash(socket, :info, status)}
-    end
+    unblock(id, maybe_to_atom(attrs["block_type"]), socket.assigns[:scope], socket)
   end
 
   def handle_event("circle_create", %{"name" => name} = attrs, socket) do
@@ -299,6 +269,34 @@ defmodule Bonfire.Boundaries.LiveHandler do
        socket
        |> assign_flash(:info, l("Deleted"))
        |> redirect_to("/boundaries/acls")}
+    end
+  end
+
+  def unblock(id, block_type, scope, socket)
+      when is_binary(id) do
+    current_user = current_user_required!(socket)
+
+    can_instance_wide =
+      Bonfire.Boundaries.can?(current_user, :block, :instance) ||
+        is_admin?(current_user)
+
+    with {:ok, status} <-
+           (if can_instance_wide do
+              Bonfire.Boundaries.Blocks.unblock(
+                id,
+                block_type,
+                maybe_to_atom(scope) || socket
+              )
+            else
+              debug("not admin, fallback to user-level block")
+
+              Bonfire.Boundaries.Blocks.unblock(
+                id,
+                block_type,
+                socket
+              )
+            end) do
+      {:noreply, assign_flash(socket, :info, status)}
     end
   end
 

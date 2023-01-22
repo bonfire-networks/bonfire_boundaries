@@ -54,7 +54,9 @@
     <Bonfire.Boundaries.Web.CircleLive
       id={@circle_id}
       circle_id={@circle_id}
+      scope={@scope}
       setting_boundaries={false}
+      showing_within={@block_type}
     />
   </div>
 {#else}
@@ -177,7 +179,9 @@
     <Bonfire.Boundaries.Web.CircleLive
       id={@circle_id}
       circle_id={@circle_id}
+      scope={@scope}
       setting_boundaries={false}
+      showing_within={@block_type}
     />
     <!-- </div>
   </div> -->

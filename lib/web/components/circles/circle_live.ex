@@ -12,6 +12,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   prop parent_back, :any, default: nil
   prop setting_boundaries, :boolean, default: false
   prop scope, :atom, default: nil
+  prop showing_within, :atom, default: nil
   prop feedback_title, :string, default: nil
   prop feedback_message, :string, default: nil
 
@@ -52,37 +53,36 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
       members =
         Enum.map(e(circle, :encircles, []), &{&1.subject_id, &1})
         |> Map.new()
-
-      # |> debug
+        |> debug("members")
 
       member_ids = Map.keys(members)
       # |> debug
 
       # TODO: handle pagination
-      followed =
-        Bonfire.Social.Follows.list_my_followed(current_user,
-          paginate: false,
-          exclude_ids: member_ids
-        )
+      # followed =
+      #   Bonfire.Social.Follows.list_my_followed(current_user,
+      #     paginate: false,
+      #     exclude_ids: member_ids
+      #   )
 
-      already_seen_ids = member_ids ++ Enum.map(followed, & &1.edge.object_id)
+      # already_seen_ids = member_ids ++ Enum.map(followed, & &1.edge.object_id)
 
-      # |> debug
-      followers =
-        Bonfire.Social.Follows.list_my_followers(current_user,
-          paginate: false,
-          exclude_ids: already_seen_ids
-        )
+      # # |> debug
+      # followers =
+      #   Bonfire.Social.Follows.list_my_followers(current_user,
+      #     paginate: false,
+      #     exclude_ids: already_seen_ids
+      #   )
 
-      # |> debug
+      # # |> debug
 
-      suggestions =
-        Enum.map(followers ++ followed ++ [current_user], fn follow ->
-          u = f(follow)
-          {ulid(u), u}
-        end)
-        |> Map.new()
-        |> debug
+      # suggestions =
+      #   Enum.map(followers ++ followed ++ [current_user], fn follow ->
+      #     u = f(follow)
+      #     {ulid(u), u}
+      #   end)
+      #   |> Map.new()
+      #   |> debug
 
       stereotype_id = e(circle, :stereotyped, :stereotype_id, nil)
 
@@ -96,7 +96,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
              circle: circle,
              myself: e(socket, :myself, nil),
              stereotype_id: stereotype_id,
-             suggestions: suggestions,
+             #  suggestions: suggestions,
              read_only:
                e(circle, :stereotyped, :stereotype_id, nil) in @follow_stereotypes or
                  ulid(circle) in @follow_stereotypes
@@ -110,7 +110,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
          circle: Map.drop(circle, [:encircles]),
          members: members,
          page_title: l("Circle"),
-         suggestions: suggestions,
+         #  suggestions: suggestions,
          stereotype_id: stereotype_id,
          read_only:
            stereotype_id in @follow_stereotypes or
@@ -142,10 +142,17 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     add_member(e(socket.assigns, :suggestions, %{})[id] || id, socket)
   end
 
-  def do_handle_event("remove", attrs, socket) do
-    # debug(attrs)
-    with id when is_binary(id) <- e(attrs, "subject", nil),
-         {1, _} <-
+  def do_handle_event(
+        "remove",
+        %{"subject" => id} = attrs,
+        %{assigns: %{showing_within: showing_within}} = socket
+      )
+      when not is_nil(showing_within) and is_binary(id) do
+    LiveHandler.unblock(id, showing_within, socket.assigns[:scope], socket)
+  end
+
+  def do_handle_event("remove", %{"subject" => id} = attrs, socket) when is_binary(id) do
+    with {1, _} <-
            Circles.remove_from_circles(id, e(socket.assigns, :circle, nil)) do
       {:noreply,
        socket

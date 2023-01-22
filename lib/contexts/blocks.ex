@@ -44,7 +44,7 @@ defmodule Bonfire.Boundaries.Blocks do
          :instance_wide
        )
        when block_type in [:silence, :silence_them] do
-    instance_wide_circles([:silence_me])
+    instance_wide_circles([:silence_me, :silence_them])
     |> info("instance_wide_circles_silenced")
     |> do_mutate_blocklists(block_or_unblock, user_or_instance_to_block, ...)
   end

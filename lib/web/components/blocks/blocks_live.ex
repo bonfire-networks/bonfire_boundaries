@@ -25,7 +25,8 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
         Bonfire.Boundaries.Blocks.user_block_circles(scope || current_user, block_type)
       end
       |> List.first()
-      |> debug("ccircle")
+
+    # |> debug("ccircle")
 
     # circle = Bonfire.Boundaries.Blocks.list(block_type, scope || current_user)
 
