@@ -501,7 +501,9 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def preload(list_of_assigns, opts \\ []) do
-    if current_user(List.first(list_of_assigns)) do
+    debug(list_of_assigns, "preload from given assigns")
+
+    if current_user(list_of_assigns) do
       preload_assigns_async(
         list_of_assigns,
         &assigns_to_params/1,
@@ -509,7 +511,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
         opts ++ [skip_if_set: :object_boundary]
       )
     else
-      # no need to preload list of boundaries for guests
+      debug("no need to preload list of boundaries for guests")
       list_of_assigns
     end
   end
