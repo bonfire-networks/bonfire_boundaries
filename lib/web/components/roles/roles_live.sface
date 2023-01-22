@@ -1,5 +1,4 @@
 <div class="">
-  <div class="p-4 -m-4 bg-base-200">
     <div class="p-4 mb-0 rounded-md bg-info/10">
       <div class="flex">
         <div class="flex-shrink-0">
@@ -11,16 +10,16 @@
         </div>
       </div>
     </div>
-  </div>
 
   <div class="mt-4">
-    <ul role="list" class="divide-y rounded-lg bg-base-content/5 divide-base-300">
+    <ul role="list" class="flex flex-col gap-2">
       <li
+        class="rounded-md bg-base-content/5"
         x-data="{open: false}"
         :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()}
         :if={verbs != []}
       >
-        <div x-on:click="open = !open" class="block cursor-pointer hover:bg-base-content/5">
+        <div x-on:click="open = !open" class="block rounded-md cursor-pointer hover:bg-base-content/5">
           <div class="flex items-center gap-3 p-3">
             <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-base-content/80" />
             <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
@@ -36,7 +35,7 @@
           </div>
         </div>
         <div x-cloak x-show="open" x-collapse>
-          <div class="p-3">
+          <div class="p-3 bg-base-content/5">
             <ul class="flex flex-col divide-y divide-base-300">
               <li :for={verb <- verbs} class="flex items-center justify-between gap-8 p-3">
                 <div class="flex flex-col gap-0.5">
@@ -51,7 +50,7 @@
                           {e(verb_details, :verb, nil) || verb}
                         </div>
                       </div>
-                      <div class="text-xs text-base-content/70">{e(verb_details, :summary, nil)}</div>
+                      <div class="text-sm text-base-content/70">{e(verb_details, :summary, nil)}</div>
                   {/case}
                 </div>
                 <Bonfire.Boundaries.Web.YesMaybeFalseLive value read_only />

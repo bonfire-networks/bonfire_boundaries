@@ -1,6 +1,7 @@
 {#if @selected_tab == "silenced"}
   <div>
     <!-- TODO: consolidate this view and the boundary editing one (so you can directly add people/circles here as well) -->
+    <div class="bg-base-200">
     <div class="p-4 mb-3 rounded-md bg-info/10">
       <div class="flex">
         <div class="flex-shrink-0">
@@ -50,7 +51,7 @@
         </div>
       </div>
     </div>
-
+    </div>
     <Bonfire.Boundaries.Web.CircleLive
       id={@circle_id}
       circle_id={@circle_id}
@@ -61,6 +62,7 @@
   </div>
 {#else}
   <div>
+    <div class="bg-base-200">
     <div class="p-4 mb-3 rounded-md bg-info/10">
       <div class="flex">
         <div class="flex-shrink-0">
@@ -114,68 +116,8 @@
         </div>
       </div>
     </div>
-
-    <!-- <div class="p-3">
-      <div class="shadow-lg alert alert-info">
-        <div class="flex items-start">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            class="flex-shrink-0 w-6 h-6 stroke-current"
-          ><path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            /></svg>
-          <div class="flex flex-col">
-            <div :if={@scope == :instance_wide} class="text-sm">{l(
-                "Users or instances on this list will not be able to see or interact with anyone on this instance"
-              )}</div>
-            <div :if={@scope != :instance_wide} class="text-sm">{l("Users or instances on this list will not be able to see or interact with you or your content")}</div>
-            <div x-data="{active_block: false}" role="region" class="">
-              <button
-                type="button"
-                x-on:click="active_block = ! active_block"
-                :aria-expanded="active_block"
-                class="flex items-center w-full text-sm"
-              >
-                <span x-show="!active_block" class="underline">{l("Read more")}</span>
-                <span x-show="active_block" class="underline">{l("Read less")}</span>
-                <span x-show="active_block" aria-hidden="true" class="ml-2">&minus;</span>
-                <span x-show="!active_block" aria-hidden="true" class="ml-2">&plus;</span>
-              </button>
-              <div x-show="active_block" x-collapse>
-                <div class="block mt-3">
-                  <ul class="block pl-4 mt-1 prose-sm list-disc">
-                    <li>
-                      {l("Nothing you post privately will be shown to them from now on.")}
-                    </li>
-                    <li>
-                      {l("They will still be able to see things you post publicly.")}
-                    </li>
-                    <li>
-                      {l("You won't be able to @ mention or message them.")}
-                    </li>
-                    <li>
-                      {l("They won't be able to follow you.")}
-                    </li>
-                    <li>
-                      {l(
-                        "You will be able to undo this later but they may not be able to see any activities they missed."
-                      )}
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
-    <!-- <div class="px-3">
-    <div class="flex flex-col"> -->
+    </div>
+    
     <Bonfire.Boundaries.Web.CircleLive
       id={@circle_id}
       circle_id={@circle_id}
