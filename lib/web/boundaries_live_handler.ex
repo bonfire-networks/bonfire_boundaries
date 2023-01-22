@@ -1,5 +1,6 @@
 defmodule Bonfire.Boundaries.LiveHandler do
   use Bonfire.UI.Common.Web, :live_handler
+  use Untangle
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Acls
@@ -419,6 +420,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     |> preload(opts)
   end
 
+  @decorate time()
   def maybe_check_boundaries(list_of_assigns, opts \\ []) do
     current_user = current_user(List.first(list_of_assigns))
 
@@ -501,12 +503,17 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def preload(list_of_assigns, opts \\ []) do
-    preload_assigns_async(
-      list_of_assigns,
-      &assigns_to_params/1,
-      &do_preload/3,
-      opts ++ [skip_if_set: :object_boundary]
-    )
+    if current_user(List.first(list_of_assigns)) do
+      preload_assigns_async(
+        list_of_assigns,
+        &assigns_to_params/1,
+        &do_preload/3,
+        opts ++ [skip_if_set: :object_boundary]
+      )
+    else
+      # no need to preload list of boundaries for guests
+      list_of_assigns
+    end
   end
 
   defp assigns_to_params(assigns) do
@@ -520,6 +527,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     }
   end
 
+  @decorate time()
   defp do_preload(list_of_components, list_of_ids, current_user) do
     my_states =
       if is_list(list_of_ids) and list_of_ids != [],

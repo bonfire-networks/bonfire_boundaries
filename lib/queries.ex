@@ -65,7 +65,7 @@ defmodule Bonfire.Boundaries.Queries do
 
                   join(
                     unquote(query),
-                    :inner,
+                    Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
                     [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
                     v in subquery(vis),
                     on: unquote(field_ref) == v.object_id
@@ -78,16 +78,14 @@ defmodule Bonfire.Boundaries.Queries do
 
               join(
                 unquote(query),
-                :inner,
+                Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
                 [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
                 v in subquery(vis),
                 on: unquote(field_ref) == v.object_id
               )
 
             other ->
-              import Untangle
-              error(other, "Weird skip_boundary_check")
-              query
+              raise "Unexpected skip_boundary_check"
           end
         end
 
@@ -120,7 +118,7 @@ defmodule Bonfire.Boundaries.Queries do
 
                   join(
                     unquote(query),
-                    :inner,
+                    Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
                     [unquote(Macro.var(:root, __MODULE__))],
                     v in subquery(vis),
                     on:
@@ -135,7 +133,7 @@ defmodule Bonfire.Boundaries.Queries do
 
               join(
                 unquote(query),
-                :inner,
+                Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
                 [unquote(Macro.var(:root, __MODULE__))],
                 v in subquery(vis),
                 on:
@@ -222,7 +220,11 @@ defmodule Bonfire.Boundaries.Queries do
 
       vis = filter_where_not(agent, Common.Utils.e(opts, :verbs, [:see, :read]))
 
-      join(q, :inner, [main_object: main_object], v in subquery(vis),
+      join(
+        q,
+        Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
+        [main_object: main_object],
+        v in subquery(vis),
         on: main_object.id == v.object_id
       )
     end
