@@ -249,14 +249,15 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :remotes_may_reply
         ],
         "local" => [:locals_may_read, :locals_may_interact, :locals_may_reply]
-      },
-      create_verbs: [
-        # block:  Bonfire.Data.Social.Block,
-        boost: Bonfire.Data.Social.Boost,
-        follow: Bonfire.Data.Social.Follow,
-        flag: Bonfire.Data.Social.Flag,
-        like: Bonfire.Data.Social.Like
-      ]
+      }
+
+    # create_verbs: [
+    #   # block:  Bonfire.Data.Social.Block,
+    #   boost: Bonfire.Data.Social.Boost,
+    #   follow: Bonfire.Data.Social.Follow,
+    #   flag: Bonfire.Data.Social.Flag,
+    #   like: Bonfire.Data.Social.Like
+    # ],
 
     ### Now follows quite a lot of fixtures that must be inserted into the database.
 

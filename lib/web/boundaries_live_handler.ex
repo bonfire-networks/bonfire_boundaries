@@ -508,7 +508,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
         list_of_assigns,
         &assigns_to_params/1,
         &do_preload/3,
-        opts ++ [skip_if_set: :object_boundary]
+        opts ++ [skip_if_set: :object_boundary, preload_status_key: :preloaded_async_boundaries]
       )
     else
       debug("no need to preload list of boundaries for guests")
