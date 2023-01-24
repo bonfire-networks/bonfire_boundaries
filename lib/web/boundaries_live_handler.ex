@@ -501,7 +501,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def preload(list_of_assigns, opts \\ []) do
-    debug(list_of_assigns, "preload from given assigns")
+    # debug(list_of_assigns, "preload from given assigns")
 
     if current_user(list_of_assigns) do
       preload_assigns_async(
