@@ -392,7 +392,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     # fix this ugly thing
     (existing ++
        Enum.map(selected_circles, &Bonfire.Boundaries.Circles.get_tuple/1))
-    |> Utils.filter_empty([])
+    |> Enums.filter_empty([])
     |> Enum.uniq()
 
     # |> debug()

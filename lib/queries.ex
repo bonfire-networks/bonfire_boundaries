@@ -19,6 +19,7 @@ defmodule Bonfire.Boundaries.Queries do
   alias Bonfire.Boundaries.Verbs
 
   alias Bonfire.Common
+  alias Common.Types
 
   # defmacro can_see?(controlled, user), do: can(controlled, user, :see)
   # defmacro can_edit?(controlled, user), do: can(controlled, user, :edit)
@@ -236,6 +237,6 @@ defmodule Bonfire.Boundaries.Queries do
     (Common.Config.get(:env) != :prod &&
        Common.Config.get(:skip_all_boundary_checks)) ||
       (is_list(opts) && Keyword.get(opts, :skip_boundary_check, false)) ||
-      (not is_nil(object) && Common.Utils.ulid(object) != agent)
+      (not is_nil(object) && Common.Types.ulid(object) != agent)
   end
 end

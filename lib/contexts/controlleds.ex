@@ -4,7 +4,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   import Ecto.Query
   import EctoSparkles
   import Untangle
-  import Bonfire.Common.Utils
+  use Bonfire.Common.Utils
   alias Bonfire.Common.Config
   alias Bonfire.Common.Cache
   alias Bonfire.Boundaries.Acls

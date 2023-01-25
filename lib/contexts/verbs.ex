@@ -77,7 +77,7 @@ defmodule Bonfire.Boundaries.Verbs do
   def verbs_for_role(role) do
     role =
       role
-      |> Utils.maybe_to_atom()
+      |> Types.maybe_to_atom()
       |> debug("role")
 
     if is_atom(role) do

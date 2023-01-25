@@ -76,8 +76,8 @@ defmodule Bonfire.Boundaries do
 
   def my_grants_on(users, things) do
     from(s in Summary,
-      where: s.subject_id in ^Utils.ulid(users),
-      where: s.object_id in ^Utils.ulid(things)
+      where: s.subject_id in ^Types.ulid(users),
+      where: s.object_id in ^Types.ulid(things)
     )
     |> repo().all()
     |> Enum.group_by(&{&1.subject_id, &1.object_id, &1.value})
@@ -193,7 +193,7 @@ defmodule Bonfire.Boundaries do
   def take_care_of!(things, user) when is_list(things) do
     repo().upsert_all(
       Caretaker,
-      Enum.map(things, &%{id: Utils.ulid(&1), caretaker_id: Utils.ulid(user)})
+      Enum.map(things, &%{id: Types.ulid(&1), caretaker_id: Types.ulid(user)})
     )
 
     # |> debug
@@ -203,7 +203,7 @@ defmodule Bonfire.Boundaries do
         %{caretaker: _} ->
           Map.put(thing, :caretaker, %Caretaker{
             id: thing.id,
-            caretaker_id: Utils.ulid(user),
+            caretaker_id: Types.ulid(user),
             caretaker: user
           })
 
