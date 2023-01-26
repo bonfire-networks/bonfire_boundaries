@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Fixtures do
   import Bonfire.Boundaries.Integration
   import Untangle
-  alias Bonfire.Common.Utils
+  use Bonfire.Common.Utils
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.AccessControl.Circle
   alias Bonfire.Data.AccessControl.Grant
@@ -45,9 +45,9 @@ defmodule Bonfire.Boundaries.Fixtures do
           id: ULID.generate(),
           acl_id: Acls.get_id!(acl),
           subject_id: Circles.get_id!(circle),
-          verb_id: Verbs.get_id!(Utils.elem_or(verb, 0, verb)),
+          verb_id: Verbs.get_id!(Enums.elem_or(verb, 0, verb)),
           # if no monoid specified in config, default to positive grant
-          value: Utils.elem_or(verb, 1, true)
+          value: Enums.elem_or(verb, 1, true)
         }
       end
 
@@ -71,7 +71,7 @@ defmodule Bonfire.Boundaries.Fixtures do
     # Make the instance admins circle caretaker of global circles and ACLs
     repo().insert_all_or_ignore(
       Caretaker,
-      Utils.ulids(acls ++ circles)
+      ulids(acls ++ circles)
       |> Enum.map(&%{id: &1, caretaker_id: admin_circle})
     )
     |> info("Init built-in verbs and boundaries")
