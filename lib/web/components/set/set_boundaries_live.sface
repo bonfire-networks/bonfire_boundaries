@@ -8,7 +8,19 @@
         form_input_name={__MODULE__}
         label="Select one or more boundaries, circles, or people"
       />
-    </div>
+    </div>  
+
+    <Bonfire.UI.Common.ProfileItemLive 
+      wrapper_class="flex items-center justify-between"
+      profile={e(current_user(@__context__), :profile, nil)} 
+      character={e(current_user(@__context__), :character, nil)} 
+      show_controls={[]}>
+      <div class="flex items-center gap-2">
+        <button disabled class="normal-case btn btn-sm btn-outline btn-disabled">{l("Caretaker")}</button>
+      </div>  
+    </Bonfire.UI.Common.ProfileItemLive>
+
+
     <!-- Next choosen boundaries or Circles/Users -->
     <Bonfire.Boundaries.Web.BoundaryItemsLive
       to_boundaries={@to_boundaries |> debug("to_boundaries")}
