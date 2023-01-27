@@ -10,7 +10,7 @@
         title={l("Public: visible to everyone. People on the fediverse can see, interact, and reply.")}
         class={
           "flex items-center gap-1",
-          "align-bottom": @with_label != true,
+          "": @with_label != true,
           "flex items-center gap-2": @with_label == true
         }
       >
@@ -26,7 +26,7 @@
         title={l("Local: everyone on this instance can see, interact, and reply.")}
         class={
           "flex items-center gap-1",
-          "align-bottom": @with_label != true,
+          "": @with_label != true,
           "flex items-center gap-2": @with_label == true
         }
       >
@@ -42,7 +42,7 @@
         title={e(@object_boundary, :name, "Custom Boundaries")}
         class={
           "flex items-center gap-1",
-          "align-bottom": @with_label != true,
+          "": @with_label != true,
           "flex items-center gap-2": @with_label == true
         }
       >
