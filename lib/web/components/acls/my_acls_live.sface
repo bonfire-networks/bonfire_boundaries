@@ -72,7 +72,8 @@
                                   title={e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) ||
                                     e(subject, :name, nil) || e(subject, :profile, :name, nil) ||
                                     e(subject, :character, :username, nil) || ulid(subject)}
-                                  class="w-8 h-8 bg-base-content/5 rounded-xl"
+                                  class="w-8 h-8"
+                                  bg_class="bg-base-content/5 rounded-xl"
                                 />
                               {#else}
                                 <div class="flex items-center gap-3">

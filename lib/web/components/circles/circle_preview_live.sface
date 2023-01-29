@@ -3,7 +3,8 @@
     <Bonfire.UI.Common.AvatarLive
       :for={member <- @members |> Enum.slice(0..2)}
       user={e(member, :subject, nil) || member}
-      class={"w-#{@size} h-#{@size} bg-base-content/5 rounded-xl"}
+      class={"w-#{@size} h-#{@size} "}
+      bg_class="fill-base-content/5 bg-base-content/5 rounded-xl"
     />
     <div
       :if={(@count || Enum.count(@members)) > 3}
