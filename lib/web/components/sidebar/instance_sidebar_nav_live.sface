@@ -51,7 +51,7 @@
         <span class={
           "text-sm text-base-content/80",
           "font-semibold": @showing_within == :dashboard
-        }>{l("Local Boundaries")}</span>
+        }>{l("Instance Boundaries")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
       </div>
     </LiveRedirect>
@@ -80,13 +80,13 @@
         <span class={
           "text-sm text-base-content/80",
           "font-semibold": @showing_within == :dashboard
-        }>{l("Instance Boundaries")}</span>
+        }>{l("Instance Permissions")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
       </div>
     </LiveRedirect>
   </li>
 
-  <li
+  <!-- <li
     class={
       "",
       "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
@@ -141,5 +141,5 @@
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
       </div>
     </LiveRedirect>
-  </li>
+  </li> -->
 </ul>

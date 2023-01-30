@@ -189,6 +189,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_read_request = [:read, :request]
     verbs_see_read_request = [:read, :see, :request]
 
+    verbs_interact_minus_follow =
+      verbs_see_read_request ++
+        [
+          :like
+        ]
+
     verbs_interact_minus_boost =
       verbs_see_read_request ++
         [
@@ -196,11 +202,17 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :follow
         ]
 
-    verbs_interact_reply_minus_boost = verbs_interact_minus_boost ++ [:reply, :mention, :message]
-
     verbs_interact_incl_boost = verbs_interact_minus_boost ++ [:boost, :pin]
-    verbs_interact_and_reply = verbs_interact_incl_boost ++ [:reply, :mention, :message]
-    verbs_interact_and_contribute = verbs_interact_and_reply ++ [:create, :tag]
+
+    verbs_participate_message_minus_follow =
+      verbs_interact_minus_follow ++ [:reply, :mention, :message]
+
+    verbs_participate_message_minus_boost =
+      verbs_interact_minus_boost ++ [:reply, :mention, :message]
+
+    verbs_participate_and_message = verbs_interact_incl_boost ++ [:reply, :mention, :message]
+
+    verbs_contribute = verbs_participate_and_message ++ [:create, :tag]
 
     public_acls = [
       :guests_may_see_read,
@@ -219,13 +231,13 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         none: [],
         read: verbs_see_read_request,
         interact: verbs_interact_incl_boost,
-        participate: verbs_interact_and_reply,
-        contribute: verbs_interact_and_contribute,
+        participate: verbs_participate_and_message,
+        contribute: verbs_contribute,
         caretaker: all_verb_names
       ],
       verbs_to_grant: [
-        default: verbs_interact_and_reply,
-        message: verbs_interact_reply_minus_boost
+        default: verbs_participate_and_message,
+        message: verbs_participate_message_minus_boost
       ],
       # preset ACLs to show in smart input
       acls_to_present: [],
@@ -371,6 +383,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           id: "2HEYS11ENCEDMES0CAN0TSEEME",
           name: "People who silenced me cannot discover me",
           stereotype: true
+        },
+        no_follow: %{
+          id: "1MVSTREQVESTBEF0REF0110W1N",
+          name: "People must request to follow"
         }
       },
       ### Grants are the entries of an ACL and define the permissions a user or circle has for content using this ACL.
@@ -385,28 +401,29 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # admins can care for every aspect of the instance
         instance_care: %{
           admin: all_verb_names,
-          local: verbs_interact_and_contribute,
+          local: verbs_contribute,
           activity_pub: verbs_interact_incl_boost,
           guest: verbs_see_read_request
         },
         guests_may_see_read: %{guest: verbs_see_read_request},
         guests_may_see: %{guest: verbs_see_request},
         guests_may_read: %{guest: verbs_read_request},
-        # interact but not reply
+        # interact but NOT reply/message/mention
         remotes_may_interact: %{activity_pub: verbs_interact_incl_boost},
-        # interact and reply
-        remotes_may_reply: %{activity_pub: verbs_interact_and_reply},
+        # interact and reply/message/mention
+        remotes_may_reply: %{activity_pub: verbs_participate_and_message},
         locals_may_read: %{local: verbs_see_read_request},
-        # interact but not reply
+        # interact but NOT reply/message/mention
         locals_may_interact: %{local: verbs_interact_incl_boost},
-        # interact and reply
-        locals_may_reply: %{local: verbs_interact_and_reply},
+        # interact and reply/message/mention
+        locals_may_reply: %{local: verbs_participate_and_message},
         # negative grants:
         nobody_can_anything: %{ghost_them: verbs_negative.(all_verb_names)},
         nobody_can_reach: %{
           silence_them: verbs_negative.([:mention, :message, :reply])
         },
-        nobody_can_see: %{silence_me: verbs_negative.([:see])}
+        nobody_can_see: %{silence_me: verbs_negative.([:see])},
+        no_follow: %{local: verbs_negative.([:follow]), activity_pub: verbs_negative.([:follow])}
       }
 
     # end of global boundaries
@@ -477,8 +494,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           SELF:
             [
               # positive permissions
-              :locals_may_interact,
-              :remotes_may_interact,
+              :locals_may_reply,
+              :remotes_may_reply,
               :i_may_administer
               # note that extra ACLs are added by `Bonfire.Boundaries.Users.default_visibility/0`
             ] ++ negative_grants

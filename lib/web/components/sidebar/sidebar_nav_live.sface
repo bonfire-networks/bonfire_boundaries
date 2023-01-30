@@ -77,7 +77,7 @@
     </LiveRedirect>
   </li>
 
-  <li class={
+  <!-- <li class={
     "",
     "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
       @showing_within == :dashboard
@@ -126,5 +126,5 @@
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
       </div>
     </LiveRedirect>
-  </li>
+  </li> -->
 </ul>

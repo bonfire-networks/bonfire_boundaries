@@ -19,7 +19,6 @@ defmodule Bonfire.Boundaries.Queries do
   alias Bonfire.Boundaries.Verbs
 
   alias Bonfire.Common
-  alias Common.Types
 
   # defmacro can_see?(controlled, user), do: can(controlled, user, :see)
   # defmacro can_edit?(controlled, user), do: can(controlled, user, :edit)
@@ -234,9 +233,9 @@ defmodule Bonfire.Boundaries.Queries do
   def skip_boundary_check?(opts, object \\ nil) do
     agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
 
-    (Common.Config.get(:env) != :prod &&
+    (Common.Config.get(:env) != :prod and
        Common.Config.get(:skip_all_boundary_checks)) ||
-      (is_list(opts) && Keyword.get(opts, :skip_boundary_check, false)) ||
-      (not is_nil(object) && Common.Types.ulid(object) != agent)
+      (is_list(opts) and Keyword.get(opts, :skip_boundary_check)) ||
+      (not is_nil(object) and Common.Enums.id(object) == Common.Enums.id(agent))
   end
 end

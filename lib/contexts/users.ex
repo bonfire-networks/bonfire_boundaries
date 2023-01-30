@@ -18,7 +18,9 @@ defmodule Bonfire.Boundaries.Users do
   alias Bonfire.Data.Identity.Named
   alias Pointers.ULID
 
-  def create_default_boundaries(user) do
+  def create_default_boundaries(user, opts \\ []) do
+    debug(opts)
+
     user_default_boundaries = Boundaries.user_default_boundaries()
     #  |> debug("create_default_boundaries")
     circles =
@@ -64,7 +66,10 @@ defmodule Bonfire.Boundaries.Users do
     ### control access to the user themselves (e.g. to view their profile or mention them)
     controlleds =
       for {:SELF, acls2} <- Map.fetch!(user_default_boundaries, :controlleds),
-          acl <- acls2 ++ default_profile_visibility() do
+          acl <-
+            acls2 ++
+              default_profile_visibility(opts[:undiscoverable]) ++
+              maybe_request_before_follow(opts[:request_before_follow]) do
         %{id: user.id, acl_id: default_acl_id(acls, acl)}
       end
 
@@ -97,14 +102,23 @@ defmodule Bonfire.Boundaries.Users do
     Boundaries.take_care_of!(acls ++ circles, user)
   end
 
-  defp default_profile_visibility do
-    if !Bonfire.Common.Config.get(
-         [Bonfire.Me.Users, :undiscoverable],
-         false
-       ) do
+  defp default_profile_visibility(bool) do
+    if !bool and
+         !Bonfire.Common.Config.get(
+           [Bonfire.Me.Users, :undiscoverable],
+           false
+         ) do
       [:guests_may_see_read]
     else
       [:guests_may_read]
+    end
+  end
+
+  defp maybe_request_before_follow(bool) do
+    if bool || Bonfire.Common.Config.get([Bonfire.Me.Users, :request_before_follow]) do
+      [:no_follow]
+    else
+      []
     end
   end
 
