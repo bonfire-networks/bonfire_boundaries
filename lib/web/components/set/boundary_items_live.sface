@@ -1,4 +1,4 @@
-<div class="flex flex-col gap-3">
+<div class="flex flex-col gap-3 mt-3">
   <div
     :for={{id, data} <- Bonfire.Boundaries.Web.SetBoundariesLive.reject_presets(@to_boundaries || [])}
     class="flex items-center justify-between"
