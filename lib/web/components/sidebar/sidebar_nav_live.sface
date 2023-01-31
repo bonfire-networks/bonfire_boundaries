@@ -10,11 +10,16 @@
     <LiveRedirect
       to={~p"/boundaries/circles"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
+        "flex items-center gap-8 rounded-md py-2 px-2 w-full",
         "bg-base-content/10": @selected_tab == "circles"
       }
     >
-      <Icon iconify="material-symbols:group-work" class="w-5 h-5 font-normal text-base-content/80" />
+      <Icon 
+        iconify="material-symbols:group-work" 
+        class={
+          "w-5 h-5 font-normal text-base-content/80",
+          "w-6 h-6 ml-2 text-info/70":  @showing_within == :dashboard
+        } />
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/80",
@@ -33,13 +38,16 @@
     <LiveRedirect
       to={~p"/boundaries/roles"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
+        "flex items-center gap-8 rounded-md py-2 px-2 w-full",
         "bg-base-content/10 ": @selected_tab == "account"
       }
     >
       <Icon
         iconify="ri:shield-user-fill"
-        class={"w-5 h-5 font-normal text-base-content/80 ", "": @selected_tab == "account"}
+        class={
+          "w-5 h-5 font-normal text-base-content/80",
+          "w-6 h-6 ml-2 text-info/70":  @showing_within == :dashboard
+        }
       />
       <div class="flex flex-col">
         <span class={
@@ -59,13 +67,16 @@
     <LiveRedirect
       to={~p"/boundaries/acls"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
+        "flex items-center gap-8 rounded-md py-2 px-2 w-full",
         "bg-base-content/10": @selected_tab == "acls"
       }
     >
       <Icon
         solid="LockClosed"
-        class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "acls"}
+        class={
+          "w-5 h-5 font-normal text-base-content/80",
+          "w-6 h-6 ml-2 text-info/70":  @showing_within == :dashboard
+        }
       />
       <div class="flex flex-col">
         <span class={
@@ -76,55 +87,4 @@
       </div>
     </LiveRedirect>
   </li>
-
-  <!-- <li class={
-    "",
-    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-      @showing_within == :dashboard
-  }>
-    <LiveRedirect
-      to={~p"/boundaries/ghosted"}
-      class={
-        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
-        "bg-base-content/10": @selected_tab == "ghosted"
-      }
-    >
-      <Icon
-        iconify="mingcute:ghost-fill"
-        class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "ghosted"}
-      />
-      <div class="flex flex-col">
-        <span class={
-          "text-sm text-base-content/80",
-          "font-semibold": @showing_within == :dashboard
-        }>{l("Ghosted")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
-      </div>
-    </LiveRedirect>
-  </li>
-  <li class={
-    "",
-    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-      @showing_within == :dashboard
-  }>
-    <LiveRedirect
-      to={~p"/boundaries/silenced"}
-      class={
-        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
-        "bg-base-content/10": @selected_tab == "silenced"
-      }
-    >
-      <Icon
-        solid="VolumeOff"
-        class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "silenced"}
-      />
-      <div class="flex flex-col">
-        <span class={
-          "text-sm text-base-content/80",
-          "font-semibold": @showing_within == :dashboard
-        }>{l("Silenced")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
-      </div>
-    </LiveRedirect>
-  </li> -->
 </ul>
