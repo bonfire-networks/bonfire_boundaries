@@ -14,12 +14,13 @@
         "bg-base-content/10": @selected_tab == "circles"
       }
     >
-      <Icon 
-        iconify="material-symbols:group-work" 
+      <Icon
+        iconify="material-symbols:group-work"
         class={
           "w-5 h-5 font-normal text-base-content/80",
-          "w-6 h-6 ml-2 text-info/70":  @showing_within == :dashboard
-        } />
+          "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
+        }
+      />
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/80",
@@ -46,7 +47,7 @@
         iconify="ri:shield-user-fill"
         class={
           "w-5 h-5 font-normal text-base-content/80",
-          "w-6 h-6 ml-2 text-info/70":  @showing_within == :dashboard
+          "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
         }
       />
       <div class="flex flex-col">
@@ -75,7 +76,7 @@
         solid="LockClosed"
         class={
           "w-5 h-5 font-normal text-base-content/80",
-          "w-6 h-6 ml-2 text-info/70":  @showing_within == :dashboard
+          "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
         }
       />
       <div class="flex flex-col">
