@@ -2,7 +2,7 @@
   <!-- <Bonfire.UI.Common.OpenModalLive
     id="add_members"
     title_text={l("Add members")}
-    form_opts={%{"phx-change" => "select"}}
+    form_opts={"phx-change": "select"}
   >
     <div class="pb-4 mt-4 border-b border-base-content/10">
       <div class="flex items-center rounded-lg">
@@ -77,7 +77,7 @@
           id="edit_name"
           title_text={l("Edit circle name")}
           no_actions
-          form_opts={%{"phx-submit" => "Bonfire.Boundaries:edit"}}
+          form_opts={"phx-submit": "Bonfire.Boundaries:edit"}
         >
           <div class="w-full mt-4 form-control">
             <!-- <label class="label">
