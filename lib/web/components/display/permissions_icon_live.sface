@@ -4,15 +4,19 @@
 >
   {#case @boundary_tuple || Bonfire.Boundaries.preset_boundary_role_from_acl(@object_boundary)}
     {#match {name, extra} = _role}
-      <!-- <div class="tippy"> -->
       {#case name}
         {#match "Caretaker"}
           <Bonfire.UI.Common.OpenModalLive id={Pointers.ULID.generate()} title_text={l("Boundary details")}>
             <div class="text-sm">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div>
+            <div class="menu menu-compact">
+              <div :if={is_list(extra)} :for={item <- extra}>
+                {item}
+              </div>
+            </div>
             <:open_btn>
-              <div class="flex items-center w-full gap-2">
-                <Icon iconify="material-symbols:vpn-key-rounded" class="w-4 h-4 text-neutral-content/80" />
-                <span class="">{l("Caretaker")}</span>
+              <div class="flex items-center w-full gap-2 place-content-center">
+                <Icon  iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
+                <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Caretaker")}</span>
               </div>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
@@ -20,9 +24,9 @@
           <Bonfire.UI.Common.OpenModalLive id={Pointers.ULID.generate()} title_text={l("Boundary details")}>
             <div class="text-sm">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div>
             <:open_btn>
-              <div class="flex items-center w-full gap-2">
-                <Icon iconify="ic:baseline-remove-red-eye" class="w-4 h-4 text-neutral-content/80" />
-                <span class="">{l("Reader")}</span>
+              <div class="flex items-center w-full gap-2 place-content-center">
+                <Icon  iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
+                <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Reader")}</span>
               </div>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
@@ -30,9 +34,9 @@
           <Bonfire.UI.Common.OpenModalLive id={Pointers.ULID.generate()} title_text={l("Boundary details")}>
             <div class="text-sm">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div>
             <:open_btn>
-              <div class="flex items-center w-full gap-2">
-                <Icon iconify="ic:baseline-remove-red-eye" class="w-4 h-4 text-neutral-content/80" />
-                <span class="">{l("Participant")}</span>
+              <div class="flex items-center w-full gap-2 place-content-center">
+                <Icon  iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
+                <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Participant")}</span>
               </div>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
@@ -40,19 +44,128 @@
           <Bonfire.UI.Common.OpenModalLive id={Pointers.ULID.generate()} title_text={l("Boundary details")}>
             <div class="text-sm">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div>
             <:open_btn>
-              <div class="flex items-center w-full gap-2">
-                <Icon iconify="heroicons:chat-bubble-left-right-solid" class="w-4 h-4 text-neutral-content/80" />
-                <span class="">{l("Interact")}</span>
+              <div class="flex items-center w-full gap-2 place-content-center">
+                <Icon  iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
+                <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Interact")}</span>
               </div>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
         {#match "Custom"}
-          <Bonfire.UI.Common.OpenModalLive id={Pointers.ULID.generate()} title_text={l("Boundary details")}>
-            <div class="text-sm">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div>
+          <Bonfire.UI.Common.OpenModalLive id={Pointers.ULID.generate()}>
+            <!-- <div class="text-sm">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div> -->
+            <div class="">
+              <div class="flex items-center gap-2">
+                <div class="text-base font-medium">{l "Boundary details: Custom"}</div></div>
+                <div class="p-4 my-6 rounded-md bg-info/10">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+                    </div>
+                    <div class="flex-1 ml-3 md:flex md:justify-between">
+                      <p class="text-sm text-info">
+                        {l(
+                          "These permissions are set by the activity Caretaker. They specify which actions you can perform on this activity."
+                        )}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="gap-2 mt-4">
+                  <div class="py-2 text-xs font-medium tracking-wider uppercase border-b border-base-content/10 text-base-content/50">Reader</div>
+                  <div class="flex items-center gap-2 mt-2">
+                    {#if Enum.member?(extra, "See") and Enum.member?(extra, "Read") and Enum.member?(extra, "Request") == false}
+                      <span class="gap-2 badge badge-lg text-sm !h-[1.75rem]">
+                      <Icon solid="InformationCircle" class="w-4 h-4 text-neutral-content" />
+                      {l "you dont have any permission as reader"}</span>
+                    {#else}
+                    <div :if={"See" in extra} class="flex items-center gap-2 px-3 py-1 rounded bg-neutral text-neutral-content">
+                      <Icon solid="check" class="w-5 h-5 text-success" />
+                      <div class="text-sm font-semibold">See</div>
+                    </div>
+                    <div :if={"Read" in extra} class="flex items-center gap-2 px-3 py-1 rounded bg-neutral text-neutral-content">
+                      <Icon solid="check" class="w-5 h-5 text-success" />
+                      <div class="text-sm font-semibold">Read</div>
+                    </div>
+                    <div :if={"Request" in extra} class="flex items-center gap-2 px-3 py-1 rounded bg-neutral text-neutral-content">
+                      <Icon solid="check" class="w-5 h-5 text-success" />
+                      <div class="text-sm font-semibold">Request</div>
+                    </div> 
+                    {/if}
+                  </div>
+
+                  <div class="py-2 mt-4 text-xs font-medium tracking-wider uppercase border-b border-base-content/10 text-base-content/50">Participant</div>
+                  <div class="flex items-center gap-2 mt-2">
+                    {#if Enum.member?(extra, "Like") and Enum.member?(extra, "Boost") and Enum.member?(extra, "Follow") == false}
+                      <span class="gap-2 badge badge-lg text-sm !h-[1.75rem]">
+                      <Icon solid="InformationCircle" class="w-4 h-4 text-neutral-content" />
+                      {l "you dont have any permission as participant"}</span>
+                    {#else}
+                    <div :if={"Like" in extra} class="flex items-center gap-2 px-3 py-1 rounded bg-neutral text-neutral-content">
+                      <Icon solid="check" class="w-5 h-5 text-success" />
+                      <div class="text-sm font-semibold">Like</div>
+                    </div>
+                    <div :if={"Boost" in extra} class="flex items-center gap-2 px-3 py-1 rounded bg-neutral text-neutral-content">
+                      <Icon solid="check" class="w-5 h-5 text-success" />
+                      <div class="text-sm font-semibold">Boost</div>
+                    </div>
+                    <div :if={"Follow" in extra} class="flex items-center gap-2 px-3 py-1 rounded bg-neutral text-neutral-content">
+                      <Icon solid="check" class="w-5 h-5 text-success" />
+                      <div class="text-sm font-semibold">Follow</div>
+                    </div> 
+                    {/if}
+                  </div>
+
+                  <div class="py-2 mt-4 text-xs font-medium tracking-wider uppercase border-b border-base-content/10 text-base-content/50">Contributor</div>
+                  <div class="flex items-center gap-2 mt-2">
+                    {#if Enum.member?(extra, "Mention") and Enum.member?(extra, "Reply") and Enum.member?(extra, "Message") == false}
+                      <span class="gap-2 badge badge-lg text-sm !h-[1.75rem]">
+                      <Icon solid="InformationCircle" class="w-4 h-4 text-neutral-content" />
+                      {l "you dont have any permission as contributor"}</span>
+                    {#else}
+                    <div :if={"Mention" in extra} class="flex items-center gap-2 px-3 py-1 rounded bg-neutral text-neutral-content">
+                      <Icon solid="check" class="w-5 h-5 text-success" />
+                      <div class="text-sm font-semibold">Mention</div>
+                    </div>
+                    <div :if={"Reply" in extra} class="flex items-center gap-2 px-3 py-1 rounded bg-neutral text-neutral-content">
+                      <Icon solid="check" class="w-5 h-5 text-success" />
+                      <div class="text-sm font-semibold">Reply</div>
+                    </div>
+                    <div :if={"Message" in extra} class="flex items-center gap-2 px-3 py-1 rounded bg-neutral text-neutral-content">
+                      <Icon solid="check" class="w-5 h-5 text-success" />
+                      <div class="text-sm font-semibold">Message</div>
+                    </div> 
+                    {/if}
+                  </div>
+
+                  <div class="py-2 mt-4 text-xs font-medium tracking-wider uppercase border-b border-base-content/10 text-base-content/50">Caretaker</div>
+                  <div class="flex items-center gap-2 mt-2">
+                    {#if Enum.member?(extra, "Edit") and Enum.member?(extra, "Delete") == false}
+                      <span class="gap-2 badge badge-lg text-sm !h-[1.75rem]">
+                        <Icon solid="InformationCircle" class="w-4 h-4 text-neutral-content" />
+                        {l "you dont have any permission as caretaker"}
+                      </span>
+                    {#else}
+                    <div :if={"Edit" in extra} class="flex items-center gap-2 px-3 py-1 rounded bg-neutral text-neutral-content">
+                      <Icon solid="check" class="w-5 h-5 text-success" />
+                      <div class="text-sm font-semibold">Edit</div>
+                    </div>
+                    <div :if={"Delete" in extra} class="flex items-center gap-2 px-3 py-1 rounded bg-neutral text-neutral-content">
+                      <Icon solid="check" class="w-5 h-5 text-success" />
+                      <div class="text-sm font-semibold">Delete</div>
+                    </div>
+                    {/if}
+                  </div>
+
+                  
+                  <!-- <div :if={is_list(extra)} :for={item <- extra} class="flex items-center justify-between pt-2">
+                    <div class="flex-1 text-sm font-semibold capitalize">{item}</div>
+                    <Bonfire.Boundaries.Web.YesMaybeFalseLive value={true} read_only />
+                  </div> -->
+                </div>
+              </div>
             <:open_btn>
-              <div class="flex items-center w-full gap-2">
-                <Icon iconify="material-symbols:settings" class="w-4 h-4 text-neutral-content/80" />
-                <span class="">{l("Custom")}</span>
+              <div class="flex items-center w-full gap-2 place-content-center">
+                <Icon  iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
+                <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Custom")}</span>
               </div>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
@@ -60,9 +173,9 @@
           <Bonfire.UI.Common.OpenModalLive id={Pointers.ULID.generate()} title_text={l("Boundary details")}>
             <div class="text-sm">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div>
             <:open_btn>
-              <div class="flex items-center w-full gap-2">
-                <Icon iconify="material-symbols:settings" class="w-4 h-4 text-neutral-content/80" />
-                <span class="">{l("Custom")}</span>
+              <div class="flex items-center w-full gap-2 place-content-center">
+                <Icon  iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
+                <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Custom")}</span>
               </div>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>

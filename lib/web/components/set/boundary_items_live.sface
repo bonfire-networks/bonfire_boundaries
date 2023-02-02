@@ -10,7 +10,7 @@
       <div class="text-sm font-medium text-base-content">{e(data, :name, nil) || if is_tuple(data), do: elem(data, 1), else: data}</div>
     </div>
 
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1">
       <Bonfire.Boundaries.Web.BoundaryDetailsModalLive
         id={id}
         name={e(data, :name, nil) || if is_tuple(data), do: elem(data, 1), else: data}
@@ -20,9 +20,9 @@
           value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
           target: "#smart_input"
         )}
-        class="rounded btn btn-error btn-sm btn-outline btn-square opacity-80"
+        class="rounded btn btn-sm btn-ghost btn-square opacity-80"
       >
-        <Icon solid="Minus" class="w-4 h-4" />
+        <Icon solid="Trash" class="w-4 h-4 text-base-content/70" />
       </div>
     </div>
   </div>
@@ -46,7 +46,7 @@
           <div class="text-sm font-medium text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
         </div>
     {/case}
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1">
       <Bonfire.Boundaries.Web.RolesDropdownLive circle_id={id} />
 
       <div
@@ -54,9 +54,9 @@
           value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
           target: "#smart_input"
         )}
-        class="rounded btn btn-error btn-sm btn-outline btn-square opacity-80"
+        class="rounded btn btn-sm btn-ghost btn-square opacity-80"
       >
-        <Icon solid="Minus" class="w-4 h-4" />
+        <Icon solid="Trash" class="w-4 h-4 text-base-content/70" />
       </div>
     </div>
     <!-- <div aria-haspopup="true" class="dropdown dropdown-top dropdown-end">
