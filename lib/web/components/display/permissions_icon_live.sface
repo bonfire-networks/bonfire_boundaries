@@ -6,10 +6,11 @@
     {#match {name, extra} = _role}
       {#case name}
         {#match "Caretaker"}
-          <Bonfire.UI.Common.OpenModalLive 
-            open_btn_wrapper_class={"!py-1 !px-3"}
+          <Bonfire.UI.Common.OpenModalLive
+            open_btn_wrapper_class="!py-1 !px-3"
             no_actions
-            id={Pointers.ULID.generate()}>
+            id={Pointers.ULID.generate()}
+          >
             <div class="">
               <div class="flex items-center gap-2">
                 <div class="text-base font-medium">{l("Caretaker defails")}</div>
@@ -28,26 +29,28 @@
                 </div>
               </div> -->
               <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l "Allowed actions"}</div>
-                <div class="w-full prose-sm prose">{l "As caretaker you own full control over the activity and have the right to perform any action over it."}</div>
+                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
+                <div class="w-full prose-sm prose">{l(
+                    "As caretaker you own full control over the activity and have the right to perform any action over it."
+                  )}</div>
               </div>
-            </div>            
+            </div>
             <:open_btn>
               <div class="flex items-center w-full gap-3">
                 <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
                 <div class="">
                   <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Caretaker")}</span>
-                  <div class="text-xs text-neutral-content/80">{l "Full permissions"}</div>
+                  <div class="text-xs text-neutral-content/80">{l("Full permissions")}</div>
                 </div>
               </div>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
         {#match "Read"}
-          <Bonfire.UI.Common.OpenModalLive 
+          <Bonfire.UI.Common.OpenModalLive
             id={Pointers.ULID.generate()}
             no_actions
-            open_btn_wrapper_class={"!py-1 !px-3"}
-            >
+            open_btn_wrapper_class="!py-1 !px-3"
+          >
             <div class="">
               <div class="flex items-center gap-2">
                 <div class="text-base font-medium">{l("Reader details")}</div>
@@ -66,7 +69,7 @@
                 </div>
               </div>
               <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l "Allowed actions"}</div>
+                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
                 <div class="gap-4 columns-3">
                   <div :for={item <- extra} class="flex items-center gap-3 mb-3">
                     <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
@@ -80,17 +83,18 @@
                 <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
                 <div class="">
                   <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Reader")}</span>
-                  <div class="text-xs text-neutral-content/80">{l "View only"}</div>
+                  <div class="text-xs text-neutral-content/80">{l("View only")}</div>
                 </div>
               </div>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
         {#match "Participant"}
-          <Bonfire.UI.Common.OpenModalLive 
+          <Bonfire.UI.Common.OpenModalLive
             no_actions
-            open_btn_wrapper_class={"!py-1 !px-3"}
-            id={Pointers.ULID.generate()} 
-            title_text={l("Boundary details")}>
+            open_btn_wrapper_class="!py-1 !px-3"
+            id={Pointers.ULID.generate()}
+            title_text={l("Boundary details")}
+          >
             <div class="">
               <div class="flex items-center gap-2">
                 <div class="text-base font-medium">{l("Reader details")}</div>
@@ -109,7 +113,7 @@
                 </div>
               </div>
               <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l "Allowed actions"}</div>
+                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
                 <div class="gap-4 columns-3">
                   <div :for={item <- extra} class="flex items-center gap-3 mb-3">
                     <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
@@ -123,16 +127,17 @@
                 <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
                 <div class="">
                   <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Participant")}</span>
-                  <div class="text-xs text-neutral-content/80">{l "Can reply"}</div>
+                  <div class="text-xs text-neutral-content/80">{l("Can reply")}</div>
                 </div>
               </div>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
         {#match "Interact"}
-          <Bonfire.UI.Common.OpenModalLive 
+          <Bonfire.UI.Common.OpenModalLive
             no_actions
-            open_btn_wrapper_class={"!py-1 !px-3"}
-            id={Pointers.ULID.generate()}>
+            open_btn_wrapper_class="!py-1 !px-3"
+            id={Pointers.ULID.generate()}
+          >
             <div class="">
               <div class="flex items-center gap-2">
                 <div class="text-base font-medium">{l("Reader details")}</div>
@@ -151,7 +156,7 @@
                 </div>
               </div>
               <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l "Allowed actions"}</div>
+                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
                 <div class="gap-4 columns-3">
                   <div :for={item <- extra} class="flex items-center gap-3 mb-3">
                     <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
@@ -161,18 +166,19 @@
               </div>
             </div>
             <div class="flex items-center w-full gap-3">
-                <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
-                <div class="">
-                  <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Interact")}</span>
-                  <div class="text-xs text-neutral-content/80">{l "Can see and react"}</div>
-                </div>
+              <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
+              <div class="">
+                <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Interact")}</span>
+                <div class="text-xs text-neutral-content/80">{l("Can see and react")}</div>
               </div>
+            </div>
           </Bonfire.UI.Common.OpenModalLive>
         {#match "Custom"}
-          <Bonfire.UI.Common.OpenModalLive 
+          <Bonfire.UI.Common.OpenModalLive
             no_actions
-            open_btn_wrapper_class={"!py-1 !px-3"}
-            id={Pointers.ULID.generate()}>
+            open_btn_wrapper_class="!py-1 !px-3"
+            id={Pointers.ULID.generate()}
+          >
             <!-- <div class="text-sm">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div> -->
             <div class="">
               <div class="flex items-center gap-2">
@@ -192,7 +198,7 @@
                 </div>
               </div>
               <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l "Allowed actions"}</div>
+                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
                 <div class="gap-4 columns-3">
                   <div :for={item <- extra} class="flex items-center gap-3 mb-3">
                     <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
@@ -206,17 +212,17 @@
                 <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
                 <div class="">
                   <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Custom")}</span>
-                  <div class="text-xs text-neutral-content/80">{l "Discover more"}</div>
+                  <div class="text-xs text-neutral-content/80">{l("Discover more")}</div>
                 </div>
               </div>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
         {#match _}
-          <Bonfire.UI.Common.OpenModalLive 
-            id={Pointers.ULID.generate()} 
+          <Bonfire.UI.Common.OpenModalLive
+            id={Pointers.ULID.generate()}
             no_actions
-            open_btn_wrapper_class={"!py-1 !px-3"}
-            >
+            open_btn_wrapper_class="!py-1 !px-3"
+          >
             <div class="">
               <div class="flex items-center gap-2">
                 <div class="text-base font-medium">{l("Custom")}</div>
@@ -235,7 +241,7 @@
                 </div>
               </div>
               <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l "Allowed actions"}</div>
+                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
                 <div class="gap-4 columns-3">
                   <div :for={item <- extra} class="flex items-center gap-3 mb-3">
                     <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
@@ -249,7 +255,7 @@
                 <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
                 <div class="">
                   <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Custom")}</span>
-                  <div class="text-xs text-neutral-content/80">{l "Discover more"}</div>
+                  <div class="text-xs text-neutral-content/80">{l("Discover more")}</div>
                 </div>
               </div>
             </:open_btn>
