@@ -235,6 +235,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         contribute: verbs_contribute,
         caretaker: all_verb_names
       ],
+      role_to_grant: [
+        default: :participate
+      ],
       verbs_to_grant: [
         default: verbs_participate_and_message,
         message: verbs_participate_message_minus_boost

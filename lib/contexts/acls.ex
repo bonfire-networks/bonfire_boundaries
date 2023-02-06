@@ -82,10 +82,12 @@ defmodule Bonfire.Boundaries.Acls do
         acl_id = ULID.generate()
         controlled = [%{acl_id: acl_id} | acls]
 
+        # default_role = e(opts, :role_to_grant, nil) || Config.get!([:role_to_grant, :default])
+
         custom_grants =
           (e(opts, :verbs_to_grant, nil) ||
              Config.get!([:verbs_to_grant, :default]))
-          |> debug("verbs_to_grant")
+          |> debug("default verbs_to_grant")
           |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ...))
 
         # |> debug("on-the-fly ACLs to create")
@@ -123,14 +125,28 @@ defmodule Bonfire.Boundaries.Acls do
        List.wrap(mentions_grants(changeset, preset, opts)) ++
        List.wrap(maybe_custom_circles_or_users(opts)))
     |> debug("custom_recipients")
-    |> Enum.uniq()
+    |> Enum.map(fn
+      {subject, role} -> {subject, role}
+      subject -> {subject, nil}
+    end)
+    |> Enum.sort_by(fn {_subject, role} -> role end, :desc)
+    |> debug()
+    |> Enum.uniq_by(fn {subject, _role} -> subject end)
+    |> debug()
     |> filter_empty([])
   end
 
   defp maybe_custom_circles_or_users(opts) do
     Enum.map(maybe_from_opts(opts, :to_circles, []), fn
-      {key, val} -> ulid(key) || ulid(val)
-      val -> ulid(val)
+      {key, val} ->
+        # with custom role 
+        case ulid(key) do
+          nil -> {ulid(val), key}
+          subject_id -> {subject_id, val}
+        end
+
+      val ->
+        ulid(val)
     end)
   end
 
@@ -251,8 +267,11 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
-  defp grant_to({subject_id, role}, acl_id, default_verbs) do
-    with {:ok, role_verbs} <- Verbs.verbs_for_role(role) do
+  defp grant_to({subject_id, nil}, acl_id, default_verbs),
+    do: grant_to(subject_id, acl_id, default_verbs)
+
+  defp grant_to({subject_id, role}, acl_id, _default_verbs) do
+    with {:ok, role_verbs} <- Verbs.verbs_for_role(role) |> debug("verbs for role") do
       grant_to(subject_id, acl_id, role_verbs)
     else
       e ->
