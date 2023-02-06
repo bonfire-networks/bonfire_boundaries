@@ -4,263 +4,67 @@
 >
   {#case @boundary_tuple || Bonfire.Boundaries.preset_boundary_role_from_acl(@object_boundary)}
     {#match {name, extra} = _role}
-      {#case name}
-        {#match "Caretaker"}
-          <Bonfire.UI.Common.OpenModalLive
-            open_btn_wrapper_class="!py-1 !px-3"
-            no_actions
-            id={Pointers.ULID.generate()}
-          >
-            <div class="">
-              <div class="flex items-center gap-2">
-                <div class="text-base font-medium">{l("Caretaker defails")}</div>
-              </div>
-              <!-- <div class="p-4 my-6 rounded-md bg-info/10">
-                <div class="flex">
-                  <div class="flex-shrink-0">
-                    <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-                  </div>
-                  <div class="flex-1 ml-3 md:flex md:justify-between">
-                    <p class="text-sm text-info">
-                      {l(
-                        "These permissions are set by the activity Caretaker. They specify which actions you can perform on this activity."
-                      )}</p>
-                  </div>
-                </div>
-              </div> -->
-              <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
-                <div class="w-full prose-sm prose">{l(
-                    "As caretaker you own full control over the activity and have the right to perform any action over it."
-                  )}</div>
-              </div>
+      <Bonfire.UI.Common.OpenModalLive
+        id={Pointers.ULID.generate()}
+        no_actions
+        open_btn_wrapper_class="!py-1 !px-3"
+      >
+        <div class="">
+          <div class="flex items-center gap-2">
+            <div class="text-base font-medium">{name || l("Custom")}</div>
+          </div>
+          {#if name == "Caretaker"}
+            <div class="gap-2 mt-4">
+              <div class="w-full prose-sm prose">{l(
+                  "As caretaker you have full control over this, including the right to perform any action on it, and to set its boundaries."
+                )}</div>
             </div>
-            <:open_btn>
-              <div class="flex items-center w-full gap-3">
-                <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
-                <div class="">
-                  <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Caretaker")}</span>
-                  <div class="text-xs text-neutral-content/80">{l("Full permissions")}</div>
+          {#else}
+            <div class="p-4 my-6 rounded-md bg-info/10">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
                 </div>
-              </div>
-            </:open_btn>
-          </Bonfire.UI.Common.OpenModalLive>
-        {#match "Read"}
-          <Bonfire.UI.Common.OpenModalLive
-            id={Pointers.ULID.generate()}
-            no_actions
-            open_btn_wrapper_class="!py-1 !px-3"
-          >
-            <div class="">
-              <div class="flex items-center gap-2">
-                <div class="text-base font-medium">{l("Reader details")}</div>
-              </div>
-              <div class="p-4 my-6 rounded-md bg-info/10">
-                <div class="flex">
-                  <div class="flex-shrink-0">
-                    <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-                  </div>
-                  <div class="flex-1 ml-3 md:flex md:justify-between">
-                    <p class="text-sm text-info">
-                      {l(
-                        "These permissions are set by the activity Caretaker. They specify which actions you can perform on this activity."
-                      )}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
-                <div class="gap-4 columns-3">
-                  <div :for={item <- extra} class="flex items-center gap-3 mb-3">
-                    <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
-                    <div class="text-sm font-medium traking-wide text-base-content/80">{item}</div>
-                  </div>
+                <div class="flex-1 ml-3 md:flex md:justify-between">
+                  <p class="text-sm text-info">
+                    {l(
+                      "These permissions are set by the activity Caretaker. They specify which actions you can perform on this activity."
+                    )}</p>
                 </div>
               </div>
             </div>
-            <:open_btn>
-              <div class="flex items-center w-full gap-3">
-                <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
-                <div class="">
-                  <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Reader")}</span>
-                  <div class="text-xs text-neutral-content/80">{l("View only")}</div>
-                </div>
-              </div>
-            </:open_btn>
-          </Bonfire.UI.Common.OpenModalLive>
-        {#match "Participant"}
-          <Bonfire.UI.Common.OpenModalLive
-            no_actions
-            open_btn_wrapper_class="!py-1 !px-3"
-            id={Pointers.ULID.generate()}
-            title_text={l("Boundary details")}
-          >
-            <div class="">
-              <div class="flex items-center gap-2">
-                <div class="text-base font-medium">{l("Reader details")}</div>
-              </div>
-              <div class="p-4 my-6 rounded-md bg-info/10">
-                <div class="flex">
-                  <div class="flex-shrink-0">
-                    <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-                  </div>
-                  <div class="flex-1 ml-3 md:flex md:justify-between">
-                    <p class="text-sm text-info">
-                      {l(
-                        "These permissions are set by the activity Caretaker. They specify which actions you can perform on this activity."
-                      )}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
-                <div class="gap-4 columns-3">
-                  <div :for={item <- extra} class="flex items-center gap-3 mb-3">
-                    <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
-                    <div class="text-sm font-medium traking-wide text-base-content/80">{item}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <:open_btn>
-              <div class="flex items-center w-full gap-3">
-                <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
-                <div class="">
-                  <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Participant")}</span>
-                  <div class="text-xs text-neutral-content/80">{l("Can reply")}</div>
-                </div>
-              </div>
-            </:open_btn>
-          </Bonfire.UI.Common.OpenModalLive>
-        {#match "Interact"}
-          <Bonfire.UI.Common.OpenModalLive
-            no_actions
-            open_btn_wrapper_class="!py-1 !px-3"
-            id={Pointers.ULID.generate()}
-          >
-            <div class="">
-              <div class="flex items-center gap-2">
-                <div class="text-base font-medium">{l("Reader details")}</div>
-              </div>
-              <div class="p-4 my-6 rounded-md bg-info/10">
-                <div class="flex">
-                  <div class="flex-shrink-0">
-                    <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-                  </div>
-                  <div class="flex-1 ml-3 md:flex md:justify-between">
-                    <p class="text-sm text-info">
-                      {l(
-                        "These permissions are set by the activity Caretaker. They specify which actions you can perform on this activity."
-                      )}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
-                <div class="gap-4 columns-3">
-                  <div :for={item <- extra} class="flex items-center gap-3 mb-3">
-                    <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
-                    <div class="text-sm font-medium traking-wide text-base-content/80">{item}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center w-full gap-3">
-              <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
+            <div class="gap-2 mt-4">
+              <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
               <div class="">
-                <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Interact")}</span>
-                <div class="text-xs text-neutral-content/80">{l("Can see and react")}</div>
+                <div :for={verb_name <- extra} class="flex items-center gap-3 mb-3">
+                  {#case Bonfire.Boundaries.Verbs.get(verb_name)}
+                    {#match nil}
+                      <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/70" />
+                      <div class="text-sm font-medium traking-wide text-base-content/80">{verb_name}</div>
+                    {#match verb}
+                      <Icon
+                        iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+                        class="w-4 h-4 text-base-content/70"
+                        fill="currentColor"
+                      />
+                      <div class="text-sm font-medium traking-wide text-base-content/80">{e(verb, :verb, nil) || verb_name}</div>
+                      <div class="text-xs text-base-content/70">{e(verb, :summary, nil)}</div>
+                  {/case}
+                </div>
               </div>
             </div>
-          </Bonfire.UI.Common.OpenModalLive>
-        {#match "Custom"}
-          <Bonfire.UI.Common.OpenModalLive
-            no_actions
-            open_btn_wrapper_class="!py-1 !px-3"
-            id={Pointers.ULID.generate()}
-          >
-            <!-- <div class="text-sm">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div> -->
+          {/if}
+        </div>
+        <:open_btn>
+          <div class="flex items-center w-full gap-3">
+            <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
             <div class="">
-              <div class="flex items-center gap-2">
-                <div class="text-base font-medium">{l("Custom")}</div>
-              </div>
-              <div class="p-4 my-6 rounded-md bg-info/10">
-                <div class="flex">
-                  <div class="flex-shrink-0">
-                    <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-                  </div>
-                  <div class="flex-1 ml-3 md:flex md:justify-between">
-                    <p class="text-sm text-info">
-                      {l(
-                        "These permissions are set by the activity Caretaker. They specify which actions you can perform on this activity."
-                      )}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
-                <div class="gap-4 columns-3">
-                  <div :for={item <- extra} class="flex items-center gap-3 mb-3">
-                    <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
-                    <div class="text-sm font-medium traking-wide text-base-content/80">{item}</div>
-                  </div>
-                </div>
-              </div>
+              <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{name || l("Custom")}</span>
+              <div class="text-xs text-neutral-content/80">{l("Details")}</div>
             </div>
-            <:open_btn>
-              <div class="flex items-center w-full gap-3">
-                <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
-                <div class="">
-                  <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Custom")}</span>
-                  <div class="text-xs text-neutral-content/80">{l("Discover more")}</div>
-                </div>
-              </div>
-            </:open_btn>
-          </Bonfire.UI.Common.OpenModalLive>
-        {#match _}
-          <Bonfire.UI.Common.OpenModalLive
-            id={Pointers.ULID.generate()}
-            no_actions
-            open_btn_wrapper_class="!py-1 !px-3"
-          >
-            <div class="">
-              <div class="flex items-center gap-2">
-                <div class="text-base font-medium">{l("Custom")}</div>
-              </div>
-              <div class="p-4 my-6 rounded-md bg-info/10">
-                <div class="flex">
-                  <div class="flex-shrink-0">
-                    <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-                  </div>
-                  <div class="flex-1 ml-3 md:flex md:justify-between">
-                    <p class="text-sm text-info">
-                      {l(
-                        "These permissions are set by the activity Caretaker. They specify which actions you can perform on this activity."
-                      )}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="gap-2 mt-4">
-                <div class="mb-4 text-xs font-light tracking-wider uppercase text-base-content/70">{l("Allowed actions")}</div>
-                <div class="gap-4 columns-3">
-                  <div :for={item <- extra} class="flex items-center gap-3 mb-3">
-                    <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/80" />
-                    <div class="text-sm font-medium traking-wide text-base-content/80">{item}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <:open_btn>
-              <div class="flex items-center w-full gap-3">
-                <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
-                <div class="">
-                  <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{l("Custom")}</span>
-                  <div class="text-xs text-neutral-content/80">{l("Discover more")}</div>
-                </div>
-              </div>
-            </:open_btn>
-          </Bonfire.UI.Common.OpenModalLive>
-      {/case}
+          </div>
+        </:open_btn>
+      </Bonfire.UI.Common.OpenModalLive>
       <!-- </div> -->
       <!-- <div class="template" style="display: none;">
           <div class="flex p-2 bg-neutral rounded shadow max-w-[200px] items-start gap-2">

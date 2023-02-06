@@ -6,6 +6,7 @@
 />
 <Bonfire.Boundaries.Web.PermissionsIconLive
   object_boundary={@object_boundary}
+  scope={@scope}
   boundary_tuple={@boundary_tuple}
   with_icon={@with_icon}
   with_label={@with_label}

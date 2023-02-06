@@ -1,6 +1,7 @@
 <span>
   <Bonfire.Boundaries.Web.BoundaryIconStatelessLive
     object_boundary={@object_boundary}
+    scope={@scope}
     with_icon={@with_icon}
     with_label={@with_label}
     class={@class}

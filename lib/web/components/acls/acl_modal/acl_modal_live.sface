@@ -25,18 +25,33 @@
           "flex items-center justify-between gap-6 py-5 px-3",
           "bg-base-content/5": e(l, :value, nil) == nil
         }>
-          <div class="flex-1">
-            <div class="flex flex-col">
-              <div class="flex-1 text-sm font-medium">
-                {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
+          {#case Bonfire.Boundaries.Verbs.get(verb_id)}
+            {#match nil}
+              <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/70" />
+
+              <div class="flex-1">
+                <div class="flex flex-col">
+                  <div class="flex-1 text-sm font-medium">
+                    {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
+                  </div>
+                </div>
               </div>
-              {#case Bonfire.Boundaries.Verbs.get(verb_id)}
-                {#match nil}
-                {#match verb}
+            {#match verb}
+              <Icon
+                iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+                class="w-4 h-4 text-base-content/70"
+                fill="currentColor"
+              />
+
+              <div class="flex-1">
+                <div class="flex flex-col">
+                  <div class="flex-1 text-sm font-medium">
+                    {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
+                  </div>
                   <p class="text-xs text-base-content/80">{e(verb, :summary, nil)}</p>
-              {/case}
-            </div>
-          </div>
+                </div>
+              </div>
+          {/case}
 
           <div class="flex items-end px-2 py-1 mt-px">
             <Bonfire.Boundaries.Web.YesMaybeFalseLive

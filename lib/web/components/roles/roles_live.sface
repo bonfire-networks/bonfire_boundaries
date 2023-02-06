@@ -37,20 +37,26 @@
         <div x-cloak x-show="open" x-collapse>
           <div class="p-3 bg-base-content/5">
             <ul class="flex flex-col divide-y divide-base-300">
-              <li :for={verb <- verbs} class="flex items-center justify-between gap-8 p-3">
+              <li :for={verb_name <- verbs} class="flex items-center justify-between gap-8 p-3">
                 <div class="flex flex-col gap-0.5">
-                  {#case Bonfire.Boundaries.Verbs.get(verb)}
+                  {#case Bonfire.Boundaries.Verbs.get(verb_name)}
                     {#match nil}
                       <div class="flex-1 text-sm font-semibold capitalize">
-                        {verb}
+                        <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/70" />
+                        {verb_name}
                       </div>
-                    {#match verb_details}
+                    {#match verb}
                       <div class="flex items-center gap-2">
+                        <Icon
+                          iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+                          class="w-4 h-4 text-base-content/70"
+                          fill="currentColor"
+                        />
                         <div class="flex-1 text-sm font-semibold capitalize">
-                          {e(verb_details, :verb, nil) || verb}
+                          {e(verb, :verb, nil) || verb}
                         </div>
                       </div>
-                      <div class="text-sm text-base-content/70">{e(verb_details, :summary, nil)}</div>
+                      <div class="text-xs text-base-content/70">{e(verb, :summary, nil)}</div>
                   {/case}
                 </div>
                 <Bonfire.Boundaries.Web.YesMaybeFalseLive value read_only />

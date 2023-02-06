@@ -4,6 +4,7 @@ defmodule Bonfire.Boundaries.Web.PermissionsIconLive do
   # Tip: use `BoundaryIconLive` unless you don't want to preload boundaries, and instead a parent component is providing the `object_boundary` data
   prop object_boundary, :any, default: nil
   prop boundary_tuple, :any, default: nil
+  prop scope, :atom, default: nil
 
   prop with_icon, :boolean, default: false
   prop with_label, :boolean, default: false
