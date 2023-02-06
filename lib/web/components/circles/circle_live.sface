@@ -33,15 +33,15 @@
               character={e(member, :subject, :character, nil) || e(member, :character, nil) || member}
             />
           </th>
-          <td class="flex items-end">
+          <td class="flex items-end justify-end mt-1">
             <button
               :if={!@read_only}
-              class="flex items-center normal-case rounded btn btn-error btn-xs"
+              class="flex items-center normal-case rounded btn btn-square btn-sm"
               phx-value-subject={id}
               :on-click="remove"
             >
-              <!-- <Icon solid="Minus" class="mr-2" /> -->
-              <span>{l("Remove")}</span>
+              <Icon solid="Trash" class="w-4 h-4" />
+              <!-- <span>{l("Remove")}</span> -->
             </button>
           </td>
         </tr>
