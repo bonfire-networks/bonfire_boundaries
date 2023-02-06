@@ -12,7 +12,7 @@
 
     <Bonfire.UI.Common.ProfileItemLive
       wrapper_class="flex items-center justify-between"
-      profile={e(current_user(@__context__), :profile, nil)}
+      profile={e(current_user(@__context__), :profile, %{name: l("Me")})}
       character={e(current_user(@__context__), :character, nil)}
       show_controls={[]}
     >
