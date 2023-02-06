@@ -95,7 +95,7 @@
           />
         </div>
         <div class="pt-4">
-          <Dynamic.Component
+          <Dynamic.LiveComponent
             :if={module_enabled?(Bonfire.Boundaries.Web.RolesLive) and @current_user}
             module={Bonfire.Boundaries.Web.RolesLive}
             id="roles"
