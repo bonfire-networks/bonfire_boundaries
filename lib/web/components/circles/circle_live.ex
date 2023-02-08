@@ -15,6 +15,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   prop showing_within, :atom, default: nil
   prop feedback_title, :string, default: nil
   prop feedback_message, :string, default: nil
+  prop read_only, :boolean, default: false
 
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})
@@ -46,7 +47,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
       )
 
     with {:ok, circle} <-
-           Circles.get_for_caretaker(id, current_user)
+           Circles.get_for_caretaker(id, current_user, scope: e(socket.assigns, :scope, nil))
            |> repo().maybe_preload(encircles: [subject: [:profile, :character]]) do
       debug(circle, "circle")
 
@@ -98,7 +99,8 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
              stereotype_id: stereotype_id,
              #  suggestions: suggestions,
              read_only:
-               e(circle, :stereotyped, :stereotype_id, nil) in @follow_stereotypes or
+               e(socket.assigns, :read_only, nil) ||
+                 e(circle, :stereotyped, :stereotype_id, nil) in @follow_stereotypes ||
                  ulid(circle) in @follow_stereotypes
            ]}
         ]

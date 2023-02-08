@@ -19,7 +19,7 @@
                 <div class="flex-1 ml-3 md:flex md:justify-between">
                   <p class="text-sm text-info">
                     {l(
-                      "Boundaries are used to define and enforce rules around access and permissions to content or functionality. A boundary can apply to one or more users and circles."
+                      "Boundaries define and enforce rules that can be used to control access and permissions to content or functionality. A boundary can apply to one or more users and circles."
                     )}</p>
                 </div>
               </div>

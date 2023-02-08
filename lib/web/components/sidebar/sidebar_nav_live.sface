@@ -27,7 +27,7 @@
           "text-sm text-base-content/80",
           "font-semibold": @showing_within == :dashboard
         }>{l("Circles")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Group your contacts based on shared characteristics")}</p>
       </div>
     </LiveRedirect>
   </li>
@@ -57,7 +57,7 @@
           "text-sm text-base-content/80",
           "font-semibold": @showing_within == :dashboard
         }>{l("Roles")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define sets of permissions which you can assign to users and circles")}</p>
       </div>
     </LiveRedirect>
   </li>
@@ -87,7 +87,7 @@
           "text-sm text-base-content/80",
           "font-semibold": @showing_within == :dashboard
         }>{l("Boundaries")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define and enforce rules for access and permissions to content or functionality")}</p>
       </div>
     </LiveRedirect>
   </li>

@@ -6,7 +6,7 @@
       </div>
       <div class="flex-1 ml-3 md:flex md:justify-between">
         <p class="text-sm text-info">
-          {l("Roles are a way to group permissions together. You can assign roles to users and circles.")}</p>
+          {l("Roles define sets of permissions which you can assign to users and circles")}</p>
       </div>
     </div>
   </div>

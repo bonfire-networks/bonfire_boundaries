@@ -294,7 +294,7 @@ defmodule Bonfire.Boundaries.Circles do
       {:ok, circle}
     else
       {:error, :not_found} ->
-        if is_admin?(caretaker),
+        if is_admin?(caretaker) || opts[:scope] == :instance_wide,
           do:
             repo().single(
               get_for_caretaker_q(

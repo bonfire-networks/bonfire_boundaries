@@ -58,6 +58,7 @@
       scope={@scope}
       setting_boundaries={false}
       showing_within={@block_type}
+      read_only={@read_only}
     />
   </div>
 {#else}
@@ -124,6 +125,7 @@
       scope={@scope}
       setting_boundaries={false}
       showing_within={@block_type}
+      read_only={@read_only}
     />
     <!-- </div>
   </div> -->

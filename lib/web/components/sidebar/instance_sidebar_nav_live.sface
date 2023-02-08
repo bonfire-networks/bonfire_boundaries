@@ -23,7 +23,7 @@
           "text-sm text-base-content/80",
           "font-semibold": @showing_within == :dashboard
         }>{l("Instance Circles")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Group users based on shared characteristics or roles")}</p>
       </div>
     </LiveRedirect>
   </li>
@@ -34,7 +34,7 @@
       "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
         @showing_within == :dashboard
     }
-    :if={Settings.get(:experimental_features_enabled, false, @__context__)}
+    :if={Bonfire.Boundaries.can?(@__context__, :assign, :instance)}
   >
     <LiveRedirect
       to={~p"/boundaries/instance_acls"}
@@ -52,7 +52,7 @@
           "text-sm text-base-content/80",
           "font-semibold": @showing_within == :dashboard
         }>{l("Instance Boundaries")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define and enforce instance-wide rules for access and permissions to content or functionality")}</p>
       </div>
     </LiveRedirect>
   </li>
@@ -63,7 +63,7 @@
       "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
         @showing_within == :dashboard
     }
-    :if={Bonfire.Boundaries.can?(@__context__, :configure, :instance)}
+    :if={Bonfire.Boundaries.can?(@__context__, :assign, :instance)}
   >
     <LiveRedirect
       to={~p"/boundaries/instance_acl"}
@@ -81,7 +81,7 @@
           "text-sm text-base-content/80",
           "font-semibold": @showing_within == :dashboard
         }>{l("Instance Permissions")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define which circles or users can control different aspects of the instance")}</p>
       </div>
     </LiveRedirect>
   </li>
@@ -110,7 +110,7 @@
           "text-sm text-base-content/80",
           "font-semibold": @showing_within == :dashboard
         }>{l("Ghosted instance-wide")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>...</p>
       </div>
     </LiveRedirect>
   </li>
@@ -138,7 +138,7 @@
           "text-sm text-base-content/80",
           "font-semibold": @showing_within == :dashboard
         }>{l("Silenced instance-wide")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Circles are user defined group of users that shares similar characteristic")}</p>
+        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>...</p>
       </div>
     </LiveRedirect>
   </li> -->

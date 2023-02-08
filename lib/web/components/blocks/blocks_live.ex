@@ -12,9 +12,14 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
     tab = e(assigns, :selected_tab, nil)
 
     scope =
-      if Integration.is_admin?(current_user) ||
-           Bonfire.Boundaries.can?(current_user, :block, :instance),
-         do: e(assigns, :scope, nil)
+      e(assigns, :scope, nil)
+      |> debug("scope")
+
+    read_only =
+      (scope == :instance_wide and
+         (Integration.is_admin?(current_user) ||
+            Bonfire.Boundaries.can?(current_user, :block, :instance)) != true)
+      |> debug("read_only?")
 
     block_type = if tab == "ghosted", do: :ghost, else: :silence
 
@@ -25,8 +30,7 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
         Bonfire.Boundaries.Blocks.user_block_circles(scope || current_user, block_type)
       end
       |> List.first()
-
-    # |> debug("ccircle")
+      |> debug("ccircle")
 
     # circle = Bonfire.Boundaries.Blocks.list(block_type, scope || current_user)
 
@@ -48,6 +52,7 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
        scope: scope,
        page: tab,
        selected_tab: tab,
+       read_only: read_only,
        block_type: block_type,
        # page_title: l("Blocks")<>" - #{scope} #{tab}",
        current_user: current_user,
