@@ -137,7 +137,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp maybe_custom_circles_or_users(opts) do
-    Enum.map(maybe_from_opts(opts, :to_circles, []), fn
+    Enum.map(List.wrap(maybe_from_opts(opts, :to_circles, [])), fn
       {key, val} ->
         # with custom role 
         case ulid(key) do
@@ -546,9 +546,9 @@ defmodule Bonfire.Boundaries.Acls do
   def find_caretaker_stereotypes(caretaker, stereotypes) do
     from(a in Acl,
       join: c in Caretaker,
-      on: a.id == c.id and c.caretaker_id == ^ulid(caretaker),
+      on: a.id == c.id and c.caretaker_id == ^ulid!(caretaker),
       join: s in Stereotyped,
-      on: a.id == s.id and s.stereotype_id in ^stereotypes,
+      on: a.id == s.id and s.stereotype_id in ^ulids(stereotypes),
       preload: [caretaker: c, stereotyped: s]
     )
     |> repo().all()

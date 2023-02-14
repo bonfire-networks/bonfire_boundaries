@@ -6,6 +6,11 @@ defmodule Bonfire.Boundaries.Blocks do
   # alias Bonfire.Data.AccessControl.Grant
   # alias Bonfire.Data.Identity.Caretaker
 
+  def federation_module,
+    do: [
+      "Block"
+    ]
+
   def types_blocked(types) when is_list(types) do
     Enum.flat_map(types, &types_blocked/1) |> Enum.uniq()
   end
@@ -25,15 +30,33 @@ defmodule Bonfire.Boundaries.Blocks do
   @doc """
   Block something for everyone on the instance (only for admins)
   """
-  def instance_wide_block(user_or_instance_to_block, block_type) do
+  def instance_wide_block(user_or_instance_to_block, block_type \\ nil) do
     block(user_or_instance_to_block, block_type, :instance_wide)
   end
 
-  def block(user_or_instance_to_block, block_type, opts) do
-    mutate(:block, user_or_instance_to_block, block_type, opts)
+  def block(user_or_instance_to_block, block_type \\ nil, opts) do
+    with {:ok, blocked} <- mutate(:block, user_or_instance_to_block, block_type, opts) do
+      if user_or_instance_to_block != :instance_wide do
+        me = Utils.current_user_required!(opts)
+        types_blocked = types_blocked(block_type)
+
+        # TODO: what about if I block and later unblock someone? they should probably not have to re-follow...
+        if :ghost_them in types_blocked do
+          debug("make the person I am ghosting unfollow me - TODO: do not federate this?")
+          Utils.maybe_apply(Bonfire.Social.Follows, :unfollow, [user_or_instance_to_block, me])
+        end
+
+        if :silence_them in types_blocked do
+          debug("unfollow the person I am silencing")
+          Utils.maybe_apply(Bonfire.Social.Follows, :unfollow, [me, user_or_instance_to_block])
+        end
+      end
+
+      {:ok, blocked}
+    end
   end
 
-  def unblock(user_or_instance_to_block, block_type, opts) do
+  def unblock(user_or_instance_to_block, block_type \\ nil, opts) do
     mutate(:unblock, user_or_instance_to_block, block_type, opts)
   end
 
@@ -234,5 +257,22 @@ defmodule Bonfire.Boundaries.Blocks do
     )
 
     nil
+  end
+
+  def ap_receive_activity(
+        blocker,
+        %{data: %{"type" => "Block"} = _data} = _activity,
+        %{data: %{}} = blocked
+      ) do
+    info("apply incoming Block")
+
+    with {:ok, blocked} <-
+           Bonfire.Federate.ActivityPub.AdapterUtils.get_character_by_ap_id(blocked) |> debug(),
+         {:ok, block} <- block(blocked, :all, current_user: blocker) |> debug() do
+      {:ok, block}
+    else
+      e ->
+        error(e)
+    end
   end
 end

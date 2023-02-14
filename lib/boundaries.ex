@@ -16,6 +16,7 @@ defmodule Bonfire.Boundaries do
   # alias Pointers.Pointer
   import Queries, only: [boundarise: 3]
   import Ecto.Query
+  import EctoSparkles
 
   def preset_name(boundaries) when is_list(boundaries) do
     debug(boundaries, "inputted")
@@ -68,21 +69,50 @@ defmodule Bonfire.Boundaries do
     |> Enum.map(& &1.acl)
   end
 
-  def my_grants_on(user, things) when not is_list(user),
-    do: my_grants_on([user], things)
+  def list_grants_on(things) do
+    from(s in Summary,
+      where: s.object_id in ^Types.ulids(things)
+    )
+    |> group_all_by_verb()
+  end
 
-  def my_grants_on(users, thing) when not is_list(thing),
-    do: my_grants_on(users, [thing])
+  @doc "eg: `list_grants_on(id, [:see, :read])`"
+  def list_grants_on(things, verbs) do
+    verb_ids =
+      List.wrap(verbs)
+      |> Enum.map(fn
+        slug when is_atom(slug) -> Verbs.get_id!(slug)
+        id when is_binary(id) or is_map(id) -> ulid(id)
+      end)
+
+    verb_names =
+      Enum.map(verb_ids, &Verbs.get(&1).verb)
+      |> Enum.sort()
+      |> debug()
+
+    from(s in Summary,
+      where: s.object_id in ^Types.ulids(things),
+      where: s.verb_id in ^verb_ids
+    )
+    |> proload([:subject])
+    |> group_all_by_verb()
+    |> Enum.filter(&(&1.verbs == verb_names))
+  end
 
   def my_grants_on(users, things) do
     from(s in Summary,
-      where: s.subject_id in ^Types.ulid(users),
-      where: s.object_id in ^Types.ulid(things)
+      where: s.subject_id in ^Types.ulids(users),
+      where: s.object_id in ^Types.ulids(things)
     )
+    |> group_all_by_verb()
+  end
+
+  defp group_all_by_verb(query) do
+    query
     |> repo().all()
     |> Enum.group_by(&{&1.subject_id, &1.object_id, &1.value})
     |> for({_k, [v | _] = vs} <- ...) do
-      Map.put(v, :verbs, Enum.sort(Enum.map(vs, &Verbs.get!(&1.verb_id).verb)))
+      Map.put(v, :verbs, Enum.map(vs, &Verbs.get!(&1.verb_id).verb) |> Enum.sort())
     end
 
     # |> Enum.map(&Map.take(&1, [:subject_id, :object_id, :verbs, :value]))

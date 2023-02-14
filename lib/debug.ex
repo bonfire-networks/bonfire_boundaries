@@ -2,7 +2,6 @@ defmodule Bonfire.Boundaries.Debug do
   use Arrows
   # import Untangle
   alias Bonfire.Boundaries
-  alias Bonfire.Boundaries.Summary
   alias Bonfire.Boundaries.Verbs
 
   alias Bonfire.Common.Utils
@@ -66,6 +65,18 @@ defmodule Bonfire.Boundaries.Debug do
 
   def debug_my_grants_on(users, things) do
     Boundaries.my_grants_on(users, things)
+    |> Enum.map(&Map.take(&1, [:subject_id, :object_id, :verbs, :value]))
+    |> Scribe.print()
+  end
+
+  def debug_grants_on(things) do
+    Boundaries.list_grants_on(things)
+    |> Enum.map(&Map.take(&1, [:subject_id, :object_id, :verbs, :value]))
+    |> Scribe.print()
+  end
+
+  def debug_grants_on(things, verbs) do
+    Boundaries.list_grants_on(things, verbs)
     |> Enum.map(&Map.take(&1, [:subject_id, :object_id, :verbs, :value]))
     |> Scribe.print()
   end
