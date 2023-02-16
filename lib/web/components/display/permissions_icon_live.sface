@@ -39,7 +39,7 @@
                 <div :for={verb_name <- extra} class="flex items-center gap-3 mb-3">
                   {#case Bonfire.Boundaries.Verbs.get(verb_name)}
                     {#match nil}
-                      <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-neutral-content/70" />
+                      <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
                       <div class="text-sm font-medium traking-wide text-base-content/80">{verb_name}</div>
                     {#match verb}
                       <Icon
