@@ -249,7 +249,7 @@ defmodule Bonfire.Boundaries do
     Config.get!(:user_default_boundaries)
   end
 
-  def can?(subject, can_verbs?, %{verbs: can_verbs!, value: true} = object_boundary)
+  def can?(_subject, can_verbs?, %{verbs: can_verbs!, value: true} = object_boundary)
       when is_list(can_verbs!) do
     warn(object_boundary, "WIP for preloaded object_boundary")
     Enum.all?(List.wrap(can_verbs?), &Enum.member?(can_verbs!, Verbs.get(&1)[:verb]))

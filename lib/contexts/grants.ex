@@ -14,7 +14,7 @@ defmodule Bonfire.Boundaries.Grants do
   alias Bonfire.Data.Identity.User
   # alias Bonfire.Data.AccessControl.Accesses
   alias Bonfire.Boundaries.Circles
-  alias Bonfire.Boundaries.Grants
+  # alias Bonfire.Boundaries.Grants
   alias Bonfire.Boundaries.Verbs
   alias Bonfire.Boundaries.Circles
 

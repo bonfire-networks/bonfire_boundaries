@@ -1,9 +1,9 @@
 defmodule Bonfire.Boundaries.Web.BoundariesLive do
   use Bonfire.UI.Common.Web, :surface_live_view
-  import Untangle
-  import Bonfire.Boundaries.Integration, only: [is_admin?: 1]
+  # import Untangle
+  # import Bonfire.Boundaries.Integration, only: [is_admin?: 1]
   alias Bonfire.UI.Me.LivePlugs
-  alias Bonfire.Boundaries.Circles
+  # alias Bonfire.Boundaries.Circles
 
   declare_extension(
     "Boundaries",

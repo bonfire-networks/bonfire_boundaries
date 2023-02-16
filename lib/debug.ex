@@ -9,7 +9,7 @@ defmodule Bonfire.Boundaries.Debug do
   alias Bonfire.Boundaries.Circles
 
   import Bonfire.Boundaries.Integration
-  import Ecto.Query, only: [from: 2]
+  # import Ecto.Query, only: [from: 2]
 
   defp get_user_acls(user) do
     Acls.list(current_user: user, skip_boundary_check: true)

@@ -1,6 +1,6 @@
 defmodule Bonfire.Boundaries.Acts.SetBoundaries do
   alias Bonfire.Epics
-  alias Bonfire.Epics.Act
+  # alias Bonfire.Epics.Act
   alias Bonfire.Epics.Epic
 
   alias Bonfire.Boundaries.Acls

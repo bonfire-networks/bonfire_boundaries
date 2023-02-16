@@ -15,9 +15,9 @@ defmodule Bonfire.Boundaries.Circles do
   alias Bonfire.Data.AccessControl.Encircle
 
   alias Bonfire.Data.Identity.Caretaker
-  alias Ecto.Changeset
+  # alias Ecto.Changeset
   alias Pointers.Changesets
-  alias Pointers.Pointer
+  # alias Pointers.Pointer
 
   # don't show "others who silenced me" in circles
   @default_q_opts [exclude_circles: ["0KF1NEY0VD0N0TWANTT0HEARME"]]
