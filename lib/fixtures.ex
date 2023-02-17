@@ -25,7 +25,7 @@ defmodule Bonfire.Boundaries.Fixtures do
       "0AND0MSTRANGERS0FF1NTERNET",
       "3SERSFR0MY0VR10CA11NSTANCE",
       "7EDERATEDW1THANACT1V1TYPVB",
-      admin_circle
+      admin_circle()
     ]
 
   def insert() do
@@ -77,6 +77,6 @@ defmodule Bonfire.Boundaries.Fixtures do
     |> info("Init built-in verbs and boundaries")
 
     # make the instance ACL control the instance object (which are the same)
-    Bonfire.Boundaries.Controlleds.add_acls(instance_acl, instance_acl)
+    Bonfire.Boundaries.Controlleds.add_acls(instance_acl(), instance_acl())
   end
 end

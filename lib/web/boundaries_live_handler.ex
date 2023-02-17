@@ -4,7 +4,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Acls
-  alias Bonfire.Boundaries.Grants
+  # alias Bonfire.Boundaries.Grants
 
   def handle_event("blocks", %{"id" => id} = attrs, socket)
       when is_binary(id) do
@@ -101,6 +101,14 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("circle_create", attrs, socket) do
     circle_create(attrs, socket)
+  end
+
+  def handle_event("acl_create", %{"name" => name} = attrs, socket) do
+    acl_create(Map.merge(attrs, %{named: %{name: name}}), socket)
+  end
+
+  def handle_event("acl_create", attrs, socket) do
+    acl_create(attrs, socket)
   end
 
   def handle_event("open_boundaries", _params, socket) do
@@ -217,17 +225,18 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
-  def handle_event("circle_soft_delete", _, socket) do
-    id = ulid!(e(socket.assigns, :circle, nil))
+  # TODO
+  # def handle_event("circle_soft_delete", _, socket) do
+  #   id = ulid!(e(socket.assigns, :circle, nil))
 
-    with {:ok, _circle} <-
-           Circles.soft_delete(id, current_user_required!(socket)) |> debug() do
-      {:noreply,
-       socket
-       |> assign_flash(:info, l("Archived"))
-       |> redirect_to("/boundaries/circles")}
-    end
-  end
+  #   with {:ok, _circle} <-
+  #          Circles.soft_delete(id, current_user_required!(socket)) |> debug() do
+  #     {:noreply,
+  #      socket
+  #      |> assign_flash(:info, l("Archived"))
+  #      |> redirect_to("/boundaries/circles")}
+  #   end
+  # end
 
   def handle_event("edit", attrs, socket) do
     with {:ok, circle} <-
@@ -298,14 +307,6 @@ defmodule Bonfire.Boundaries.LiveHandler do
             end) do
       {:noreply, assign_flash(socket, :info, status)}
     end
-  end
-
-  def handle_event("acl_create", %{"name" => name} = attrs, socket) do
-    acl_create(Map.merge(attrs, %{named: %{name: name}}), socket)
-  end
-
-  def handle_event("acl_create", attrs, socket) do
-    acl_create(attrs, socket)
   end
 
   def acl_create(attrs, socket) do

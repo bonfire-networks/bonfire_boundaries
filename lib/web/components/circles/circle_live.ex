@@ -56,7 +56,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
         |> Map.new()
         |> debug("members")
 
-      member_ids = Map.keys(members)
+      # member_ids = Map.keys(members)
       # |> debug
 
       # TODO: handle pagination
@@ -146,14 +146,14 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
   def do_handle_event(
         "remove",
-        %{"subject" => id} = attrs,
+        %{"subject" => id} = _attrs,
         %{assigns: %{showing_within: showing_within}} = socket
       )
       when not is_nil(showing_within) and is_binary(id) do
     LiveHandler.unblock(id, showing_within, socket.assigns[:scope], socket)
   end
 
-  def do_handle_event("remove", %{"subject" => id} = attrs, socket) when is_binary(id) do
+  def do_handle_event("remove", %{"subject" => id} = _attrs, socket) when is_binary(id) do
     with {1, _} <-
            Circles.remove_from_circles(id, e(socket.assigns, :circle, nil)) do
       {:noreply,
@@ -183,7 +183,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
         )
 
   def handle_info(%LiveSelect.ChangeMsg{text: search} = change_msg, socket) do
-    current_user = current_user(socket)
+    # current_user = current_user(socket)
 
     Bonfire.Me.Users.search(search)
     |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()

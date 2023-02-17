@@ -1,11 +1,11 @@
 defmodule Bonfire.Boundaries.Web.RolesLive do
   use Bonfire.UI.Common.Web, :stateful_component
-  alias Bonfire.Boundaries.LiveHandler
-  alias Bonfire.Boundaries.Integration
+  # alias Bonfire.Boundaries.LiveHandler
+  # alias Bonfire.Boundaries.Integration
 
   def update(assigns, socket) do
-    current_user = current_user(assigns)
-    params = e(assigns, :__context__, :current_params, %{})
+    # current_user = current_user(assigns)
+    # params = e(assigns, :__context__, :current_params, %{})
 
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
 

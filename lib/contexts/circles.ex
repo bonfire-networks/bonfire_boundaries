@@ -198,7 +198,7 @@ defmodule Bonfire.Boundaries.Circles do
     do: repo().many(list_visible_q(user, opts ++ @default_q_opts))
 
   @doc "query for `list_visible`"
-  def list_q(user, opts \\ []) do
+  def list_q(opts \\ []) do
     exclude_circles =
       e(opts, :exclude_circles, []) ++
         if e(opts, :exclude_stereotypes, nil), do: stereotype_ids(), else: []
@@ -234,7 +234,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   @doc "query for `list_visible`"
   def list_visible_q(user, opts \\ []) do
-    list_q(user, opts)
+    list_q(opts)
     |> boundarise(circle.id, opts ++ [current_user: user])
   end
 
@@ -273,9 +273,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   @doc "query for `list_my`"
   def list_my_q(user, opts \\ []) when not is_nil(user) do
-    user
-    # |> debug
-    |> list_q(opts)
+    list_q(opts)
     |> where(
       [circle, caretaker: caretaker],
       caretaker.caretaker_id == ^ulid!(user) or
@@ -324,7 +322,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   @doc "query for `get`"
   def get_for_caretaker_q(id, caretaker, opts \\ []) do
-    list_q(caretaker, opts)
+    list_q(opts)
     # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
     |> where(
       [circle: circle, caretaker: caretaker],
@@ -332,7 +330,7 @@ defmodule Bonfire.Boundaries.Circles do
     )
   end
 
-  def edit(%Circle{} = circle, %User{} = user, params) do
+  def edit(%Circle{} = circle, %User{} = _user, params) do
     circle = repo().maybe_preload(circle, [:encircles, :named, :extra_info])
 
     params
@@ -360,7 +358,7 @@ defmodule Bonfire.Boundaries.Circles do
     repo().insert(Encircle.changeset(%{circle_id: ulid(circle), subject_id: ulid(subject)}))
   end
 
-  def remove_from_circles(subject, circles)
+  def remove_from_circles(_subject, circles)
       when is_nil(circles) or length(circles) == 0,
       do: error("No circle ID provided, so could not remove")
 
@@ -379,11 +377,9 @@ defmodule Bonfire.Boundaries.Circles do
   Fully delete the circle, including membership and boundary information. This will affect all objects previously shared with members of this circle.
   """
   def delete(%Circle{} = circle, opts) do
-    assocs = [:encircles, :caretaker, :named, :extra_info, :stereotyped]
-
     Bonfire.Social.Objects.maybe_generic_delete(Circle, circle,
       current_user: current_user(opts),
-      delete_associations: assocs
+      delete_associations: [:encircles, :caretaker, :named, :extra_info, :stereotyped]
     )
   end
 

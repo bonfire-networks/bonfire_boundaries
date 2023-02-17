@@ -13,7 +13,6 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   prop setting_boundaries, :boolean, default: false
   prop click_override, :boolean, default: false
 
-  @form_input_name to_string(__MODULE__)
   @presets ["public", "local", "mentions", "custom"]
 
   def presets, do: @presets

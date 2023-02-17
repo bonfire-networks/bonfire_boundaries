@@ -3,7 +3,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Grants
   alias Bonfire.Boundaries.LiveHandler
-  alias Bonfire.Boundaries.Integration
+  # alias Bonfire.Boundaries.Integration
   require Integer
 
   prop acl_id, :string, default: nil
@@ -25,7 +25,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def update(assigns, socket) do
-    current_user = current_user(assigns)
+    # current_user = current_user(assigns)
     params = e(assigns, :__context__, :current_params, %{})
 
     acl_id = e(assigns, :acl_id, nil) || e(socket.assigns, :acl_id, nil) || e(params, "id", nil)
@@ -86,7 +86,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         page_header_aside: []
       )
 
-      verbs = e(socket.assigns, :verbs, [])
+      # verbs = e(socket.assigns, :verbs, [])
 
       list_by_subject = subject_verb_grant(e(acl, :grants, []))
       # list_by_verb = verb_subject_grant(e(acl, :grants, []))
@@ -128,7 +128,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     add_to_acl(id, socket)
   end
 
-  def handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
+  def do_handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
     remove_from_acl(subject, socket)
   end
 
@@ -144,7 +144,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     add_to_acl(data |> Enum.into(%{name: text}), socket)
   end
 
-  def do_handle_event("edit_grant_verb", %{"subject" => subjects} = attrs, socket) do
+  def do_handle_event("edit_grant_verb", %{"subject" => subjects} = _attrs, socket) do
     # debug(attrs)
     current_user = current_user_required!(socket)
     acl = e(socket.assigns, :acl, nil)
@@ -182,7 +182,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
-  def do_handle_event("edit_grant_role", %{"to_circles" => subjects} = attrs, socket) do
+  def do_handle_event("edit_grant_role", %{"to_circles" => subjects} = _attrs, socket) do
     # debug(attrs)
     current_user = current_user_required!(socket)
     acl = e(socket.assigns, :acl, nil)
@@ -275,7 +275,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
     subject_map = %{id => %{subject: subject, verb_grants: nil}}
 
-    subject_name = LiveHandler.subject_name(subject)
+    # subject_name = LiveHandler.subject_name(subject)
     # |> debug("name")
 
     socket
@@ -321,7 +321,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   def remove_from_acl(subject, socket) do
     # IO.inspect(subject, label: "ULLID")
     acl_id = ulid!(e(socket.assigns, :acl, nil))
-    subject_id = ulid!(subject)
+    # subject_id = ulid!(subject)
 
     {:noreply,
      with {del, _} when is_integer(del) and del > 0 <-
@@ -441,7 +441,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   def verb_subject_grant(_), do: %{}
 
-  def columns(context) do
+  def columns(_context) do
     # if Settings.get([:ui, :compact], false, context), do: 3, else: 2
     2
   end

@@ -10,13 +10,14 @@ defmodule Bonfire.Boundaries.Acls do
   import Bonfire.Boundaries.Integration
   import Bonfire.Boundaries.Queries
 
-  alias Bonfire.Data.AccessControl.Acl
+  alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Identity.ExtraInfo
   alias Bonfire.Data.Identity.Caretaker
-  alias Bonfire.Boundaries.Stereotyped
+  alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.AccessControl.Controlled
   alias Bonfire.Data.AccessControl.Grant
+  alias Bonfire.Boundaries.Stereotyped
 
   alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries
@@ -33,13 +34,12 @@ defmodule Bonfire.Boundaries.Acls do
   def acls, do: Config.get(:acls)
 
   def preset_acl_ids do
-    filter_acls =
-      Config.get(:public_acls_on_objects, [
-        :guests_may_see_read,
-        :locals_may_interact,
-        :locals_may_reply
-      ])
-      |> Enum.map(&get_id!/1)
+    Config.get(:public_acls_on_objects, [
+      :guests_may_see_read,
+      :locals_may_interact,
+      :locals_may_reply
+    ])
+    |> Enum.map(&get_id!/1)
   end
 
   def get(slug) when is_atom(slug), do: acls()[slug]
@@ -434,7 +434,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   def list_built_ins do
     list_q(skip_boundary_check: true)
-    |> where([acl], acl.id in ^built_in_ids)
+    |> where([acl], acl.id in ^built_in_ids())
     |> repo().many()
   end
 
@@ -443,8 +443,8 @@ defmodule Bonfire.Boundaries.Acls do
     filter = Config.get(:acls_to_present)
 
     acls()
-    |> Enum.filter(fn {name, acl} -> name in filter end)
-    |> Enum.map(fn {name, acl} -> acl.id end)
+    |> Enum.filter(fn {name, _acl} -> name in filter end)
+    |> Enum.map(fn {_name, acl} -> acl.id end)
   end
 
   def opts_for_dropdown() do

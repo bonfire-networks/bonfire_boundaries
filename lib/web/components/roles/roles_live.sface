@@ -1,74 +1,75 @@
-<div class="">
-  <div class="p-4 mb-0 rounded-md bg-info/10">
-    <div class="flex">
-      <div class="flex-shrink-0">
-        <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-      </div>
-      <div class="flex-1 ml-3 md:flex md:justify-between">
-        <p class="text-sm text-info">
-          {l("Roles define sets of permissions which you can assign to users and circles")}</p>
+<div>
+  <div>
+    <div class="p-4 mb-0 rounded-md bg-info/10">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+        </div>
+        <div class="flex-1 ml-3 md:flex md:justify-between">
+          <p class="text-sm text-info">
+            {l("Roles define sets of permissions which you can assign to users and circles")}</p>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="mt-4">
-    <ul role="list" class="flex flex-col gap-2">
-      <li
-        class="rounded-md bg-base-content/5"
-        x-data="{open: false}"
-        :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()}
-        :if={verbs != []}
-      >
-        <div x-on:click="open = !open" class="block rounded-md cursor-pointer hover:bg-base-content/5">
-          <div class="flex items-center gap-3 p-3">
-            <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-base-content/80" />
-            <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
-              <div class="truncate">
-                <div class="flex text-sm">
-                  <p class="text-sm font-bold capitalize truncate">{name}</p>
+    <div class="mt-4">
+      <ul role="list" class="flex flex-col gap-2">
+        <li
+          class="rounded-md bg-base-content/5"
+          x-data="{open: false}"
+          :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()}
+          :if={verbs != []}
+        >
+          <div x-on:click="open = !open" class="block rounded-md cursor-pointer hover:bg-base-content/5">
+            <div class="flex items-center gap-3 p-3">
+              <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-base-content/80" />
+              <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
+                <div class="truncate">
+                  <div class="flex text-sm">
+                    <p class="text-sm font-bold capitalize truncate">{name}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="flex-shrink-0 ml-5">
-              <Icon solid="ChevronDown" class="w-5 h-5 text-base-content/50" />
+              <div class="flex-shrink-0 ml-5">
+                <Icon solid="ChevronDown" class="w-5 h-5 text-base-content/50" />
+              </div>
             </div>
           </div>
-        </div>
-        <div x-cloak x-show="open" x-collapse>
-          <div class="p-3 bg-base-content/5">
-            <ul class="flex flex-col divide-y divide-base-300">
-              <li :for={verb_name <- verbs} class="flex items-center justify-between gap-8 p-3">
-                <div class="flex flex-col gap-0.5">
-                  {#case Bonfire.Boundaries.Verbs.get(verb_name)}
-                    {#match nil}
-                      <div class="flex-1 text-sm font-semibold capitalize">
-                        <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
-                        {verb_name}
-                      </div>
-                    {#match verb}
-                      <div class="flex items-center gap-2">
-                        <Icon
-                          iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
-                          class="w-4 h-4 text-base-content/70"
-                          fill="currentColor"
-                        />
+          <div x-cloak x-show="open" x-collapse>
+            <div class="p-3 bg-base-content/5">
+              <ul class="flex flex-col divide-y divide-base-300">
+                <li :for={verb_name <- verbs} class="flex items-center justify-between gap-8 p-3">
+                  <div class="flex flex-col gap-0.5">
+                    {#case Bonfire.Boundaries.Verbs.get(verb_name)}
+                      {#match nil}
                         <div class="flex-1 text-sm font-semibold capitalize">
-                          {e(verb, :verb, nil) || verb}
+                          <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
+                          {verb_name}
                         </div>
-                      </div>
-                      <div class="text-xs text-base-content/70">{e(verb, :summary, nil)}</div>
-                  {/case}
-                </div>
-                <Bonfire.Boundaries.Web.YesMaybeFalseLive value read_only />
-              </li>
-            </ul>
+                      {#match verb}
+                        <div class="flex items-center gap-2">
+                          <Icon
+                            iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+                            class="w-4 h-4 text-base-content/70"
+                            fill="currentColor"
+                          />
+                          <div class="flex-1 text-sm font-semibold capitalize">
+                            {e(verb, :verb, nil) || verb}
+                          </div>
+                        </div>
+                        <div class="text-xs text-base-content/70">{e(verb, :summary, nil)}</div>
+                    {/case}
+                  </div>
+                  <Bonfire.Boundaries.Web.YesMaybeFalseLive value read_only />
+                </li>
+              </ul>
+            </div>
           </div>
-        </div>
-      </li>
-    </ul>
-  </div>
+        </li>
+      </ul>
+    </div>
 
-  <!-- <div class="mt-4 divide-y rounded-lg bg-base-content/5 divide-base-300">
+    <!-- <div class="mt-4 divide-y rounded-lg bg-base-content/5 divide-base-300">
     <div
       :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()}
       :if={verbs != []}
@@ -113,19 +114,20 @@
     </div>
   </div> -->
 
-  <style>
-    .boundaries-switches label div.btn {
-    color: hsl(var(--bc));
-    }
-    .boundaries-switches label input:checked ~ div.btn-yes {
-    color: hsl(var(--su) / 0.90);
-    }
-    .boundaries-switches label input:checked ~ div.btn-no {
-    color: hsl(var(--er) / 0.90);
-    }
-    .boundaries-switches label input:checked ~ div.btn-maybe {
-    background: white;
-    color: black;
-    }
-  </style>
+    <style>
+      .boundaries-switches label div.btn {
+      color: hsl(var(--bc));
+      }
+      .boundaries-switches label input:checked ~ div.btn-yes {
+      color: hsl(var(--su) / 0.90);
+      }
+      .boundaries-switches label input:checked ~ div.btn-no {
+      color: hsl(var(--er) / 0.90);
+      }
+      .boundaries-switches label input:checked ~ div.btn-maybe {
+      background: white;
+      color: black;
+      }
+    </style>
+  </div>
 </div>

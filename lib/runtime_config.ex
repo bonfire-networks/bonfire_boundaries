@@ -204,8 +204,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     verbs_interact_incl_boost = verbs_interact_minus_boost ++ [:boost, :pin]
 
-    verbs_participate_message_minus_follow =
-      verbs_interact_minus_follow ++ [:reply, :mention, :message]
+    # verbs_participate_message_minus_follow =
+    #   verbs_interact_minus_follow ++ [:reply, :mention, :message]
 
     verbs_participate_message_minus_boost =
       verbs_interact_minus_boost ++ [:reply, :mention, :message]

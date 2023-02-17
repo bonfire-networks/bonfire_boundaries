@@ -260,9 +260,12 @@ defmodule Bonfire.Boundaries do
     debug(object, "check object")
     current_user = current_user(subject)
     current_user_id = ulid(current_user)
-    creator_id = e(object, :created, :creator_id, nil) || e(object, :creator_id, nil)
 
-    case (not is_nil(current_user_id) and e(object, :created, :creator_id, nil) == current_user_id) or
+    creator_id =
+      e(object, :created, :creator_id, nil) || e(object, :created, :creator, :id, nil) ||
+        e(object, :creator_id, nil) || e(object, :creator, :id, nil)
+
+    case (not is_nil(current_user_id) and creator_id == current_user_id) or
            pointer_permitted?(object,
              current_user: current_user,
              current_account: current_account(subject),
@@ -282,12 +285,12 @@ defmodule Bonfire.Boundaries do
     end
   end
 
-  def can?(subject, verbs, nil) do
+  def can?(_subject, _verbs, nil) do
     debug("object is nil")
     nil
   end
 
-  def can?(subject, verbs, :skip) do
+  def can?(_subject, _verbs, :skip) do
     debug("no object boundary data")
     nil
   end

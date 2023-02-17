@@ -53,8 +53,8 @@ defmodule Bonfire.Boundaries.Grants do
   end
 
   def upsert_or_delete(
-        %{acl_id: acl_id, subject_id: subject_id, verb_id: verb_id, value: nil} = attrs,
-        opts
+        %{acl_id: acl_id, subject_id: subject_id, verb_id: verb_id, value: nil} = _attrs,
+        _opts
       ) do
     repo().get_by(Grant,
       acl_id: acl_id,
@@ -65,7 +65,7 @@ defmodule Bonfire.Boundaries.Grants do
     |> repo().delete()
   end
 
-  def upsert_or_delete(%{} = attrs, opts) do
+  def upsert_or_delete(%{} = attrs, _opts) do
     repo().upsert(
       changeset(attrs),
       attrs,
@@ -146,7 +146,7 @@ defmodule Bonfire.Boundaries.Grants do
     end
   end
 
-  def remove_subject_from_acl(subject, acls)
+  def remove_subject_from_acl(_subject, acls)
       when is_nil(acls) or (is_list(acls) and length(acls) == 0),
       do: error("No boundary ID provided, so could not remove.")
 

@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Verbs do
 
   def verbs, do: Bonfire.Common.Config.get!(:verbs)
 
-  def verbs_count, do: Enum.count(verbs)
+  def verbs_count, do: Enum.count(verbs())
 
   def slugs, do: Keyword.keys(verbs())
 
@@ -38,7 +38,7 @@ defmodule Bonfire.Boundaries.Verbs do
   def ids(verb) when is_atom(verb), do: ids([verb])
 
   def role_verbs, do: Config.get(:role_verbs)
-  def roles, do: role_verbs |> Keyword.keys()
+  def roles, do: role_verbs() |> Keyword.keys()
 
   def role_names do
     for role <- roles() do
