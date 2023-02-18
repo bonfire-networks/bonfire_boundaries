@@ -30,10 +30,7 @@
             "rounded-md bg-base-content/5",
             "bg-base-content/10": @to_boundaries_ids |> Enum.member?(acl_id)
           }>
-            <LiveRedirect
-              class="block p-3 rounded-md hover:bg-base-content/5"
-              to={~p"/boundaries/acl/" <> acl.id}
-            >
+            <LiveRedirect class="block p-3 rounded-md hover:bg-base-content/5" to={path(acl)}>
               <label
                 class="flex items-center w-full gap-3 cursor-pointer"
                 phx-click={if @setting_boundaries,

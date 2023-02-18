@@ -57,7 +57,7 @@
 
       <!-- <div
         :if={@section != "settings" and !@read_only}
-        href={"/boundaries/acl/#{ulid(@acl)}/settings"}
+        href={"~p/boundaries/acl/#{ulid(@acl)}/settings"}
         phx-click="assign"
         phx-value-section="settings"
         phx-target={@myself}

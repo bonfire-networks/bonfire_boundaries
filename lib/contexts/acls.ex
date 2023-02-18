@@ -556,7 +556,7 @@ defmodule Bonfire.Boundaries.Acls do
     # |> debug("stereotype acls")
   end
 
-  def edit(%Acl{} = acl, %User{} = user, params) do
+  def edit(%Acl{} = acl, %User{} = _user, params) do
     acl = repo().maybe_preload(acl, [:named, :extra_info])
 
     params

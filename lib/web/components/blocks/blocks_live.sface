@@ -1,5 +1,5 @@
-{#if @selected_tab == "silenced"}
-  <div>
+<div>
+  {#if @selected_tab == "silenced"}
     <!-- TODO: consolidate this view and the boundary editing one (so you can directly add people/circles here as well) -->
     <div class="bg-base-200">
       <div class="p-4 mb-3 rounded-md bg-info/10">
@@ -60,9 +60,7 @@
       showing_within={@block_type}
       read_only={@read_only}
     />
-  </div>
-{#else}
-  <div>
+  {#else}
     <div class="bg-base-200">
       <div class="p-4 mb-3 rounded-md bg-info/10">
         <div class="flex">
@@ -129,5 +127,5 @@
     />
     <!-- </div>
   </div> -->
-  </div>
-{/if}
+  {/if}
+</div>

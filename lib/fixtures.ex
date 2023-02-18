@@ -72,7 +72,7 @@ defmodule Bonfire.Boundaries.Fixtures do
     repo().insert_all_or_ignore(
       Caretaker,
       ulids(acls ++ circles)
-      |> Enum.map(&%{id: &1, caretaker_id: admin_circle})
+      |> Enum.map(&%{id: &1, caretaker_id: admin_circle()})
     )
     |> info("Init built-in verbs and boundaries")
 

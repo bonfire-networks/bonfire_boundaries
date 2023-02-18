@@ -329,7 +329,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        assign_flash(socket, :info, l("Removed from boundary"))
        |> assign_updated()
 
-       # |> redirect_to("/boundaries/acl/#{id}")
+       # |> redirect_to(~p"/boundaries/acl/#{id}")
      else
        _ ->
          assign_flash(socket, :info, l("No permissions removed from boundary"))

@@ -324,7 +324,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
          section: nil
        )
        |> assign_flash(:info, l("Boundary created!"))
-       |> maybe_redirect_to("/boundaries/acl/" <> id, attrs)}
+       |> maybe_redirect_to(path(acl), attrs)}
     end
   end
 
