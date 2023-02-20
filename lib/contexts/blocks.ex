@@ -267,7 +267,8 @@ defmodule Bonfire.Boundaries.Blocks do
     info("apply incoming Block")
 
     with {:ok, blocked} <-
-           Bonfire.Federate.ActivityPub.AdapterUtils.get_character_by_ap_id(blocked) |> debug(),
+           Bonfire.Federate.ActivityPub.Federator.AdapterUtils.get_character_by_ap_id(blocked)
+           |> debug(),
          {:ok, block} <- block(blocked, :all, current_user: blocker) |> debug() do
       {:ok, block}
     else

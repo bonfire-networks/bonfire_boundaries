@@ -1,4 +1,5 @@
 defmodule Bonfire.Boundaries.Migrations do
+  @moduledoc false
   # alias Bonfire.Boundaries.Verbs
   alias Bonfire.Data.AccessControl.Circle
   alias Bonfire.Data.AccessControl.Controlled

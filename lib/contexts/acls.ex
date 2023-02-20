@@ -89,8 +89,7 @@ defmodule Bonfire.Boundaries.Acls do
              Config.get!([:verbs_to_grant, :default]))
           |> debug("default verbs_to_grant")
           |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ...))
-
-        # |> debug("on-the-fly ACLs to create")
+          |> debug("on-the-fly ACLs to create")
 
         changeset
         |> Changeset.prepare_changes(fn changeset ->
@@ -124,16 +123,18 @@ defmodule Bonfire.Boundaries.Acls do
     (List.wrap(reply_to_grants(changeset, preset, opts)) ++
        List.wrap(mentions_grants(changeset, preset, opts)) ++
        List.wrap(maybe_custom_circles_or_users(opts)))
-    |> debug("custom_recipients")
+    |> debug()
     |> Enum.map(fn
       {subject, role} -> {subject, role}
       subject -> {subject, nil}
     end)
+    |> debug()
     |> Enum.sort_by(fn {_subject, role} -> role end, :desc)
     |> debug()
     |> Enum.uniq_by(fn {subject, _role} -> subject end)
     |> debug()
     |> filter_empty([])
+    |> debug()
   end
 
   defp maybe_custom_circles_or_users(opts) do

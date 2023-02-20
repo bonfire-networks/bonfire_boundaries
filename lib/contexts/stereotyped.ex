@@ -31,6 +31,7 @@ defmodule Bonfire.Boundaries.Stereotyped do
 end
 
 defmodule Bonfire.Boundaries.Stereotyped.Migration do
+  @moduledoc false
   use Ecto.Migration
   import Pointers.Migration
   alias Bonfire.Boundaries.Stereotyped
