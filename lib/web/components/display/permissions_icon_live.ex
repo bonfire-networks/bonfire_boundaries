@@ -11,5 +11,5 @@ defmodule Bonfire.Boundaries.Web.PermissionsIconLive do
 
   prop class, :css_class,
     default:
-      "text-base md:text-sm text-neutral-content/80 border-b border-neutral-content/10 pb-1 rounded m-1"
+      "text-base md:text-sm text-neutral-content/80 border-b border-neutral-content/10 pb-1 rounded m-1 permissions_icon"
 end
