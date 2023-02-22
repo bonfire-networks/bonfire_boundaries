@@ -10,14 +10,14 @@
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <span class="text-xl">
-                      <Icon iconify="noto:globe-showing-europe-africa" class="w-5 h-5" />
+                      <Icon iconify="noto:globe-with-meridians" class="w-5 h-5" />
                     </span>
                   </div>
                   <div class="flex flex-col gap-1 ml-3">
                     <div class="text-sm font-semibold">{l("Public")}</div>
                     <p class="text-sm text-base-content/70">
                       {l(
-                        "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines. This is in addition to any boundaries you set below."
+                        "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines."
                       )}
                     </p>
                   </div>
@@ -33,7 +33,7 @@
                     <div class="text-sm font-semibold">{l("Local")}</div>
                     <p class="text-sm text-base-content/70">
                       {l(
-                        "Everyone on this instance will be able to see, interact, and reply, in addition to any boundaries you set below."
+                        "Everyone on this instance will be able to see, interact, and reply."
                       )}
                     </p>
                   </div>
@@ -47,7 +47,7 @@
                     <div class="text-sm font-semibold">{l("Mentions")}</div>
                     <p class="text-sm text-base-content/70">
                       {l(
-                        "Anyone mentioned will be able to see, interact, and reply (across the fediverse), in addition to any boundaries you set below."
+                        "Anyone mentioned will be able to see, interact, and reply (across the fediverse)."
                       )}
                     </p>
                   </div>
@@ -61,7 +61,7 @@
                   </div>
                   <div class="flex flex-col gap-1 ml-3">
                     <div class="text-sm font-semibold">{l("Custom")}</div>
-                    <p class="text-sm text-base-content/70">{l("Specify custom boundaries below.")}</p>
+                    <p class="text-sm text-base-content/70">{l("Specify custom boundaries above.")}</p>
                   </div>
                 </div>
             {/case}

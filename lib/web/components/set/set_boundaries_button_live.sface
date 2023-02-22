@@ -5,7 +5,7 @@
       x-on:click="open_boundaries = true, smart_input_title_text = 'Share the activity'"
       phx-click="Bonfire.Boundaries:open_boundaries"
       phx-target="#smart_input"
-      class="flex items-center gap-2 normal-case rounded-full btn-sm btn opacity-90"
+      class="flex items-center gap-2 normal-case rounded-full btn-ghost btn-sm btn opacity-90"
     >
       <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} />
       <!-- <Icon iconify="fluent:people-edit-20-filled" class="w-4 h-4 text-base-content/70" /> -->
