@@ -114,7 +114,7 @@
           phx-value-section="members"
           phx-target={@myself}
           class={
-            "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-3 py-2 text-base-content/60",
+            "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-3 py-2 text-base-content/70",
             "border-rounded border-primary !text-primary": @section == "members"
           }
           role="tab"
@@ -130,7 +130,7 @@
           phx-value-section="suggestions"
           phx-target={@myself}
           class={
-            "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-3 py-2 text-base-content/60",
+            "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-3 py-2 text-base-content/70",
             "border-rounded border-primary !text-primary": @section == "suggestions"
           }
           role="tab"
@@ -144,7 +144,7 @@
           phx-value-section="settings"
           phx-target={@myself}
           class={
-            "cursor-pointer border-b-4 border-transparent hover:bg-base-content/5 inline-flex px-5 py-2.5 text-base-content/60",
+            "cursor-pointer border-b-4 border-transparent hover:bg-base-content/5 inline-flex px-5 py-2.5 text-base-content/70",
             "border-rounded border-primary !text-base-content": @section == "settings"
           }
           role="tab"

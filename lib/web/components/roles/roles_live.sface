@@ -31,7 +31,7 @@
                 </div>
               </div>
               <div class="flex-shrink-0 ml-5">
-                <Icon solid="ChevronDown" class="w-5 h-5 text-base-content/50" />
+                <Icon solid="ChevronDown" class="w-5 h-5 text-base-content/70" />
               </div>
             </div>
           </div>

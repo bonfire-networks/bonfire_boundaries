@@ -90,7 +90,7 @@
                         {#match true}
                           <Icon outline="InformationCircle" class="w-5 h-5" />
                         {#match _}
-                          <Icon solid="ChevronRight" class="w-5 h-5 text-base-content/50" />
+                          <Icon solid="ChevronRight" class="w-5 h-5 text-base-content/70" />
                       {/case}
                     </div>
                   {#else}

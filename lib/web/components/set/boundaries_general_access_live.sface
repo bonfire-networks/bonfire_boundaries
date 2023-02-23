@@ -10,7 +10,7 @@
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <span class="text-xl">
-                      <Icon iconify="noto:globe-with-meridians" class="w-5 h-5" />
+                      <Icon iconify="ph:globe" class="w-5 h-5" />
                     </span>
                   </div>
                   <div class="flex flex-col gap-1 ml-3">
@@ -26,7 +26,7 @@
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <span class="text-xl">
-                      <Icon iconify="noto:house-with-garden" class="w-5 h-5" />
+                      <Icon iconify="ph:campfire-bold" class="w-5 h-5" />
                     </span>
                   </div>
                   <div class="flex flex-col gap-1 ml-3">
@@ -56,7 +56,7 @@
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <span class="text-xl">
-                      <Icon iconify="noto:gear" class="w-5 h-5" />
+                      <Icon iconify="ph:gear-fill" class="w-5 h-5" />
                     </span>
                   </div>
                   <div class="flex flex-col gap-1 ml-3">
@@ -82,6 +82,7 @@
               >
                 <li>
                   <button
+                    class="text-neutral-content"
                     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
                       value: %{id: "public", name: l("Public")},
                       target: "#smart_input"
@@ -92,6 +93,7 @@
                   </button>
                 </li>
                 <li><button
+                    class="text-neutral-content"
                     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
                       value: %{id: "local", name: l("Local")},
                       target: "#smart_input"
@@ -100,6 +102,7 @@
                   >
                     {l("Local")}</button></li>
                 <li><button
+                    class="text-neutral-content"
                     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
                       value: %{id: "mentions", name: l("Mentions")},
                       target: "#smart_input"
@@ -107,6 +110,7 @@
                     type="button"
                   >{l("Mentions")}</button></li>
                 <li><button
+                    class="text-neutral-content"
                     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
                       value: %{id: "custom", name: l("Custom")},
                       target: "#smart_input"
@@ -117,7 +121,7 @@
               </ul>
             </div>
           </div>
-          <!-- <div class="text-sm text-base-content/60">
+          <!-- <div class="text-sm text-base-content/70">
             
           </div> -->
         </div>

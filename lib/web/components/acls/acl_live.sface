@@ -31,7 +31,7 @@
             phx-value-section="permissions"
             phx-target={@myself}
             class={
-              "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-5 py-2.5 text-base-content/60",
+              "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-5 py-2.5 text-base-content/70",
               "border-primary !text-base-content": @section == "permissions"
             }
             role="tab"
@@ -47,7 +47,7 @@
             phx-value-section="settings"
             phx-target={@myself}
             class={
-              "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-5 py-2.5 text-base-content/60",
+              "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-5 py-2.5 text-base-content/70",
               "border-primary !text-base-content": @section == "settings"
             }
             role="tab"

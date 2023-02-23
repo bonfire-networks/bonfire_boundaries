@@ -1,16 +1,16 @@
 {#case @preset_boundary}
   {#match {"public", _}}
-    <span class="text-lg"><Icon iconify="noto:globe-with-meridians" class="w-5 h-5" /></span>
+    <span class="text-lg"><Icon iconify="ph:globe" class="w-5 h-5" /></span>
     <span>{l("Public")}</span>
   {#match {"local", _}}
-    <span class="text-lg"><Icon iconify="noto:house-with-garden" class="w-5 h-5" /></span>
+    <span class="text-lg"><Icon iconify="ph:campfire-bold" class="w-5 h-5" /></span>
     <span>{l("Local instance")}</span>
   {#match {"mentions", _}}
     <span class="text-lg">﹫</span> <span>{l("Mentions")}</span>
   {#match {_, name}}
-    <span class="text-lg"><Icon iconify="noto:gear" class="w-5 h-5" /></span>
+    <span class="text-lg"><Icon iconify="ph:gear-fill" class="w-5 h-5" /></span>
     <span>{name}</span>
   {#match _}
-    <span class="text-lg"><Icon iconify="noto:gear" class="w-5 h-5" /></span>
+    <span class="text-lg"><Icon iconify="ph:gear-fill" class="w-5 h-5" /></span>
     <span>{l("Custom")}</span>
 {/case}
