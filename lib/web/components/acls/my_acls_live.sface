@@ -48,7 +48,7 @@
                       target: "#smart_input"
                     )}
               >
-                <Icon solid="LockClosed" class="w-5 h-5 text-base-content/80" />
+                <Icon solid="LockClosed" class="w-5 h-5 text-base-content/70" />
                 <div class="flex-1">
                   <div class="flex items-center space-x-4">
                     <div class="text-sm font-bold capitalize">{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) ||

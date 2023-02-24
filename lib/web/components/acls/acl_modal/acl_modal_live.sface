@@ -48,7 +48,7 @@
                   <div class="flex-1 text-sm font-medium">
                     {e(l, :verb, :verb, nil) || e(l, :verb, nil)}
                   </div>
-                  <p class="text-xs text-base-content/80">{e(verb, :summary, nil)}</p>
+                  <p class="text-xs text-base-content/70">{e(verb, :summary, nil)}</p>
                 </div>
               </div>
           {/case}

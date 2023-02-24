@@ -17,10 +17,10 @@
         "bg-base-content/10": @selected_tab == "instance_circles"
       }
     >
-      <Icon iconify="material-symbols:group-work" class="w-5 h-5 font-normal text-base-content/80" />
+      <Icon iconify="material-symbols:group-work" class="w-5 h-5 font-normal text-base-content/70" />
       <div class="flex flex-col">
         <span class={
-          "text-sm text-base-content/80",
+          "text-sm text-base-content/70",
           "font-semibold": @showing_within == :dashboard
         }>{l("Instance Circles")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Group users based on shared characteristics or roles")}</p>
@@ -45,11 +45,11 @@
     >
       <Icon
         solid="LockClosed"
-        class={"w-5 h-5 font-normal text-base-content/80", "!text-primary": @selected_tab == "instance_acls"}
+        class={"w-5 h-5 font-normal text-base-content/70", "!text-primary": @selected_tab == "instance_acls"}
       />
       <div class="flex flex-col">
         <span class={
-          "text-sm text-base-content/80",
+          "text-sm text-base-content/70",
           "font-semibold": @showing_within == :dashboard
         }>{l("Instance Boundaries")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define and enforce instance-wide rules for access and permissions to content or functionality")}</p>
@@ -74,11 +74,11 @@
     >
       <Icon
         iconify="bxs:EditLocation"
-        class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "instance_acl"}
+        class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "instance_acl"}
       />
       <div class="flex flex-col">
         <span class={
-          "text-sm text-base-content/80",
+          "text-sm text-base-content/70",
           "font-semibold": @showing_within == :dashboard
         }>{l("Instance Permissions")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define which circles or users can control different aspects of the instance")}</p>
@@ -103,11 +103,11 @@
     >
       <Icon
         iconify="mingcute:ghost-fill"
-        class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "instance_ghosted"}
+        class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "instance_ghosted"}
       />
       <div class="flex flex-col">
         <span class={
-          "text-sm text-base-content/80",
+          "text-sm text-base-content/70",
           "font-semibold": @showing_within == :dashboard
         }>{l("Ghosted instance-wide")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>...</p>
@@ -131,11 +131,11 @@
     >
       <Icon
         solid="VolumeOff"
-        class={"w-5 h-5 font-normal text-base-content/80", "": @selected_tab == "instance_silenced"}
+        class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "instance_silenced"}
       />
       <div class="flex flex-col">
         <span class={
-          "text-sm text-base-content/80",
+          "text-sm text-base-content/70",
           "font-semibold": @showing_within == :dashboard
         }>{l("Silenced instance-wide")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>...</p>

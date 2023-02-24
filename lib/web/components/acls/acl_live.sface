@@ -16,7 +16,7 @@
     <div :if={!@setting_boundaries} class="">
       <!-- <div
         :if={e(@acl, :extra_info, :summary, nil)}
-        class="pb-3 text-sm font-normal text-base-content/80"
+        class="pb-3 text-sm font-normal text-base-content/70"
       >{e(@acl, :extra_info, :summary, nil)}</div> -->
 
       <ul
@@ -241,7 +241,7 @@
           <!-- <div class="flex items-center space-x-8">
           <div class="flex flex-col">
             <div class="flex-1 text-base font-bold">{l "Archive this boundary"}</div>
-            <div class="text-sm text-base-content/80">{l "If you no longer want to use this boundary, but still want existing permissions using it to be preserved."}</div>
+            <div class="text-sm text-base-content/70">{l "If you no longer want to use this boundary, but still want existing permissions using it to be preserved."}</div>
           </div>
           <Bonfire.UI.Common.OpenModalLive
             id={Pointers.ULID.generate()} 

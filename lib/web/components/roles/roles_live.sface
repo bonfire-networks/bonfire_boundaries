@@ -22,7 +22,7 @@
         >
           <div x-on:click="open = !open" class="block rounded-md cursor-pointer hover:bg-base-content/5">
             <div class="flex items-center gap-3 p-3">
-              <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-base-content/80" />
+              <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-base-content/70" />
               <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
                 <div class="truncate">
                   <div class="flex text-sm">

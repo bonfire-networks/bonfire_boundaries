@@ -82,7 +82,7 @@
   <!-- <div class="flex items-center justify-between">
   <Bonfire.UI.Common.ProfileItemLive profile={e(@current_user, :profile, nil)} character={e(@current_user, :character, nil)} show_controls={[]} />
       <div aria-haspopup="true" class="dropdown dropdown-end">
-        <label tabindex="0" class="font-medium normal-case btn btn-sm btn-ghost text-base-content/80">
+        <label tabindex="0" class="font-medium normal-case btn btn-sm btn-ghost text-base-content/70">
           <span>{l("Caretaker")}</span>
         </label>
       </div>

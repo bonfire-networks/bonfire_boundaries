@@ -23,7 +23,7 @@
             x-on:click="show_boundary_list = true"
             class="btn btn-ghost btn-sm btn-circle"
           >
-            <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
+            <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
           </div>
 
           <div class="flex space-x-2 items-top">
@@ -31,7 +31,7 @@
             <div class="">
               <div>{e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) ||
                   l("Untitled boundary")}</div>
-              <div class="text-sm font-normal text-base-content/80">{e(@acl, :extra_info, :summary, nil)}</div>
+              <div class="text-sm font-normal text-base-content/70">{e(@acl, :extra_info, :summary, nil)}</div>
             </div>
           </div>
         </div>
@@ -58,7 +58,7 @@
           <Icon outline="ChevronLeft" class="w-4 h-4" />
           <span>{l("Back")}</span>
         </div>
-        <!-- <p class="mt-1 text-base font-regular text-base-content/80">{l "This is a sample description to help remember what this boundary is about."}</p> -->
+        <!-- <p class="mt-1 text-base font-regular text-base-content/70">{l "This is a sample description to help remember what this boundary is about."}</p> -->
       </div>
     </div>
 
@@ -66,7 +66,7 @@
       <div :if={@section != "settings"}>
         <div :if={!@read_only} class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
           <div class="flex items-center px-2 space-x-9">
-            <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/80">{l("People and circles in this boundary")}</h2>
+            <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/70">{l("People and circles in this boundary")}</h2>
             <div
               :on-click="assign"
               phx-value-section="new_circle"
@@ -303,7 +303,7 @@
           <!-- <div class="flex items-center space-x-8">
           <div class="flex flex-col">
             <div class="flex-1 text-base font-bold">{l "Archive this boundary"}</div>
-            <div class="text-sm text-base-content/80">{l "If you no longer want to use this boundary, but still want existing permissions using it to be preserved."}</div>
+            <div class="text-sm text-base-content/70">{l "If you no longer want to use this boundary, but still want existing permissions using it to be preserved."}</div>
           </div>
           <Bonfire.UI.Common.OpenModalLive
             id={Pointers.ULID.generate()} 
@@ -329,7 +329,7 @@
           <div class="flex items-center space-x-8">
             <div class="flex flex-col">
               <div class="flex-1 text-base font-bold">{l("Delete this boundary")}</div>
-              <div class="text-sm text-base-content/80">{l(
+              <div class="text-sm text-base-content/70">{l(
                   "Deleting a boundary means anything shared with users of the local instance using this boundary will no longer be shared. Please be certain."
                 )}</div>
             </div>

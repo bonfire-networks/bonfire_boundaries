@@ -98,12 +98,12 @@
             phx-target={@parent_back}
             class="btn btn-outline btn-sm btn-circle"
           >
-            <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/80" />
+            <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
           </div>
           <div>{@title || e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) ||
               l("Untitled circle")}</div>
         </div>
-        <p class="mt-1 text-sm font-regular text-base-content/80">{@description || e(@circle, :extra_info, :summary, nil)}</p>
+        <p class="mt-1 text-sm font-regular text-base-content/70">{@description || e(@circle, :extra_info, :summary, nil)}</p>
       </div>
     </div>
     <ul role="tablist" class="flex items-stretch gap-3 text-sm font-medium rounded-b-lg bg-base-content/5">

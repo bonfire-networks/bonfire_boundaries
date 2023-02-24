@@ -40,14 +40,14 @@
                   {#case Bonfire.Boundaries.Verbs.get(verb_name)}
                     {#match nil}
                       <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
-                      <div class="text-sm font-medium traking-wide text-base-content/80">{verb_name}</div>
+                      <div class="text-sm font-medium traking-wide text-base-content/70">{verb_name}</div>
                     {#match verb}
                       <Icon
                         iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
                         class="w-4 h-4 text-base-content/70"
                         fill="currentColor"
                       />
-                      <div class="text-sm font-medium traking-wide text-base-content/80">{e(verb, :verb, nil) || verb_name}</div>
+                      <div class="text-sm font-medium traking-wide text-base-content/70">{e(verb, :verb, nil) || verb_name}</div>
                       <div class="text-xs text-base-content/70">{e(verb, :summary, nil)}</div>
                   {/case}
                 </div>
