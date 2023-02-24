@@ -32,9 +32,7 @@
                   <div class="flex flex-col gap-1 ml-3">
                     <div class="text-sm font-semibold">{l("Local")}</div>
                     <p class="text-sm text-base-content/70">
-                      {l(
-                        "Everyone on this instance will be able to see, interact, and reply."
-                      )}
+                      {l("Everyone on this instance will be able to see, interact, and reply.")}
                     </p>
                   </div>
                 </div>
@@ -46,9 +44,7 @@
                   <div class="flex flex-col gap-1 ml-3">
                     <div class="text-sm font-semibold">{l("Mentions")}</div>
                     <p class="text-sm text-base-content/70">
-                      {l(
-                        "Anyone mentioned will be able to see, interact, and reply (across the fediverse)."
-                      )}
+                      {l("Anyone mentioned will be able to see, interact, and reply (across the fediverse).")}
                     </p>
                   </div>
                 </div>
