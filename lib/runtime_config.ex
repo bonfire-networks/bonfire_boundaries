@@ -243,6 +243,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       acls_to_present: [],
       # what boundaries we can display to everyone when applied on objects
       public_acls_on_objects: public_acls ++ [:guests_may_see],
+      #  used for setting boundaries
       preset_acls: %{
         "public" => [
           :guests_may_see_read,
@@ -252,6 +253,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "federated" => [:locals_may_reply],
         "local" => [:locals_may_reply]
       },
+      #  used for displaying boundaries
       preset_acls_all: %{
         "public" => [
           :guests_may_see,
