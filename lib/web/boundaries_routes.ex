@@ -30,9 +30,9 @@ defmodule Bonfire.Boundaries.Web.Routes do
         pipe_through(:browser)
         pipe_through(:user_required)
 
-        live("/", BoundariesLive)
-        live("/:tab", BoundariesLive)
-        live("/:tab/:id", BoundariesLive)
+        live("/", BoundariesLive, as: :boundaries)
+        live("/:tab", BoundariesLive, as: :boundaries)
+        live("/:tab/:id", BoundariesLive, as: :boundaries)
         live("/:tab/:id/:section", BoundariesLive, as: :boundaries)
       end
 
