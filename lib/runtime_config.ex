@@ -535,5 +535,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             :i_may_administer
           ] ++ negative_grants
       }
+
+    config :bonfire, :ui,
+      profile: [
+        my_network: [
+          "/boundaries/circles": "Circles",
+          "/boundaries/ghosted": "Ghosted",
+          "/boundaries/silenced": "Silenced"
+        ]
+      ]
   end
 end
