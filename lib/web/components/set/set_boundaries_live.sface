@@ -21,7 +21,7 @@
       </div>
     </Bonfire.UI.Common.ProfileItemLive>
 
-    <!-- Next choosen boundaries or Circles/Users -->
+    <!-- Next already-choosen boundaries or Circles/Users -->
     <Bonfire.Boundaries.Web.BoundaryItemsLive
       to_boundaries={@to_boundaries |> debug("to_boundaries")}
       to_circles={@to_circles}

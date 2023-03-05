@@ -21,33 +21,6 @@ defmodule Bonfire.Boundaries.Controlleds do
     Controlled.changeset(c, attrs)
   end
 
-  def list_q,
-    do:
-      from(
-        c in Controlled,
-        left_join: acl in assoc(c, :acl),
-        as: :acl,
-        # left_join: named in assoc(acl, :named),
-        order_by: [asc: c.acl_id],
-        # preload: [acl: {acl, named: named}]
-        preload: [acl: acl]
-      )
-
-  # WIP: instead of preloading named from DB we can use names from Config
-
-  defp list_q(objects) do
-    where(list_q(), [c], c.id in ^ulids(objects))
-  end
-
-  defp list_on_objects_by_subject_q(objects, current_user) do
-    list_q(objects)
-    |> proload(acl: [:stereotyped, :grants])
-    |> where(
-      [c, grants: grants],
-      grants.subject_id == ^ulid(current_user) and c.acl_id not in ^Acls.preset_acl_ids()
-    )
-  end
-
   def list_on_objects_by_subject(objects, current_user) do
     repo().many(list_on_objects_by_subject_q(objects, current_user))
     |> Enum.reduce(%{}, fn c, acc ->
@@ -62,20 +35,20 @@ defmodule Bonfire.Boundaries.Controlleds do
   Only call this as an admin or curator of the object.
   """
   def list_on_object(%{} = object) do
-    Map.get(
-      repo().maybe_preload(
-        object,
-        [
-          controlled: [
-            acl: [
-              :named,
-              grants: [subject: [:named, :profile, :character]],
-              stereotyped: [:named]
-            ]
+    repo().maybe_preload(
+      object,
+      [
+        controlled: [
+          acl: [
+            :named,
+            grants: [subject: [:named, :profile, :character]],
+            stereotyped: [:named]
           ]
-        ],
-        force: true
-      ),
+        ]
+      ],
+      force: true
+    )
+    |> Map.get(
       :controlled,
       []
     )
@@ -114,6 +87,33 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   defp do_list_presets_on_objects(_), do: %{}
+
+  def list_q,
+    do:
+      from(
+        c in Controlled,
+        left_join: acl in assoc(c, :acl),
+        as: :acl,
+        # left_join: named in assoc(acl, :named),
+        order_by: [asc: c.acl_id],
+        # preload: [acl: {acl, named: named}]
+        preload: [acl: acl]
+      )
+
+  # TODO: instead of preloading named from DB we can use names from Config
+
+  defp list_q(objects) do
+    where(list_q(), [c], c.id in ^ulids(objects))
+  end
+
+  defp list_on_objects_by_subject_q(objects, current_user) do
+    list_q(objects)
+    |> proload(acl: [:stereotyped, :grants])
+    |> where(
+      [c, grants: grants],
+      grants.subject_id == ^ulid(current_user) and c.acl_id not in ^Acls.preset_acl_ids()
+    )
+  end
 
   defp list_presets_on_objects_q(objects) do
     list_q(objects)

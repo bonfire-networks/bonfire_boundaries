@@ -1,4 +1,4 @@
-{#for {id, data} <- @to_boundaries || []}
+{#for {id, data} <- List.wrap(@to_boundaries) |> debug("to_boundaries")}
   <input
     name="to_boundaries[]"
     value={id}

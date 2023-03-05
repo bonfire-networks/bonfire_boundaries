@@ -22,6 +22,9 @@ defmodule Bonfire.Boundaries do
     debug(boundaries, "inputted")
     # Note: only one applies, in priority from most to least restrictive
     cond do
+      "admins" in boundaries ->
+        "admins"
+
       "mentions" in boundaries ->
         "mentions"
 
@@ -29,13 +32,12 @@ defmodule Bonfire.Boundaries do
         "local"
 
       "federated" in boundaries ->
+        # TODO: we should set a boundary based federated activity/object, rather than assuming
         "federated"
 
-      "public" in boundaries ->
-        "public"
-
-      "admins" in boundaries ->
-        "admins"
+      "open" in boundaries or "request" in boundaries or "invite" in boundaries or
+          "visible" in boundaries ->
+        boundaries
 
       true ->
         # debug(boundaries, "No preset boundary set")
@@ -45,21 +47,21 @@ defmodule Bonfire.Boundaries do
   end
 
   def preset_name(other) do
-    boundaries_set(other)
+    boundaries_normalise(other)
     |> preset_name()
   end
 
-  def boundaries_set(text) when is_binary(text) do
+  def boundaries_normalise(text) when is_binary(text) do
     text
     |> String.split(",")
     |> Enum.map(&String.trim/1)
   end
 
-  def boundaries_set(list) when is_list(list) do
+  def boundaries_normalise(list) when is_list(list) do
     list
   end
 
-  def boundaries_set(other) do
+  def boundaries_normalise(other) do
     warn(other, "Invalid boundaries set")
     []
   end
@@ -167,7 +169,32 @@ defmodule Bonfire.Boundaries do
     nil
   end
 
-  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl) do
+  def preset_boundary_tuple_from_acl(acl, object_type \\ nil)
+
+  def preset_boundary_tuple_from_acl(acl, %{__struct__: schema} = _object),
+    do: preset_boundary_tuple_from_acl(acl, schema)
+
+  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, Bonfire.Classify.Category) do
+    # debug(acl)
+
+    preset_acls = Config.get!(:preset_acls)
+
+    open_acl_ids =
+      preset_acls["open"]
+      |> Enum.map(&Acls.get_id!/1)
+
+    visible_acl_ids =
+      preset_acls["visible"]
+      |> Enum.map(&Acls.get_id!/1)
+
+    cond do
+      acl_id in open_acl_ids -> {"open", l("Open")}
+      acl_id in visible_acl_ids -> {"visible", l("Visible")}
+      true -> {"private", l("Private")}
+    end
+  end
+
+  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, _object_type) do
     # debug(acl)
 
     preset_acls = Config.get!(:preset_acls_all)
@@ -188,18 +215,19 @@ defmodule Bonfire.Boundaries do
   end
 
   def preset_boundary_tuple_from_acl(
-        %{__typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = _summary
+        %{__typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = _summary,
+        object_type
       ) do
-    preset_boundary_tuple_from_acl(%Acl{id: acl_id})
+    preset_boundary_tuple_from_acl(%Acl{id: acl_id}, object_type)
   end
 
-  def preset_boundary_tuple_from_acl(%{acl: acl}),
-    do: preset_boundary_tuple_from_acl(acl)
+  def preset_boundary_tuple_from_acl(%{acl: acl}, object_type),
+    do: preset_boundary_tuple_from_acl(acl, object_type)
 
-  def preset_boundary_tuple_from_acl([acl]),
-    do: preset_boundary_tuple_from_acl(acl)
+  def preset_boundary_tuple_from_acl([acl], object_type),
+    do: preset_boundary_tuple_from_acl(acl, object_type)
 
-  def preset_boundary_tuple_from_acl(other) do
+  def preset_boundary_tuple_from_acl(other, _object_type) do
     warn(other, "No pattern matched")
     nil
   end

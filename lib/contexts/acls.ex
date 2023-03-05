@@ -21,7 +21,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries
-  # alias Bonfire.Boundaries.Circles
+  alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Boundaries.Verbs
   alias Ecto.Changeset
   alias Pointers.Changesets
@@ -57,30 +57,43 @@ defmodule Bonfire.Boundaries.Acls do
     opts
     |> info("opts")
 
-    to_boundaries =
-      Boundaries.boundaries_set(maybe_from_opts(opts, :boundary, opts))
-      |> info("to_boundaries")
+    context_id = maybe_from_opts(opts, :context_id)
 
-    preset =
-      Boundaries.preset_name(to_boundaries)
-      |> info("preset_name")
+    {preset, control_acls} =
+      case maybe_from_opts(opts, :boundary, opts) do
+        {:clone, controlled_object_id} ->
+          copy_acls_from_existing_object(controlled_object_id)
 
-    # id = Changeset.get_field(changeset, :id)
-    # add ACLs based on any boundary presets (eg. public/local/mentions)
-    # add any ACLs directly specified in input
-    acls =
-      base_acls(creator, preset, opts) ++
-        maybe_add_direct_acl_ids(to_boundaries)
+        ["clone_context"] when is_binary(context_id) ->
+          copy_acls_from_existing_object(context_id)
 
-    debug(acls, "preset + inputted ACLs to set")
+        to_boundaries ->
+          to_boundaries =
+            Boundaries.boundaries_normalise(to_boundaries)
+            |> info("validated to_boundaries")
+
+          preset =
+            Boundaries.preset_name(to_boundaries)
+            |> info("preset_name")
+
+          # add ACLs based on any boundary presets (eg. public/local/mentions)
+          # + add any ACLs directly specified in input
+          control_acls =
+            base_acls(creator, preset, opts) ++
+              maybe_add_direct_acl_ids(to_boundaries)
+
+          {preset, control_acls}
+      end
+
+    debug(control_acls, "preset + inputted ACLs to set")
 
     case custom_recipients(changeset, preset, opts) do
       [] ->
-        Changesets.put_assoc(changeset, :controlled, acls)
+        Changesets.put_assoc(changeset, :controlled, control_acls)
 
       custom_recipients ->
         acl_id = ULID.generate()
-        controlled = [%{acl_id: acl_id} | acls]
+        controlled = [%{acl_id: acl_id} | control_acls]
 
         # default_role = e(opts, :role_to_grant, nil) || Config.get!([:role_to_grant, :default])
 
@@ -99,6 +112,13 @@ defmodule Bonfire.Boundaries.Acls do
         end)
         |> Changesets.put_assoc!(:controlled, controlled)
     end
+  end
+
+  defp copy_acls_from_existing_object(controlled_object_id) do
+    {nil,
+     Controlleds.list_on_object(controlled_object_id)
+     |> Enum.map(&Map.take(&1, [:acl_id]))
+     |> debug()}
   end
 
   # when the user picks a preset, this maps to a set of base acls
@@ -138,7 +158,9 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp maybe_custom_circles_or_users(opts) do
-    Enum.map(List.wrap(maybe_from_opts(opts, :to_circles, [])), fn
+    maybe_from_opts(opts, :to_circles, [])
+    |> List.wrap()
+    |> Enum.map(fn
       {key, val} ->
         # with custom role 
         case ulid(key) do

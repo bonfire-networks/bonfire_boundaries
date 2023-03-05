@@ -153,7 +153,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         id: "11NV1TESPE0P1E0RGRANTENTRY",
         verb: "Invite",
         icon: "bx:Gift",
-        summary: "Invite users or grant entry",
+        summary: "Join without invitation and invite others",
         scope: :instance
       },
       mediate: %{
@@ -211,6 +211,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     verbs_contribute = verbs_participate_and_message ++ [:create, :tag]
 
+    # verbs_join_and_contribute = verbs_contribute ++ [:invite]
+
     public_acls = [
       :guests_may_see_read,
       :guests_may_read,
@@ -251,7 +253,15 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :remotes_may_reply
         ],
         "federated" => [:locals_may_reply],
-        "local" => [:locals_may_reply]
+        "local" => [:locals_may_reply],
+        "open" => [:guests_may_see_read, :locals_may_contribute, :remotes_may_contribute],
+        "visible" => [
+          :no_follow,
+          :guests_may_see_read,
+          :locals_may_interact,
+          :remotes_may_interact
+        ],
+        "private" => []
       },
       #  used for displaying boundaries
       preset_acls_all: %{
@@ -335,11 +345,15 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         },
         remotes_may_interact: %{
           id: "5REM0TEPE0P1E1NTERACTREACT",
-          name: "Remote users may read and interact"
+          name: "Remote actors may read and interact"
         },
         remotes_may_reply: %{
           id: "5REM0TEPE0P1E1NTERACTREP1Y",
-          name: "Remote users may read, interact and reply"
+          name: "Remote actors may read, interact and reply"
+        },
+        remotes_may_contribute: %{
+          id: "7REM0TEACT0RSCANC0NTR1BVTE",
+          name: "Remote actors may contribute"
         },
         locals_may_read: %{
           id: "10CA1SMAYSEEANDREAD0N1YN0W",
@@ -352,6 +366,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         locals_may_reply: %{
           id: "710CA1SMY1NTERACTANDREP1YY",
           name: "Local users may read, interact and reply"
+        },
+        locals_may_contribute: %{
+          id: "1ANY10CA1VSERCANC0NTR1BVTE",
+          name: "Local users may contribute"
         },
 
         ### Stereotypes - placeholders for special per-user ACLs the system will manage.
@@ -371,19 +389,19 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # mentions_may_reply:    %{id: "7MENT10NSCANEVENREP1YT01TS", name: "Mentions may read, interact and reply", stereotype: true},
 
         ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
-        nobody_can_anything: %{
+        ghosted_cannot_anything: %{
           id: "0H0STEDCANTSEE0RD0ANYTH1NG",
-          name: "People I ghosted cannot see",
+          name: "People I ghosted cannot see me",
           stereotype: true
         },
-        nobody_can_reach: %{
+        silenced_cannot_reach_me: %{
           id: "1S11ENCEDTHEMS0CAN0TP1NGME",
           name: "People I silenced aren't discoverable by me",
           stereotype: true
         },
-        nobody_can_see: %{
+        cannot_discover_when_if_silenced: %{
           id: "2HEYS11ENCEDMES0CAN0TSEEME",
-          name: "People who silenced me cannot discover me",
+          name: "People who silenced me can not discover me",
           stereotype: true
         },
         no_follow: %{
@@ -419,12 +437,15 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         locals_may_interact: %{local: verbs_interact_incl_boost},
         # interact and reply/message/mention
         locals_may_reply: %{local: verbs_participate_and_message},
+        # join + interact + contribute
+        locals_may_contribute: %{local: verbs_contribute},
+        remotes_may_contribute: %{activity_pub: verbs_contribute},
         # negative grants:
-        nobody_can_anything: %{ghost_them: verbs_negative.(all_verb_names)},
-        nobody_can_reach: %{
+        ghosted_cannot_anything: %{ghost_them: verbs_negative.(all_verb_names)},
+        silenced_cannot_reach_me: %{
           silence_them: verbs_negative.([:mention, :message, :reply])
         },
-        nobody_can_see: %{silence_me: verbs_negative.([:see])},
+        cannot_discover_when_if_silenced: %{silence_me: verbs_negative.([:see])},
         no_follow: %{local: verbs_negative.([:follow]), activity_pub: verbs_negative.([:follow])}
       }
 
@@ -432,13 +453,13 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     negative_grants = [
       # instance-wide negative permissions
-      :nobody_can_anything,
-      :nobody_can_reach,
-      :nobody_can_see,
+      :ghosted_cannot_anything,
+      :silenced_cannot_reach_me,
+      :cannot_discover_when_if_silenced,
       # per-user negative permissions
-      :they_cannot_anything,
-      :they_cannot_reach,
-      :they_cannot_see
+      :my_ghosted_cannot_anything,
+      :my_silenced_cannot_reach_me,
+      :my_cannot_discover_when_if_silenced
     ]
 
     ### Creating a user also entails inserting a default boundaries configuration for them.
@@ -465,9 +486,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           # i_may_reply:          %{stereotype: :i_may_interact},
           i_may_administer: %{stereotype: :i_may_administer},
           ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
-          they_cannot_anything: %{stereotype: :nobody_can_anything},
-          they_cannot_reach: %{stereotype: :nobody_can_reach},
-          they_cannot_see: %{stereotype: :nobody_can_see}
+          my_ghosted_cannot_anything: %{stereotype: :ghosted_cannot_anything},
+          my_silenced_cannot_reach_me: %{stereotype: :silenced_cannot_reach_me},
+          my_cannot_discover_when_if_silenced: %{stereotype: :cannot_discover_when_if_silenced}
         },
         ### Data structure:
         ### * The outer keys are ACL names declared above.
@@ -482,14 +503,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           i_may_administer: %{SELF: all_verb_names},
           ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
           # People/instances I ghost can't see (or interact with or anything) me or my objects
-          they_cannot_anything: %{ghost_them: verbs_negative.(all_verb_names)},
+          my_ghosted_cannot_anything: %{ghost_them: verbs_negative.(all_verb_names)},
           # People/instances I silence can't ping me
-          they_cannot_reach: %{
+          my_silenced_cannot_reach_me: %{
             silence_them: verbs_negative.([:mention, :message])
           },
           # People who silence me can't see me or my objects in feeds and such (but can still read them if they have a
           # direct link or come across my objects in a thread structure or such).
-          they_cannot_see: %{silence_me: verbs_negative.([:see])}
+          my_cannot_discover_when_if_silenced: %{silence_me: verbs_negative.([:see])}
         },
         ### This lets us control access to the user themselves (e.g. to view their profile or mention them)
         controlleds: %{
