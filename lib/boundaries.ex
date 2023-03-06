@@ -35,6 +35,9 @@ defmodule Bonfire.Boundaries do
         # TODO: we should set a boundary based federated activity/object, rather than assuming
         "federated"
 
+      "public" in boundaries ->
+        "public"
+
       "open" in boundaries or "request" in boundaries or "invite" in boundaries or
           "visible" in boundaries ->
         boundaries
