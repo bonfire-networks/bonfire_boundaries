@@ -4,7 +4,7 @@
       object={@object}
       with_icon
       label={e(@object, :profile, :name, l("this user"))}
-      class="flex items-center w-full text-sm text-neutral-content/80"
+      class="flex items-center w-full gap-2 text-sm text-neutral-content/80"
     />
   </li>
 
@@ -13,7 +13,7 @@
       with_icon
       object={e(peered(@object, @peered), :peer_id, nil)}
       label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
-      class="flex items-center w-full text-sm text-neutral-content/80"
+      class="flex items-center w-full gap-2 text-sm text-neutral-content/80"
     />
   </li>
 {/if}
