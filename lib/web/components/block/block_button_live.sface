@@ -136,16 +136,12 @@
     </div>
 
     <:open_btn>
-      <div 
+      <div
         title={l("Delete this object")}
-        class={e(@class, "btn btn-sm flex items-center gap-2 btn-outline rounded-full")}>
-        <Icon
-          solid="Ban"
-          class={e(@icon_class, "w-4 h-4 stroke-1 text-neutral-content/70")}
-        />
-        <span 
-          :if={!@hide_text}
-          class="text-left truncate ellipsis">
+        class={e(@class, "btn btn-sm flex items-center gap-2 btn-outline rounded-full")}
+      >
+        <Icon solid="Ban" class={e(@icon_class, "w-4 h-4 stroke-1 text-neutral-content/70")} />
+        <span :if={!@hide_text} class="text-left truncate ellipsis">
           {@open_btn_label || l("Block %{user_or_instance_name}", user_or_instance_name: @label)}
         </span>
       </div>
