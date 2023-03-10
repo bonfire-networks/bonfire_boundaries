@@ -3,7 +3,7 @@ defmodule Bonfire.Boundaries do
   import Bonfire.Boundaries.Integration
 
   # alias Bonfire.Data.Identity.User
-  # alias Bonfire.Boundaries.Circles
+  alias Bonfire.Boundaries.Circles
   # alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.Identity.Caretaker
@@ -284,6 +284,11 @@ defmodule Bonfire.Boundaries do
       when is_list(can_verbs!) do
     warn(object_boundary, "WIP for preloaded object_boundary")
     Enum.all?(List.wrap(can_verbs?), &Enum.member?(can_verbs!, Verbs.get(&1)[:verb]))
+  end
+
+  def can?(circle_name, verbs, object) when is_atom(circle_name) do
+    # lookup if a built-in circle (eg. local users) has permission (note that some circle members may NOT have permission if they're also in another circle with negative permissions)
+    can?([current_user: Bonfire.Boundaries.Circles.get_id(circle_name)], verbs, object)
   end
 
   def can?(subject, verbs, object)

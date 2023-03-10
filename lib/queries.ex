@@ -25,14 +25,6 @@ defmodule Bonfire.Boundaries.Queries do
   # defmacro can_delete?(controlled, user), do: can(controlled, user, :delete)
   # defmacro can?(controlled, user, verb \\ :see), do: can(controlled, user, verb)
 
-  def user_and_circle_ids(user) do
-    case user do
-      %{id: user_id} -> [user_id]
-      _ when is_binary(user) -> [user]
-      _ -> [Bonfire.Boundaries.Circles.circles()[:guest][:id]]
-    end
-  end
-
   defmacro boundarise(query, field_ref, opts),
     do: boundarise_impl(query, field_ref, opts)
 
@@ -237,5 +229,12 @@ defmodule Bonfire.Boundaries.Queries do
        Common.Config.get(:skip_all_boundary_checks)) ||
       (is_list(opts) and Keyword.get(opts, :skip_boundary_check)) ||
       (not is_nil(object) and Common.Enums.id(object) == Common.Enums.id(agent))
+  end
+
+  defp user_and_circle_ids(subjects) do
+    case Bonfire.Common.Types.ulids(subjects) do
+      [] -> [Bonfire.Boundaries.Circles.circles()[:guest][:id]]
+      ids when is_list(ids) -> ids
+    end
   end
 end

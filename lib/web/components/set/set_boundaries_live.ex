@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   prop to_boundaries, :any, default: nil
   prop preset_boundary, :any, default: nil
   prop to_circles, :list, default: []
-  prop showing_within, :any, default: nil
+  prop showing_within, :atom, default: nil
   prop show_select_recipients, :boolean, default: false
   prop open_boundaries, :boolean, default: false
   prop hide_breakdown, :boolean, default: false

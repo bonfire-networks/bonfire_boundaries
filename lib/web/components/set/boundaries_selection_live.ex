@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Web.BoundariesSelectionLive do
   use Bonfire.UI.Common.Web, :stateless_component
 
-  # prop showing_within, :any
+  # prop showing_within, :atom
   prop to_boundaries, :any, default: nil
   prop to_circles, :list, default: []
   prop thread_mode, :atom, default: nil
