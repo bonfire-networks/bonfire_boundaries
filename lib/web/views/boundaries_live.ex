@@ -84,7 +84,6 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
          {Bonfire.Boundaries.Web.NewCircleButtonLive,
           [
             scope: :user,
-            myself: e(socket, :myself, nil),
             setting_boundaries: false
           ]}
        ],
@@ -101,8 +100,6 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
        page_header_aside: [
          {Bonfire.Boundaries.Web.NewAclButtonLive,
           [
-            scope: :user,
-            myself: e(socket, :myself, nil),
             setting_boundaries: false
           ]}
        ],

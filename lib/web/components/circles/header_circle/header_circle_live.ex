@@ -5,5 +5,4 @@ defmodule Bonfire.Boundaries.Web.HeaderCircleLive do
   prop stereotype_id, :string, default: nil
   prop read_only, :boolean, default: false
   prop suggestions, :list, default: []
-  prop myself, :map, default: nil
 end

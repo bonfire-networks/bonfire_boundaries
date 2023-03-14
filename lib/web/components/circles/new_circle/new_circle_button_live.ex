@@ -3,6 +3,5 @@ defmodule Bonfire.Boundaries.Web.NewCircleButtonLive do
   # alias Bonfire.Boundaries.Circles
 
   prop scope, :atom, default: nil
-  prop myself, :map, default: nil
   prop setting_boundaries, :boolean, default: false
 end

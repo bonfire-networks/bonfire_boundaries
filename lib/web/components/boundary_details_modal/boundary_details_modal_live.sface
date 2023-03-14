@@ -5,31 +5,8 @@
   no_actions
 >
   <div class="mt-4">
-    <!-- <div class="mb-6">
-      <Bonfire.UI.Common.MultiselectLive
-        implementation={:live_select}
-        form_input_name={__MODULE__}
-        label={l("Select a circle or user to add")}
-      />
-    </div>
-
-    <ul class="flex flex-col gap-4">
-      <li class="flex items-center justify-between">
-        <Bonfire.UI.Common.ProfileItemLive
-          profile={e(@current_user, :profile, nil)}
-          character={e(@current_user, :character, nil)}
-          show_controls={[]}
-        />
-        <div class="flex items-center gap-2">
-          <Bonfire.Boundaries.Web.RolesDropdownLive circle_id={nil} />
-          <div class="btn btn-sm btn-circle btn-ghost">
-            <Icon solid="Trash" class="w-4 h-4 text-error" />
-          </div>
-        </div>
-      </li>
-    </ul> -->
-
-    <Bonfire.Boundaries.Web.AclLive id={@id} acl_id={@id} setting_boundaries />
+  
+    <Bonfire.Boundaries.Web.AclLive  id={"ACL-boundary-#{@id}"} />
   </div>
   <:open_btn>
     <button type="button" class="normal-case rounded btn btn-sm opacity-80">

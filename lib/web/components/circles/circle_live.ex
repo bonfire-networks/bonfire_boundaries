@@ -95,7 +95,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
           {Bonfire.Boundaries.Web.HeaderCircleLive,
            [
              circle: circle,
-             myself: e(socket, :myself, nil),
              stereotype_id: stereotype_id,
              #  suggestions: suggestions,
              read_only:
