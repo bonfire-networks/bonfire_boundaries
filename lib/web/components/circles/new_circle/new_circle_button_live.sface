@@ -4,11 +4,9 @@
   no_actions
 >
   <div>
-  <Bonfire.Boundaries.Web.NewCircleLive
-    setting_boundaries={@setting_boundaries}
-  />
+    <Bonfire.Boundaries.Web.NewCircleLive setting_boundaries={@setting_boundaries} />
   </div>
-  
+
   <:open_btn>
     <div class="normal-case rounded btn btn-primary btn-xs">
       {l("New circle")}

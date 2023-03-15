@@ -5,8 +5,7 @@
   no_actions
 >
   <div class="mt-4">
-  
-    <Bonfire.Boundaries.Web.AclLive  id={"ACL-boundary-#{@id}"} />
+    <Bonfire.Boundaries.Web.AclLive id={"ACL-boundary-#{@id}"} />
   </div>
   <:open_btn>
     <button type="button" class="normal-case rounded btn btn-sm opacity-80">
