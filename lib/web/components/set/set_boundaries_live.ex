@@ -47,18 +47,6 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     to_boundaries ++ [{acl_id, name}]
   end
 
-  def handle_info(%LiveSelect.ChangeMsg{text: search} = change_msg, socket) do
-    current_user = current_user(socket)
-
-    (Bonfire.Boundaries.Acls.list_my(current_user, search: search) ++
-       Bonfire.Boundaries.Circles.list_my(current_user, search: search) ++
-       Bonfire.Me.Users.search(search))
-    |> results_for_multiselect()
-    |> LiveSelect.update_options(change_msg, ...)
-
-    {:noreply, socket}
-  end
-
   def results_for_multiselect(results) do
     results
     |> Enum.map(fn
@@ -71,11 +59,14 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
          %{id: e(circle, :id, nil), field: :to_circles}}
 
       user ->
-        {e(user, :profile, :name, nil),
+        name = e(user, :profile, :name, nil)
+
+        {name,
          %{
            id: e(user, :id, nil),
            field: :to_circles,
-           icon: e(user, :profile, :icon, nil),
+           icon: Media.avatar_url(user),
+           name: name,
            username: e(user, :character, :username, nil)
          }}
     end)
@@ -84,7 +75,19 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     |> debug()
   end
 
-  def handle_event(
+  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+    current_user = current_user(socket)
+
+    (Bonfire.Boundaries.Acls.list_my(current_user, search: search) ++
+       Bonfire.Boundaries.Circles.list_my(current_user, search: search) ++
+       Bonfire.Me.Users.search(search))
+    |> results_for_multiselect()
+    |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
+
+    {:noreply, socket}
+  end
+
+  def do_handle_event(
         "multi_select",
         %{data: data, text: text},
         socket
@@ -97,10 +100,10 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
       case field do
         :to_boundaries ->
           e(socket.assigns, field, [{"public", l("Public")}]) ++
-            [{data["id"], data |> Enum.into(%{name: text})}]
+            [{data["id"], data}]
 
         _ ->
-          e(socket.assigns, field, []) ++ [{data |> Enum.into(%{name: text}), data["id"]}]
+          e(socket.assigns, field, []) ++ [{data, data["id"]}]
       end
       |> Enum.uniq()
 

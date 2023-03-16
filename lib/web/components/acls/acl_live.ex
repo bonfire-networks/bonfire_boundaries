@@ -141,7 +141,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def do_handle_event("multi_select", %{data: data, text: text}, socket) do
-    add_to_acl(data |> Enum.into(%{name: text}), socket)
+    add_to_acl(data, socket)
   end
 
   def do_handle_event("edit_grant_verb", %{"subject" => subjects} = _attrs, socket) do
@@ -229,6 +229,17 @@ defmodule Bonfire.Boundaries.Web.AclLive do
      )}
   end
 
+  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+    current_user = current_user(socket)
+
+    (Bonfire.Boundaries.Circles.list_my(current_user, search: search) ++
+       Bonfire.Me.Users.search(search))
+    |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
+    |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
+
+    {:noreply, socket}
+  end
+
   def handle_event(
         action,
         attrs,
@@ -242,17 +253,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
           __MODULE__,
           &do_handle_event/3
         )
-
-  def handle_info(%LiveSelect.ChangeMsg{text: search} = change_msg, socket) do
-    current_user = current_user(socket)
-
-    (Bonfire.Boundaries.Circles.list_my(current_user, search: search) ++
-       Bonfire.Me.Users.search(search))
-    |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
-    |> LiveSelect.update_options(change_msg, ...)
-
-    {:noreply, socket}
-  end
 
   def add_to_acl(id, socket) when is_binary(id) do
     {:noreply,

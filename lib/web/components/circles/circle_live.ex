@@ -135,7 +135,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   end
 
   def do_handle_event("multi_select", %{data: data, text: text}, socket) do
-    add_member(data |> Enum.into(%{name: text}), socket)
+    add_member(data, socket)
   end
 
   def do_handle_event("select", %{"id" => id}, socket) do
@@ -167,6 +167,16 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
+  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+    # current_user = current_user(socket)
+
+    Bonfire.Me.Users.search(search)
+    |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
+    |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
+
+    {:noreply, socket}
+  end
+
   def handle_event(
         action,
         attrs,
@@ -180,16 +190,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
           __MODULE__,
           &do_handle_event/3
         )
-
-  def handle_info(%LiveSelect.ChangeMsg{text: search} = change_msg, socket) do
-    # current_user = current_user(socket)
-
-    Bonfire.Me.Users.search(search)
-    |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
-    |> LiveSelect.update_options(change_msg, ...)
-
-    {:noreply, socket}
-  end
 
   def add_member(subject, socket) do
     # debug(attrs)
