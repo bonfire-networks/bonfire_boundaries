@@ -1,16 +1,17 @@
+  <div class="flex flex-col flex-1">
 <!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
-<div x-data="{show_boundary_list: true}">
+<!-- <div x-data="{show_boundary_list: true}">
   <div class="flex flex-col mt-1 mb-6">
     <div class="mb-3 text-sm font-medium tracking-wide text-base-content/70">{l("Specify permissions for this activity")}</div>
-    <div class="mb-6">
+    <div class="mb-6"> -->
       <Bonfire.UI.Common.MultiselectLive
         implementation={:live_select}
         form_input_name={__MODULE__}
         label="Select one or more boundaries, circles, or people"
       />
-    </div>
+    <!-- </div> -->
 
-    <Bonfire.UI.Common.ProfileItemLive
+    <!-- <Bonfire.UI.Common.ProfileItemLive
       wrapper_class="flex items-center justify-between"
       profile={e(current_user(@__context__), :profile, %{name: l("Me")})}
       character={e(current_user(@__context__), :character, nil)}
@@ -19,14 +20,15 @@
       <div class="flex items-center gap-2">
         <button disabled class="normal-case btn btn-sm btn-outline btn-disabled">{l("Caretaker")}</button>
       </div>
-    </Bonfire.UI.Common.ProfileItemLive>
+    </Bonfire.UI.Common.ProfileItemLive> -->
 
     <!-- Next already-choosen boundaries or Circles/Users -->
     <Bonfire.Boundaries.Web.BoundaryItemsLive
       to_boundaries={@to_boundaries |> debug("to_boundaries")}
       to_circles={@to_circles}
     />
-  </div>
+  <!-- </div>
   <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={@preset_boundary} />
   <Bonfire.Boundaries.Web.BoundaryComposerActionsLive />
+</div> -->
 </div>

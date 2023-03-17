@@ -1,14 +1,23 @@
-<div>
-  <div x-show="!open_boundaries" class="flex items-center gap-2 mx">
-    <button
+<div class="flex items-center flex-1 gap-2 mx">
+  <div class="w-full dropdown dropdown-end">
+    <label
       type="button"
-      x-on:click="open_boundaries = true, smart_input_title_text = 'Share the activity'"
-      phx-click="Bonfire.Boundaries:open_boundaries"
-      phx-target="#smart_input"
-      class="flex items-center gap-2 normal-case rounded-full btn-ghost btn-sm btn opacity-90"
+      tabindex="0"
+      aria-haspopup="true"
+      aria-expanded="true"
+      class="flex items-center justify-between w-full gap-2 normal-case rounded btn-ghost btn-sm btn opacity-90"
     >
       <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} />
-      <!-- <Icon iconify="fluent:people-edit-20-filled" class="w-4 h-4 text-base-content/70" /> -->
-    </button>
+      <Icon iconify="bx:expand-vertical" class="w-5 h-5 text-base-content/70" />
+    </label>
+    <ul
+      tabindex="0"
+      class="mt-1 rounded menu-compact !block shadow w-full menu dropdown-content bg-neutral"
+      role="menu"
+      aria-orientation="vertical"
+      aria-labelledby="user-profile-menu"
+    >
+      <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={Bonfire.Boundaries.Web.SetBoundariesLive.boundaries_to_preset(@to_boundaries)} />
+    </ul>
   </div>
 </div>

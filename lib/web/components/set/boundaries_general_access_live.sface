@@ -1,4 +1,4 @@
-<div class="">
+<!-- <div class="">
   <div class="py-3 text-xs font-medium tracking-wider uppercase border-t border-base-content/10 text-base-content/70">{l("General permissions")}</div>
   <div class="flex flex-col w-full gap-3">
     <div class="flex-1">
@@ -13,7 +13,7 @@
                       <Icon iconify="ph:globe" class="w-5 h-5" />
                     </span>
                   </div>
-                  <div class="flex flex-col gap-1 ml-3">
+                  <div class="flex flex-col ml-3">
                     <div class="text-sm font-semibold">{l("Public")}</div>
                     <p class="text-sm text-base-content/70">
                       {l(
@@ -29,7 +29,7 @@
                       <Icon iconify="ph:campfire-bold" class="w-5 h-5" />
                     </span>
                   </div>
-                  <div class="flex flex-col gap-1 ml-3">
+                  <div class="flex flex-col ml-3">
                     <div class="text-sm font-semibold">{l("Local")}</div>
                     <p class="text-sm text-base-content/70">
                       {l("Everyone on this instance will be able to see, interact, and reply.")}
@@ -41,7 +41,7 @@
                   <div class="flex-shrink-0">
                     <span class="text-xl">﹫</span>
                   </div>
-                  <div class="flex flex-col gap-1 ml-3">
+                  <div class="flex flex-col ml-3">
                     <div class="text-sm font-semibold">{l("Mentions")}</div>
                     <p class="text-sm text-base-content/70">
                       {l("Anyone mentioned will be able to see, interact, and reply (across the fediverse).")}
@@ -55,7 +55,7 @@
                       <Icon iconify="ph:gear-fill" class="w-5 h-5" />
                     </span>
                   </div>
-                  <div class="flex flex-col gap-1 ml-3">
+                  <div class="flex flex-col ml-3">
                     <div class="text-sm font-semibold">{l("Custom")}</div>
                     <p class="text-sm text-base-content/70">{l("Specify custom boundaries above.")}</p>
                   </div>
@@ -68,7 +68,6 @@
                 class="flex items-center justify-start gap-2 normal-case w-fit btn-ghost btn btn-sm opacity-70"
               >
                 {l("Edit")}
-                <!-- <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} /> -->
                 <Icon solid="ChevronDown" class="inline w-5 h-5" />
               </label>
               <ul
@@ -117,11 +116,99 @@
               </ul>
             </div>
           </div>
-          <!-- <div class="text-sm text-base-content/70">
-            
-          </div> -->
         </div>
       </div>
     </div>
   </div>
-</div>
+</div> -->
+
+
+<li>
+  <button
+    class="text-neutral-content"
+    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+      value: %{id: "public", name: l("Public")},
+      target: "#smart_input"
+    )}
+    type="button"
+  >
+    <div class="flex items-start pt-1 text-left">
+      <div class="flex-shrink-0">
+        <span class="text-xl">
+          <Icon iconify="ph:globe" class="w-5 h-5" />
+        </span>
+      </div>
+      <div class="flex flex-col ml-3">
+        <div class="text-sm font-semibold">{l("Public")}</div>
+        <p class="text-[13px] text-opacity/70">
+          {l(
+            "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines."
+          )}
+        </p>
+      </div>
+    </div>
+  </button>
+  </li>
+  <li>
+  <button
+    class="text-neutral-content"
+    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+      value: %{id: "local", name: l("Local")},
+      target: "#smart_input"
+    )}
+    type="button"
+  >
+    <div class="flex items-start pt-1 text-left">
+      <div class="flex-shrink-0">
+        <span class="text-xl">
+          <Icon iconify="ph:campfire-bold" class="w-5 h-5" />
+        </span>
+      </div>
+      <div class="flex flex-col ml-3">
+        <div class="text-sm font-semibold">{l("Local")}</div>
+        <p class="text-[13px] text-opacity/70">
+          {l("Everyone on this instance will be able to see, interact, and reply.")}
+        </p>
+      </div>
+    </div>
+    </button></li>
+  <li><button
+    class="text-neutral-content"
+    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+      value: %{id: "mentions", name: l("Mentions")},
+      target: "#smart_input"
+    )}
+    type="button"
+  >
+   <div class="flex items-start pt-1 text-left">
+    <div class="flex-shrink-0">
+      <span class="text-xl">﹫</span>
+    </div>
+    <div class="flex flex-col ml-3">
+      <div class="text-sm font-semibold">{l("Mentions")}</div>
+      <p class="text-[13px] text-opacity/70">
+        {l("Anyone mentioned will be able to see, interact, and reply.")}
+      </p>
+    </div>
+  </div>
+  </button></li>
+  <li><button
+    class="text-neutral-content"
+    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+      value: %{id: "custom", name: l("Custom")},
+      target: "#smart_input"
+    )}
+    type="button"
+  >
+  <div class="flex items-start pt-1 text-left">
+    <div class="flex-shrink-0">
+      <span class="text-xl">
+        <Icon iconify="ph:gear-fill" class="w-5 h-5" />
+      </span>
+    </div>
+    <div class="flex flex-col ml-3">
+      <div class="text-sm font-semibold">{l("Custom")}</div>
+      <p class="text-[13px] text-opacity/70">{l("Specify custom boundaries.")}</p>
+    </div>
+  </div>
+  </button></li>
