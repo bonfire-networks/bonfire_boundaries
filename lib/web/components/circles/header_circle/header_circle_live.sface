@@ -72,17 +72,19 @@
       aria-orientation="vertical"
       class="!block mt-1 rounded shadow dropdown_actions w-60 md:w-48 menu md:menu-compact dropdown-content bg-neutral"
     >
-      <li>
+      <li class="edit_name">
         <Bonfire.UI.Common.OpenModalLive
           id="edit_name"
           title_text={l("Edit circle name")}
           no_actions
+          open_btn_wrapper_class="flex flex-1 w-full"
           form_opts={"phx-submit": "Bonfire.Boundaries:edit"}
         >
           <div class="w-full mt-4 form-control">
             <!-- <label class="label">
                 <span class="text-xs font-semibold tracking-wider text-base-content/70">{l("Edit the circle name")}</span>
               </label> -->
+              <input type="hidden" name="id" value={e(@circle, :id, nil)} />
             <div class="flex items-center">
               <input
                 name="named[name]"
@@ -109,14 +111,15 @@
             </div> -->
           <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
           <:open_btn>
-            <div>{l("Edit name")}</div>
+            <button type="button" class="px-4 py-2">{l("Edit name")}</button>
           </:open_btn>
         </Bonfire.UI.Common.OpenModalLive>
       </li>
-      <li>
+      <li class="delete_circle">
         <Bonfire.UI.Common.OpenModalLive
           id={Pointers.ULID.generate()}
           title_text={l("Delete this circle")}
+          open_btn_wrapper_class="flex flex-1 w-full"
         >
           <div class="mt-4 prose-sm prose">
             <p>{l(
@@ -124,7 +127,7 @@
               )}</p>
           </div>
           <:open_btn>
-            <div class="text-error">{l("Delete circle")}</div>
+            <button type="button" class="px-4 py-2 text-error">{l("Delete circle")}</button>
           </:open_btn>
           <:action_btns>
             <button

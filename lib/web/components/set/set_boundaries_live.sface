@@ -1,14 +1,33 @@
+<div class="flex w-full gap-2 px-2 pt-2 mt-2 -mx-2 border-t items-top border-base-content/10">
+  
+  <Icon iconify="carbon:subnet-acl-rules" class="w-5 h-5 mx-1 mt-2 shrink-0 text-base-content/70" />
+
   <div class="flex flex-col flex-1">
-<!-- DEFAULT BOUNDARIES TO DISPLAY ON THE COMPOSER BOX -->
-<!-- <div x-data="{show_boundary_list: true}">
-  <div class="flex flex-col mt-1 mb-6">
-    <div class="mb-3 text-sm font-medium tracking-wide text-base-content/70">{l("Specify permissions for this activity")}</div>
-    <div class="mb-6"> -->
       <Bonfire.UI.Common.MultiselectLive
         implementation={:live_select}
         form_input_name={__MODULE__}
-        label="Select one or more boundaries, circles, or people"
+        label="Select one or more circles or people"
       />
+
+      <!-- <div class="flex gap-2 py-2 scrollable">
+        {#for acl <- Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
+          |> Enum.map(fn
+            %Bonfire.Data.AccessControl.Acl{} = acl ->
+            %{
+              id: e(acl, :id, nil),
+              field: :to_boundaries,
+              name: e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil)
+            } end)
+          |> Enum.filter(fn acl -> acl[:name] != nil end)
+        }
+          <button 
+            :key={e(acl, :id, nil)}
+            type="button" 
+            class="btn hover:bg-base-content hover:!text-base-300 btn-xs !max-h-[1.75rem] !min-h-[1.75rem] !h-[1.75rem] rounded font-normal capitalize bg-base-content/10 text-base-content/70 feed_tab border-none">
+            {e(acl, :name, nil)}
+          </button>
+        {/for}
+      </div> -->
     <!-- </div> -->
 
     <!-- <Bonfire.UI.Common.ProfileItemLive
@@ -24,11 +43,13 @@
 
     <!-- Next already-choosen boundaries or Circles/Users -->
     <Bonfire.Boundaries.Web.BoundaryItemsLive
-      to_boundaries={@to_boundaries |> debug("to_boundaries")}
+      to_boundaries={[]}
       to_circles={@to_circles}
     />
   <!-- </div>
   <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={@preset_boundary} />
   <Bonfire.Boundaries.Web.BoundaryComposerActionsLive />
 </div> -->
+</div>
+
 </div>

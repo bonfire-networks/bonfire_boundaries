@@ -264,13 +264,14 @@
           </Bonfire.UI.Common.OpenModalLive>
         </div> -->
 
-          <div class="flex items-center space-x-8">
+          <div class="flex items-center justify-between space-x-8">
             <div class="flex flex-col">
               <div class="flex-1 text-base font-bold text-error">{l("Delete this boundary")}</div>
               <div class="mt-2 text-sm text-error-content">{l(
                   "Deleting a boundary means anything shared with users of the local instance using this boundary will no longer be shared. Please be certain."
                 )}</div>
             </div>
+            <div>
             <Bonfire.UI.Common.OpenModalLive
               id={Pointers.ULID.generate()}
               title_text={l("Delete this boundary")}
@@ -293,6 +294,7 @@
                 </button>
               </:action_btns>
             </Bonfire.UI.Common.OpenModalLive>
+            </div>
           </div>
         </div>
       </section>
