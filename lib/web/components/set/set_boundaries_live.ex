@@ -53,18 +53,18 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
       %Bonfire.Data.AccessControl.Acl{} = acl ->
         {e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil),
          %{
-            id: e(acl, :id, nil),
-            field: :to_boundaries,
-            name: e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil)
-          }}
+           id: e(acl, :id, nil),
+           field: :to_boundaries,
+           name: e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil)
+         }}
 
       %Bonfire.Data.AccessControl.Circle{} = circle ->
         {e(circle, :named, :name, nil) || e(circle, :sterotyped, :named, :name, nil),
          %{
-            id: e(circle, :id, nil),
-            field: :to_circles,
-            name: e(circle, :named, :name, nil) || e(circle, :sterotyped, :named, :name, nil)
-          }}
+           id: e(circle, :id, nil),
+           field: :to_circles,
+           name: e(circle, :named, :name, nil) || e(circle, :sterotyped, :named, :name, nil)
+         }}
 
       user ->
         name = e(user, :profile, :name, nil)
@@ -92,7 +92,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     current_user = current_user(socket)
     # Bonfire.Boundaries.Acls.list_my(current_user, search: search) ++
     (Bonfire.Boundaries.Circles.list_my(current_user, search: search) ++
-      Bonfire.Me.Users.search(search))
+       Bonfire.Me.Users.search(search))
     |> results_for_multiselect()
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
 

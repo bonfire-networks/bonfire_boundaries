@@ -122,7 +122,6 @@
   </div>
 </div> -->
 
-
 <li>
   <button
     class="text-neutral-content"
@@ -148,8 +147,8 @@
       </div>
     </div>
   </button>
-  </li>
-  <li>
+</li>
+<li>
   <button
     class="text-neutral-content"
     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
@@ -171,8 +170,8 @@
         </p>
       </div>
     </div>
-    </button></li>
-  <li>
+  </button></li>
+<li>
   <button
     class="text-neutral-content"
     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
@@ -181,20 +180,20 @@
     )}
     type="button"
   >
-   <div class="flex items-start text-left">
-    <div class="flex-shrink-0">
-      <span class="text-xl">﹫</span>
+    <div class="flex items-start text-left">
+      <div class="flex-shrink-0">
+        <span class="text-xl">﹫</span>
+      </div>
+      <div class="flex flex-col ml-3">
+        <div class="text-sm font-semibold">{l("Mentions")}</div>
+        <p class="text-[13px] text-opacity/70">
+          {l("Anyone mentioned will be able to see, interact, and reply.")}
+        </p>
+      </div>
     </div>
-    <div class="flex flex-col ml-3">
-      <div class="text-sm font-semibold">{l("Mentions")}</div>
-      <p class="text-[13px] text-opacity/70">
-        {l("Anyone mentioned will be able to see, interact, and reply.")}
-      </p>
-    </div>
-  </div>
   </button>
-  </li>
-  <li><button
+</li>
+<li><button
     class="text-neutral-content"
     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
       value: %{id: "custom", name: l("Custom")},
@@ -202,30 +201,31 @@
     )}
     type="button"
   >
-  <div class="flex items-start text-left">
-    <div class="flex-shrink-0">
-      <span class="text-xl">
-        <Icon iconify="ph:gear-fill" class="w-5 h-5" />
-      </span>
+    <div class="flex items-start text-left">
+      <div class="flex-shrink-0">
+        <span class="text-xl">
+          <Icon iconify="ph:gear-fill" class="w-5 h-5" />
+        </span>
+      </div>
+      <div class="flex flex-col ml-3">
+        <div class="text-sm font-semibold">{l("Custom")}</div>
+        <p class="text-[13px] text-opacity/70">{l("Specify custom boundaries.")}</p>
+      </div>
     </div>
-    <div class="flex flex-col ml-3">
-      <div class="text-sm font-semibold">{l("Custom")}</div>
-      <p class="text-[13px] text-opacity/70">{l("Specify custom boundaries.")}</p>
-    </div>
-  </div>
   </button>
-  </li>
-  {#for acl <- Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
+</li>
+{#for acl <-
+    Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
     |> Enum.map(fn
       %Bonfire.Data.AccessControl.Acl{} = acl ->
-      %{
-        id: e(acl, :id, nil),
-        field: :to_boundaries,
-        description: e(acl, :extra_info, :summary, nil),
-        name: e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil)
-      } end)
-    |> Enum.filter(fn acl -> acl[:name] != nil end)
-  }
+        %{
+          id: e(acl, :id, nil),
+          field: :to_boundaries,
+          description: e(acl, :extra_info, :summary, nil),
+          name: e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil)
+        }
+    end)
+    |> Enum.filter(fn acl -> acl[:name] != nil end)}
   <li>
     <button
       class="text-neutral-content"
@@ -235,17 +235,17 @@
       )}
       type="button"
     >
-    <div class="flex items-start text-left">
-      <div class="flex-shrink-0">
-        <span class="text-xl">
-          <Icon iconify="ph:gear-fill" class="w-5 h-5" />
-        </span>
+      <div class="flex items-start text-left">
+        <div class="flex-shrink-0">
+          <span class="text-xl">
+            <Icon iconify="ph:gear-fill" class="w-5 h-5" />
+          </span>
+        </div>
+        <div class="flex flex-col ml-3">
+          <div class="text-sm font-semibold">{e(acl, :name, nil)}</div>
+          <p class="text-[13px] text-opacity/70">{e(acl, :description, nil)}</p>
+        </div>
       </div>
-      <div class="flex flex-col ml-3">
-        <div class="text-sm font-semibold">{e(acl, :name, nil)}</div>
-        <p class="text-[13px] text-opacity/70">{e(acl, :description, nil)}</p>
-      </div>
-    </div>
     </button>
   </li>
-  {/for}
+{/for}

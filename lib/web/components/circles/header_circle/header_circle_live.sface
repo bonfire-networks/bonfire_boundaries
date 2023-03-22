@@ -84,7 +84,7 @@
             <!-- <label class="label">
                 <span class="text-xs font-semibold tracking-wider text-base-content/70">{l("Edit the circle name")}</span>
               </label> -->
-              <input type="hidden" name="id" value={e(@circle, :id, nil)} />
+            <input type="hidden" name="id" value={e(@circle, :id, nil)}>
             <div class="flex items-center">
               <input
                 name="named[name]"

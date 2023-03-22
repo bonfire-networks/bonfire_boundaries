@@ -240,11 +240,11 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("edit", attrs, socket) do
     with {:ok, circle} <-
-      Circles.edit(
-        e(attrs, :id, nil),
-        current_user_required!(socket),
-        attrs
-      ) do
+           Circles.edit(
+             e(attrs, :id, nil),
+             current_user_required!(socket),
+             attrs
+           ) do
       {:noreply,
        socket
        |> assign_flash(:info, l("Edited!"))

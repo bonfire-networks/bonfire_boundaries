@@ -272,28 +272,28 @@
                 )}</div>
             </div>
             <div>
-            <Bonfire.UI.Common.OpenModalLive
-              id={Pointers.ULID.generate()}
-              title_text={l("Delete this boundary")}
-            >
-              {l(
-                "The boundary will be permanently deleted. This action will affect everything that was shared on the local instance using the boundary."
-              )}
-              <:open_btn>
-                <div class="normal-case rounded btn btn-outline btn-error btn-sm">{l("Delete")}</div>
-              </:open_btn>
-              <:action_btns>
-                <button
-                  data-id="delete_boundary"
-                  type="button"
-                  :on-click="Bonfire.Boundaries:acl_delete"
-                  phx-value-go="/boundaries/acls"
-                  class="normal-case btn btn-error btn-sm"
-                >
-                  <span class="text-left truncate ellipsis">{l("Delete this boundary")}</span>
-                </button>
-              </:action_btns>
-            </Bonfire.UI.Common.OpenModalLive>
+              <Bonfire.UI.Common.OpenModalLive
+                id={Pointers.ULID.generate()}
+                title_text={l("Delete this boundary")}
+              >
+                {l(
+                  "The boundary will be permanently deleted. This action will affect everything that was shared on the local instance using the boundary."
+                )}
+                <:open_btn>
+                  <div class="normal-case rounded btn btn-outline btn-error btn-sm">{l("Delete")}</div>
+                </:open_btn>
+                <:action_btns>
+                  <button
+                    data-id="delete_boundary"
+                    type="button"
+                    :on-click="Bonfire.Boundaries:acl_delete"
+                    phx-value-go="/boundaries/acls"
+                    class="normal-case btn btn-error btn-sm"
+                  >
+                    <span class="text-left truncate ellipsis">{l("Delete this boundary")}</span>
+                  </button>
+                </:action_btns>
+              </Bonfire.UI.Common.OpenModalLive>
             </div>
           </div>
         </div>
