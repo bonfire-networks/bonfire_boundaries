@@ -2,6 +2,7 @@ defmodule Bonfire.Boundaries.Web.BlockMenuButtonsLive do
   use Bonfire.UI.Common.Web, :stateless_component
 
   prop object, :any, default: nil
+  prop parent_id, :string, default: nil
   prop peered, :any, default: nil
 
   def peered(object, peered) do

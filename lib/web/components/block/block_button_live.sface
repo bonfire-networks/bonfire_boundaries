@@ -1,6 +1,6 @@
 {#if !@my_block}
   <Bonfire.UI.Common.OpenModalLive
-    id={Pointers.ULID.generate()}
+    id={"block-#{@parent_id}-#{id(@object)}"}
     title_text={l("Block %{user_or_instance_name}", user_or_instance_name: @label)}
     form_opts={"phx-submit": "Bonfire.Boundaries:blocks"}
   >

@@ -19,7 +19,7 @@
         <li class="rounded-md bg-base-content/5">
           <LiveRedirect
             class="block rounded-md hover:bg-base-content/5"
-            to={~p"/boundaries/circle/" <> circle.id}
+            to={~p"/boundaries/circle/" <> id(circle)}
           >
             <div class="flex items-center gap-3 p-3">
               <Icon iconify="material-symbols:group-work" class="w-5 h-5 text-base-content/70" />
@@ -30,6 +30,7 @@
                   </div>
                 </div>
                 <Bonfire.Boundaries.Web.CirclePreviewLive
+                  parent_id={id(circle)}
                   members={e(circle, :encircles, [])}
                   count={e(circle, :encircles_count, 0)}
                   size={8}

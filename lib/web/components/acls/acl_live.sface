@@ -244,7 +244,7 @@
             <div class="text-sm text-base-content/70">{l "If you no longer want to use this boundary, but still want existing permissions using it to be preserved."}</div>
           </div>
           <Bonfire.UI.Common.OpenModalLive
-            id={Pointers.ULID.generate()} 
+            id={"archive-#{@acl_id || id(@acl)}"} 
             title_text={l("Archive this boundary")}
             >
             {l "The boundary will be permanently archived and no longer appear in your list of boundaries."} 
@@ -273,7 +273,7 @@
             </div>
             <div>
               <Bonfire.UI.Common.OpenModalLive
-                id={Pointers.ULID.generate()}
+                id={"delete-#{@acl_id || id(@acl)}"}
                 title_text={l("Delete this boundary")}
               >
                 {l(

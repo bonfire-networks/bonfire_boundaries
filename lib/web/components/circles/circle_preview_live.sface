@@ -2,6 +2,7 @@
   <div class="flex gap-1 avatar-group">
     <Bonfire.UI.Common.AvatarLive
       :for={member <- @members |> Enum.slice(0..2)}
+      parent_id={@parent_id}
       user={e(member, :subject, nil) || member}
       class={"w-#{@size} h-#{@size} "}
       bg_class="fill-base-content/5 bg-base-content/5 rounded-xl"

@@ -66,6 +66,7 @@
                             AclLive.subject_verb_grant(e(acl, :grants, [])) |> Enum.slice(0..2)}
                           {#if e(subject, :profile, :id, nil)}
                             <Bonfire.UI.Common.AvatarLive
+                              parent_id="acls"
                               user={e(subject, nil)}
                               title={e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) ||
                                 e(subject, :name, nil) || e(subject, :profile, :name, nil) ||

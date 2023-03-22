@@ -2,6 +2,7 @@
   <li :if={current_user_id(@__context__) != id(@object)} class="hover:bg-neutral/20">
     <Bonfire.Boundaries.Web.BlockButtonLive
       object={@object}
+      parent_id={"user-#{@parent_id}"}
       with_icon
       label={e(@object, :profile, :name, l("this user"))}
       class="flex items-center w-full gap-2 text-sm text-neutral-content/80"
@@ -12,6 +13,7 @@
     <Bonfire.Boundaries.Web.BlockButtonLive
       with_icon
       object={e(peered(@object, @peered), :peer_id, nil)}
+      parent_id={"instance-#{@parent_id}"}
       label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
       class="flex items-center w-full gap-2 text-sm text-neutral-content/80"
     />

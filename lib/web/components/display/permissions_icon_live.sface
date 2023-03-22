@@ -5,7 +5,7 @@
   {#case @boundary_tuple || Bonfire.Boundaries.preset_boundary_role_from_acl(@object_boundary)}
     {#match {name, extra} = _role}
       <Bonfire.UI.Common.OpenModalLive
-        id={Pointers.ULID.generate()}
+        id={"permissions_icon-#{@parent_id}"}
         no_actions
         open_btn_wrapper_class="!py-1 !px-3"
       >
@@ -71,7 +71,7 @@
             <div class="flex items-start gap-2">
               <div class="flex flex-col gap-1 text-center">
                 <div class="text-sm font-medium text-neutral-content/80">{name}</div>
-                <Bonfire.UI.Common.OpenModalLive id={Pointers.ULID.generate()} title_text={l("Boundary details")}>
+                <Bonfire.UI.Common.OpenModalLive id={"permissions_details-#{@parent_id}"} title_text={l("Boundary details")}>
                   <div class="text-sm">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div>
                   <:open_btn>
                     <button type="button" class="normal-case rounded btn btn-info btn-xs">

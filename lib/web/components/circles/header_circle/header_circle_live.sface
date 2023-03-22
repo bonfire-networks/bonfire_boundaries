@@ -117,7 +117,7 @@
       </li>
       <li class="delete_circle">
         <Bonfire.UI.Common.OpenModalLive
-          id={Pointers.ULID.generate()}
+          id="delete_circle"
           title_text={l("Delete this circle")}
           open_btn_wrapper_class="flex flex-1 w-full"
         >

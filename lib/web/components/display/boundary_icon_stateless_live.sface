@@ -5,6 +5,7 @@
   class={@class}
 />
 <Bonfire.Boundaries.Web.PermissionsIconLive
+  parent_id={@parent_id}
   object_boundary={@object_boundary}
   scope={@scope}
   boundary_tuple={@boundary_tuple}

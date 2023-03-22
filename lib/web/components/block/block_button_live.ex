@@ -3,6 +3,7 @@ defmodule Bonfire.Boundaries.Web.BlockButtonLive do
   # TODO: make stateful and preload block status?
 
   prop object, :any
+  prop parent_id, :string, default: nil
   prop with_icon, :boolean, default: false
   prop icon_class, :css_class, default: nil
   prop hide_text, :boolean, default: false
