@@ -1,4 +1,4 @@
-<div class="flex items-center flex-1 gap-2 mx">
+<div class="flex items-center flex-1 gap-2">
   <div class="w-full dropdown dropdown-end">
     <label
       type="button"
