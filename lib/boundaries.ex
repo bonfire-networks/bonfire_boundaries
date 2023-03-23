@@ -78,11 +78,35 @@ defmodule Bonfire.Boundaries do
     from(s in Summary,
       where: s.object_id in ^Types.ulids(things)
     )
-    |> group_all_by_verb()
+    |> all_grouped_by_verb()
   end
 
   @doc "eg: `list_grants_on(id, [:see, :read])`"
   def list_grants_on(things, verbs) do
+    from(s in Summary,
+      where: s.object_id in ^Types.ulids(things)
+    )
+    |> filter_grants_by_verbs(verbs)
+  end
+
+  def users_grants_on(users, things) do
+    query_users_grants_on(users, things)
+    |> all_grouped_by_verb()
+  end
+
+  def users_grants_on(users, things, verbs) do
+    query_users_grants_on(users, things)
+    |> filter_grants_by_verbs(verbs)
+  end
+
+  defp query_users_grants_on(users, things) do
+    from(s in Summary,
+      where: s.subject_id in ^Types.ulids(users),
+      where: s.object_id in ^Types.ulids(things)
+    )
+  end
+
+  defp filter_grants_by_verbs(query, verbs) do
     verb_ids =
       List.wrap(verbs)
       |> Enum.map(fn
@@ -95,24 +119,14 @@ defmodule Bonfire.Boundaries do
       |> Enum.sort()
       |> debug()
 
-    from(s in Summary,
-      where: s.object_id in ^Types.ulids(things),
+    from(s in query,
       where: s.verb_id in ^verb_ids
     )
-    |> proload([:subject])
-    |> group_all_by_verb()
+    |> all_grouped_by_verb()
     |> Enum.filter(&(&1.verbs == verb_names))
   end
 
-  def my_grants_on(users, things) do
-    from(s in Summary,
-      where: s.subject_id in ^Types.ulids(users),
-      where: s.object_id in ^Types.ulids(things)
-    )
-    |> group_all_by_verb()
-  end
-
-  defp group_all_by_verb(query) do
+  defp all_grouped_by_verb(query) do
     query
     |> repo().all()
     |> Enum.group_by(&{&1.subject_id, &1.object_id, &1.value})

@@ -555,7 +555,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     if not is_nil(current_user) do
       # WIP: show user's computed permission instead of preset if we have current_user
       # case Bonfire.Boundaries.Controlleds.list_on_objects_by_subject(list_of_ids, current_user) do
-      case Bonfire.Boundaries.my_grants_on(current_user, list_of_ids) do
+      case Bonfire.Boundaries.users_grants_on(current_user, list_of_ids) do
         custom when custom != %{} and custom != [] ->
           custom
           |> Map.new(&{&1.object_id, Map.take(&1, [:verbs, :value])})

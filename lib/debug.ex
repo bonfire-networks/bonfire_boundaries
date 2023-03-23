@@ -64,7 +64,7 @@ defmodule Bonfire.Boundaries.Debug do
   end
 
   def debug_my_grants_on(users, things) do
-    Boundaries.my_grants_on(users, things)
+    Boundaries.users_grants_on(users, things)
     |> Enum.map(&Map.take(&1, [:subject_id, :object_id, :verbs, :value]))
     |> Scribe.print()
   end
