@@ -30,12 +30,12 @@
   <div :for={{data, id} <- @to_circles || []} class="flex items-center justify-between mt-2">
     {#case data}
       {#match %{"icon" => _}}
-        <Bonfire.UI.Common.ProfileItemLive 
-          avatar_class="w-6 h-6 rounded bg-base-200" 
-          inline 
-          profile={data} 
-          character={data} 
-          show_controls={[]} 
+        <Bonfire.UI.Common.ProfileItemLive
+          avatar_class="w-6 h-6 rounded bg-base-200"
+          inline
+          profile={data}
+          character={data}
+          show_controls={[]}
         />
       {#match _ when is_binary(data)}
         <div class="flex items-center gap-3 grow">
