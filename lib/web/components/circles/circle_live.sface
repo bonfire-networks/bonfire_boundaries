@@ -39,7 +39,7 @@
               phx-value-subject={id}
               :on-click="remove"
             >
-              <Icon solid="Trash" class="w-4 h-4" />
+              <#Icon solid="Trash" class="w-4 h-4" />
               <!-- <span>{l("Remove")}</span> -->
             </button>
           </td>
@@ -98,7 +98,7 @@
             phx-target={@parent_back}
             class="btn btn-outline btn-sm btn-circle"
           >
-            <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
+            <#Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
           </div>
           <div>{@title || e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) ||
               l("Untitled circle")}</div>
@@ -216,7 +216,7 @@
             <div class="p-4 my-4 mb-0 rounded-md bg-info/10">
               <div class="flex">
                 <div class="flex-shrink-0">
-                  <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+                  <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
                 </div>
                 <div class="flex-1 ml-3 md:flex md:justify-between">
                   <p class="text-sm text-info">

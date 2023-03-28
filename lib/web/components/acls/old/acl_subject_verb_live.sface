@@ -11,10 +11,10 @@
           phx-target={@parent_back}
           class="btn btn-ghost btn-sm btn-circle"
         >
-          <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
+          <#Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
         </div>
 
-        <!-- <Icon solid="LockClosed" class="w-6 h-6 text-base-content/70" /> -->
+        <!-- <#Icon solid="LockClosed" class="w-6 h-6 text-base-content/70" /> -->
         <div>{e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) ||
             l("Untitled boundary")}</div>
       </div>
@@ -32,7 +32,7 @@
         <div class="flex items-center mt-3 space-x-2">
           <span class="flex items-center space-x-1 badge-lg badge badge-outline">
             <span class="text-sm">Alice</span>
-            <Icon solid="X" class="w-4 h-4 stroke-current" />
+            <#Icon solid="X" class="w-4 h-4 stroke-current" />
           </span>
         </div>
         <div :if={!@read_only}>
@@ -80,12 +80,12 @@
               <div class="flex flex-wrap gap-2 mt-2" x-show="!active">
                 {#for verb <- can(e(l, :verb_grants, %{}))}
                   <span class="badge badge-success">
-                    <Icon outline="Check" class="w-4 h-4 mr-1" />
+                    <#Icon outline="Check" class="w-4 h-4 mr-1" />
                     {verb}</span>
                 {/for}
                 {#for verb <- cannot(e(l, :verb_grants, %{}))}
                   <span class="badge badge-error">
-                    <Icon outline="X" class="w-4 h-4 mr-1" />
+                    <#Icon outline="X" class="w-4 h-4 mr-1" />
                     {verb}</span>
                 {/for}
               </div>

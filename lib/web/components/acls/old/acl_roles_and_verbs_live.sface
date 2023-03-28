@@ -23,7 +23,7 @@
             x-on:click="show_boundary_list = true"
             class="btn btn-ghost btn-sm btn-circle"
           >
-            <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
+            <#Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
           </div>
 
           <div class="flex space-x-2 items-top">
@@ -43,7 +43,7 @@
           phx-target={@myself}
           class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
         >
-          <Icon outline="Cog" class="w-4 h-4" />
+          <#Icon outline="Cog" class="w-4 h-4" />
           <span>{l("Settings")}</span>
         </div>
 
@@ -55,7 +55,7 @@
           phx-target={@myself}
           class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
         >
-          <Icon outline="ChevronLeft" class="w-4 h-4" />
+          <#Icon outline="ChevronLeft" class="w-4 h-4" />
           <span>{l("Back")}</span>
         </div>
         <!-- <p class="mt-1 text-base font-regular text-base-content/70">{l "This is a sample description to help remember what this boundary is about."}</p> -->
@@ -86,7 +86,7 @@
               phx-value-subject_id={ulid(subject)}
               phx-target={@myself}
               class="flex-shrink-0 ml-0.5 h-4 w-4 rounded-full inline-flex items-center justify-center text-info-content hover:bg-info-content/30 hover:text-info-content/80 focus:outline-none focus:bg-info-content/80 focus:text-white">
-              <Icon solid="X" class="w-4 h-4" />
+              <#Icon solid="X" class="w-4 h-4" />
             </span>
           </span>
         </div> -->
@@ -137,7 +137,7 @@
                   />
                 {#else}
                   <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-                    <Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
+                    <#Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
                   </span>
                   {LiveHandler.subject_name(e(l, :subject, nil))}
                 {/if}
@@ -156,7 +156,7 @@
                     phx-target={@myself}
                     class="btn btn-xs btn-circle btn-error"
                   >
-                    <Icon solid="Minus" class="w-4 h-4" />
+                    <#Icon solid="Minus" class="w-4 h-4" />
                   </div>
                 </div>
               </li>
@@ -178,8 +178,8 @@
                           {#match nil}
                           {#match verb}
                             <span class="tooltip" data-tip={e(verb, :summary, nil)}>
-                              <Icon
-                                iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+                              <Iconify.iconify
+                                icon={e(verb, :icon, nil)}
                                 class="w-4 h-4 text-base-content/70"
                                 fill="currentColor"
                               />

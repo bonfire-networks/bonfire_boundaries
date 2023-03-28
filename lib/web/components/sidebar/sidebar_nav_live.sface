@@ -15,7 +15,7 @@
         "bg-base-content/10": @selected_tab == "circles"
       }
     >
-      <Icon
+      <#Icon
         iconify="material-symbols:group-work"
         class={
           "w-4 h-4 font-normal text-base-content/70",
@@ -45,7 +45,7 @@
         "bg-base-content/10 ": @selected_tab == "account"
       }
     >
-      <Icon
+      <#Icon
         iconify="ri:shield-user-fill"
         class={
           "w-4 h-4 font-normal text-base-content/70",
@@ -75,7 +75,7 @@
         "bg-base-content/10": @selected_tab == "acls"
       }
     >
-      <Icon
+      <#Icon
         solid="LockClosed"
         class={
           "w-4 h-4 font-normal text-base-content/70",

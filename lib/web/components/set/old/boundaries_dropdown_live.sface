@@ -20,28 +20,28 @@
         style="display: none"
         class="font-normal normal-case btn btn-ghost btn-xs"
       >
-        <Icon solid="Globe" class="w-4 h-4 text-base-content text-opacity-70" />
+        <#Icon solid="Globe" class="w-4 h-4 text-base-content text-opacity-70" />
       </div>
       <div
         x-show="to_boundaries.length==1 && to_boundaries[0] == 'local'"
         style="display: none"
         class="font-normal normal-case btn btn-ghost btn-xs"
       >
-        <Icon solid="LocationMarker" class="w-4 h-4 text-base-content text-opacity-70" />
+        <#Icon solid="LocationMarker" class="w-4 h-4 text-base-content text-opacity-70" />
       </div>
       <div
         x-show="to_boundaries.length==1 && to_boundaries[0] == 'mentions'"
         style="display: none"
         class="font-normal normal-case btn btn-ghost btn-xs"
       >
-        <Icon solid="AtSymbol" class="w-4 h-4 text-base-content text-opacity-70" />
+        <#Icon solid="AtSymbol" class="w-4 h-4 text-base-content text-opacity-70" />
       </div>
       <div
         x-show="to_boundaries.length==1 && to_boundaries[0] == 'message'"
         style="display: none"
         class="font-normal normal-case btn btn-ghost btn-xs"
       >
-        <Icon solid="Chat-alt-2" class="w-4 h-4 text-base-content text-opacity-70" />
+        <#Icon solid="Chat-alt-2" class="w-4 h-4 text-base-content text-opacity-70" />
       </div>
     </div>
 
@@ -72,7 +72,7 @@
         x-on:click="to_boundaries = ['public']; to_boundaries_names = ['Public']; open_boundaries = false;"
         class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-neutral rounded-t-md hover:bg-neutral hover:bg-opacity-30"
       >
-        <Icon solid="Globe" />
+        <#Icon solid="Globe" />
         <div class="flex-1">
           <div class="text-sm font-medium text-neutral text-opacity-80">{l("Public")}</div>
           <p class="text-xs text-neutral text-opacity-80">{l("Publicly visible to everyone on the fediverse and in search engines")}</p>
@@ -82,7 +82,7 @@
         x-on:click="to_boundaries = ['local']; to_boundaries_names = ['Local']; open_boundaries = false;"
         class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30"
       >
-        <Icon solid="LocationMarker" />
+        <#Icon solid="LocationMarker" />
         <div class="flex-1">
           <div class="text-sm font-medium text-neutral text-opacity-80">{l("Local Instance")}</div>
           <p class="text-xs text-neutral text-opacity-80">{l("Visible to all members of this instance")}</p>
@@ -92,7 +92,7 @@
         x-on:click="to_boundaries = ['mentions']; to_boundaries_names = ['Mentions']; open_boundaries = false;"
         class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30"
       >
-        <Icon solid="AtSymbol" />
+        <#Icon solid="AtSymbol" />
         <div class="flex-1">
           <div class="text-sm font-medium text-neutral text-opacity-80">{l("Mentions")}</div>
           <p class="text-xs text-neutral text-opacity-80">{l("Visible only to those mentioned, across the fediverse")}</p>
@@ -103,7 +103,7 @@
       x-show="to_boundaries.length==1 && to_boundaries[0] == 'message'"
       class="flex p-2 space-x-2 text-sm transition duration-150 ease-in-out cursor-pointer text-primary-content-700 text-neutral hover:bg-neutral hover:bg-opacity-30"
     >
-      <Icon solid="Chat-alt-2" />
+      <#Icon solid="Chat-alt-2" />
       <div class="flex-1">
         <div class="text-sm font-medium text-neutral text-opacity-80">{l("Message")}</div>
         <p class="text-xs text-neutral text-opacity-80">{l("Visible only to people included in this message thread:")}

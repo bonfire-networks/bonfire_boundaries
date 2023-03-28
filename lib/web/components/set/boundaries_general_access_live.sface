@@ -10,7 +10,7 @@
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <span class="text-xl">
-                      <Icon iconify="ph:globe" class="w-5 h-5" />
+                      <#Icon iconify="ph:globe" class="w-5 h-5" />
                     </span>
                   </div>
                   <div class="flex flex-col ml-3">
@@ -26,7 +26,7 @@
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <span class="text-xl">
-                      <Icon iconify="ph:campfire-bold" class="w-5 h-5" />
+                      <#Icon iconify="ph:campfire-bold" class="w-5 h-5" />
                     </span>
                   </div>
                   <div class="flex flex-col ml-3">
@@ -52,7 +52,7 @@
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <span class="text-xl">
-                      <Icon iconify="ph:gear-fill" class="w-5 h-5" />
+                      <#Icon iconify="ph:gear-fill" class="w-5 h-5" />
                     </span>
                   </div>
                   <div class="flex flex-col ml-3">
@@ -68,7 +68,7 @@
                 class="flex items-center justify-start gap-2 normal-case w-fit btn-ghost btn btn-sm opacity-70"
               >
                 {l("Edit")}
-                <Icon solid="ChevronDown" class="inline w-5 h-5" />
+                <#Icon solid="ChevronDown" class="inline w-5 h-5" />
               </label>
               <ul
                 role="menu"
@@ -134,7 +134,7 @@
     <div class="flex items-start text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">
-          <Icon iconify="ph:globe" class="w-5 h-5" />
+          <#Icon iconify="ph:globe" class="w-5 h-5" />
         </span>
       </div>
       <div class="flex flex-col ml-3">
@@ -160,7 +160,7 @@
     <div class="flex items-start text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">
-          <Icon iconify="ph:campfire-bold" class="w-5 h-5" />
+          <#Icon iconify="ph:campfire-bold" class="w-5 h-5" />
         </span>
       </div>
       <div class="flex flex-col ml-3">
@@ -204,7 +204,7 @@
     <div class="flex items-start text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">
-          <Icon iconify="ph:gear-fill" class="w-5 h-5" />
+          <#Icon iconify="ph:gear-fill" class="w-5 h-5" />
         </span>
       </div>
       <div class="flex flex-col ml-3">
@@ -238,7 +238,7 @@
       <div class="flex items-start text-left">
         <div class="flex-shrink-0">
           <span class="text-xl">
-            <Icon iconify="ph:gear-fill" class="w-5 h-5" />
+            <#Icon iconify="ph:gear-fill" class="w-5 h-5" />
           </span>
         </div>
         <div class="flex flex-col ml-3">

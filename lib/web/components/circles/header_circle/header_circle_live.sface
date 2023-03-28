@@ -16,7 +16,7 @@
     <div class="p-4 my-4 mb-0 rounded-md bg-info/10">
       <div class="flex">
         <div class="flex-shrink-0">
-          <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+          <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
         </div>
         <div class="flex-1 ml-3 md:flex md:justify-between">
           <p class="text-sm text-info">
@@ -56,7 +56,7 @@
     </ul>
     <:open_btn>
       <div class="flex items-center gap-2 normal-case rounded text-info btn btn-xs btn-ghost">
-        <Icon iconify="heroicons:user-plus-20-solid" class="w-4 h-4 text-info" />
+        <#Icon iconify="heroicons:user-plus-20-solid" class="w-4 h-4 text-info" />
         <span>{l("Add member")}</span>
       </div>
     </:open_btn>
@@ -64,7 +64,7 @@
 
   <div :if={!@read_only and !@stereotype_id} aria-haspopup="true" class="dropdown dropdown-end">
     <label tabindex="0" class="rounded btn btn-xs btn-ghost btn-square">
-      <Icon solid="DotsVertical" class="w-4 h-4" />
+      <#Icon solid="DotsVertical" class="w-4 h-4" />
     </label>
     <ul
       tabindex="0"

@@ -5,7 +5,7 @@
   >
     <div class="flex items-center gap-3 grow">
       <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-        <Icon solid="LockClosed" class="inline-block w-5 h-5 text-base-content/70" />
+        <#Icon solid="LockClosed" class="inline-block w-5 h-5 text-base-content/70" />
       </span>
       <div class="text-sm font-medium text-base-content">{e(data, :name, nil) || if is_tuple(data), do: elem(data, 1), else: data}</div>
     </div>
@@ -22,7 +22,7 @@
         )}
         class="rounded btn btn-sm btn-ghost btn-square opacity-80"
       >
-        <Icon solid="Trash" class="w-4 h-4 text-base-content/70" />
+        <#Icon solid="Trash" class="w-4 h-4 text-base-content/70" />
       </div>
     </div>
   </div>
@@ -40,14 +40,14 @@
       {#match _ when is_binary(data)}
         <div class="flex items-center gap-3 grow">
           <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-            <Icon iconify="material-symbols:group" class="inline-block w-5 h-5 text-base-content/70" />
+            <#Icon iconify="material-symbols:group" class="inline-block w-5 h-5 text-base-content/70" />
           </span>
           <div class="text-sm font-medium text-base-content">{data}</div>
         </div>
       {#match _}
         <div class="flex items-center gap-3 grow">
           <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-            <Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
+            <#Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
           </span>
           <div class="text-sm font-medium text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
         </div>
@@ -62,13 +62,13 @@
         )}
         class="rounded btn btn-sm btn-ghost btn-square opacity-80"
       >
-        <Icon solid="Trash" class="w-4 h-4 text-base-content/70" />
+        <#Icon solid="Trash" class="w-4 h-4 text-base-content/70" />
       </div>
     </div>
     <!-- <div aria-haspopup="true" class="dropdown dropdown-top dropdown-end">
           <label tabindex="0" class="flex items-center gap-2 normal-case rounded btn btn-sm">
             <span>{l("Participate")}</span>
-            <Icon solid="ChevronDown" class="w-4 h-4" />
+            <#Icon solid="ChevronDown" class="w-4 h-4" />
           </label>
           <ul
             tabindex="0"

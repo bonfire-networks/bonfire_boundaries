@@ -11,10 +11,10 @@
           phx-target={@parent_back}
           class="btn btn-ghost btn-sm btn-circle"
         >
-          <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
+          <#Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
         </div>
 
-        <!-- <Icon solid="LockClosed" class="w-6 h-6 text-base-content/70" /> -->
+        <!-- <#Icon solid="LockClosed" class="w-6 h-6 text-base-content/70" /> -->
         <div>{e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) ||
             l("Untitled boundary")}</div>
       </div>
@@ -32,7 +32,7 @@
         <div class="flex items-center mt-3 space-x-2">
           <span class="flex items-center space-x-1 badge-lg badge badge-outline">
             <span class="text-sm">Alice</span>
-            <Icon solid="X" class="w-4 h-4 stroke-current" />
+            <#Icon solid="X" class="w-4 h-4 stroke-current" />
           </span>
         </div>
         <div :if={!@read_only}>
@@ -60,9 +60,9 @@
             <div class="flex items-center p-2">
               <div class="flex-1">{e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}</div>
               <div class="flex items-center space-x-1">
-                <div class="p-1 border rounded bg-base-100 border-base-300"><Icon iconify="bx:CheckShield" /></div>
-                <div class="p-1 border rounded bg-base-100 border-base-300"><Icon iconify="bx:Shield" /></div>
-                <div class="p-1 border rounded bg-base-100 border-base-300"><Icon iconify="bx:ShieldX" /></div>
+                <div class="p-1 border rounded bg-base-100 border-base-300"><#Icon iconify="bx:CheckShield" /></div>
+                <div class="p-1 border rounded bg-base-100 border-base-300"><#Icon iconify="bx:Shield" /></div>
+                <div class="p-1 border rounded bg-base-100 border-base-300"><#Icon iconify="bx:ShieldX" /></div>
               </div>
             </div>
           </div>

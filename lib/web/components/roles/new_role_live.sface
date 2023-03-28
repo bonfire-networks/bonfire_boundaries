@@ -6,7 +6,7 @@
       phx-target={@parent_back}
       class="btn btn-sm btn-ghost btn-circle"
     >
-      <Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
+      <#Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
     </div>
     <span>{l("Back")}</span>
   </div>

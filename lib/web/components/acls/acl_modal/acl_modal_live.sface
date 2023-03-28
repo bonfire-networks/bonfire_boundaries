@@ -7,7 +7,7 @@
     <div class="p-4 mb-4 rounded-md bg-info/10">
       <div class="flex">
         <div class="flex-shrink-0">
-          <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+          <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
         </div>
         <div class="flex-1 ml-3 md:flex md:justify-between">
           <p class="text-sm text-info">
@@ -27,7 +27,7 @@
         }>
           {#case Bonfire.Boundaries.Verbs.get(verb_id)}
             {#match nil}
-              <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
+              <#Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
 
               <div class="flex-1">
                 <div class="flex flex-col">
@@ -37,8 +37,8 @@
                 </div>
               </div>
             {#match verb}
-              <Icon
-                iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+              <Iconify.iconify
+                icon={e(verb, :icon, "")}
                 class="w-4 h-4 text-base-content/70"
                 fill="currentColor"
               />

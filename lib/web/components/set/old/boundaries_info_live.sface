@@ -1,14 +1,14 @@
 <div class="flex">
   {#if is_list(@to_boundaries) and length(@to_boundaries) == 1 &&
       List.first(@to_boundaries) |> elem(0) == "public"}
-    <Icon solid="Globe" class="mr-3 w-8 h-8 text-base-content text-opacity-70" />
+    <#Icon solid="Globe" class="mr-3 w-8 h-8 text-base-content text-opacity-70" />
     <span>{l(
         "Your %{activity_type} will be publicly visible to everyone on the fediverse and in search engines.",
         activity_type: @activity_type_or_reply
       )}</span>
   {#elseif is_list(@to_boundaries) and length(@to_boundaries) == 1 &&
       List.first(@to_boundaries) |> elem(0) == "local"}
-    <Icon solid="LocationMarker" class="mr-3 w-8 h-8 text-base-content text-opacity-70" />
+    <#Icon solid="LocationMarker" class="mr-3 w-8 h-8 text-base-content text-opacity-70" />
     <span>{l(
         "Your %{activity_type} will only be visible to members of your local instance.",
         activity_type: @activity_type_or_reply
@@ -16,7 +16,7 @@
     </span>
   {#elseif is_list(@to_boundaries) and length(@to_boundaries) == 1 &&
       List.first(@to_boundaries) |> elem(0) == "mentions"}
-    <Icon solid="AtSymbol" class="mr-3 w-8 h-8 text-base-content text-opacity-70" />
+    <#Icon solid="AtSymbol" class="mr-3 w-8 h-8 text-base-content text-opacity-70" />
     <span>{l(
         "Your %{activity_type} will be visible to anyone @ mentioned (plus yourself and instance admins).",
         activity_type: @activity_type_or_reply
@@ -24,7 +24,7 @@
     </span>
   {#elseif is_list(@to_boundaries) and length(@to_boundaries) == 1 &&
       List.first(@to_boundaries) |> elem(0) == "message"}
-    <Icon solid="Chat-alt-2" class="mr-3 w-8 h-8 text-base-content text-opacity-70" />
+    <#Icon solid="Chat-alt-2" class="mr-3 w-8 h-8 text-base-content text-opacity-70" />
     <span>{l(
         "Your %{activity_type} will only be visible to the person you are messaging (plus yourself and possibly instance admins).",
         activity_type: @activity_type_or_reply

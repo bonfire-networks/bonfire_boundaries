@@ -23,7 +23,7 @@
         disabled={@read_only}
       />
       <div class="btn btn-circle btn-xs">
-        <Icon solid="X" class="w-4 h-4" />
+        <#Icon solid="X" class="w-4 h-4" />
       </div>
     </label>
     <button
@@ -54,7 +54,7 @@
         disabled={@read_only}
       />
       <div class={"btn btn-square btn-xs btn-yes", "btn-disabled": @read_only}>
-        <Icon solid="Check" class="w-4 h-4" />
+        <#Icon solid="Check" class="w-4 h-4" />
       </div>
     </label> -->
     <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Not specified")}>
@@ -67,7 +67,7 @@
         disabled={@read_only}
       />
       <div class={"btn btn-square btn-xs btn-maybe", "btn-disabled": @read_only}>
-        <Icon solid="Minus" class="w-4 h-4" />
+        <#Icon solid="Minus" class="w-4 h-4" />
       </div>
     </label> -->
     <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Cannot")}>
@@ -80,7 +80,7 @@
         disabled={@read_only}
       />
       <div class={"btn btn-square btn-xs btn-no", "btn-disabled": @read_only}>
-        <Icon solid="X" class="w-4 h-4" />
+        <#Icon solid="X" class="w-4 h-4" />
       </div>
     </label> -->
   </form>

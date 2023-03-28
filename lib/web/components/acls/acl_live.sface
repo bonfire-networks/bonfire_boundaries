@@ -63,7 +63,7 @@
         phx-target={@myself}
         class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
         >
-        <Icon outline="Cog" class="w-4 h-4" />
+        <#Icon outline="Cog" class="w-4 h-4" />
         <span>{l("Settings")}</span>
       </div>
 
@@ -75,7 +75,7 @@
         phx-target={@myself}
         class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
         >
-        <Icon outline="ChevronLeft" class="w-4 h-4" />
+        <#Icon outline="ChevronLeft" class="w-4 h-4" />
         <span>{l("Back")}</span>
       </div> -->
     </div>
@@ -112,7 +112,7 @@
                 {#else}
                   <div class="flex items-center gap-3">
                     <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-                      <Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
+                      <#Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
                     </span>
                     <div class="text-sm truncate max-w-[160px] font-medium text-base-content">{LiveHandler.subject_name(subject)}</div>
                   </div>
@@ -128,7 +128,7 @@
                   />
                   <div class="dropdown dropdown-end">
                     <label tabindex="0" class="rounded btn btn-square btn-ghost btn-sm">
-                      <Icon solid="DotsVertical" class="w-4 h-4" />
+                      <#Icon solid="DotsVertical" class="w-4 h-4" />
                     </label>
                     <ul tabindex="0" class="w-48 p-1 rounded shadow dropdown-content menu menu-compact bg-neutral">
                       <li :if={!@setting_boundaries}>

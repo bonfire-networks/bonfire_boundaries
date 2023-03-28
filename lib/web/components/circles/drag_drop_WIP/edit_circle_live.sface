@@ -13,7 +13,7 @@
             <button
               :on-click="Bonfire.Boundaries:circle_delete"
               class="btn btn-primary w-max inline-flex items-center"
-            ><Icon solid="Trash" />{l("Delete circle")}</button>
+            ><#Icon solid="Trash" />{l("Delete circle")}</button>
           </div>
         </div>
       </div>
@@ -75,10 +75,10 @@
                 </div>
                 <div :if={!@read_only} class="flex mr-1">
                   <span class="to flex items-center" x-on:click="move_item(event, 'circle_members')">
-                    <Icon solid="PlusCircle" />
+                    <#Icon solid="PlusCircle" />
                   </span>
                   <span class="from flex items-center" x-on:click="move_item(event, 'circle_suggestions')">
-                    <Icon solid="MinusCircle" />
+                    <#Icon solid="MinusCircle" />
                   </span>
                 </div>
               </li>
@@ -141,10 +141,10 @@
 
                 <div :if={!@read_only} class="flex mr-1">
                   <span class="to flex items-center button" x-on:click="move_item(event, 'circle_members')">
-                    <Icon solid="PlusCircle" />
+                    <#Icon solid="PlusCircle" />
                   </span>
                   <span class="from flex items-center button" x-on:click="move_item(event, 'circle_suggestions')">
-                    <Icon solid="MinusCircle" />
+                    <#Icon solid="MinusCircle" />
                   </span>
                 </div>
               </li>
@@ -185,10 +185,10 @@
 
                 <div :if={!@read_only} class="flex mr-1">
                   <span class="to flex items-center button" x-on:click="move_item(event, 'circle_members')">
-                    <Icon solid="PlusCircle" />
+                    <#Icon solid="PlusCircle" />
                   </span>
                   <span class="from flex items-center button" x-on:click="move_item(event, 'circle_suggestions')">
-                    <Icon solid="MinusCircle" />
+                    <#Icon solid="MinusCircle" />
                   </span>
                 </div>
               </li>

@@ -14,7 +14,7 @@
           "flex items-center gap-2": @with_label == true
         }
       >
-        <Icon :if={@with_icon} solid="Globe" class="w-4 h-4 text-base-content/70" />
+        <#Icon :if={@with_icon} solid="Globe" class="w-4 h-4 text-base-content/70" />
         <span
           :if={@with_label}
           class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
@@ -30,7 +30,7 @@
           "flex items-center gap-2": @with_label == true
         }
       >
-        <Icon :if={@with_icon} solid="Home" class="w-4 h-4 text-base-content/70" />
+        <#Icon :if={@with_icon} solid="Home" class="w-4 h-4 text-base-content/70" />
         <span
           :if={@with_label}
           class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
@@ -46,7 +46,7 @@
           "flex items-center gap-2": @with_label == true
         }
       >
-        <Icon :if={@with_icon} solid="Cog" class="w-4 h-4 text-base-content/70" />
+        <#Icon :if={@with_icon} solid="Cog" class="w-4 h-4 text-base-content/70" />
         <span
           :if={@with_label}
           class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}

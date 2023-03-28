@@ -1,5 +1,8 @@
 <div class="flex w-full gap-2 px-2 pt-2 mt-2 border-t items-top border-base-content/10">
-  <Icon iconify="carbon:subnet-acl-rules" class="w-5 h-5 mx-1 mt-2 shrink-0 text-base-content/70" />
+  <#Icon
+    iconify="carbon:subnet-acl-rules"
+    class="w-5 h-5 mx-1 mt-2 shrink-0 text-base-content/70"
+  />
 
   <div class="flex flex-col flex-1">
     <Bonfire.UI.Common.MultiselectLive

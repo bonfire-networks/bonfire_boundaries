@@ -8,7 +8,7 @@
       class="flex items-center justify-between w-full gap-2 normal-case rounded btn-ghost btn-sm btn opacity-90"
     >
       <Bonfire.Boundaries.Web.BoundariesPresetNameLive preset_boundary={@preset_boundary} />
-      <Icon iconify="bx:expand-vertical" class="w-5 h-5 text-base-content/70" />
+      <#Icon iconify="bx:expand-vertical" class="w-5 h-5 text-base-content/70" />
     </label>
     <ul
       tabindex="0"

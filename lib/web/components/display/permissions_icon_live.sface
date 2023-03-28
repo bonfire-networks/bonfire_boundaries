@@ -23,7 +23,7 @@
             <div class="p-4 my-6 rounded-md bg-info/10">
               <div class="flex">
                 <div class="flex-shrink-0">
-                  <Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+                  <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
                 </div>
                 <div class="flex-1 ml-3 md:flex md:justify-between">
                   <p class="text-sm text-info">
@@ -39,11 +39,11 @@
                 <div :for={verb_name <- extra} class="flex items-center gap-3 mb-3">
                   {#case Bonfire.Boundaries.Verbs.get(verb_name)}
                     {#match nil}
-                      <Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
+                      <#Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
                       <div class="text-sm font-medium traking-wide text-base-content/70">{verb_name}</div>
                     {#match verb}
-                      <Icon
-                        iconify={e(verb, :icon, "Heroicons-Solid:QuestionMarkCircle")}
+                      <Iconify.iconify
+                        icon={e(verb, :icon, "")}
                         class="w-4 h-4 text-base-content/70"
                         fill="currentColor"
                       />
@@ -57,7 +57,7 @@
         </div>
         <:open_btn>
           <div class="flex items-center w-full gap-3">
-            <Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
+            <#Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
             <div class="">
               <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{name || l("Custom")}</span>
               <div class="text-xs text-neutral-content/80">{l("Details")}</div>
