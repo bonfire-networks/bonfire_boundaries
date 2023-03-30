@@ -106,6 +106,7 @@
                 {#if e(subject, :profile, :id, nil)}
                   <Bonfire.UI.Common.ProfileItemLive
                     profile={e(subject, :profile, nil)}
+                    avatar_class="w-8 h-8 rounded"
                     character={e(subject, :character, nil)}
                     show_controls={[]}
                   />
