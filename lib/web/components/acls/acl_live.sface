@@ -164,7 +164,6 @@
       <section :if={@section == "settings"} role="tabpanel">
         <div class="pb-3 text-lg font-normal">{l("General")}</div>
         <form phx-submit="edit" phx-target={@myself} class="p-4 border rounded-lg border-base-content/10">
-
           <div class="w-full form-control">
             <label class="label">
               <span class="text-xs font-semibold tracking-wider text-base-content/70">{l("Edit the boundary name")}</span>

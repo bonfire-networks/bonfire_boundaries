@@ -9,28 +9,25 @@
     </form>
   </div>
 
-    <div class="grid grid-cols-1 gap-3 mx-3 sm:grid-cols-2 lg:gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {#for {id, member} <- @members}
-        <div class="col-span-1">
-          <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
-          <input
-            type="hidden"
-            name={"circle[encircle][#{id}][subject_id]"}
-            value={e(member, :subject_id, "")}
-          />
-          <Bonfire.UI.Me.UserPreviewLive user={e(member, :subject, nil) || e(member, nil) || member} >
-            <:actions>
-              <div :if={!@read_only}  class="flex items-center gap-2 p-2">
-                <button 
-                  phx-value-subject={id}
-                  :on-click="remove"
-                  class="w-full normal-case btn btn-error btn-sm">{l "Remove"}</button>
-              </div>
-            </:actions>
-          </Bonfire.UI.Me.UserPreviewLive>
-        </div>
-      {/for}
-    </div>
+  <div class="grid grid-cols-1 gap-3 mx-3 sm:grid-cols-2 lg:gap-6 md:grid-cols-2 lg:grid-cols-3">
+    {#for {id, member} <- @members}
+      <div class="col-span-1">
+        <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
+        <input
+          type="hidden"
+          name={"circle[encircle][#{id}][subject_id]"}
+          value={e(member, :subject_id, "")}
+        />
+        <Bonfire.UI.Common.UserPreviewLive user={e(member, :subject, nil) || e(member, nil) || member}>
+          <:actions>
+            <div :if={!@read_only} class="flex items-center gap-2 p-2">
+              <button phx-value-subject={id} :on-click="remove" class="w-full normal-case btn btn-error btn-sm">{l("Remove")}</button>
+            </div>
+          </:actions>
+        </Bonfire.UI.Common.UserPreviewLive>
+      </div>
+    {/for}
+  </div>
 
   <!-- <div class="text-xs font-medium tracking-wider uppercase text-base-content/70">{l("Members")}</div>
   <ul id="circle_members" class="divide-y divide-base-300">
