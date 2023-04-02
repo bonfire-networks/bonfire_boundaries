@@ -227,7 +227,7 @@ defmodule Bonfire.Boundaries.Queries do
 
     (Common.Config.env() != :prod and
        Common.Config.get(:skip_all_boundary_checks)) ||
-      (is_list(opts) and Keyword.get(opts, :skip_boundary_check)) ||
+      (is_list(opts) and Keyword.get(opts, :skip_boundary_check) == true) ||
       (not is_nil(object) and Common.Enums.id(object) == Common.Enums.id(agent))
   end
 
