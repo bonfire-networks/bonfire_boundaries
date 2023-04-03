@@ -1,18 +1,18 @@
 <div class="px-4 py-6 sm:p-6 lg:pb-8">
   <div class="sticky top-0">
     <div class="mt-6">
-      <div class="flex items-center border-b-4 pb-10">
-        <!-- <div class="shadow-2xl ring-4 ring-white flex-shrink-0 flex items-center justify-center w-24 h-24 rounded-full bg-pink-600 text-white text-sm font-medium">
+      <div class="flex items-center pb-10 border-b-4">
+        <!-- <div class="flex items-center justify-center flex-shrink-0 w-24 h-24 text-sm font-medium text-white bg-pink-600 rounded-full shadow-2xl ring-4 ring-white">
             GA
         </div> -->
-        <div class="ml-4 flex flex-col">
+        <div class="flex flex-col ml-4">
           <h3 class="text-2xl font-bold text-base-content opacity-80">{e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) ||
               l("Untitled circle")}</h3>
-          <!-- <p class="text-base font-regular text-base-content opacity-80 mt-1">This is a sample description to help remember what this circle is about.</p> -->
+          <!-- <p class="mt-1 text-base font-regular text-base-content opacity-80">This is a sample description to help remember what this circle is about.</p> -->
           <div :if={!e(@circle, :stereotyped, nil)} class="flex items-center mt-3 space-x-3">
             <button
               :on-click="Bonfire.Boundaries:circle_delete"
-              class="btn btn-primary w-max inline-flex items-center"
+              class="inline-flex items-center btn btn-primary w-max"
             ><#Icon solid="Trash" />{l("Delete circle")}</button>
           </div>
         </div>
@@ -21,15 +21,15 @@
   </div>
   <div class="mt-8">
     <div class="block" x-cloak x-data="{ adding: false, removing: false }">
-      <h3 class="font-sm mb-2 text-medium text-base-content opacity-80">Circle Members</h3>
-      <div class="overflow-hidden relative border rounded-lg  drag_drop__container__to">
+      <h3 class="mb-2 font-sm text-medium text-base-content opacity-80">Circle Members</h3>
+      <div class="relative overflow-hidden border rounded-lg drag_drop__container__to">
         <form :on-change={if !@read_only, do: "Bonfire.Boundaries:circle_edit"}>
           <input type="hidden" name="circle[id]" value={e(@circle, :id, "")}>
           <input type="hidden" id="circle_changed" name="circle_changed" value="0">
 
           <ul
             id="circle_members"
-            class="grid grid-flow-col grid-cols-5 p-4 gap-4"
+            class="grid grid-flow-col grid-cols-5 gap-4 p-4"
             :class="{ 'bg-secondary': adding }"
             x-on:drop="adding = false"
             x-on:drop.prevent="target = event.target.closest('ul');
@@ -46,7 +46,7 @@
             {#for member <- e(@circle, :encircles, [])}
               <li
                 id={"item-" <> member.id}
-                class="p-2 flex"
+                class="flex p-2"
                 :class="{ 'bg-base-2000': dragging }"
                 x-on:dragstart.self="dragging = true;
                     event.dataTransfer.effectAllowed='move';
@@ -69,15 +69,16 @@
                 <div class="flex-1">
                   <Bonfire.UI.Common.ProfileItemLive
                     show_controls={[]}
+                    avatar_class="w-10 h-10 rounded bg-base-300"
                     profile={e(member, :subject, :profile, nil)}
                     character={e(member, :subject, :character, nil)}
                   />
                 </div>
                 <div :if={!@read_only} class="flex mr-1">
-                  <span class="to flex items-center" x-on:click="move_item(event, 'circle_members')">
+                  <span class="flex items-center to" x-on:click="move_item(event, 'circle_members')">
                     <#Icon solid="PlusCircle" />
                   </span>
-                  <span class="from flex items-center" x-on:click="move_item(event, 'circle_suggestions')">
+                  <span class="flex items-center from" x-on:click="move_item(event, 'circle_suggestions')">
                     <#Icon solid="MinusCircle" />
                   </span>
                 </div>
@@ -90,8 +91,8 @@
       </div>
 
       <div :if={!@read_only}>
-        <h3 class="font-sm mt-4 mb-2 text-medium text-base-content opacity-80">Suggestions</h3>
-        <div class="overflow-hidden relative border rounded-lg drag_drop__container__from">
+        <h3 class="mt-4 mb-2 font-sm text-medium text-base-content opacity-80">Suggestions</h3>
+        <div class="relative overflow-hidden border rounded-lg drag_drop__container__from">
           <ul
             id="circle_suggestions"
             class="flex flex-col divide-y-2"
@@ -109,7 +110,7 @@
             {#for suggested <- @followed}
               <li
                 id={"item-" <> suggested.id}
-                class="p-2 flex"
+                class="flex p-2"
                 :class="{ 'drag_drop__iter__dragging': dragging }"
                 x-on:dragstart.self="dragging = true;
                     event.dataTransfer.effectAllowed='move';
@@ -133,6 +134,7 @@
                 />
                 <div class="flex-1">
                   <Bonfire.UI.Common.ProfileItemLive
+                    avatar_class="w-10 h-10 rounded bg-base-300"
                     show_controls={[]}
                     profile={e(suggested, :edge, :object, :profile, nil)}
                     character={e(suggested, :edge, :object, :character, nil)}
@@ -140,10 +142,10 @@
                 </div>
 
                 <div :if={!@read_only} class="flex mr-1">
-                  <span class="to flex items-center button" x-on:click="move_item(event, 'circle_members')">
+                  <span class="flex items-center to button" x-on:click="move_item(event, 'circle_members')">
                     <#Icon solid="PlusCircle" />
                   </span>
-                  <span class="from flex items-center button" x-on:click="move_item(event, 'circle_suggestions')">
+                  <span class="flex items-center from button" x-on:click="move_item(event, 'circle_suggestions')">
                     <#Icon solid="MinusCircle" />
                   </span>
                 </div>
@@ -153,7 +155,7 @@
             {#for suggested <- @followers}
               <li
                 id={"item-" <> suggested.id}
-                class="p-2 flex"
+                class="flex p-2"
                 :class="{ 'drag_drop__iter__dragging': dragging }"
                 x-on:dragstart.self="dragging = true;
                     event.dataTransfer.effectAllowed='move';
@@ -178,16 +180,17 @@
                 <div class="flex-1">
                   <Bonfire.UI.Common.ProfileItemLive
                     show_controls={[]}
+                    avatar_class="w-10 h-10 rounded bg-base-300"
                     profile={e(suggested, :edge, :subject, :profile, nil)}
                     character={e(suggested, :edge, :subject, :character, nil)}
                   />
                 </div>
 
                 <div :if={!@read_only} class="flex mr-1">
-                  <span class="to flex items-center button" x-on:click="move_item(event, 'circle_members')">
+                  <span class="flex items-center to button" x-on:click="move_item(event, 'circle_members')">
                     <#Icon solid="PlusCircle" />
                   </span>
-                  <span class="from flex items-center button" x-on:click="move_item(event, 'circle_suggestions')">
+                  <span class="flex items-center from button" x-on:click="move_item(event, 'circle_suggestions')">
                     <#Icon solid="MinusCircle" />
                   </span>
                 </div>
