@@ -1,33 +1,66 @@
-<div id="circle_preview" class="-m-4">
-  <div :if={!@read_only} class="p-4">
-    <form :on-change="select">
-      <Bonfire.UI.Common.MultiselectLive
-        implementation={:live_select}
-        form_input_name={Bonfire.Boundaries.Web.CircleLive}
-        label={l("Search for users to add")}
-      />
-    </form>
-  </div>
-
-  <div class="grid grid-cols-1 gap-3 mx-3 sm:grid-cols-2 lg:gap-6 md:grid-cols-2 lg:grid-cols-3">
-    {#for {id, member} <- @members}
-      <div class="col-span-1">
-        <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
-        <input
-          type="hidden"
-          name={"circle[encircle][#{id}][subject_id]"}
-          value={e(member, :subject_id, "")}
+<div id="circle_preview" class="">
+  
+  <div class="p-4 pt-8 mb-4 bg-base-200/50">
+    <div class="text-2xl font-bold text-center">
+      <h2>{e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil)}</h2>
+    </div>
+    
+    <div :if={!@read_only} class="p-4 pt-6">
+      <form :on-change="select">
+        <Bonfire.UI.Common.MultiselectLive
+          implementation={:live_select}
+          form_input_name={Bonfire.Boundaries.Web.CircleLive}
+          label={l("Search for users to add")}
         />
-        <Bonfire.UI.Common.UserPreviewLive user={e(member, :subject, nil) || e(member, nil) || member}>
-          <:actions>
-            <div :if={!@read_only} class="flex items-center gap-2 p-2">
-              <button phx-value-subject={id} :on-click="remove" class="w-full normal-case btn btn-error btn-sm">{l("Remove")}</button>
-            </div>
-          </:actions>
-        </Bonfire.UI.Common.UserPreviewLive>
-      </div>
-    {/for}
+      </form>
+    </div>
   </div>
+  {#if Enum.count(@members) > 0}
+    <div class="grid grid-cols-3 gap-3 px-4 lg:gap-6 lg:grid-cols-4">
+      {#for {id, member} <- @members}
+        <div class="col-span-1 group">
+          <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
+          <input
+            type="hidden"
+            name={"circle[encircle][#{id}][subject_id]"}
+            value={e(member, :subject_id, "")}
+          />
+          <div class="relative flex flex-col items-center justify-center text-center place-content-center">
+            <div :if={!@read_only}  class="absolute top-0 z-50 hidden group-hover:block right-3">
+              <button  phx-value-subject={id} :on-click="remove" class="normal-case btn-square btn btn-error btn-sm">
+                <#Icon iconify="ph:trash-fill" class="w-5 h-5" />
+              </button>
+            </div>
+            <Bonfire.UI.Common.AvatarLive
+              parent_id="user_preview"
+              class="flex-1 inline-block object-cover w-20 h-20 mx-auto rounded-full md:w-24 md:h-24 bg-base-300"
+              size="42"
+              user={e(member, :subject, nil) || e(member, nil) || member}
+            />
+
+            <LiveRedirect to={"/@#{e(member, :subject, :character, :username, "") || e(member, :character, :username, "")}"} class="mt-1.5 text-base md:text-lg truncate w-full font-bold link link-hover text-base-content">{e(member, :subject, :profile, :name, "Anonymous") || e(member, :profile, :name, "Anonymous")}</LiveRedirect>
+            <div class="w-full text-sm font-normal truncate text-base-content/70">
+              @{e(member, :subject, :character, :username, "") || e(member, :character, :username, "")}
+            </div>
+          </div>
+          <!-- <Bonfire.UI.Common.UserPreviewLive user={e(member, :subject, nil) || e(member, nil) || member}>
+            <:actions>
+              <div :if={!@read_only} class="flex items-center gap-2 p-2">
+                <button phx-value-subject={id} :on-click="remove" class="w-full normal-case btn btn-error btn-sm">{l("Remove")}</button>
+              </div>
+            </:actions>
+          </Bonfire.UI.Common.UserPreviewLive> -->
+        </div>
+      {/for}
+    </div>
+  {#else}
+    <li id="no-members" class="flex items-center place-content-center">
+      <Bonfire.UI.Common.EmptyFeed
+        feedback_title={e(@feedback_title, l("This circle has no members yet"))}
+        feedback_message={e(@feedback_message, l("Add some users to get started!"))}
+      />
+    </li>
+  {/if}
 
   <!-- <div class="text-xs font-medium tracking-wider uppercase text-base-content/70">{l("Members")}</div>
   <ul id="circle_members" class="divide-y divide-base-300">

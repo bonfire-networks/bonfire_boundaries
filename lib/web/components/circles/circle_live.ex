@@ -88,7 +88,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
       stereotype_id = e(circle, :stereotyped, :stereotype_id, nil)
 
       send_self(
-        page_title: e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil),
+        page_title: l("Circle"),
         back: true,
         circle: circle,
         page_header_aside: [

@@ -1,6 +1,6 @@
 <select
   name={"to_circles[#{@circle_id}]"}
-  class="font-normal underline rounded select underline-offset-4 decoration-dotted text-base-content/70 select-sm"
+  class="font-normal rounded select text-base-content/70 select-sm"
 >
   <option
     :for={{id, name} <- Bonfire.Boundaries.Verbs.role_names() ++ @extra_roles}

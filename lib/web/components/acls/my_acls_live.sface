@@ -1,4 +1,4 @@
-<div>
+<div class="p-4">
   {#if @edit_acl_id}
     <Bonfire.Boundaries.Web.AclLive
       id={@edit_acl_id}

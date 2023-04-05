@@ -27,11 +27,10 @@
     </div>
   </div>
 
-  <div :for={{data, id} <- @to_circles || []} class="flex items-center justify-between mt-2">
+  <div :for={{data, id} <- @to_circles || []} class="flex items-center justify-between py-2">
     {#case data}
       {#match %{"icon" => _}}
         <Bonfire.UI.Common.ProfileItemLive
-          avatar_class="w-6 h-6 rounded bg-base-200"
           inline
           profile={data}
           character={data}
@@ -39,16 +38,16 @@
         />
       {#match _ when is_binary(data)}
         <div class="flex items-center gap-3 grow">
-          <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
+          <!-- <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
             <#Icon iconify="material-symbols:group" class="inline-block w-5 h-5 text-base-content/70" />
-          </span>
+          </span> -->
           <div class="text-sm font-medium text-base-content">{data}</div>
         </div>
       {#match _}
         <div class="flex items-center gap-3 grow">
-          <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
+          <!-- <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
             <#Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
-          </span>
+          </span> -->
           <div class="text-sm font-medium text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
         </div>
     {/case}
@@ -60,9 +59,9 @@
           value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
           target: "#smart_input"
         )}
-        class="rounded btn btn-sm btn-ghost btn-square opacity-80"
+        class="rounded btn btn-sm btn-square"
       >
-        <#Icon solid="Trash" class="w-4 h-4 text-base-content/70" />
+        <#Icon solid="Trash" class="w-5 h-5 md:w-4 md:h-4" />
       </div>
     </div>
     <!-- <div aria-haspopup="true" class="dropdown dropdown-top dropdown-end">
