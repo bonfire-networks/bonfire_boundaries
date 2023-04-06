@@ -9,8 +9,8 @@
       selected_tab={@selected_tab}
       path_prefix={"/@#{e(@current_user, :character, :username, "")}/"}
       tabs={if id(@current_user) == id(@user),
-      do: Config.get([:ui, :profile, :my_network], circles: l("circles")),
-      else: Config.get([:ui, :profile, :network], followers: l("Followers"))}
+        do: Config.get([:ui, :profile, :my_network], circles: l("circles")),
+        else: Config.get([:ui, :profile, :network], followers: l("Followers"))}
     />
     <div class="">
       <ul role="list" class="flex flex-col gap-2 p-3">

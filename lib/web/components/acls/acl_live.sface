@@ -1,4 +1,4 @@
-<div class=p-4>
+<div class="p-4">
   {#if @section == "new_circle"}
     <Bonfire.Boundaries.Web.NewCircleLive
       parent_back={@myself}
