@@ -97,7 +97,7 @@
             Role per circle or person
           </div> -->
           <form :on-change="edit_grant_role">
-            <ul class="flex flex-col divide-y divide-base-300">
+            <ul class="flex flex-col divide-y divide-base-content/10">
               <li
                 :for={{{subject_id, %{subject: subject, verb_grants: verb_grants} = _subject_verb_grant}, _i} <-
                   Enum.with_index(@list_by_subject || [])}

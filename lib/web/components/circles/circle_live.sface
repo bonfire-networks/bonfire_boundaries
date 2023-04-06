@@ -63,7 +63,7 @@
   {/if}
 
   <!-- <div class="text-xs font-medium tracking-wider uppercase text-base-content/70">{l("Members")}</div>
-  <ul id="circle_members" class="divide-y divide-base-300">
+  <ul id="circle_members" class="divide-y divide-base-content/10">
     {#if Enum.count(@members) > 0}
       {#for {id, member} <- @members}
         <li id={"item-" <> id} class="flex items-center py-3">
@@ -238,7 +238,7 @@
                 </div>
               </div>
             </div>
-            <ul id="circle_suggestions" class="flex flex-col divide-y divide-base-300">
+            <ul id="circle_suggestions" class="flex flex-col divide-y divide-base-content/10">
               
               {#for {id, suggested} <- @suggestions}
                 <li id={"item-" <> id} class="flex items-center py-3">

@@ -78,7 +78,7 @@
         id="roles"
       />
     {#match _}
-      <div class="flex flex-col gap-8 divide-y divide-base-300">
+      <div class="flex flex-col gap-8 divide-y divide-base-content/10">
         <Dynamic.LiveComponent
           :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and @current_user}
           module={Bonfire.Boundaries.Web.MyAclsLive}
