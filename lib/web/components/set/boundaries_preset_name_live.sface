@@ -1,4 +1,4 @@
-{#case List.last(@to_boundaries) |> debug("PEPPE")}
+{#case List.last(@to_boundaries) |> debug("main boundary to show in composer")}
   {#match {"public", _}}
     <span class="text-lg"><#Icon iconify="ph:globe" class="w-5 h-5" /></span>
     <span class="flex-1 w-full text-left">{l("Public")}</span>
