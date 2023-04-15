@@ -142,7 +142,7 @@ defmodule Bonfire.Boundaries.Acls do
   defp custom_recipients(changeset, preset, opts) do
     (List.wrap(reply_to_grants(changeset, preset, opts)) ++
        List.wrap(mentions_grants(changeset, preset, opts)) ++
-       List.wrap(maybe_custom_circles_or_users(opts)))
+       List.wrap(maybe_custom_circles_or_users(maybe_from_opts(opts, :to_circles, []))))
     |> debug()
     |> Enum.map(fn
       {subject, role} -> {subject, role}
@@ -150,16 +150,15 @@ defmodule Bonfire.Boundaries.Acls do
     end)
     |> debug()
     |> Enum.sort_by(fn {_subject, role} -> role end, :desc)
-    |> debug()
+    # |> debug()
     |> Enum.uniq_by(fn {subject, _role} -> subject end)
-    |> debug()
+    # |> debug()
     |> filter_empty([])
     |> debug()
   end
 
-  defp maybe_custom_circles_or_users(opts) do
-    maybe_from_opts(opts, :to_circles, [])
-    |> List.wrap()
+  defp maybe_custom_circles_or_users(to_circles) when is_list(to_circles) or is_map(to_circles) do
+    to_circles
     |> Enum.map(fn
       {key, val} ->
         # with custom role 
@@ -171,7 +170,11 @@ defmodule Bonfire.Boundaries.Acls do
       val ->
         ulid(val)
     end)
+    |> debug()
   end
+
+  defp maybe_custom_circles_or_users(to_circles),
+    do: maybe_custom_circles_or_users(List.wrap(to_circles))
 
   defp reply_to_grants(changeset, preset, _opts) do
     reply_to_creator =
