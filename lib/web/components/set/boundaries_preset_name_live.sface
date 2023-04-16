@@ -13,4 +13,7 @@
   {#match {_, item}}
     <span class="text-lg"><#Icon iconify="ph:gear-fill" class="w-5 h-5" /></span>
     <span class="flex-1 w-full text-left">{item}</span>
+  {#match _}
+    <span class="text-lg"><#Icon iconify="ph:gear-fill" class="w-5 h-5" /></span>
+    <span class="flex-1 w-full text-left">{l("Custom")}</span>
 {/case}
