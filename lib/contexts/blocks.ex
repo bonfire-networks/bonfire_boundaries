@@ -174,7 +174,7 @@ defmodule Bonfire.Boundaries.Blocks do
        ) do
     circle_caretaker
     |> per_user_circles(..., block_type)
-    # |> info("user:circles_to_block")
+    # |> debug("user circles to block")
     |> repo().maybe_preload(caretaker: [caretaker: [:profile]])
     |> do_mutate_blocklists(block_or_unblock, user_or_instance_add, ...)
   end
