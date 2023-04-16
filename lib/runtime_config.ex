@@ -252,7 +252,6 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :locals_may_reply,
           :remotes_may_reply
         ],
-        "federated" => [:locals_may_reply],
         "local" => [:locals_may_reply],
         "open" => [:guests_may_see_read, :locals_may_contribute, :remotes_may_contribute],
         "visible" => [

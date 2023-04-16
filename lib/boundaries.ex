@@ -31,10 +31,6 @@ defmodule Bonfire.Boundaries do
       "local" in boundaries ->
         "local"
 
-      "federated" in boundaries ->
-        # TODO: we should set a boundary based federated activity/object, rather than assuming
-        "federated"
-
       "public" in boundaries ->
         "public"
 
@@ -336,7 +332,7 @@ defmodule Bonfire.Boundaries do
   end
 
   def can?(_subject, _verbs, object)
-      when is_nil(object) or object in [:skip, :skip_boundary_check] do
+      when is_nil(object) or object in [:skip, :skip_boundary_check, :loading] do
     debug("no object or boundary data")
     nil
   end
