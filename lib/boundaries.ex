@@ -335,14 +335,9 @@ defmodule Bonfire.Boundaries do
     end
   end
 
-  def can?(_subject, _verbs, nil) do
-    debug("object is nil")
-    nil
-  end
-
   def can?(_subject, _verbs, object)
       when is_nil(object) or object in [:skip, :skip_boundary_check] do
-    debug("no object boundary data")
+    debug("no object or boundary data")
     nil
   end
 
