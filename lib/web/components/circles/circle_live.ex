@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Web.CircleLive do
   use Bonfire.UI.Common.Web, :stateful_component
   alias Bonfire.Boundaries.Circles
-  alias Bonfire.Boundaries.LiveHandler
+  alias Bonfire.Boundaries.Blocks
 
   @follow_stereotypes [
     "7DAPE0P1E1PERM1TT0F0110WME",
@@ -9,6 +9,8 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   ]
 
   prop circle_id, :any, default: nil
+  prop circle, :any, default: nil
+  prop circle_type, :atom, default: nil
   prop parent_back, :any, default: nil
   prop setting_boundaries, :boolean, default: false
   prop scope, :atom, default: nil
@@ -46,9 +48,11 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
         settings_section_description: l("Create and manage your circle.")
       )
 
-    with {:ok, circle} <-
-           Circles.get_for_caretaker(id, current_user, scope: e(socket.assigns, :scope, nil))
-           |> repo().maybe_preload(encircles: [subject: [:profile, :character]]) do
+    with %{} = circle <-
+           (e(assigns, :circle, nil) ||
+              Circles.get_for_caretaker(id, current_user, scope: e(socket.assigns, :scope, nil)))
+           |> repo().maybe_preload(encircles: [subject: [:profile, :character]])
+           |> ok_unwrap() do
       debug(circle, "circle")
 
       members =
@@ -109,7 +113,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
        assign(
          socket,
          circle: Map.drop(circle, [:encircles]),
-         members: members,
+         members: members || %{},
          page_title: l("Circle"),
          #  suggestions: suggestions,
          stereotype_id: stereotype_id,
@@ -146,10 +150,21 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   def do_handle_event(
         "remove",
         %{"subject" => id} = _attrs,
-        %{assigns: %{showing_within: showing_within}} = socket
+        %{assigns: %{scope: scope, circle_type: circle_type}} = socket
       )
-      when not is_nil(showing_within) and is_binary(id) do
-    LiveHandler.unblock(id, showing_within, socket.assigns[:scope], socket)
+      when is_binary(id) and circle_type in [:silence, :ghost] do
+    with {:ok, _} <-
+           Blocks.unblock(id, circle_type, scope || current_user(socket)) do
+      {:noreply,
+       socket
+       |> update(:members, &Map.drop(&1, [id]))
+       |> assign_flash(:info, l("Unblocked!"))}
+    else
+      other ->
+        error(other)
+
+        {:noreply, assign_flash(socket, :error, l("Could not unblock"))}
+    end
   end
 
   def do_handle_event("remove", %{"subject" => id} = _attrs, socket) when is_binary(id) do
@@ -157,8 +172,8 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
            Circles.remove_from_circles(id, e(socket.assigns, :circle, nil)) do
       {:noreply,
        socket
-       |> assign_flash(:info, l("Removed from circle!"))
-       |> assign(members: Map.drop(e(socket.assigns, :members, nil), [id]))}
+       |> update(:members, &Map.drop(&1, [id]))
+       |> assign_flash(:info, l("Removed from circle!"))}
     else
       other ->
         error(other)
@@ -167,14 +182,35 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
-  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
-    # current_user = current_user(socket)
+  def do_handle_event(
+        "live_select_change",
+        %{"id" => live_select_id, "text" => search},
+        %{assigns: %{circle_type: circle_type}} = socket
+      )
+      when circle_type in [:silence, :ghost] do
+    current_user_id =
+      current_user_id(socket)
+      |> debug("avoid blocking myself")
 
-    Bonfire.Me.Users.search(search)
-    |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
+    do_results_for_multiselect(search)
+    |> Enum.reject(fn {_name, %{id: id}} -> id == current_user_id end)
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
 
     {:noreply, socket}
+  end
+
+  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+    debug(socket.assigns)
+
+    do_results_for_multiselect(search)
+    |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
+
+    {:noreply, socket}
+  end
+
+  def do_results_for_multiselect(search) do
+    Bonfire.Me.Users.search(search)
+    |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
   end
 
   def handle_event(
@@ -191,8 +227,30 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
           &do_handle_event/3
         )
 
+  def add_member(subject, %{assigns: %{scope: scope, circle_type: circle_type}} = socket)
+      when circle_type in [:silence, :ghost] do
+    with id when is_binary(id) <- ulid(subject),
+         {:ok, _} <- Blocks.block(id, circle_type, scope || current_user(socket)) do
+      {:noreply,
+       socket
+       |> assign_flash(:info, l("Blocked!"))
+       |> assign(
+         members:
+           Map.merge(
+             %{id => subject},
+             e(socket.assigns, :members, %{})
+           )
+           |> debug()
+       )}
+    else
+      other ->
+        error(other)
+
+        {:noreply, assign_flash(socket, :error, l("Could not block"))}
+    end
+  end
+
   def add_member(subject, socket) do
-    # debug(attrs)
     with id when is_binary(id) <- ulid(subject),
          {:ok, _} <- Circles.add_to_circles(id, e(socket.assigns, :circle, nil)) do
       {:noreply,

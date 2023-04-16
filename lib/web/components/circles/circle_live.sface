@@ -18,11 +18,15 @@
     <div class="grid grid-cols-3 gap-3 px-4 lg:gap-6 lg:grid-cols-4">
       {#for {id, member} <- @members}
         <div class="col-span-1 group">
-          <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
+          <input
+            type="hidden"
+            name={"circle[encircle][#{id}][circle_id]"}
+            value={e(@circle, :id, @circle_id)}
+          />
           <input
             type="hidden"
             name={"circle[encircle][#{id}][subject_id]"}
-            value={e(member, :subject_id, "")}
+            value={e(member, :subject_id, id)}
           />
           <div class="relative flex flex-col items-center justify-center text-center place-content-center">
             <div :if={!@read_only} class="absolute top-0 z-50 hidden group-hover:block right-3">
@@ -39,14 +43,17 @@
               class="flex-1 inline-block object-cover w-20 h-20 mx-auto rounded-full md:w-24 md:h-24 bg-base-300"
               size="42"
               user={e(member, :subject, nil) || e(member, nil) || member}
+              src={e(member, "icon", nil)}
             />
 
             <LiveRedirect
               to={"/@#{e(member, :subject, :character, :username, "") || e(member, :character, :username, "")}"}
               class="mt-1.5 text-base md:text-lg truncate w-full font-bold link link-hover text-base-content"
-            >{e(member, :subject, :profile, :name, "Anonymous") || e(member, :profile, :name, "Anonymous")}</LiveRedirect>
+            >{e(member, :subject, :profile, :name, nil) || e(member, :profile, :name, nil) ||
+                e(member, :name, "Unknown")}</LiveRedirect>
             <div class="w-full text-sm font-normal truncate text-base-content/70">
-              @{e(member, :subject, :character, :username, "") || e(member, :character, :username, "")}
+              @{e(member, :subject, :character, :username, nil) || e(member, :character, :username, nil) ||
+                e(member, :username, nil)}
             </div>
           </div>
           <!-- <Bonfire.UI.Common.UserPreviewLive user={e(member, :subject, nil) || e(member, nil) || member}>

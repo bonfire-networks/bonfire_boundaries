@@ -80,7 +80,8 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     end)
     # Filter to remove any nils
     |> Enum.filter(fn {name, _} -> name != nil end)
-    |> debug()
+
+    # |> debug()
   end
 
   def list_my_boundaries(socket) do

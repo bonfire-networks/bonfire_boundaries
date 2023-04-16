@@ -34,10 +34,10 @@ defmodule Bonfire.Boundaries.Blocks do
     block(user_or_instance_to_block, block_type, :instance_wide)
   end
 
-  def block(user_or_instance_to_block, block_type \\ nil, opts) do
-    with {:ok, blocked} <- mutate(:block, user_or_instance_to_block, block_type, opts) do
-      if user_or_instance_to_block != :instance_wide and opts != :instance_wide do
-        me = Utils.current_user_required!(opts)
+  def block(user_or_instance_to_block, block_type \\ nil, scope) do
+    with {:ok, blocked} <- mutate(:block, user_or_instance_to_block, block_type, scope) do
+      if user_or_instance_to_block != :instance_wide and scope != :instance_wide do
+        me = Utils.current_user_required!(scope)
         types_blocked = types_blocked(block_type)
 
         # TODO: what about if I block and later unblock someone? they should probably not have to re-follow...
@@ -56,8 +56,8 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
-  def unblock(user_or_instance_to_block, block_type \\ nil, opts) do
-    mutate(:unblock, user_or_instance_to_block, block_type, opts)
+  def unblock(user_or_instance_to_block, block_type \\ nil, scope) do
+    mutate(:unblock, user_or_instance_to_block, block_type, scope)
   end
 
   defp mutate(
@@ -83,10 +83,10 @@ defmodule Bonfire.Boundaries.Blocks do
     |> do_mutate_blocklists(block_or_unblock, user_or_instance_to_block, ...)
   end
 
-  # @doc "Block something for the current user (current_user should be passed in opts)"
-  defp mutate(block_or_unblock, user_or_instance_to_block, block_type, opts)
+  # @doc "Block something for the current user (current_user should be passed as scope)"
+  defp mutate(block_or_unblock, user_or_instance_to_block, block_type, scope)
        when block_type in [:silence, :silence_them] do
-    current_user = Utils.current_user_required!(opts)
+    current_user = Utils.current_user_required!(scope)
     silence_them = types_blocked(block_type)
 
     debug(
@@ -192,7 +192,6 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   defp do_mutate_blocklists(:unblock, user_or_instance_to_unblock, circles) do
-    # TODO: properly validate the inserts
     with {deleted, _} when deleted > 0 <-
            Circles.remove_from_circles(user_or_instance_to_unblock, circles) do
       {:ok, "Unblocked"}

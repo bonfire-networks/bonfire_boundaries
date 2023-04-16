@@ -14,19 +14,19 @@
             <p :if={@scope != :instance_wide} class="text-sm text-info">
               {l("You will not receive any updates from the users or instances on this list")}
             </p>
-            <div x-data="{active_silence: false}" role="region" class="">
+            <div x-data="{active_info: false}" role="region" class="">
               <button
                 type="button"
-                x-on:click="active_silence = ! active_silence"
-                :aria-expanded="active_silence"
+                x-on:click="active_info = ! active_info"
+                :aria-expanded="active_info"
                 class="flex items-center w-full text-sm text-info"
               >
-                <span x-show="!active_silence" class="underline">{l("Read more")}</span>
-                <span x-show="active_silence" class="underline">{l("Read less")}</span>
-                <span x-show="active_silence" aria-hidden="true" class="ml-2">&minus;</span>
-                <span x-show="!active_silence" aria-hidden="true" class="ml-2">&plus;</span>
+                <span x-show="!active_info" class="underline">{l("Read more")}</span>
+                <span x-show="active_info" class="underline">{l("Read less")}</span>
+                <span x-show="active_info" aria-hidden="true" class="ml-2">&minus;</span>
+                <span x-show="!active_info" aria-hidden="true" class="ml-2">&plus;</span>
               </button>
-              <div x-show="active_silence" x-collapse>
+              <div x-show="active_info" x-collapse>
                 <div class="block mt-3">
                   <ul class="block pl-4 mt-1 prose-sm list-disc text-info">
                     <li>
@@ -53,14 +53,17 @@
       </div>
     </div>
     <Bonfire.Boundaries.Web.CircleLive
-      id={@circle_id}
+      id={@circle_id || @id}
       circle_id={@circle_id}
+      circle={@circle}
+      circle_type={:silence}
       scope={@scope}
       setting_boundaries={false}
       showing_within={@block_type}
       read_only={@read_only}
     />
   {#else}
+    <!-- ghost -->
     <div class="bg-base-200">
       <div class="p-4 mb-3 rounded-md bg-info/10">
         <div class="flex">
@@ -76,19 +79,19 @@
             <p :if={@scope != :instance_wide} class="text-sm text-info">
               {l("Users or instances on this list will not be able to see or interact with you or your content")}
             </p>
-            <div x-data="{active_silence: false}" role="region" class="">
+            <div x-data="{active_info: false}" role="region" class="">
               <button
                 type="button"
-                x-on:click="active_silence = ! active_silence"
-                :aria-expanded="active_silence"
+                x-on:click="active_info = ! active_info"
+                :aria-expanded="active_info"
                 class="flex items-center w-full text-sm text-info"
               >
-                <span x-show="!active_silence" class="underline">{l("Read more")}</span>
-                <span x-show="active_silence" class="underline">{l("Read less")}</span>
-                <span x-show="active_silence" aria-hidden="true" class="ml-2">&minus;</span>
-                <span x-show="!active_silence" aria-hidden="true" class="ml-2">&plus;</span>
+                <span x-show="!active_info" class="underline">{l("Read more")}</span>
+                <span x-show="active_info" class="underline">{l("Read less")}</span>
+                <span x-show="active_info" aria-hidden="true" class="ml-2">&minus;</span>
+                <span x-show="!active_info" aria-hidden="true" class="ml-2">&plus;</span>
               </button>
-              <div x-show="active_silence" x-collapse>
+              <div x-show="active_info" x-collapse>
                 <div class="block mt-3">
                   <ul class="block pl-4 mt-1 prose-sm list-disc">
                     <li>
@@ -118,8 +121,10 @@
     </div>
 
     <Bonfire.Boundaries.Web.CircleLive
-      id={@circle_id}
+      id={@circle_id || @id}
       circle_id={@circle_id}
+      circle={@circle}
+      circle_type={:ghost}
       scope={@scope}
       setting_boundaries={false}
       showing_within={@block_type}

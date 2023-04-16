@@ -55,8 +55,9 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
        read_only: read_only,
        block_type: block_type,
        # page_title: l("Blocks")<>" - #{scope} #{tab}",
-       current_user: current_user,
-       circle_id: ulid(circle)
+       #  current_user: current_user,
+       circle: circle,
+       circle_id: id(circle)
        #  circle: circle
        #  blocks: blocks
 
