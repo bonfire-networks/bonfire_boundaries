@@ -14,7 +14,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     ### Verbs are like permissions. Each represents some activity or operation that may or may not be able to perform.
     verbs = [
-      #
+      request: %{
+        id: "1NEEDPERM1SS10NT0D0TH1SN0W",
+        verb: "Request",
+        icon: "humbleicons:user-asking",
+        summary: "Request permission for another verb (eg. request to follow)"
+      },
       see: %{
         id: "0BSERV1NG11ST1NGSEX1STENCE",
         verb: "See",
@@ -26,30 +31,6 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         verb: "Read",
         icon: "bxs:BookReader",
         summary: "Readable/visible (if you can see or have a direct link)"
-      },
-      create: %{
-        id: "4REATE0RP0STBRANDNEW0BJECT",
-        verb: "Create",
-        icon: "bxs:Pen",
-        summary: "Create a post or other object"
-      },
-      edit: %{
-        id: "4HANG1NGVA1VES0FPR0PERT1ES",
-        verb: "Edit",
-        icon: "bx:Highlight",
-        summary: "Modify the contents of an existing object"
-      },
-      delete: %{
-        id: "4AKESTVFFG0AWAYPERMANENT1Y",
-        verb: "Delete",
-        icon: "bxs:TrashAlt",
-        summary: "Delete an object"
-      },
-      follow: %{
-        id: "20SVBSCR1BET0THE0VTPVT0F1T",
-        verb: "Follow",
-        icon: "bx:Walk",
-        summary: "Follow a user or thread or whatever"
       },
       like: %{
         id: "11KES1ND1CATEAM11DAPPR0VA1",
@@ -82,6 +63,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "bx:At",
         summary: "Mention a user or object (and notify them)"
       },
+      message: %{
+        id: "40NTACTW1THAPR1VATEMESSAGE",
+        verb: "Message",
+        icon: "bxs:Send",
+        summary: "Send a message"
+      },
       tag: %{
         id: "4ATEG0R1S1NGNGR0VP1NGSTVFF",
         verb: "Tag",
@@ -94,17 +81,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "fluent:status-16-filled",
         summary: "Set/update a status or label"
       },
-      message: %{
-        id: "40NTACTW1THAPR1VATEMESSAGE",
-        verb: "Message",
-        icon: "bxs:Send",
-        summary: "Send a message"
-      },
-      request: %{
-        id: "1NEEDPERM1SS10NT0D0TH1SN0W",
-        verb: "Request",
-        icon: "humbleicons:user-asking",
-        summary: "Request permission for another verb (eg. request to follow)"
+      follow: %{
+        id: "20SVBSCR1BET0THE0VTPVT0F1T",
+        verb: "Follow",
+        icon: "bx:Walk",
+        summary: "Follow a user or thread or whatever"
       },
       schedule: %{
         id: "7SCHEDV1EF1XEDDES1REDDATES",
@@ -117,6 +98,24 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         verb: "Pin",
         icon: "eos-icons:pin",
         summary: "Pin something to highlight it"
+      },
+      create: %{
+        id: "4REATE0RP0STBRANDNEW0BJECT",
+        verb: "Create",
+        icon: "bxs:Pen",
+        summary: "Create a post or other object"
+      },
+      edit: %{
+        id: "4HANG1NGVA1VES0FPR0PERT1ES",
+        verb: "Edit",
+        icon: "bx:Highlight",
+        summary: "Modify the contents of an existing object"
+      },
+      delete: %{
+        id: "4AKESTVFFG0AWAYPERMANENT1Y",
+        verb: "Delete",
+        icon: "bxs:TrashAlt",
+        summary: "Delete an object"
       },
 
       # WIP adding verbs, see: https://github.com/bonfire-networks/bonfire-app/issues/406
@@ -188,28 +187,25 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_see_request = [:see, :request]
     verbs_read_request = [:read, :request]
     verbs_see_read_request = [:read, :see, :request]
+    verbs_interaction = [:like, :follow]
+    verbs_sharing = [:boost, :pin]
+    verbs_ping = [:reply, :mention, :message]
+    verbs_contrib = [:create, :tag]
 
     # verbs_interact_minus_follow =
     #   verbs_see_read_request ++ [:like]
 
-    verbs_interact_minus_boost =
-      verbs_see_read_request ++
-        [
-          :like,
-          :follow
-        ]
-
-    verbs_interact_incl_boost = verbs_interact_minus_boost ++ [:boost, :pin]
+    verbs_interact_minus_boost = verbs_see_read_request ++ verbs_interaction
+    verbs_interact_incl_boost = verbs_interact_minus_boost ++ verbs_sharing
 
     # verbs_participate_message_minus_follow =
-    #   verbs_interact_minus_follow ++ [:reply, :mention, :message]
+    #   verbs_interact_minus_follow ++ verbs_ping
 
-    verbs_participate_message_minus_boost =
-      verbs_interact_minus_boost ++ [:reply, :mention, :message]
+    verbs_participate_message_minus_boost = verbs_interact_minus_boost ++ verbs_ping
 
-    verbs_participate_and_message = verbs_interact_incl_boost ++ [:reply, :mention, :message]
+    verbs_participate_and_message = verbs_interact_incl_boost ++ verbs_ping
 
-    verbs_contribute = verbs_participate_and_message ++ [:create, :tag]
+    verbs_contribute = verbs_participate_and_message ++ verbs_contrib
 
     # verbs_join_and_contribute = verbs_contribute ++ [:invite]
 
@@ -226,13 +222,19 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     config :bonfire,
       verbs: verbs,
       role_verbs: [
-        # Boost, Follow, Like, Mention, Pin, Read, Reply, Request, See, Tag
         none: [],
         read: verbs_see_read_request,
         interact: verbs_interact_incl_boost,
         participate: verbs_participate_and_message,
         contribute: verbs_contribute,
-        caretaker: all_verb_names
+        administer: all_verb_names
+      ],
+      negative_role_verbs: [
+        read: all_verb_names,
+        interact: Enum.reject(all_verb_names, fn v -> v in verbs_see_read_request end),
+        participate: Enum.reject(all_verb_names, fn v -> v in verbs_interact_incl_boost end),
+        contribute: Enum.reject(all_verb_names, fn v -> v in verbs_participate_and_message end),
+        administer: Enum.reject(all_verb_names, fn v -> v in verbs_contribute end)
       ],
       role_to_grant: [
         default: :participate

@@ -38,12 +38,18 @@ defmodule Bonfire.Boundaries.Verbs do
   def ids(verb) when is_atom(verb), do: ids([verb])
 
   def role_verbs, do: Config.get(:role_verbs)
-  def roles, do: role_verbs() |> Keyword.keys()
+  def negative_role_verbs, do: Config.get(:negative_role_verbs)
 
-  def role_names do
-    for role <- roles() do
+  def roles_for_dropdown do
+    positive = role_verbs() |> Keyword.keys()
+    negative = negative_role_verbs() |> Keyword.keys()
+
+    for role <- positive do
       {role, String.capitalize(to_string(role))}
-    end
+    end ++
+      for role <- negative do
+        {"negative_#{role}", l("Cannot") <> " " <> String.capitalize(to_string(role))}
+      end
   end
 
   def role_from_verb_names(verbs) do
@@ -57,7 +63,7 @@ defmodule Bonfire.Boundaries.Verbs do
   def role_from_verb(verbs, field \\ :verb, all_role_verbs \\ role_verbs()) do
     cond do
       Enum.count(verbs) == verbs_count() ->
-        :caretaker
+        :administer
 
       true ->
         case all_role_verbs
@@ -74,19 +80,26 @@ defmodule Bonfire.Boundaries.Verbs do
     end
   end
 
+  def verbs_for_role("negative_" <> role) do
+    do_verbs_for_role(role, false, negative_role_verbs())
+  end
+
   def verbs_for_role(role) do
+    do_verbs_for_role(role, true, role_verbs())
+  end
+
+  defp do_verbs_for_role(role, value, role_verbs) do
     role =
       role
       |> Types.maybe_to_atom()
       |> debug("role")
 
     if is_atom(role) do
-      role_verbs = role_verbs()
       roles = role_verbs |> Keyword.keys()
 
       cond do
-        role in roles -> {:ok, role_verbs[role] || []}
-        role in [nil, :none, :custom] -> {:ok, []}
+        role in roles -> {:ok, value, role_verbs[role] || []}
+        role in [nil, :none, :custom] -> {:ok, value, []}
         true -> error(role, l("This role is not defined."))
       end
     else

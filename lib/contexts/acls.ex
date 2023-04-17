@@ -293,12 +293,15 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
-  defp grant_to({subject_id, nil}, acl_id, default_verbs),
-    do: grant_to(subject_id, acl_id, default_verbs)
+  defp grant_to(subject, acl_id, default_verbs, value \\ true)
 
-  defp grant_to({subject_id, role}, acl_id, _default_verbs) do
-    with {:ok, role_verbs} <- Verbs.verbs_for_role(role) |> debug("verbs for role") do
-      grant_to(subject_id, acl_id, role_verbs)
+  defp grant_to({subject_id, nil}, acl_id, default_verbs, value),
+    do: grant_to(subject_id, acl_id, default_verbs, value)
+
+  defp grant_to({subject_id, role}, acl_id, _default_verbs, _value) do
+    with {:ok, value, role_verbs} <- Verbs.verbs_for_role(role) do
+      debug(role_verbs, "verbs for (#{value}) role")
+      grant_to(subject_id, acl_id, role_verbs, value)
     else
       e ->
         error(e)
@@ -306,10 +309,10 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
-  defp grant_to(user_etc, acl_id, verbs) when is_list(verbs),
-    do: Enum.map(verbs, &grant_to(user_etc, acl_id, &1))
+  defp grant_to(user_etc, acl_id, verbs, value) when is_list(verbs),
+    do: Enum.map(verbs, &grant_to(user_etc, acl_id, &1, value))
 
-  defp grant_to(user_etc, acl_id, verb) do
+  defp grant_to(user_etc, acl_id, verb, value) do
     debug(user_etc)
 
     %{
@@ -317,7 +320,7 @@ defmodule Bonfire.Boundaries.Acls do
       acl_id: acl_id,
       subject_id: user_etc,
       verb_id: Verbs.get_id!(verb),
-      value: true
+      value: value
     }
   end
 

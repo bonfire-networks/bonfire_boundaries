@@ -137,12 +137,12 @@ defmodule Bonfire.Boundaries.Grants do
   end
 
   def grant_role(subject_id, acl_id, role, opts \\ []) do
-    with {:ok, role_verbs} <- Verbs.verbs_for_role(role) do
+    with {:ok, value, role_verbs} <- Verbs.verbs_for_role(role) do
       # first remove all existing grants to this subject
       remove_subject_from_acl(subject_id, acl_id)
 
       # then re-add based on role
-      grant(subject_id, acl_id, role_verbs, true, opts)
+      grant(subject_id, acl_id, role_verbs, value, opts)
     end
   end
 

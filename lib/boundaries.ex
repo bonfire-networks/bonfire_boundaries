@@ -172,7 +172,7 @@ defmodule Bonfire.Boundaries do
   def preset_boundary_role_from_acl(%{verbs: verbs} = _summary) do
     # debug(summary)
     case Verbs.role_from_verb_names(verbs) do
-      :caretaker -> {l("Caretaker"), l("Full permissions")}
+      :administer -> {l("Administer"), l("Full permissions")}
       role -> {String.capitalize(to_string(role)), verbs}
     end
   end
