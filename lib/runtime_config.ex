@@ -233,7 +233,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         read: all_verb_names,
         interact: Enum.reject(all_verb_names, fn v -> v in verbs_see_read_request end),
         participate: Enum.reject(all_verb_names, fn v -> v in verbs_interact_incl_boost end),
-        contribute: Enum.reject(all_verb_names, fn v -> v in verbs_participate_and_message end),
+        # contribute: Enum.reject(all_verb_names, fn v -> v in verbs_participate_and_message end),
         administer: Enum.reject(all_verb_names, fn v -> v in verbs_contribute end)
       ],
       role_to_grant: [
