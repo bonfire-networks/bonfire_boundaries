@@ -132,7 +132,7 @@
                       <#Icon solid="DotsVertical" class="w-4 h-4" />
                     </label>
                     <ul tabindex="0" class="w-48 p-1 rounded shadow dropdown-content menu menu-compact bg-neutral">
-                      <li :if={!@setting_boundaries}>
+                      <!-- <li :if={!@setting_boundaries}>
                         <Bonfire.Boundaries.Web.AclModalLive
                           subject_id={subject_id}
                           role_title={Bonfire.Boundaries.Verbs.role_from_verb_ids(Map.keys(verb_grants || %{}))}
@@ -140,7 +140,7 @@
                           verbs={@verbs}
                           myself={@myself}
                         />
-                      </li>
+                      </li> -->
                       <li>
                         <button
                           phx-click="remove_from_acl"
