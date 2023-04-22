@@ -5,7 +5,7 @@
       parent_id={"user-#{@parent_id}"}
       with_icon
       label={e(@object, :profile, :name, l("this user"))}
-      class="flex items-center w-full gap-2 text-sm text-neutral-content/80"
+      class="flex items-center w-full gap-2 text-sm text-base-content/80"
     />
   </li>
 
@@ -15,7 +15,7 @@
       object={e(peered(@object, @peered), :peer_id, nil)}
       parent_id={"instance-#{@parent_id}"}
       label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
-      class="flex items-center w-full gap-2 text-sm text-neutral-content/80"
+      class="flex items-center w-full gap-2 text-sm text-base-content/80"
     />
   </li>
 {/if}

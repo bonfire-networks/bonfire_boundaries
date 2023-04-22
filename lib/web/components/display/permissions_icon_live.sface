@@ -59,8 +59,8 @@
           <div class="flex items-center w-full gap-3">
             <#Icon iconify="ri:shield-user-fill" class="w-5 h-5 text-info/80" />
             <div class="">
-              <span class="text-xs font-semibold tracking-wider text-center uppercase text-neutral-content/80">{name || l("Custom")}</span>
-              <div class="text-xs text-neutral-content/80">{l("Details")}</div>
+              <span class="text-xs font-semibold tracking-wider text-center uppercase text-base-content/80">{name || l("Custom")}</span>
+              <div class="text-xs text-base-content/80">{l("Details")}</div>
             </div>
           </div>
         </:open_btn>
