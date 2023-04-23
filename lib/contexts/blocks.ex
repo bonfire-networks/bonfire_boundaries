@@ -34,6 +34,13 @@ defmodule Bonfire.Boundaries.Blocks do
     block(user_or_instance_to_block, block_type, :instance_wide)
   end
 
+  def remote_instance_block(display_hostname, block_type, scope) do
+    with {:ok, circle} <- Bonfire.Boundaries.Circles.get_or_create(display_hostname) do
+      debug(circle, "blocking (#{block_type}) an entire instance: #{display_hostname}")
+      block(circle, block_type, scope)
+    end
+  end
+
   def block(user_or_instance_to_block, block_type \\ nil, scope)
 
   def block(
@@ -42,10 +49,17 @@ defmodule Bonfire.Boundaries.Blocks do
         scope
       )
       when schema == Bonfire.Data.ActivityPub.Peer do
-    debug(display_hostname, "blocking (#{block_type}) an entire instance")
+    remote_instance_block(display_hostname, block_type, scope)
+  end
 
-    with {:ok, circle} <- Bonfire.Boundaries.Circles.get_or_create(display_hostname) do
-      block(circle, block_type, scope)
+  def block(id, block_type, scope) when is_binary(id) do
+    with {:ok, user_or_circle} <- Bonfire.Common.Pointers.get(id, skip_boundary_check: true) do
+      debug(user_or_circle, "found by ID or username")
+      block(user_or_circle, block_type, scope)
+    else
+      _ ->
+        debug("assume it's an instance display_hostname")
+        remote_instance_block(id, block_type, scope)
     end
   end
 
@@ -236,7 +250,7 @@ defmodule Bonfire.Boundaries.Blocks do
     |> per_user_circles(current_user, ...)
   end
 
-  defp is_blocked_by?(%{} = user_or_peer, block_type, current_user_ids)
+  defp is_blocked_by?(user_or_peer, block_type, current_user_ids)
        when is_list(current_user_ids) and current_user_ids != [] do
     # info(user_or_peer, "user_or_peer to check")
     info(current_user_ids, "current_user_ids")
