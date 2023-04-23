@@ -59,6 +59,11 @@ defmodule Bonfire.Boundaries.Circles do
     end)
   end
 
+  def list_my_defaults(_user \\ nil) do
+    # TODO make configurable
+    Enum.map([:guest, :local, :activity_pub], &Circles.get_tuple/1)
+  end
+
   def list_built_ins() do
     Enum.map(circles(), fn {_slug, %{id: id}} ->
       id
@@ -191,52 +196,49 @@ defmodule Bonfire.Boundaries.Circles do
   ## invariants:
   ## * Created circles will have the user as a caretaker
 
+  def get_for_caretaker(id, caretaker, opts \\ []) do
+    with {:ok, circle} <-
+           repo().single(query_my_by_id(id, caretaker, opts ++ @default_q_opts)) do
+      {:ok, circle}
+    else
+      {:error, :not_found} ->
+        if is_admin?(caretaker) || opts[:scope] == :instance_wide,
+          do:
+            repo().single(
+              query_my_by_id(
+                id,
+                Bonfire.Boundaries.Fixtures.admin_circle(),
+                opts ++ @default_q_opts
+              )
+            ),
+          else: {:error, :not_found}
+    end
+  end
+
+  def get_by_name(name, caretaker) do
+    repo().single(query_basic_my(caretaker, name: name))
+  end
+
+  def get_stereotype_circles(subject, stereotypes) when is_list(stereotypes) do
+    stereotypes = Enum.map(stereotypes, &Bonfire.Boundaries.Circles.get_id!/1)
+
+    # skip boundaries since we should only use this query internally
+    query_my(subject, skip_boundary_check: true)
+    |> where(
+      [circle: circle, stereotyped: stereotyped],
+      stereotyped.stereotype_id in ^ulid(stereotypes)
+    )
+    |> repo().all()
+  end
+
+  def get_stereotype_circles(subject, stereotype),
+    do: get_stereotype_circles(subject, [stereotype])
+
   @doc """
   Lists the circles that we are permitted to see.
   """
   def list_visible(user, opts \\ []),
-    do: repo().many(list_visible_q(user, opts ++ @default_q_opts))
-
-  @doc "query for `list_visible`"
-  def list_q(opts \\ []) do
-    exclude_circles =
-      e(opts, :exclude_circles, []) ++
-        if e(opts, :exclude_stereotypes, nil), do: stereotype_ids(), else: []
-
-    from(circle in Circle, as: :circle)
-    |> proload([
-      :named,
-      :extra_info,
-      :caretaker,
-      stereotyped: {"stereotype_", [:named]}
-    ])
-    |> where(
-      [circle, stereotyped: stereotyped],
-      circle.id not in ^exclude_circles and
-        (is_nil(stereotyped.id) or
-           stereotyped.stereotype_id not in ^exclude_circles)
-    )
-    |> maybe_search(opts[:search])
-  end
-
-  def maybe_search(query, text) when is_binary(text) and text != "" do
-    query
-    |> where(
-      [named: named, stereotype_named: stereotype_named],
-      ilike(named.name, ^"#{text}%") or
-        ilike(named.name, ^"% #{text}%") or
-        ilike(stereotype_named.name, ^"#{text}%") or
-        ilike(stereotype_named.name, ^"% #{text}%")
-    )
-  end
-
-  def maybe_search(query, _), do: query
-
-  @doc "query for `list_visible`"
-  def list_visible_q(user, opts \\ []) do
-    list_q(opts)
-    |> boundarise(circle.id, opts ++ [current_user: user])
-  end
+    do: repo().many(query_visible(user, opts ++ @default_q_opts))
 
   @doc """
   Lists the circles we are the registered caretakers of that we are
@@ -244,7 +246,7 @@ defmodule Bonfire.Boundaries.Circles do
   user to see them, they will not be shown.
   """
   def list_my(user, opts \\ []),
-    do: repo().many(list_my_q(user, opts ++ @default_q_opts))
+    do: repo().many(query_my(user, opts ++ @default_q_opts))
 
   def list_my_with_global(user, opts \\ []) do
     list_my(user,
@@ -253,7 +255,7 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   def list_my_with_counts(user, opts \\ []) do
-    list_my_q(user, opts ++ @default_q_opts)
+    query_my(user, opts ++ @default_q_opts)
     |> join(
       :left,
       [circle],
@@ -271,9 +273,70 @@ defmodule Bonfire.Boundaries.Circles do
     |> repo().many()
   end
 
-  @doc "query for `list_my`"
-  def list_my_q(user, opts \\ []) when not is_nil(user) do
-    list_q(opts)
+  @doc "query for `list_visible`"
+  def query(opts \\ []) do
+    exclude_circles =
+      e(opts, :exclude_circles, []) ++
+        if e(opts, :exclude_stereotypes, nil), do: stereotype_ids(), else: []
+
+    from(circle in Circle, as: :circle)
+    |> proload([
+      :named,
+      :extra_info,
+      :caretaker,
+      stereotyped: {"stereotype_", [:named]}
+    ])
+    |> where(
+      [circle, stereotyped: stereotyped],
+      circle.id not in ^exclude_circles and
+        (is_nil(stereotyped.id) or
+           stereotyped.stereotype_id not in ^exclude_circles)
+    )
+    |> maybe_by_name(opts[:name])
+    |> maybe_search(opts[:search])
+  end
+
+  defp maybe_by_name(query, text) when is_binary(text) and text != "" do
+    query
+    |> where(
+      [named: named],
+      named.name == ^text
+    )
+  end
+
+  defp maybe_by_name(query, _), do: query
+
+  defp maybe_search(query, text) when is_binary(text) and text != "" do
+    query
+    |> where(
+      [named: named, stereotype_named: stereotype_named],
+      ilike(named.name, ^"#{text}%") or
+        ilike(named.name, ^"% #{text}%") or
+        ilike(stereotype_named.name, ^"#{text}%") or
+        ilike(stereotype_named.name, ^"% #{text}%")
+    )
+  end
+
+  defp maybe_search(query, _), do: query
+
+  @doc "query for `list_visible`"
+  def query_visible(user, opts \\ []) do
+    query(opts)
+    |> boundarise(circle.id, opts ++ [current_user: user])
+  end
+
+  defp query_basic(opts) do
+    from(circle in Circle, as: :circle)
+    |> proload([
+      :named,
+      :caretaker
+    ])
+    |> maybe_by_name(opts[:name])
+    |> maybe_search(opts[:search])
+  end
+
+  defp query_basic_my(user, opts \\ []) when not is_nil(user) do
+    query_basic(opts)
     |> where(
       [circle, caretaker: caretaker],
       caretaker.caretaker_id == ^ulid!(user) or
@@ -281,53 +344,38 @@ defmodule Bonfire.Boundaries.Circles do
     )
   end
 
-  def list_my_defaults(_user \\ nil) do
-    # TODO make configurable
-    Enum.map([:guest, :local, :activity_pub], &Circles.get_tuple/1)
-  end
-
-  def get_for_caretaker(id, caretaker, opts \\ []) do
-    with {:ok, circle} <-
-           repo().single(get_for_caretaker_q(id, caretaker, opts ++ @default_q_opts)) do
-      {:ok, circle}
-    else
-      {:error, :not_found} ->
-        if is_admin?(caretaker) || opts[:scope] == :instance_wide,
-          do:
-            repo().single(
-              get_for_caretaker_q(
-                id,
-                Bonfire.Boundaries.Fixtures.admin_circle(),
-                opts ++ @default_q_opts
-              )
-            ),
-          else: {:error, :not_found}
-    end
-  end
-
-  def get_stereotype_circles(subject, stereotypes) when is_list(stereotypes) do
-    stereotypes = Enum.map(stereotypes, &Bonfire.Boundaries.Circles.get_id!/1)
-
-    # skip boundaries since we should only use this query internally
-    list_my_q(subject, skip_boundary_check: true)
+  @doc "query for `list_my`"
+  def query_my(caretaker, opts \\ []) when not is_nil(caretaker) do
+    query(opts)
     |> where(
-      [circle: circle, stereotyped: stereotyped],
-      stereotyped.stereotype_id in ^ulid(stereotypes)
+      [circle, caretaker: caretaker],
+      caretaker.caretaker_id == ^ulid!(caretaker) or
+        circle.id in ^e(opts, :extra_ids_to_include, [])
     )
-    |> repo().all()
   end
-
-  def get_stereotype_circles(subject, stereotype),
-    do: get_stereotype_circles(subject, [stereotype])
 
   @doc "query for `get`"
-  def get_for_caretaker_q(id, caretaker, opts \\ []) do
-    list_q(opts)
+  def query_my_by_id(id, caretaker, opts \\ []) do
+    query_my(caretaker, opts)
     # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
     |> where(
-      [circle: circle, caretaker: caretaker],
-      circle.id == ^ulid!(id) and caretaker.caretaker_id == ^ulid!(caretaker)
+      [circle: circle],
+      circle.id == ^ulid!(id)
     )
+  end
+
+  def get_or_create(name, caretaker \\ nil) when is_binary(name) do
+    # instance-wide circle if not user provided
+    caretaker = caretaker || Bonfire.Boundaries.Fixtures.admin_circle()
+
+    case get_by_name(name, caretaker) do
+      {:ok, circle} ->
+        {:ok, circle}
+
+      _none ->
+        debug(name, "circle unknown, create it now")
+        create(caretaker, name)
+    end
   end
 
   def edit(%Circle{} = circle, %User{} = _user, params) do

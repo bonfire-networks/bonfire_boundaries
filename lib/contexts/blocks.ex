@@ -34,7 +34,22 @@ defmodule Bonfire.Boundaries.Blocks do
     block(user_or_instance_to_block, block_type, :instance_wide)
   end
 
-  def block(user_or_instance_to_block, block_type \\ nil, scope) do
+  def block(user_or_instance_to_block, block_type \\ nil, scope)
+
+  def block(
+        %{__struct__: schema, display_hostname: display_hostname} = instance_to_block,
+        block_type,
+        scope
+      )
+      when schema == Bonfire.Data.ActivityPub.Peer do
+    debug(display_hostname, "blocking (#{block_type}) an entire instance")
+
+    with {:ok, circle} <- Bonfire.Boundaries.Circles.get_or_create(display_hostname) do
+      block(circle, block_type, scope)
+    end
+  end
+
+  def block(user_or_instance_to_block, block_type, scope) do
     with {:ok, blocked} <- mutate(:block, user_or_instance_to_block, block_type, scope) do
       if user_or_instance_to_block != :instance_wide and scope != :instance_wide do
         me = Utils.current_user_required!(scope)
@@ -222,7 +237,7 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   defp is_blocked_by?(%{} = user_or_peer, block_type, current_user_ids)
-       when is_list(current_user_ids) and length(current_user_ids) > 0 do
+       when is_list(current_user_ids) and current_user_ids != [] do
     # info(user_or_peer, "user_or_peer to check")
     info(current_user_ids, "current_user_ids")
 
@@ -244,15 +259,16 @@ defmodule Bonfire.Boundaries.Blocks do
     is_blocked_by?(user_or_peer, block_type, [user])
   end
 
-  defp is_blocked_by?(user_or_peer, _block_types, current_user_ids) do
+  defp is_blocked_by?(user_or_peer, _block_types, []) do
+    debug("no current_user/current_user_ids")
+
+    nil
+  end
+
+  defp is_blocked_by?(user_or_peer, _block_types, _) do
     warn(
       user_or_peer,
-      "no pattern found for user_or_peer (or current_user/current_user_ids)"
-    )
-
-    warn(
-      current_user_ids,
-      "no pattern found for current_user/current_user_ids (or user_or_peer)"
+      "no pattern found"
     )
 
     nil
