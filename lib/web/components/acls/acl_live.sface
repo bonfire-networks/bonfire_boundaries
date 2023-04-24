@@ -122,7 +122,7 @@
                 <div class="flex items-center gap-2" :if={!@read_only}>
                   <Bonfire.Boundaries.Web.RolesDropdownLive
                     circle_id={subject_id}
-                    role={Bonfire.Boundaries.Verbs.role_from_verb_ids(Map.keys(verb_grants || %{}))
+                    role={Bonfire.Boundaries.Verbs.role_from_grants(Map.values(verb_grants |> debug("verb_grants")))
                     |> debug("role_from_verbs")}
                     extra_roles={[{:custom, l("Custom")}]}
                     no_actions
