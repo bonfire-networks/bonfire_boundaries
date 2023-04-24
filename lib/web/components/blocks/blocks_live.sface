@@ -1,7 +1,7 @@
 <div>
   {#if @selected_tab == "silenced"}
     <!-- TODO: consolidate this view and the boundary editing one (so you can directly add people/circles here as well) -->
-    <div class="bg-base-200">
+    <div class="p-2">
       <div class="p-4 mb-3 rounded-md bg-info/10">
         <div class="flex">
           <div class="flex-shrink-0">
@@ -64,7 +64,7 @@
     />
   {#else}
     <!-- ghost -->
-    <div class="bg-base-200">
+    <div class="p-2">
       <div class="p-4 mb-3 rounded-md bg-info/10">
         <div class="flex">
           <div class="flex-shrink-0">
@@ -93,7 +93,7 @@
               </button>
               <div x-show="active_info" x-collapse>
                 <div class="block mt-3">
-                  <ul class="block pl-4 mt-1 prose-sm list-disc">
+                  <ul class="block pl-4 mt-1 prose-sm text-info list-disc">
                     <li>
                       {l("Nothing you post privately will be shown to them from now on.")}
                     </li>
