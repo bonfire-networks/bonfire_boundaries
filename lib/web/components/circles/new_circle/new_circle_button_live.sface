@@ -1,11 +1,13 @@
-<Bonfire.UI.Common.OpenModalLive id="new_circle" title_text={l("Create a new circle")} no_actions>
-  <div>
-    <Bonfire.Boundaries.Web.NewCircleLive setting_boundaries={@setting_boundaries} />
-  </div>
-
-  <:open_btn>
-    <div class="normal-case rounded btn btn-primary btn-sm btn-outline">
-      {l("New circle")}
+<div data-role="new_circle">
+  <Bonfire.UI.Common.OpenModalLive id="new_circle" title_text={l("Create a new circle")} no_actions>
+    <div>
+      <Bonfire.Boundaries.Web.NewCircleLive setting_boundaries={@setting_boundaries} />
     </div>
-  </:open_btn>
-</Bonfire.UI.Common.OpenModalLive>
+
+    <:open_btn>
+      <div class="normal-case rounded btn btn-primary btn-sm btn-outline">
+        {l("New circle")}
+      </div>
+    </:open_btn>
+  </Bonfire.UI.Common.OpenModalLive>
+</div>
