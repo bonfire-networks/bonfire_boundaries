@@ -336,6 +336,10 @@ defmodule Bonfire.Boundaries.Acls do
     |> repo().insert()
   end
 
+  def simple_create(caretaker, name) do
+    create(%{named: %{name: name}}, current_user: caretaker)
+  end
+
   def changeset(:create, attrs, opts) do
     changeset(:create, attrs, opts, Keyword.fetch!(opts, :current_user))
   end
