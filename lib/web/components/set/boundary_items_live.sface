@@ -27,7 +27,10 @@
     </div>
   </div>
 
-  <div :for={{data, id} <- @to_circles || []} class="inline-flex items-center  p-1 bg-base-content/5 rounded-lg">
+  <div
+    :for={{data, id} <- @to_circles || []}
+    class="inline-flex items-center  p-1 bg-base-content/5 rounded-lg"
+  >
     {#case data}
       {#match %{"icon" => _}}
         <p class="text-sm truncate max-w-[200px] border-r-0 border-base-content/10 px-2 leading-[32px] h-[34px] !border-r-none font-bold group-hover:underline text-base-content">

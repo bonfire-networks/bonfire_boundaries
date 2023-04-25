@@ -15,84 +15,77 @@
     </div>
   </div>
   {#if Enum.count(@members) > 0}
-
-  <div class="overflow-x-auto  w-full">
-    <table class="table w-full ">
-      <!-- head -->
-      <thead class="sr-only">
-        <tr>
-          <th>User</th>
-          <!-- <th>Job</th>
+    <div class="overflow-x-auto  w-full">
+      <table class="table w-full">
+        <!-- head -->
+        <thead class="sr-only">
+          <tr>
+            <th>User</th>
+            <!-- <th>Job</th>
           <th>Favorite Color</th> -->
-          <th></th>
-        </tr>
-      </thead>
-      <tbody class="">
-        <!-- row 1 -->
-        {#for {id, member} <- @members}
-        <tr class="">
-          <input
-              type="hidden"
-              name={"circle[encircle][#{id}][circle_id]"}
-              value={e(@circle, :id, @circle_id)}
-            />
-            <input
-              type="hidden"
-              name={"circle[encircle][#{id}][subject_id]"}
-              value={e(member, :subject_id, id)}
-            />
-          <td>
-            <div class="flex items-center space-x-3">
-              <Bonfire.UI.Common.AvatarLive
-                  parent_id="user_preview"
-                  class="flex-1 inline-block object-cover w-12 h-12 mx-auto rounded-full md:w-12 md:h-12 bg-base-300"
-                  size="42"
-                  user={e(member, :subject, nil) || e(member, nil) || member}
-                  src={e(member, "icon", nil)}
-                />
-              <div>
-                <div class="font-bold">{e(member, :subject, :profile, :name, nil) || e(member, :profile, :name, nil) ||
-                e(member, :name, "Unknown")}</div>
-                <div class="text-sm opacity-50">@{e(member, :subject, :character, :username, nil) || e(member, :character, :username, nil) ||
-                e(member, :username, nil)}</div>
-              </div>
-            </div>
-          </td>
-          <!-- <td>
+            <th />
+          </tr>
+        </thead>
+        <tbody class="">
+          <!-- row 1 -->
+          {#for {id, member} <- @members}
+            <tr class="">
+              <input
+                type="hidden"
+                name={"circle[encircle][#{id}][circle_id]"}
+                value={e(@circle, :id, @circle_id)}
+              />
+              <input
+                type="hidden"
+                name={"circle[encircle][#{id}][subject_id]"}
+                value={e(member, :subject_id, id)}
+              />
+              <td>
+                <div class="flex items-center space-x-3">
+                  <Bonfire.UI.Common.AvatarLive
+                    parent_id="user_preview"
+                    class="flex-1 inline-block object-cover w-12 h-12 mx-auto rounded-full md:w-12 md:h-12 bg-base-300"
+                    size="42"
+                    user={e(member, :subject, nil) || e(member, nil) || member}
+                    src={e(member, "icon", nil)}
+                  />
+                  <div>
+                    <div class="font-bold">{e(member, :subject, :profile, :name, nil) || e(member, :profile, :name, nil) ||
+                        e(member, :name, "Unknown")}</div>
+                    <div class="text-sm opacity-50">@{e(member, :subject, :character, :username, nil) || e(member, :character, :username, nil) ||
+                        e(member, :username, nil)}</div>
+                  </div>
+                </div>
+              </td>
+              <!-- <td>
             Zemlak, Daniel and Leannon
             <br/>
             <span class="badge badge-ghost badge-sm">Desktop Support Technician</span>
           </td>
           <td>Purple</td> -->
-          <th>
-            <div class="flex items-center justify-end">
-              <button 
-                :if={!@read_only} 
-                phx-value-subject={id}
-                :on-click="remove"
-                class="btn btn-ghost btn-xs">
-                {l("Remove")}
-              </button>
-            </div>
-          </th>
-        </tr>
-        {/for}
-      </tbody>
-      <!-- foot -->
-      <tfoot class="sr-only">
-        <tr>
-          <th>User</th>
-          <!-- <th>Job</th>
+              <th>
+                <div class="flex items-center justify-end">
+                  <button :if={!@read_only} phx-value-subject={id} :on-click="remove" class="btn btn-ghost btn-xs">
+                    {l("Remove")}
+                  </button>
+                </div>
+              </th>
+            </tr>
+          {/for}
+        </tbody>
+        <!-- foot -->
+        <tfoot class="sr-only">
+          <tr>
+            <th>User</th>
+            <!-- <th>Job</th>
           <th>Favorite Color</th> -->
-          <th></th>
-        </tr>
-      </tfoot>
-      
-    </table>
-  </div>
+            <th />
+          </tr>
+        </tfoot>
+      </table>
+    </div>
 
-
-<!-- 
+    <!-- 
     <div class="grid grid-cols-3 gap-3 px-4 lg:gap-6 lg:grid-cols-4">
       {#for {id, member} <- @members}
         <div class="col-span-1 group">

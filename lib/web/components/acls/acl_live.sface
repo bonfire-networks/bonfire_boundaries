@@ -24,12 +24,13 @@
         class="flex justify-evenly items-stretch gap-3 text-sm font-medium border-b border-base-content/10"
       >
         <!-- Tab -->
-        <li 
+        <li
           to={~p"/boundaries/acl/#{ulid(@acl)}"}
           phx-click="assign"
           phx-value-section="permissions"
           phx-target={@myself}
-          class="cursor-pointer hover:bg-base-content/5 flex-1 flex place-content-center">
+          class="cursor-pointer hover:bg-base-content/5 flex-1 flex place-content-center"
+        >
           <div
             class={
               "border-b-4 border-transparent inline-flex px-5 pb-3 pt-5 text-base-content/70",
@@ -41,12 +42,13 @@
           </div>
         </li>
 
-        <li 
+        <li
           to={~p"/boundaries/circle/#{ulid(@acl)}/settings"}
           phx-click="assign"
           phx-value-section="settings"
           phx-target={@myself}
-          class="cursor-pointer hover:bg-base-content/5 flex-1 flex place-content-center">
+          class="cursor-pointer hover:bg-base-content/5 flex-1 flex place-content-center"
+        >
           <div
             class={
               "border-b-4 border-transparent inline-flex px-5 pb-3 pt-5 text-base-content/70",
@@ -85,7 +87,7 @@
     <div class="">
       <div :if={@section != "settings"}>
         <div :if={!@read_only}>
-          <form  class="p-2 border-b border-base-content/10" :on-change="select">
+          <form class="p-2 border-b border-base-content/10" :on-change="select">
             <Bonfire.UI.Common.MultiselectLive
               implementation={:live_select}
               form_input_name={__MODULE__}
