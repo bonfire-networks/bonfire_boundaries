@@ -65,7 +65,13 @@
           <td>Purple</td> -->
               <th>
                 <div class="flex items-center justify-end">
-                  <button data-role="remove_user" :if={!@read_only} phx-value-subject={id} :on-click="remove" class="btn btn-ghost btn-xs">
+                  <button
+                    data-role="remove_user"
+                    :if={!@read_only}
+                    phx-value-subject={id}
+                    :on-click="remove"
+                    class="btn btn-ghost btn-xs"
+                  >
                     {l("Remove")}
                   </button>
                 </div>

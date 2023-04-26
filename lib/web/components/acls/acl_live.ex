@@ -140,6 +140,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     add_to_acl(id, socket)
   end
 
+  def do_handle_event("select", %{"id" => id} = _attrs, socket) do
+    add_to_acl(id, socket)
+  end
+
   def do_handle_event("multi_select", %{data: data, text: text}, socket) do
     add_to_acl(data, socket)
   end

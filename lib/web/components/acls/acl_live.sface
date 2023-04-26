@@ -100,7 +100,7 @@
           <!-- <div class="text-xl font-medium collapse-title">
             Role per circle or person
           </div> -->
-          <form :on-change="edit_grant_role">
+          <form id="edit_grants" :on-change="edit_grant_role">
             <ul class="flex flex-col divide-y divide-base-content/10 px-4 mt-2">
               <li
                 :for={{{subject_id, %{subject: subject, verb_grants: verb_grants} = _subject_verb_grant}, _i} <-

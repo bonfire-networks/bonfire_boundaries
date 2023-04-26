@@ -1,9 +1,10 @@
 <div data-role="new_acl">
-  <Bonfire.UI.Common.OpenModalLive 
-    id="new_acl" 
+  <Bonfire.UI.Common.OpenModalLive
+    id="new_acl"
     title_text={l("New boundary")}
     form_opts={"phx-submit": "Bonfire.Boundaries:acl_create"}
-    no_actions>
+    no_actions
+  >
     <Bonfire.Boundaries.Web.NewAclLive setting_boundaries={@setting_boundaries} />
     <:open_btn>
       <div class="normal-case rounded btn btn-primary btn-sm btn-outline">

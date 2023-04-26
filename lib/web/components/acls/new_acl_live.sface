@@ -80,8 +80,8 @@
     </div>
   </div> -->
 
-      <!-- :phx-value-name="name" -->
-      <!-- phx-value-no_redirect={if @setting_boundaries, do: "1"} -->
+    <!-- :phx-value-name="name" -->
+    <!-- phx-value-no_redirect={if @setting_boundaries, do: "1"} -->
     <button
       x-on:click="show_boundary_list = true"
       x-bind:disabled="name.length == 0"

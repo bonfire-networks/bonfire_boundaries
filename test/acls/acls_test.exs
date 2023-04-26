@@ -164,10 +164,7 @@ defmodule Bonfire.Boundaries.AclTest do
     {:ok, acl} = Acls.simple_create(me, name)
 
     # add bob to Acl
-    Grants.grant_role(bob.id, acl.id, "read", current_user: me)
-
-    # upgrade bob's role
-    Grants.grant_role(bob.id, acl.id, "contribute", current_user: me)
+    Grants.grant_role(bob.id, acl.id, "negative_read", current_user: me)
 
     {:ok, acl} =
       Acls.get_for_caretaker(acl.id, me)
@@ -178,13 +175,13 @@ defmodule Bonfire.Boundaries.AclTest do
         ]
       )
 
-    # check bob has create permission
+    # check bob has no read permission
     assert Enum.any?(acl.grants, fn grant ->
-             grant.subject_id == bob.id and grant.verb.verb == "Create"
+             grant.subject_id == bob.id and grant.verb.verb == "Read" and grant.value == false
            end)
 
-    # downgrade bob's role
-    Grants.grant_role(bob.id, acl.id, "read", current_user: me)
+    # change bob's role
+    Grants.grant_role(bob.id, acl.id, "negative_contribute", current_user: me)
 
     {:ok, acl} =
       Acls.get_for_caretaker(acl.id, me)
@@ -195,14 +192,31 @@ defmodule Bonfire.Boundaries.AclTest do
         ]
       )
 
-    # check that bob no longer has create permission
+    # check bob has no create permission
+    assert Enum.any?(acl.grants, fn grant ->
+             grant.subject_id == bob.id and grant.verb.verb == "Create" and grant.value == false
+           end)
+
+    # change bob's role
+    Grants.grant_role(bob.id, acl.id, "negative_read", current_user: me)
+
+    {:ok, acl} =
+      Acls.get_for_caretaker(acl.id, me)
+      |> repo().maybe_preload(
+        grants: [
+          :verb,
+          subject: [:named, :profile, :character, stereotyped: [:named]]
+        ]
+      )
+
+    # check that bob no longer has no create permission
     refute Enum.any?(acl.grants, fn grant ->
-             grant.subject_id == bob.id and grant.verb.verb == "Create"
+             grant.subject_id == bob.id and grant.verb.verb == "Create" and grant.value == false
            end)
 
-    # but he can still read
+    # but he can still cannot read
     assert Enum.any?(acl.grants, fn grant ->
-             grant.subject_id == bob.id and grant.verb.verb == "Read"
+             grant.subject_id == bob.id and grant.verb.verb == "Read" and grant.value == false
            end)
   end
 end
