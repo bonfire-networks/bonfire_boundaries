@@ -87,7 +87,7 @@
     <div class="">
       <div :if={@section != "settings"}>
         <div :if={!@read_only}>
-          <form class="p-2 border-b border-base-content/10" :on-change="select">
+          <form id="edit_acl_members" class="p-2 border-b border-base-content/10" :on-change="select">
             <Bonfire.UI.Common.MultiselectLive
               implementation={:live_select}
               form_input_name={__MODULE__}

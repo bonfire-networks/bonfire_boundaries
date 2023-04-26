@@ -80,13 +80,13 @@
     </div>
   </div> -->
 
+      <!-- :phx-value-name="name" -->
+      <!-- phx-value-no_redirect={if @setting_boundaries, do: "1"} -->
     <button
-      phx-click="Bonfire.Boundaries:acl_create"
       x-on:click="show_boundary_list = true"
-      :phx-value-name="name"
       x-bind:disabled="name.length == 0"
-      phx-value-no_redirect={if @setting_boundaries, do: "1"}
-      type="button"
+      type="submit"
+      data-role="new_acl_submit"
       class="w-full mt-3 normal-case btn btn-primary"
     >{l("Create")}
     </button>

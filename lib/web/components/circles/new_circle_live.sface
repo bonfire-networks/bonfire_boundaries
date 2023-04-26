@@ -13,12 +13,13 @@
       </div>
     </div>
 
-    <button
-      phx-click="Bonfire.Boundaries:circle_create"
-      :phx-value-name="name"
-      x-bind:disabled="name.length == 0"
+      <!-- phx-click="Bonfire.Boundaries:circle_create"
       phx-value-no_redirect={if @setting_boundaries, do: "1"}
-      type="button"
+      :phx-value-name="name" -->
+    <button
+      x-bind:disabled="name.length == 0"
+      type="submit"
+      data-role="new_circle_submit"
       class="w-full mt-3 normal-case btn btn-primary"
     >
       {l("Create")}

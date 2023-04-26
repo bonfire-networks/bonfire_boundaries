@@ -1,5 +1,9 @@
 <div data-role="new_circle">
-  <Bonfire.UI.Common.OpenModalLive id="new_circle" title_text={l("Create a new circle")} no_actions>
+  <Bonfire.UI.Common.OpenModalLive 
+    id="new_circle" 
+    title_text={l("Create a new circle")} 
+    form_opts={"phx-submit": "Bonfire.Boundaries:circle_create"}
+    no_actions>
     <div>
       <Bonfire.Boundaries.Web.NewCircleLive setting_boundaries={@setting_boundaries} />
     </div>
