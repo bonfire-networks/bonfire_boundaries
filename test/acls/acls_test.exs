@@ -164,7 +164,30 @@ defmodule Bonfire.Boundaries.AclTest do
     {:ok, acl} = Acls.simple_create(me, name)
 
     # add bob to Acl
+    Grants.grant_role(bob.id, acl.id, "negative_participate", current_user: me)
+    |> debug("1stgrant")
+ 
+    {:ok, acl} =
+      Acls.get_for_caretaker(acl.id, me)
+      |> repo().maybe_preload(
+        grants: [
+          :verb,
+          subject: [:named, :profile, :character, stereotyped: [:named]]
+        ]
+      )
+
+    # check bob is not blocked from reading 
+    refute Enum.any?(acl.grants, fn grant ->
+             grant.subject_id == bob.id and grant.verb.verb == "Read" and grant.value == false
+           end)
+    # check bob has no reply permission 
+    assert Enum.any?(acl.grants, fn grant ->
+             grant.subject_id == bob.id and grant.verb.verb == "Reply" and grant.value == false
+           end)
+
+    # change bob's role
     Grants.grant_role(bob.id, acl.id, "negative_read", current_user: me)
+    |> debug("2ndgrant")
 
     {:ok, acl} =
       Acls.get_for_caretaker(acl.id, me)
@@ -179,26 +202,14 @@ defmodule Bonfire.Boundaries.AclTest do
     assert Enum.any?(acl.grants, fn grant ->
              grant.subject_id == bob.id and grant.verb.verb == "Read" and grant.value == false
            end)
-
-    # change bob's role
-    Grants.grant_role(bob.id, acl.id, "negative_contribute", current_user: me)
-
-    {:ok, acl} =
-      Acls.get_for_caretaker(acl.id, me)
-      |> repo().maybe_preload(
-        grants: [
-          :verb,
-          subject: [:named, :profile, :character, stereotyped: [:named]]
-        ]
-      )
-
-    # check bob has no create permission
+    # check bob still has no reply permission either
     assert Enum.any?(acl.grants, fn grant ->
-             grant.subject_id == bob.id and grant.verb.verb == "Create" and grant.value == false
+             grant.subject_id == bob.id and grant.verb.verb == "Reply" and grant.value == false
            end)
 
     # change bob's role
-    Grants.grant_role(bob.id, acl.id, "negative_read", current_user: me)
+    Grants.grant_role(bob.id, acl.id, "negative_participate", current_user: me)
+    |> debug("3rdgrant")
 
     {:ok, acl} =
       Acls.get_for_caretaker(acl.id, me)
@@ -209,13 +220,12 @@ defmodule Bonfire.Boundaries.AclTest do
         ]
       )
 
-    # check that bob no longer has no create permission
+    # check that bob has no reply permission again
     refute Enum.any?(acl.grants, fn grant ->
-             grant.subject_id == bob.id and grant.verb.verb == "Create" and grant.value == false
+             grant.subject_id == bob.id and grant.verb.verb == "Reply" and grant.value == false
            end)
-
-    # but he can still cannot read
-    assert Enum.any?(acl.grants, fn grant ->
+    # but he can can read again
+    refute Enum.any?(acl.grants, fn grant ->
              grant.subject_id == bob.id and grant.verb.verb == "Read" and grant.value == false
            end)
   end

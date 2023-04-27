@@ -120,10 +120,12 @@ defmodule Bonfire.Boundaries.Verbs do
       cond do
         role in roles -> {:ok, value, role_verbs[role] || []}
         role in [nil, :none, :custom] -> {:ok, value, []}
-        true -> error(role, l("This role is not defined."))
+        true -> 
+          debug(roles, "available roles")
+          error(role, ("This role is not defined."))
       end
     else
-      error(role, l("This is not a valid role."))
+      error(role, ("This is not a valid role."))
     end
   end
 

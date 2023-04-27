@@ -95,7 +95,7 @@ defmodule Bonfire.Boundaries.Grants do
 
   def grant(subject_id, acl_id, verb, value, opts)
       when is_atom(verb) and not is_nil(verb) do
-    debug("Me.Grants - lookup verb #{inspect(verb)}")
+    debug(verb, "lookup verb")
     grant(subject_id, acl_id, Config.get(:verbs)[verb][:id], value, opts)
   end
 
@@ -138,11 +138,21 @@ defmodule Bonfire.Boundaries.Grants do
 
   def grant_role(subject_id, acl_id, role, opts \\ []) do
     with {:ok, value, role_verbs} <- Verbs.verbs_for_role(role) do
+
+      debug(length(role_verbs), value)
+
       # first remove all existing grants to this subject
       remove_subject_from_acl(subject_id, acl_id)
+      |> debug("cleeen before granting #{role}")
 
       # then re-add based on role
+      # TODO: optimise with an insert_all or single changeset?
       grant(subject_id, acl_id, role_verbs, value, opts)
+    else 
+      {:error, e} -> raise e
+      e ->
+        error(e, "No such role found")
+        raise "No such role found"
     end
   end
 
