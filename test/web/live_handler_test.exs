@@ -176,21 +176,139 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
              |> form("#edit_grants")
              |> render_change(%{to_circles: %{alice.id => "administer"}})
 
-      open_browser(view)
+      # open_browser(view)
 
       assert render(view) =~ "Permission edited"
     end
 
     test "Remove a user from a boundary works" do
+      # create a bunch of users
+      account = fake_account!()
+      me = fake_user!(account)
+      alice = fake_user!(account)
+      # create a boundary
+      {:ok, acl} = Acls.create(%{named: %{name: "meme"}}, current_user: me)
+      Grants.grant_role(alice.id, acl.id, "contribute", current_user: me)
+      # navigate to the boundary page
+      conn = conn(user: me, account: account)
+      next = "/boundaries/acl/#{acl.id}"
+      {:ok, view, _html} = live(conn, next)
+
+      view
+      |> element("li[data-role=remove_from_boundary] div[data-role=open_modal]")
+      |> render_click()
+
+      assert view
+             |> element("button[data-role=remove_from_boundary_btn]")
+             |> render_click()
+
+      assert render(view) =~ "Removed from boundary"
     end
 
     test "Add a circle and assign a role to a boundary works" do
+       # create a bunch of users
+       account = fake_account!()
+       me = fake_user!(account)
+       alice = fake_user!(account)
+       # create a circle
+       {:ok, circle} = Circles.create(me, %{named: %{name: "family"}})
+       # create a boundary
+       {:ok, acl} = Acls.create(%{named: %{name: "meme"}}, current_user: me)
+       # navigate to the boundary page
+       conn = conn(user: me, account: account)
+       next = "/boundaries/acl/#{acl.id}"
+       {:ok, view, _html} = live(conn, next)
+       # add circle family to the boundary via the input form
+       assert view
+              |> form("#edit_acl_members")
+              |> render_change(%{id: circle.id})
+
+       assert render(view) =~ "finish adding it to the boundary"
+
+       assert view
+              |> form("#edit_grants")
+              |> render_change(%{to_circles: %{circle.id => "administer"}})
+
+       # open_browser(view)
+
+       assert render(view) =~ "Permission edited"
     end
 
     test "Remove a circle from a boundary works" do
+       # create a bunch of users
+       account = fake_account!()
+       me = fake_user!(account)
+       # create a circle
+       {:ok, circle} = Circles.create(me, %{named: %{name: "family"}})
+       # create a boundary
+       {:ok, acl} = Acls.create(%{named: %{name: "meme"}}, current_user: me)
+       Grants.grant_role(circle.id, acl.id, "contribute", current_user: me)
+       # navigate to the boundary page
+       conn = conn(user: me, account: account)
+       next = "/boundaries/acl/#{acl.id}"
+       {:ok, view, _html} = live(conn, next)
+
+       view
+       |> element("li[data-role=remove_from_boundary] div[data-role=open_modal]")
+       |> render_click()
+
+       assert view
+              |> element("button[data-role=remove_from_boundary_btn]")
+              |> render_click()
+
+       assert render(view) =~ "Removed from boundary!"
     end
 
     test "Edit a role in a boundary works" do
+      # create a bunch of users
+      account = fake_account!()
+      me = fake_user!(account)
+      alice = fake_user!(account)
+      # create a boundary
+      {:ok, acl} = Acls.create(%{named: %{name: "meme"}}, current_user: me)
+      # navigate to the boundary page
+      conn = conn(user: me, account: account)
+      next = "/boundaries/acl/#{acl.id}"
+      {:ok, view, _html} = live(conn, next)
+      # add alice to the boundary via the input form
+      assert view
+             |> form("#edit_acl_members")
+             |> render_change(%{id: alice.id})
+
+      assert render(view) =~ "finish adding it to the boundary"
+
+      assert view
+             |> form("#edit_grants")
+             |> render_change(%{to_circles: %{alice.id => "negative_participate"}})
+
+      assert render(view) =~ "Permission edited"
+
+      # reload
+      next = "/boundaries/acl/#{acl.id}"
+      {:ok, view, _html} = live(conn, next)
+
+      # check role is correct
+      assert view
+             |> element("#edit_grants ul:first-child select option[selected]")
+             |> render() =~ "Cannot Participate"
+
+      # downgrade role
+      assert view
+             |> form("#edit_grants")
+             |> render_change(%{to_circles: %{alice.id => "negative_interact"}})
+
+      assert render(view) =~ "Permission edited"
+
+      # open_browser(view)
+
+      # reload
+      next = "/boundaries/acl/#{acl.id}"
+      {:ok, view, _html} = live(conn, next)
+
+      # check role is correct
+      assert view
+             |> element("#edit_grants ul:first-child select option[selected]")
+             |> render() =~ "Cannot Interact"
     end
 
     test "Add a user, assign a role to a boundary, and then edit/downgrade that boundary works" do
@@ -246,6 +364,36 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
     end
 
     test "Edit Settings to a boundary works" do
+      # create a bunch of users
+      account = fake_account!()
+      me = fake_user!(account)
+      alice = fake_user!(account)
+      # create a circle
+      {:ok, acl} = Acls.create(%{named: %{name: "meme"}}, current_user: me)
+      # navigate to the acl settings page
+      conn = conn(user: me, account: account)
+      next = "/boundaries/acl/#{acl.id}/settings"
+      {:ok, view, _html} = live(conn, next)
+      # open_browser(view)
+      new_acl_name = "friends"
+      assert view
+        |> form("#edit_acl", named: %{name: new_acl_name})
+        |> render_submit()
+
+      assert render(view) =~ "Edited!"
+      assert render(view) =~ new_acl_name
+
+      # WIP: the view is not updated instantly
+      view
+      |> element("div[data-role=delete_boundary_modal] div[data-role=open_modal]")
+      |> render_click()
+
+      assert {:ok, acls, _html} = view
+             |> element("button[data-id=delete_boundary]")
+             |> render_click()
+             |> follow_redirect(conn, "/boundaries/acls")
+
+      assert render(acls) =~ "Deleted"
     end
   end
 end

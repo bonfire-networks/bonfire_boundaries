@@ -1,7 +1,7 @@
-<div class="flex gap-2">
+<div class="flex flex-wrap">
   <div
     :for={{id, data} <- Bonfire.Boundaries.Web.SetBoundariesLive.reject_presets(@to_boundaries || [])}
-    class="flex items-center justify-between"
+    class="mt-2 mr-2 flex items-center justify-between"
   >
     <div class="flex items-center gap-3 grow">
       <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
@@ -29,11 +29,11 @@
 
   <div
     :for={{data, id} <- @to_circles || []}
-    class="inline-flex items-center  p-1 bg-base-content/5 rounded-lg"
+    class="mt-2 mr-2 inline-flex items-center border border-base-content/30"
   >
     {#case data}
       {#match %{"icon" => _}}
-        <p class="text-sm truncate max-w-[200px] border-r-0 border-base-content/10 px-2 leading-[32px] h-[34px] !border-r-none font-bold group-hover:underline text-base-content">
+        <p class="text-sm truncate max-w-[200px] pl-1.5 text-base-content">
           {e(data, :name, "Anon")}
         </p>
         <!-- <Bonfire.UI.Common.ProfileItemLive inline profile={data} character={data} show_controls={[]} /> -->
@@ -49,48 +49,20 @@
           <!-- <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
             <#Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
           </span> -->
-          <div class="text-sm font-medium text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
+          <div class="text-sm font-medium pl-1.5 text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
         </div>
     {/case}
-    <div class="flex border border-base-content/30 items-center gap-1">
-      <Bonfire.Boundaries.Web.RolesDropdownLive circle_id={id} />
-
       <div
         phx-click={JS.push("Bonfire.Boundaries:remove_circle",
           value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
           target: "#smart_input"
         )}
-        class="btn btn-sm btn-square btn-ghost !rounded-none border-none !border-l  border-l-solid border-base-content/30"
+        class="btn border-r border-base-content/30 btn-xs btn-square btn-ghost !rounded-none border-none !border-l  border-l-solid border-base-content/30"
       >
-        <#Icon solid="Trash" class="w-5 h-5 md:w-4 md:h-4" />
+        <#Icon iconify="ri:close-line" class="w-5 h-5 md:w-4 md:h-4" />
       </div>
+    <div class="flex border-l border-solid border-l-base-content/30 items-center gap-1">
+      <Bonfire.Boundaries.Web.RolesDropdownLive circle_id={id} />
     </div>
-    <!-- <div aria-haspopup="true" class="dropdown dropdown-top dropdown-end">
-          <label tabindex="0" class="flex items-center gap-2 normal-case rounded btn btn-sm">
-            <span>{l("Participate")}</span>
-            <#Icon solid="ChevronDown" class="w-4 h-4" />
-          </label>
-          <ul
-            tabindex="0"
-            role="menu"
-            aria-orientation="vertical"
-            class="!block rounded shadow dropdown_actions w-52 menu menu-compact dropdown-content bg-neutral"
-          >
-            <li><a>Read</a></li>
-            <li><a>Interact</a></li>
-            <li><a>Participate</a></li>
-            <li><a>Contribute</a></li>
-          </ul>
-        </div> -->
   </div>
-
-  <!-- show the current user with its default role -->
-  <!-- <div class="flex items-center justify-between">
-  <Bonfire.UI.Common.ProfileItemLive profile={e(@current_user, :profile, nil)} character={e(@current_user, :character, nil)} show_controls={[]} />
-      <div aria-haspopup="true" class="dropdown dropdown-end">
-        <label tabindex="0" class="font-medium normal-case btn btn-sm btn-ghost text-base-content/70">
-          <span>{l("Caretaker")}</span>
-        </label>
-      </div>
-    </div> -->
 </div>
