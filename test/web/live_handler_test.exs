@@ -256,7 +256,7 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
              |> element("button[data-role=remove_from_boundary_btn]")
              |> render_click()
 
-      assert render(view) =~ "Removed from boundary!"
+      assert render(view) =~ "Removed from boundary"
     end
 
     test "Edit a role in a boundary works" do

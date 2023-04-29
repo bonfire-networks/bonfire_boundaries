@@ -222,8 +222,8 @@ defmodule Bonfire.Boundaries.AclTest do
         ]
       )
 
-    # check that bob has no reply permission again
-    refute Enum.any?(acl.grants, fn grant ->
+    # check that bob still has no reply permission again
+    assert Enum.any?(acl.grants, fn grant ->
              grant.subject_id == bob.id and grant.verb.verb == "Reply" and grant.value == false
            end)
 

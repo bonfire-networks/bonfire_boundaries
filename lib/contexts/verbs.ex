@@ -68,7 +68,7 @@ defmodule Bonfire.Boundaries.Verbs do
         role_from_verb(verb_ids_from_grants(positive), :id)
 
       positive == [] and negative != [] ->
-        "negative_#{role_from_verb(verb_ids_from_grants(negative), :id, negative_role_verbs())}"
+        negative_role_from_verb(verb_ids_from_grants(negative), :id)
 
       true ->
         nil
@@ -79,10 +79,24 @@ defmodule Bonfire.Boundaries.Verbs do
     Enum.map(grants, &e(&1, :verb_id, nil))
   end
 
-  def role_from_verb(verbs, field \\ :verb, all_role_verbs \\ role_verbs()) do
+  def negative_role_from_verb(
+        verbs,
+        field \\ :verb,
+        all_role_verbs \\ negative_role_verbs(),
+        role_for_all \\ :read
+      ) do
+    "negative_#{role_from_verb(verbs, field, all_role_verbs, role_for_all) || :none}"
+  end
+
+  def role_from_verb(
+        verbs,
+        field \\ :verb,
+        all_role_verbs \\ role_verbs(),
+        role_for_all \\ :administer
+      ) do
     cond do
       Enum.count(verbs) == verbs_count() ->
-        :administer
+        role_for_all
 
       true ->
         case all_role_verbs
@@ -94,10 +108,15 @@ defmodule Bonfire.Boundaries.Verbs do
 
                # |> debug
              end) do
-          [{role, _verbs}] -> role
-          _ -> nil
+          [{role, _verbs}] ->
+            role
+
+          other ->
+            warn(other, "unknown")
+            nil
         end
     end
+    |> debug()
   end
 
   def verbs_for_role("negative_" <> role) do
