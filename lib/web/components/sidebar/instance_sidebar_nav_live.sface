@@ -11,10 +11,10 @@
     :if={Bonfire.Boundaries.can?(@__context__, :assign, :instance)}
   >
     <LiveRedirect
-      to={~p"/boundaries/instance_circles"}
+      to={~p"/boundaries/scope/instance/circles"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2 w-full",
-        "bg-base-content/10": @selected_tab == "instance_circles"
+        "bg-base-content/10": @selected_tab == "circles"
       }
     >
       <#Icon iconify="material-symbols:group-work" class="w-5 h-5 font-normal text-base-content/70" />
@@ -37,15 +37,15 @@
     :if={Bonfire.Boundaries.can?(@__context__, :assign, :instance)}
   >
     <LiveRedirect
-      to={~p"/boundaries/instance_acls"}
+      to={~p"/boundaries/scope/instance/acls"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2 w-full",
-        "bg-base-content/10": @selected_tab == "instance_acls"
+        "bg-base-content/10": @selected_tab == "acls"
       }
     >
       <#Icon
         solid="LockClosed"
-        class={"w-5 h-5 font-normal text-base-content/70", "!text-primary": @selected_tab == "instance_acls"}
+        class={"w-5 h-5 font-normal text-base-content/70", "!text-primary": @selected_tab == "acls"}
       />
       <div class="flex flex-col">
         <span class={

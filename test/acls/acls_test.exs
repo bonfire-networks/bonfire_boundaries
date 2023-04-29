@@ -166,7 +166,7 @@ defmodule Bonfire.Boundaries.AclTest do
     # add bob to Acl
     Grants.grant_role(bob.id, acl.id, "negative_participate", current_user: me)
     |> debug("1stgrant")
- 
+
     {:ok, acl} =
       Acls.get_for_caretaker(acl.id, me)
       |> repo().maybe_preload(
@@ -180,6 +180,7 @@ defmodule Bonfire.Boundaries.AclTest do
     refute Enum.any?(acl.grants, fn grant ->
              grant.subject_id == bob.id and grant.verb.verb == "Read" and grant.value == false
            end)
+
     # check bob has no reply permission 
     assert Enum.any?(acl.grants, fn grant ->
              grant.subject_id == bob.id and grant.verb.verb == "Reply" and grant.value == false
@@ -202,6 +203,7 @@ defmodule Bonfire.Boundaries.AclTest do
     assert Enum.any?(acl.grants, fn grant ->
              grant.subject_id == bob.id and grant.verb.verb == "Read" and grant.value == false
            end)
+
     # check bob still has no reply permission either
     assert Enum.any?(acl.grants, fn grant ->
              grant.subject_id == bob.id and grant.verb.verb == "Reply" and grant.value == false
@@ -224,6 +226,7 @@ defmodule Bonfire.Boundaries.AclTest do
     refute Enum.any?(acl.grants, fn grant ->
              grant.subject_id == bob.id and grant.verb.verb == "Reply" and grant.value == false
            end)
+
     # but he can can read again
     refute Enum.any?(acl.grants, fn grant ->
              grant.subject_id == bob.id and grant.verb.verb == "Read" and grant.value == false

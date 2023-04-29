@@ -153,16 +153,19 @@
                           open_btn_wrapper_class="flex flex-1 w-full"
                         >
                           <div class="prose prose-lg">
-                            {l("Are you sure to remove %{subject_name} from %{boundary_name} boundary?", subject_name: LiveHandler.subject_name(subject), boundary_name: e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil))}
+                            {l("Are you sure to remove %{subject_name} from %{boundary_name} boundary?",
+                              subject_name: LiveHandler.subject_name(subject),
+                              boundary_name: e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil)
+                            )}
                           </div>
                           <button
                             data-role="remove_from_boundary_btn"
-                            phx-click={
-                              JS.push("remove_from_acl",  
-                                value: %{
-                                  subject_id: subject_id}, 
-                                target: @myself)
-                              }
+                            phx-click={JS.push("remove_from_acl",
+                              value: %{
+                                subject_id: subject_id
+                              },
+                              target: @myself
+                            )}
                             class="w-full mt-3 normal-case btn btn-error"
                             type="button"
                           >
@@ -172,7 +175,6 @@
                             <button type="button" data-role="remove_from_boundary_modal" class="text-base-content">{l("Remove")}</button>
                           </:open_btn>
                         </Bonfire.UI.Common.OpenModalLive>
-                        
                       </li>
                     </ul>
                   </div>
@@ -185,7 +187,12 @@
 
       <section :if={@section == "settings"} class="p-4" role="tabpanel">
         <div class="pb-3 text-lg font-normal">{l("General")}</div>
-        <form id="edit_acl" phx-submit="edit" phx-target={@myself} class="p-4 border rounded-lg border-base-content/10">
+        <form
+          id="edit_acl"
+          phx-submit="edit"
+          phx-target={@myself}
+          class="p-4 border rounded-lg border-base-content/10"
+        >
           <div class="w-full form-control">
             <label class="label">
               <span class="text-xs font-semibold tracking-wider text-base-content/70">{l("Edit the boundary name")}</span>

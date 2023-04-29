@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   prop circle_type, :atom, default: nil
   prop parent_back, :any, default: nil
   prop setting_boundaries, :boolean, default: false
-  prop scope, :atom, default: nil
+  prop scope, :atom, default: :user
   prop showing_within, :atom, default: nil
   prop feedback_title, :string, default: nil
   prop feedback_message, :string, default: nil

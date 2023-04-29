@@ -202,6 +202,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def handle_event("remove_from_circle", %{"subject_id" => subject}, socket) do
+    _current_user = current_user_required!(socket)
     id = ulid!(e(socket.assigns, :circle, nil))
 
     with {:ok, _circle} <-
@@ -310,9 +311,11 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def acl_create(attrs, socket) do
+    current_user = current_user_required!(socket)
+
     with {:ok, %{id: id} = acl} <-
            Acls.create(attrs,
-             current_user: e(socket.assigns, :scope, nil) || current_user_required!(socket)
+             current_user: e(socket.assigns, :scope, nil) || current_user
            ) do
       # Bonfire.UI.Common.OpenModalLive.close()
 
@@ -329,9 +332,11 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def circle_create(attrs, socket) do
+    current_user = current_user_required!(socket)
+
     with {:ok, %{id: id} = circle} <-
            Circles.create(
-             e(socket.assigns, :scope, nil) || current_user_required!(socket),
+             e(socket.assigns, :scope, nil) || current_user,
              attrs
            ) do
       # Bonfire.UI.Common.OpenModalLive.close()
@@ -348,6 +353,8 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   defp maybe_add_to_acl(socket, subject) do
+    _current_user = current_user_required!(socket)
+
     if e(socket.assigns, :acl, nil) do
       Bonfire.Boundaries.Web.AclLive.add_to_acl(subject, socket)
     else

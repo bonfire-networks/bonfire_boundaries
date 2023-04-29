@@ -52,15 +52,15 @@
           <div class="text-sm font-medium pl-1.5 text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
         </div>
     {/case}
-      <div
-        phx-click={JS.push("Bonfire.Boundaries:remove_circle",
-          value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
-          target: "#smart_input"
-        )}
-        class="btn border-r border-base-content/30 btn-xs btn-square btn-ghost !rounded-none border-none !border-l  border-l-solid border-base-content/30"
-      >
-        <#Icon iconify="ri:close-line" class="w-5 h-5 md:w-4 md:h-4" />
-      </div>
+    <div
+      phx-click={JS.push("Bonfire.Boundaries:remove_circle",
+        value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
+        target: "#smart_input"
+      )}
+      class="btn border-r border-base-content/30 btn-xs btn-square btn-ghost !rounded-none border-none !border-l  border-l-solid border-base-content/30"
+    >
+      <#Icon iconify="ri:close-line" class="w-5 h-5 md:w-4 md:h-4" />
+    </div>
     <div class="flex border-l border-solid border-l-base-content/30 items-center gap-1">
       <Bonfire.Boundaries.Web.RolesDropdownLive circle_id={id} />
     </div>

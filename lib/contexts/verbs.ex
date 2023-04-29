@@ -118,14 +118,18 @@ defmodule Bonfire.Boundaries.Verbs do
       roles = role_verbs |> Keyword.keys()
 
       cond do
-        role in roles -> {:ok, value, role_verbs[role] || []}
-        role in [nil, :none, :custom] -> {:ok, value, []}
-        true -> 
+        role in roles ->
+          {:ok, value, role_verbs[role] || []}
+
+        role in [nil, :none, :custom] ->
+          {:ok, value, []}
+
+        true ->
           debug(roles, "available roles")
-          error(role, ("This role is not defined."))
+          error(role, "This role is not defined.")
       end
     else
-      error(role, ("This is not a valid role."))
+      error(role, "This is not a valid role.")
     end
   end
 

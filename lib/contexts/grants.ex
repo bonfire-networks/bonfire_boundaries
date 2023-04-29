@@ -138,7 +138,6 @@ defmodule Bonfire.Boundaries.Grants do
 
   def grant_role(subject_id, acl_id, role, opts \\ []) do
     with {:ok, value, role_verbs} <- Verbs.verbs_for_role(role) do
-
       debug(length(role_verbs), value)
 
       # first remove all existing grants to this subject
@@ -148,8 +147,10 @@ defmodule Bonfire.Boundaries.Grants do
       # then re-add based on role
       # TODO: optimise with an insert_all or single changeset?
       grant(subject_id, acl_id, role_verbs, value, opts)
-    else 
-      {:error, e} -> raise e
+    else
+      {:error, e} ->
+        raise e
+
       e ->
         error(e, "No such role found")
         raise "No such role found"

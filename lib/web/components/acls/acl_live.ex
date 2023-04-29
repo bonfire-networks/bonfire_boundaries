@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   prop selected_tab, :any, default: nil
   prop section, :any, default: nil
   prop setting_boundaries, :boolean, default: false
-  prop scope, :atom, default: nil
+  prop scope, :atom, default: :user
 
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})

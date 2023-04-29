@@ -19,7 +19,7 @@
         <li class="rounded-md bg-base-content/5">
           <LiveRedirect
             class="block rounded-md hover:bg-base-content/5"
-            to={~p"/boundaries/circle/" <> id(circle)}
+            to={~p"/boundaries/scope/#{@scope}/circle/#{id(circle)}"}
           >
             <div class="flex items-center gap-3 p-3">
               <#Icon iconify="material-symbols:group-work" class="w-5 h-5 text-base-content/70" />

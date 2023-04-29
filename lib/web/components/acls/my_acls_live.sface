@@ -32,7 +32,7 @@
           }>
             <LiveRedirect
               class="block p-3 rounded-md hover:bg-base-content/5"
-              to={~p"/boundaries/acl/#{id(acl)}"}
+              to={~p"/boundaries/scope/#{@scope}/acl/#{id(acl)}"}
             >
               <label
                 class="flex items-center w-full gap-3 cursor-pointer"
