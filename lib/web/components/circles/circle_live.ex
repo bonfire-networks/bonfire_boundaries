@@ -11,6 +11,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   prop circle_id, :any, default: nil
   prop circle, :any, default: nil
   prop circle_type, :atom, default: nil
+  prop name, :string, default: nil
   prop parent_back, :any, default: nil
   prop setting_boundaries, :boolean, default: false
   prop scope, :atom, default: :user
@@ -92,7 +93,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
       stereotype_id = e(circle, :stereotyped, :stereotype_id, nil)
 
       send_self(
-        page_title: l("Circle"),
+        page_title: e(socket.assigns, :name, nil) || l("Circle"),
         back: true,
         circle: circle,
         page_header_aside: [

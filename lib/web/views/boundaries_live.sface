@@ -39,9 +39,19 @@
     {#match "ghosted"}
       <Bonfire.Boundaries.Web.BlocksLive id="blocks" selected_tab="ghosted" />
     {#match "instance_silenced"}
-      <Bonfire.Boundaries.Web.BlocksLive scope={:instance_wide} id="blocks" selected_tab="silenced" />
+      <Bonfire.Boundaries.Web.BlocksLive
+        scope={:instance_wide}
+        id="blocks"
+        selected_tab="silenced"
+        name={l("Silenced instance-wide")}
+      />
     {#match "instance_ghosted"}
-      <Bonfire.Boundaries.Web.BlocksLive scope={:instance_wide} id="blocks" selected_tab="ghosted" />
+      <Bonfire.Boundaries.Web.BlocksLive
+        scope={:instance_wide}
+        id="blocks"
+        selected_tab="ghosted"
+        name={l("Ghosted instance-wide")}
+      />
       <!-- {#match "instance_circles"}
       <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and @current_user}

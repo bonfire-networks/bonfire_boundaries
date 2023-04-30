@@ -1,7 +1,7 @@
 <div id="circle_preview" class="">
   <div class="">
     <div class="p-4 text-2xl font-bold text-center pb-0">
-      <h1 data-role="circle_title">{e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil)}</h1>
+      <h1 data-role="circle_title">{@name || e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil)}</h1>
     </div>
 
     <div :if={!@read_only} class="p-2 mt-4 border-b border-t border-base-content/10">

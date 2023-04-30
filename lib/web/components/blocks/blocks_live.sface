@@ -1,6 +1,5 @@
 <div>
   {#if @selected_tab == "silenced"}
-    <!-- TODO: consolidate this view and the boundary editing one (so you can directly add people/circles here as well) -->
     <div class="p-2">
       <div class="p-4 mb-3 rounded-md bg-info/10">
         <div class="flex">
@@ -56,6 +55,7 @@
       id={@circle_id || @id}
       circle_id={@circle_id}
       circle={@circle}
+      name={@name}
       circle_type={:silence}
       scope={@scope}
       setting_boundaries={false}
@@ -124,6 +124,7 @@
       id={@circle_id || @id}
       circle_id={@circle_id}
       circle={@circle}
+      name={@name}
       circle_type={:ghost}
       scope={@scope}
       setting_boundaries={false}

@@ -3,6 +3,7 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
   alias Bonfire.Boundaries.Integration
 
   prop selected_tab, :string
+  prop name, :string, default: nil
   prop blocks, :list, default: []
   prop page_info, :any
   prop scope, :atom, default: nil
@@ -11,9 +12,8 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
     current_user = current_user(assigns)
     tab = e(assigns, :selected_tab, nil)
 
-    scope =
-      e(assigns, :scope, nil)
-      |> debug("scope")
+    scope = e(assigns, :scope, nil)
+    # |> debug("scope")
 
     read_only =
       (scope == :instance_wide and
@@ -30,7 +30,8 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
         Bonfire.Boundaries.Blocks.user_block_circles(scope || current_user, block_type)
       end
       |> List.first()
-      |> debug("ccircle")
+
+    # |> debug("ccircle")
 
     # circle = Bonfire.Boundaries.Blocks.list(block_type, scope || current_user)
 
@@ -46,8 +47,9 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
     # } #|> debug
 
     {:ok,
-     assign(
-       socket,
+     socket
+     |> assign(assigns)
+     |> assign(
        # user or instance-wide?
        scope: scope,
        page: tab,
@@ -62,7 +64,8 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
        #  blocks: blocks
 
        # page_info: e(q, :page_info, [])
-     )}
+     )
+     |> debug("blas")}
   end
 
   def handle_event(
