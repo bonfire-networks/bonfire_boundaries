@@ -96,7 +96,9 @@ defmodule Bonfire.Boundaries.Grants do
   def grant(subject_id, acl_id, verb, value, opts)
       when is_atom(verb) and not is_nil(verb) do
     debug(verb, "lookup verb")
-    grant(subject_id, acl_id, Config.get(:verbs)[verb][:id], value, opts)
+    verb_id = Bonfire.Boundaries.Verbs.get!(verb)[:id]
+    |> debug
+    grant(subject_id, acl_id, verb_id, value, opts)
   end
 
   def grant(subject_id, acl, verb_id, value, opts)
