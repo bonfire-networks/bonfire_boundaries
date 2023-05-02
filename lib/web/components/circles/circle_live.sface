@@ -15,7 +15,7 @@
     </div>
   </div>
   {#if Enum.count(@members) > 0}
-    <div class="overflow-x-auto  w-full">
+    <div class="overflow-x-auto m-4 rounded-lg border border-base-content/10">
       <table class="table w-full">
         <!-- head -->
         <thead class="sr-only">
@@ -40,7 +40,7 @@
                 name={"circle[encircle][#{id}][subject_id]"}
                 value={e(member, :subject_id, id)}
               />
-              <td>
+              <td class="!bg-transparent">
                 <div class="flex items-center space-x-3">
                   <Bonfire.UI.Common.AvatarLive
                     parent_id="user_preview"
@@ -63,19 +63,19 @@
             <span class="badge badge-ghost badge-sm">Desktop Support Technician</span>
           </td>
           <td>Purple</td> -->
-              <th>
+              <td class="!bg-transparent">
                 <div class="flex items-center justify-end">
                   <button
                     data-role="remove_user"
                     :if={!@read_only}
                     phx-value-subject={id}
                     :on-click="remove"
-                    class="btn btn-ghost btn-xs"
+                    class="btn btn-outline normal-case btn-sm"
                   >
                     {l("Remove")}
                   </button>
                 </div>
-              </th>
+              </td>
             </tr>
           {/for}
         </tbody>
