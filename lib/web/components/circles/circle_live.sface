@@ -41,7 +41,7 @@
                 value={e(member, :subject_id, id)}
               />
               <td class="!bg-transparent">
-                <div class="flex items-center space-x-3">
+                <LiveRedirect  to={path(e(member, :subject, :character, nil))} class="group flex items-center space-x-3">
                   <Bonfire.UI.Common.AvatarLive
                     parent_id="user_preview"
                     class="flex-1 inline-block object-cover w-12 h-12 mx-auto rounded-full md:w-12 md:h-12 bg-base-300"
@@ -50,12 +50,12 @@
                     src={e(member, "icon", nil)}
                   />
                   <div>
-                    <div class="font-bold">{e(member, :subject, :profile, :name, nil) || e(member, :profile, :name, nil) ||
+                    <div class="group-hover:underline font-bold">{e(member, :subject, :profile, :name, nil) || e(member, :profile, :name, nil) ||
                         e(member, :name, "Unknown")}</div>
                     <div class="text-sm opacity-50">@{e(member, :subject, :character, :username, nil) || e(member, :character, :username, nil) ||
                         e(member, :username, nil)}</div>
                   </div>
-                </div>
+                </LiveRedirect>
               </td>
               <!-- <td>
             Zemlak, Daniel and Leannon
