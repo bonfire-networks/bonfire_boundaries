@@ -8,6 +8,7 @@ defmodule Bonfire.Boundaries.Web.BlockButtonLive do
   prop icon_class, :css_class, default: nil
   prop hide_text, :boolean, default: false
   prop my_block, :any
+  prop type, :string, default: nil
   prop class, :css_class
   prop label, :string, default: nil
   prop open_btn_label, :string, default: nil
