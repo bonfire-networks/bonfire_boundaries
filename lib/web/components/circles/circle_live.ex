@@ -20,6 +20,8 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   prop feedback_message, :string, default: nil
   prop read_only, :boolean, default: false
 
+  slot default, required: false
+
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})
 

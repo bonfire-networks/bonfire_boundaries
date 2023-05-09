@@ -1,6 +1,5 @@
 
 
-{#if !@my_block}
   <Bonfire.UI.Common.OpenModalLive
     no_actions
     id={"block-#{@parent_id}-#{id(@object)}-#{@type}"}
@@ -57,15 +56,17 @@
           </div>
         </div>
          <button 
+          data-role="unsilence"
           :if={!Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, :instance_wide)}
-          :on-click={JS.push("Bonfire.UI.Common.OpenModalLive.close()") |>  JS.push("Bonfire.Social.Block:unsilence")}
+          :on-click="Bonfire.Social.Block:unsilence_in_modal"
           phx-value-id={e(@object, :id, @object)}
           type="button" 
           class="btn mt-3 btn-warning normal-case">{l "Unsilence"}
         </button>
       {#else}
       <button 
-        :on-click={JS.push("Bonfire.UI.Common.OpenModalLive.close()") |>  JS.push("Bonfire.Social.Block:silence")}
+        data-role="silence"
+        :on-click="Bonfire.Social.Block:silence_in_modal"
         phx-value-id={e(@object, :id, @object)}
         type="button" 
         class="btn mt-3 btn-warning normal-case">{l "Silence"}
@@ -148,15 +149,17 @@
             <span>{l "%{user_or_instance_name} is already ghosted",  user_or_instance_name: @label}</span>
           </div>
         </div>
-        <button  
+        <button 
+        data-role="unghost" 
         :if={!Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, :instance_wide)}
-        :on-click={JS.push("Bonfire.UI.Common.OpenModalLive.close()") |>  JS.push("Bonfire.Social.Block:unghost")}
+        :on-click="Bonfire.Social.Block:unghost_in_modal"
         phx-value-id={e(@object, :id, @object)} 
         type="button" 
         class="btn mt-3 btn-warning normal-case">{l "Unghost"}</button>
       {#else}
       <button  
-        :on-click={JS.push("Bonfire.UI.Common.OpenModalLive.close()") |>  JS.push("Bonfire.Social.Block:ghost")}
+        data-role="ghost" 
+        :on-click="Bonfire.Social.Block:ghost_in_modal"
         phx-value-id={e(@object, :id, @object)} 
         type="button" 
         class="btn mt-3 btn-warning normal-case">{l "Ghost"}</button>
@@ -212,29 +215,3 @@
       </button>
     </:action_btns> -->
   </Bonfire.UI.Common.OpenModalLive>
-{#else}
-  <div>
-    <button
-      data-id="unblock"
-      :on-click="Bonfire.Boundaries:unblock"
-      phx-value-id={e(@object, :id, @object)}
-      phx-value-block_type={@block_type}
-      phx-value-scope={@scope}
-      type="button"
-      class={e(@class, "btn btn-sm btn-outline normal-case rounded-full")}
-    >
-      <#Icon
-        outline="CheckCircle"
-        :if={@scope != "instance_wide"}
-        class="w-4 h-4 mr-2 shrink-0 text-bas-content text-opacity-70"
-      />
-      <#Icon
-        outline="LockOpen"
-        :if={@scope == "instance_wide"}
-        class="w-4 h-4 mr-2 shrink-0 text-bas-content text-opacity-70"
-      />
-
-      <span class="truncate ellipsis">{l("Unblock %{user_or_instance_name}", user_or_instance_name: @label)}</span>
-    </button>
-  </div>
-{/if}

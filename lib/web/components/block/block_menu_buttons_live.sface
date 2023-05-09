@@ -1,5 +1,5 @@
 {#if @current_user != nil}
-  <li :if={current_user_id(@__context__) != id(@object)} data-role="block_modal" class="hover:bg-neutral/20">
+  <li :if={current_user_id(@__context__) != id(@object)} data-role="ghost_modal" class="hover:bg-neutral/20">
     <Bonfire.Boundaries.Web.BlockButtonLive
       object={@object}
       type="ghost"
@@ -11,7 +11,7 @@
     />
   </li>
 
-  <li :if={current_user_id(@__context__) != id(@object)} data-role="block_modal" class="hover:bg-neutral/20">
+  <li :if={current_user_id(@__context__) != id(@object)} data-role="silence_modal" class="hover:bg-neutral/20">
     <Bonfire.Boundaries.Web.BlockButtonLive
       object={@object}
       type="silence"

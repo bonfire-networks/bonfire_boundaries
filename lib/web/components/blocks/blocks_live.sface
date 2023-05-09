@@ -1,56 +1,6 @@
 <div>
   {#if @selected_tab == "silenced"}
-    <div class="p-2">
-      <div class="p-4 mb-3 rounded-md bg-info/10">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-          </div>
-          <div class="flex flex-col flex-1 gap-1 ml-3">
-            <p :if={@scope == :instance_wide} class="text-sm text-info">
-              {l("Nobody on this instance will receive any updates from the users or instances on this list")}
-            </p>
-            <p :if={@scope != :instance_wide} class="text-sm text-info">
-              {l("You will not receive any updates from the users or instances on this list")}
-            </p>
-            <div x-data="{active_info: false}" role="region" class="">
-              <button
-                type="button"
-                x-on:click="active_info = ! active_info"
-                :aria-expanded="active_info"
-                class="flex items-center w-full text-sm text-info"
-              >
-                <span x-show="!active_info" class="underline">{l("Read more")}</span>
-                <span x-show="active_info" class="underline">{l("Read less")}</span>
-                <span x-show="active_info" aria-hidden="true" class="ml-2">&minus;</span>
-                <span x-show="!active_info" aria-hidden="true" class="ml-2">&plus;</span>
-              </button>
-              <div x-show="active_info" x-collapse>
-                <div class="block mt-3">
-                  <ul class="block pl-4 mt-1 prose-sm list-disc text-info">
-                    <li>
-                      {l("You won't see anything they write/create in feeds.")}
-                    </li>
-                    <li>
-                      {l("You will still be able to view their profile or read their posts using direct links.")}
-                    </li>
-                    <li>
-                      {l("You won't see any @ mentions or messages they send you.")}
-                    </li>
-                    <li>
-                      {l("You won't be able to follow them.")}
-                    </li>
-                    <li>
-                      {l("You will be able to undo this later but may not be able to see any activities you missed.")}
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    
     <Bonfire.Boundaries.Web.CircleLive
       id={@circle_id || @id}
       circle_id={@circle_id}
@@ -61,22 +11,75 @@
       setting_boundaries={false}
       showing_within={@block_type}
       read_only={@read_only}
-    />
+    >
+
+      <div class="flex flex-col flex-1 gap-1 text-center prose">
+        <p :if={@scope == :instance_wide} class="mt-3 px-4 mb-0">
+          {l("Nobody on this instance will receive any updates from the users or instances on this list")}
+        </p>
+        <p :if={@scope != :instance_wide} class="mt-3 px-4 mb-0">
+          {l("You will not receive any updates from the users or instances on this list")}
+        </p>
+        <div x-data="{active_info: false}" role="region" class="">
+          <button
+            type="button"
+            x-on:click="active_info = ! active_info"
+            :aria-expanded="active_info"
+            class="flex items-center w-full place-content-center font-medium text-sm"
+          >
+            <span x-show="!active_info" class="underline">{l("Read more")}</span>
+            <span x-show="active_info" class="underline">{l("Read less")}</span>
+            <span x-show="active_info" aria-hidden="true" class="ml-2">&minus;</span>
+            <span x-show="!active_info" aria-hidden="true" class="ml-2">&plus;</span>
+          </button>
+          <div x-show="active_info" x-collapse>
+            <div class="block mt-3 text-left px-3">
+              <ul class="block pl-4 mt-1 prose-sm list-disc">
+                <li>
+                  {l("You won't see anything they write/create in feeds.")}
+                </li>
+                <li>
+                  {l("You will still be able to view their profile or read their posts using direct links.")}
+                </li>
+                <li>
+                  {l("You won't see any @ mentions or messages they send you.")}
+                </li>
+                <li>
+                  {l("You won't be able to follow them.")}
+                </li>
+                <li>
+                  {l("You will be able to undo this later but may not be able to see any activities you missed.")}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </Bonfire.Boundaries.Web.CircleLive>
   {#else}
     <!-- ghost -->
-    <div class="p-2">
-      <div class="p-4 mb-3 rounded-md bg-info/10">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-          </div>
-          <div class="flex flex-col flex-1 gap-1 ml-3">
-            <p :if={@scope == :instance_wide} class="text-sm text-info">
+    
+
+    <Bonfire.Boundaries.Web.CircleLive
+      id={@circle_id || @id}
+      circle_id={@circle_id}
+      circle={@circle}
+      name={@name}
+      circle_type={:ghost}
+      scope={@scope}
+      setting_boundaries={false}
+      showing_within={@block_type}
+      read_only={@read_only}
+    >
+
+          <div class="flex flex-col flex-1 gap-1 text-center prose">
+            <p :if={@scope == :instance_wide} class="mt-3 px-4 mb-0">
               {l(
                 "Users or instances on this list will not be able to see or interact with anyone on this instance"
               )}
             </p>
-            <p :if={@scope != :instance_wide} class="text-sm text-info">
+            <p :if={@scope != :instance_wide} class="mt-3 mb-0 px-4">
               {l("Users or instances on this list will not be able to see or interact with you or your content")}
             </p>
             <div x-data="{active_info: false}" role="region" class="">
@@ -84,7 +87,7 @@
                 type="button"
                 x-on:click="active_info = ! active_info"
                 :aria-expanded="active_info"
-                class="flex items-center w-full text-sm text-info"
+                class="flex items-center w-full place-content-center font-medium text-sm"
               >
                 <span x-show="!active_info" class="underline">{l("Read more")}</span>
                 <span x-show="active_info" class="underline">{l("Read less")}</span>
@@ -92,8 +95,8 @@
                 <span x-show="!active_info" aria-hidden="true" class="ml-2">&plus;</span>
               </button>
               <div x-show="active_info" x-collapse>
-                <div class="block mt-3">
-                  <ul class="block pl-4 mt-1 prose-sm text-info list-disc">
+                <div class="block mt-3 text-left px-3">
+                  <ul class="block pl-4 mt-1 prose-sm list-disc">
                     <li>
                       {l("Nothing you post privately will be shown to them from now on.")}
                     </li>
@@ -116,21 +119,8 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
 
-    <Bonfire.Boundaries.Web.CircleLive
-      id={@circle_id || @id}
-      circle_id={@circle_id}
-      circle={@circle}
-      name={@name}
-      circle_type={:ghost}
-      scope={@scope}
-      setting_boundaries={false}
-      showing_within={@block_type}
-      read_only={@read_only}
-    />
+    </Bonfire.Boundaries.Web.CircleLive>
     <!-- </div>
   </div> -->
   {/if}
