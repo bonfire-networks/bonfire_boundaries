@@ -17,7 +17,7 @@
       <ul
         role="tablist"
         class="flex justify-evenly items-stretch gap-3 text-sm font-medium border-b border-base-content/10"
-      >
+        >
         <li
           to={~p"/boundaries/acl/#{ulid(@acl)}"}
           phx-click="assign"
@@ -96,6 +96,7 @@
                 <div class="flex items-center gap-2" :if={!@read_only}>
                   <Bonfire.Boundaries.Web.RolesDropdownLive
                     circle_id={subject_id}
+                    setting_boundaries={@setting_boundaries}
                     role={Bonfire.Boundaries.Verbs.role_from_grants(Map.values(verb_grants || %{}))}
                     extra_roles={[{:custom, l("Custom")}]}
                     no_actions
