@@ -14,16 +14,10 @@
     />
   {#else}
     <div :if={!@setting_boundaries} class="">
-      <!-- <div
-        :if={e(@acl, :extra_info, :summary, nil)}
-        class="pb-3 text-sm font-normal text-base-content/70"
-      >{e(@acl, :extra_info, :summary, nil)}</div> -->
-
       <ul
         role="tablist"
         class="flex justify-evenly items-stretch gap-3 text-sm font-medium border-b border-base-content/10"
       >
-        <!-- Tab -->
         <li
           to={~p"/boundaries/acl/#{ulid(@acl)}"}
           phx-click="assign"
@@ -58,30 +52,6 @@
           >{l("Settings")}</div>
         </li>
       </ul>
-
-      <!-- <div
-        :if={@section != "settings" and !@read_only}
-        href={"~p/boundaries/acl/#{ulid(@acl)}/settings"}
-        phx-click="assign"
-        phx-value-section="settings"
-        phx-target={@myself}
-        class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
-        >
-        <#Icon outline="Cog" class="w-4 h-4" />
-        <span>{l("Settings")}</span>
-      </div>
-
-      <div
-        :if={@section == "settings"}
-        to={~p"/boundaries/acl/#{ulid(@acl)}"}
-        phx-click="assign"
-        phx-value-section="permissions"
-        phx-target={@myself}
-        class="flex items-center space-x-1 text-sm font-medium normal-case btn btn-sm btn-ghost"
-        >
-        <#Icon outline="ChevronLeft" class="w-4 h-4" />
-        <span>{l("Back")}</span>
-      </div> -->
     </div>
 
     <div class="">
@@ -226,32 +196,6 @@
           :if={!e(@acl, :stereotyped, nil)}
           class="p-4 mt-6 border rounded-lg bg-error/5 border-error/30"
         >
-          <!-- <div class="flex items-center space-x-8">
-          <div class="flex flex-col">
-            <div class="flex-1 text-base font-bold">{l "Archive this boundary"}</div>
-            <div class="text-sm text-base-content/70">{l "If you no longer want to use this boundary, but still want existing permissions using it to be preserved."}</div>
-          </div>
-          <Bonfire.UI.Common.OpenModalLive
-            id={"archive-#{@acl_id || id(@acl)}"} 
-            title_text={l("Archive this boundary")}
-            >
-            {l "The boundary will be permanently archived and no longer appear in your list of boundaries."} 
-            <:open_btn>
-              <div class="normal-case btn btn-outline btn-warning btn-sm">{l "Archive"}</div>
-            </:open_btn>
-            <:action_btns>
-              <button 
-                data-id="archive_boundary"
-                type="button" 
-                :on-click="Bonfire.Boundaries:acl_soft_delete" 
-                phx-value-go="/boundaries/acls"
-                class="normal-case btn btn-outline btn-warning btn-sm">
-                <span class="text-left truncate ellipsis">{l("Archive this boundary")}</span>
-              </button>
-            </:action_btns>
-          </Bonfire.UI.Common.OpenModalLive>
-        </div> -->
-
           <div class="flex items-center justify-between space-x-8">
             <div class="flex flex-col">
               <div class="flex-1 text-base font-bold text-error">{l("Delete this boundary")}</div>

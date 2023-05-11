@@ -3,7 +3,7 @@
     <Bonfire.Boundaries.Web.BlockButtonLive
       object={@object}
       type="ghost"
-      open_btn_label={l("Ghost this user")}
+      open_btn_label={@open_btn_label}
       parent_id={"user-#{@parent_id}"}
       with_icon
       label={e(@object, :profile, :name, l("this user"))}
@@ -15,13 +15,26 @@
     <Bonfire.Boundaries.Web.BlockButtonLive
       object={@object}
       type="silence"
-      open_btn_label={l("Silence this user")}
+      open_btn_label={@open_btn_label}
       parent_id={"user-#{@parent_id}"}
       with_icon
       label={e(@object, :profile, :name, l("this user"))}
       class="flex items-center w-full gap-2 text-sm text-base-content/80"
     />
   </li>
+
+  <li :if={current_user_id(@__context__) != id(@object)} data-role="block_modal" class="hover:bg-neutral/20">
+      <Bonfire.Boundaries.Web.BlockButtonLive
+        object={@object}
+        type="block"
+        open_btn_label={@open_btn_label}
+        parent_id={"user-#{@parent_id}"}
+        with_icon
+        label={e(@object, :profile, :name, l("this user"))}
+        class="flex items-center w-full gap-2 text-sm text-base-content/80"
+      />
+    </li>
+
 
   <li :if={e(peered(@object, @peered), :peer_id, nil)} class="">
     <Bonfire.Boundaries.Web.BlockButtonLive
@@ -37,6 +50,16 @@
     <Bonfire.Boundaries.Web.BlockButtonLive
       with_icon
       type="silence"
+      object={e(peered(@object, @peered), :peer_id, nil)}
+      parent_id={"instance-#{@parent_id}"}
+      label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
+      class="flex items-center w-full gap-2 text-sm text-base-content/80"
+    />
+  </li>
+  <li :if={e(peered(@object, @peered), :peer_id, nil)} class="">
+    <Bonfire.Boundaries.Web.BlockButtonLive
+      with_icon
+      type="block"
       object={e(peered(@object, @peered), :peer_id, nil)}
       parent_id={"instance-#{@parent_id}"}
       label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}

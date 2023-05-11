@@ -4,6 +4,7 @@ defmodule Bonfire.Boundaries.Web.BlockMenuButtonsLive do
   prop object, :any, default: nil
   prop parent_id, :string, default: nil
   prop peered, :any, default: nil
+  prop open_btn_label, :string, default: nil
 
   def peered(object, peered) do
     peered || e(object, :peered, nil) || e(object, :character, :peered, nil)
