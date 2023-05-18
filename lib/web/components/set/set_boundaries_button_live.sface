@@ -12,7 +12,7 @@
     </label>
     <ul
       tabindex="0"
-      class="mt-1 rounded menu-compact !block shadow w-full menu dropdown-content bg-neutral"
+      class="mt-1 rounded !block shadow w-full menu-compact menu dropdown-content bg-base-100"
       role="menu"
       aria-orientation="vertical"
       aria-labelledby="user-profile-menu"

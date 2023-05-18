@@ -10,11 +10,11 @@
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <span class="text-xl">
-                      <#Icon iconify="ph:globe" class="w-5 h-5" />
+                      <#Icon iconify="ph:globe" class="w-4 h-4" />
                     </span>
                   </div>
                   <div class="flex flex-col ml-3">
-                    <div class="text-sm font-semibold">{l("Public")}</div>
+                    <div class="text-sm font-semibold text-base-content/90">{l("Public")}</div>
                     <p class="text-sm text-base-content/70">
                       {l(
                         "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines."
@@ -26,11 +26,11 @@
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <span class="text-xl">
-                      <#Icon iconify="ph:campfire-bold" class="w-5 h-5" />
+                      <#Icon iconify="ph:campfire-bold" class="w-4 h-4" />
                     </span>
                   </div>
                   <div class="flex flex-col ml-3">
-                    <div class="text-sm font-semibold">{l("Local")}</div>
+                    <div class="text-sm font-semibold text-base-content/90">{l("Local")}</div>
                     <p class="text-sm text-base-content/70">
                       {l("Everyone on this instance will be able to see, interact, and reply.")}
                     </p>
@@ -42,7 +42,7 @@
                     <span class="text-xl">﹫</span>
                   </div>
                   <div class="flex flex-col ml-3">
-                    <div class="text-sm font-semibold">{l("Mentions")}</div>
+                    <div class="text-sm font-semibold text-base-content/90">{l("Mentions")}</div>
                     <p class="text-sm text-base-content/70">
                       {l("Anyone mentioned will be able to see, interact, and reply (across the fediverse).")}
                     </p>
@@ -52,11 +52,11 @@
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
                     <span class="text-xl">
-                      <#Icon iconify="ph:gear-fill" class="w-5 h-5" />
+                      <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
                     </span>
                   </div>
                   <div class="flex flex-col ml-3">
-                    <div class="text-sm font-semibold">{l("Custom")}</div>
+                    <div class="text-sm font-semibold text-base-content/90">{l("Custom")}</div>
                     <p class="text-sm text-base-content/70">{l("Specify custom boundaries above.")}</p>
                   </div>
                 </div>
@@ -68,7 +68,7 @@
                 class="flex items-center justify-start gap-2 normal-case w-fit btn-ghost btn btn-sm opacity-70"
               >
                 {l("Edit")}
-                <#Icon solid="ChevronDown" class="inline w-5 h-5" />
+                <#Icon solid="ChevronDown" class="inline w-4 h-4" />
               </label>
               <ul
                 role="menu"
@@ -77,7 +77,7 @@
               >
                 <li>
                   <button
-                    class="text-neutral-content"
+                    class="text-base-content"
                     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
                       value: %{id: "public", name: l("Public")},
                       target: "#smart_input"
@@ -88,7 +88,7 @@
                   </button>
                 </li>
                 <li><button
-                    class="text-neutral-content"
+                    class="text-base-content"
                     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
                       value: %{id: "local", name: l("Local")},
                       target: "#smart_input"
@@ -97,7 +97,7 @@
                   >
                     {l("Local")}</button></li>
                 <li><button
-                    class="text-neutral-content"
+                    class="text-base-content"
                     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
                       value: %{id: "mentions", name: l("Mentions")},
                       target: "#smart_input"
@@ -105,7 +105,7 @@
                     type="button"
                   >{l("Mentions")}</button></li>
                 <li><button
-                    class="text-neutral-content"
+                    class="text-base-content"
                     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
                       value: %{id: "custom", name: l("Custom")},
                       target: "#smart_input"
@@ -124,24 +124,27 @@
 
 <li>
   <button
-    class="text-neutral-content"
-    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+    class="text-base-content"
+    phx-click={
+      JS.push("Bonfire.Boundaries:select_boundary",
       value: %{id: "public", name: l("Public")},
       target: "#smart_input"
-    )}
+      )
+      |> JS.hide(to: "#custom_boundaries")
+    }
     type="button"
   >
-    <div class="flex items-start text-left">
+    <div class="flex items-center text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">
-          <#Icon iconify="ph:globe" class="w-5 h-5" />
+          <#Icon iconify="ph:globe" class="w-4 h-4" />
         </span>
       </div>
       <div class="flex flex-col ml-3">
-        <div class="text-sm font-semibold">{l("Public")}</div>
+        <div class="text-sm font-semibold text-base-content/90">{l("Public")}</div>
         <p class="text-[13px] text-opacity/70">
           {l(
-            "Publicly visible to everyone. People on the fediverse can see, interact, and reply. Discoverable by search engines."
+            "Publicly visible to everyone. Discoverable by search engines."
           )}
         </p>
       </div>
@@ -150,21 +153,21 @@
 </li>
 <li>
   <button
-    class="text-neutral-content"
+    class="text-base-content"
     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
       value: %{id: "local", name: l("Local")},
       target: "#smart_input"
-    )}
+    )  |> JS.hide(to: "#custom_boundaries")}
     type="button"
   >
-    <div class="flex items-start text-left">
+    <div class="flex items-center text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">
-          <#Icon iconify="ph:campfire-bold" class="w-5 h-5" />
+          <#Icon iconify="ph:campfire-bold" class="w-4 h-4" />
         </span>
       </div>
       <div class="flex flex-col ml-3">
-        <div class="text-sm font-semibold">{l("Local")}</div>
+        <div class="text-sm font-semibold text-base-content/90">{l("Local")}</div>
         <p class="text-[13px] text-opacity/70">
           {l("Everyone on this instance will be able to see, interact, and reply.")}
         </p>
@@ -173,19 +176,19 @@
   </button></li>
 <li>
   <button
-    class="text-neutral-content"
+    class="text-base-content"
     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
       value: %{id: "mentions", name: l("Mentions")},
       target: "#smart_input"
-    )}
+    ) |> JS.hide(to: "#custom_boundaries")}
     type="button"
   >
-    <div class="flex items-start text-left">
+    <div class="flex items-center text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">﹫</span>
       </div>
       <div class="flex flex-col ml-3">
-        <div class="text-sm font-semibold">{l("Mentions")}</div>
+        <div class="text-sm font-semibold text-base-content/90">{l("Mentions")}</div>
         <p class="text-[13px] text-opacity/70">
           {l("Anyone mentioned will be able to see, interact, and reply.")}
         </p>
@@ -193,28 +196,32 @@
     </div>
   </button>
 </li>
-<li><button
-    class="text-neutral-content"
-    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-      value: %{id: "custom", name: l("Custom")},
-      target: "#smart_input"
-    )}
+<li>
+  <button
+    class="text-base-content"
+    phx-click={
+      JS.push("Bonfire.Boundaries:select_boundary",
+        value: %{id: "custom", name: l("Custom")},
+        target: "#smart_input"
+      )
+      |> JS.show(to: "#custom_boundaries")
+    }
     type="button"
   >
-    <div class="flex items-start text-left">
+    <div class="flex items-center text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">
-          <#Icon iconify="ph:gear-fill" class="w-5 h-5" />
+          <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
         </span>
       </div>
       <div class="flex flex-col ml-3">
-        <div class="text-sm font-semibold">{l("Custom")}</div>
+        <div class="text-sm font-semibold text-base-content/90">{l("Custom")}</div>
         <p class="text-[13px] text-opacity/70">{l("Specify custom boundaries.")}</p>
       </div>
     </div>
   </button>
 </li>
-{#for acl <-
+<!-- {#for acl <-
     Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
     |> Enum.map(fn
       %Bonfire.Data.AccessControl.Acl{} = acl ->
@@ -228,24 +235,24 @@
     |> Enum.filter(fn acl -> acl[:name] != nil end)}
   <li>
     <button
-      class="text-neutral-content"
+      class="text-base-content"
       phx-click={JS.push("Bonfire.Boundaries:select_boundary",
         value: %{id: e(acl, :id, nil), name: e(acl, :name, nil)},
         target: "#smart_input"
       )}
       type="button"
     >
-      <div class="flex items-start text-left">
+      <div class="flex items-center text-left">
         <div class="flex-shrink-0">
           <span class="text-xl">
-            <#Icon iconify="ph:gear-fill" class="w-5 h-5" />
+            <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
           </span>
         </div>
         <div class="flex flex-col ml-3">
-          <div class="text-sm font-semibold">{e(acl, :name, nil)}</div>
+          <div class="text-sm font-semibold text-base-content/90">{e(acl, :name, nil)}</div>
           <p class="text-[13px] text-opacity/70">{e(acl, :description, nil)}</p>
         </div>
       </div>
     </button>
   </li>
-{/for}
+{/for} -->
