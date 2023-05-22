@@ -1,14 +1,14 @@
 <div class="flex items-center flex-1 gap-2">
-  <div class="w-full dropdown dropdown-end">
+  <div class="w-full dropdown">
     <label
       type="button"
       tabindex="0"
       aria-haspopup="true"
       aria-expanded="true"
-      class="flex items-center justify-between w-full gap-2 normal-case rounded btn-ghost btn-sm btn opacity-90"
+      class="flex w-fit items-center justify-between gap-2 btn-ghost normal-case rounded-full border btn-sm btn border-base-content/30 text-primary"
     >
       <Bonfire.Boundaries.Web.BoundariesPresetNameLive to_boundaries={@to_boundaries} />
-      <#Icon iconify="bx:expand-vertical" class="w-5 h-5 text-base-content/70" />
+      <#Icon iconify="ri:arrow-down-s-line" class="w-4 h-4 text-primary/80" />
     </label>
     <ul
       tabindex="0"

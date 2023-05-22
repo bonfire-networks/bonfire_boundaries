@@ -1,10 +1,10 @@
-<div class="flex w-full gap-2 px-2 pt-2 mt-2 border-t items-top border-base-content/10">
-  <#Icon
+<div class="flex w-full flex-1 h-full gap-2 p-2 items-top">
+  <!-- <#Icon
     iconify="carbon:subnet-acl-rules"
     class="w-5 h-5 mx-1 mt-2 shrink-0 text-base-content/70"
-  />
+  /> -->
 
-  <div class="flex flex-col -ml-1 relative  bg-base-100 multiselect_in_composer flex-1">
+  <div class="flex flex-col relative h-full multiselect_in_composer flex-1">
     <Bonfire.UI.Common.MultiselectLive
       implementation={:live_select}
       form_input_name={__MODULE__}
@@ -45,9 +45,9 @@
 
     <!-- Next already-choosen boundaries or Circles/Users -->
     <Bonfire.Boundaries.Web.BoundaryItemsLive to_boundaries={[]} to_circles={@to_circles} />
+    <!-- <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={@preset_boundary} /> -->
+    <Bonfire.Boundaries.Web.BoundaryComposerActionsLive />
     <!-- </div>
-  <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={@preset_boundary} />
-  <Bonfire.Boundaries.Web.BoundaryComposerActionsLive />
 </div> -->
   </div>
 </div>

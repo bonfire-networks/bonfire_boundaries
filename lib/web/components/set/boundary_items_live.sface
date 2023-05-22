@@ -1,5 +1,11 @@
-<div class="flex flex-wrap">
-  <div
+{#if Enum.empty?(@to_circles)}
+  <Bonfire.UI.Common.EmptyFeed
+      feedback_title={l("Select a circle or user")}
+      feedback_message={l("Grant specific permissions to users or circles by adding them to the list.")}
+    />
+{#else}
+<div class="flex flex-col divide-y divide-base-content/10 mt-3 flex-wrap">
+  <!-- <div
     :for={{id, data} <- Bonfire.Boundaries.Web.SetBoundariesLive.reject_presets(@to_boundaries || [])}
     class="mt-2 mr-2 flex items-center justify-between"
   >
@@ -25,44 +31,49 @@
         <#Icon solid="Trash" class="w-4 h-4 text-base-content/70" />
       </div>
     </div>
-  </div>
+  </div> -->
 
   <div
     :for={{data, id} <- @to_circles || []}
-    class="mt-2 mr-2 inline-flex items-center border border-base-content/30"
+    class="flex py-2 items-center w-full  justify-between"
   >
+    
     {#case data}
       {#match %{"icon" => _}}
-        <p class="text-sm truncate max-w-[200px] pl-1.5 text-base-content">
+        <!-- <p class="text-sm truncate max-w-[200px] pl-1.5 text-base-content">
           {e(data, :name, "Anon")}
-        </p>
-        <!-- <Bonfire.UI.Common.ProfileItemLive inline profile={data} character={data} show_controls={[]} /> -->
+        </p> -->
+        <Bonfire.UI.Common.ProfileItemLive inline profile={data} character={data} show_controls={[]} />
       {#match _ when is_binary(data)}
         <div class="flex items-center gap-3 grow">
-          <!-- <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-            <#Icon iconify="material-symbols:group" class="inline-block w-5 h-5 text-base-content/70" />
-          </span> -->
-          <div class="text-sm font-medium text-base-content">{data}</div>
+          <#Icon iconify="material-symbols:group" class="inline-block w-7 h-7 text-base-content/70" />
+          <div class="text-base font-medium text-base-content">{data}</div>
         </div>
       {#match _}
         <div class="flex items-center gap-3 grow">
-          <!-- <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-            <#Icon iconify="material-symbols:group-work" class="inline-block w-5 h-5 text-base-content/70" />
-          </span> -->
-          <div class="text-sm font-medium pl-1.5 text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
+          <#Icon iconify="material-symbols:group-work" class="inline-block w-7 h-7 text-base-content/70" />
+          <div class="text-base font-medium pl-1.5 text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
         </div>
     {/case}
-    <div
-      phx-click={JS.push("Bonfire.Boundaries:remove_circle",
-        value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
-        target: "#smart_input"
-      )}
-      class="btn border-r border-base-content/30 btn-xs btn-square btn-ghost !rounded-none border-none !border-l  border-l-solid border-base-content/30"
-    >
-      <#Icon iconify="ri:close-line" class="w-5 h-5 md:w-4 md:h-4" />
-    </div>
-    <div class="flex border-l border-solid border-l-base-content/30 items-center gap-1">
-      <Bonfire.Boundaries.Web.RolesDropdownLive circle_id={id} />
+    <div class="items-center flex gap-2">
+      <div class="flex items-center gap-1">
+        <Bonfire.Boundaries.Web.RolesDropdownLive 
+          setting_boundaries={true}
+          circle_id={id} />
+      </div>
+
+      <div
+        phx-click={JS.push("Bonfire.Boundaries:remove_circle",
+          value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
+          target: "#smart_input"
+        )}
+        class="btn btn-sm btn-circle btn-ghost"
+      >
+        <#Icon iconify="ph:trash-fill" class="w-5 h-5 md:w-4 md:h-4" />
+      </div>
     </div>
   </div>
 </div>
+
+
+{/if}

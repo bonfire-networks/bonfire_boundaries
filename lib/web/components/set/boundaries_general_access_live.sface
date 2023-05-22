@@ -130,7 +130,6 @@
       value: %{id: "public", name: l("Public")},
       target: "#smart_input"
       )
-      |> JS.hide(to: "#custom_boundaries")
     }
     type="button"
   >
@@ -157,7 +156,7 @@
     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
       value: %{id: "local", name: l("Local")},
       target: "#smart_input"
-    )  |> JS.hide(to: "#custom_boundaries")}
+    )}
     type="button"
   >
     <div class="flex items-center text-left">
@@ -180,7 +179,7 @@
     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
       value: %{id: "mentions", name: l("Mentions")},
       target: "#smart_input"
-    ) |> JS.hide(to: "#custom_boundaries")}
+    )}
     type="button"
   >
     <div class="flex items-center text-left">
@@ -204,8 +203,7 @@
         value: %{id: "custom", name: l("Custom")},
         target: "#smart_input"
       )
-      |> JS.show(to: "#custom_boundaries")
-    }
+      |> JS.toggle(to: "#write_post_content_wrapper") |> JS.toggle(to: "#extra_boundaries")}
     type="button"
   >
     <div class="flex items-center text-left">
