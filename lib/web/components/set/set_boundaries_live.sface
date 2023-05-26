@@ -8,6 +8,7 @@
     <Bonfire.UI.Common.MultiselectLive
       implementation={:live_select}
       form_input_name={__MODULE__}
+      options={list_my_circles(@__context__)}
       label="Select one or more circles or people"
     />
 

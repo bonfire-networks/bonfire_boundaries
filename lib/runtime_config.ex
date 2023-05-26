@@ -295,7 +295,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         local: %{id: "3SERSFR0MY0VR10CA11NSTANCE", name: "Local Users"},
         activity_pub: %{
           id: "7EDERATEDW1THANACT1V1TYPVB",
-          name: "ActivityPub Peers"
+          name: "Remote ActivityPub Actors"
         },
         admin: %{id: "0ADM1NSVSERW1THSVPERP0WERS", name: "Instance Admins"},
 

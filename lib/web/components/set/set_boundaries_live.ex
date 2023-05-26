@@ -89,10 +89,16 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     Bonfire.Boundaries.Acls.list_my(current_user)
   end
 
+  def list_my_circles(context) do
+    Bonfire.Boundaries.Circles.list_my_with_global(current_user(context))
+    |> results_for_multiselect()
+    |> debug
+  end
+
   def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
     current_user = current_user(socket)
     # Bonfire.Boundaries.Acls.list_my(current_user, search: search) ++
-    (Bonfire.Boundaries.Circles.list_my(current_user, search: search) ++
+    (Bonfire.Boundaries.Circles.list_my_with_global(current_user, search: search) ++
        Bonfire.Me.Users.search(search))
     |> results_for_multiselect()
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
