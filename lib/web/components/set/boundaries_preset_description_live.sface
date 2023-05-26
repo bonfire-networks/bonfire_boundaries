@@ -1,17 +1,18 @@
 <button
   type="button"
   phx-click={JS.toggle(to: "#write_post_content_wrapper") |> JS.toggle(to: "#extra_boundaries")}
-  class="flex text-[13px] pr-2 font-semibold text-primary/80 items-center gap-2">
+  class="flex text-[13px] pr-2 font-semibold text-primary/80 items-center gap-2"
+>
   {#case List.last(@to_boundaries) |> debug("main boundary to show in composer")}
-  {#match {"public", _}}
+    {#match {"public", _}}
       <span class="text-lg"><#Icon iconify="ph:globe" class="w-5 h-5" /></span>
-      <span class="flex-1 w-full text-left">{l"Publicly visible to everyone"}</span>
-  {#match {"local", _}}
+      <span class="flex-1 w-full text-left">{l("Publicly visible to everyone")}</span>
+    {#match {"local", _}}
       <span class="text-lg"><#Icon iconify="ph:campfire-bold" class="w-5 h-5" /></span>
       <span class="flex-1 w-full text-left">{l("Only instance users can see and reply")}</span>
-  {#match {"mentions", _}}
+    {#match {"mentions", _}}
       <span class="text-lg">﹫</span> <span class="flex-1 w-full text-left">{l("Anyone mentioned will be able to see and reply")}</span>
-  {#match _}
+    {#match _}
       <span class="text-lg"><#Icon iconify="ph:gear-fill" class="w-5 h-5" /></span>
       <span class="flex-1 w-full text-left">{l("Custom permissions")}</span>
   {/case}

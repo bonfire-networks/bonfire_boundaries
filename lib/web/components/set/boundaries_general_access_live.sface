@@ -125,12 +125,10 @@
 <li>
   <button
     class="text-base-content"
-    phx-click={
-      JS.push("Bonfire.Boundaries:select_boundary",
+    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
       value: %{id: "public", name: l("Public")},
       target: "#smart_input"
-      )
-    }
+    )}
     type="button"
   >
     <div class="flex items-center text-left">
@@ -142,9 +140,7 @@
       <div class="flex flex-col ml-3">
         <div class="text-sm font-semibold text-base-content/90">{l("Public")}</div>
         <p class="text-[13px] text-opacity/70">
-          {l(
-            "Publicly visible to everyone. Discoverable by search engines."
-          )}
+          {l("Publicly visible to everyone. Discoverable by search engines.")}
         </p>
       </div>
     </div>
@@ -198,12 +194,12 @@
 <li>
   <button
     class="text-base-content"
-    phx-click={
-      JS.push("Bonfire.Boundaries:select_boundary",
-        value: %{id: "custom", name: l("Custom")},
-        target: "#smart_input"
-      )
-      |> JS.toggle(to: "#write_post_content_wrapper") |> JS.toggle(to: "#extra_boundaries")}
+    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+      value: %{id: "custom", name: l("Custom")},
+      target: "#smart_input"
+    )
+    |> JS.toggle(to: "#write_post_content_wrapper")
+    |> JS.toggle(to: "#extra_boundaries")}
     type="button"
   >
     <div class="flex items-center text-left">

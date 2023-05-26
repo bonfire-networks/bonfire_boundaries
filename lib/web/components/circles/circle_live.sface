@@ -3,7 +3,7 @@
     <div class="p-4 text-2xl font-bold mt-3 text-center pb-0">
       <h1 data-role="circle_title">{@name || e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil)}</h1>
     </div>
-    <#slot></#slot>
+    <#slot />
     <div :if={!@read_only} class="p-2 mt-4 border-b border-t border-base-content/10">
       <form id="edit_circle_participant" :on-change="select">
         <Bonfire.UI.Common.MultiselectLive
@@ -41,7 +41,10 @@
                 value={e(member, :subject_id, id)}
               />
               <td class="!bg-transparent">
-                <LiveRedirect  to={path(e(member, :subject, :character, nil))} class="group flex items-center space-x-3">
+                <LiveRedirect
+                  to={path(e(member, :subject, :character, nil))}
+                  class="group flex items-center space-x-3"
+                >
                   <Bonfire.UI.Common.AvatarLive
                     parent_id="user_preview"
                     class="flex-1 inline-block object-cover w-12 h-12 mx-auto rounded-full md:w-12 md:h-12 bg-base-300"
