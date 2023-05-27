@@ -65,6 +65,8 @@ defmodule Bonfire.Boundaries.Queries do
               end
 
             false ->
+              Untangle.debug("field_ref case 1")
+
               user = Bonfire.Common.Utils.current_user(opts)
               vis = Bonfire.Boundaries.Queries.filter_where_not(user, verbs)
 
@@ -120,18 +122,34 @@ defmodule Bonfire.Boundaries.Queries do
               end
 
             false ->
+              Untangle.debug("field_ref case 2")
+
               user = Bonfire.Common.Utils.current_user(opts)
               vis = Bonfire.Boundaries.Queries.filter_where_not(user, verbs)
 
-              join(
-                unquote(query),
-                Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
-                [unquote(Macro.var(:root, __MODULE__))],
-                v in subquery(vis),
-                on:
-                  unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) ==
-                    v.object_id
-              )
+              if opts[:parent_as] do
+                join(
+                  unquote(query),
+                  Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
+                  [unquote(Macro.var(:root, __MODULE__))],
+                  v in subquery(vis),
+                  on:
+                    parent_as(:activity).unquote(field_ref) ==
+                      v.object_id
+                )
+
+                # FIXME: should figure out how to do something like `unquote(Keyword.get(opts, :parent_as))` instead of hardcoding :activity
+              else
+                join(
+                  unquote(query),
+                  Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
+                  [unquote(Macro.var(:root, __MODULE__))],
+                  v in subquery(vis),
+                  on:
+                    unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) ==
+                      v.object_id
+                )
+              end
 
             other ->
               import Untangle
