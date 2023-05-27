@@ -240,8 +240,19 @@ defmodule Bonfire.Boundaries.Blocks do
     |> instance_wide_circles()
   end
 
-  defp per_user_circles(current_user, block_types) when is_list(block_types) do
+  defp per_user_circles(current_user, block_types)
+       when not is_nil(current_user) and is_list(block_types) do
     Circles.get_stereotype_circles(current_user, block_types)
+  end
+
+  defp per_user_circles(nil, block_types) do
+    warn("no user provided")
+    []
+  end
+
+  defp per_user_circles(_, block_types) do
+    warn(block_types, "expected a list of block types")
+    []
   end
 
   def user_block_circles(current_user, block_type) do
@@ -251,25 +262,25 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   defp is_blocked_by?(user_or_peer, block_type, current_user_ids)
-       when is_list(current_user_ids) and current_user_ids != [] do
+       when not is_nil(user_or_peer) and is_list(current_user_ids) and current_user_ids != [] do
     # info(user_or_peer, "user_or_peer to check")
     info(current_user_ids, "current_user_ids")
 
     block_types = types_blocked(block_type)
 
     current_user_ids
-    |> info("user_ids")
-    |> Enum.map(&per_user_circles(&1, block_types))
-    # |> info("user_block_circles")
+    |> debug("user_ids")
+    |> Enum.flat_map(&per_user_circles(ulid(&1), block_types))
+    |> debug("user_block_circles")
     |> Bonfire.Boundaries.Circles.is_encircled_by?(user_or_peer, ...)
   end
 
   defp is_blocked_by?(user_or_peer, block_type, user_id)
-       when is_binary(user_id) do
+       when not is_nil(user_or_peer) and is_binary(user_id) do
     is_blocked_by?(user_or_peer, block_type, [user_id])
   end
 
-  defp is_blocked_by?(user_or_peer, block_type, %{} = user) do
+  defp is_blocked_by?(user_or_peer, block_type, %{} = user) when not is_nil(user_or_peer) do
     is_blocked_by?(user_or_peer, block_type, [user])
   end
 

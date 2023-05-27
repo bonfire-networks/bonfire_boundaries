@@ -21,6 +21,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   # don't show "others who silenced me" in circles
   @default_q_opts [exclude_circles: ["0KF1NEY0VD0N0TWANTT0HEARME"]]
+  @exclude_block_stereotypes ["7N010NGERWANTT011STENT0Y0V", "7N010NGERC0NSENTT0Y0VN0WTY"]
   # @exclude_stereotypes ["7N010NGERWANTT011STENT0Y0V", "7N010NGERC0NSENTT0Y0VN0WTY", "4THEPE0P1ES1CH00SET0F0110W", "7DAPE0P1E1PERM1TT0F0110WME"]
 
   # special built-in circles (eg, guest, local, activity_pub)
@@ -169,8 +170,9 @@ defmodule Bonfire.Boundaries.Circles do
   @doc """
   Lists the circles that we are permitted to see.
   """
-  def is_encircled_by?(subject, circle) when is_nil(subject) or is_nil(circle) or circle == [],
-    do: nil
+  def is_encircled_by?(subject, circle)
+      when is_nil(subject) or is_nil(circle) or subject == [] or circle == [],
+      do: nil
 
   def is_encircled_by?(subject, circle) when is_atom(circle) and not is_nil(circle),
     do: is_encircled_by?(subject, [get_id!(circle)])
@@ -249,8 +251,13 @@ defmodule Bonfire.Boundaries.Circles do
     do: repo().many(query_my(user, opts ++ @default_q_opts))
 
   def list_my_with_global(user, opts \\ []) do
-    list_my(user,
-      extra_ids_to_include: opts[:global_circles] || Bonfire.Boundaries.Fixtures.global_circles()
+    list_my(
+      user,
+      opts ++
+        [
+          extra_ids_to_include:
+            opts[:global_circles] || Bonfire.Boundaries.Fixtures.global_circles()
+        ]
     )
   end
 
@@ -277,7 +284,14 @@ defmodule Bonfire.Boundaries.Circles do
   def query(opts \\ []) do
     exclude_circles =
       e(opts, :exclude_circles, []) ++
-        if e(opts, :exclude_stereotypes, nil), do: stereotype_ids(), else: []
+        if e(opts, :exclude_stereotypes, nil),
+          do: stereotype_ids(),
+          else:
+            [] ++
+              if(e(opts, :exclude_block_stereotypes, nil),
+                do: @exclude_block_stereotypes,
+                else: []
+              )
 
     from(circle in Circle, as: :circle)
     |> proload([
@@ -345,11 +359,12 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc "query for `list_my`"
-  def query_my(caretaker, opts \\ []) when not is_nil(caretaker) do
+  def query_my(caretaker, opts \\ [])
+      when (is_binary(caretaker) or is_map(caretaker) or is_list(caretaker)) and caretaker != [] do
     query(opts)
     |> where(
       [circle, caretaker: caretaker],
-      caretaker.caretaker_id == ^ulid!(caretaker) or
+      caretaker.caretaker_id in ^ulids(caretaker) or
         circle.id in ^e(opts, :extra_ids_to_include, [])
     )
   end

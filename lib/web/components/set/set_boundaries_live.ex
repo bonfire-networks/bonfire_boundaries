@@ -51,19 +51,23 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     results
     |> Enum.map(fn
       %Bonfire.Data.AccessControl.Acl{} = acl ->
-        {e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil),
+        name = e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil)
+
+        {name,
          %{
            id: e(acl, :id, nil),
            field: :to_boundaries,
-           name: e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil)
+           name: name
          }}
 
       %Bonfire.Data.AccessControl.Circle{} = circle ->
-        {e(circle, :named, :name, nil) || e(circle, :sterotyped, :named, :name, nil),
+        name = e(circle, :named, :name, nil) || e(circle, :stereotyped, :named, :name, nil)
+
+        {name,
          %{
            id: e(circle, :id, nil),
            field: :to_circles,
-           name: e(circle, :named, :name, nil) || e(circle, :sterotyped, :named, :name, nil)
+           name: name
          }}
 
       user ->
@@ -90,15 +94,22 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   end
 
   def list_my_circles(context) do
-    Bonfire.Boundaries.Circles.list_my_with_global(current_user(context))
+    Bonfire.Boundaries.Circles.list_my_with_global(current_user(context),
+      exclude_block_stereotypes: true
+    )
+    # |> debug
     |> results_for_multiselect()
-    |> debug
+
+    # |> debug
   end
 
   def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
     current_user = current_user(socket)
     # Bonfire.Boundaries.Acls.list_my(current_user, search: search) ++
-    (Bonfire.Boundaries.Circles.list_my_with_global(current_user, search: search) ++
+    (Bonfire.Boundaries.Circles.list_my_with_global(
+       [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
+       search: search
+     ) ++
        Bonfire.Me.Users.search(search))
     |> results_for_multiselect()
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)

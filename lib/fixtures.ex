@@ -19,12 +19,14 @@ defmodule Bonfire.Boundaries.Fixtures do
 
   def instance_acl, do: "01SETT1NGSF0R10CA11NSTANCE"
   def admin_circle, do: "0ADM1NSVSERW1THSVPERP0WERS"
+  def activity_pub_circle, do: "7EDERATEDW1THANACT1V1TYPVB"
+
   # TODO: generate from config
   def global_circles,
     do: [
       "0AND0MSTRANGERS0FF1NTERNET",
       "3SERSFR0MY0VR10CA11NSTANCE",
-      "7EDERATEDW1THANACT1V1TYPVB",
+      activity_pub_circle(),
       admin_circle()
     ]
 
