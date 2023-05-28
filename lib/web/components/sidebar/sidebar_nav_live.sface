@@ -16,7 +16,7 @@
       }
     >
       <#Icon
-        iconify="material-symbols:group-work"
+        iconify="material-symbols:group-work-outline"
         class={
           "w-4 h-4 font-normal text-base-content/70",
           "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
