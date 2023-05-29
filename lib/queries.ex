@@ -25,8 +25,16 @@ defmodule Bonfire.Boundaries.Queries do
   # defmacro can_delete?(controlled, user), do: can(controlled, user, :delete)
   # defmacro can?(controlled, user, verb \\ :see), do: can(controlled, user, verb)
 
-  defmacro boundarise(query, field_ref, opts),
-    do: boundarise_impl(query, field_ref, opts)
+  defmacro __using__(_) do
+    quote do
+      import Ecto.Query
+      import Bonfire.Boundaries.Queries
+    end
+  end
+
+  defmacro boundarise(query, field_ref, opts) do
+    boundarise_impl(query, field_ref, opts)
+  end
 
   defp boundarise_impl(query, field_ref, opts) do
     case field_ref do
