@@ -87,7 +87,10 @@
                 {#else}
                   <div class="flex items-center gap-3">
                     <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-                      <#Icon iconify="material-symbols:group-work-outline" class="inline-block w-5 h-5 text-base-content/70" />
+                      <#Icon
+                        iconify="material-symbols:group-work-outline"
+                        class="inline-block w-5 h-5 text-base-content/70"
+                      />
                     </span>
                     <div class="text-sm truncate max-w-[160px] font-medium text-base-content">{LiveHandler.subject_name(subject)}</div>
                   </div>
