@@ -30,7 +30,7 @@ defmodule Bonfire.Boundaries.Queries do
 
   defp boundarise_impl(query, field_ref, opts) do
     case field_ref do
-      {{:., _, [{alia, _, _}, _field]}, [{:no_parens, true} | _], []} ->
+      {{:., _, [{alia, _, _}, field]}, [{:no_parens, true} | _], []} ->
         quote do
           require Untangle
           query = unquote(query)
@@ -50,32 +50,41 @@ defmodule Bonfire.Boundaries.Queries do
 
                 current_user ->
                   vis =
-                    Bonfire.Boundaries.Queries.filter_where_not(
+                    Bonfire.Boundaries.Queries.query_with_summary(
                       current_user,
-                      verbs
+                      verbs,
+                      from(Summary, where: [object_id: parent_as(unquote(alia)).unquote(field)])
                     )
 
-                  join(
+                  where(
                     unquote(query),
-                    Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
-                    [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
-                    v in subquery(vis),
-                    on: unquote(field_ref) == v.object_id
+                    exists(vis)
                   )
               end
 
             false ->
-              Untangle.debug("field_ref case 1")
+              current_user = Bonfire.Common.Utils.current_user(opts)
 
-              user = Bonfire.Common.Utils.current_user(opts)
-              vis = Bonfire.Boundaries.Queries.filter_where_not(user, verbs)
+              # vis = Bonfire.Boundaries.Queries.query_with_summary(uscurrent_userer, verbs)
 
-              join(
+              # join(
+              #   unquote(query),
+              #   Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
+              #   [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
+              #   v in subquery(vis),
+              #   on: unquote(field_ref) == v.object_id
+              # )
+
+              vis =
+                Bonfire.Boundaries.Queries.query_with_summary(
+                  current_user,
+                  verbs,
+                  from(Summary, where: [object_id: parent_as(unquote(alia)).unquote(field)])
+                )
+
+              where(
                 unquote(query),
-                Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
-                [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
-                v in subquery(vis),
-                on: unquote(field_ref) == v.object_id
+                exists(vis)
               )
 
             other ->
@@ -86,104 +95,40 @@ defmodule Bonfire.Boundaries.Queries do
       {field, meta, args} = field_ref
       when is_atom(field) and is_list(meta) and
              (is_nil(args) or args == []) ->
-        quote do
-          require Untangle
-          query = unquote(query)
-          opts = unquote(opts)
-          verbs = List.wrap(Bonfire.Common.Utils.e(opts, :verbs, [:see, :read]))
+        raise RuntimeError,
+          message: """
+          Specifying only the field name is not supported: #{inspect(field_ref)}`
 
-          case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
-            true ->
-              query
+          Expected this form:
 
-            :admins ->
-              case Bonfire.Common.Utils.current_user(opts) do
-                %{id: _, instance_admin: %{is_instance_admin: true}} ->
-                  Untangle.debug("Skipping boundary checks for instance administrator")
-
-                  query
-
-                current_user ->
-                  vis =
-                    Bonfire.Boundaries.Queries.filter_where_not(
-                      current_user,
-                      verbs
-                    )
-
-                  join(
-                    unquote(query),
-                    Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
-                    [unquote(Macro.var(:root, __MODULE__))],
-                    v in subquery(vis),
-                    on:
-                      unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) ==
-                        v.object_id
-                  )
-              end
-
-            false ->
-              Untangle.debug("field_ref case 2")
-
-              user = Bonfire.Common.Utils.current_user(opts)
-              vis = Bonfire.Boundaries.Queries.filter_where_not(user, verbs)
-
-              if opts[:parent_as] do
-                join(
-                  unquote(query),
-                  Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
-                  [unquote(Macro.var(:root, __MODULE__))],
-                  v in subquery(vis),
-                  on:
-                    parent_as(:activity).unquote(field_ref) ==
-                      v.object_id
-                )
-
-                # FIXME: should figure out how to do something like `unquote(Keyword.get(opts, :parent_as))` instead of hardcoding :activity
-              else
-                join(
-                  unquote(query),
-                  Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
-                  [unquote(Macro.var(:root, __MODULE__))],
-                  v in subquery(vis),
-                  on:
-                    unquote(Macro.var(:root, __MODULE__)).unquote(field_ref) ==
-                      v.object_id
-                )
-              end
-
-            other ->
-              import Untangle
-              error(other, "Weird skip_boundary_check")
-              query
-          end
-        end
+           * `alias.field` (for ID field `field` on table alias `alias`, e.g: `activity.object_id`)
+          """
 
       _ ->
         raise RuntimeError,
           message: """
           Invalid field reference: #{inspect(field_ref)}`
 
-          Expected one of these forms:
+          Expected this form:
 
-           * `field` (for field `field` on the root schema)
-           * `alias.field` (for field `field` on alias `alias`)
+           * `alias.field` (for ID field `field` on table alias `alias`, e.g: `activity.object_id`)
           """
     end
   end
 
   @doc """
-  A subquery which filters out results the current user is
-  not permitted to perform *all* of the specified verbs on.
+  A subquery which filters out results the current user is not permitted to perform *all* of the specified verbs on.
 
-  Parameters are an expression evaluating to the current user,
-  and a list of verbs.
+  Parameters are an expression evaluating to the current user, a list of verbs, and optionally an initial query on `Summary` in order to filter what objects are checked.
   """
-  def filter_where_not(user, verbs \\ [:see, :read]) do
+  def query_with_summary(user, verbs \\ [:see, :read], query \\ Summary) do
     ids = user_and_circle_ids(user)
     verbs = Verbs.ids(verbs)
 
-    from(summary in Summary,
-      where: summary.subject_id in ^ids and summary.verb_id in ^verbs,
+    from(summary in query,
+      where:
+        summary.subject_id in ^ids and
+          summary.verb_id in ^verbs,
       group_by: summary.object_id,
       having: fragment("agg_perms(?)", summary.value),
       select: %{
@@ -228,14 +173,17 @@ defmodule Bonfire.Boundaries.Queries do
     else
       agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
 
-      vis = filter_where_not(agent, Common.Utils.e(opts, :verbs, [:see, :read]))
+      vis =
+        query_with_summary(
+          agent,
+          Common.Utils.e(opts, :verbs, [:see, :read]),
+          from(Summary, where: [object_id: parent_as(:main_object).id])
+        )
 
-      join(
+      where(
         q,
-        Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
         [main_object: main_object],
-        v in subquery(vis),
-        on: main_object.id == v.object_id
+        exists(vis)
       )
     end
   end
