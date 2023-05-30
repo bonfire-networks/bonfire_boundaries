@@ -4,7 +4,7 @@
     feedback_message={l("Here you can grant specific permissions to one or more users or circles.")}
   />
 {#else}
-  <div class="flex flex-col divide-y divide-base-content/10 mt-3 flex-wrap">
+  <div class="flex flex-1 flex-col divide-y divide-base-content/10 mt-3 flex-wrap">
     <!-- <div
     :for={{id, data} <- Bonfire.Boundaries.Web.SetBoundariesLive.reject_presets(@to_boundaries || [])}
     class="mt-2 mr-2 flex items-center justify-between"
@@ -49,7 +49,7 @@
           <div class="flex items-center gap-3 grow">
             <#Icon
               iconify="material-symbols:group-work-outline"
-              class="inline-block w-9 h-9 text-base-content/70"
+              class="inline-block w-8 h-8 text-base-content/70"
             />
             <div class="text-base font-medium text-base-content">{data}</div>
           </div>
@@ -57,9 +57,9 @@
           <div class="flex items-center gap-3 grow">
             <#Icon
               iconify="material-symbols:group-work-outline"
-              class="inline-block w-9 h-9 text-base-content/70"
+              class="inline-block w-8 h-8 text-base-content/70"
             />
-            <div class="text-base font-medium pl-1.5 text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
+            <div class="text-sm font-bold group-hover:underline text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
           </div>
       {/case}
       <div class="items-center flex gap-2">

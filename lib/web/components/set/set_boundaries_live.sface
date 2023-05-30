@@ -4,7 +4,7 @@
     class="w-5 h-5 mx-1 mt-2 shrink-0 text-base-content/70"
   /> -->
 
-  <div class="flex flex-col relative h-full multiselect_in_composer flex-1">
+  <div class="flex flex-col relative h-full multiselect_in_composer flex-1 min-h-[376px]">
     <Bonfire.UI.Common.MultiselectLive
       implementation={:live_select}
       form_input_name={__MODULE__}
