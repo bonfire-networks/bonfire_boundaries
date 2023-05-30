@@ -12,7 +12,10 @@
       <span class="flex-1 w-full text-left">{l("Only instance users can see and reply")}</span>
     {#match {"mentions", _}}
       <span class="text-lg">﹫</span> <span class="flex-1 w-full text-left">{l("Anyone mentioned will be able to see and reply")}</span>
-    {#match _}
+    {#match {id, name} when id != "custom"}
+      <span class="text-lg"><#Icon iconify="fluent:door-tag-20-filled" class="w-5 h-5" /></span>
+      <span class="flex-1 w-full text-left">{name}</span>
+    {#match other}
       <span class="text-lg"><#Icon iconify="ph:gear-fill" class="w-5 h-5" /></span>
       <span class="flex-1 w-full text-left">{l("Custom permissions")}</span>
   {/case}

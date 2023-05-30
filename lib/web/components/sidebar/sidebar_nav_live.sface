@@ -76,7 +76,7 @@
       }
     >
       <#Icon
-        solid="LockClosed"
+        iconify="fluent:door-tag-20-filled"
         class={
           "w-4 h-4 font-normal text-base-content/70",
           "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard

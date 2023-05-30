@@ -14,7 +14,7 @@
           <#Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
         </div>
 
-        <!-- <#Icon solid="LockClosed" class="w-6 h-6 text-base-content/70" /> -->
+        <!-- <#Icon iconify="fluent:door-tag-20-filled" class="w-6 h-6 text-base-content/70" /> -->
         <div>{e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil) ||
             l("Untitled boundary")}</div>
       </div>

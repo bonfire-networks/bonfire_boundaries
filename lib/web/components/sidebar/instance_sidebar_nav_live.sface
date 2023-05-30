@@ -47,7 +47,7 @@
       }
     >
       <#Icon
-        solid="LockClosed"
+        iconify="fluent:door-tag-20-filled"
         class={"w-5 h-5 font-normal text-base-content/70", "!text-primary": @selected_tab == "acls"}
       />
       <div class="flex flex-col">
