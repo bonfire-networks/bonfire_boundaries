@@ -175,24 +175,32 @@ defmodule Bonfire.Boundaries.Circles do
       do: nil
 
   def is_encircled_by?(subject, circle) when is_atom(circle) and not is_nil(circle),
-    do: is_encircled_by?(subject, [get_id!(circle)])
+    do: is_encircled_by?(subject, get_id!(circle))
 
-  def is_encircled_by?(subject, circle) when not is_list(circle),
-    do: is_encircled_by?(subject, [circle])
-
-  def is_encircled_by?(subject, circles),
+  def is_encircled_by?(subject, circles) when is_list(circles) or is_binary(circles),
     do: repo().exists?(is_encircled_by_q(subject, circles))
 
   # @doc "query for `list_visible`"
-  defp is_encircled_by_q(subject, circles) do
+  def is_encircled_by_q(subject, circles) do
+    encircled_by_q(subject)
+    |> where(
+      [encircle: encircle],
+      encircle.circle_id in ^ulids(circles)
+    )
+  end
+
+  defp encircled_by_q(subject) do
     from(encircle in Encircle, as: :encircle)
     |> where(
       [encircle: encircle],
-      encircle.subject_id == ^ulid(subject) and
-        encircle.circle_id in ^ulid(circles)
-
-      # |> info("circle_ids")
+      encircle.subject_id in ^ulids(subject)
     )
+  end
+
+  def preload_encircled_by(subject, circles, opts \\ []) do
+    circles
+    |> repo().preload([encircles: encircled_by_q(subject)], opts)
+    |> debug()
   end
 
   ## invariants:
