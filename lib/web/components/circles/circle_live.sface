@@ -15,7 +15,7 @@
     </div>
   </div>
   {#if Enum.count(@members) > 0}
-    <div class="overflow-x-auto m-4 rounded-lg border border-base-content/10">
+    <div class="">
       <table class="table w-full">
         <!-- head -->
         <thead class="sr-only">
@@ -73,7 +73,7 @@
                     :if={!@read_only}
                     phx-value-subject={id}
                     :on-click="remove"
-                    class="btn btn-outline rounded normal-case btn-sm"
+                    class="btn border-base-content/50 btn-outline rounded normal-case btn-xs"
                   >
                     {l("Remove")}
                   </button>

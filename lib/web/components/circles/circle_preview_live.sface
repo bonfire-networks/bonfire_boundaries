@@ -11,7 +11,7 @@
       :if={(@count || Enum.count(@members)) > 3}
       class="align-middle border-0 rounded avatar placeholder"
     >
-      <div class={"w-#{@size} h-#{@size} bg-neutral-focus text-neutral-content text-xs font-medium"}>
+      <div class={"w-#{@size} h-#{@size} text-base-content text-xs font-medium"}>
         <span>+{(@count || Enum.count(@members)) - 3}</span>
       </div>
     </div>
