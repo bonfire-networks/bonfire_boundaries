@@ -131,7 +131,6 @@
     )}
     type="button"
   >
-
     <div class="p-1.5 flex items-center text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">
