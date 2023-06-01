@@ -1,7 +1,6 @@
 <div data-role="add_to_circle">
   <Bonfire.UI.Common.OpenModalLive
     id={"add-to-circle-modal-#{@parent_id}-#{@user_id}"}
-    title_text={l("Pick a circle")}
     no_actions
     modal_class="add_to_circle"
   >
@@ -11,7 +10,7 @@
       user_id={@user_id}
     />
     <:open_btn>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center w-full gap-2 text-sm text-base-content/80">
         <#Icon iconify="fluent:people-list-16-filled" class="w-4 h-4" />
         <span>{l("Add to circle")}</span>
       </div>

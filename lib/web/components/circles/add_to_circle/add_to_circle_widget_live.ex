@@ -5,6 +5,39 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
   prop circles, :list, default: []
   prop user_id, :any, default: nil
 
+
+  def do_handle_event("circle_create_from_modal", %{"name" => name} = attrs, socket) do
+    circle_create_from_modal(Map.merge(attrs, %{named: %{name: name}}), socket)
+  end
+
+  def do_handle_event("circle_create_from_modal", attrs, socket) do
+    circle_create_from_modal(attrs, socket)
+  end
+
+  def circle_create_from_modal(attrs, socket) do
+    current_user = current_user_required!(socket)
+
+    with {:ok, %{id: id} = circle} <-
+           Circles.create(
+             e(socket.assigns, :scope, nil) || current_user,
+             attrs
+           ) do
+      # Bonfire.UI.Common.OpenModalLive.close()
+      # JS.toggle(to: "#new_circle_from_modal")
+      # JS.toggle(to: "#circles_list")
+      {:noreply,
+          socket
+          |> update(:circles, &Circles.preload_encircled_by(id, &1, force: true))
+          |> assign_flash(:info, "Circle created!")
+      }
+    else
+      other ->
+        error(other)
+
+        {:noreply, assign_flash(socket, :error, "Could not create circle")}
+    end
+  end
+
   def do_handle_event("add", %{"id" => id, "circle" => circle}, socket) do
     # TODO: check permission
     # current_user = current_user(socket)

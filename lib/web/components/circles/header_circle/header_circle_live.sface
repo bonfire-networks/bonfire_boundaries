@@ -111,7 +111,7 @@
             </div> -->
           <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
           <:open_btn>
-            <button type="button" class="px-4 py-2 text-base-content">{l("Edit name")}</button>
+            <button type="button" class="">{l("Edit name")}</button>
           </:open_btn>
         </Bonfire.UI.Common.OpenModalLive>
       </li>
@@ -127,7 +127,7 @@
               )}</p>
           </div>
           <:open_btn>
-            <button type="button" class="px-4 py-2 text-error">{l("Delete circle")}</button>
+            <button type="button" class="text-error">{l("Delete circle")}</button>
           </:open_btn>
           <:action_btns>
             <button

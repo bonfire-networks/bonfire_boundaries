@@ -125,7 +125,7 @@
                           no_actions
                           open_btn_wrapper_class="flex flex-1 w-full"
                         >
-                          <div class="prose prose-lg">
+                          <div class="prose prose-sm mt-2">
                             {l("Are you sure to remove %{subject_name} from %{boundary_name} boundary?",
                               subject_name: LiveHandler.subject_name(subject),
                               boundary_name: e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil)
