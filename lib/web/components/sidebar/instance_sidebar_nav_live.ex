@@ -4,7 +4,7 @@ defmodule Bonfire.Boundaries.Web.InstanceSidebarNavLive do
   prop selected_tab, :string
   prop id, :string, default: nil
 
-  prop class, :css_class, default: "gap-1 my-2 menu !flex"
+  prop class, :css_class, default: "p-0 m-0"
 
   declare_settings_nav_component("Links to boundaries & circles management pages",
     scope: :instance

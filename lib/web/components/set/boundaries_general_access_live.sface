@@ -122,7 +122,7 @@
   </div>
 </div> -->
 
-<li>
+<li class="">
   <button
     class="text-base-content"
     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
@@ -131,7 +131,8 @@
     )}
     type="button"
   >
-    <div class="flex items-center text-left">
+
+    <div class="p-1.5 flex items-center text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">
           <#Icon iconify="ph:globe" class="w-4 h-4" />
@@ -146,7 +147,7 @@
     </div>
   </button>
 </li>
-<li>
+<li class="">
   <button
     class="text-base-content"
     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
@@ -155,7 +156,7 @@
     )}
     type="button"
   >
-    <div class="flex items-center text-left">
+    <div class="p-1.5 flex items-center text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">
           <#Icon iconify="ph:campfire-bold" class="w-4 h-4" />
@@ -169,7 +170,7 @@
       </div>
     </div>
   </button></li>
-<li>
+<li class="">
   <button
     class="text-base-content"
     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
@@ -178,7 +179,7 @@
     )}
     type="button"
   >
-    <div class="flex items-center text-left">
+    <div class="p-1.5 flex items-center text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">﹫</span>
       </div>
@@ -191,7 +192,7 @@
     </div>
   </button>
 </li>
-<li>
+<li class="">
   <button
     class="text-base-content"
     phx-click={JS.push("Bonfire.Boundaries:select_boundary",
@@ -202,7 +203,7 @@
     |> JS.toggle(to: "#extra_boundaries")}
     type="button"
   >
-    <div class="flex items-center text-left">
+    <div class="p-1.5 flex items-center text-left">
       <div class="flex-shrink-0">
         <span class="text-xl">
           <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
@@ -236,7 +237,7 @@
       )}
       type="button"
     >
-      <div class="flex items-center text-left">
+      <div class="p-1.5 flex items-center text-left">
         <div class="flex-shrink-0">
           <span class="text-xl">
             <#Icon iconify="fluent:door-tag-20-filled" class="w-4 h-4" />
