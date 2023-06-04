@@ -6,7 +6,7 @@
     {#match {name, extra} = _role}
       <!-- id={"permissions_icon-#{@parent_id}-#{@object_id}"} -->
       <Bonfire.UI.Common.OpenModalLive
-        id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, @object_id, __MODULE__)}
+        id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "#{@parent_id}-#{@object_id}", __MODULE__)}
         no_actions
         open_btn_wrapper_class="!py-1 !px-3"
       >
@@ -14,7 +14,7 @@
           <div class="flex items-center gap-2">
             <div class="text-base font-medium">{name || l("Custom")}</div>
           </div>
-          {#if name == "Caretaker"}
+          {#if name in ["Caretaker", "Administer"]}
             <div class="gap-2 mt-4">
               <div class="w-full prose-sm prose">{l(
                   "As caretaker you have full control over this, including the right to perform any action on it, and to set its boundaries."
