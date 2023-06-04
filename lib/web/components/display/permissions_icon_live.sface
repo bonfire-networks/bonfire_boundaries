@@ -4,8 +4,9 @@
 >
   {#case @boundary_tuple || Bonfire.Boundaries.preset_boundary_role_from_acl(@object_boundary)}
     {#match {name, extra} = _role}
+      <!-- id={"permissions_icon-#{@parent_id}-#{@object_id}"} -->
       <Bonfire.UI.Common.OpenModalLive
-        id={"permissions_icon-#{@parent_id}"}
+        id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, @object_id, __MODULE__)}
         no_actions
         open_btn_wrapper_class="!py-1 !px-3"
       >
