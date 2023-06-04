@@ -8,6 +8,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   # alias Bonfire.Common.Config
   # alias Bonfire.Common.Cache
   alias Bonfire.Boundaries.Acls
+  alias Bonfire.Boundaries.Verbs
   alias Bonfire.Data.AccessControl.Controlled
 
   def create(%{} = attrs) when not is_struct(attrs) do
@@ -88,6 +89,22 @@ defmodule Bonfire.Boundaries.Controlleds do
 
   defp do_list_presets_on_objects(_), do: %{}
 
+  def list_subjects_by_verb(objects, verbs, value \\ true) do
+    multiple? = is_list(verbs) and verbs != []
+
+    list_on_objects_by_verb_q(objects, Verbs.ids(verbs), value)
+    |> repo().many()
+    # |> debug()
+    |> Map.new(fn c ->
+      # note: Map.new discards duplicates for the same key
+      {
+        "#{e(c, :acl, :grants, :verb_id, nil)}-#{e(c, :acl, :grants, :subject_id, nil)}",
+        if(multiple?, do: e(c, :acl, :grants, nil), else: e(c, :acl, :grants, :subject, nil))
+      }
+    end)
+    |> if multiple?, do: ..., else: Map.values(...)
+  end
+
   def list_q,
     do:
       from(
@@ -112,6 +129,15 @@ defmodule Bonfire.Boundaries.Controlleds do
     |> where(
       [c, grants: grants],
       grants.subject_id == ^ulid(current_user) and c.acl_id not in ^Acls.preset_acl_ids()
+    )
+  end
+
+  defp list_on_objects_by_verb_q(objects, verbs, value \\ true) do
+    list_q(objects)
+    |> proload(acl: [grants: [:verb, subject: [:profile, :character]]])
+    |> where(
+      [c, grants: grants],
+      grants.verb_id in ^ulids(verbs) and grants.value == ^value
     )
   end
 

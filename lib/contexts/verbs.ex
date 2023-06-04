@@ -29,7 +29,15 @@ defmodule Bonfire.Boundaries.Verbs do
         message: "Missing default verb: #{inspect(id_or_name)}"
   end
 
-  def get_id(slug), do: verbs()[slug][:id]
+  def get_id(slug) when is_atom(slug), do: verbs()[slug][:id]
+
+  def get_id(id_or_slug) when is_binary(id_or_slug) do
+    case maybe_to_atom(id_or_slug) do
+      slug when not is_nil(slug) and is_atom(slug) -> get_id(slug)
+      _ -> ulid(id_or_slug)
+    end
+  end
+
   def get_id!(slug), do: get!(slug)[:id]
 
   def ids(verbs) when is_list(verbs),
