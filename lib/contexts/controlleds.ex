@@ -1,4 +1,7 @@
 defmodule Bonfire.Boundaries.Controlleds do
+  @moduledoc """
+  An object is linked to one or more `Acl`s by the `Controlled` multimixin, which pairs an object ID with an ACL ID. Because it is a multimixin, a given object can have multiple ACLs applied. In the case of overlap, permissions are combined with `false` being prioritised.
+  """
   use Arrows
   import Bonfire.Boundaries.Integration
   import Ecto.Query
@@ -8,6 +11,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   # alias Bonfire.Common.Config
   # alias Bonfire.Common.Cache
   alias Bonfire.Boundaries.Acls
+  alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Boundaries.Verbs
   alias Bonfire.Data.AccessControl.Controlled
 
@@ -89,9 +93,21 @@ defmodule Bonfire.Boundaries.Controlleds do
 
   defp do_list_presets_on_objects(_), do: %{}
 
-  def list_subjects_by_verb(objects, verbs, value \\ true) do
-    multiple? = is_list(verbs) and verbs != []
+  def list_subjects_by_verb(objects, verb, value \\ true) when is_binary(verb) or is_atom(verb) do
+    list_on_objects_by_verb_q(objects, Verbs.ids(verb), value)
+    |> repo().many()
+    # |> debug()
+    |> Map.new(fn c ->
+      # note: Map.new discards duplicates for the same key
+      {
+        "#{e(c, :acl, :grants, :verb_id, nil)}-#{e(c, :acl, :grants, :subject_id, nil)}",
+        e(c, :acl, :grants, :subject, nil)
+      }
+    end)
+    |> Map.values()
+  end
 
+  def list_grants_by_verbs(objects, verbs, value \\ true) when is_list(verbs) do
     list_on_objects_by_verb_q(objects, Verbs.ids(verbs), value)
     |> repo().many()
     # |> debug()
@@ -99,10 +115,9 @@ defmodule Bonfire.Boundaries.Controlleds do
       # note: Map.new discards duplicates for the same key
       {
         "#{e(c, :acl, :grants, :verb_id, nil)}-#{e(c, :acl, :grants, :subject_id, nil)}",
-        if(multiple?, do: e(c, :acl, :grants, nil), else: e(c, :acl, :grants, :subject, nil))
+        e(c, :acl, :grants, nil)
       }
     end)
-    |> if multiple?, do: ..., else: Map.values(...)
   end
 
   def list_q,
@@ -184,5 +199,11 @@ defmodule Bonfire.Boundaries.Controlleds do
   def add_acls(object, acls) when is_list(acls) do
     # TODO: optimise
     Enum.map(acls, &add_acls(object, &1))
+  end
+
+  def grant_role(subject_id, object, role, opts \\ []) do
+    with {:ok, acl} <- Acls.get_or_create_object_custom_acl(object, current_user(opts)) do
+      Controlleds.grant_role(subject_id, acl, role, opts)
+    end
   end
 end

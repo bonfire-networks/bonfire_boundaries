@@ -472,7 +472,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
     list_of_ids =
       list_of_objects
-      |> Enum.map(&ulid_or_acl/1)
+      |> Enum.map(&Acls.acl_id/1)
       |> Enum.uniq()
       |> filter_empty(nil)
 
@@ -529,14 +529,6 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
-  defp ulid_or_acl(:instance) do
-    Bonfire.Boundaries.Fixtures.instance_acl()
-  end
-
-  defp ulid_or_acl(obj) do
-    ulid(obj)
-  end
-
   def preload(list_of_assigns, opts \\ []) do
     # debug(list_of_assigns, "preload from given assigns")
 
@@ -589,7 +581,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       |> debug("presets")
 
     if not is_nil(current_user) do
-      # WIP: show user's computed permission instead of preset if we have current_user
+      # WIP: display user's computed permission if we have current_user
       # case Bonfire.Boundaries.Controlleds.list_on_objects_by_subject(list_of_ids, current_user) do
       case Bonfire.Boundaries.users_grants_on(current_user, list_of_ids) do
         custom when custom != %{} and custom != [] ->

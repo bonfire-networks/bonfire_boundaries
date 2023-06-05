@@ -1,6 +1,13 @@
 defmodule Bonfire.Boundaries.Acls do
   @moduledoc """
-  acls represent fully populated access control rules that can be reused
+  ACLs represent fully populated access control rules that can be reused.
+  Can be reused to secure multiple objects, thus exists independently of any object.
+
+  The table doesn't have any fields of its own: 
+  ```
+  has_many(:grants, Grant)
+  has_many(:controlled, Controlled)
+  ```
   """
   use Arrows
   use Bonfire.Common.Utils
@@ -17,12 +24,13 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.AccessControl.Controlled
   alias Bonfire.Data.AccessControl.Grant
-  alias Bonfire.Boundaries.Stereotyped
+  alias Bonfire.Data.AccessControl.Stereotyped
 
   alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Boundaries.Verbs
+  alias Bonfire.Boundaries.Fixtures
   alias Ecto.Changeset
   alias Pointers.Changesets
   alias Pointers.ULID
@@ -52,6 +60,14 @@ defmodule Bonfire.Boundaries.Acls do
 
   def get_id(slug), do: e(acls(), slug, :id, nil)
   def get_id!(slug), do: get!(slug)[:id]
+
+  def acl_id(:instance) do
+    Bonfire.Boundaries.Fixtures.instance_acl()
+  end
+
+  def acl_id(obj) do
+    ulid(obj) || get_id!(obj)
+  end
 
   def cast(changeset, creator, opts) do
     opts
@@ -92,7 +108,9 @@ defmodule Bonfire.Boundaries.Acls do
         Changesets.put_assoc(changeset, :controlled, control_acls)
 
       custom_recipients ->
+        # TODO: enable using cast on existing objects by using `get_or_create_object_custom_acl(object)` to check if a custom Acl already exists?
         acl_id = ULID.generate()
+
         controlled = [%{acl_id: acl_id} | control_acls]
 
         # default_role = e(opts, :role_to_grant, nil) || Config.get!([:role_to_grant, :default])
@@ -106,7 +124,11 @@ defmodule Bonfire.Boundaries.Acls do
 
         changeset
         |> Changeset.prepare_changes(fn changeset ->
-          changeset.repo.insert!(%Acl{id: acl_id})
+          changeset.repo.insert!(%Acl{
+            id: acl_id,
+            stereotyped: %Stereotyped{id: acl_id, stereotype_id: Fixtures.custom_acl()}
+          })
+
           changeset.repo.insert_all(Grant, custom_grants)
           changeset
         end)
@@ -338,6 +360,24 @@ defmodule Bonfire.Boundaries.Acls do
 
   def simple_create(caretaker, name) do
     create(%{named: %{name: name}}, current_user: caretaker)
+  end
+
+  def get_or_create_object_custom_acl(object, caretaker \\ nil) do
+    case get_object_custom_acl(object) do
+      {:ok, acl} ->
+        acl
+
+      _ ->
+        acl_id = ULID.generate()
+
+        create(
+          %{
+            id: acl_id,
+            stereotyped: %Stereotyped{id: acl_id, stereotype_id: Fixtures.custom_acl()}
+          },
+          current_user: caretaker
+        )
+    end
   end
 
   def changeset(:create, attrs, opts) do
@@ -572,7 +612,6 @@ defmodule Bonfire.Boundaries.Acls do
   # FIXME: this vs acls/0 ?
   def user_default_acls() do
     Map.fetch!(Boundaries.user_default_boundaries(), :acls)
-
     # |> debug
   end
 
@@ -587,6 +626,18 @@ defmodule Bonfire.Boundaries.Acls do
     |> repo().all()
 
     # |> debug("stereotype acls")
+  end
+
+  def get_object_custom_acl(object) do
+    from(a in Acl,
+      join: c in Controlled,
+      on: a.id == c.acl_id and c.id == ^object,
+      join: s in Stereotyped,
+      on: a.id == s.id and s.stereotype_id == ^Fixtures.custom_acl(),
+      preload: [stereotyped: s]
+    )
+    |> repo().single()
+    |> debug("custom acl")
   end
 
   def edit(%Acl{} = acl, %User{} = _user, params) do

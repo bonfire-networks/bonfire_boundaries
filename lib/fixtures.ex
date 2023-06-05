@@ -17,6 +17,7 @@ defmodule Bonfire.Boundaries.Fixtures do
   alias Bonfire.Boundaries.Circles
   alias Pointers.ULID
 
+  def custom_acl, do: "7HECVST0MAC1F0RAN0BJECTETC"
   def instance_acl, do: "01SETT1NGSF0R10CA11NSTANCE"
   def admin_circle, do: "0ADM1NSVSERW1THSVPERP0WERS"
   def activity_pub_circle, do: "7EDERATEDW1THANACT1V1TYPVB"
@@ -54,21 +55,28 @@ defmodule Bonfire.Boundaries.Fixtures do
       end
 
     repo().insert_all_or_ignore(Acl, Enum.map(acls, &Map.take(&1, [:id])))
+    |> info("Init ACLs")
+
     repo().insert_all_or_ignore(Circle, Enum.map(circles, &Map.take(&1, [:id])))
+    |> info("Init circles")
 
     repo().insert_all_or_ignore(
       Verb,
       Enum.map(verbs, &Map.take(&1, [:id, :verb]))
     )
+    |> info("Init verbs")
 
     # then grants
-    repo().insert_all_or_ignore(Grant, grants) |> debug("grants added")
+    repo().insert_all_or_ignore(Grant, grants)
+    |> debug("grants added")
+    |> info("Init grants")
 
     # Then the mixins
     repo().insert_all_or_ignore(
       Named,
       Enum.map(named, &Map.take(&1, [:id, :name]))
     )
+    |> info("Add names")
 
     # Make the instance admins circle caretaker of global circles and ACLs
     repo().insert_all_or_ignore(
@@ -76,9 +84,12 @@ defmodule Bonfire.Boundaries.Fixtures do
       ulids(acls ++ circles)
       |> Enum.map(&%{id: &1, caretaker_id: admin_circle()})
     )
-    |> info("Init built-in verbs and boundaries")
+    |> info("Init caretakers")
 
     # make the instance ACL control the instance object (which are the same)
     Bonfire.Boundaries.Controlleds.add_acls(instance_acl(), instance_acl())
+    |> info("Init instance ACL")
+
+    :ok
   end
 end

@@ -8,7 +8,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries.Circles
-  # alias Bonfire.Boundaries.Stereotyped
+  # alias Bonfire.Data.AccessControl.Stereotyped
   alias Bonfire.Data.Identity.ExtraInfo
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.AccessControl.Circle

@@ -1,12 +1,11 @@
 defmodule Bonfire.Boundaries.Grants do
   @moduledoc """
-  a grant applies to a subject
+  A grant is part of an `Acl`, and defines a permission (`value` boolean on a `verb`) for a `subject`
   """
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Queries
   import Bonfire.Boundaries.Integration
   import Ecto.Query
-
   # import EctoSparkles
 
   alias Ecto.Changeset
@@ -74,14 +73,15 @@ defmodule Bonfire.Boundaries.Grants do
   end
 
   @doc """
-  Grant takes three parameters:
+  Edits or adds a grant to an Acl 
+
+  Takes three parameters:
   - subject_id:  who we are granting access to
   - acl_id: what ACL we're applying a grant to
   - verb: which verb/action
   - value: true, false, or nil
   """
   def grant(subject_id, acl_id, verb, value, opts \\ [])
-
   # |> debug("mapped") # TODO: optimise?
   def grant(subject_ids, acl_id, verb, value, opts) when is_list(subject_ids),
     do:
@@ -141,11 +141,13 @@ defmodule Bonfire.Boundaries.Grants do
     nil
   end
 
+  @doc "Edits or adds grants to an Acl based on a role"
   def grant_role(subject_id, acl_id, role, opts \\ []) do
     with {:ok, value, role_verbs} <- Verbs.verbs_for_role(role) do
       debug(length(role_verbs), value)
 
-      # first remove all existing grants to this subject
+      # first remove existing grants to this subject
+      # FIXME: what if the user granted a separate role or custom verbs to the same subject? we should only remove grants that match the old role we're changing (if any)
       remove_subject_from_acl(subject_id, acl_id)
       |> debug("cleeen before granting #{role}")
 

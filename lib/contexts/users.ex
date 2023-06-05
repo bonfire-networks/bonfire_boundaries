@@ -7,7 +7,7 @@ defmodule Bonfire.Boundaries.Users do
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Circles
-  alias Bonfire.Boundaries.Stereotyped
+  alias Bonfire.Data.AccessControl.Stereotyped
   alias Bonfire.Boundaries.Verbs
 
   alias Bonfire.Data.AccessControl.Acl
@@ -97,8 +97,8 @@ defmodule Bonfire.Boundaries.Users do
     repo().insert_all_or_ignore(Named, named)
     repo().insert_all_or_ignore(Controlled, controlleds)
     repo().insert_all_or_ignore(Stereotyped, stereotypes)
-    # * The ACLs and Circles must be deleted when the user is deleted.
-    # * Grants will take care of themselves because they have a strong pointer acl_id.
+    # NOTE: The ACLs and Circles must be deleted when the user is deleted.
+    # Grants will take care of themselves because they have a strong pointer acl_id.
     Boundaries.take_care_of!(acls ++ circles, user)
   end
 

@@ -373,7 +373,13 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: "Local users may contribute"
         },
 
-        ### Stereotypes - placeholders for special per-user ACLs the system will manage.
+        ### Stereotypes - placeholders for special per-user (or per-object) ACLs the system will manage.
+
+        custom_acl: %{
+          id: "7HECVST0MAC1F0RAN0BJECTETC",
+          name: "Custom boundary",
+          stereotype: true
+        },
 
         ## ACLs that confer my personal permissions on things i have created
         # i_may_read:            %{id: "71MAYSEEANDREADMY0WNSTVFFS", name: "I may read"},              # not currently used
@@ -400,7 +406,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: "People I silenced aren't discoverable by me",
           stereotype: true
         },
-        cannot_discover_when_if_silenced: %{
+        cannot_discover_if_silenced: %{
           id: "2HEYS11ENCEDMES0CAN0TSEEME",
           name: "People who silenced me can not discover me",
           stereotype: true
@@ -446,7 +452,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         silenced_cannot_reach_me: %{
           silence_them: verbs_negative.([:mention, :message, :reply])
         },
-        cannot_discover_when_if_silenced: %{silence_me: verbs_negative.([:see])},
+        cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])},
         no_follow: %{local: verbs_negative.([:follow]), activity_pub: verbs_negative.([:follow])}
       }
 
@@ -456,11 +462,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       # instance-wide negative permissions
       :ghosted_cannot_anything,
       :silenced_cannot_reach_me,
-      :cannot_discover_when_if_silenced,
+      :cannot_discover_if_silenced,
       # per-user negative permissions
       :my_ghosted_cannot_anything,
       :my_silenced_cannot_reach_me,
-      :my_cannot_discover_when_if_silenced
+      :my_cannot_discover_if_silenced
     ]
 
     ### Creating a user also entails inserting a default boundaries configuration for them.
@@ -489,7 +495,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
           my_ghosted_cannot_anything: %{stereotype: :ghosted_cannot_anything},
           my_silenced_cannot_reach_me: %{stereotype: :silenced_cannot_reach_me},
-          my_cannot_discover_when_if_silenced: %{stereotype: :cannot_discover_when_if_silenced}
+          my_cannot_discover_if_silenced: %{stereotype: :cannot_discover_if_silenced}
         },
         ### Data structure:
         ### * The outer keys are ACL names declared above.
@@ -511,7 +517,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           },
           # People who silence me can't see me or my objects in feeds and such (but can still read them if they have a
           # direct link or come across my objects in a thread structure or such).
-          my_cannot_discover_when_if_silenced: %{silence_me: verbs_negative.([:see])}
+          my_cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])}
         },
         ### This lets us control access to the user themselves (e.g. to view their profile or mention them)
         controlleds: %{

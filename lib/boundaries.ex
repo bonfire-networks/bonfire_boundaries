@@ -97,8 +97,8 @@ defmodule Bonfire.Boundaries do
 
   defp query_users_grants_on(users, things) do
     from(s in Summary,
-      where: s.subject_id in ^Types.ulids(users),
-      where: s.object_id in ^Types.ulids(things)
+      where: s.object_id in ^Types.ulids(things),
+      where: s.subject_id in ^Types.ulids(users)
     )
   end
 
