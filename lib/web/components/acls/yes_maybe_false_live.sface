@@ -1,3 +1,19 @@
+{#if @read_only}
+  {#case @value}
+    {#match true}
+    <div class="badge badge-success badge-sm">
+      <#Icon solid="Check" class="w-4 h-4" />
+      <span class="">{l "Can"}</span>
+    </div>
+    {#match false}
+    <div class="badge badge-error badge-sm">
+      <#Icon solid="X" class="w-4 h-4" />
+      <span class="">{l "Cannot"}</span>
+    </div>
+    {#match nil}
+    <#Icon solid="Minus" class="w-4 h-4 text-gray-400" />
+  {/case}
+{#else}
 <div class="flex items-center gap-3 boundaries-switches">
   <form :on-change="edit_grant_verb" phx-target={@event_target} class="flex items-center gap-3">
     <input
@@ -5,7 +21,6 @@
       value={if @value == true, do: "1", else: "0"}
       type="checkbox"
       name={@field_name}
-      disabled={@read_only}
       class={
         "toggle toggle-md",
         "!toggle-success": @value == true,
@@ -20,7 +35,6 @@
         type="radio"
         value=""
         checked={is_nil(@value)}
-        disabled={@read_only}
       />
       <div class="btn btn-circle btn-xs">
         <#Icon solid="X" class="w-4 h-4" />
@@ -85,3 +99,4 @@
     </label> -->
   </form>
 </div>
+{/if}

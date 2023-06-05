@@ -22,7 +22,7 @@
             to={~p"/boundaries/scope/#{@scope}/circle/#{id(circle)}"}
           >
             <div class="flex items-center gap-3 p-3">
-              <#Icon iconify="material-symbols:group-work-outline" class="w-5 h-5 text-base-content/70" />
+              <#Icon iconify="fluent:people-list-16-filled" class="w-5 h-5 text-base-content/70" />
               <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
                 <div class="truncate">
                   <div class="flex text-sm">
