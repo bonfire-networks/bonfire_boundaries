@@ -503,6 +503,9 @@ defmodule Bonfire.Boundaries.Acls do
       when is_binary(stereotype_id) do
     true
   end
+  def is_stereotyped?(_acl) do
+    false
+  end
 
   def is_stereotype?(acl) do
     # debug(acl)
