@@ -13,7 +13,7 @@
       setting_boundaries={@setting_boundaries}
     />
   {#else}
-    <div :if={!@setting_boundaries} class="">
+    <div :if={!@setting_boundaries and !@read_only} class="">
       <ul
         role="tablist"
         class="flex justify-evenly items-stretch gap-3 text-sm font-medium border-b border-base-content/10"
@@ -54,7 +54,7 @@
       </ul>
     </div>
 
-    <div class="">
+    <div date-role="edit-acl">
       <div :if={@section != "settings"}>
         <div :if={!@read_only}>
           <form id="edit_acl_members" class="p-2 border-b border-base-content/10" :on-change="select">
@@ -87,10 +87,7 @@
                 {#else}
                   <div class="flex items-center gap-3">
                     <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-                      <#Icon
-                        iconify="fluent:people-list-16-filled"
-                        class="inline-block w-5 h-5 text-base-content/70"
-                      />
+                      <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/70" />
                     </span>
                     <div class="text-sm truncate max-w-[160px] font-medium text-base-content">{LiveHandler.subject_name(subject)}</div>
                   </div>
@@ -158,7 +155,7 @@
         {/if}
       </div>
 
-      <section :if={@section == "settings"} class="p-4" role="tabpanel">
+      <section :if={@section == "settings" and !@read_only} class="p-4" role="tabpanel">
         <div class="pb-3 text-lg font-normal">{l("General")}</div>
         <form
           id="edit_acl"
@@ -173,7 +170,7 @@
             <div class="flex items-center">
               <input
                 name="named[name]"
-                value={e(@acl, :named, :name, nil)}
+                value={e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil)}
                 type="text"
                 placeholder="Type here"
                 class="w-full input input-bordered"

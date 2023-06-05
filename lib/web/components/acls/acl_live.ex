@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   prop selected_tab, :any, default: nil
   prop section, :any, default: nil
   prop setting_boundaries, :boolean, default: false
-  prop scope, :atom, default: :user
+  prop scope, :any, default: :user
 
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})
@@ -31,20 +31,22 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     acl_id = e(assigns, :acl_id, nil) || e(socket.assigns, :acl_id, nil) || e(params, "id", nil)
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
 
-    verbs = Bonfire.Boundaries.Verbs.list(:db, :id)
+    # note: Verbs only needed if doing custom permissions rather than using roles
+    # verbs = Bonfire.Boundaries.Verbs.list(:db, :id)
+    # verbs =
+    #   if scope != :instance do
+    #     # filter out instance-related roles (to show only content related ones)
+    #
+    #     instance_verbs =
+    #       Bonfire.Boundaries.Verbs.list(:instance, :id)
+    #       |> debug
 
-    verbs =
-      if scope != :instance do
-        instance_verbs =
-          Bonfire.Boundaries.Verbs.list(:instance, :id)
-          |> debug
-
-        verbs
-        |> Enum.reject(&(elem(&1, 0) in instance_verbs))
-        |> debug
-      else
-        verbs
-      end
+    #     verbs
+    #     |> Enum.reject(&(elem(&1, 0) in instance_verbs))
+    #     |> debug
+    #   else
+    #     verbs
+    #   end
 
     global_circles = Bonfire.Boundaries.Fixtures.global_circles()
 
@@ -53,7 +55,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
      |> assign(assigns)
      |> assign(
        section: e(params, "section", "permissions"),
-       verbs: verbs,
+       #  verbs: verbs,
        acl_id: acl_id,
        #  suggestions: suggestions,
        global_circles: global_circles,
@@ -78,7 +80,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
                subject: [:named, :profile, :character, stereotyped: [:named]]
              ]
            ) do
-      # debug(acl, "acl")
+      debug(acl, "acllll")
+
       send_self(
         back: true,
         page_title: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil),
@@ -101,8 +104,9 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         # subjects: subjects(e(acl, :grants, [])),
         read_only:
           Acls.is_stereotype?(acl) or
-            (acl_id in Acls.built_in_ids() and
-               !Bonfire.Boundaries.can?(current_user, :grant, :instance))
+            (!Acls.is_object_custom?(acl) and
+               (Acls.is_stereotyped?(acl) and
+                  !Bonfire.Boundaries.can?(current_user, :grant, :instance)))
       )
     end
   end

@@ -365,18 +365,22 @@ defmodule Bonfire.Boundaries.Acls do
   def get_or_create_object_custom_acl(object, caretaker \\ nil) do
     case get_object_custom_acl(object) do
       {:ok, acl} ->
-        acl
+        {:ok, acl}
 
       _ ->
         acl_id = ULID.generate()
 
-        create(
-          %{
-            id: acl_id,
-            stereotyped: %Stereotyped{id: acl_id, stereotype_id: Fixtures.custom_acl()}
-          },
-          current_user: caretaker
-        )
+        with {:ok, acl} <-
+               create(
+                 %{
+                   id: acl_id,
+                   stereotyped: %{id: acl_id, stereotype_id: Fixtures.custom_acl()}
+                 },
+                 current_user: caretaker
+               ),
+             {:ok, _} <- Controlleds.add_acls(object, acl) do
+          {:ok, acl}
+        end
     end
   end
 
@@ -495,7 +499,7 @@ defmodule Bonfire.Boundaries.Acls do
     |> Enum.map(& &1.id)
   end
 
-  def is_stereotype?(%{stereotyped: %{stereotype_id: stereotype_id}} = _acl)
+  def is_stereotyped?(%{stereotyped: %{stereotype_id: stereotype_id}} = _acl)
       when is_binary(stereotype_id) do
     true
   end
@@ -503,6 +507,16 @@ defmodule Bonfire.Boundaries.Acls do
   def is_stereotype?(acl) do
     # debug(acl)
     ulid(acl) in stereotype_ids()
+  end
+
+  def is_object_custom?(%{stereotyped: %{stereotype_id: stereotype_id}} = _acl)
+      when is_binary(stereotype_id) do
+    is_object_custom?(stereotype_id)
+    |> debug(stereotype_id)
+  end
+
+  def is_object_custom?(acl) do
+    id(acl) == Fixtures.custom_acl()
   end
 
   def list_built_ins do
@@ -631,7 +645,7 @@ defmodule Bonfire.Boundaries.Acls do
   def get_object_custom_acl(object) do
     from(a in Acl,
       join: c in Controlled,
-      on: a.id == c.acl_id and c.id == ^object,
+      on: a.id == c.acl_id and c.id == ^id(object),
       join: s in Stereotyped,
       on: a.id == s.id and s.stereotype_id == ^Fixtures.custom_acl(),
       preload: [stereotyped: s]

@@ -16,15 +16,15 @@
       <ul role="list" class="flex flex-col divide-y divide-base-content/10">
         <li
           class=""
-          
           x-data="{open: false}"
           :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()}
           :if={verbs != []}
         >
-          <div 
+          <div
             :class="{'bg-base-content/10 hover:!bg-base-content/10': open}"
-            x-on:click="open = !open" 
-            class="block cursor-pointer hover:bg-base-content/5">
+            x-on:click="open = !open"
+            class="block cursor-pointer hover:bg-base-content/5"
+          >
             <div class="flex items-center gap-3 p-4">
               <#Icon iconify="mdi:shield-lock-open" class="w-5 h-5 text-base-content/70" />
               <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
@@ -35,7 +35,7 @@
                 </div>
               </div>
               <div class="btn btn-ghost btn-circle rounded flex items-center gap-2 btn-sm normal-case">
-                <span class="sr-only">{l "Details"}</span>
+                <span class="sr-only">{l("Details")}</span>
                 <#Icon solid="ChevronDown" class="w-5 h-5 text-base-content/70" />
               </div>
             </div>
@@ -77,14 +77,16 @@
         </li>
 
         <li
-         class=""
+          class=""
           x-data="{open: false}"
           :for={{name, verbs} <- Bonfire.Boundaries.Verbs.negative_role_verbs()}
           :if={verbs != []}
         >
-          <div :class="{'bg-base-content/10 hover:!bg-base-content/10': open}"
-            x-on:click="open = !open" 
-            class="block cursor-pointer hover:bg-base-content/5">
+          <div
+            :class="{'bg-base-content/10 hover:!bg-base-content/10': open}"
+            x-on:click="open = !open"
+            class="block cursor-pointer hover:bg-base-content/5"
+          >
             <div class="flex items-center gap-3 p-4">
               <#Icon iconify="mdi:shield-lock" class="w-5 h-5 text-base-content/70" />
               <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
@@ -94,8 +96,8 @@
                   </div>
                 </div>
               </div>
-               <div class="btn btn-ghost btn-circle rounded flex items-center gap-2 btn-sm normal-case">
-                <span class="sr-only">{l "Details"}</span>
+              <div class="btn btn-ghost btn-circle rounded flex items-center gap-2 btn-sm normal-case">
+                <span class="sr-only">{l("Details")}</span>
                 <#Icon solid="ChevronDown" class="w-5 h-5 text-base-content/70" />
               </div>
             </div>

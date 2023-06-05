@@ -1,9 +1,5 @@
 <div data-role="new_role">
-  <Bonfire.UI.Common.OpenModalLive
-    id="new_role"
-    title_text={l("Create a new role")}
-    no_actions
-  >
+  <Bonfire.UI.Common.OpenModalLive id="new_role" title_text={l("Create a new role")} no_actions>
     <div>
       <Bonfire.Boundaries.Web.NewRoleLive setting_boundaries={@setting_boundaries} />
     </div>

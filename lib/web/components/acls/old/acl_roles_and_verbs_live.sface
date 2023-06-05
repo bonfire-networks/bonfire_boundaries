@@ -138,10 +138,7 @@
                   />
                 {#else}
                   <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-                    <#Icon
-                      iconify="fluent:people-list-16-filled"
-                      class="inline-block w-5 h-5 text-base-content/70"
-                    />
+                    <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/70" />
                   </span>
                   {LiveHandler.subject_name(e(l, :subject, nil))}
                 {/if}

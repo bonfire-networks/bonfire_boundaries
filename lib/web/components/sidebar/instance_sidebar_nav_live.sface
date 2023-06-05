@@ -17,10 +17,7 @@
         "bg-base-content/10": @selected_tab == "circles"
       }
     >
-      <#Icon
-        iconify="fluent:people-list-16-filled"
-        class="w-5 h-5 font-normal text-base-content/70"
-      />
+      <#Icon iconify="fluent:people-list-16-filled" class="w-5 h-5 font-normal text-base-content/70" />
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/70",

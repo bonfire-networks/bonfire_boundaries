@@ -1,64 +1,64 @@
 {#if @read_only}
   {#case @value}
     {#match true}
-    <div class="badge badge-success badge-sm">
-      <#Icon solid="Check" class="w-4 h-4" />
-      <span class="">{l "Can"}</span>
-    </div>
+      <div class="badge badge-success badge-sm">
+        <#Icon solid="Check" class="w-4 h-4" />
+        <span class="">{l("Can")}</span>
+      </div>
     {#match false}
-    <div class="badge badge-error badge-sm">
-      <#Icon solid="X" class="w-4 h-4" />
-      <span class="">{l "Cannot"}</span>
-    </div>
+      <div class="badge badge-error badge-sm">
+        <#Icon solid="X" class="w-4 h-4" />
+        <span class="">{l("Cannot")}</span>
+      </div>
     {#match nil}
-    <#Icon solid="Minus" class="w-4 h-4 text-gray-400" />
+      <#Icon solid="Minus" class="w-4 h-4 text-gray-400" />
   {/case}
 {#else}
-<div class="flex items-center gap-3 boundaries-switches">
-  <form :on-change="edit_grant_verb" phx-target={@event_target} class="flex items-center gap-3">
-    <input
-      :if={@value != nil}
-      value={if @value == true, do: "1", else: "0"}
-      type="checkbox"
-      name={@field_name}
-      class={
-        "toggle toggle-md",
-        "!toggle-success": @value == true,
-        "!border-error !bg-error !text-error": @value == false
-      }
-      checked={@value}
-    />
-    <label :if={@value != nil && !@read_only}>
+  <div class="flex items-center gap-3 boundaries-switches">
+    <form :on-change="edit_grant_verb" phx-target={@event_target} class="flex items-center gap-3">
       <input
-        class="absolute opacity-0"
+        :if={@value != nil}
+        value={if @value == true, do: "1", else: "0"}
+        type="checkbox"
         name={@field_name}
-        type="radio"
-        value=""
-        checked={is_nil(@value)}
+        class={
+          "toggle toggle-md",
+          "!toggle-success": @value == true,
+          "!border-error !bg-error !text-error": @value == false
+        }
+        checked={@value}
       />
-      <div class="btn btn-circle btn-xs">
-        <#Icon solid="X" class="w-4 h-4" />
-      </div>
-    </label>
-    <button
-      :if={@value == nil && !@read_only}
-      class={
-        "normal-case rounded btn btn-xs",
-        "btn-disabled": @read_only
-      }
-    >
-      {l("Edit")}
-    </button>
-    <button
-      :if={@value == nil && @read_only}
-      class={
-        "normal-case rounded btn btn-xs",
-        "btn-disabled": @read_only
-      }
-    >
-      {l("Not specified")}
-    </button>
-    <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Can")}>
+      <label :if={@value != nil && !@read_only}>
+        <input
+          class="absolute opacity-0"
+          name={@field_name}
+          type="radio"
+          value=""
+          checked={is_nil(@value)}
+        />
+        <div class="btn btn-circle btn-xs">
+          <#Icon solid="X" class="w-4 h-4" />
+        </div>
+      </label>
+      <button
+        :if={@value == nil && !@read_only}
+        class={
+          "normal-case rounded btn btn-xs",
+          "btn-disabled": @read_only
+        }
+      >
+        {l("Edit")}
+      </button>
+      <button
+        :if={@value == nil && @read_only}
+        class={
+          "normal-case rounded btn btn-xs",
+          "btn-disabled": @read_only
+        }
+      >
+        {l("Not specified")}
+      </button>
+      <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Can")}>
       <input
         class="absolute opacity-0"
         name={@field_name}
@@ -71,7 +71,7 @@
         <#Icon solid="Check" class="w-4 h-4" />
       </div>
     </label> -->
-    <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Not specified")}>
+      <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Not specified")}>
       <input
         class="absolute opacity-0"
         name={@field_name}
@@ -84,7 +84,7 @@
         <#Icon solid="Minus" class="w-4 h-4" />
       </div>
     </label> -->
-    <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Cannot")}>
+      <!-- <label class="tooltip tooltip-top" data-tip={if @value == true, do: l("Cannot")}>
       <input
         class="absolute opacity-0"
         name={@field_name}
@@ -97,6 +97,6 @@
         <#Icon solid="X" class="w-4 h-4" />
       </div>
     </label> -->
-  </form>
-</div>
+    </form>
+  </div>
 {/if}

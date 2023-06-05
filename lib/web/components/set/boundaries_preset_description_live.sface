@@ -23,5 +23,5 @@
       {/case}
     </button>
   {#match boundary_name}
-  <div></div>
- {/case}
+    <div />
+{/case}

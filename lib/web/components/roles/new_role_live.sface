@@ -1,5 +1,4 @@
 <div class="">
-
   <div x-data="{ name: '' }" class="w-full">
     <div class="w-full form-control">
       <label class="label">
@@ -16,7 +15,7 @@
       </div>
     </div>
 
-      <!-- phx-target={@event_target} -->
+    <!-- phx-target={@event_target} -->
     <button
       phx-click="Bonfire.Boundaries:role_create"
       :phx-value-name="name"

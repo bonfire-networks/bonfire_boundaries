@@ -8,12 +8,12 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
     # params = e(assigns, :__context__, :current_params, %{})
 
     send_self(
-        page_title: e(socket.assigns, :name, nil) || l("Roles"),
-        back: true,
-        page_header_aside: [
-          { Bonfire.Boundaries.Web.NewRoleButtonLive, []}
-        ]
-      )
+      page_title: e(socket.assigns, :name, nil) || l("Roles"),
+      back: true,
+      page_header_aside: [
+        {Bonfire.Boundaries.Web.NewRoleButtonLive, []}
+      ]
+    )
 
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
 
