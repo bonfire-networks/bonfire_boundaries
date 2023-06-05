@@ -107,7 +107,7 @@
                     <Bonfire.Boundaries.Web.BlockButtonLive
                       object={e(block, :subject, nil)}
                       scope={@scope}
-                      block_type={@block_type}
+                      type={@block_type}
                       my_block
                       label={l("Unsilence")}
                     />
@@ -232,7 +232,7 @@
                     <Bonfire.Boundaries.Web.BlockButtonLive
                       object={e(block, :subject, nil)}
                       scope={@scope}
-                      block_type={@block_type}
+                      type={@block_type}
                       my_block
                       label={l("Unghost")}
                     />

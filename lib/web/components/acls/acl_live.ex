@@ -71,9 +71,11 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     current_user = current_user(socket)
 
     acl_id = e(socket.assigns, :acl_id, nil)
+    acl = e(socket.assigns, :acl, nil)
+    acl = if id(acl) == acl_id, do: {:ok, acl}
 
     with {:ok, acl} <-
-           Acls.get_for_caretaker(acl_id, current_user)
+           (acl || Acls.get_for_caretaker(acl_id, current_user))
            |> repo().maybe_preload(
              grants: [
                :verb,
@@ -237,11 +239,51 @@ defmodule Bonfire.Boundaries.Web.AclLive do
      )}
   end
 
-  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+  def do_handle_event(
+        "live_select_change",
+        %{"id" => live_select_id, "text" => search},
+        %{assigns: %{scope: :user}} = socket
+      ) do
     current_user = current_user(socket)
 
-    (Bonfire.Boundaries.Circles.list_my(current_user, search: search) ++
+    (Bonfire.Boundaries.Circles.list_my_with_global(
+       [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
+       search: search
+     ) ++
        Bonfire.Me.Users.search(search))
+    |> results_to_multiselect(live_select_id, socket)
+  end
+
+  def do_handle_event(
+        "live_select_change",
+        %{"id" => live_select_id, "text" => search},
+        %{assigns: %{scope: :instance}} = socket
+      ) do
+    (Bonfire.Boundaries.Circles.list_my_with_global(
+       [
+         Bonfire.Boundaries.Fixtures.admin_circle(),
+         Bonfire.Boundaries.Fixtures.activity_pub_circle()
+       ],
+       search: search
+     ) ++
+       Bonfire.Me.Users.search(search))
+    |> results_to_multiselect(live_select_id, socket)
+  end
+
+  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+    current_user = current_user(socket)
+    # for groups and the like 
+    # TODO: should they have their own circles?
+    (Bonfire.Boundaries.Circles.list_my_with_global(
+       [Bonfire.Boundaries.Fixtures.activity_pub_circle()],
+       search: search
+     ) ++
+       Bonfire.Me.Users.search(search))
+    |> results_to_multiselect(live_select_id, socket)
+  end
+
+  defp results_to_multiselect(results, live_select_id, socket) do
+    results
     |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
 

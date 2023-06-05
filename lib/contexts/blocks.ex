@@ -65,6 +65,8 @@ defmodule Bonfire.Boundaries.Blocks do
 
   def block(user_or_instance_to_block, block_type, scope) do
     with {:ok, blocked} <- mutate(:block, user_or_instance_to_block, block_type, scope) do
+      debug(blocked, "blooocked")
+
       if user_or_instance_to_block != :instance_wide and scope != :instance_wide do
         me = Utils.current_user_required!(scope)
         types_blocked = types_blocked(block_type)

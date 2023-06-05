@@ -1,6 +1,6 @@
 <Bonfire.UI.Common.OpenModalLive
   no_actions
-  :if={@parent_id && @object}
+  :if={@object}
   id={"block-#{@parent_id}-#{id(@object)}-#{@type}"}
   title_text={@title || l("%{type} %{user_or_instance_name}", type: @type, user_or_instance_name: @label)}
 >
@@ -12,7 +12,7 @@
           )}</div>
         <button
           data-role="unsilence"
-          :on-click="Bonfire.Social.Block:unsilence"
+          :on-click="Bonfire.Boundaries.Blocks:unsilence"
           phx-value-id={e(@object, :id, @object)}
           type="button"
           class="btn my-3 rounded-full w-full btn-warning normal-case"
@@ -60,7 +60,7 @@
         </div>
         <button
           data-role="silence"
-          :on-click="Bonfire.Social.Block:silence"
+          :on-click="Bonfire.Boundaries.Blocks:silence"
           phx-value-id={e(@object, :id, @object)}
           type="button"
           class="btn rounded-full w-full btn-warning normal-case"
@@ -83,21 +83,21 @@
             </p>
           </div>
           <button
-            :on-click="Bonfire.Social.Block:unsilence_instance_wide"
+            :on-click="Bonfire.Boundaries.Blocks:unsilence_instance_wide"
             phx-value-id={e(@object, :id, @object)}
             class="btn btn-error mt-3 w-full rounded-full normal-case"
           >{l("Unsilence instance-wide")}</button>
         {#else}
           <div class="flex flex-col p-2 mt-5 space-y-3 border rounded border-error/30 bg-error/5">
-            <div class="text-base font-semibold text-error-content">{l("Super powers")}</div>
-            <p class="mt-0 text-sm text-error-content">
+            <div class="text-base font-semibold">{l("Super powers")}</div>
+            <p class="mt-0 text-sm">
               {l(
                 "You can enforce the silence for all users of your instance. All local users will stop seeing %{user_or_instance_name} or their content",
                 user_or_instance_name: @label
               )}
             </p>
             <button
-              :on-click="Bonfire.Social.Block:silence_instance_wide"
+              :on-click="Bonfire.Boundaries.Blocks:silence_instance_wide"
               phx-value-id={e(@object, :id, @object)}
               class="btn btn-error rounded-full btn-outline normal-case"
             >{l("Silence instance-wide")}</button>
@@ -113,7 +113,7 @@
           )}</div>
         <button
           data-role="unghost"
-          :on-click="Bonfire.Social.Block:unghost"
+          :on-click="Bonfire.Boundaries.Blocks:unghost"
           phx-value-id={e(@object, :id, @object)}
           type="button"
           class="btn my-3 rounded-full w-full btn-warning normal-case"
@@ -164,7 +164,7 @@
         </div>
         <button
           data-role="ghost"
-          :on-click="Bonfire.Social.Block:ghost"
+          :on-click="Bonfire.Boundaries.Blocks:ghost"
           phx-value-id={e(@object, :id, @object)}
           type="button"
           class="btn rounded-full w-full btn-warning normal-case"
@@ -187,21 +187,21 @@
             </p>
           </div>
           <button
-            :on-click="Bonfire.Social.Block:unghost_instance_wide"
+            :on-click="Bonfire.Boundaries.Blocks:unghost_instance_wide"
             phx-value-id={e(@object, :id, @object)}
             class="btn btn-error mt-3 w-full rounded-full normal-case"
           >{l("Unghost instance-wide")}</button>
         {#else}
           <div class="flex flex-col p-2 mt-5 space-y-3 border rounded border-error/30 bg-error/5">
-            <div class="text-base font-semibold text-error-content">{l("Super powers")}</div>
-            <p class="mt-0 text-sm text-error-content">
+            <div class="text-base font-semibold">{l("Super powers")}</div>
+            <p class="mt-0 text-sm">
               {l(
                 "You can enforce the ghost for all users of your instance. Prevent %{user_or_instance_name} from seeing or interacting with all local users",
                 user_or_instance_name: @label
               )}
             </p>
             <button
-              :on-click="Bonfire.Social.Block:ghost_instance_wide"
+              :on-click="Bonfire.Boundaries.Blocks:ghost_instance_wide"
               phx-value-id={e(@object, :id, @object)}
               class="btn btn-error rounded-full btn-outline normal-case"
             >{l("Ghost instance-wide")}</button>
@@ -210,43 +210,45 @@
       </div>
     {/if}
   {#else}
-    {#if !@only_admin}
-      {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, current_user: @current_user) &&
-          Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, current_user: @current_user)}
-        <div class="text-sm mt-3">{l("By unblocking %{user_or_instance_name}, you will be able to interact together with them.",
-            user_or_instance_name: @label
+    {#if !@only_admin and
+        Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, current_user: @current_user) &&
+        Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, current_user: @current_user)}
+      <div class="text-sm mt-3">{l("By unblocking %{user_or_instance_name}, you will be able to interact together with them.",
+          user_or_instance_name: @label
+        )}</div>
+      <button
+        data-role="unblock"
+        :on-click="Bonfire.Boundaries.Blocks:unblock"
+        phx-value-id={e(@object, :id, @object)}
+        type="button"
+        class="btn my-3 rounded-full w-full btn-error normal-case"
+      >{l("Unblock")}
+      </button>
+    {#else}
+      <div class="my-3">
+        <div class="text-sm">{l(
+            "When you feel unsafe, or you tried discussing or flagging problematic people or content and it went nowhere, or you simply came across spam or trolls, you can always resort to blocking."
           )}</div>
-        <button
-          data-role="unblock"
-          :on-click="Bonfire.Social.Block:unblock"
-          phx-value-id={e(@object, :id, @object)}
-          type="button"
-          class="btn my-3 rounded-full w-full btn-error normal-case"
-        >{l("Unblock")}
-        </button>
-      {#else}
-        <div class="my-3">
-          <div class="text-sm">{l(
-              "When you feel unsafe, or you tried discussing or flagging problematic people or content and it went nowhere, or you simply came across spam or trolls, you can always resort to blocking."
-            )}</div>
-        </div>
-        <button
-          data-role="block"
-          :on-click="Bonfire.Social.Block:block"
-          phx-value-id={e(@object, :id, @object)}
-          type="button"
-          class="btn rounded-full w-full btn-warning normal-case"
-        >{l("Block")}
-        </button>
-      {/if}
+      </div>
+      <button
+        data-role="block"
+        :on-click="Bonfire.Boundaries.Blocks:block"
+        phx-value-id={e(@object, :id, @object)}
+        type="button"
+        class="btn rounded-full w-full btn-warning normal-case"
+      >{l("Block")}
+      </button>
     {/if}
+
     {#if !@only_user}
       <div
-        :if={Bonfire.Me.Users.is_admin?(@current_user) ||
+        :if={((@scope |> debug("scooooop")) not in [nil, :user, :instance] and
+           Bonfire.Me.Users.is_admin?(@current_user)) ||
+          Bonfire.Boundaries.can?(@__context__, :block, @scope) ||
           Bonfire.Boundaries.can?(@__context__, :block, :instance)}
         class=""
       >
-        {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, :instance_wide)}
+        <!-- {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, @scope) && Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, @scope)}
           <div class="">
             <p class="mt-0 text-sm text-base-content/80">
               {l("Are you sure to unblock %{user_or_instance_name} instance-wide?",
@@ -255,21 +257,59 @@
             </p>
           </div>
           <button
-            :on-click="Bonfire.Social.Block:unblock_instance_wide"
+            :on-click="Bonfire.Boundaries.Blocks:unblock_scope"
+            phx-value-id={e(@object, :id, @object)}
+            class="btn btn-error mt-3 w-full rounded-full normal-case"
+          >{l("Unblock instance-wide")}</button>
+        {#else} -->
+        <div class="flex flex-col p-2 mt-5 space-y-3 border rounded border-error/30 bg-error/5">
+          <div class="text-base font-semibold">{l("Super powers")}</div>
+          <p class="mt-0 text-sm">
+            {l(
+              "You can enforce the block for your group: %{user_or_instance_name} will no longer be able to see or interact with the group or future group activities.",
+              user_or_instance_name: @label
+            )}
+          </p>
+          <button
+            :on-click="Bonfire.Boundaries.Blocks:block_scoped"
+            phx-value-id={e(@object, :id, @object)}
+            phx-value-scope={id(@scope) || @scope}
+            class="btn btn-error rounded-full btn-outline normal-case"
+          >{l("Block from the group")}</button>
+        </div>
+        <!-- {/if} -->
+      </div>
+
+      <div
+        :if={Bonfire.Me.Users.is_admin?(@current_user) ||
+          Bonfire.Boundaries.can?(@__context__, :block, :instance)}
+        class=""
+      >
+        {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, :instance) &&
+            Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, :instance)}
+          <div class="">
+            <p class="mt-0 text-sm text-base-content/80">
+              {l("Are you sure to unblock %{user_or_instance_name} instance-wide?",
+                user_or_instance_name: @label
+              )}
+            </p>
+          </div>
+          <button
+            :on-click="Bonfire.Boundaries.Blocks:unblock_instance_wide"
             phx-value-id={e(@object, :id, @object)}
             class="btn btn-error mt-3 w-full rounded-full normal-case"
           >{l("Unblock instance-wide")}</button>
         {#else}
           <div class="flex flex-col p-2 mt-5 space-y-3 border rounded border-error/30 bg-error/5">
-            <div class="text-base font-semibold text-error-content">{l("Super powers")}</div>
-            <p class="mt-0 text-sm text-error-content">
+            <div class="text-base font-semibold">{l("Super powers")}</div>
+            <p class="mt-0 text-sm">
               {l(
                 "You can enforce the block for all users of your instance. All local users will stop interact with %{user_or_instance_name} or their content",
                 user_or_instance_name: @label
               )}
             </p>
             <button
-              :on-click="Bonfire.Social.Block:block_instance_wide"
+              :on-click="Bonfire.Boundaries.Blocks:block_instance_wide"
               phx-value-id={e(@object, :id, @object)}
               class="btn btn-error rounded-full btn-outline normal-case"
             >{l("Block instance-wide")}</button>

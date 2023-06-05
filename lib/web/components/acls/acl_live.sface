@@ -13,7 +13,7 @@
       setting_boundaries={@setting_boundaries}
     />
   {#else}
-    <div :if={!@setting_boundaries and !@read_only} class="">
+    <div :if={!@setting_boundaries and !@read_only and !Acls.is_object_custom?(@acl)} class="">
       <ul
         role="tablist"
         class="flex justify-evenly items-stretch gap-3 text-sm font-medium border-b border-base-content/10"

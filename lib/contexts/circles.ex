@@ -420,7 +420,7 @@ defmodule Bonfire.Boundaries.Circles do
     end
   end
 
-  def add_to_circles(subject, circles) when is_list(circles) do
+  def add_to_circles(subject, circles) when is_list(circles) and circles != [] do
     # TODO: optimise
     Enum.map(circles, &add_to_circles(subject, &1))
   end
