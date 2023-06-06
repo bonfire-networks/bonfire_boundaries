@@ -80,14 +80,14 @@
                 {#if e(subject, :profile, :id, nil)}
                   <Bonfire.UI.Common.ProfileItemLive
                     profile={e(subject, :profile, nil)}
-                    avatar_class="w-8 h-8 rounded"
+                    avatar_class="w-8 h-8 rounded-full"
                     character={e(subject, :character, nil)}
                     show_controls={[]}
                   />
                 {#else}
                   <div class="flex items-center gap-3">
-                    <span class="flex items-center w-8 h-8 rounded place-content-center bg-base-content/5">
-                      <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/70" />
+                    <span class="flex items-center w-8 h-8 rounded-full place-content-center bg-info/30">
+                      <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-info" />
                     </span>
                     <div class="text-sm truncate max-w-[160px] font-medium text-base-content">{LiveHandler.subject_name(subject)}</div>
                   </div>
@@ -200,7 +200,7 @@
           <div class="flex items-center justify-between space-x-8">
             <div class="flex flex-col">
               <div class="flex-1 text-base font-bold text-error">{l("Delete this boundary")}</div>
-              <div class="mt-2 text-sm text-error-content">{l(
+              <div class="mt-2 text-sm text-error">{l(
                   "Deleting a boundary means anything shared with users of the local instance using this boundary will no longer be shared. Please be certain."
                 )}</div>
             </div>
@@ -209,9 +209,9 @@
                 id={"delete-#{@acl_id || id(@acl)}"}
                 title_text={l("Delete this boundary")}
               >
-                {l(
+                <div class="mt-3 prose prose-sm">{l(
                   "The boundary will be permanently deleted. This action will affect everything that was shared on the local instance using the boundary."
-                )}
+                )}</div>
                 <:open_btn>
                   <div class="normal-case rounded btn btn-outline btn-error btn-sm">{l("Delete")}</div>
                 </:open_btn>

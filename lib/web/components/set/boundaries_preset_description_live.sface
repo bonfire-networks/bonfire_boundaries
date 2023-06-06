@@ -3,7 +3,7 @@
     <button
       type="button"
       phx-click={JS.toggle(to: "#write_post_content_wrapper") |> JS.toggle(to: "#extra_boundaries")}
-      class="flex text-[13px] pr-2 font-semibold text-primary/80 items-center gap-2"
+      class="flex hover:underline text-[13px] pr-2 font-semibold text-primary/80 items-center gap-2"
     >
       {#case List.last(@to_boundaries) |> debug("main boundary to show in composer")}
         {#match {"public", _}}

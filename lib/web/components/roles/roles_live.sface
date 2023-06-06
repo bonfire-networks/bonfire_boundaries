@@ -26,7 +26,7 @@
             class="block cursor-pointer hover:bg-base-content/5"
           >
             <div class="flex items-center gap-3 p-4">
-              <#Icon iconify="mdi:shield-lock-open" class="w-5 h-5 text-base-content/70" />
+              <#Icon iconify="mingcute:hat-fill" class="w-5 h-5 text-base-content/70" />
               <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
                 <div class="truncate">
                   <div class="flex text-sm">
@@ -88,7 +88,7 @@
             class="block cursor-pointer hover:bg-base-content/5"
           >
             <div class="flex items-center gap-3 p-4">
-              <#Icon iconify="mdi:shield-lock" class="w-5 h-5 text-base-content/70" />
+              <#Icon iconify="mingcute:hat-fill" class="w-5 h-5 text-base-content/70" />
               <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
                 <div class="truncate">
                   <div class="flex text-sm">
