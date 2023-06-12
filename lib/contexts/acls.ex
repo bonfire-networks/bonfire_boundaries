@@ -86,11 +86,11 @@ defmodule Bonfire.Boundaries.Acls do
         to_boundaries ->
           to_boundaries =
             Boundaries.boundaries_normalise(to_boundaries)
-            |> info("validated to_boundaries")
+            |> debug("validated to_boundaries")
 
           preset =
             Boundaries.preset_name(to_boundaries)
-            |> info("preset_name")
+            |> debug("preset_name")
 
           # add ACLs based on any boundary presets (eg. public/local/mentions)
           # + add any ACLs directly specified in input
@@ -346,6 +346,17 @@ defmodule Bonfire.Boundaries.Acls do
     }
   end
 
+  def base_acls_from_preset(creator, preset, opts \\ []) do
+    preset =
+      Boundaries.boundaries_normalise(preset)
+      |> debug("validated to_boundaries")
+      |> Boundaries.preset_name()
+      |> debug("preset_name")
+
+    # add ACLs based on any boundary presets (eg. public/local/mentions)
+    base_acls(creator, preset, opts)
+  end
+
   ## invariants:
 
   ## * All a user's ACLs will have the user as an administrator but it
@@ -503,6 +514,7 @@ defmodule Bonfire.Boundaries.Acls do
       when is_binary(stereotype_id) do
     true
   end
+
   def is_stereotyped?(_acl) do
     false
   end

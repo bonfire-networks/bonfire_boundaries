@@ -1,4 +1,4 @@
-{#case clone_context(@to_boundaries)}
+{#case Bonfire.Boundaries.Web.SetBoundariesButtonLive.clone_context(@to_boundaries)}
   {#match false}
     <button
       type="button"

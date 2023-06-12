@@ -169,23 +169,13 @@ defmodule Bonfire.Boundaries.Controlleds do
     from(e in Controlled,
       where:
         e.id == ^ulid!(object) and
-          e.acl_id in ^ulids_or(acls, &Bonfire.Boundaries.Acls.get_id/1)
+          e.acl_id in ^ulids_or(acls, &acl_id/1)
     )
     |> repo().delete_all()
   end
 
-  # TODO: move somewhere re-usable
-  def ulids_or(objects, fallback_or_fun) when is_list(objects) do
-    Enum.map(objects, &ulids_or(&1, fallback_or_fun))
-  end
-
-  def ulids_or(object, fun) when is_function(fun) do
-    List.wrap(ulid(object) || fun.(object))
-  end
-
-  def ulids_or(object, fallback) do
-    List.wrap(ulid(object) || fallback)
-  end
+  defp acl_id(%{acl_id: id}), do: id
+  defp acl_id(id), do: Bonfire.Boundaries.Acls.get_id(id)
 
   def add_acls(object, acl) when is_atom(acl) do
     Bonfire.Boundaries.Acls.get_id!(acl)

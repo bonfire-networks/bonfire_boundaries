@@ -1,23 +1,34 @@
-<div class="flex relative z-50 items-center flex-1 gap-2">
-  <div class="w-full dropdown">
-    <label
-      type="button"
-      tabindex="0"
-      aria-haspopup="true"
-      aria-expanded="true"
-      class="flex w-fit items-center justify-between gap-2 btn-ghost normal-case rounded-full border btn-sm btn border-base-content/30 text-primary"
-    >
-      <Bonfire.Boundaries.Web.BoundariesPresetNameLive to_boundaries={@to_boundaries} />
-      <#Icon iconify="ri:arrow-down-s-line" class="w-4 h-4 text-primary/80" />
-    </label>
-    <ul
-      tabindex="0"
-      class="mt-1 rounded !block shadow w-full menu-compact menu dropdown-content bg-base-100"
-      role="menu"
-      aria-orientation="vertical"
-      aria-labelledby="user-profile-menu"
-    >
-      <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={Bonfire.Boundaries.Web.SetBoundariesLive.boundaries_to_preset(@to_boundaries)} />
-    </ul>
-  </div>
-</div>
+{#case clone_context(@to_boundaries)}
+  {#match false}
+    <div class="flex items-center flex-1 gap-2">
+      <div class="flex relative z-50 items-center flex-1 gap-2">
+        <div class="w-full dropdown">
+          <label
+            type="button"
+            tabindex="0"
+            aria-haspopup="true"
+            aria-expanded="true"
+            class="flex w-fit items-center justify-between gap-2 btn-ghost normal-case rounded-full border btn-sm btn border-base-content/30 text-primary"
+          >
+            <Bonfire.Boundaries.Web.BoundariesPresetNameLive to_boundaries={@to_boundaries} />
+            <#Icon iconify="ri:arrow-down-s-line" class="w-4 h-4 text-primary/80" />
+          </label>
+          <ul
+            tabindex="0"
+            class="mt-1 rounded !block shadow w-full menu-compact menu dropdown-content bg-base-100"
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby="user-profile-menu"
+          >
+            <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={Bonfire.Boundaries.Web.SetBoundariesLive.boundaries_to_preset(@to_boundaries)} />
+          </ul>
+        </div>
+      </div>
+    </div>
+  {#match boundary_name}
+    <div class="flex items-center gap-2 mx">
+      <div class="flex items-center gap-2 normal-case rounded-full btn-active btn-ghost btn-sm btn opacity-90 cursor-default">
+        <span>{boundary_name}</span>
+      </div>
+    </div>
+{/case}

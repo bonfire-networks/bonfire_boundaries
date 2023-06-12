@@ -3,8 +3,8 @@
     <div class="w-16 h-16 rounded-full flex place-content-center items-center bg-info/30">
       <#Icon iconify="mingcute:hat-fill" class="w-8 h-8 text-info" />
     </div>
-    <div class="text-center font-bold text-lg mt-3">{l "Create a new role"}</div>
-    <p class="text-sm text-center mt-1">{l "Use roles to organize how users can interact with you and with your contents"}</p>
+    <div class="text-center font-bold text-lg mt-3">{l("Create a new role")}</div>
+    <p class="text-sm text-center mt-1">{l("Use roles to organize how users can interact with you and with your contents")}</p>
   </div>
   <div x-data="{ name: '' }" class="w-full mt-4">
     <div class="w-full form-control">
@@ -24,29 +24,29 @@
 
     <div class="form-control mt-4">
       <label class="label !justify-start gap-2 cursor-pointer">
-        <input type="checkbox" class="toggle" />
-        <span class="label-text">{l "Use this role for activities boundaries"}</span> 
+        <input type="checkbox" class="toggle">
+        <span class="label-text">{l("Use this role for activities boundaries")}</span>
       </label>
     </div>
 
     <div class="form-control mt-2">
       <label class="label !justify-start gap-2 cursor-pointer">
-        <input type="checkbox" class="toggle" />
-        <span class="label-text">{l "Use this role for system boundaries"}</span> 
+        <input type="checkbox" class="toggle">
+        <span class="label-text">{l("Use this role for system boundaries")}</span>
       </label>
     </div>
 
     <div class="form-control mt-2">
       <label class="label !justify-start gap-2 cursor-pointer">
-        <input type="checkbox" class="toggle" />
-        <span class="label-text">{l "Enable this role for all users"}</span> 
+        <input type="checkbox" class="toggle">
+        <span class="label-text">{l("Enable this role for all users")}</span>
       </label>
     </div>
 
     <div class="form-control mt-2">
       <label class="label !justify-start gap-2 cursor-pointer">
-        <input type="checkbox" class="toggle" />
-        <span class="label-text">{l "Show the role members separated from the others in lists"}</span> 
+        <input type="checkbox" class="toggle">
+        <span class="label-text">{l("Show the role members separated from the others in lists")}</span>
       </label>
     </div>
 

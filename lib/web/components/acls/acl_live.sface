@@ -210,8 +210,8 @@
                 title_text={l("Delete this boundary")}
               >
                 <div class="mt-3 prose prose-sm">{l(
-                  "The boundary will be permanently deleted. This action will affect everything that was shared on the local instance using the boundary."
-                )}</div>
+                    "The boundary will be permanently deleted. This action will affect everything that was shared on the local instance using the boundary."
+                  )}</div>
                 <:open_btn>
                   <div class="normal-case rounded btn btn-outline btn-error btn-sm">{l("Delete")}</div>
                 </:open_btn>

@@ -247,7 +247,14 @@ defmodule Bonfire.Boundaries do
 
   def set_boundaries(creator, object, opts)
       when is_list(opts) and (is_binary(object) or is_map(object)) do
-    with {:ok, _pointer} <-
+    with :ok <-
+           maybe_remove_previous_preset(
+             e(object, :created, :creator, nil) || e(object, :created, :creator_id, nil) ||
+               e(object, :creator, nil) || e(object, :creator_id, nil) || creator,
+             object,
+             opts[:remove_previous_preset]
+           ),
+         {:ok, _pointer} <-
            Ecto.Changeset.cast(%Pointers.Pointer{id: ulid(object)}, %{}, [])
            |> Bonfire.Boundaries.Acls.cast(creator, opts)
            #  |> debug("ACL it")
@@ -255,6 +262,28 @@ defmodule Bonfire.Boundaries do
       # debug(one_grant: grant)
       {:ok, :granted}
     end
+  end
+
+  defp maybe_remove_previous_preset(creator, object, [preset]) do
+    maybe_remove_previous_preset(creator, object, preset)
+  end
+
+  defp maybe_remove_previous_preset(creator, object, {preset, _description}) do
+    debug(preset, "TODO")
+
+    Acls.base_acls_from_preset(creator, preset)
+    |> debug("base_acls_from_preset to remove")
+    |> Bonfire.Boundaries.Controlleds.remove_acls(
+      object,
+      ...
+    )
+    |> debug("removed?")
+
+    :ok
+  end
+
+  defp maybe_remove_previous_preset(_, _, _) do
+    :ok
   end
 
   @doc """
