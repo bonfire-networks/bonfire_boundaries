@@ -1,0 +1,61 @@
+<div
+  :class="{'bg-base-content/10 hover:!bg-base-content/10': open}"
+  x-on:click="open = !open"
+  class="block cursor-pointer hover:bg-base-content/5"
+>
+  <div class="flex items-center gap-3 p-4">
+    <#Icon iconify="mingcute:hat-fill" class="w-5 h-5 text-base-content/70" />
+    <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
+      <div class="truncate">
+        <div class="flex text-sm">
+          <p class="text-sm font-bold capitalize truncate">{Recase.to_title(to_string(@name))}</p>
+        </div>
+      </div>
+    </div>
+    <div class="btn btn-ghost btn-circle rounded flex items-center gap-2 btn-sm normal-case">
+      <span class="sr-only">{l("Details")}</span>
+      <#Icon solid="ChevronDown" class="w-5 h-5 text-base-content/70" />
+    </div>
+  </div>
+</div>
+<div :class="{'bg-base-content/5': open}" x-cloak x-show="open" x-collapse>
+  <div class="">
+    <ul class="">
+      {#for verb <- e(@role, :can_verbs, nil) || []}
+        <Bonfire.Boundaries.Web.RoleVerbLive
+          value
+          read_only={@read_only}
+          verb={verb}
+          all_verbs={@all_verbs}
+          event_target={@event_target}
+          field_name={"role[#{@name}]"}
+        />
+      {/for}
+
+      {#for verb <- e(@role, :cannot_verbs, nil) || []}
+        <Bonfire.Boundaries.Web.RoleVerbLive
+          value={false}
+          read_only={@read_only}
+          verb={verb}
+          all_verbs={@all_verbs}
+          event_target={@event_target}
+          field_name={"role[#{@name}]"}
+        />
+      {/for}
+
+      {#if !@read_only}
+        {#for verb <-
+            (@available_verbs || [])
+            |> Enum.reject(&(elem(&1, 0) in (e(@role, :can_verbs, []) ++ e(@role, :cannot_verbs, []))))}
+          <Bonfire.Boundaries.Web.RoleVerbLive
+            read_only={@read_only}
+            verb={verb}
+            all_verbs={[]}
+            event_target={@event_target}
+            field_name={"role[#{@name}]"}
+          />
+        {/for}
+      {/if}
+    </ul>
+  </div>
+</div>

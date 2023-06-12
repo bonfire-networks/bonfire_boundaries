@@ -1,7 +1,7 @@
 <div data-role="new_role">
   <Bonfire.UI.Common.OpenModalLive id="new_role" no_actions>
     <div>
-      <Bonfire.Boundaries.Web.NewRoleLive setting_boundaries={@setting_boundaries} />
+      <Bonfire.Boundaries.Web.NewRoleLive setting_boundaries={@setting_boundaries} scope={@scope} />
     </div>
 
     <:open_btn>

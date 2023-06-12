@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
   prop parent_id, :string, default: nil
   prop object_boundary, :any, default: nil
   prop boundary_tuple, :any, default: nil
-  prop scope, :atom, default: nil
+  prop scope, :any, default: nil
 
   prop with_icon, :boolean, default: false
   prop with_label, :boolean, default: false

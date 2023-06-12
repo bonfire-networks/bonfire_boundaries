@@ -31,6 +31,7 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Boundaries.Verbs
   alias Bonfire.Boundaries.Fixtures
+  alias Bonfire.Boundaries.Roles
   alias Ecto.Changeset
   alias Pointers.Changesets
   alias Pointers.ULID
@@ -119,7 +120,7 @@ defmodule Bonfire.Boundaries.Acls do
           (e(opts, :verbs_to_grant, nil) ||
              Config.get!([:verbs_to_grant, :default]))
           |> debug("default verbs_to_grant")
-          |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ...))
+          |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ..., true, opts))
           |> debug("on-the-fly ACLs to create")
 
         changeset
@@ -315,15 +316,15 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
-  defp grant_to(subject, acl_id, default_verbs, value \\ true)
+  defp grant_to(subject, acl_id, default_verbs, value, opts)
 
-  defp grant_to({subject_id, nil}, acl_id, default_verbs, value),
-    do: grant_to(subject_id, acl_id, default_verbs, value)
+  defp grant_to({subject_id, nil}, acl_id, default_verbs, value, opts),
+    do: grant_to(subject_id, acl_id, default_verbs, value, opts)
 
-  defp grant_to({subject_id, role}, acl_id, _default_verbs, _value) do
-    with {:ok, value, role_verbs} <- Verbs.verbs_for_role(role) do
+  defp grant_to({subject_id, role}, acl_id, _default_verbs, _value, opts) do
+    with {:ok, value, role_verbs} <- Roles.verbs_for_role(role, opts) do
       debug(role_verbs, "verbs for (#{value}) role")
-      grant_to(subject_id, acl_id, role_verbs, value)
+      grant_to(subject_id, acl_id, role_verbs, value, opts)
     else
       e ->
         error(e)
@@ -331,10 +332,10 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
-  defp grant_to(user_etc, acl_id, verbs, value) when is_list(verbs),
-    do: Enum.map(verbs, &grant_to(user_etc, acl_id, &1, value))
+  defp grant_to(user_etc, acl_id, verbs, value, opts) when is_list(verbs),
+    do: Enum.map(verbs, &grant_to(user_etc, acl_id, &1, value, opts))
 
-  defp grant_to(user_etc, acl_id, verb, value) do
+  defp grant_to(user_etc, acl_id, verb, value, _opts) do
     debug(user_etc)
 
     %{

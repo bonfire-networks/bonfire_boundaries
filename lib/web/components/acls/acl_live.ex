@@ -14,6 +14,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   prop section, :any, default: nil
   prop setting_boundaries, :boolean, default: false
   prop scope, :any, default: :user
+  prop usage, :any, default: nil
 
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})
@@ -154,7 +155,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     add_to_acl(data, socket)
   end
 
-  def do_handle_event("edit_grant_verb", %{"subject" => subjects} = _attrs, socket) do
+  def do_handle_event("edit_verb_value", %{"subject" => subjects} = _attrs, socket) do
     # debug(attrs)
     current_user = current_user_required!(socket)
     acl = e(socket.assigns, :acl, nil)
@@ -196,10 +197,11 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     # debug(attrs)
     current_user = current_user_required!(socket)
     acl = e(socket.assigns, :acl, nil)
+    scope = e(socket.assigns, :scope, nil)
 
     grants =
       Enum.map(subjects, fn {subject_id, role_name} ->
-        Grants.grant_role(subject_id, acl, role_name, current_user: current_user)
+        Grants.grant_role(subject_id, acl, role_name, current_user: current_user, scope: scope)
       end)
       |> List.flatten()
 

@@ -16,6 +16,7 @@ defmodule Bonfire.Boundaries.Grants do
   # alias Bonfire.Boundaries.Grants
   alias Bonfire.Boundaries.Verbs
   alias Bonfire.Boundaries.Circles
+  alias Bonfire.Boundaries.Roles
 
   def grants, do: Config.get([:grants])
 
@@ -143,7 +144,7 @@ defmodule Bonfire.Boundaries.Grants do
 
   @doc "Edits or adds grants to an Acl based on a role"
   def grant_role(subject_id, acl_id, role, opts \\ []) do
-    with {:ok, value, role_verbs} <- Verbs.verbs_for_role(role) do
+    with {:ok, value, role_verbs} <- Roles.verbs_for_role(role, opts) do
       debug(length(role_verbs), value)
 
       # first remove existing grants to this subject

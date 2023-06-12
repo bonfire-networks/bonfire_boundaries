@@ -1,7 +1,6 @@
 defmodule Bonfire.Boundaries.Circles do
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
-  import Bonfire.Boundaries.Integration
   import Bonfire.Boundaries.Queries
   import Ecto.Query
   import EctoSparkles

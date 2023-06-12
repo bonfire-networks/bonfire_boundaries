@@ -42,7 +42,7 @@
       class={
         "flex items-center gap-3 rounded-md py-2 px-2 w-full",
         "!gap-8": @showing_within == :dashboard,
-        "bg-base-content/10 ": @selected_tab == "account"
+        "bg-base-content/10 ": @selected_tab == "roles"
       }
     >
       <#Icon

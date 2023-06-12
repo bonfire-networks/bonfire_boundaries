@@ -116,7 +116,7 @@
                 {e(grant, :verb, :verb, nil) || e(grant, :verb, nil)}
               </div>
               <div class="flex items-center space-x-3 switch-toggle">
-                <form :on-change="edit_grant_verb">
+                <form :on-change="edit_verb_value">
                   <label>
                     <input
                       class="absolute opacity-0"

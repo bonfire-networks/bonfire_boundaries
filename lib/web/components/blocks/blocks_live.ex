@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
   prop name, :string, default: nil
   prop blocks, :list, default: []
   prop page_info, :any
-  prop scope, :atom, default: nil
+  prop scope, :any, default: nil
 
   def update(assigns, socket) do
     current_user = current_user(assigns)

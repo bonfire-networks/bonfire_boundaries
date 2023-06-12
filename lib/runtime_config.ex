@@ -219,23 +219,30 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       :locals_may_reply
     ]
 
+    cannot_read = Enum.reject(all_verb_names, fn v -> v == :request end)
+    cannot_interact = Enum.reject(all_verb_names, fn v -> v in verbs_see_read_request end)
+    cannot_participate = Enum.reject(all_verb_names, fn v -> v in verbs_interact_incl_boost end)
+
+    cannot_contribute =
+      Enum.reject(all_verb_names, fn v -> v in verbs_participate_and_message end)
+
+    cannot_administer = Enum.reject(all_verb_names, fn v -> v in verbs_contribute end)
+
     config :bonfire,
       verbs: verbs,
-      role_verbs: [
-        none: [],
-        read: verbs_see_read_request,
-        interact: verbs_interact_incl_boost,
-        participate: verbs_participate_and_message,
-        contribute: verbs_contribute,
-        administer: all_verb_names
-      ],
-      negative_role_verbs: [
-        read: Enum.reject(all_verb_names, fn v -> v == :request end),
-        interact: Enum.reject(all_verb_names, fn v -> v in verbs_see_read_request end),
-        participate: Enum.reject(all_verb_names, fn v -> v in verbs_interact_incl_boost end),
-        # contribute: Enum.reject(all_verb_names, fn v -> v in verbs_participate_and_message end),
-        administer: Enum.reject(all_verb_names, fn v -> v in verbs_contribute end)
-      ],
+      role_verbs: %{
+        none: %{read_only: true},
+        read: %{can_verbs: verbs_see_read_request, read_only: true},
+        interact: %{can_verbs: verbs_interact_incl_boost, read_only: true},
+        participate: %{can_verbs: verbs_participate_and_message, read_only: true},
+        contribute: %{usage: :ops, can_verbs: verbs_contribute, read_only: true},
+        administer: %{can_verbs: all_verb_names, read_only: true},
+        cannot_read: %{cannot_verbs: cannot_read, read_only: true},
+        cannot_interact: %{cannot_verbs: cannot_interact, read_only: true},
+        cannot_participate: %{cannot_verbs: cannot_participate, read_only: true},
+        cannot_contribute: %{usage: :ops, cannot_verbs: cannot_contribute, read_only: true},
+        cannot_administer: %{cannot_verbs: cannot_administer, read_only: true}
+      },
       role_to_grant: [
         default: :participate
       ],

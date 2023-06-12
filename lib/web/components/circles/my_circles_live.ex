@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
   prop setting_boundaries, :boolean, default: false
   prop section, :any, default: nil
   prop parent_back, :any, default: nil
-  prop scope, :atom, default: :user
+  prop scope, :any, default: :user
 
   def update(
         %{scope: scope} = assigns,

@@ -14,186 +14,43 @@
 
     <div class="mt-4">
       <ul role="list" class="flex flex-col divide-y divide-base-content/10">
-        <li
-          class=""
-          x-data="{open: false}"
-          :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()}
-          :if={verbs != []}
-        >
-          <div
-            :class="{'bg-base-content/10 hover:!bg-base-content/10': open}"
-            x-on:click="open = !open"
-            class="block cursor-pointer hover:bg-base-content/5"
-          >
-            <div class="flex items-center gap-3 p-4">
-              <#Icon iconify="mingcute:hat-fill" class="w-5 h-5 text-base-content/70" />
-              <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
-                <div class="truncate">
-                  <div class="flex text-sm">
-                    <p class="text-sm font-bold capitalize truncate">{name}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="btn btn-ghost btn-circle rounded flex items-center gap-2 btn-sm normal-case">
-                <span class="sr-only">{l("Details")}</span>
-                <#Icon solid="ChevronDown" class="w-5 h-5 text-base-content/70" />
-              </div>
-            </div>
-          </div>
-          <div :class="{'bg-base-content/5': open}" x-cloak x-show="open" x-collapse>
-            <div class="">
-              <ul class="">
-                <li :for={verb_name <- verbs} class="flex items-center justify-between gap-8 p-3">
-                  <div class="flex flex-col gap-0.5">
-                    {#case Bonfire.Boundaries.Verbs.get(verb_name)}
-                      {#match nil}
-                        <div class="flex-1 text-sm font-semibold capitalize">
-                          <#Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
-                          {verb_name}
-                        </div>
-                      {#match verb}
-                        <div class="flex items-center gap-3">
-                          <div class="w-10 h-10 min-w-[2.5rem] flex-1 shrink-0 rounded-full bg-info/10 flex place-content-center items-center">
-                            <Iconify.iconify
-                              icon={e(verb, :icon, "")}
-                              class="w-5 h-5 text-base-content"
-                              fill="currentColor"
-                            />
-                          </div>
-                          <div class="flex flex-col">
-                            <div class="flex-1 text-sm font-semibold capitalize">
-                              {e(verb, :verb, nil) || verb}
-                            </div>
-                            <div class="text-[13px] text-base-content/70">{e(verb, :summary, nil)}</div>
-                          </div>
-                        </div>
-                    {/case}
-                  </div>
-                  <Bonfire.Boundaries.Web.YesMaybeFalseLive value read_only />
-                </li>
-              </ul>
-            </div>
-          </div>
+        <li class="" x-data="{open: false}" :for={{name, role} <- @role_verbs || []}>
+          <Bonfire.Boundaries.Web.RoleDetailsLive
+            name={to_string(e(role, :name, nil) || name)}
+            role={role}
+            read_only={e(role, :read_only, false)}
+            available_verbs={@available_verbs}
+            all_verbs={@all_verbs}
+            event_target={@myself}
+            scope={@scope}
+          />
         </li>
 
-        <li
-          class=""
-          x-data="{open: false}"
-          :for={{name, verbs} <- Bonfire.Boundaries.Verbs.negative_role_verbs()}
-          :if={verbs != []}
-        >
-          <div
-            :class="{'bg-base-content/10 hover:!bg-base-content/10': open}"
-            x-on:click="open = !open"
-            class="block cursor-pointer hover:bg-base-content/5"
-          >
-            <div class="flex items-center gap-3 p-4">
-              <#Icon iconify="mingcute:hat-fill" class="w-5 h-5 text-base-content/70" />
-              <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
-                <div class="truncate">
-                  <div class="flex text-sm">
-                    <p class="text-sm font-bold capitalize truncate">{l("Cannot")} {name}</p>
-                  </div>
-                </div>
-              </div>
-              <div class="btn btn-ghost btn-circle rounded flex items-center gap-2 btn-sm normal-case">
-                <span class="sr-only">{l("Details")}</span>
-                <#Icon solid="ChevronDown" class="w-5 h-5 text-base-content/70" />
-              </div>
-            </div>
-          </div>
-          <div :class="{'bg-base-content/5': open}" x-cloak x-show="open" x-collapse>
-            <div class="">
-              <ul class="">
-                <li :for={verb_name <- verbs} class="flex items-center justify-between gap-8 p-3">
-                  <div class="flex flex-col gap-0.5">
-                    {#case Bonfire.Boundaries.Verbs.get(verb_name)}
-                      {#match nil}
-                        <div class="flex-1 text-sm font-semibold capitalize">
-                          <#Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
-                          {verb_name}
-                        </div>
-                      {#match verb}
-                        <div class="flex items-center gap-3">
-                          <div class="w-10 h-10 min-w-[2.5rem] flex-1 shrink-0 rounded-full bg-info/10 flex place-content-center items-center">
-                            <Iconify.iconify
-                              icon={e(verb, :icon, "")}
-                              class="w-5 h-5 text-base-content"
-                              fill="currentColor"
-                            />
-                          </div>
-                          <div class="flex flex-col">
-                            <div class="flex-1 text-sm font-semibold capitalize">
-                              {e(verb, :verb, nil) || verb}
-                            </div>
-                            <div class="text-[13px] text-base-content/70">{e(verb, :summary, nil)}</div>
-                          </div>
-                        </div>
-                    {/case}
-                  </div>
-                  <Bonfire.Boundaries.Web.YesMaybeFalseLive value={false} read_only />
-                </li>
-              </ul>
-            </div>
-          </div>
-        </li>
+        <!-- <li class="" x-data="{open: false}" :for={{name, role} <- debug(@negative_role_verbs || [])}>
+          <Bonfire.Boundaries.Web.RoleDetailsLive
+            default_value={false}
+            name={l("Cannot") <> " " <> to_string(e(role, :name, nil) || name)}
+            role={role}
+            read_only={e(role, :read_only, false)}
+            available_verbs={@available_verbs}
+            all_verbs={@all_verbs}
+            event_target={@myself}
+          />
+        </li> -->
       </ul>
     </div>
-
-    <!-- <div class="mt-4 divide-y rounded-lg bg-base-content/5 divide-base-300">
-    <div
-      :for={{name, verbs} <- Bonfire.Boundaries.Verbs.role_verbs()}
-      :if={verbs != []}
-      x-data="{open: false}"
-      class="p-3"
-    >
-      <div class="flex items-center justify-between">
-        <div class="flex flex-col gap-1">
-          <div class="text-sm font-bold capitalize">{name}</div>
-        </div>
-        <button
-          type="button"
-          x-on:click="open = !open"
-          x-text="open ? 'Hide details' : 'See details'"
-          class="normal-case btn btn-sm"
-        >{l("Expand")}</button>
-      </div>
-      <div x-cloak x-show="open" x-collapse>
-        <div class="mt-3 rounded-xl bg-base-300">
-          <ul class="flex flex-col divide-y divide-base-content/10">
-            <li :for={verb <- verbs} class="flex items-center justify-between gap-8 p-3">
-              <div class="flex flex-col gap-0.5">
-                {#case Bonfire.Boundaries.Verbs.get(verb)}
-                  {#match nil}
-                    <div class="flex-1 text-sm font-semibold capitalize">
-                      {verb}
-                    </div>
-                  {#match verb_details}
-                    <div class="flex items-center gap-2">
-                      <div class="flex-1 text-sm font-semibold capitalize">
-                        {e(verb_details, :verb, nil) || verb}
-                      </div>
-                    </div>
-                    <div class="text-xs text-base-content/70">{e(verb_details, :summary, nil)}</div>
-                {/case}
-              </div>
-              <Bonfire.Boundaries.Web.YesMaybeFalseLive value read_only />
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div> -->
 
     <style>
       .boundaries-switches label div.btn {
       color: hsl(var(--bc));
       }
       .boundaries-switches label input:checked ~ div.btn-yes {
-      color: hsl(var(--su) / 0.90);
+      color: hsl(var(--pc));
+      background: hsl(var(--su) / 0.90);
       }
       .boundaries-switches label input:checked ~ div.btn-no {
-      color: hsl(var(--er) / 0.90);
+      color: hsl(var(--pc));
+      background: hsl(var(--er) / 0.90);
       }
       .boundaries-switches label input:checked ~ div.btn-maybe {
       background: white;

@@ -11,6 +11,7 @@ defmodule Bonfire.Boundaries do
   alias Bonfire.Boundaries.Verbs
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Controlleds
+  alias Bonfire.Boundaries.Roles
   alias Bonfire.Boundaries.Queries
   alias Pointers
   # alias Pointers.Pointer
@@ -155,31 +156,18 @@ defmodule Bonfire.Boundaries do
   def preset_boundary_from_acl(
         %{verbs: verbs, __typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = _summary
       ) do
-    {preset_boundary_role_from_acl(%{verbs: verbs}),
+    {Roles.preset_boundary_role_from_acl(%{verbs: verbs}),
      preset_boundary_tuple_from_acl(%Acl{id: acl_id})}
 
     # |> debug("merged ACL + verbs")
   end
 
   def preset_boundary_from_acl(%{verbs: verbs} = _summary) do
-    preset_boundary_role_from_acl(%{verbs: verbs})
+    Roles.preset_boundary_role_from_acl(%{verbs: verbs})
   end
 
   def preset_boundary_from_acl(acl) do
     preset_boundary_tuple_from_acl(acl)
-  end
-
-  def preset_boundary_role_from_acl(%{verbs: verbs} = _summary) do
-    # debug(summary)
-    case Verbs.role_from_verb_names(verbs) do
-      :administer -> {l("Administer"), l("Full permissions")}
-      role -> {String.capitalize(to_string(role)), verbs}
-    end
-  end
-
-  def preset_boundary_role_from_acl(other) do
-    warn(other, "No pattern matched")
-    nil
   end
 
   def preset_boundary_tuple_from_acl(acl, object_type \\ nil)

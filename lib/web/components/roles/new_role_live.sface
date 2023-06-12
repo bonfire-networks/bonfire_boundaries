@@ -1,64 +1,58 @@
 <div class="px-2">
-  <div class="flex flex-col items-center place-content-center">
-    <div class="w-16 h-16 rounded-full flex place-content-center items-center bg-info/30">
-      <#Icon iconify="mingcute:hat-fill" class="w-8 h-8 text-info" />
-    </div>
-    <div class="text-center font-bold text-lg mt-3">{l("Create a new role")}</div>
-    <p class="text-sm text-center mt-1">{l("Use roles to organize how users can interact with you and with your contents")}</p>
-  </div>
-  <div x-data="{ name: '' }" class="w-full mt-4">
-    <div class="w-full form-control">
-      <label class="label">
-        <span class="font-medium label-text">{l("Enter a name for the role")}</span>
-      </label>
-      <div class="flex items-center">
-        <input
-          x-model="name"
-          name="named[name]"
-          type="text"
-          placeholder={l("Type the role name")}
-          class="w-full input input-bordered"
-        />
+  <form phx-submit="Bonfire.Boundaries:role_create">
+    <div class="flex flex-col items-center place-content-center">
+      <div class="w-16 h-16 rounded-full flex place-content-center items-center bg-info/30">
+        <#Icon iconify="mingcute:hat-fill" class="w-8 h-8 text-info" />
       </div>
+      <div class="text-center font-bold text-lg mt-3">{l("Create a new role")}</div>
+      <p class="text-sm text-center mt-1">{l("Use roles to organize how users can interact with you and with your contents")}</p>
     </div>
+    <div class="w-full mt-4">
+      <div class="w-full form-control">
+        <label class="label">
+          <span class="font-medium label-text">{l("Enter a name for the role")}</span>
+        </label>
+        <div class="flex items-center">
+          <input
+            name="name"
+            type="text"
+            placeholder={l("Type the role name")}
+            class="w-full input input-bordered"
+          />
+        </div>
+      </div>
 
-    <div class="form-control mt-4">
+      <!-- <div class="form-control mt-4">
       <label class="label !justify-start gap-2 cursor-pointer">
-        <input type="checkbox" class="toggle">
-        <span class="label-text">{l("Use this role for activities boundaries")}</span>
+        <input type="radio" class="radio" name="usage" value="">
+        <span class="label-text">{l("Use this role to set boundaries when posting")}</span>
       </label>
-    </div>
+    </div> -->
 
-    <div class="form-control mt-2">
-      <label class="label !justify-start gap-2 cursor-pointer">
-        <input type="checkbox" class="toggle">
-        <span class="label-text">{l("Use this role for system boundaries")}</span>
-      </label>
-    </div>
+      <div class="form-control mt-2">
+        <label class="label !justify-start gap-2 cursor-pointer">
+          <input type="radio" class="radio" name="usage" value="ops">
+          <span class="label-text">{l("Use this role only to set system boundaries (e.g. group or instance)")}</span>
+        </label>
+      </div>
 
-    <div class="form-control mt-2">
-      <label class="label !justify-start gap-2 cursor-pointer">
-        <input type="checkbox" class="toggle">
-        <span class="label-text">{l("Enable this role for all users")}</span>
-      </label>
-    </div>
+      <div class="form-control mt-2" :if={@scope == :instance}>
+        <label class="label !justify-start gap-2 cursor-pointer">
+          <input type="checkbox" class="toggle" name="display" value="instance_wide" checked disabled>
+          <span class="label-text">{l("Enable this role for all users")}</span>
+        </label>
+      </div>
 
-    <div class="form-control mt-2">
+      <!-- <div class="form-control mt-2">
       <label class="label !justify-start gap-2 cursor-pointer">
         <input type="checkbox" class="toggle">
         <span class="label-text">{l("Show the role members separated from the others in lists")}</span>
       </label>
-    </div>
+    </div> -->
 
-    <!-- phx-target={@event_target} -->
-    <button
-      phx-click="Bonfire.Boundaries:role_create"
-      :phx-value-name="name"
-      phx-value-no_redirect={if @setting_boundaries, do: "1"}
-      type="button"
-      class="w-full mt-3 normal-case btn btn-primary"
-    >
-      {l("Create role")}
-    </button>
-  </div>
+      <button type="submit" class="w-full mt-3 normal-case btn btn-primary">
+        {l("Create role")}
+      </button>
+    </div>
+  </form>
 </div>

@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconLive do
   # can also provide it manually
   prop object_boundary, :any, default: nil
 
-  prop scope, :atom, default: nil
+  prop scope, :any, default: nil
 
   prop with_icon, :boolean, default: false
   prop with_label, :boolean, default: false

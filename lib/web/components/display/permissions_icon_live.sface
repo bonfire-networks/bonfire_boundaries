@@ -2,7 +2,7 @@
   :if={not is_atom(@object_boundary) or @object_boundary == false or not is_nil(@boundary_tuple)}
   class={@class}
 >
-  {#case @boundary_tuple || Bonfire.Boundaries.preset_boundary_role_from_acl(@object_boundary)}
+  {#case @boundary_tuple || Bonfire.Boundaries.Roles.preset_boundary_role_from_acl(@object_boundary)}
     {#match {name, extra} = _role}
       <!-- id={"permissions_icon-#{@parent_id}-#{@object_id}"} -->
       <Bonfire.UI.Common.OpenModalLive

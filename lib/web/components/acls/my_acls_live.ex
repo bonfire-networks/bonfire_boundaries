@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
   prop built_ins, :list, default: []
   prop section, :any, default: nil
   prop edit_acl_id, :string, default: nil
-  prop scope, :atom, default: :user
+  prop scope, :any, default: :user
 
   def update(
         %{scope: scope} = assigns,

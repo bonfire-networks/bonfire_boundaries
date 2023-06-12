@@ -76,6 +76,7 @@
         selected_tab="acls"
         id="acl"
         scope={:instance}
+        usage={:ops}
         acl_id={Bonfire.Boundaries.Fixtures.instance_acl()}
       />
     {#match "roles"}

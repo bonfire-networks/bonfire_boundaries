@@ -4,6 +4,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Acls
+  alias Bonfire.Boundaries.Roles
   # alias Bonfire.Boundaries.Grants
 
   def handle_event("blocks", %{"id" => id} = attrs, socket)
@@ -94,14 +95,6 @@ defmodule Bonfire.Boundaries.LiveHandler do
       when is_binary(id) do
     unblock(id, maybe_to_atom(attrs["block_type"]), socket.assigns[:scope], socket)
   end
-
-  # def handle_event("role_create", %{"name" => name} = attrs, socket) do
-  #   role_create(Map.merge(attrs, %{named: %{name: name}}), socket)
-  # end
-
-  # def handle_event("role_create", attrs, socket) do
-  #   role_create(attrs, socket)
-  # end
 
   def handle_event("circle_create", %{"name" => name} = attrs, socket) do
     circle_create(Map.merge(attrs, %{named: %{name: name}}), socket)
@@ -290,6 +283,31 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
+  def handle_event("role_create", attrs, socket) do
+    current_user = current_user_required!(socket)
+
+    scope =
+      case e(socket.assigns, :scope, nil) do
+        :user -> current_user
+        nil -> current_user
+        scope -> scope
+      end
+
+    with {:ok, %{id: _id} = role} <-
+           Roles.create(
+             attrs,
+             scope: scope,
+             current_user: current_user
+           ) do
+      Bonfire.UI.Common.OpenModalLive.close()
+
+      {:noreply,
+       socket
+       |> assign_flash(:info, "Role created!")
+       |> assign(roles: [role] ++ e(socket.assigns, :roles, []))}
+    end
+  end
+
   def unblock(id, block_type, scope, socket)
       when is_binary(id) do
     current_user = current_user_required!(socket)
@@ -359,27 +377,6 @@ defmodule Bonfire.Boundaries.LiveHandler do
       |> maybe_add_to_acl(circle)
     end
   end
-
-  # def role_create(attrs, socket) do
-  #   current_user = current_user_required!(socket)
-
-  #   with {:ok, %{id: id} = circle} <-
-  #          Circles.create(
-  #            e(socket.assigns, :scope, nil) || current_user,
-  #            attrs
-  #          ) do
-  #     # Bonfire.UI.Common.OpenModalLive.close()
-
-  #     socket
-  #     |> assign_flash(:info, "Circle created!")
-  #     |> assign(
-  #       circles: [circle] ++ e(socket.assigns, :circles, []),
-  #       section: nil
-  #     )
-  #     |> maybe_redirect_to("/boundaries/circle/" <> id, attrs)
-  #     |> maybe_add_to_acl(circle)
-  #   end
-  # end
 
   defp maybe_add_to_acl(socket, subject) do
     _current_user = current_user_required!(socket)

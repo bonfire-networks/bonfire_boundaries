@@ -6,7 +6,9 @@
   }
 >
   <option
-    :for={{id, name} <- Bonfire.Boundaries.Verbs.roles_for_dropdown() ++ @extra_roles}
+    :for={{id, name} <-
+      Bonfire.Boundaries.Roles.roles_for_dropdown(@usage, scope: @scope, current_user: @current_user) ++
+        @extra_roles}
     value={id}
     selected={if @role == id or (is_nil(@role) and id == :participate), do: true}
   >{name}</option>
