@@ -293,7 +293,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
         scope -> scope
       end
 
-    with {:ok, %{id: _id} = role} <-
+    with {:ok, _} <-
            Roles.create(
              attrs,
              scope: scope,
@@ -304,7 +304,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       {:noreply,
        socket
        |> assign_flash(:info, "Role created!")
-       |> assign(roles: [role] ++ e(socket.assigns, :roles, []))}
+       |> redirect_to(current_url(socket))}
     end
   end
 

@@ -176,8 +176,9 @@ defmodule Bonfire.Boundaries.Circles do
   def is_encircled_by?(subject, circle) when is_atom(circle) and not is_nil(circle),
     do: is_encircled_by?(subject, get_id!(circle))
 
-  def is_encircled_by?(subject, circles) when is_list(circles) or is_binary(circles),
-    do: repo().exists?(is_encircled_by_q(subject, circles))
+  def is_encircled_by?(subject, circles)
+      when is_list(circles) or is_binary(circles) or is_map(circles),
+      do: repo().exists?(is_encircled_by_q(subject, circles))
 
   # @doc "query for `list_visible`"
   def is_encircled_by_q(subject, circles) do

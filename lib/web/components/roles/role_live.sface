@@ -1,20 +1,9 @@
-<div>
-  test {e(assigns, :current_params, :id, nil)}
-
-  <div class="flex flex-col gap-0.5">
-    {#case Bonfire.Boundaries.Verbs.get(:participate)}
-      {#match nil}
-        <div class="flex-1 text-sm font-semibold capitalize">
-          {e(assigns, :current_params, :id, nil)}
-        </div>
-      {#match verb_details}
-        <div class="flex items-center gap-2">
-          <div class="flex-1 text-sm font-semibold capitalize">
-            {e(verb_details, :verb, nil) || e(assigns, :current_params, :id, nil)}
-          </div>
-        </div>
-        <div class="text-xs text-base-content/70">{e(verb_details, :summary, nil)}</div>
-    {/case}
-  </div>
-  <Bonfire.Boundaries.Web.YesMaybeFalseLive value read_only />
-</div>
+<Bonfire.Boundaries.Web.RoleDetailsLive
+  name={to_string(e(@role, :name, nil) || @name)}
+  role={@role}
+  read_only={e(@role, :read_only, false)}
+  available_verbs={@available_verbs}
+  all_verbs={@all_verbs}
+  event_target={@myself}
+  scope={@scope}
+/>

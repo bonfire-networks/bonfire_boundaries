@@ -3,5 +3,7 @@ defmodule Bonfire.Boundaries.Web.NewRoleButtonLive do
   # alias Bonfire.Boundaries.Circles
 
   prop scope, :any, default: nil
+  prop scope_type, :any, default: nil
   prop setting_boundaries, :boolean, default: false
+  prop event_target, :any, default: nil
 end

@@ -14,7 +14,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   prop section, :any, default: nil
   prop setting_boundaries, :boolean, default: false
   prop scope, :any, default: :user
-  prop usage, :any, default: nil
+  prop usage, :any, default: :all
 
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
     params = e(assigns, :__context__, :current_params, %{})
@@ -31,6 +31,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
     acl_id = e(assigns, :acl_id, nil) || e(socket.assigns, :acl_id, nil) || e(params, "id", nil)
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
+
+    scope_type = Types.object_type(scope) || scope
 
     # note: Verbs only needed if doing custom permissions rather than using roles
     # verbs = Bonfire.Boundaries.Verbs.list(:db, :id)
@@ -55,6 +57,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
      socket
      |> assign(assigns)
      |> assign(
+       scope_type: scope_type,
        section: e(params, "section", "permissions"),
        #  verbs: verbs,
        acl_id: acl_id,
@@ -68,7 +71,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
      |> assign_updated()}
   end
 
-  def assign_updated(socket) do
+  def assign_updated(socket, force? \\ false) do
     current_user = current_user(socket)
 
     acl_id = e(socket.assigns, :acl_id, nil)
@@ -78,19 +81,24 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     with {:ok, acl} <-
            (acl || Acls.get_for_caretaker(acl_id, current_user))
            |> repo().maybe_preload(
-             grants: [
-               :verb,
-               subject: [:named, :profile, :character, stereotyped: [:named]]
-             ]
+             [
+               grants: [
+                 :verb,
+                 subject: [:named, :profile, :character, stereotyped: [:named]]
+               ]
+             ],
+             force: force?
            ) do
       debug(acl, "acllll")
 
-      send_self(
-        back: true,
-        page_title: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil),
-        acl: acl,
-        page_header_aside: []
-      )
+      if e(socket.assigns, :scope_type, nil) not in [:group, Bonfire.Classify.Category] do
+        send_self(
+          back: true,
+          page_title: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil),
+          acl: acl,
+          page_header_aside: []
+        )
+      end
 
       # verbs = e(socket.assigns, :verbs, [])
 
@@ -179,7 +187,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         :noreply,
         socket
         |> assign_flash(:info, l("Permission edited!"))
-        |> assign_updated()
+        |> assign_updated(true)
 
         # |> assign(
         # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
@@ -211,8 +219,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       {
         :noreply,
         socket
-        |> assign_flash(:info, l("Permission edited!"))
-        |> assign_updated()
+        |> assign_flash(:info, l("Role assigned!"))
+        |> assign_updated(true)
         # |> assign(
         # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
         # )
@@ -221,7 +229,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       other ->
         error(other)
 
-        {:noreply, assign_error(socket, l("Could not edit permission"))}
+        {:noreply, assign_error(socket, l("Could not assign the role"))}
     end
   end
 
@@ -379,7 +387,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
      with {del, _} when is_integer(del) and del > 0 <-
             Grants.remove_subject_from_acl(subject, acl_id) do
        assign_flash(socket, :info, l("Removed from boundary"))
-       |> assign_updated()
+       |> assign_updated(true)
 
        # |> redirect_to(~p"/boundaries/acl/#{id}")
      else

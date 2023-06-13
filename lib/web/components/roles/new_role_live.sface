@@ -1,10 +1,12 @@
 <div class="px-2">
-  <form phx-submit="Bonfire.Boundaries:role_create">
+  <form phx-submit="Bonfire.Boundaries:role_create" phx-target={@event_target}>
     <div class="flex flex-col items-center place-content-center">
       <div class="w-16 h-16 rounded-full flex place-content-center items-center bg-info/30">
         <#Icon iconify="mingcute:hat-fill" class="w-8 h-8 text-info" />
       </div>
-      <div class="text-center font-bold text-lg mt-3">{l("Create a new role")}</div>
+      <div class="text-center font-bold text-lg mt-3">{l("Create a new %{user_or_group_or_instance} role",
+          user_or_group_or_instance: Types.object_type_display(@scope_type)
+        )}</div>
       <p class="text-sm text-center mt-1">{l("Use roles to organize how users can interact with you and with your contents")}</p>
     </div>
     <div class="w-full mt-4">
@@ -31,8 +33,8 @@
 
       <div class="form-control mt-2">
         <label class="label !justify-start gap-2 cursor-pointer">
-          <input type="radio" class="radio" name="usage" value="ops">
-          <span class="label-text">{l("Use this role only to set system boundaries (e.g. group or instance)")}</span>
+          <input type="checkbox" class="toggle" name="usage" value="ops">
+          <span class="label-text">{l("Use this role only to set system boundaries (e.g. group or instance) rather than content")}</span>
         </label>
       </div>
 

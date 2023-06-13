@@ -144,8 +144,11 @@ defmodule Bonfire.Boundaries.Grants do
 
   @doc "Edits or adds grants to an Acl based on a role"
   def grant_role(subject_id, acl_id, role, opts \\ []) do
-    with {:ok, value, role_verbs} <- Roles.verbs_for_role(role, opts) do
-      debug(length(role_verbs), value)
+    debug(opts, "opts")
+
+    with {:ok, can_verbs, cannot_verbs} <- Roles.verbs_for_role(role, opts) do
+      debug(can_verbs, "grant true for verbs")
+      debug(cannot_verbs, "grant false for verbs")
 
       # first remove existing grants to this subject
       # FIXME: what if the user granted a separate role or custom verbs to the same subject? we should only remove grants that match the old role we're changing (if any)
@@ -154,7 +157,8 @@ defmodule Bonfire.Boundaries.Grants do
 
       # then re-add based on role
       # TODO: optimise with an insert_all or single changeset?
-      grant(subject_id, acl_id, role_verbs, value, opts)
+      grant(subject_id, acl_id, can_verbs, true, opts) ++
+        grant(subject_id, acl_id, cannot_verbs, false, opts)
     else
       {:error, e} ->
         raise e

@@ -178,7 +178,7 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
 
       # open_browser(view)
 
-      assert render(view) =~ "Permission edited"
+      assert render(view) =~ "Role assigned"
     end
 
     test "Remove a user from a boundary works" do
@@ -231,7 +231,7 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
 
       # open_browser(view)
 
-      assert render(view) =~ "Permission edited"
+      assert render(view) =~ "Role assigned"
     end
 
     test "Remove a circle from a boundary works" do
@@ -279,9 +279,9 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
 
       assert view
              |> form("#edit_grants")
-             |> render_change(%{to_circles: %{alice.id => "negative_participate"}})
+             |> render_change(%{to_circles: %{alice.id => "cannot_participate"}})
 
-      assert render(view) =~ "Permission edited"
+      assert render(view) =~ "Role assigned"
 
       # reload
       next = "/boundaries/acl/#{acl.id}"
@@ -295,9 +295,9 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
       # downgrade role
       assert view
              |> form("#edit_grants")
-             |> render_change(%{to_circles: %{alice.id => "negative_interact"}})
+             |> render_change(%{to_circles: %{alice.id => "cannot_interact"}})
 
-      assert render(view) =~ "Permission edited"
+      assert render(view) =~ "Role assigned"
 
       # open_browser(view)
 
@@ -331,9 +331,9 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
 
       assert view
              |> form("#edit_grants")
-             |> render_change(%{to_circles: %{alice.id => "negative_administer"}})
+             |> render_change(%{to_circles: %{alice.id => "cannot_administer"}})
 
-      assert render(view) =~ "Permission edited"
+      assert render(view) =~ "Role assigned"
 
       # reload
       next = "/boundaries/acl/#{acl.id}"
@@ -347,9 +347,9 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
       # downgrade role
       assert view
              |> form("#edit_grants")
-             |> render_change(%{to_circles: %{alice.id => "negative_read"}})
+             |> render_change(%{to_circles: %{alice.id => "cannot_read"}})
 
-      assert render(view) =~ "Permission edited"
+      assert render(view) =~ "Role assigned"
 
       # open_browser(view)
 

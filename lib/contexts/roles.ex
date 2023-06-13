@@ -4,51 +4,68 @@ defmodule Bonfire.Boundaries.Roles do
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Verbs
 
-  def role_verbs(usage \\ nil, opts \\ [])
-  def role_verbs(:ops, opts), do: Settings.get(:role_verbs, [], opts)
+  def role_verbs(usage \\ :all, opts \\ [])
+  def role_verbs(:ops, opts), do: role_verbs(:all, opts)
+  def role_verbs(:all, opts), do: do_get(:role_verbs, opts)
 
   def role_verbs(_, opts),
     do:
-      Settings.get(:role_verbs, [], opts)
+      do_get(:role_verbs, opts)
       |> Enums.fun(:filter, fn
         %{usage: :ops} -> false
         _ -> true
       end)
 
   def get(role_name, opts) do
-    Settings.get([:role_verbs, role_name], %{}, opts)
+    do_get([:role_verbs, role_name], opts)
     |> Enum.into(%{})
-    |> debug(role_name)
   end
 
-  # def negative_role_verbs(usage \\ nil)
-  # def negative_role_verbs(:ops), do: Config.get(:negative_role_verbs)
-  # def negative_role_verbs(_),
+  defp do_get(key, opts) do
+    opts =
+      to_options(opts)
+      |> Keyword.put_new(:one_scope_only, true)
+
+    if opts[:scope] == :instance do
+      Config.get(key, %{})
+    else
+      Settings.get(key, %{}, opts)
+    end
+    |> debug("gottt")
+  end
+
+  # def cannot_role_verbs(usage \\ nil)
+  # def cannot_role_verbs(:ops), do: Config.get(:cannot_role_verbs)
+  # def cannot_role_verbs(_),
   #   do:
-  #     Config.get(:negative_role_verbs)
+  #     Config.get(:cannot_role_verbs)
   #     |> Enums.fun(:filter, fn
   #       %{usage: :ops} -> false
   #       _ -> true
   #     end)
 
   def roles_for_dropdown(usage \\ nil, opts) do
+    opts =
+      to_options(opts)
+      |> Keyword.put_new(:one_scope_only, false)
+
     roles = role_verbs(usage, opts) |> Enums.fun(:keys)
 
     # negative =
-    #   negative_role_verbs(usage)
+    #   cannot_role_verbs(usage)
     #   |> Enums.fun(:keys)
     #   |> debug()
 
     debug(
       for role <- roles || [] do
-        {role, String.capitalize(to_string(role))}
+        {role, Recase.to_title(to_string(role))}
       end
     )
 
     # ++
     #   debug(
     #     for role <- negative || [] do
-    #       {"negative_#{role}", l("Cannot") <> " " <> String.capitalize(to_string(role))}
+    #       {"cannot_#{role}", l("Cannot") <> " " <> Recase.to_title(to_string(role))}
     #     end
     #   )
   end
@@ -57,19 +74,29 @@ defmodule Bonfire.Boundaries.Roles do
     role_from_verb(verbs, :verb) || :custom
   end
 
-  def role_from_grants(grants) do
+  def role_from_grants(grants, opts) do
+    opts =
+      to_options(opts)
+      |> Keyword.put_new(:one_scope_only, false)
+
+    all_role_verbs = role_verbs(:all, opts)
+
     {positive, negative} =
       Enum.split_with(grants, fn
         %{value: value} -> value
       end)
-      |> debug("good vs evil")
+      |> debug("yes vs no")
 
     cond do
       positive != [] and negative == [] ->
-        role_from_verb(verb_ids_from_grants(positive), :id)
+        verb_ids_from_grants(positive)
+        # |> debug("YES")
+        |> role_from_verb(:id, all_role_verbs)
 
       positive == [] and negative != [] ->
-        negative_role_from_verb(verb_ids_from_grants(negative), :id)
+        verb_ids_from_grants(negative)
+        # |> debug("NO")
+        |> cannot_role_from_verb(:id, all_role_verbs)
 
       true ->
         nil
@@ -80,80 +107,73 @@ defmodule Bonfire.Boundaries.Roles do
     Enum.map(grants, &e(&1, :verb_id, nil))
   end
 
-  def negative_role_from_verb(
+  def cannot_role_from_verb(
         verbs,
-        field \\ :verb,
-        all_role_verbs \\ role_verbs(),
+        verb_field \\ :verb,
+        all_role_verbs \\ role_verbs(:all),
         role_for_all \\ :read,
-        field \\ :cannot_verbs
+        verbs_field \\ :cannot_verbs
       ) do
-    "negative_#{role_from_verb(verbs, field, all_role_verbs, role_for_all, field) || :none}"
+    role_from_verb(verbs, verb_field, all_role_verbs, role_for_all, verbs_field)
   end
 
   def role_from_verb(
         verbs,
         verb_field \\ :verb,
-        all_role_verbs \\ role_verbs(),
+        all_role_verbs \\ role_verbs(:all),
         role_for_all \\ :administer,
         verbs_field \\ :can_verbs
       ) do
-    cond do
-      Enum.count(verbs) == Verbs.verbs_count() ->
-        role_for_all
-
-      true ->
-        case all_role_verbs
-             |> debug("all_role_verbs")
-             |> Enum.filter(fn {_role, %{^verbs_field => a_role_verbs}} ->
+    if Enum.count(verbs) == Verbs.verbs_count() do
+      role_for_all
+    else
+      case all_role_verbs
+           |> debug("all_role_verbs")
+           |> Enum.filter(fn
+             {_role, %{^verbs_field => a_role_verbs}} ->
                verbs ==
-                 Enum.map(a_role_verbs, &Map.get(Verbs.get(&1), verb_field))
+                 Enum.map(a_role_verbs, &e(Verbs.get(&1), verb_field, []))
                  |> Enum.sort()
 
-               # |> debug
-             end) do
-          [{role, _verbs}] ->
-            role
+             # |> debug
+             _ ->
+               false
+           end) do
+        [{role, _verbs}] ->
+          role
 
-          other ->
-            warn(other, "unknown")
-            nil
-        end
+        other ->
+          warn(other, "unknown")
+          nil
+      end
     end
     |> debug()
   end
 
-  def verbs_for_role(role, opts)
-
-  def verbs_for_role("negative_" <> role, opts) do
-    do_verbs_for_role(role, false, :cannot_verbs, role_verbs(nil, opts))
-  end
-
   def verbs_for_role(role, opts) do
-    do_verbs_for_role(role, true, :can_verbs, role_verbs(nil, opts))
+    opts =
+      to_options(opts)
+      |> Keyword.put_new(:one_scope_only, false)
+
+    do_verbs_for_role(to_string(role), Types.maybe_to_atom(role), role_verbs(:all, opts), opts)
   end
 
-  defp do_verbs_for_role(role, value, field, all_role_verbs) do
-    role =
-      role
-      |> Types.maybe_to_atom()
-      |> debug("role")
+  defp do_verbs_for_role(role_string, role, all_role_verbs, _opts) do
+    roles = all_role_verbs |> Enums.fun(:keys)
 
-    if is_atom(role) do
-      roles = role_verbs |> Enums.fun(:keys)
+    cond do
+      role in roles ->
+        {:ok, e(all_role_verbs, role, :can_verbs, []), e(all_role_verbs, role, :cannot_verbs, [])}
 
-      cond do
-        role in roles ->
-          {:ok, value, e(role_verbs, role, field, [])}
+      role_string in roles ->
+        {:ok, e(all_role_verbs, role, :can_verbs, []), e(all_role_verbs, role, :cannot_verbs, [])}
 
-        role in [nil, :none, :custom] ->
-          {:ok, value, []}
+      role in [nil, :none, :custom] ->
+        {:ok, [], []}
 
-        true ->
-          debug(roles, "available roles")
-          error(role, "This role is not defined.")
-      end
-    else
-      error(role, "This is not a valid role.")
+      true ->
+        debug(roles, "available roles")
+        error(role, "This role is not properly defined.")
     end
   end
 
@@ -161,7 +181,7 @@ defmodule Bonfire.Boundaries.Roles do
     # debug(summary)
     case role_from_verb_names(verbs) do
       :administer -> {l("Administer"), l("Full permissions")}
-      role -> {String.capitalize(to_string(role)), verbs}
+      role -> {Recase.to_title(to_string(role)), verbs}
     end
   end
 
@@ -180,8 +200,9 @@ defmodule Bonfire.Boundaries.Roles do
   end
 
   def create(name, usage, opts) do
+    debug(opts, "opts")
     # TODO: whether to show an instance role to all users
-    Settings.get([:role_verbs], %{}, opts)
+    role_verbs(:all, opts)
     |> Enum.into(%{})
     |> debug("existing roles")
     |> Map.merge(%{name => %{usage: usage}})

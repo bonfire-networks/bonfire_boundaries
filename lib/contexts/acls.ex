@@ -322,9 +322,9 @@ defmodule Bonfire.Boundaries.Acls do
     do: grant_to(subject_id, acl_id, default_verbs, value, opts)
 
   defp grant_to({subject_id, role}, acl_id, _default_verbs, _value, opts) do
-    with {:ok, value, role_verbs} <- Roles.verbs_for_role(role, opts) do
-      debug(role_verbs, "verbs for (#{value}) role")
-      grant_to(subject_id, acl_id, role_verbs, value, opts)
+    with {:ok, can_verbs, cannot_verbs} <- Roles.verbs_for_role(role, opts) do
+      grant_to(subject_id, acl_id, can_verbs, true, opts) ++
+        grant_to(subject_id, acl_id, cannot_verbs, false, opts)
     else
       e ->
         error(e)

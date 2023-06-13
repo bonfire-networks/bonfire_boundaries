@@ -9,6 +9,13 @@
           <p class="text-sm text-info">
             {l("Roles define sets of permissions which you can assign to users and circles")}</p>
         </div>
+        <div :if={@scope_type in [:group, Bonfire.Classify.Category]} class="flex-shrink-0">
+          <Bonfire.Boundaries.Web.NewRoleButtonLive
+            scope={@scope}
+            scope_type={@scope_type}
+            event_target={@myself}
+          />
+        </div>
       </div>
     </div>
 
@@ -26,7 +33,7 @@
           />
         </li>
 
-        <!-- <li class="" x-data="{open: false}" :for={{name, role} <- debug(@negative_role_verbs || [])}>
+        <!-- <li class="" x-data="{open: false}" :for={{name, role} <- debug(@cannot_role_verbs || [])}>
           <Bonfire.Boundaries.Web.RoleDetailsLive
             default_value={false}
             name={l("Cannot") <> " " <> to_string(e(role, :name, nil) || name)}
