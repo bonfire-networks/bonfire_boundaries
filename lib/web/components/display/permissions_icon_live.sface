@@ -58,10 +58,10 @@
         </div>
         <:open_btn>
           <div class="flex items-center w-full gap-3">
-            <#Icon iconify="icon-park-solid:sorcerer-hat" class="w-5 h-5 text-info/80" />
+            <#Icon iconify="mingcute:hat-fill" class="w-4 h-4 text-info" />
             <div class="">
               <span class="text-xs font-semibold tracking-wider text-center uppercase text-base-content/80">{name || l("Custom")}</span>
-              <div class="text-xs text-base-content/80">{l("Details")}</div>
+              <!-- <div class="text-xs text-base-content/80">{l("Details")}</div> -->
             </div>
           </div>
         </:open_btn>
