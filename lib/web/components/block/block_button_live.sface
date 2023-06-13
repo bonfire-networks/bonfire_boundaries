@@ -1,7 +1,11 @@
 <Bonfire.UI.Common.OpenModalLive
   no_actions
   :if={@object}
-  id={"block-#{@parent_id}-#{id(@object)}-#{@type}"}
+  id={ComponentID.new(
+    Bonfire.UI.Common.OpenModalLive,
+    "block-#{@parent_id}-#{id(@object)}-#{@type}",
+    __MODULE__
+  )}
   title_text={@title || l("%{type} %{user_or_instance_name}", type: @type, user_or_instance_name: @label)}
 >
   {#if @type == "silence"}

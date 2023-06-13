@@ -1,6 +1,10 @@
 <div data-role="add_to_circle">
   <Bonfire.UI.Common.OpenModalLive
-    id={"add-to-circle-modal-#{@parent_id}-#{@user_id}"}
+    id={ComponentID.new(
+      Bonfire.UI.Common.OpenModalLive,
+      "add-to-circle-modal-#{@parent_id}-#{@user_id}",
+      __MODULE__
+    )}
     no_actions
     modal_class="add_to_circle"
   >
