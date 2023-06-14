@@ -11,9 +11,9 @@
     </div>
     <div class="w-full mt-4">
       <div class="w-full form-control">
-        <label class="label">
+        <!-- <label class="label">
           <span class="font-medium label-text">{l("Enter a name for the role")}</span>
-        </label>
+        </label> -->
         <div class="flex items-center">
           <input
             name="name"
@@ -31,14 +31,14 @@
       </label>
     </div> -->
 
-      <div class="form-control mt-2">
-        <label class="label !justify-start gap-2 cursor-pointer">
+      <div class="form-control bg-info/30 rounded p-3 mt-2">
+        <label class="label !justify-start items-start gap-4 cursor-pointer">
           <input type="checkbox" class="toggle" name="usage" value="ops">
-          <span class="label-text">{l("Use this role only to set system boundaries (e.g. group or instance) rather than content")}</span>
+          <span class="label-text text-info">{l("Use this role only to set system boundaries (e.g. group or instance) rather than content")}</span>
         </label>
       </div>
 
-      <div class="form-control mt-2" :if={@scope == :instance}>
+      <div class="form-control bg-info/30 rounded p-3 mt-2" :if={@scope == :instance}>
         <label class="label !justify-start gap-2 cursor-pointer">
           <input type="checkbox" class="toggle" name="display" value="instance_wide" checked disabled>
           <span class="label-text">{l("Enable this role for all users")}</span>
