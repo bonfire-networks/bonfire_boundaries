@@ -37,7 +37,7 @@ defmodule Bonfire.Boundaries.Acls do
   alias Pointers.ULID
 
   # don't show "others who silenced me"
-  @exclude_stereotypes ["2HEYS11ENCEDMES0CAN0TSEEME"]
+  @exclude_stereotypes ["2HEYS11ENCEDMES0CAN0TSEEME", "7HECVST0MAC1F0RAN0BJECTETC"]
 
   # special built-in acls (eg, guest, local, activity_pub)
   def acls, do: Config.get(:acls)
