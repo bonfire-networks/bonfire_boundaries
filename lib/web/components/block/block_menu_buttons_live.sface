@@ -1,86 +1,95 @@
 {#if @current_user != nil}
-  <li
-    :if={current_user_id(@__context__) != id(@object)}
-    data-role="ghost_modal"
-    class="hover:bg-neutral/20"
-  >    
-    <Bonfire.Boundaries.Web.BlockButtonLive
-      object={@object}
-      scope={@scope}
-      type="ghost"
-      open_btn_label={@open_btn_label}
-      parent_id={"user-#{@parent_id}"}
-      with_icon
-      label={e(@object, :profile, :name, l("this user"))}
-      class="flex items-center w-full gap-2 text-sm text-base-content/80"
-    />
-  </li>
+  {#case {current_user_id(@__context__) != id(@object), e(peered(@object, @peered), :peer_id, false)}}
+    {#match {false, false}}
+      <!-- can't block ourselves -->
+    {#match {block_object, block_peer}}
+      <li>
+        <details>
+          <summary>
+            <div class="flex items-center w-full gap-2 text-sm text-base-content/80">
+              <#Icon iconify="heroicons-solid:ban" class="w-4 h-4 shrink-0" />
+              <span class="truncate ellipsis">{l("Block")}</span>
+            </div>
+          </summary>
+          <ul>
+            {#if block_object}
+              <li data-role="ghost_modal" class="hover:bg-neutral/20">
+                <Bonfire.Boundaries.Web.BlockButtonLive
+                  object={@object}
+                  scope={@scope}
+                  type="ghost"
+                  open_btn_label={@open_btn_label}
+                  parent_id={"user-#{@parent_id}"}
+                  with_icon
+                  label={e(@object, :profile, :name, l("this user"))}
+                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                />
+              </li>
 
-  <li
-    :if={current_user_id(@__context__) != id(@object)}
-    data-role="silence_modal"
-    class="hover:bg-neutral/20"
-  >
-    <Bonfire.Boundaries.Web.BlockButtonLive
-      object={@object}
-      scope={@scope}
-      type="silence"
-      open_btn_label={@open_btn_label}
-      parent_id={"user-#{@parent_id}"}
-      with_icon
-      label={e(@object, :profile, :name, l("this user"))}
-      class="flex items-center w-full gap-2 text-sm text-base-content/80"
-    />
-  </li> 
+              <li data-role="silence_modal" class="hover:bg-neutral/20">
+                <Bonfire.Boundaries.Web.BlockButtonLive
+                  object={@object}
+                  scope={@scope}
+                  type="silence"
+                  open_btn_label={@open_btn_label}
+                  parent_id={"user-#{@parent_id}"}
+                  with_icon
+                  label={e(@object, :profile, :name, l("this user"))}
+                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                />
+              </li>
 
-  <li
-    :if={current_user_id(@__context__) != id(@object)}
-    data-role="block_modal"
-    class="hover:bg-neutral/20"
-  >
-    <Bonfire.Boundaries.Web.BlockButtonLive
-      object={@object}
-      scope={@scope}
-      type="block"
-      open_btn_label={@open_btn_label}
-      parent_id={"user-#{@parent_id}"}
-      with_icon
-      label={e(@object, :profile, :name, l("this user"))}
-      class="flex items-center w-full gap-2 text-sm text-base-content/80"
-    />
-  </li>
+              <li data-role="block_modal" class="hover:bg-neutral/20">
+                <Bonfire.Boundaries.Web.BlockButtonLive
+                  object={@object}
+                  scope={@scope}
+                  type="block"
+                  open_btn_label={@open_btn_label}
+                  parent_id={"user-#{@parent_id}"}
+                  with_icon
+                  label={e(@object, :profile, :name, l("this user"))}
+                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                />
+              </li>
+            {/if}
 
-  <li :if={e(peered(@object, @peered), :peer_id, nil)} class="">
-    <Bonfire.Boundaries.Web.BlockButtonLive
-      with_icon
-      type="ghost"
-      object={e(peered(@object, @peered), :peer_id, nil)}
-      scope={@scope}
-      parent_id={"instance-#{@parent_id}"}
-      label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
-      class="flex items-center w-full gap-2 text-sm text-base-content/80"
-    />
-  </li>
-  <li :if={e(peered(@object, @peered), :peer_id, nil)} class="">
-    <Bonfire.Boundaries.Web.BlockButtonLive
-      with_icon
-      type="silence"
-      object={e(peered(@object, @peered), :peer_id, nil)}
-      scope={@scope}
-      parent_id={"instance-#{@parent_id}"}
-      label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
-      class="flex items-center w-full gap-2 text-sm text-base-content/80"
-    />
-  </li>
-  <li :if={e(peered(@object, @peered), :peer_id, nil)} class="">
-    <Bonfire.Boundaries.Web.BlockButtonLive
-      with_icon
-      type="block"
-      object={e(peered(@object, @peered), :peer_id, nil)}
-      scope={@scope}
-      parent_id={"instance-#{@parent_id}"}
-      label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
-      class="flex items-center w-full gap-2 text-sm text-base-content/80"
-    />
-  </li>
+            {#if block_peer}
+              <li class="">
+                <Bonfire.Boundaries.Web.BlockButtonLive
+                  with_icon
+                  type="ghost"
+                  object={block_peer}
+                  scope={@scope}
+                  parent_id={"instance-#{@parent_id}"}
+                  label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
+                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                />
+              </li>
+              <li class="">
+                <Bonfire.Boundaries.Web.BlockButtonLive
+                  with_icon
+                  type="silence"
+                  object={block_peer}
+                  scope={@scope}
+                  parent_id={"instance-#{@parent_id}"}
+                  label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
+                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                />
+              </li>
+              <li class="">
+                <Bonfire.Boundaries.Web.BlockButtonLive
+                  with_icon
+                  type="block"
+                  object={block_peer}
+                  scope={@scope}
+                  parent_id={"instance-#{@parent_id}"}
+                  label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
+                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                />
+              </li>
+            {/if}
+          </ul>
+        </details>
+      </li>
+  {/case}
 {/if}
