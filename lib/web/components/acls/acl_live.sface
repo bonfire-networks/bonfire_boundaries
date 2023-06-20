@@ -122,7 +122,7 @@
                       </li> -->
                       <li data-role="remove_from_boundary">
                         <Bonfire.UI.Common.OpenModalLive
-                          id={"remove_from_acl-#{ulid(subject)}"}
+                          id={"remove_from_acl_#{ulid(subject)}"}
                           title_text={l("Remove from boundary")}
                           no_actions
                           open_btn_wrapper_class="flex flex-1 w-full"
@@ -211,7 +211,7 @@
             </div>
             <div data-role="delete_boundary_modal">
               <Bonfire.UI.Common.OpenModalLive
-                id={"delete-#{@acl_id || id(@acl)}"}
+                id={"delete_#{@acl_id || id(@acl)}"}
                 title_text={l("Delete this boundary")}
               >
                 <div class="mt-3 prose prose-sm">{l(

@@ -1,6 +1,6 @@
 <Bonfire.UI.Common.OpenModalLive
   reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
-  id={"modal-verbs-#{@subject_id}"}
+  id={"modal_verbs_#{@subject_id}"}
   title_text={l("Edit Role") <> " - " <> Atom.to_string(@role_title)}
 >
   <div class="mt-4 overflow-x-hidden">

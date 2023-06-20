@@ -6,7 +6,7 @@
     {#match {name, extra} = _role}
       <!-- id={"permissions_icon-#{@parent_id}-#{@object_id}"} -->
       <Bonfire.UI.Common.OpenModalLive
-        id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "#{@parent_id}-#{@object_id}", __MODULE__)}
+        id={ComponentID.new(Bonfire.UI.Common.OpenModalLive, "#{@parent_id}_#{@object_id}", __MODULE__)}
         no_actions
         open_btn_wrapper_class="!py-1 !px-3"
       >
@@ -72,7 +72,7 @@
             <div class="flex items-start gap-2">
               <div class="flex flex-col gap-1 text-center">
                 <div class="text-sm font-medium text-neutral-content/80">{name}</div>
-                <Bonfire.UI.Common.OpenModalLive id={"permissions_details-#{@parent_id}"} title_text={l("Boundary details")}>
+                <Bonfire.UI.Common.OpenModalLive id={"permissions_details_#{@parent_id}"} title_text={l("Boundary details")}>
                   <div class="text-sm">{if is_list(extra), do: Enum.join(extra, ", "), else: extra}</div>
                   <:open_btn>
                     <button type="button" class="normal-case rounded btn btn-info btn-xs">

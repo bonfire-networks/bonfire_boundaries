@@ -1,6 +1,6 @@
 <Bonfire.UI.Common.OpenModalLive
   reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
-  id={"modal-boundary-#{@id}"}
+  id={"modal_boundary_#{@id}"}
   title_text={"#{@name} " <> l("details")}
   no_actions
 >

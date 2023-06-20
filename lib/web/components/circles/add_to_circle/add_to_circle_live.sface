@@ -2,7 +2,7 @@
   <Bonfire.UI.Common.OpenModalLive
     id={ComponentID.new(
       Bonfire.UI.Common.OpenModalLive,
-      "add-to-circle-modal-#{@parent_id}-#{@user_id}",
+      "add_to_circle_modal_#{@parent_id}_#{@user_id}",
       __MODULE__
     )}
     no_actions
