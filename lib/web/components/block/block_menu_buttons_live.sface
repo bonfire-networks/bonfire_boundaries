@@ -3,7 +3,7 @@
     :if={current_user_id(@__context__) != id(@object)}
     data-role="ghost_modal"
     class="hover:bg-neutral/20"
-  >
+  >    
     <Bonfire.Boundaries.Web.BlockButtonLive
       object={@object}
       scope={@scope}
@@ -31,7 +31,7 @@
       label={e(@object, :profile, :name, l("this user"))}
       class="flex items-center w-full gap-2 text-sm text-base-content/80"
     />
-  </li>
+  </li> 
 
   <li
     :if={current_user_id(@__context__) != id(@object)}
