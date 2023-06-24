@@ -3,7 +3,7 @@
   </div>
   <button
     type="button"
-    phx-click={JS.toggle(to: "#write_post_content_wrapper") |> JS.toggle(to: "#extra_boundaries")}
+    phx-click={JS.toggle(to: "#compose_content_wrapper") |> JS.toggle(to: "#extra_boundaries")}
     class="w-full gap-2 normal-case rounded-full btn btn-primary btn-outline"
   >
     <span class="">{l("Done")}</span>

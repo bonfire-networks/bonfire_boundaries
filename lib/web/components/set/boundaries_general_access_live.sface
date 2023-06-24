@@ -198,7 +198,7 @@
       value: %{id: "custom", name: l("Custom")},
       target: "#smart_input"
     )
-    |> JS.toggle(to: "#write_post_content_wrapper")
+    |> JS.toggle(to: "#compose_content_wrapper")
     |> JS.toggle(to: "#extra_boundaries")}
     type="button"
   >
