@@ -27,7 +27,7 @@
 
   <div class="">
     <div :if={@section == "permissions"}>
-      <div class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
+      <div class="p-3 border-t border-b bg-base-content/5 border-base-content/20">
         <div class="text-xs font-semibold uppercase text-base-content/70">{l("Users and circles that belong to this boundary")}</div>
         <div class="flex items-center mt-3 space-x-2">
           <span class="flex items-center space-x-1 badge-lg badge badge-outline">

@@ -4,7 +4,7 @@
     <button
       phx-click={JS.toggle(to: "#circles_list")
       |> JS.toggle(to: "#new_circle_from_modal")}
-      class="border-b w-full block text-left mt-1 border-base-content/10 hover:bg-base-content/5 py-3 px-4"
+      class="border-b w-full block text-left mt-1 border-base-content/20 hover:bg-base-content/5 py-3 px-4"
     >
       <div class="flex items-center gap-2 text-primary text-sm font-medium">
         <#Icon solid="Plus" class="w-4 h-4" />

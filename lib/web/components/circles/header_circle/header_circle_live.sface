@@ -4,7 +4,7 @@
     title_text={l("Add members")}
     form_opts={"phx-change": "select"}
   >
-    <div class="pb-4 mt-4 border-b border-base-content/10">
+    <div class="pb-4 mt-4 border-b border-base-content/20">
       <div class="flex items-center rounded-lg">
         <Bonfire.UI.Common.MultiselectLive
           implementation={:live_select}

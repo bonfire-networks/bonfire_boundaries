@@ -64,7 +64,7 @@
 
     <div class="">
       <div :if={@section != "settings"}>
-        <div :if={!@read_only} class="p-3 border-t border-b bg-base-content/5 border-base-content/10">
+        <div :if={!@read_only} class="p-3 border-t border-b bg-base-content/5 border-base-content/20">
           <div class="flex items-center px-2 space-x-9">
             <h2 class="flex-1 text-xs font-semibold tracking-wide uppercase text-base-content/70">{l("People and circles in this boundary")}</h2>
             <div
@@ -106,7 +106,7 @@
                     placeholder={l("Add more users or circles")}
                     name="add"
                     id="acl_tagify"
-                    class="w-full border tagify--outside tagify !border-base-content/10"
+                    class="w-full border tagify--outside tagify !border-base-content/20"
                   />
                    <select class="tagify hide">
                     {#for {id, name} <- @suggestions}
@@ -172,7 +172,7 @@
             <div class="collapse-content">
               <div class={"grid w-full grid-cols-1 md:grid-cols-#{columns(@__context__)} gap-3 p-3"}>
                 {#for {{verb_id, l}, i} <- Enum.with_index(@list_by_verb || [])}
-                  <div class="col-span-1 rounded shadow-lg border-base-content/10 bg-base-content/5">
+                  <div class="col-span-1 rounded shadow-lg border-base-content/20 bg-base-content/5">
                     <div class="flex-1 rounded">
                       <div class="flex items-center p-2 space-x-2 bg-base-content/5">
                         {#case Bonfire.Boundaries.Verbs.get(verb_id)}

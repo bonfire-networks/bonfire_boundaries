@@ -1,5 +1,5 @@
 <!-- <div class="">
-  <div class="py-3 text-xs font-medium tracking-wider uppercase border-t border-base-content/10 text-base-content/70">{l("General permissions")}</div>
+  <div class="py-3 text-xs font-medium tracking-wider uppercase border-t border-base-content/20 text-base-content/70">{l("General permissions")}</div>
   <div class="flex flex-col w-full gap-3">
     <div class="flex-1">
       <div class="flex items-start gap-4">

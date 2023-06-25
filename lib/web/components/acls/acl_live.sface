@@ -16,7 +16,7 @@
     <div :if={!@setting_boundaries and !@read_only and !Acls.is_object_custom?(@acl)} class="">
       <ul
         role="tablist"
-        class="flex justify-evenly items-stretch gap-3 text-sm font-medium border-b border-base-content/10"
+        class="flex justify-evenly items-stretch gap-3 text-sm font-medium border-b border-base-content/20"
       >
         <li
           to={~p"/boundaries/acl/#{ulid(@acl)}"}
@@ -57,7 +57,7 @@
     <div date-role="edit-acl">
       <div :if={@section != "settings"}>
         <div :if={!@read_only}>
-          <form id="edit_acl_members" class="p-2 border-b border-base-content/10" :on-change="select">
+          <form id="edit_acl_members" class="p-2 border-b border-base-content/20" :on-change="select">
             <Bonfire.UI.Common.MultiselectLive
               implementation={:live_select}
               form_input_name={__MODULE__}
@@ -166,7 +166,7 @@
           id="edit_acl"
           phx-submit="edit"
           phx-target={@myself}
-          class="p-4 border rounded-lg border-base-content/10"
+          class="p-4 border rounded-lg border-base-content/20"
         >
           <div class="w-full form-control">
             <label class="label">
