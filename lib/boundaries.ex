@@ -430,7 +430,8 @@ defmodule Bonfire.Boundaries do
   end
 
   defp load_query(ids, _, opts) do
-    from(p in Pointers.query_base(), where: p.id in ^List.wrap(ids))
+    (opts[:from] || Pointers.query_base())
+    |> where([p], p.id in ^List.wrap(ids))
     |> boundarise(main_object.id, opts)
   end
 end
