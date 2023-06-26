@@ -190,7 +190,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_interaction = [:like, :follow]
     verbs_sharing = [:boost, :pin]
     verbs_ping = [:reply, :mention, :message]
-    verbs_contrib = [:create, :tag]
+    verbs_edit = [:edit, :tag, :describe]
+    verbs_contrib = [:create, :tag, :describe]
 
     # verbs_interact_minus_follow =
     #   verbs_see_read_request ++ [:like]
@@ -204,6 +205,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_participate_message_minus_boost = verbs_interact_minus_boost ++ verbs_ping
 
     verbs_participate_and_message = verbs_interact_incl_boost ++ verbs_ping
+
+    verbs_editor = verbs_participate_and_message ++ verbs_edit
 
     verbs_contribute = verbs_participate_and_message ++ verbs_contrib
 
@@ -235,6 +238,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         read: %{can_verbs: verbs_see_read_request, read_only: true},
         interact: %{can_verbs: verbs_interact_incl_boost, read_only: true},
         participate: %{can_verbs: verbs_participate_and_message, read_only: true},
+        edit: %{can_verbs: verbs_editor, read_only: true},
         contribute: %{usage: :ops, can_verbs: verbs_contribute, read_only: true},
         administer: %{can_verbs: all_verb_names, read_only: true},
         cannot_read: %{cannot_verbs: cannot_read, read_only: true},
