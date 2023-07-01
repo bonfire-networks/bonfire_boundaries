@@ -252,7 +252,7 @@ defmodule Bonfire.Boundaries.Roles do
   end
 
   def reset_instance_roles do
+    Settings.put([@config_key], nil, scope: :instance, skip_boundary_check: true)
     Config.delete(@config_key, :bonfire)
-    Settings.put([@config_key], [], scope: :instance, skip_boundary_check: true)
   end
 end
