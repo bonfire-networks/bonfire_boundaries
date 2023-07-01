@@ -91,6 +91,18 @@ defmodule Bonfire.Boundaries.Blocks do
     mutate(:unblock, user_or_instance_to_block, block_type, scope)
   end
 
+  def unblock_all(block_type \\ nil, scope)
+
+  def unblock_all(block_type, :instance_wide) do
+    instance_wide_circles(block_type)
+    |> Circles.empty_circles()
+  end
+
+  def unblock_all(block_type, scope) do
+    user_block_circles(current_user(scope), block_type)
+    |> Circles.empty_circles()
+  end
+
   defp mutate(
          block_or_unblock,
          user_or_instance_to_block,

@@ -444,6 +444,13 @@ defmodule Bonfire.Boundaries.Circles do
     remove_from_circles(subject, [circle])
   end
 
+  def empty_circles(circles) when is_list(circles) do
+    from(e in Encircle,
+      where: e.circle_id in ^ulid(circles)
+    )
+    |> repo().delete_all()
+  end
+
   @doc """
   Fully delete the circle, including membership and boundary information. This will affect all objects previously shared with members of this circle.
   """
