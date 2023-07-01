@@ -114,7 +114,8 @@ defmodule Bonfire.Boundaries do
     verb_names =
       Enum.map(verb_ids, &Verbs.get(&1).verb)
       |> Enum.sort()
-      |> debug()
+
+    # |> debug()
 
     from(s in query,
       where: s.verb_id in ^verb_ids
