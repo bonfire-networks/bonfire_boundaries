@@ -410,7 +410,7 @@ defmodule Bonfire.Boundaries do
   Loads binaries according to boundaries (which are assumed to be ULID pointer IDs).
   Lists which are iterated and return a [sub]list with only permitted pointers.
   """
-  def load_pointers(items, opts) when is_list(items) do
+  def load_pointers(items, opts) do
     # debug(items, "items")
     case ulid(items) do
       [] ->
@@ -431,7 +431,7 @@ defmodule Bonfire.Boundaries do
   end
 
   defp load_query(ids, _, opts) do
-    (opts[:from] || Pointers.query_base())
+    (opts[:from] || Pointers.query_base(if opts[:include_deleted], do: :include_deleted))
     |> where([p], p.id in ^List.wrap(ids))
     |> boundarise(main_object.id, opts)
   end
