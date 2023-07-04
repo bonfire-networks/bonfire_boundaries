@@ -18,7 +18,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
 
   on_mount {LivePlugs, [Bonfire.UI.Me.LivePlugs.LoadCurrentUser]}
 
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     {
       :ok,
       # |> assign(:without_sidebar,  true)
@@ -31,6 +31,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
         back: true,
         page: "boundaries",
         scope: :user,
+        current_params: params,
         sidebar_widgets: [
           users: [
             secondary: [

@@ -72,14 +72,15 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
 
       user ->
         name = e(user, :profile, :name, nil)
+        username = e(user, :character, :username, nil)
 
-        {name,
+        {"#{name} - #{username}",
          %{
            id: e(user, :id, nil),
            field: :to_circles,
            icon: Media.avatar_url(user),
            name: name,
-           username: e(user, :character, :username, nil)
+           username: username
          }}
     end)
     # Filter to remove any nils

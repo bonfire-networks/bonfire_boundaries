@@ -10,6 +10,7 @@
         selected_tab="acls"
         id="acl"
         scope={@scope}
+        acl_id={@current_params["id"]}
       />
     {#match "circles"}
       <Dynamic.LiveComponent
@@ -25,6 +26,7 @@
         selected_tab={@selected_tab}
         id="view_circle"
         scope={@scope}
+        circle_id={@current_params["id"]}
       />
     {#match "acls"}
       <Dynamic.LiveComponent
