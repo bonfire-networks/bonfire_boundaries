@@ -1,8 +1,10 @@
 {#if Enum.empty?(@to_circles)}
-  <Bonfire.UI.Common.EmptyFeed
+  <!-- <Bonfire.UI.Common.EmptyFeed
     feedback_title={l("Grant custom permissions")}
     feedback_message={l("Here you can grant specific permissions to one or more users or circles.")}
-  />
+  /> -->
+
+  <!-- <div class="text-center  p-4 font-medium bg-base-200 rounded-box my-2">{"Grant custom permissions to specific users or circles"}</div> -->
 {#else}
   <div class="flex flex-1 flex-col divide-y divide-base-content/10 mt-3 flex-wrap">
     <!-- <div
@@ -47,12 +49,16 @@
           />
         {#match _ when is_binary(data)}
           <div class="flex items-center gap-3 grow">
-            <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-8 h-8 text-base-content/70" />
+            <span class="w-8 h-8 rounded-full bg-base-content/10 flex items-center place-content-center">
+              <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/80" />
+            </span>
             <div class="text-base font-medium text-base-content">{data}</div>
           </div>
         {#match _}
           <div class="flex items-center gap-3 grow">
-            <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-8 h-8 text-base-content/70" />
+            <span class="w-8 h-8 rounded-full bg-base-content/10 flex items-center place-content-center">
+              <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/80" />
+            </span>
             <div class="text-sm font-bold group-hover:underline text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
           </div>
       {/case}

@@ -85,6 +85,8 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     end)
     # Filter to remove any nils
     |> Enum.filter(fn {name, _} -> name != nil end)
+    # Reduce the results to show in dropdown for clarity to 4 items
+    |> Enum.take(4)
 
     # |> debug()
   end

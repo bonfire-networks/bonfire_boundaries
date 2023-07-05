@@ -2,7 +2,14 @@
   {#match false}
     <div class="flex items-center flex-1 gap-2 mt-1">
       <div class="flex relative z-50 items-center flex-1 gap-2">
-        <div class="w-full dropdown">
+        <button
+      type="button"
+      phx-click={JS.toggle(to: "#compose_content_wrapper") |> JS.toggle(to: "#boundaries_picker")}
+      class="flex w-fit items-center justify-between gap-2 btn-ghost normal-case rounded-full border btn-sm btn border-base-content/30 text-primary"
+    >
+       <Bonfire.Boundaries.Web.BoundariesPresetNameLive to_boundaries={@to_boundaries} />
+      </button>
+        <!-- <div class="w-full dropdown">
           <label
             type="button"
             tabindex="0"
@@ -22,7 +29,7 @@
           >
             <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={Bonfire.Boundaries.Web.SetBoundariesLive.boundaries_to_preset(@to_boundaries)} />
           </ul>
-        </div>
+        </div> -->
       </div>
     </div>
   {#match boundary_name}
