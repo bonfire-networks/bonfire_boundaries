@@ -67,7 +67,7 @@
           checked={@value == true}
           disabled={@read_only}
         />
-        <div class={"btn btn-square btn-xs btn-yes", "btn-disabled": @read_only}>
+        <div class={"btn btn-circle btn-ghost !border !border-base-content/30 btn-sm btn-yes", "btn-disabled": @read_only}>
           <#Icon solid="Check" class="w-4 h-4" />
         </div>
       </label>
@@ -80,7 +80,7 @@
           checked={is_nil(@value)}
           disabled={@read_only}
         />
-        <div class={"btn btn-square btn-xs btn-maybe", "btn-disabled": @read_only}>
+        <div class={"btn btn-circle btn-ghost !border !border-base-content/30 btn-sm btn-maybe", "btn-disabled": @read_only}>
           <#Icon solid="Minus" class="w-4 h-4" />
         </div>
       </label>
@@ -93,7 +93,7 @@
           checked={@value == false}
           disabled={@read_only}
         />
-        <div class={"btn btn-square btn-xs btn-no", "btn-disabled": @read_only}>
+        <div class={"btn btn-circle btn-ghost !border !border-base-content/30 btn-sm btn-no", "btn-disabled": @read_only}>
           <#Icon solid="X" class="w-4 h-4" />
         </div>
       </label>

@@ -1,7 +1,7 @@
 <div
-  :class="{'bg-base-content/10 hover:!bg-base-content/10': open}"
+  :class="{'border-b border-base-content/20': open}"
   x-on:click="open = !open"
-  class="block cursor-pointer hover:bg-base-content/5"
+  class="block cursor-pointer"
 >
   <div class="flex items-center gap-3 p-4">
     <#Icon iconify="mingcute:hat-fill" class="w-5 h-5 text-base-content/70" />
@@ -12,13 +12,13 @@
         </div>
       </div>
     </div>
-    <div class="btn btn-ghost btn-circle rounded flex items-center gap-2 btn-sm normal-case">
+    <div class="btn btn-ghost btn-circle flex items-center gap-2 btn-sm normal-case">
       <span class="sr-only">{l("Details")}</span>
       <#Icon solid="ChevronDown" class="w-5 h-5 text-base-content/70" />
     </div>
   </div>
 </div>
-<div :class="{'bg-base-content/5': open}" x-cloak x-show="open" x-collapse>
+<div x-cloak x-show="open" x-collapse>
   <div class="">
     <ul class="">
       {#for verb <- e(@role, :can_verbs, nil) || []}

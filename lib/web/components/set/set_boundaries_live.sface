@@ -41,25 +41,14 @@
 
     <div class="flex items-center mt-8 mb-4 justify-between">
       <div class="font-bold flex-1 text-sm">{l "Specific permissions"}</div>
-      <div>
-      <Bonfire.UI.Common.InlineModalLive
-        id={"info_roles"}
-        title_text={l("Roles")}
-        value={nil}
-        cancel_label={l("Done")}
-      >
-        
-        
-        <:open_btn>
-          <div class="btn !border-base-content/30 !border btn-outline rounded-full btn-sm normal-case text-sm font-medium flex items-center gap-2">
-            <#Icon iconify="mingcute:hat-fill" class="w-4 h-4" />
-            <span>{l "View roles"}</span>
-          </div>
-          <!-- <input type="hidden" name={"upload_metadata[#{entry.ref}][label]"} value={value}> -->
-        </:open_btn>
-      </Bonfire.UI.Common.InlineModalLive>
-      </div>
-      
+      <button
+        type="button"
+        phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#roles_detail")}
+        class="btn !border-base-content/30 !border btn-outline rounded-full btn-sm normal-case text-sm font-medium flex items-center gap-2">
+        <#Icon iconify="mingcute:hat-fill" class="w-4 h-4" />
+        <span>{l "View roles"}</span>
+      </button>
+
     </div>
       <div class="flex flex-col gap-2">
       <div class="collapse !overflow-visible collapse-arrow bg-base-100">

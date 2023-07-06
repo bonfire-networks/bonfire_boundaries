@@ -216,7 +216,7 @@
       value: %{id: "custom", name: l("Custom")},
       target: "#smart_input"
     )
-    |> JS.toggle(to: "#compose_content_wrapper")
+    |> JS.toggle(to: "#boundaries_picker")
     |> JS.toggle(to: "#extra_boundaries")}
     type="button"
   >
