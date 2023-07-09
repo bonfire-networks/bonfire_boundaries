@@ -123,158 +123,158 @@
 </div> -->
 
 <div class="menu flex flex-col gap-3 menu-lg">
-<div class="flex px-2 items-center gap-3 justify-between">
-  <button
-    class="text-base-content"
-    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-      value: %{id: "public", name: l("Public")},
-      target: "#smart_input"
-    )}
-    type="button"
-  >
-  <div class="flex items-center gap-2">
-      <input type="radio" name="radio-1" class="radio" checked />
-    <div class="p-1.5 flex items-center text-left">
-      <div class="flex-shrink-0">
-        <span class="text-xl">
-          <#Icon iconify="ph:globe" class="w-6 h-6" />
-        </span>
-      </div>
-      <div class="flex flex-col ml-3">
-        <div class="text-sm font-semibold text-base-content/90">{l("Public")}</div>
-        <p class="text-[13px] text-opacity/70">
-          {l("Publicly visible to everyone. Discoverable by search engines.")}
-        </p>
-      </div>
-    </div>
-  </div>
-  </button>
-  <button
-    type="button"
-    phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
-    class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case">
-    {l"Edit"}
-  </button>
-</div>
-<div class="flex px-2 items-center gap-3 justify-between">
-  <button
-    class="text-base-content"
-    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-      value: %{id: "local", name: l("Local")},
-      target: "#smart_input"
-    )}
-    type="button"
-  > 
-    <div class="flex items-center gap-2">
-      <input type="radio" name="radio-1" class="radio"  />
-      <div class="p-1.5 flex items-center text-left">
-        <div class="flex-shrink-0">
-          <span class="text-xl">
-            <#Icon iconify="ph:campfire-bold" class="w-6 h-6" />
-          </span>
-        </div>
-        <div class="flex flex-col ml-3">
-          <div class="text-sm font-semibold text-base-content/90">{l("Local")}</div>
-          <p class="text-[13px] text-opacity/70">
-            {l("Everyone on this instance will be able to see, interact, and reply.")}
-          </p>
-        </div>
-      </div>
-    </div>
-  </button>
-</div>
-
-<div class="flex px-2 items-center gap-3 justify-between">
-  <button
-    class="text-base-content"
-    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-      value: %{id: "mentions", name: l("Mentions")},
-      target: "#smart_input"
-    )}
-    type="button"
-  >
-  <div class="flex items-center gap-2">
-      <input type="radio" name="radio-1" class="radio"  />
-    <div class="p-1.5 flex items-center text-left">
-      <div class="flex-shrink-0">
-        <span class="text-2xl">﹫</span>
-      </div>
-      <div class="flex flex-col ml-3">
-        <div class="text-sm font-semibold text-base-content/90">{l("Mentions")}</div>
-        <p class="text-[13px] text-opacity/70">
-          {l("Anyone mentioned will be able to see, interact, and reply.")}
-        </p>
-      </div>
-    </div>
-  </div>
-  </button>
-</div>
-<div class="flex px-2 items-center gap-3 justify-between">
-  <button
-    class="text-base-content"
-    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-      value: %{id: "custom", name: l("Custom")},
-      target: "#smart_input"
-    )
-    |> JS.toggle(to: "#boundaries_picker")
-    |> JS.toggle(to: "#extra_boundaries")}
-    type="button"
-  >
-  <div class="flex items-center gap-2">
-      <input type="radio" name="radio-1" class="radio"  />
-    <div class="p-1.5 flex items-center text-left">
-      <div class="flex-shrink-0">
-        <span class="text-xl">
-          <#Icon iconify="ph:gear-fill" class="w-6 h-6" />
-        </span>
-      </div>
-      <div class="flex flex-col ml-3">
-        <div class="text-sm font-semibold text-base-content/90">{l("Custom")}</div>
-        <p class="text-[13px] text-opacity/70">{l("Specify custom boundaries.")}</p>
-      </div>
-    </div>
-  </div>
-  </button>
-</div>
-{#for acl <-
-    Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
-    |> Enum.map(fn
-      %Bonfire.Data.AccessControl.Acl{} = acl ->
-        %{
-          id: e(acl, :id, nil),
-          field: :to_boundaries,
-          description: e(acl, :extra_info, :summary, nil),
-          name: e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil)
-        }
-    end)
-    |> Enum.filter(fn acl -> acl[:name] != nil end)}
   <div class="flex px-2 items-center gap-3 justify-between">
     <button
       class="text-base-content"
       phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-        value: %{id: e(acl, :id, nil), name: e(acl, :name, nil)},
+        value: %{id: "public", name: l("Public")},
         target: "#smart_input"
       )}
       type="button"
     >
-    <div class="flex items-center gap-2">
-      <input type="radio" name="radio-1" class="radio"  />
-      <div class="p-1.5 flex items-center text-left">
-        <div class="flex-shrink-0">
-          <span class="text-xl">
-            <#Icon iconify="fluent:door-tag-20-filled" class="w-6 h-6" />
-          </span>
-        </div>
-        <div class="flex flex-col ml-3">
-          <div class="text-sm font-semibold text-base-content/90">{e(acl, :name, nil)}</div>
-          <p class="text-[13px] text-opacity/70">{e(acl, :description, nil)}</p>
+      <div class="flex items-center gap-2">
+        <input type="radio" name="radio-1" class="radio" checked>
+        <div class="p-1.5 flex items-center text-left">
+          <div class="flex-shrink-0">
+            <span class="text-xl">
+              <#Icon iconify="ph:globe" class="w-6 h-6" />
+            </span>
+          </div>
+          <div class="flex flex-col ml-3">
+            <div class="text-sm font-semibold text-base-content/90">{l("Public")}</div>
+            <p class="text-[13px] text-opacity/70">
+              {l("Publicly visible to everyone. Discoverable by search engines.")}
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </button>
+    <button
+      type="button"
+      phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
+      class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+    >
+      {l("Edit")}
     </button>
   </div>
-{/for}
+  <div class="flex px-2 items-center gap-3 justify-between">
+    <button
+      class="text-base-content"
+      phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+        value: %{id: "local", name: l("Local")},
+        target: "#smart_input"
+      )}
+      type="button"
+    >
+      <div class="flex items-center gap-2">
+        <input type="radio" name="radio-1" class="radio">
+        <div class="p-1.5 flex items-center text-left">
+          <div class="flex-shrink-0">
+            <span class="text-xl">
+              <#Icon iconify="ph:campfire-bold" class="w-6 h-6" />
+            </span>
+          </div>
+          <div class="flex flex-col ml-3">
+            <div class="text-sm font-semibold text-base-content/90">{l("Local")}</div>
+            <p class="text-[13px] text-opacity/70">
+              {l("Everyone on this instance will be able to see, interact, and reply.")}
+            </p>
+          </div>
+        </div>
+      </div>
+    </button>
+  </div>
 
+  <div class="flex px-2 items-center gap-3 justify-between">
+    <button
+      class="text-base-content"
+      phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+        value: %{id: "mentions", name: l("Mentions")},
+        target: "#smart_input"
+      )}
+      type="button"
+    >
+      <div class="flex items-center gap-2">
+        <input type="radio" name="radio-1" class="radio">
+        <div class="p-1.5 flex items-center text-left">
+          <div class="flex-shrink-0">
+            <span class="text-2xl">﹫</span>
+          </div>
+          <div class="flex flex-col ml-3">
+            <div class="text-sm font-semibold text-base-content/90">{l("Mentions")}</div>
+            <p class="text-[13px] text-opacity/70">
+              {l("Anyone mentioned will be able to see, interact, and reply.")}
+            </p>
+          </div>
+        </div>
+      </div>
+    </button>
+  </div>
+  <div class="flex px-2 items-center gap-3 justify-between">
+    <button
+      class="text-base-content"
+      phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+        value: %{id: "custom", name: l("Custom")},
+        target: "#smart_input"
+      )
+      |> JS.toggle(to: "#boundaries_picker")
+      |> JS.toggle(to: "#extra_boundaries")}
+      type="button"
+    >
+      <div class="flex items-center gap-2">
+        <input type="radio" name="radio-1" class="radio">
+        <div class="p-1.5 flex items-center text-left">
+          <div class="flex-shrink-0">
+            <span class="text-xl">
+              <#Icon iconify="ph:gear-fill" class="w-6 h-6" />
+            </span>
+          </div>
+          <div class="flex flex-col ml-3">
+            <div class="text-sm font-semibold text-base-content/90">{l("Custom")}</div>
+            <p class="text-[13px] text-opacity/70">{l("Specify custom boundaries.")}</p>
+          </div>
+        </div>
+      </div>
+    </button>
+  </div>
+  {#for acl <-
+      Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
+      |> Enum.map(fn
+        %Bonfire.Data.AccessControl.Acl{} = acl ->
+          %{
+            id: e(acl, :id, nil),
+            field: :to_boundaries,
+            description: e(acl, :extra_info, :summary, nil),
+            name: e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil)
+          }
+      end)
+      |> Enum.filter(fn acl -> acl[:name] != nil end)}
+    <div class="flex px-2 items-center gap-3 justify-between">
+      <button
+        class="text-base-content"
+        phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+          value: %{id: e(acl, :id, nil), name: e(acl, :name, nil)},
+          target: "#smart_input"
+        )}
+        type="button"
+      >
+        <div class="flex items-center gap-2">
+          <input type="radio" name="radio-1" class="radio">
+          <div class="p-1.5 flex items-center text-left">
+            <div class="flex-shrink-0">
+              <span class="text-xl">
+                <#Icon iconify="fluent:door-tag-20-filled" class="w-6 h-6" />
+              </span>
+            </div>
+            <div class="flex flex-col ml-3">
+              <div class="text-sm font-semibold text-base-content/90">{e(acl, :name, nil)}</div>
+              <p class="text-[13px] text-opacity/70">{e(acl, :description, nil)}</p>
+            </div>
+          </div>
+        </div>
+      </button>
+    </div>
+  {/for}
 </div>
 
 <div class="flex items-center justify-between px-3 pb-3 mt-4">

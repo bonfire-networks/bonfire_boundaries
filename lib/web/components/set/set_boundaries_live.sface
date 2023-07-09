@@ -5,64 +5,67 @@
   /> -->
 
   <div class="flex flex-col relative h-full multiselect_in_composer flex-1 min-h-[376px]">
-
-    <div 
+    <div
       x-data="{
         open: false
       }"
-      class="bg-primary/10 rounded-box p-4">
-      <div class="font-bold mb-3 text-sm">{l"General permissions"}</div>
+      class="bg-primary/10 rounded-box p-4"
+    >
+      <div class="font-bold mb-3 text-sm">{l("General permissions")}</div>
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3 font-semibold">
-        <Bonfire.Boundaries.Web.BoundariesPresetNameLive to_boundaries={@to_boundaries} />
+          <Bonfire.Boundaries.Web.BoundariesPresetNameLive to_boundaries={@to_boundaries} />
         </div>
         <button
           x-show="!open"
           type="button"
           x-on:click="open = !open"
           type="button"
-          class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case">
-          {l"Customize"}
+          class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+        >
+          {l("Customize")}
         </button>
         <button
           x-show="open"
           type="button"
           x-on:click="open = !open"
-          c class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case">
-          {l"Collapse"}
+          c
+          class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+        >
+          {l("Collapse")}
         </button>
       </div>
       <div x-show="open" x-cloak x-collapse>
         <div class="flex flex-col gap-3">
-            <!-- HERE GOES THE boundary_items_live for default boundaries -->
+          <!-- HERE GOES THE boundary_items_live for default boundaries -->
         </div>
       </div>
     </div>
 
     <div class="flex items-center mt-8 mb-4 justify-between">
-      <div class="font-bold flex-1 text-sm">{l "Specific permissions"}</div>
+      <div class="font-bold flex-1 text-sm">{l("Specific permissions")}</div>
       <button
         type="button"
         phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#roles_detail")}
-        class="btn !border-base-content/30 !border btn-outline rounded-full btn-sm normal-case text-sm font-medium flex items-center gap-2">
+        class="btn !border-base-content/30 !border btn-outline rounded-full btn-sm normal-case text-sm font-medium flex items-center gap-2"
+      >
         <#Icon iconify="mingcute:hat-fill" class="w-4 h-4" />
-        <span>{l "View roles"}</span>
+        <span>{l("View roles")}</span>
       </button>
-
     </div>
-      <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2">
       <div class="collapse !overflow-visible collapse-arrow bg-base-100">
-        <input type="radio" name="my-accordion-2" checked="checked" /> 
+        <input type="radio" name="my-accordion-2" checked="checked">
         <div class="collapse-title  text-sm font-medium">
           <div class="flex items-center gap-3">
             <span class="w-8 h-8 bg-info/10 rounded-full flex items-center place-content-center">
               <#Icon iconify="mingcute:user-add-2-fill" class="w-5 h-5 text-info" />
             </span>
-            <span>{l "Add users or circles"}</span>
+            <span>{l("Add users or circles")}</span>
           </div>
         </div>
-        <div class="collapse-content "> 
-         <Bonfire.UI.Common.MultiselectLive
+        <div class="collapse-content">
+          <Bonfire.UI.Common.MultiselectLive
             implementation={:live_select}
             form_input_name={__MODULE__}
             preloaded_options={list_my_circles(@__context__)}
@@ -73,21 +76,20 @@
         </div>
       </div>
       <div class="collapse !overflow-visible  collapse-arrow bg-base-100">
-        <input type="radio" name="my-accordion-2" /> 
+        <input type="radio" name="my-accordion-2">
         <div class="collapse-title text-sm font-medium">
           <div class="flex items-center gap-3">
             <span class="w-8 h-8 bg-info/10 rounded-full flex items-center place-content-center">
               <#Icon iconify="mingcute:user-remove-2-fill" class="w-5 h-5 text-info" />
             </span>
-            <span>{l "Exclude users or circles"}</span>
+            <span>{l("Exclude users or circles")}</span>
           </div>
         </div>
-        <div class="collapse-content"> 
+        <div class="collapse-content">
           <p>hello</p>
         </div>
       </div>
     </div>
-    
 
     <!-- <div class="flex gap-2 py-2 scrollable">
         {#for acl <- Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
