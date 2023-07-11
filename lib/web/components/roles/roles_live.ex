@@ -15,7 +15,7 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
 
     scope_type = Types.object_type(scope) || scope
 
-    if scope_type not in [:group, Bonfire.Classify.Category] do
+    if scope_type not in [:smart_input, :group, Bonfire.Classify.Category] do
       # not for groups
       send_self(
         scope: scope,
@@ -50,22 +50,24 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
     #   end
     #   |> debug()
 
-    {:ok,
-     socket
-     |> assign(assigns)
-     |> assign(
-       scope_type: scope_type,
-       role_verbs:
-         Bonfire.Boundaries.Roles.role_verbs(:all,
-           one_scope_only: true,
-           scope: scope,
-           current_user: current_user
-         ),
-       #  cannot_role_verbs: Bonfire.Boundaries.Roles.cannot_role_verbs(),
-       all_verbs: Bonfire.Boundaries.Verbs.verbs(),
-       available_verbs: available_verbs
-     )
-     |> debug()}
+    {
+      :ok,
+      socket
+      |> assign(assigns)
+      |> assign(
+        scope_type: scope_type,
+        role_verbs:
+          Bonfire.Boundaries.Roles.role_verbs(:all,
+            one_scope_only: true,
+            scope: scope,
+            current_user: current_user
+          ),
+        #  cannot_role_verbs: Bonfire.Boundaries.Roles.cannot_role_verbs(),
+        all_verbs: Bonfire.Boundaries.Verbs.verbs(),
+        available_verbs: available_verbs
+      )
+      #  |> debug()
+    }
   end
 
   def do_handle_event("edit_verb_value", %{"role" => roles} = attrs, socket) do
