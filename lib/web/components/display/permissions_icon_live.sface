@@ -29,7 +29,7 @@
                 <div class="flex-1 ml-3 md:flex md:justify-between">
                   <p class="text-sm text-info">
                     {l(
-                      "These permissions are set by the activity Caretaker. They specify which actions you can perform on this activity."
+                      "These permissions are set by the creator or caretaker. They specify which actions you can perform on this content."
                     )}</p>
                 </div>
               </div>

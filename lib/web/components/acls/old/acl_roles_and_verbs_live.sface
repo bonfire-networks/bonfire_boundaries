@@ -197,7 +197,11 @@
                       :for={{subject_id, %{subject: subject}} <- e(@list_by_subject, [])}
                       class="flex items-center px-2 py-1 mt-px"
                     >
-                      <div class={"flex-1 pr-2 text-left truncate ellipsis", "text-sm": !@ui_compact, "text-xs": @ui_compact}>
+                      <div class={
+                        "flex-1 pr-2 text-left truncate ellipsis",
+                        "text-sm": @ui_compact != true,
+                        "text-xs": @ui_compact
+                      }>
                         {#if !e(subject, :stereotyped, :stereotype_id, nil) and e(subject, :named, :id, nil) != nil and
                             subject_id not in e(@global_circles, [])}
                           <span

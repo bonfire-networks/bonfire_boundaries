@@ -65,7 +65,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        global_circles: global_circles,
        settings_section_title: "View boundary",
        settings_section_description: l("Create and manage your boundary."),
-       ui_compact: Settings.get([:ui, :compact], false, assigns),
+       ui_compact: e(assigns, :ui_compact, nil) || e(assigns, :__context__, :ui_compact, nil),
        selected_tab: "acls"
      )
      |> assign_updated()}
@@ -501,9 +501,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   def verb_subject_grant(_), do: %{}
 
-  def columns(_context) do
-    # if Settings.get([:ui, :compact], false, context), do: 3, else: 2
-    2
+  def columns(context) do
+    if context[:ui_compact], do: 3, else: 2
   end
 
   def predefined_subjects(subjects) do
