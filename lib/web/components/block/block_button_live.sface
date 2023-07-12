@@ -80,7 +80,7 @@
       >
         {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, :instance_wide)}
           <div class="">
-            <p class="mt-0 text-sm text-base-content/80">
+            <p class="mt-0 text-sm text-base-content/70">
               {l("Are you sure to unsilence %{user_or_instance_name} instance-wide?",
                 user_or_instance_name: @label
               )}
@@ -184,7 +184,7 @@
       >
         {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, :instance_wide)}
           <div class="">
-            <p class="mt-0 text-sm text-base-content/80">
+            <p class="mt-0 text-sm text-base-content/70">
               {l("Are you sure to unghost %{user_or_instance_name} instance-wide?",
                 user_or_instance_name: @label
               )}
@@ -254,7 +254,7 @@
       >
         <!-- {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, @scope) && Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, @scope)}
           <div class="">
-            <p class="mt-0 text-sm text-base-content/80">
+            <p class="mt-0 text-sm text-base-content/70">
               {l("Are you sure to unblock %{user_or_instance_name} instance-wide?",
                 user_or_instance_name: @label
               )}
@@ -292,7 +292,7 @@
         {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, :instance) &&
             Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, :instance)}
           <div class="">
-            <p class="mt-0 text-sm text-base-content/80">
+            <p class="mt-0 text-sm text-base-content/70">
               {l("Are you sure to unblock %{user_or_instance_name} instance-wide?",
                 user_or_instance_name: @label
               )}
@@ -329,17 +329,17 @@
       <#Icon
         :if={@with_icon && @type == "ghost"}
         iconify="mingcute:ghost-fill"
-        class="w-4 h-4 stroke-1 text-base-content/80"
+        class="w-4 h-4 stroke-1 text-base-content/70"
       />
       <#Icon
         :if={@with_icon && @type == "silence"}
         iconify="heroicons-solid:volume-off"
-        class="w-4 h-4 stroke-1 text-base-content/80"
+        class="w-4 h-4 stroke-1 text-base-content/70"
       />
       <#Icon
         :if={@with_icon && @type == "block"}
         iconify="heroicons-solid:ban"
-        class="w-4 h-4 stroke-1 text-base-content/80"
+        class="w-4 h-4 stroke-1 text-base-content/70"
       />
       <span :if={!@hide_text} class="text-left truncate ellipsis">
         {@open_btn_label ||

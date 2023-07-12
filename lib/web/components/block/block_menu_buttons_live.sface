@@ -6,7 +6,7 @@
       <li>
         <details>
           <summary>
-            <div class="flex items-center w-full gap-2 text-sm text-base-content/80">
+            <div class="flex items-center w-full gap-2 text-sm text-base-content/70">
               <#Icon iconify="heroicons-solid:ban" class="w-4 h-4 shrink-0" />
               <span class="truncate ellipsis">{l("Block")}</span>
             </div>
@@ -22,7 +22,7 @@
                   parent_id={"user-#{@parent_id}"}
                   with_icon
                   label={e(@object, :profile, :name, l("this user"))}
-                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                  class="flex items-center w-full gap-2 text-sm text-base-content/70"
                 />
               </li>
 
@@ -35,7 +35,7 @@
                   parent_id={"user-#{@parent_id}"}
                   with_icon
                   label={e(@object, :profile, :name, l("this user"))}
-                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                  class="flex items-center w-full gap-2 text-sm text-base-content/70"
                 />
               </li>
 
@@ -48,7 +48,7 @@
                   parent_id={"user-#{@parent_id}"}
                   with_icon
                   label={e(@object, :profile, :name, l("this user"))}
-                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                  class="flex items-center w-full gap-2 text-sm text-base-content/70"
                 />
               </li>
             {/if}
@@ -62,7 +62,7 @@
                   scope={@scope}
                   parent_id={"instance-#{@parent_id}"}
                   label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
-                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                  class="flex items-center w-full gap-2 text-sm text-base-content/70"
                 />
               </li>
               <li class="">
@@ -73,7 +73,7 @@
                   scope={@scope}
                   parent_id={"instance-#{@parent_id}"}
                   label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
-                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                  class="flex items-center w-full gap-2 text-sm text-base-content/70"
                 />
               </li>
               <li class="">
@@ -84,7 +84,7 @@
                   scope={@scope}
                   parent_id={"instance-#{@parent_id}"}
                   label={URI.parse(e(peered(@object, @peered), :canonical_uri, "#")).host}
-                  class="flex items-center w-full gap-2 text-sm text-base-content/80"
+                  class="flex items-center w-full gap-2 text-sm text-base-content/70"
                 />
               </li>
             {/if}

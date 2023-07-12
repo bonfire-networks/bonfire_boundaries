@@ -50,14 +50,14 @@
         {#match _ when is_binary(data)}
           <div class="flex items-center gap-3 grow">
             <span class="w-8 h-8 rounded-full bg-base-content/10 flex items-center place-content-center">
-              <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/80" />
+              <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/70" />
             </span>
             <div class="text-base font-medium text-base-content">{data}</div>
           </div>
         {#match _}
           <div class="flex items-center gap-3 grow">
             <span class="w-8 h-8 rounded-full bg-base-content/10 flex items-center place-content-center">
-              <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/80" />
+              <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/70" />
             </span>
             <div class="text-sm font-bold group-hover:underline text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
           </div>

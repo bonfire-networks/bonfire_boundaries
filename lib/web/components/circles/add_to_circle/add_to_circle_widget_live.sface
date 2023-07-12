@@ -75,7 +75,7 @@
         type="button"
         class="btn btn-sm btn-ghost btn-circle"
       >
-        <#Icon iconify="ion:chevron-back" class="w-5 h-5 text-base-content/80" />
+        <#Icon iconify="ion:chevron-back" class="w-5 h-5 text-base-content/70" />
       </button>
       <div class="font-bold text-base">{l("Create a new circle")}</div>
     </div>

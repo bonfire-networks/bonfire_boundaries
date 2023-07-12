@@ -3,6 +3,7 @@
   boundary_tuple={@boundary_tuple}
   with_icon={@with_icon}
   class={@class}
+  object={@object}
 />
 <Bonfire.Boundaries.Web.PermissionsIconLive
   parent_id={@parent_id}
