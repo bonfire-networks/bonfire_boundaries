@@ -11,7 +11,5 @@ defmodule Bonfire.Boundaries.Web.PermissionsIconLive do
   prop with_icon, :boolean, default: false
   prop with_label, :boolean, default: false
 
-  prop class, :css_class,
-    default:
-      "permissions_icon"
+  prop class, :css_class, default: "permissions_icon"
 end

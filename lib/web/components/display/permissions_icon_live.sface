@@ -2,94 +2,82 @@
   :if={not is_atom(@object_boundary) or @object_boundary == false or not is_nil(@boundary_tuple)}
   class={@class}
 >
- 
   {#case @boundary_tuple || Bonfire.Boundaries.Roles.preset_boundary_role_from_acl(@object_boundary)}
     {#match {name, extra} = _role}
-
-
-    <div
-      x-data="{open: false}"
-      class="bg-base-content/10 rounded-box mb-2 w-full"
-    >
-      <div class="flex items-center w-full p-4 gap-3">
-        <div class="flex items-center w-full flex-1 justify-between">
-          <div class="text-sm font-medium flex items-center gap-2">
-          <#Icon iconify="mingcute:hat-fill" class="w-4 h-4 text-info" />
-          <span>{l("Your role:")}</span>
-          <span class="text-sm font-semibold tracking-wider text-center uppercase text-base-content">{name || l("Custom")}</span>
+      <div x-data="{open: false}" class="bg-base-content/10 rounded-box mb-2 w-full">
+        <div class="flex items-center w-full p-4 gap-3">
+          <div class="flex items-center w-full flex-1 justify-between">
+            <div class="text-sm font-medium flex items-center gap-2">
+              <#Icon iconify="mingcute:hat-fill" class="w-4 h-4 text-info" />
+              <span>{l("Your role:")}</span>
+              <span class="text-sm font-semibold tracking-wider text-center uppercase text-base-content">{name || l("Custom")}</span>
+            </div>
+            <button
+              x-show="!open"
+              type="button"
+              x-on:click="open = !open"
+              type="button"
+              class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+            >
+              {l("Details")}
+            </button>
+            <button
+              x-show="open"
+              type="button"
+              x-on:click="open = !open"
+              class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+            >
+              {l("Collapse")}
+            </button>
+          </div>
         </div>
-        <button
-          x-show="!open"
-          type="button"
-          x-on:click="open = !open"
-          type="button"
-          class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
-        >
-          {l("Details")}
-        </button>
-        <button
-          x-show="open"
-          type="button"
-          x-on:click="open = !open"
-          class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
-        >
-          {l("Collapse")}
-        </button>
+
+        <div x-show="open" x-cloak x-collapse>
+          <div class="flex flex-col gap-3">
+            <div class="">
+              {#if name in ["Caretaker", "Administer"]}
+                <div class="gap-2 m-4 mt-0">
+                  <div class="w-full prose-sm prose">{l(
+                      "As caretaker you have full control over this, including the right to perform any action on it, and to set its boundaries."
+                    )}</div>
+                </div>
+              {#else}
+                <div class="rounded-md bg-info/10 m-4 mt-0 p-3">
+                  <div class="flex">
+                    <div class="flex-shrink-0">
+                      <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+                    </div>
+                    <div class="flex-1 ml-3 md:flex md:justify-between">
+                      <p class="text-sm text-info">
+                        {l(
+                          "These permissions are set by the creator or caretaker. They specify which actions you can perform on this content."
+                        )}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="gap-2 m-4">
+                  <div class="mb-4 text-xs font-medium tracking-wider uppercase text-base-content/90">{l("Allowed actions")}</div>
+                  <div class="">
+                    <div :for={verb_name <- extra} class="flex items-start gap-3 mb-3">
+                      {#case Bonfire.Boundaries.Verbs.get(verb_name)}
+                        {#match nil}
+                          <#Icon iconify="mingcute:hat-fill" class="w-4 h-4 text-secondary-content/70" />
+                          <div class="text-sm font-medium traking-wide text-base-content/70">{verb_name}</div>
+                        {#match verb}
+                          <Iconify.iconify icon={e(verb, :icon, "")} class="w-4 h-4 text-info" fill="currentColor" />
+                          <div class="flex flex-col">
+                            <div class="text-sm font-medium traking-wide text-base-content/90">{e(verb, :verb, nil) || verb_name}</div>
+                            <div class="text-xs text-base-content/70">{e(verb, :summary, nil)}</div>
+                          </div>
+                      {/case}
+                    </div>
+                  </div>
+                </div>
+              {/if}
+            </div>
+          </div>
         </div>
       </div>
-
-      <div x-show="open" x-cloak x-collapse>
-        <div class="flex flex-col gap-3">
-          <div class="">
-          {#if name in ["Caretaker", "Administer"]}
-            <div class="gap-2 m-4 mt-0">
-              <div class="w-full prose-sm prose">{l(
-                  "As caretaker you have full control over this, including the right to perform any action on it, and to set its boundaries."
-                )}</div>
-            </div>
-          {#else}
-            <div class="rounded-md bg-info/10 m-4 mt-0 p-3">
-              <div class="flex">
-                <div class="flex-shrink-0">
-                  <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-                </div>
-                <div class="flex-1 ml-3 md:flex md:justify-between">
-                  <p class="text-sm text-info">
-                    {l(
-                      "These permissions are set by the creator or caretaker. They specify which actions you can perform on this content."
-                    )}</p>
-                </div>
-              </div>
-            </div>
-            <div class="gap-2 m-4">
-              <div class="mb-4 text-xs font-medium tracking-wider uppercase text-base-content/90">{l("Allowed actions")}</div>
-              <div class="">
-                <div :for={verb_name <- extra} class="flex items-start gap-3 mb-3">
-                  {#case Bonfire.Boundaries.Verbs.get(verb_name)}
-                    {#match nil}
-                      <#Icon iconify="mingcute:hat-fill" class="w-4 h-4 text-secondary-content/70" />
-                      <div class="text-sm font-medium traking-wide text-base-content/70">{verb_name}</div>
-                    {#match verb}
-                      <Iconify.iconify
-                        icon={e(verb, :icon, "")}
-                        class="w-4 h-4 text-info"
-                        fill="currentColor"
-                      />
-                      <div class="flex flex-col">
-                        <div class="text-sm font-medium traking-wide text-base-content/90">{e(verb, :verb, nil) || verb_name}</div>
-                        <div class="text-xs text-base-content/70">{e(verb, :summary, nil)}</div>
-                      </div>
-                  {/case}
-                </div>
-              </div>
-            </div>
-          {/if}
-        </div>
-        </div>
-      </div>
-
-    </div>
-
 
       <!-- id={"permissions_icon-#{@parent_id}-#{@object_id}"} -->
       <!-- <Bonfire.UI.Common.OpenModalLive
