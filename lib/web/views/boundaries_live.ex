@@ -8,6 +8,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
   declare_extension(
     "Boundaries",
     icon: "twemoji:handshake",
+    emoji: "🤝",
     exclude_from_nav: true
   )
 
