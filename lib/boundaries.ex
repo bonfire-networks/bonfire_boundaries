@@ -51,6 +51,28 @@ defmodule Bonfire.Boundaries do
     |> preset_name()
   end
 
+  def boundaries_or_default(to_boundaries, opts \\ [])
+
+  def boundaries_or_default(to_boundaries, _opts)
+      when is_list(to_boundaries) and to_boundaries != [] do
+    to_boundaries
+  end
+
+  def boundaries_or_default(to_boundaries, _opts)
+      when is_tuple(to_boundaries) do
+    [to_boundaries]
+  end
+
+  def boundaries_or_default(_, opts) do
+    default_boundaries(opts)
+  end
+
+  def default_boundaries(_opts \\ []) do
+    # default boundaries for new stuff
+    # TODO: make default user-configurable
+    [{"public", l("Public")}]
+  end
+
   def boundaries_normalise(text) when is_binary(text) do
     text
     |> String.split(",")

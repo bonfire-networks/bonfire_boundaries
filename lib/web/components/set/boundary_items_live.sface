@@ -1,4 +1,4 @@
-{#if Enum.empty?(@to_circles)}
+{#if Enum.empty?(@circles)}
   <!-- <Bonfire.UI.Common.EmptyFeed
     feedback_title={l("Grant custom permissions")}
     feedback_message={l("Here you can grant specific permissions to one or more users or circles.")}
@@ -35,7 +35,7 @@
     </div>
   </div> -->
 
-    <div :for={{data, id} <- @to_circles || []} class="flex py-2 items-center w-full justify-between">
+    <div :for={{data, id} <- @circles || []} class="flex py-2 items-center w-full justify-between">
       {#case data}
         {#match %{"icon" => _}}
           <!-- <p class="text-sm truncate max-w-[200px] pl-1.5 text-base-content">
@@ -64,7 +64,11 @@
       {/case}
       <div class="items-center flex gap-2">
         <div class="flex items-center gap-1" phx-update="ignore">
-          <Bonfire.Boundaries.Web.RolesDropdownLive setting_boundaries circle_id={id} />
+          <Bonfire.Boundaries.Web.RolesDropdownLive
+            setting_boundaries
+            circle_id={id}
+            roles={@roles_for_dropdown}
+          />
         </div>
 
         <div

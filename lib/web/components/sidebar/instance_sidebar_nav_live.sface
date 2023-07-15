@@ -52,7 +52,7 @@
         <span class={
           "text-sm text-base-content/70",
           "font-semibold": @showing_within == :dashboard
-        }>{l("Roles")}</span>
+        }>{l("Instance Roles")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define sets of permissions which you can assign to users and circles")}</p>
       </div>
     </LiveRedirect>
@@ -81,7 +81,7 @@
         <span class={
           "text-sm text-base-content/70",
           "font-semibold": @showing_within == :dashboard
-        }>{l("Instance Boundaries")}</span>
+        }>{l("Boundary Presets")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define and enforce instance-wide rules for access and permissions to content or functionality")}</p>
       </div>
     </LiveRedirect>

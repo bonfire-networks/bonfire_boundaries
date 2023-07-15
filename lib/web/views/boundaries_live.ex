@@ -101,7 +101,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      assign(
        socket,
        selected_tab: tab,
-       page_title: l("Boundaries"),
+       page_title: l("Boundary Presets"),
        page_header_aside: [
          {Bonfire.Boundaries.Web.NewAclButtonLive,
           [

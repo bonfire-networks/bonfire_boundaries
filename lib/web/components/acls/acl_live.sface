@@ -61,6 +61,7 @@
             <Bonfire.UI.Common.MultiselectLive
               implementation={:live_select}
               form_input_name={__MODULE__}
+              preloaded_options={@my_circles}
               label={l("Search for circles or users to add")}
             />
           </form>

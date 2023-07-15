@@ -6,7 +6,10 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
   prop load_roles, :boolean, default: true
 
   def update(assigns, socket) do
-    current_user = current_user(assigns) || current_user(socket)
+    current_user =
+      (current_user(assigns) || current_user(socket))
+      |> debug("cuuu")
+
     # params = e(assigns, :__context__, :current_params, %{})
 
     scope =
@@ -35,7 +38,7 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
     end
 
     available_verbs = Bonfire.Boundaries.Verbs.list(:code, :id)
-    # |> debug()
+    # |> debug("available_verbs")
 
     # available_verbs =
     #   if scope != :instance do
@@ -58,10 +61,11 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
         scope_type: scope_type,
         role_verbs:
           Bonfire.Boundaries.Roles.role_verbs(:all,
-            one_scope_only: true,
+            one_scope_only: scope_type not in [:smart_input],
             scope: scope,
             current_user: current_user
-          ),
+          )
+          |> debug("role_verbs"),
         #  cannot_role_verbs: Bonfire.Boundaries.Roles.cannot_role_verbs(),
         all_verbs: Bonfire.Boundaries.Verbs.verbs(),
         available_verbs: available_verbs

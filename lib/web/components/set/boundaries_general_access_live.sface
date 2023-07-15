@@ -78,7 +78,7 @@
                 <li>
                   <button
                     class="text-base-content"
-                    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+                    phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
                       value: %{id: "public", name: l("Public")},
                       target: "#smart_input"
                     )}
@@ -89,7 +89,7 @@
                 </li>
                 <li><button
                     class="text-base-content"
-                    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+                    phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
                       value: %{id: "local", name: l("Local")},
                       target: "#smart_input"
                     )}
@@ -98,7 +98,7 @@
                     {l("Local")}</button></li>
                 <li><button
                     class="text-base-content"
-                    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+                    phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
                       value: %{id: "mentions", name: l("Mentions")},
                       target: "#smart_input"
                     )}
@@ -106,7 +106,7 @@
                   >{l("Mentions")}</button></li>
                 <li><button
                     class="text-base-content"
-                    phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+                    phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
                       value: %{id: "custom", name: l("Custom")},
                       target: "#smart_input"
                     )}
@@ -126,14 +126,14 @@
   <div class="flex px-2 items-center gap-3 justify-between">
     <button
       class="text-base-content"
-      phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+      phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
         value: %{id: "public", name: l("Public")},
         target: "#smart_input"
       )}
       type="button"
     >
       <div class="flex items-center gap-2">
-        <input type="radio" name="radio-1" class="radio" checked>
+        <input type="radio" name="radio-1" class="radio" checked={matches?(@preset_boundary, "public")}>
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
@@ -150,24 +150,25 @@
       </div>
     </button>
     <button
+      :if={matches?(@preset_boundary, "public")}
       type="button"
       phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
       class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
     >
-      {l("Edit")}
+      {l("Customise")}
     </button>
   </div>
   <div class="flex px-2 items-center gap-3 justify-between">
     <button
       class="text-base-content"
-      phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+      phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
         value: %{id: "local", name: l("Local")},
         target: "#smart_input"
       )}
       type="button"
     >
       <div class="flex items-center gap-2">
-        <input type="radio" name="radio-1" class="radio">
+        <input type="radio" name="radio-1" class="radio" checked={matches?(@preset_boundary, "local")}>
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
@@ -183,19 +184,32 @@
         </div>
       </div>
     </button>
+    <button
+      :if={matches?(@preset_boundary, "local")}
+      type="button"
+      phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
+      class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+    >
+      {l("Customise")}
+    </button>
   </div>
 
   <div class="flex px-2 items-center gap-3 justify-between">
     <button
       class="text-base-content"
-      phx-click={JS.push("Bonfire.Boundaries:select_boundary",
+      phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
         value: %{id: "mentions", name: l("Mentions")},
         target: "#smart_input"
       )}
       type="button"
     >
       <div class="flex items-center gap-2">
-        <input type="radio" name="radio-1" class="radio">
+        <input
+          type="radio"
+          name="radio-1"
+          class="radio"
+          checked={matches?(@preset_boundary, "mentions")}
+        />
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-2xl">﹫</span>
@@ -209,40 +223,22 @@
         </div>
       </div>
     </button>
-  </div>
-  <div class="flex px-2 items-center gap-3 justify-between">
     <button
-      class="text-base-content"
-      phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-        value: %{id: "custom", name: l("Custom")},
-        target: "#smart_input"
-      )
-      |> JS.toggle(to: "#boundaries_picker")
-      |> JS.toggle(to: "#extra_boundaries")}
+      :if={matches?(@preset_boundary, "mentions")}
       type="button"
+      phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
+      class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
     >
-      <div class="flex items-center gap-2">
-        <input type="radio" name="radio-1" class="radio">
-        <div class="p-1.5 flex items-center text-left">
-          <div class="flex-shrink-0">
-            <span class="text-xl">
-              <#Icon iconify="ph:gear-fill" class="w-6 h-6" />
-            </span>
-          </div>
-          <div class="flex flex-col ml-3">
-            <div class="text-sm font-semibold text-base-content/90">{l("Custom")}</div>
-            <p class="text-[13px] text-opacity/70">{l("Specify custom boundaries.")}</p>
-          </div>
-        </div>
-      </div>
+      {l("Customise")}
     </button>
   </div>
-  {#for acl <-
+
+  {#for %{id: acl_id} = acl <-
       Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
       |> Enum.map(fn
-        %Bonfire.Data.AccessControl.Acl{} = acl ->
+        %Bonfire.Data.AccessControl.Acl{id: acl_id} = acl ->
           %{
-            id: e(acl, :id, nil),
+            id: acl_id,
             field: :to_boundaries,
             description: e(acl, :extra_info, :summary, nil),
             name: e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil)
@@ -252,14 +248,14 @@
     <div class="flex px-2 items-center gap-3 justify-between">
       <button
         class="text-base-content"
-        phx-click={JS.push("Bonfire.Boundaries:select_boundary",
-          value: %{id: e(acl, :id, nil), name: e(acl, :name, nil)},
+        phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
+          value: %{id: acl_id, name: e(acl, :name, nil)},
           target: "#smart_input"
         )}
         type="button"
       >
         <div class="flex items-center gap-2">
-          <input type="radio" name="radio-1" class="radio">
+          <input type="radio" name="radio-1" class="radio" checked={matches?(@to_boundaries, acl_id)}>
           <div class="p-1.5 flex items-center text-left">
             <div class="flex-shrink-0">
               <span class="text-xl">
@@ -273,8 +269,43 @@
           </div>
         </div>
       </button>
+      <button
+        :if={matches?(@to_boundaries, acl_id)}
+        type="button"
+        phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
+        class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+      >
+        {l("Customise")}
+      </button>
     </div>
   {/for}
+  <div class="flex px-2 items-center gap-3 justify-between">
+    <button
+      class="text-base-content"
+      phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
+        value: %{id: "custom", name: l("Custom")},
+        target: "#smart_input"
+      )
+      |> JS.toggle(to: "#boundaries_picker")
+      |> JS.toggle(to: "#extra_boundaries")}
+      type="button"
+    >
+      <div class="flex items-center gap-2">
+        <input type="radio" name="radio-1" class="radio" checked={matches?(@preset_boundary, "custom")}>
+        <div class="p-1.5 flex items-center text-left">
+          <div class="flex-shrink-0">
+            <span class="text-xl">
+              <#Icon iconify="ph:gear-fill" class="w-6 h-6" />
+            </span>
+          </div>
+          <div class="flex flex-col ml-3">
+            <div class="text-sm font-semibold text-base-content/90">{l("Custom")}</div>
+            <p class="text-[13px] text-opacity/70">{l("Specify custom boundaries, starting with a blank slate.")}</p>
+          </div>
+        </div>
+      </div>
+    </button>
+  </div>
 </div>
 
 <div class="flex items-center justify-between px-3 pb-3 mt-4">

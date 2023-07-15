@@ -182,6 +182,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   defp maybe_custom_circles_or_users(to_circles) when is_list(to_circles) or is_map(to_circles) do
     to_circles
+    |> debug()
     |> Enum.map(fn
       {key, val} ->
         # with custom role 

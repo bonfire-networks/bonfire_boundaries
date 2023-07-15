@@ -86,7 +86,7 @@
         <span class={
           "text-sm text-base-content/70",
           "font-semibold": @showing_within == :dashboard
-        }>{l("Boundaries")}</span>
+        }>{l("Boundary Presets")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define and enforce rules for access and permissions to content or functionality")}</p>
       </div>
     </LiveRedirect>

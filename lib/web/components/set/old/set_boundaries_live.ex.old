@@ -6,6 +6,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   prop default_circles, :list, default: []
   prop to_boundaries, :any, default: nil
   prop to_circles, :list, default: []
+  prop exclude_circles, :list, default: []
 
   # FIXME! update no longer works in stateless
   def update(assigns, socket), do: {:ok,

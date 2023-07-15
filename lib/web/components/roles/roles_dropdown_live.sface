@@ -1,15 +1,17 @@
 <select
-  name={"to_circles[#{@circle_id}]"}
+  name={"to_circles[#{@circle_id}][]"}
   class={
     "font-normal border border-base-content/30 select-sm text-sm rounded-full bg-transparent select text-base-content/70",
     "select-xs text-xs pl-1 px-0": !@setting_boundaries
   }
 >
+  <option />
   <option
     :for={{id, name} <-
-      Bonfire.Boundaries.Roles.roles_for_dropdown(@usage, scope: @scope, context: @__context__) ++
-        @extra_roles}
+      @roles ||
+        Bonfire.Boundaries.Roles.roles_for_dropdown(@usage, scope: @scope, context: @__context__) ++
+          (@extra_roles || [])}
     value={id}
-    selected={if @role == id or (is_nil(@role) and id == :participate), do: true}
+    selected={if @role == id, do: true}
   >{name}</option>
 </select>

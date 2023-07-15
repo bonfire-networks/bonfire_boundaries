@@ -26,7 +26,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def update(assigns, socket) do
-    # current_user = current_user(assigns)
+    current_user = current_user(assigns)
     params = e(assigns, :__context__, :current_params, %{})
 
     acl_id = e(assigns, :acl_id, nil) || e(socket.assigns, :acl_id, nil) || e(params, "id", nil)
@@ -63,6 +63,11 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        acl_id: acl_id,
        #  suggestions: suggestions,
        global_circles: global_circles,
+       my_circles:
+         Bonfire.Boundaries.Web.SetBoundariesLive.list_my_circles(
+           if is_nil(scope) or scope == :user, do: current_user, else: scope
+         )
+         |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect(),
        settings_section_title: "View boundary",
        settings_section_description: l("Create and manage your boundary."),
        ui_compact: e(assigns, :ui_compact, nil) || e(assigns, :__context__, :ui_compact, nil),
@@ -261,7 +266,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        search: search
      ) ++
        Bonfire.Me.Users.search(search))
-    |> results_to_multiselect(live_select_id, socket)
+    |> results_for_multiselect(live_select_id, socket)
   end
 
   def do_handle_event(
@@ -277,7 +282,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        search: search
      ) ++
        Bonfire.Me.Users.search(search))
-    |> results_to_multiselect(live_select_id, socket)
+    |> results_for_multiselect(live_select_id, socket)
   end
 
   def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
@@ -289,10 +294,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        search: search
      ) ++
        Bonfire.Me.Users.search(search))
-    |> results_to_multiselect(live_select_id, socket)
+    |> results_for_multiselect(live_select_id, socket)
   end
 
-  defp results_to_multiselect(results, live_select_id, socket) do
+  defp results_for_multiselect(results, live_select_id, socket) do
     results
     |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)

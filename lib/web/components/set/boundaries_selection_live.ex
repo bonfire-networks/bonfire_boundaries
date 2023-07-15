@@ -4,6 +4,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesSelectionLive do
   # prop showing_within, :atom
   prop to_boundaries, :any, default: nil
   prop to_circles, :list, default: []
+  prop exclude_circles, :list, default: []
 
   # def input_value(boundaries) do
   #   boundaries

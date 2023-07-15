@@ -6,6 +6,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   prop to_boundaries, :any, default: nil
   prop preset_boundary, :any, default: nil
   prop to_circles, :list, default: []
+  prop exclude_circles, :list, default: []
   prop showing_within, :atom, default: nil
   prop show_select_recipients, :boolean, default: false
   prop open_boundaries, :boolean, default: false
@@ -17,6 +18,15 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
 
   def presets, do: @presets
 
+  def render(assigns) do
+    assigns
+    |> assign_new(:my_circles, fn -> list_my_circles(current_user(assigns[:__context__])) end)
+    |> assign_new(:roles_for_dropdown, fn ->
+      Bonfire.Boundaries.Roles.roles_for_dropdown(nil, scope: nil, context: assigns[:__context__])
+    end)
+    |> render_sface()
+  end
+
   def reject_presets(to_boundaries)
       when is_list(to_boundaries) and to_boundaries != [] and to_boundaries != [nil],
       do: Keyword.drop(to_boundaries, presets())
@@ -24,7 +34,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   def reject_presets(_), do: []
 
   def boundaries_to_preset(to_boundaries) do
-    to_boundaries
+    List.wrap(to_boundaries)
     |> Enum.filter(fn
       {x, _} when x in @presets -> true
       _ -> false
@@ -47,7 +57,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     to_boundaries ++ [{acl_id, name}]
   end
 
-  def results_for_multiselect(results) do
+  def results_for_multiselect(results, circle_field \\ :to_circles) do
     results
     |> Enum.map(fn
       %Bonfire.Data.AccessControl.Acl{} = acl ->
@@ -66,7 +76,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
         {name,
          %{
            id: e(circle, :id, nil),
-           field: :to_circles,
+           field: circle_field,
            name: name
          }}
 
@@ -77,7 +87,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
         {"#{name} - #{username}",
          %{
            id: e(user, :id, nil),
-           field: :to_circles,
+           field: circle_field,
            icon: Media.avatar_url(user),
            name: name,
            username: username
@@ -91,22 +101,19 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     # |> debug()
   end
 
-  def list_my_boundaries(socket) do
-    current_user = current_user(socket)
-    Bonfire.Boundaries.Acls.list_my(current_user)
-  end
+  # def list_my_boundaries(socket) do
+  #   current_user = current_user(socket)
+  #   Bonfire.Boundaries.Acls.list_my(current_user)
+  # end
 
-  def list_my_circles(context) do
-    Bonfire.Boundaries.Circles.list_my_with_global(current_user(context),
+  def list_my_circles(scope) do
+    # TODO: load using LivePlug to avoid re-loading on render?
+    Bonfire.Boundaries.Circles.list_my_with_global(scope,
       exclude_block_stereotypes: true
     )
-    # |> debug
-    |> results_for_multiselect()
-
-    # |> debug
   end
 
-  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+  def live_select_change(live_select_id, search, circle_field, socket) do
     current_user = current_user(socket)
     # Bonfire.Boundaries.Acls.list_my(current_user, search: search) ++
     (Bonfire.Boundaries.Circles.list_my_with_global(
@@ -114,10 +121,14 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
        search: search
      ) ++
        Bonfire.Me.Users.search(search))
-    |> results_for_multiselect()
+    |> results_for_multiselect(circle_field)
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
 
     {:noreply, socket}
+  end
+
+  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+    live_select_change(live_select_id, search, :to_circles, socket)
   end
 
   def do_handle_event(
@@ -127,7 +138,9 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
       ) do
     # debug(data, text)
 
-    field = maybe_to_atom(e(data, "field", :to_boundaries))
+    field =
+      maybe_to_atom(e(data, "field", :to_boundaries))
+      |> debug("field")
 
     appended_data =
       case field do

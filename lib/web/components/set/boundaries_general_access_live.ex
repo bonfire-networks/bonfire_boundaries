@@ -3,4 +3,8 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
 
   prop preset_boundary, :any, default: nil
   prop to_boundaries, :any, default: nil
+
+  def matches?({preset, _}, preset), do: true
+  def matches?([{preset, _}], preset), do: true
+  def matches?(_, _), do: false
 end

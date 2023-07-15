@@ -122,6 +122,17 @@ defmodule Bonfire.Boundaries.LiveHandler do
     {:noreply, assign(socket, :open_boundaries, false)}
   end
 
+  def handle_event("replace_boundary", %{"id" => acl_id} = params, socket) do
+    debug(acl_id, "replace_boundary")
+
+    {:noreply,
+     assign(
+       socket,
+       :to_boundaries,
+       [{acl_id, e(params, "name", acl_id)}]
+     )}
+  end
+
   def handle_event("select_boundary", %{"id" => acl_id} = params, socket) do
     debug(acl_id, "select_boundary")
 
