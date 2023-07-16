@@ -70,7 +70,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
          |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect(),
        settings_section_title: "View boundary",
        settings_section_description: l("Create and manage your boundary."),
-       ui_compact: e(assigns, :ui_compact, nil) || e(assigns, :__context__, :ui_compact, nil),
        selected_tab: "acls"
      )
      |> assign_updated()}
@@ -506,9 +505,9 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   def verb_subject_grant(_), do: %{}
 
-  def columns(context) do
-    if context[:ui_compact], do: 3, else: 2
-  end
+  # def columns(context) do
+  #  if context[:ui_compact], do: 3, else: 2
+  # end
 
   def predefined_subjects(subjects) do
     Enum.map(subjects, fn s ->

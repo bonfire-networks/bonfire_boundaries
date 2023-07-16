@@ -199,8 +199,8 @@
                     >
                       <div class={
                         "flex-1 pr-2 text-left truncate ellipsis",
-                        "text-sm": @ui_compact != true,
-                        "text-xs": @ui_compact
+                        "text-sm": @__context__[:ui_compact] != true,
+                        "text-xs": @__context__[:ui_compact]
                       }>
                         {#if !e(subject, :stereotyped, :stereotype_id, nil) and e(subject, :named, :id, nil) != nil and
                             subject_id not in e(@global_circles, [])}
