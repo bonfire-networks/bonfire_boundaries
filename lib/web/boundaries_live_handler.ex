@@ -589,8 +589,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       |> debug("presets")
 
     if not is_nil(current_user) do
-      # WIP: display user's computed permission if we have current_user
-      # case Bonfire.Boundaries.Controlleds.list_on_objects_by_subject(list_of_ids, current_user) do
+      # display user's computed permission if we have current_user
       case Bonfire.Boundaries.users_grants_on(current_user, list_of_ids) do
         custom when custom != %{} and custom != [] ->
           custom

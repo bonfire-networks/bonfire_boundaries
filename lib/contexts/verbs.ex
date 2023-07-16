@@ -13,8 +13,12 @@ defmodule Bonfire.Boundaries.Verbs do
   def get(slug, all_verbs \\ verbs())
   def get(slug, all_verbs) when is_atom(slug), do: all_verbs[slug]
 
-  def get(id_or_name, all_verbs) when is_binary(id_or_name),
-    do: get_tuple(id_or_name, all_verbs) |> elem(1)
+  def get(id_or_name, all_verbs) when is_binary(id_or_name) do
+    case get_tuple(id_or_name, all_verbs) do
+      {_slug, verb} -> verb
+      _ -> nil
+    end
+  end
 
   def get({_, %Verb{} = verb}, _all_verbs), do: verb
   def get({_, %{id: _, verb: _} = verb}, _all_verbs), do: verb
@@ -25,7 +29,12 @@ defmodule Bonfire.Boundaries.Verbs do
     end)
   end
 
-  def get_slug(id, all_verbs \\ verbs()), do: get_tuple(id, all_verbs) |> elem(0)
+  def get_slug(id_or_name, all_verbs \\ verbs()) do
+    case get_tuple(id_or_name, all_verbs) do
+      {slug, _verb} -> slug
+      _ -> nil
+    end
+  end
 
   def get!(id_or_name, all_verbs \\ verbs()) when is_atom(id_or_name) or is_binary(id_or_name) do
     get(id_or_name, all_verbs) ||

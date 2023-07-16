@@ -21,7 +21,6 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Data.Identity.ExtraInfo
   alias Bonfire.Data.Identity.Caretaker
   alias Bonfire.Data.AccessControl.Acl
-  alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.AccessControl.Controlled
   alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.AccessControl.Stereotyped
@@ -36,8 +35,40 @@ defmodule Bonfire.Boundaries.Acls do
   alias Pointers.Changesets
   alias Pointers.ULID
 
-  # don't show "others who silenced me"
-  @exclude_stereotypes ["2HEYS11ENCEDMES0CAN0TSEEME", "7HECVST0MAC1F0RAN0BJECTETC"]
+  @exclude_stereotypes
+
+  def exclude_stereotypes(including_custom? \\ true)
+
+  def exclude_stereotypes(false) do
+    # don't show "others who silenced me"
+    ["2HEYS11ENCEDMES0CAN0TSEEME"]
+  end
+
+  def exclude_stereotypes(true) do
+    # don't show custom per-object ACLs
+    exclude_stereotypes(false) ++ ["7HECVST0MAC1F0RAN0BJECTETC"]
+  end
+
+  def default_exclude_ids(including_custom? \\ true) do
+    exclude_stereotypes(including_custom?) ++
+      [
+        "71MAYADM1N1STERMY0WNSTVFFS",
+        "0H0STEDCANTSEE0RD0ANYTH1NG",
+        "1S11ENCEDTHEMS0CAN0TP1NGME"
+      ]
+  end
+
+  def remote_public_acl_ids, do: ["5REM0TEPE0P1E1NTERACTREACT", "5REM0TEPE0P1E1NTERACTREP1Y"]
+
+  def public_acl_ids(preset_acls \\ Config.get!(:preset_acls_all)),
+    do:
+      preset_acls["public"]
+      |> Enum.map(&get_id!/1)
+
+  def local_acl_ids(preset_acls \\ Config.get!(:preset_acls_all)),
+    do:
+      preset_acls["local"]
+      |> Enum.map(&get_id!/1)
 
   # special built-in acls (eg, guest, local, activity_pub)
   def acls, do: Config.get(:acls)
@@ -322,6 +353,10 @@ defmodule Bonfire.Boundaries.Acls do
   defp grant_to({subject_id, nil}, acl_id, default_verbs, value, opts),
     do: grant_to(subject_id, acl_id, default_verbs, value, opts)
 
+  defp grant_to({subject_id, roles}, acl_id, default_verbs, value, opts) when is_list(roles) do
+    Enum.flat_map(roles, &grant_to({subject_id, &1}, acl_id, default_verbs, value, opts))
+  end
+
   defp grant_to({subject_id, role}, acl_id, _default_verbs, _value, opts) do
     with {:ok, can_verbs, cannot_verbs} <- Roles.verbs_for_role(role, opts) do
       grant_to(subject_id, acl_id, can_verbs, true, opts) ++
@@ -329,23 +364,25 @@ defmodule Bonfire.Boundaries.Acls do
     else
       e ->
         error(e)
-        nil
+        []
     end
   end
 
   defp grant_to(user_etc, acl_id, verbs, value, opts) when is_list(verbs),
-    do: Enum.map(verbs, &grant_to(user_etc, acl_id, &1, value, opts))
+    do: Enum.flat_map(verbs, &grant_to(user_etc, acl_id, &1, value, opts))
 
   defp grant_to(user_etc, acl_id, verb, value, _opts) do
     debug(user_etc)
 
-    %{
-      id: ULID.generate(),
-      acl_id: acl_id,
-      subject_id: user_etc,
-      verb_id: Verbs.get_id!(verb),
-      value: value
-    }
+    [
+      %{
+        id: ULID.generate(),
+        acl_id: acl_id,
+        subject_id: user_etc,
+        verb_id: Verbs.get_id!(verb),
+        value: value
+      }
+    ]
   end
 
   def base_acls_from_preset(creator, preset, opts \\ []) do
@@ -560,13 +597,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   def opts_for_list() do
     [
-      exclude_ids:
-        @exclude_stereotypes ++
-          [
-            "71MAYADM1N1STERMY0WNSTVFFS",
-            "0H0STEDCANTSEE0RD0ANYTH1NG",
-            "1S11ENCEDTHEMS0CAN0TP1NGME"
-          ]
+      exclude_ids: default_exclude_ids()
     ]
   end
 
@@ -620,21 +651,24 @@ defmodule Bonfire.Boundaries.Acls do
 
   @doc "query for `list_my`"
   def list_my_q(user, opts \\ []) do
+    exclude =
+      e(
+        opts,
+        :exclude_ids,
+        exclude_stereotypes()
+      )
+
     list_q(skip_boundary_check: true)
     |> where(
       [acl, caretaker: caretaker],
       caretaker.caretaker_id == ^ulid!(user) or
         (acl.id in ^e(opts, :extra_ids_to_include, []) and
-           acl.id not in ^e(opts, :exclude_ids, @exclude_stereotypes))
+           acl.id not in ^exclude)
     )
     |> where(
       [stereotyped: stereotyped],
       is_nil(stereotyped.id) or
-        stereotyped.stereotype_id not in ^e(
-          opts,
-          :exclude_ids,
-          @exclude_stereotypes
-        )
+        stereotyped.stereotype_id not in ^exclude
     )
   end
 

@@ -1,10 +1,13 @@
 defmodule Bonfire.Boundaries.Web.BoundaryIconLive do
   use Bonfire.UI.Common.Web, :stateful_component
 
-  # need if you want to auto-preload boundaries (async)
-  prop object, :any, default: nil
+  # Tip: use this component if you want to auto-preload boundaries (async), otherwise use `BoundaryIconStatelessLive` if a parent component can provide the `object_boundary` data
+
+  prop object, :any, required: true
+
   # can also provide it manually
   prop object_boundary, :any, default: nil
+  prop preset_boundary, :any, default: nil
 
   prop scope, :any, default: nil
 

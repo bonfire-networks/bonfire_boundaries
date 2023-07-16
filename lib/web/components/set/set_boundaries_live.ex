@@ -7,23 +7,32 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   prop preset_boundary, :any, default: nil
   prop to_circles, :list, default: []
   prop exclude_circles, :list, default: []
+  prop custom_acls, :list, default: nil
+
   prop showing_within, :atom, default: nil
   prop show_select_recipients, :boolean, default: false
   prop open_boundaries, :boolean, default: false
   prop hide_breakdown, :boolean, default: false
-  prop setting_boundaries, :boolean, default: false
   prop click_override, :boolean, default: false
+  prop read_only, :boolean, default: false
+  prop is_caretaker, :boolean, default: true
 
   @presets ["public", "local", "mentions", "custom"]
 
   def presets, do: @presets
 
-  def render(assigns) do
+  def render(%{read_only: false} = assigns) do
     assigns
     |> assign_new(:my_circles, fn -> list_my_circles(current_user(assigns[:__context__])) end)
     |> assign_new(:roles_for_dropdown, fn ->
       Bonfire.Boundaries.Roles.roles_for_dropdown(nil, scope: nil, context: assigns[:__context__])
     end)
+    |> render_sface()
+  end
+
+  def render(assigns) do
+    assigns
+    |> assign_new(:roles_for_dropdown, fn -> [] end)
     |> render_sface()
   end
 

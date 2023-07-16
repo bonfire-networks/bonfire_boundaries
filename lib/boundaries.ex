@@ -88,8 +88,9 @@ defmodule Bonfire.Boundaries do
     []
   end
 
-  def list_object_acls(object) do
-    Controlleds.list_on_object(object)
+  def list_object_acls(object, opts \\ []) do
+    Controlleds.list_on_object(object, opts)
+    # |> debug()
     |> Enum.map(& &1.acl)
   end
 
@@ -223,13 +224,9 @@ defmodule Bonfire.Boundaries do
 
     preset_acls = Config.get!(:preset_acls_all)
 
-    public_acl_ids =
-      preset_acls["public"]
-      |> Enum.map(&Acls.get_id!/1)
+    public_acl_ids = Acls.public_acl_ids(preset_acls)
 
-    local_acl_ids =
-      preset_acls["local"]
-      |> Enum.map(&Acls.get_id!/1)
+    local_acl_ids = Acls.local_acl_ids(preset_acls)
 
     cond do
       acl_id in public_acl_ids -> {"public", l("Public")}
@@ -251,9 +248,13 @@ defmodule Bonfire.Boundaries do
   def preset_boundary_tuple_from_acl([acl], object_type),
     do: preset_boundary_tuple_from_acl(acl, object_type)
 
-  def preset_boundary_tuple_from_acl(other, _object_type) do
-    warn(other, "No pattern matched")
-    nil
+  def preset_boundary_tuple_from_acl(other, object_type) do
+    if Types.is_ulid?(other) do
+      preset_boundary_tuple_from_acl(%Acl{id: other}, object_type)
+    else
+      warn(other, "No boundary pattern matched")
+      nil
+    end
   end
 
   def set_boundaries(creator, object, opts)

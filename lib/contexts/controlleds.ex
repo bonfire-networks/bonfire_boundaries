@@ -14,6 +14,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Boundaries.Verbs
   alias Bonfire.Data.AccessControl.Controlled
+  alias Bonfire.Data.AccessControl.Acl
 
   def create(%{} = attrs) when not is_struct(attrs) do
     repo().insert(
@@ -31,7 +32,7 @@ defmodule Bonfire.Boundaries.Controlleds do
     |> Enum.reduce(%{}, fn c, acc ->
       id = ulid(c)
       # TODO: better
-      Map.put(acc, id, Map.get(acc, id, []) ++ [e(c, :acl, nil)])
+      Map.put(acc, id, Map.get(acc, id, []) ++ [e(c, :acl, nil) || %Acl{id: e(c, :acl_id, nil)}])
     end)
   end
 
@@ -39,30 +40,50 @@ defmodule Bonfire.Boundaries.Controlleds do
   List ALL boundaries applied to an object.
   Only call this as an admin or curator of the object.
   """
-  def list_on_object(%{} = object) do
-    repo().maybe_preload(
-      object,
-      [
-        controlled: [
-          acl: [
-            :named,
-            grants: [subject: [:named, :profile, :character]],
-            stereotyped: [:named]
-          ]
-        ]
-      ],
+  def list_on_object(object, opts \\ [])
+
+  def list_on_object(%{} = object, opts) do
+    exclude =
+      e(
+        opts,
+        :exclude_ids,
+        []
+      ) ++ Acls.default_exclude_ids(false)
+
+    object
+    |> repo().maybe_preload(
+      :controlled,
       force: true
+    )
+    |> debug()
+    |> repo().maybe_preload(
+      controlled: [
+        acl: [
+          :named,
+          grants: [subject: [:named, :profile, :character]],
+          stereotyped: [:named]
+        ]
+      ]
     )
     |> Map.get(
       :controlled,
       []
     )
-
-    # |> debug
+    |> Enum.reject(&(e(&1, :acl_id, nil) in exclude))
   end
 
-  def list_on_object(object) do
-    repo().many(list_q(object))
+  def list_on_object(object, opts) do
+    list_objects_q(object, opts)
+    |> proload(
+      acl:
+        {"acl_",
+         [
+           :named,
+           stereotyped: {"stereotyped_", [:named]},
+           grants: [:verb, subject: {"subject_", [:named, :profile, :character]}]
+         ]}
+    )
+    |> repo().many()
   end
 
   # def list_all, do: repo().many(list_q())
@@ -82,11 +103,12 @@ defmodule Bonfire.Boundaries.Controlleds do
   defp do_list_presets_on_objects(objects)
        when is_list(objects) and length(objects) > 0 do
     repo().many(list_presets_on_objects_q(objects))
+    |> debug()
     |> Map.new(fn c ->
       # Map.new discards duplicates for the same key, which is convenient for now as we only display one ACL (note that the order_by in the `list_on_objects` query matters)
       {
         e(c, :id, nil),
-        e(c, :acl, nil)
+        e(c, :acl, nil) || %Acl{id: e(c, :acl_id, nil)}
       }
     end)
   end
@@ -120,27 +142,39 @@ defmodule Bonfire.Boundaries.Controlleds do
     end)
   end
 
-  def list_q,
-    do:
-      from(
-        c in Controlled,
-        left_join: acl in assoc(c, :acl),
-        as: :acl,
-        # left_join: named in assoc(acl, :named),
-        order_by: [asc: c.acl_id],
-        # preload: [acl: {acl, named: named}]
-        preload: [acl: acl]
-      )
+  def list_q(opts \\ []) do
+    exclude =
+      e(
+        opts,
+        :exclude_ids,
+        []
+      ) ++ Acls.default_exclude_ids(false)
+
+    from(
+      c in Controlled,
+      left_join: acl in assoc(c, :acl),
+      as: :acl,
+      left_join: stereotyped in assoc(acl, :stereotyped),
+      as: :stereotyped,
+      where:
+        acl.id not in ^exclude and
+          (is_nil(stereotyped.id) or
+             stereotyped.stereotype_id not in ^exclude),
+      order_by: [asc: c.acl_id]
+      # preload: [acl: {acl, named: named}]
+      # preload: [acl: acl]
+    )
+  end
 
   # TODO: instead of preloading named from DB we can use names from Config
 
-  defp list_q(objects) do
-    where(list_q(), [c], c.id in ^ulids(objects))
+  defp list_objects_q(objects, opts \\ []) do
+    where(list_q(opts), [c], c.id in ^ulids(objects))
   end
 
   defp list_on_objects_by_subject_q(objects, current_user) do
-    list_q(objects)
-    |> proload(acl: [:stereotyped, :grants])
+    list_objects_q(objects)
+    |> proload(acl: [:named, stereotyped: {"stereotyped_", [:named]}, grants: [:verb]])
     |> where(
       [c, grants: grants],
       grants.subject_id == ^ulid(current_user) and c.acl_id not in ^Acls.preset_acl_ids()
@@ -148,8 +182,14 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   defp list_on_objects_by_verb_q(objects, verbs, value \\ true) do
-    list_q(objects)
-    |> proload(acl: [grants: [:verb, subject: [:profile, :character]]])
+    list_objects_q(objects)
+    |> proload(
+      acl: [
+        :named,
+        stereotyped: {"stereotyped_", [:named]},
+        grants: [:verb, subject: {"subject_", [:named, :profile, :character]}]
+      ]
+    )
     |> where(
       [c, grants: grants],
       grants.verb_id in ^ulids(verbs) and grants.value == ^value
@@ -157,7 +197,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   defp list_presets_on_objects_q(objects) do
-    list_q(objects)
+    list_objects_q(objects)
     |> where([c], c.acl_id in ^Acls.preset_acl_ids())
   end
 

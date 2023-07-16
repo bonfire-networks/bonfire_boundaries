@@ -3,6 +3,7 @@ defmodule Bonfire.Boundaries.Roles do
   import Untangle
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Verbs
+  alias Bonfire.Data.AccessControl.Acl
 
   @config_key :role_verbs
 
@@ -152,6 +153,10 @@ defmodule Bonfire.Boundaries.Roles do
     |> debug()
   end
 
+  def verbs_for_role([role], opts) do
+    verbs_for_role(role, opts)
+  end
+
   def verbs_for_role(role, opts) do
     opts =
       to_options(opts)
@@ -188,8 +193,12 @@ defmodule Bonfire.Boundaries.Roles do
   end
 
   def preset_boundary_role_from_acl(other) do
-    warn(other, "No pattern matched")
-    nil
+    if Types.is_ulid?(other) do
+      preset_boundary_role_from_acl(%Acl{id: other})
+    else
+      warn(other, "No role pattern matched")
+      nil
+    end
   end
 
   def create(attrs, opts) do
