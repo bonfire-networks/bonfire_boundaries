@@ -174,13 +174,13 @@
         <Bonfire.Boundaries.Web.SetBoundariesLive
           read_only
           is_caretaker={@is_caretaker}
-          {...for_view_edit(@is_caretaker, @object_id, @preset_boundary)}
+          {...for_view_edit(@is_caretaker, @object_id, @boundary_preset)}
         />
       </div>
       <:open_btn>
         <button type="button" class="btn btn-ghost btn-xs btn-circle">
           <Bonfire.Boundaries.Web.BoundariesPresetNameLive
-            preset_boundary={@preset_boundary}
+            boundary_preset={@boundary_preset}
             with_icon={@with_icon}
             with_label={@with_label}
             icon_class="w-4 h-4 text-base-content/60"
@@ -188,9 +188,9 @@
         </button>
       </:open_btn>
     </Bonfire.UI.Common.OpenModalLive>
-  {#elseif @preset_boundary}
+  {#elseif @boundary_preset}
     <Bonfire.Boundaries.Web.BoundariesPresetNameLive
-      preset_boundary={@preset_boundary}
+      boundary_preset={@boundary_preset}
       with_icon={@with_icon}
       with_label={@with_label}
       icon_class="w-4 h-4 text-base-content/60"

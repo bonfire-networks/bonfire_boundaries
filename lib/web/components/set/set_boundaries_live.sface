@@ -17,7 +17,7 @@
         <div class="flex items-center w-full p-4 gap-3">
           <div class="flex items-center w-full flex-1 justify-between">
             <span class="flex items-center gap-2 text-sm font-semibold tracking-wider text-center text-base-content"><Bonfire.Boundaries.Web.BoundariesPresetNameLive
-                preset_boundary={@preset_boundary}
+                boundary_preset={@boundary_preset}
                 to_boundaries={@to_boundaries}
               /></span>
             <div>
@@ -54,7 +54,7 @@
           <div class="flex flex-col gap-3">
             <div class="gap-2 m-4 mt-0 w-full prose-sm prose">
               <Bonfire.Boundaries.Web.BoundariesPresetDescriptionLive
-                preset_boundary={@preset_boundary}
+                boundary_preset={@boundary_preset}
                 to_boundaries={@to_boundaries}
               />
             </div>
@@ -184,7 +184,7 @@
     </Bonfire.UI.Common.ProfileItemLive> -->
 
       <!-- Next already-choosen boundaries or Circles/Users -->
-      <!-- <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={@preset_boundary} /> -->
+      <!-- <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive boundary_preset={@boundary_preset} /> -->
       <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={@showing_within in [:smart_input]} />
       <!-- </div>
 </div> -->

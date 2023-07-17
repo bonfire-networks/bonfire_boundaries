@@ -3,7 +3,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesButtonLive do
   use Bonfire.Common.Utils
 
   prop to_boundaries, :any, default: nil
-  prop preset_boundary, :any, default: nil
+  prop boundary_preset, :any, default: nil
 
   def clone_context(to_boundaries) do
     case to_boundaries do

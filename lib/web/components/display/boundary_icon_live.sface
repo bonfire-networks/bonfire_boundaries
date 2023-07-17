@@ -7,5 +7,6 @@
     with_icon={@with_icon}
     with_label={@with_label}
     class={@class}
+    object_type={@object_type || Types.object_type(@object)}
   />
 </span>

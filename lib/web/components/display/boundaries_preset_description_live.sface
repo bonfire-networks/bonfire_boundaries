@@ -1,4 +1,4 @@
-{#case List.last(List.wrap(@preset_boundary || @to_boundaries))}
+{#case List.last(List.wrap(@boundary_preset || @to_boundaries))}
   {#match {"public", _}}
     <span :if={@with_icon} class="text-lg"><#Icon iconify="ph:globe" class="w-5 h-5" /></span>
     <span class="flex-1 w-full text-left">{l("Publicly visible to everyone")}</span>

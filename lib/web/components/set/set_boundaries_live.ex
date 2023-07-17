@@ -4,7 +4,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
 
   prop create_object_type, :any, default: nil
   prop to_boundaries, :any, default: nil
-  prop preset_boundary, :any, default: nil
+  prop boundary_preset, :any, default: nil
   prop to_circles, :list, default: []
   prop exclude_circles, :list, default: []
   prop custom_acls, :list, default: nil

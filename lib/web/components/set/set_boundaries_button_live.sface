@@ -27,7 +27,7 @@
             aria-orientation="vertical"
             aria-labelledby="user-profile-menu"
           >
-            <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive preset_boundary={Bonfire.Boundaries.Web.SetBoundariesLive.boundaries_to_preset(@to_boundaries)} />
+            <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive boundary_preset={Bonfire.Boundaries.Web.SetBoundariesLive.boundaries_to_preset(@to_boundaries)} />
           </ul>
         </div> -->
       </div>

@@ -60,12 +60,12 @@ defmodule Bonfire.Boundaries.Acls do
 
   def remote_public_acl_ids, do: ["5REM0TEPE0P1E1NTERACTREACT", "5REM0TEPE0P1E1NTERACTREP1Y"]
 
-  def public_acl_ids(preset_acls \\ Config.get!(:preset_acls_all)),
+  def public_acl_ids(preset_acls \\ Config.get!(:preset_acls_match)),
     do:
       preset_acls["public"]
       |> Enum.map(&get_id!/1)
 
-  def local_acl_ids(preset_acls \\ Config.get!(:preset_acls_all)),
+  def local_acl_ids(preset_acls \\ Config.get!(:preset_acls_match)),
     do:
       preset_acls["local"]
       |> Enum.map(&get_id!/1)
@@ -101,7 +101,44 @@ defmodule Bonfire.Boundaries.Acls do
     ulid(obj) || get_id!(obj)
   end
 
+  def set(object, creator, opts)
+      when is_list(opts) and is_struct(object) do
+    with {:ok, _pointer} <- do_set(object, creator, opts) do
+      {:ok, :granted}
+    end
+  end
+
+  defp do_set(object, creator, opts) do
+    id = ulid(object)
+
+    case prepare_cast(object, creator, opts) do
+      {:ok, control_acls} ->
+        control_acls
+
+      {fun, control_acls} when is_function(fun) ->
+        fun.(repo())
+
+        control_acls
+    end
+    |> Enum.map(&Map.put(&1, :id, id))
+    |> debug("insert controlled")
+    |> repo().insert_all(Controlled, ..., on_conflict: :nothing)
+    |> debug("inserted?")
+  end
+
   def cast(changeset, creator, opts) do
+    case prepare_cast(changeset, creator, opts) do
+      {:ok, control_acls} ->
+        Changesets.put_assoc(changeset, :controlled, control_acls)
+
+      {fun, control_acls} when is_function(fun) ->
+        changeset
+        |> Changeset.prepare_changes(fun)
+        |> Changesets.put_assoc!(:controlled, control_acls)
+    end
+  end
+
+  def prepare_cast(changeset_or_obj, creator, opts) do
     opts
     |> info("opts")
 
@@ -135,15 +172,13 @@ defmodule Bonfire.Boundaries.Acls do
 
     debug(control_acls, "preset + inputted ACLs to set")
 
-    case custom_recipients(changeset, preset, opts) do
+    case custom_recipients(changeset_or_obj, preset, opts) do
       [] ->
-        Changesets.put_assoc(changeset, :controlled, control_acls)
+        {:ok, control_acls}
 
       custom_recipients ->
         # TODO: enable using cast on existing objects by using `get_or_create_object_custom_acl(object)` to check if a custom Acl already exists?
         acl_id = ULID.generate()
-
-        controlled = [%{acl_id: acl_id} | control_acls]
 
         # default_role = e(opts, :role_to_grant, nil) || Config.get!([:role_to_grant, :default])
 
@@ -154,18 +189,29 @@ defmodule Bonfire.Boundaries.Acls do
           |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ..., true, opts))
           |> debug("on-the-fly ACLs to create")
 
-        changeset
-        |> Changeset.prepare_changes(fn changeset ->
-          changeset.repo.insert!(%Acl{
-            id: acl_id,
-            stereotyped: %Stereotyped{id: acl_id, stereotype_id: Fixtures.custom_acl()}
-          })
-
-          changeset.repo.insert_all(Grant, custom_grants)
-          changeset
-        end)
-        |> Changesets.put_assoc!(:controlled, controlled)
+        {
+          fn repo_or_changeset -> insert_custom(repo_or_changeset, acl_id, custom_grants) end,
+          [%{acl_id: acl_id} | control_acls]
+        }
     end
+  end
+
+  defp insert_custom(repo_or_changeset \\ repo(), acl_id, custom_grants)
+
+  defp insert_custom(%Ecto.Changeset{} = changeset, acl_id, custom_grants) do
+    insert_custom(changeset.repo, acl_id, custom_grants)
+    changeset
+  end
+
+  defp insert_custom(repo, acl_id, custom_grants) do
+    repo.insert!(%Acl{
+      id: acl_id,
+      stereotyped: %Stereotyped{id: acl_id, stereotype_id: Fixtures.custom_acl()}
+    })
+    |> debug()
+
+    repo.insert_all(Grant, custom_grants)
+    |> debug()
   end
 
   defp copy_acls_from_existing_object(controlled_object_id) do
@@ -193,9 +239,9 @@ defmodule Bonfire.Boundaries.Acls do
     %{acl_id: id}
   end
 
-  defp custom_recipients(changeset, preset, opts) do
-    (List.wrap(reply_to_grants(changeset, preset, opts)) ++
-       List.wrap(mentions_grants(changeset, preset, opts)) ++
+  defp custom_recipients(changeset_or_obj, preset, opts) do
+    (List.wrap(reply_to_grants(changeset_or_obj, preset, opts)) ++
+       List.wrap(mentions_grants(changeset_or_obj, preset, opts)) ++
        List.wrap(maybe_custom_circles_or_users(maybe_from_opts(opts, :to_circles, []))))
     |> debug()
     |> Enum.map(fn
@@ -231,10 +277,10 @@ defmodule Bonfire.Boundaries.Acls do
   defp maybe_custom_circles_or_users(to_circles),
     do: maybe_custom_circles_or_users(List.wrap(to_circles))
 
-  defp reply_to_grants(changeset, preset, _opts) do
+  defp reply_to_grants(changeset_or_obj, preset, _opts) do
     reply_to_creator =
       Utils.e(
-        changeset,
+        changeset_or_obj,
         :changes,
         :replied,
         :changes,
@@ -242,7 +288,15 @@ defmodule Bonfire.Boundaries.Acls do
         :created,
         :creator,
         nil
-      )
+      ) ||
+        Utils.e(
+          changeset_or_obj,
+          :replied,
+          :replying_to,
+          :created,
+          :creator,
+          nil
+        )
 
     if reply_to_creator do
       # debug(reply_to_creator, "creators of reply_to should be added to a new ACL")
@@ -264,8 +318,10 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
-  defp mentions_grants(changeset, preset, _opts) do
-    mentions = Utils.e(changeset, :changes, :post_content, :changes, :mentions, nil)
+  defp mentions_grants(changeset_or_obj, preset, _opts) do
+    mentions =
+      Utils.e(changeset_or_obj, :changes, :post_content, :changes, :mentions, nil) ||
+        Utils.e(changeset_or_obj, :post_content, :mentions, nil)
 
     if mentions && mentions != [] do
       # debug(mentions, "mentions/tags may be added to a new ACL")
@@ -370,6 +426,9 @@ defmodule Bonfire.Boundaries.Acls do
 
   defp grant_to(user_etc, acl_id, verbs, value, opts) when is_list(verbs),
     do: Enum.flat_map(verbs, &grant_to(user_etc, acl_id, &1, value, opts))
+
+  defp grant_to(users_etc, acl_id, verb, value, opts) when is_list(users_etc),
+    do: Enum.flat_map(users_etc, &grant_to(&1, acl_id, verb, value, opts))
 
   defp grant_to(user_etc, acl_id, verb, value, _opts) do
     debug(user_etc)

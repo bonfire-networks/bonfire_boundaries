@@ -5,7 +5,7 @@
       <div class="flex items-start gap-4">
         <div class="flex flex-col w-full">
           <div class="flex items-center justify-between w-full gap-6 mb-0">
-            {#case @preset_boundary}
+            {#case @boundary_preset}
               {#match {"public", _}}
                 <div class="flex items-start">
                   <div class="flex-shrink-0">
@@ -133,7 +133,7 @@
       type="button"
     >
       <div class="flex items-center gap-2">
-        <input type="radio" name="radio-1" class="radio" checked={matches?(@preset_boundary, "public")}>
+        <input type="radio" name="radio-1" class="radio" checked={matches?(@boundary_preset, "public")}>
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
@@ -150,7 +150,7 @@
       </div>
     </button>
     <button
-      :if={matches?(@preset_boundary, "public")}
+      :if={matches?(@boundary_preset, "public")}
       type="button"
       phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
       class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
@@ -168,7 +168,7 @@
       type="button"
     >
       <div class="flex items-center gap-2">
-        <input type="radio" name="radio-1" class="radio" checked={matches?(@preset_boundary, "local")}>
+        <input type="radio" name="radio-1" class="radio" checked={matches?(@boundary_preset, "local")}>
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
@@ -185,7 +185,7 @@
       </div>
     </button>
     <button
-      :if={matches?(@preset_boundary, "local")}
+      :if={matches?(@boundary_preset, "local")}
       type="button"
       phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
       class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
@@ -208,7 +208,7 @@
           type="radio"
           name="radio-1"
           class="radio"
-          checked={matches?(@preset_boundary, "mentions")}
+          checked={matches?(@boundary_preset, "mentions")}
         />
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
@@ -224,7 +224,7 @@
       </div>
     </button>
     <button
-      :if={matches?(@preset_boundary, "mentions")}
+      :if={matches?(@boundary_preset, "mentions")}
       type="button"
       phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
       class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
@@ -291,7 +291,7 @@
       type="button"
     >
       <div class="flex items-center gap-2">
-        <input type="radio" name="radio-1" class="radio" checked={matches?(@preset_boundary, "custom")}>
+        <input type="radio" name="radio-1" class="radio" checked={matches?(@boundary_preset, "custom")}>
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">

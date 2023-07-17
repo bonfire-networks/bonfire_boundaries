@@ -12,6 +12,7 @@
       id={"add-to-circle-widget-#{@parent_id}-#{@user_id}"}
       circles={@circles}
       user_id={@user_id}
+      name={@name}
     />
     <:open_btn>
       <div class="flex items-center w-full gap-2 text-sm text-base-content/70">

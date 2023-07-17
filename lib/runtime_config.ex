@@ -275,8 +275,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         ],
         "private" => []
       },
-      #  used for displaying boundaries
-      preset_acls_all: %{
+      #  used for matching saved boundaries to presets:
+      preset_acls_match: %{
         "public" => [
           :guests_may_see,
           :guests_may_read,
@@ -284,7 +284,13 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :remotes_may_interact,
           :remotes_may_reply
         ],
-        "local" => [:locals_may_read, :locals_may_interact, :locals_may_reply]
+        "local" => [:locals_may_read, :locals_may_interact, :locals_may_reply],
+        "open" => [:guests_may_see_read, :locals_may_contribute, :remotes_may_contribute],
+        "visible" => [
+          :no_follow,
+          :locals_may_interact,
+          :remotes_may_interact
+        ]
       }
 
     # create_verbs: [

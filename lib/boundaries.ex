@@ -177,21 +177,24 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  def preset_boundary_from_acl(acl, object_type \\ nil)
+
   def preset_boundary_from_acl(
-        %{verbs: verbs, __typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = _summary
+        %{verbs: verbs, __typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = _summary,
+        object_type
       ) do
     {Roles.preset_boundary_role_from_acl(%{verbs: verbs}),
-     preset_boundary_tuple_from_acl(%Acl{id: acl_id})}
+     preset_boundary_tuple_from_acl(%Acl{id: acl_id}, object_type)}
 
     # |> debug("merged ACL + verbs")
   end
 
-  def preset_boundary_from_acl(%{verbs: verbs} = _summary) do
+  def preset_boundary_from_acl(%{verbs: verbs} = _summary, _object_type) do
     Roles.preset_boundary_role_from_acl(%{verbs: verbs})
   end
 
-  def preset_boundary_from_acl(acl) do
-    preset_boundary_tuple_from_acl(acl)
+  def preset_boundary_from_acl(acl, object_type) do
+    preset_boundary_tuple_from_acl(acl, object_type)
   end
 
   def preset_boundary_tuple_from_acl(acl, object_type \\ nil)
@@ -199,10 +202,11 @@ defmodule Bonfire.Boundaries do
   def preset_boundary_tuple_from_acl(acl, %{__struct__: schema} = _object),
     do: preset_boundary_tuple_from_acl(acl, schema)
 
-  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, Bonfire.Classify.Category) do
+  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, object_type)
+      when object_type in [Bonfire.Classify.Category, :group] do
     # debug(acl)
 
-    preset_acls = Config.get!(:preset_acls)
+    preset_acls = Config.get!(:preset_acls_match)
 
     open_acl_ids =
       preset_acls["open"]
@@ -213,8 +217,8 @@ defmodule Bonfire.Boundaries do
       |> Enum.map(&Acls.get_id!/1)
 
     cond do
-      acl_id in open_acl_ids -> {"open", l("Open")}
       acl_id in visible_acl_ids -> {"visible", l("Visible")}
+      acl_id in open_acl_ids -> {"open", l("Open")}
       true -> {"private", l("Private")}
     end
   end
@@ -222,7 +226,7 @@ defmodule Bonfire.Boundaries do
   def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, _object_type) do
     # debug(acl)
 
-    preset_acls = Config.get!(:preset_acls_all)
+    preset_acls = Config.get!(:preset_acls_match)
 
     public_acl_ids = Acls.public_acl_ids(preset_acls)
 
@@ -242,7 +246,10 @@ defmodule Bonfire.Boundaries do
     preset_boundary_tuple_from_acl(%Acl{id: acl_id}, object_type)
   end
 
-  def preset_boundary_tuple_from_acl(%{acl: acl}, object_type),
+  def preset_boundary_tuple_from_acl(%{acl: %{id: _} = acl}, object_type),
+    do: preset_boundary_tuple_from_acl(acl, object_type)
+
+  def preset_boundary_tuple_from_acl(%{acl_id: acl}, object_type),
     do: preset_boundary_tuple_from_acl(acl, object_type)
 
   def preset_boundary_tuple_from_acl([acl], object_type),
@@ -258,20 +265,33 @@ defmodule Bonfire.Boundaries do
   end
 
   def set_boundaries(creator, object, opts)
-      when is_list(opts) and (is_binary(object) or is_map(object)) do
-    with :ok <-
+      when is_list(opts) and is_struct(object) do
+    case opts[:remove_previous_preset] do
+      nil ->
+        with {:ok, _pointer} <- Acls.set(object, creator, opts) do
+          {:ok, :granted}
+        end
+
+      previous_preset ->
+        replace_boundaries(creator, object, previous_preset, opts)
+    end
+  end
+
+  def replace_boundaries(creator, object, previous_preset, opts)
+      when is_list(opts) and is_struct(object) do
+    with object <-
+           object
+           # |> repo().maybe_preload(:controlled)
+           |> repo().maybe_preload(created: [:creator])
+           |> repo().maybe_preload(:creator),
+         :ok <-
            maybe_remove_previous_preset(
              e(object, :created, :creator, nil) || e(object, :created, :creator_id, nil) ||
                e(object, :creator, nil) || e(object, :creator_id, nil) || creator,
              object,
-             opts[:remove_previous_preset]
+             previous_preset
            ),
-         {:ok, _pointer} <-
-           Ecto.Changeset.cast(%Pointers.Pointer{id: ulid(object)}, %{}, [])
-           |> Bonfire.Boundaries.Acls.cast(creator, opts)
-           #  |> debug("ACL it")
-           |> repo().update() do
-      # debug(one_grant: grant)
+         {:ok, _pointer} <- Acls.set(object, creator, opts) do
       {:ok, :granted}
     end
   end

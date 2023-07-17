@@ -1,64 +1,107 @@
-{#case List.last(List.wrap(@preset_boundary || @to_boundaries))}
+{#case List.last(List.wrap(@boundary_preset || @to_boundaries))}
   {#match {"public", _}}
     <span
       title={l("Public: visible to everyone. People on the fediverse can see, interact, and reply.")}
       class={
         @class,
-        "": @with_label != true,
         "flex items-center gap-2": @with_label && @with_icon
       }
     >
       <#Icon :if={@with_icon} iconify="ph:globe" class={@icon_class} />
-      <span
-        :if={@with_label}
-        class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
-      >{l("Public")}</span>
-      <span :if={!@with_label} class="sr-only">{l("Public")}</span>
+      <span class={
+        "text-sm normal-case",
+        "sr-only": !@with_label,
+        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+      }>{l("Public")}</span>
     </span>
   {#match {"local", _}}
     <span
       title={l("Local: everyone on this instance can see, interact, and reply.")}
       class={
         @class,
-        "": @with_label != true,
         "flex items-center gap-2": @with_label && @with_icon
       }
     >
       <#Icon :if={@with_icon} iconify="ph:campfire-bold" class={@icon_class} />
-      <span
-        :if={@with_label}
-        class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
-      >{l("Local")}</span>
-      <span :if={!@with_label} class="sr-only">{l("Local")}</span>
+      <span class={
+        "text-sm normal-case",
+        "sr-only": !@with_label,
+        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+      }>{l("Local")}</span>
     </span>
+  {#match {"open" = preset, boundary_name}}
+    <div
+      class={
+        @class,
+        "flex items-center gap-2": @with_label && @with_icon
+      }
+      title={l("Open") <> ": " <> Config.get([:ui, :group, :preset_descriptions, preset], "")}
+    >
+      <#Icon :if={@with_icon} iconify="fluent:globe-person-20-regular" class={@icon_class} />
+      <span class={
+        "text-sm normal-case",
+        "sr-only": !@with_label,
+        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+      }>{boundary_name || l("Open")}</span>
+    </div>
+  {#match {"visible" = preset, boundary_name}}
+    <div
+      class={
+        @class,
+        "flex items-center gap-2": @with_label && @with_icon
+      }
+      title={l("Visible") <> ": " <> Config.get([:ui, :group, :preset_descriptions, preset], "")}
+    >
+      <#Icon :if={@with_icon} iconify="fluent:globe-search-24-regular" class={@icon_class} />
+      <span class={
+        "text-sm normal-case",
+        "sr-only": !@with_label,
+        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+      }>{boundary_name || l("Visible")}</span>
+    </div>
+  {#match {"private" = preset, boundary_name}}
+    <div
+      class={
+        @class,
+        "flex items-center gap-2": @with_label && @with_icon
+      }
+      title={l("Private") <> ": " <> Config.get([:ui, :group, :preset_descriptions, preset], "")}
+    >
+      <#Icon :if={@with_icon} iconify="heroicons-solid:lock-closed" class={@icon_class} />
+      <span class={
+        "text-sm normal-case",
+        "sr-only": !@with_label,
+        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+      }>{boundary_name || l("Private")}</span>
+    </div>
   {#match {id, name} when id != "custom"}
     <span
       title={e(name, :named, nil) || e(name, :name, nil) || name || l("Preset Boundary")}
       class={
         @class,
-        "": @with_label != true,
         "flex items-center gap-2": @with_label && @with_icon
       }
     >
       <#Icon :if={@with_icon} iconify="fluent:door-tag-20-filled" class={@icon_class} />
-      <span
-        :if={@with_label}
-        class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
-      >{e(name, :name, nil) || name || l("Preset Boundary")}</span>
+      <span class={
+        "text-sm normal-case",
+        "sr-only": !@with_label,
+        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+      }>{e(name, :name, nil) || name || l("Preset Boundary")}</span>
     </span>
-  {#match _}
+  {#match other}
     <span
-      title={l("Custom Boundaries")}
+      title={debug(other, "cuubbb") && l("Custom Boundaries")}
       class={
         @class,
-        "": @with_label != true,
         "flex items-center gap-2": @with_label && @with_icon
       }
     >
       <#Icon :if={@with_icon} iconify="ph:gear-fill" class={@icon_class} />
-      <span
-        :if={@with_label}
-        class={"text-sm normal-case", "btn btn-sm btn-outline border-base-content/30": @with_icon != true}
-      >{l("Custom Boundaries")}</span>
+      <span class={
+        "text-sm normal-case",
+        "sr-only": !@with_label,
+        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+      }>{l("Custom Boundaries")}</span>
     </span>
 {/case}

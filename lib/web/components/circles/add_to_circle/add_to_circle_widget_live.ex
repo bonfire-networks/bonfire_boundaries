@@ -4,6 +4,7 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
 
   prop circles, :list, default: []
   prop user_id, :any, default: nil
+  prop name, :any, default: nil
 
   def do_handle_event("circle_create_from_modal", %{"name" => name} = attrs, socket) do
     circle_create_from_modal(Map.merge(attrs, %{named: %{name: name}}), socket)

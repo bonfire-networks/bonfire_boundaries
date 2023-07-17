@@ -5,4 +5,5 @@ defmodule Bonfire.Boundaries.Web.AddToCircleLive do
   prop circles, :list, default: []
   prop user_id, :any, default: nil
   prop parent_id, :any, default: nil
+  prop name, :any, default: nil
 end

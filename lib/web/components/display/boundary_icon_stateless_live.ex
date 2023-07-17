@@ -5,7 +5,8 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
   prop object_id, :string, required: true
   prop parent_id, :string, default: nil
   prop object_boundary, :any, default: nil
-  prop preset_boundary, :any, default: nil
+  prop object_type, :any, default: nil
+  prop boundary_preset, :any, default: nil
   prop scope, :any, default: nil
 
   prop with_icon, :boolean, default: true
@@ -33,11 +34,17 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
 
     is_caretaker = role_name in ["Administer", "Caretaker"]
 
+    debug(e(assigns, :object_type, nil))
+
     assigns
-    |> update(:preset_boundary, fn existing ->
-      (existing || Bonfire.Boundaries.preset_boundary_tuple_from_acl(object_boundary) ||
+    |> update(:boundary_preset, fn existing ->
+      (existing ||
+         Bonfire.Boundaries.preset_boundary_tuple_from_acl(
+           object_boundary,
+           e(assigns, :object_type, nil)
+         ) ||
          {"custom", l("Custom")})
-      |> debug("preset_boundary")
+      |> debug("boundary_preset")
     end)
     |> assign(
       role_name: role_name,
@@ -53,7 +60,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
     |> render_sface()
   end
 
-  defp for_view_edit(true, object_id, preset_boundary) when is_binary(object_id) do
+  defp for_view_edit(true, object_id, boundary_preset) when is_binary(object_id) do
     global_preset_acl_ids = Bonfire.Boundaries.Acls.preset_acl_ids()
 
     # TODO: query only custom per-object ACL (stereotype 7HECVST0MAC1F0RAN0BJECTETC) instead?
@@ -74,12 +81,12 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
       |> debug("my_presets")
 
     [
-      preset_boundary: e(List.first(my_presets), preset_boundary),
+      boundary_preset: e(List.first(my_presets), boundary_preset),
       to_boundaries: my_presets,
       to_circles: [],
       custom_acls: other_acls
     ]
   end
 
-  defp for_view_edit(_, _, preset_boundary), do: [preset_boundary: preset_boundary]
+  defp for_view_edit(_, _, boundary_preset), do: [boundary_preset: boundary_preset]
 end

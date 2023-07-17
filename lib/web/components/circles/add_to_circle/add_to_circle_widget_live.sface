@@ -1,6 +1,6 @@
 <div>
   <div id="circles_list" class="">
-    <div class="px-4 font-bold text-base">{l("Select the circle(s) you want this user to be in")}</div>
+    <div class="px-4 font-bold text-base">{l("Select the circle(s) you want %{name} to be in", name: @name || l("this user"))}</div>
     <button
       phx-click={JS.toggle(to: "#circles_list")
       |> JS.toggle(to: "#new_circle_from_modal")}
