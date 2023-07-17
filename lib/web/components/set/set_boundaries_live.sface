@@ -9,15 +9,19 @@
       x-data="{
         open: false
       }"
-      class="border-b border-base-content/20 py-4 pb-6"
+      class="border rounded-box border-base-content/20 p-4"
     >
-      <div class="font-medium mb-3 text-base">{l("Preset boundary")}</div>
+      <div class="font-medium mb-3 text-base text-base-content/90">{l("Preset boundary")}</div>
 
-      <div class="bg-base-content/10 rounded-box mb-2 w-full">
-        <div class="flex items-center w-full p-4 gap-3">
+      <div class="">
+        <div class="flex items-center w-full  gap-3">
           <div class="flex items-center w-full flex-1 justify-between">
-            <span class="flex items-center gap-2 text-sm font-semibold tracking-wider text-center text-base-content"><Bonfire.Boundaries.Web.BoundariesPresetNameLive
+            <span class="flex items-center gap-2 text-sm font-semibold tracking-wider text-center text-base-content">
+            <Bonfire.Boundaries.Web.BoundariesPresetNameLive
                 boundary_preset={@boundary_preset}
+                icon_wrapper="w-10 h-10 rounded-full flex items-center place-content-center bg-info/10"
+                icon_class="w-6 h-6 text-info"
+                with_description
                 to_boundaries={@to_boundaries}
               /></span>
             <div>
@@ -78,7 +82,7 @@
       </div>
       <div class="flex flex-col gap-2">
         {#if !@custom_acls}
-          <div class="collapse !overflow-visible collapse-arrow bg-base-content/10">
+          <div class="collapse !overflow-visible collapse-arrow bg-base-content/5">
             <input type="radio" checked="checked">
             <div class="collapse-title  text-sm font-medium">
               <div class="flex items-center gap-3">
@@ -109,7 +113,7 @@
             </div>
           </div>
 
-          <div class="collapse !overflow-visible  collapse-arrow bg-base-content/10">
+          <div class="collapse !overflow-visible  collapse-arrow bg-base-content/5">
             <input type="radio" checked={@exclude_circles != []}>
             <div class="collapse-title text-sm font-medium">
               <div class="flex items-center gap-3">

@@ -6,7 +6,8 @@ defmodule Bonfire.Boundaries.Web.BoundariesPresetNameLive do
 
   prop class, :css_class, default: ""
   prop icon_class, :css_class, default: "w-5 h-5 text-base-content/60"
-
+  prop icon_wrapper, :css_class, default: ""
   prop with_icon, :boolean, default: true
   prop with_label, :boolean, default: true
+  prop with_description, :boolean, default: false
 end
