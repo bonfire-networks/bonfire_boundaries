@@ -72,6 +72,24 @@
         </div>
 
         <div
+          :if={e(data, :type, nil) == "user"}
+          phx-click={JS.hide(to: "#boundaries_picker")
+          |> JS.hide(to: "#extra_boundaries")
+          |> JS.show(to: "#boundaries_preview")
+          |> JS.push("assign",
+            value: %{
+              preview_boundary_for_id: id,
+              preview_boundary_for_username:
+                e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)
+            },
+            target: "#boundaries_preview"
+          )}
+          class="btn btn-sm btn-circle btn-ghost"
+        >
+          <#Icon iconify="heroicons-outline:eye" class="w-5 h-5 md:w-4 md:h-4" />
+        </div>
+
+        <div
           phx-click={JS.push("Bonfire.Boundaries:remove_circle",
             value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
             target: "#smart_input"

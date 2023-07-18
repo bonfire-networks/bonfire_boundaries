@@ -17,7 +17,7 @@
         <div class="flex items-center w-full  gap-3">
           <div class="flex items-center w-full flex-1 justify-between">
             <span class="flex items-center gap-2 text-sm font-semibold tracking-wider text-center text-base-content">
-            <Bonfire.Boundaries.Web.BoundariesPresetNameLive
+              <Bonfire.Boundaries.Web.BoundariesPresetNameLive
                 boundary_preset={@boundary_preset}
                 icon_wrapper="w-10 h-10 rounded-full flex items-center place-content-center bg-info/10"
                 icon_class="w-6 h-6 text-info"

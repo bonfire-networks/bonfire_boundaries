@@ -184,7 +184,7 @@
   </div>
 </div>
 
-<div class="flex items-center justify-between px-3 pb-3 mt-4">
+<!-- <div class="flex items-center justify-between px-3 pb-3 mt-4">
   <div>
   </div>
   <button
@@ -193,5 +193,7 @@
     class="w-full gap-2 normal-case rounded-full btn btn-primary btn-outline"
   >
     <span class="">{l("Done")}</span>
-  </button>
-</div>
+  </button> 
+  </div> -->
+
+<Bonfire.Boundaries.Web.BoundaryComposerActionsLive />

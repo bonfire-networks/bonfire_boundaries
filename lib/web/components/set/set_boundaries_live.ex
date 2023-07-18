@@ -76,7 +76,8 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
          %{
            id: e(acl, :id, nil),
            field: :to_boundaries,
-           name: name
+           name: name,
+           type: "acl"
          }}
 
       %Bonfire.Data.AccessControl.Circle{} = circle ->
@@ -86,7 +87,8 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
          %{
            id: e(circle, :id, nil),
            field: circle_field,
-           name: name
+           name: name,
+           type: "circle"
          }}
 
       user ->
@@ -99,7 +101,8 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
            field: circle_field,
            icon: Media.avatar_url(user),
            name: name,
-           username: username
+           username: username,
+           type: "user"
          }}
     end)
     # Filter to remove any nils

@@ -108,6 +108,40 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
+  def preview(creator, opts)
+      when is_list(opts) do
+    with {:error, {:ok, [%{verbs: verbs}]}} <- do_preview(creator, opts) do
+      {:ok, verbs}
+    else
+      {:error, {:ok, []}} ->
+        {:ok, []}
+
+      other ->
+        error(other)
+    end
+  end
+
+  defp do_preview(creator, opts) do
+    object = generate_object()
+
+    repo().transaction(fn repo ->
+      do_set(object, creator, opts)
+
+      repo().rollback(
+        {:ok,
+         Bonfire.Boundaries.users_grants_on(
+           opts[:preview_for_id] || Circles.get_id!(:guest),
+           object
+         )}
+      )
+    end)
+  end
+
+  defp generate_object do
+    Pointers.Pointer.create(Bonfire.Data.Social.Post)
+    |> Bonfire.Common.Repo.insert!()
+  end
+
   defp do_set(object, creator, opts) do
     id = ulid(object)
 
@@ -292,7 +326,7 @@ defmodule Bonfire.Boundaries.Acls do
         Utils.e(
           changeset_or_obj,
           :replied,
-          :replying_to,
+          :reply_to,
           :created,
           :creator,
           nil
@@ -303,11 +337,11 @@ defmodule Bonfire.Boundaries.Acls do
 
       case preset do
         "public" ->
-          ulid(reply_to_creator)
+          id(reply_to_creator)
 
         "local" ->
           if is_local?(reply_to_creator),
-            do: ulid(reply_to_creator),
+            do: id(reply_to_creator),
             else: []
 
         _ ->

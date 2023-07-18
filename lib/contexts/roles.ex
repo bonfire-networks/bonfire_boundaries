@@ -185,6 +185,10 @@ defmodule Bonfire.Boundaries.Roles do
   end
 
   def preset_boundary_role_from_acl(%{verbs: verbs} = _summary) do
+    preset_boundary_role_from_acl(verbs)
+  end
+
+  def preset_boundary_role_from_acl(verbs) when is_list(verbs) do
     # debug(summary)
     case role_from_verb_names(verbs) do
       :administer -> {l("Administer"), l("Full permissions")}

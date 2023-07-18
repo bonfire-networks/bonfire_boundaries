@@ -1,0 +1,67 @@
+<div class="">
+  <div>
+    <div class="flex flex-col">
+      <div class="p-4 rounded-md bg-info/10">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+          </div>
+          <div class="flex-1 ml-3 md:flex md:justify-between">
+            <p class="text-sm text-info">
+              {l("Here you can preview how boundaries will be applied for a specific user.")}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="m-4">
+      <div class="w-full">
+        <Bonfire.UI.Common.MultiselectLive.UserSelectorLive
+          selected_options={[]}
+          label={l("Search for a user to preview")}
+          form_input_name={__MODULE__}
+          class=""
+          event_target={@myself}
+          implementation={:live_select}
+        />
+        <!-- context_id={@context_id} -->
+      </div>
+
+      <div :if={@preview_boundary_for_id}>
+        {l("Previewing boundaries for")} {@preview_boundary_for_username}:
+        <input type="hidden" name="preview_boundary_for_id" value={@preview_boundary_for_id}>
+
+        <Bonfire.Boundaries.Web.YourRoleLive
+          is_caretaker={nil}
+          role_name={@role_name}
+          label={l("Their role")}
+          scope={:preview}
+        />
+
+        <ul :if={@preview_boundary_verbs} role="list" class="flex flex-col gap-2">
+          {#for verb <- @preview_boundary_verbs || []}
+            <Bonfire.Boundaries.Web.RoleVerbLive value read_only verb={verb} all_verbs={@all_verbs} />
+          {/for}
+        </ul>
+      </div>
+    </div>
+
+    <style>
+      .boundaries-switches label div.btn {
+      color: hsl(var(--bc));
+      }
+      .boundaries-switches label input:checked ~ div.btn-yes {
+      color: hsl(var(--pc));
+      background: hsl(var(--su) / 0.90);
+      }
+      .boundaries-switches label input:checked ~ div.btn-no {
+      color: hsl(var(--pc));
+      background: hsl(var(--er) / 0.90);
+      }
+      .boundaries-switches label input:checked ~ div.btn-maybe {
+      background: white;
+      color: black;
+      }
+    </style>
+  </div>
+</div>

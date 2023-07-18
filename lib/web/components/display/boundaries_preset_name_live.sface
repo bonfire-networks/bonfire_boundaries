@@ -8,15 +8,18 @@
       }
     >
       <span :if={@with_icon} class={@icon_wrapper}>
-      <#Icon  iconify="ph:globe" class={@icon_class} />
+        <#Icon iconify="ph:globe" class={@icon_class} />
       </span>
       <div class="flex flex-col gap-0 items-start">
-      <span class={
-        "text-sm normal-case",
-        "sr-only": !@with_label,
-        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
-      }>{l("Public")}</span>
-        <span :if={@with_description} class="flex-1 w-full text-sm font-normal text-base-content/70 text-left">{l("Publicly visible to everyone")}</span>
+        <span class={
+          "text-sm normal-case",
+          "sr-only": !@with_label,
+          "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+        }>{l("Public")}</span>
+        <span
+          :if={@with_description}
+          class="flex-1 w-full text-sm font-normal text-base-content/70 text-left"
+        >{l("Publicly visible to everyone")}</span>
       </div>
     </span>
   {#match {"local", _}}
@@ -27,17 +30,20 @@
         "flex items-center gap-4": @with_label && @with_icon
       }
     >
-    <span :if={@with_icon} class={@icon_wrapper}>
-      <#Icon  iconify="ph:campfire-bold" class={@icon_class} />
-     </span>
-     <div class="flex flex-col gap-0 items-start">
+      <span :if={@with_icon} class={@icon_wrapper}>
+        <#Icon iconify="ph:campfire-bold" class={@icon_class} />
+      </span>
+      <div class="flex flex-col gap-0 items-start">
         <span class={
-        "text-sm normal-case",
-        "sr-only": !@with_label,
-        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+          "text-sm normal-case",
+          "sr-only": !@with_label,
+          "btn btn-sm btn-outline border-base-content/30": @with_icon != true
         }>{l("Local")}</span>
-        <span :if={@with_description} class="flex-1 w-full text-sm font-normal text-base-content/70 text-left">{l("Only instance users can see and reply")}</span>
-    </div>
+        <span
+          :if={@with_description}
+          class="flex-1 w-full text-sm font-normal text-base-content/70 text-left"
+        >{l("Only instance users can see and reply")}</span>
+      </div>
     </span>
   {#match {"open" = preset, boundary_name}}
     <div
@@ -47,8 +53,8 @@
       }
       title={l("Open") <> ": " <> Config.get([:ui, :group, :preset_descriptions, preset], "")}
     >
-    <span :if={@with_icon} class={@icon_wrapper}>
-      <#Icon iconify="fluent:globe-person-20-regular" class={@icon_class} />
+      <span :if={@with_icon} class={@icon_wrapper}>
+        <#Icon iconify="fluent:globe-person-20-regular" class={@icon_class} />
       </span>
       <span class={
         "text-sm normal-case",
@@ -64,9 +70,9 @@
       }
       title={l("Visible") <> ": " <> Config.get([:ui, :group, :preset_descriptions, preset], "")}
     >
-    <span :if={@with_icon} class={@icon_wrapper}>
-      <#Icon iconify="fluent:globe-search-24-regular" class={@icon_class} />
-    </span>
+      <span :if={@with_icon} class={@icon_wrapper}>
+        <#Icon iconify="fluent:globe-search-24-regular" class={@icon_class} />
+      </span>
       <span class={
         "text-sm normal-case",
         "sr-only": !@with_label,
@@ -81,9 +87,9 @@
       }
       title={l("Private") <> ": " <> Config.get([:ui, :group, :preset_descriptions, preset], "")}
     >
-    <span :if={@with_icon} class={@icon_wrapper}>
-      <#Icon iconify="heroicons-solid:lock-closed" class={@icon_class} />
-    </span>
+      <span :if={@with_icon} class={@icon_wrapper}>
+        <#Icon iconify="heroicons-solid:lock-closed" class={@icon_class} />
+      </span>
       <span class={
         "text-sm normal-case",
         "sr-only": !@with_label,
@@ -98,9 +104,9 @@
         "flex items-center gap-4": @with_label && @with_icon
       }
     >
-    <span :if={@with_icon} class={@icon_wrapper}>
-      <#Icon iconify="fluent:door-tag-20-filled" class={@icon_class} />
-     </span>
+      <span :if={@with_icon} class={@icon_wrapper}>
+        <#Icon iconify="fluent:door-tag-20-filled" class={@icon_class} />
+      </span>
       <span class={
         "text-sm normal-case",
         "sr-only": !@with_label,
@@ -115,9 +121,9 @@
         "flex items-center gap-4": @with_label && @with_icon
       }
     >
-    <span :if={@with_icon} class={@icon_wrapper}>
-      <#Icon iconify="ph:gear-fill" class={@icon_class} />
-     </span>
+      <span :if={@with_icon} class={@icon_wrapper}>
+        <#Icon iconify="ph:gear-fill" class={@icon_class} />
+      </span>
       <span class={
         "text-sm normal-case",
         "sr-only": !@with_label,

@@ -1,10 +1,19 @@
-<div class="flex items-center justify-between pt-3 mt-4">
-  <div>
-  </div>
+<div class="flex items-center justify-between pt-3 mt-4 gap-2">
   <button
     type="button"
-    phx-click={JS.toggle(to: "#compose_content_wrapper") |> JS.toggle(to: "#extra_boundaries")}
-    class="w-full gap-2 normal-case rounded-full btn btn-primary btn-outline"
+    phx-click={JS.hide(to: "#boundaries_picker")
+    |> JS.hide(to: "#extra_boundaries")
+    |> JS.show(to: "#boundaries_preview")}
+    class="normal-case rounded-full btn btn-secondary btn-outline"
+  >
+    <span class="">{l("Preview")}</span>
+  </button>
+  <button
+    type="button"
+    phx-click={JS.hide(to: "#boundaries_picker")
+    |> JS.hide(to: "#extra_boundaries")
+    |> JS.show(to: "#compose_content_wrapper")}
+    class="grow normal-case rounded-full btn btn-primary btn-outline"
   >
     <span class="">{l("Done")}</span>
   </button>

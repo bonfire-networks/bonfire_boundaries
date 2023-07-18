@@ -7,7 +7,10 @@
           phx-click={JS.toggle(to: "#compose_content_wrapper") |> JS.toggle(to: "#boundaries_picker")}
           class="flex w-fit items-center justify-between gap-2 btn-ghost normal-case rounded-full border btn-sm btn border-base-content/30 text-primary"
         >
-          <Bonfire.Boundaries.Web.BoundariesPresetNameLive icon_class="w-5 h-5 text-primary" to_boundaries={@to_boundaries} />
+          <Bonfire.Boundaries.Web.BoundariesPresetNameLive
+            icon_class="w-5 h-5 text-primary"
+            to_boundaries={@to_boundaries}
+          />
         </button>
         <!-- <div class="w-full dropdown">
           <label
