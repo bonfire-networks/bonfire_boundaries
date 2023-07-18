@@ -2,7 +2,7 @@
   <Bonfire.UI.Common.OpenModalLive
     id="new_circle"
     title_text={l("Create a new circle")}
-    form_opts={"phx-submit": "Bonfire.Boundaries:circle_create"}
+    form_opts={%{"phx-submit" => "Bonfire.Boundaries:circle_create"}}
     no_actions
   >
     <div>
