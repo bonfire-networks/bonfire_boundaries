@@ -4,6 +4,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
   prop boundary_preset, :any, default: nil
   prop to_boundaries, :any, default: nil
   prop my_acls, :any, default: nil
+  prop is_dropdown, :boolean, default: false
 
   def matches?({preset, _}, preset), do: true
   def matches?([{preset, _}], preset), do: true

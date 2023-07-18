@@ -1,7 +1,7 @@
 <select
   name={"to_circles[#{@circle_id}][]"}
   class={
-    "font-normal border border-base-content/30 select-sm text-sm rounded-full select",
+    "font-normal select-ghost select-sm text-sm rounded-full select",
     "select-xs text-xs pl-1 px-0": !@setting_boundaries
   }
 >

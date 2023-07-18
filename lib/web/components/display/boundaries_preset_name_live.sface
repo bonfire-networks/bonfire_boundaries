@@ -18,7 +18,7 @@
         }>{l("Public")}</span>
         <span
           :if={@with_description}
-          class="flex-1 w-full text-sm font-normal text-base-content/70 text-left"
+          class="flex-1 w-full text-xs font-normal text-base-content/70 text-left"
         >{l("Publicly visible to everyone")}</span>
       </div>
     </span>
@@ -41,7 +41,7 @@
         }>{l("Local")}</span>
         <span
           :if={@with_description}
-          class="flex-1 w-full text-sm font-normal text-base-content/70 text-left"
+          class="flex-1 w-full text-xs font-normal text-base-content/70 text-left"
         >{l("Only instance users can see and reply")}</span>
       </div>
     </span>
@@ -62,7 +62,7 @@
         "sr-only": !@with_label,
         "btn btn-sm btn-outline border-base-content/30": @with_icon != true
       }>{boundary_name || l("Open")}</span>
-      <span :if={@with_description} class="flex-1 w-full text-sm font-normal text-base-content/70 text-left">{l("Anyone can join and participate")}</span>
+      <span :if={@with_description} class="flex-1 w-full text-xs font-normal text-base-content/70 text-left">{l("Anyone can join and participate")}</span>
     </div>
     </div>
   {#match {"visible" = preset, boundary_name}}

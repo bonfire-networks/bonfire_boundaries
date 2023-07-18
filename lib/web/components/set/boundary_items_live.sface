@@ -6,7 +6,7 @@
 
   <!-- <div class="text-center  p-4 font-medium bg-base-200 rounded-box my-2">{"Grant custom permissions to specific users or circles"}</div> -->
 {#else}
-  <div class="flex flex-1 flex-col divide-y divide-base-content/10 mt-3 flex-wrap">
+  <div class="flex flex-1 flex-col  flex-wrap">
     <!-- <div
     :for={{id, data} <- Bonfire.Boundaries.Web.SetBoundariesLive.reject_presets(@to_boundaries || [])}
     class="mt-2 mr-2 flex items-center justify-between"

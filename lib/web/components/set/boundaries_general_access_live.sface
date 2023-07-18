@@ -1,4 +1,7 @@
-<div class="menu flex flex-col gap-3 menu-lg">
+<div class={
+    "menu flex flex-col gap-3 menu-lg",
+    "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-100 rounded-box w-[328px]": @is_dropdown
+  }>
   <div class="flex px-2 items-center gap-3 justify-between">
     <button
       class="text-base-content"
@@ -9,11 +12,11 @@
       type="button"
     >
       <div class="flex items-center gap-2">
-        <input type="radio" name="radio-1" class="radio" checked={matches?(@boundary_preset, "public")}>
+        <input :if={!@is_dropdown} type="radio" name="radio-1" class="radio" checked={matches?(@boundary_preset, "public")}>
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
-              <#Icon iconify="ph:globe" class="w-6 h-6" />
+              <#Icon iconify="ph:globe" class={"w-6 h-6", "!w-4 !h-4": @is_dropdown }/>
             </span>
           </div>
           <div class="flex flex-col ml-3">
@@ -25,14 +28,28 @@
         </div>
       </div>
     </button>
-    <button
-      :if={matches?(@boundary_preset, "public")}
-      type="button"
-      phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
-      class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
-    >
-      {l("Customise")}
-    </button>
+    <div 
+      :if={matches?(@boundary_preset, "public") && !@is_dropdown}
+      class="flex items-center gap-3">
+      <button
+        type="button"
+        phx-click={JS.hide(to: "#boundaries_picker")
+        |> JS.hide(to: "#extra_boundaries")
+        |> JS.show(to: "#boundaries_preview")}
+        class="btn-sm !border-base-content/30 !border normal-case btn-circle btn btn-outline"
+      >
+        <#Icon iconify="mdi:eye-outline" class="w-4 h-4" />
+        <span class="sr-only">{l("Preview")}</span>
+      </button>
+      <button
+        type="button"
+        phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
+        class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
+      >
+        <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
+        <span class="sr-only">{l("Customise")}</span>
+      </button>
+    </div>
   </div>
   <div class="flex px-2 items-center gap-3 justify-between">
     <button
@@ -44,11 +61,11 @@
       type="button"
     >
       <div class="flex items-center gap-2">
-        <input type="radio" name="radio-1" class="radio" checked={matches?(@boundary_preset, "local")}>
+        <input :if={!@is_dropdown} type="radio" name="radio-1" class="radio" checked={matches?(@boundary_preset, "local")}>
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
-              <#Icon iconify="ph:campfire-bold" class="w-6 h-6" />
+              <#Icon iconify="ph:campfire-bold" class={"w-6 h-6", "!w-4 !h-4": @is_dropdown } />
             </span>
           </div>
           <div class="flex flex-col ml-3">
@@ -60,14 +77,28 @@
         </div>
       </div>
     </button>
-    <button
-      :if={matches?(@boundary_preset, "local")}
-      type="button"
-      phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
-      class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
-    >
-      {l("Customise")}
-    </button>
+    <div 
+      :if={matches?(@boundary_preset, "local") && !@is_dropdown}
+      class="flex items-center gap-3">
+      <button
+        type="button"
+        phx-click={JS.hide(to: "#boundaries_picker")
+        |> JS.hide(to: "#extra_boundaries")
+        |> JS.show(to: "#boundaries_preview")}
+        class="btn-sm !border-base-content/30 !border normal-case btn-circle btn btn-outline"
+      >
+        <#Icon iconify="mdi:eye-outline" class="w-4 h-4" />
+        <span class="sr-only">{l("Preview")}</span>
+      </button>
+      <button
+        type="button"
+        phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
+        class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
+      >
+        <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
+        <span class="sr-only">{l("Customise")}</span>
+      </button>
+    </div>
   </div>
 
   <div class="flex px-2 items-center gap-3 justify-between">
@@ -81,6 +112,7 @@
     >
       <div class="flex items-center gap-2">
         <input
+          :if={!@is_dropdown}
           type="radio"
           name="radio-1"
           class="radio"
@@ -88,7 +120,7 @@
         />
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
-            <span class="text-2xl">﹫</span>
+            <span class={"text-2xl", "!text-lg": @is_dropdown}>﹫</span>
           </div>
           <div class="flex flex-col ml-3">
             <div class="text-sm font-semibold text-base-content/90">{l("Mentions")}</div>
@@ -99,14 +131,28 @@
         </div>
       </div>
     </button>
-    <button
-      :if={matches?(@boundary_preset, "mentions")}
-      type="button"
-      phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
-      class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
-    >
-      {l("Customise")}
-    </button>
+    <div 
+      :if={matches?(@boundary_preset, "mentions") && !@is_dropdown}
+      class="flex items-center gap-3">
+      <button
+        type="button"
+        phx-click={JS.hide(to: "#boundaries_picker")
+        |> JS.hide(to: "#extra_boundaries")
+        |> JS.show(to: "#boundaries_preview")}
+        class="btn-sm !border-base-content/30 !border normal-case btn-circle btn btn-outline"
+      >
+        <#Icon iconify="mdi:eye-outline" class="w-4 h-4" />
+        <span class="sr-only">{l("Preview")}</span>
+      </button>
+      <button
+        type="button"
+        phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
+        class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
+      >
+        <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
+        <span class="sr-only">{l("Customise")}</span>
+      </button>
+    </div>
   </div>
 
   {#for %{id: acl_id} = acl <- @my_acls}
@@ -120,11 +166,11 @@
         type="button"
       >
         <div class="flex items-center gap-2">
-          <input type="radio" name="radio-1" class="radio" checked={matches?(@to_boundaries, acl_id)}>
+          <input :if={!@is_dropdown} type="radio" name="radio-1" class="radio" checked={matches?(@to_boundaries, acl_id)}>
           <div class="p-1.5 flex items-center text-left">
             <div class="flex-shrink-0">
               <span class="text-xl">
-                <#Icon iconify="fluent:door-tag-20-filled" class="w-6 h-6" />
+                <#Icon iconify="fluent:door-tag-20-filled" class={"w-6 h-6", "!w-4 !h-4": @is_dropdown } />
               </span>
             </div>
             <div class="flex flex-col ml-3">
@@ -134,14 +180,30 @@
           </div>
         </div>
       </button>
-      <button
-        :if={matches?(@to_boundaries, acl_id)}
-        type="button"
-        phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
-        class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
-      >
-        {l("Customise")}
-      </button>
+      
+      <div 
+        :if={matches?(@to_boundaries, acl_id) && !@is_dropdown}
+        class="flex items-center gap-3">
+        <button
+          type="button"
+          phx-click={JS.hide(to: "#boundaries_picker")
+          |> JS.hide(to: "#extra_boundaries")
+          |> JS.show(to: "#boundaries_preview")}
+          class="btn-sm !border-base-content/30 !border normal-case btn-circle btn btn-outline"
+        >
+          <#Icon iconify="mdi:eye-outline" class="w-4 h-4" />
+          <span class="sr-only">{l("Preview")}</span>
+        </button>
+
+        <button
+          type="button"
+          phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
+          class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
+        >
+          <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
+          <span class="sr-only">{l("Customise")}</span>
+        </button>
+      </div>
     </div>
   {/for}
   <div class="flex px-2 items-center gap-3 justify-between">
@@ -156,11 +218,11 @@
       type="button"
     >
       <div class="flex items-center gap-2">
-        <input type="radio" name="radio-1" class="radio" checked={matches?(@boundary_preset, "custom")}>
+        <input :if={!@is_dropdown} type="radio" name="radio-1" class="radio" checked={matches?(@boundary_preset, "custom")}>
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
-              <#Icon iconify="ph:gear-fill" class="w-6 h-6" />
+              <#Icon iconify="ph:gear-fill" class={"w-6 h-6", "!w-4 !h-4": @is_dropdown } />
             </span>
           </div>
           <div class="flex flex-col ml-3">
@@ -185,4 +247,6 @@
   </button> 
   </div> -->
 
-<Bonfire.Boundaries.Web.BoundaryComposerActionsLive />
+<div :if={!@is_dropdown} class="px-4 pb-4">
+  <Bonfire.Boundaries.Web.BoundaryComposerActionsLive />
+</div>

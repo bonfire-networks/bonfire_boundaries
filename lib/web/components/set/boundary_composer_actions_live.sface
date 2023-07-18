@@ -1,19 +1,20 @@
-<div class="flex items-center justify-between pt-3 mt-4 gap-2">
-  <button
+<div class="flex items-center justify-between mt-4 gap-2">
+  <!-- <button
     type="button"
     phx-click={JS.hide(to: "#boundaries_picker")
     |> JS.hide(to: "#extra_boundaries")
     |> JS.show(to: "#boundaries_preview")}
-    class="normal-case rounded-full btn btn-secondary btn-outline"
+    class="normal-case btn-circle btn btn-outline"
   >
-    <span class="">{l("Preview")}</span>
-  </button>
+    <#Icon iconify="mdi:eye-outline" class="w-4 h-4" />
+    <span class="sr-only">{l("Preview")}</span>
+  </button> -->
   <button
     type="button"
     phx-click={JS.hide(to: "#boundaries_picker")
     |> JS.hide(to: "#extra_boundaries")
     |> JS.show(to: "#compose_content_wrapper")}
-    class="grow normal-case rounded-full btn btn-primary btn-outline"
+    class="normal-case grow rounded-full btn btn-primary"
   >
     <span class="">{l("Done")}</span>
   </button>
