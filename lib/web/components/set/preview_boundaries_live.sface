@@ -14,13 +14,13 @@
       </div>
     </div>
 
-    <div class="m-4">
+    <div class="my-4">
       <div class="w-full">
         <Bonfire.UI.Common.MultiselectLive.UserSelectorLive
           selected_options={[]}
+          class="!h-10 !w-full !rounded-full !input !input-bordered !bg-transparent"
           label={l("Search for a user to preview")}
           form_input_name={__MODULE__}
-          class=""
           event_target={@myself}
           implementation={:live_select}
         />
