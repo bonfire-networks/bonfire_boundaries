@@ -3,11 +3,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Blocks
 
-  @follow_stereotypes [
-    "7DAPE0P1E1PERM1TT0F0110WME",
-    "4THEPE0P1ES1CH00SET0F0110W"
-  ]
-
   prop circle_id, :any, default: nil
   prop circle, :any, default: nil
   prop circle_type, :atom, default: nil
@@ -99,6 +94,8 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
       stereotype_id = e(circle, :stereotyped, :stereotype_id, nil)
 
+      follow_stereotypes = Circles.stereotypes(:follow)
+
       send_self(
         page_title: e(socket.assigns, :name, nil) || l("Circle"),
         back: true,
@@ -111,8 +108,8 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
              #  suggestions: suggestions,
              read_only:
                e(socket.assigns, :read_only, nil) ||
-                 e(circle, :stereotyped, :stereotype_id, nil) in @follow_stereotypes ||
-                 ulid(circle) in @follow_stereotypes
+                 e(circle, :stereotyped, :stereotype_id, nil) in follow_stereotypes ||
+                 ulid(circle) in follow_stereotypes
            ]}
         ]
       )
@@ -126,8 +123,8 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
          #  suggestions: suggestions,
          stereotype_id: stereotype_id,
          read_only:
-           stereotype_id in @follow_stereotypes or
-             ulid(circle) in @follow_stereotypes,
+           stereotype_id in follow_stereotypes or
+             ulid(circle) in follow_stereotypes,
          settings_section_title: "View " <> e(circle, :named, :name, "") <> " circle"
        )}
 

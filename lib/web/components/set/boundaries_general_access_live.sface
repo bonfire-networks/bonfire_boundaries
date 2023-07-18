@@ -109,18 +109,7 @@
     </button>
   </div>
 
-  {#for %{id: acl_id} = acl <-
-      Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
-      |> Enum.map(fn
-        %Bonfire.Data.AccessControl.Acl{id: acl_id} = acl ->
-          %{
-            id: acl_id,
-            field: :to_boundaries,
-            description: e(acl, :extra_info, :summary, nil),
-            name: e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil)
-          }
-      end)
-      |> Enum.filter(fn acl -> acl[:name] != nil end)}
+  {#for %{id: acl_id} = acl <- @my_acls}
     <div class="flex px-2 items-center gap-3 justify-between">
       <button
         class="text-base-content"

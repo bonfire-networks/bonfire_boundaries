@@ -35,8 +35,6 @@ defmodule Bonfire.Boundaries.Acls do
   alias Pointers.Changesets
   alias Pointers.ULID
 
-  @exclude_stereotypes
-
   def exclude_stereotypes(including_custom? \\ true)
 
   def exclude_stereotypes(false) do
@@ -44,7 +42,7 @@ defmodule Bonfire.Boundaries.Acls do
     ["2HEYS11ENCEDMES0CAN0TSEEME"]
   end
 
-  def exclude_stereotypes(true) do
+  def exclude_stereotypes(_true) do
     # don't show custom per-object ACLs
     exclude_stereotypes(false) ++ ["7HECVST0MAC1F0RAN0BJECTETC"]
   end
@@ -224,35 +222,12 @@ defmodule Bonfire.Boundaries.Acls do
           |> debug("on-the-fly ACLs to create")
 
         {
-          fn repo_or_changeset -> insert_custom(repo_or_changeset, acl_id, custom_grants) end,
+          fn repo_or_changeset ->
+            insert_custom_acl_and_grants(repo_or_changeset, acl_id, custom_grants)
+          end,
           [%{acl_id: acl_id} | control_acls]
         }
     end
-  end
-
-  defp insert_custom(repo_or_changeset \\ repo(), acl_id, custom_grants)
-
-  defp insert_custom(%Ecto.Changeset{} = changeset, acl_id, custom_grants) do
-    insert_custom(changeset.repo, acl_id, custom_grants)
-    changeset
-  end
-
-  defp insert_custom(repo, acl_id, custom_grants) do
-    repo.insert!(%Acl{
-      id: acl_id,
-      stereotyped: %Stereotyped{id: acl_id, stereotype_id: Fixtures.custom_acl()}
-    })
-    |> debug()
-
-    repo.insert_all(Grant, custom_grants)
-    |> debug()
-  end
-
-  defp copy_acls_from_existing_object(controlled_object_id) do
-    {nil,
-     Controlleds.list_on_object(controlled_object_id)
-     |> Enum.map(&Map.take(&1, [:acl_id]))
-     |> debug()}
   end
 
   # when the user picks a preset, this maps to a set of base acls
@@ -489,6 +464,66 @@ defmodule Bonfire.Boundaries.Acls do
     base_acls(creator, preset, opts)
   end
 
+  def get_object_custom_acl(object) do
+    from(a in Acl,
+      join: c in Controlled,
+      on: a.id == c.acl_id and c.id == ^id(object),
+      join: s in Stereotyped,
+      on: a.id == s.id and s.stereotype_id == ^Fixtures.custom_acl(),
+      preload: [stereotyped: s]
+    )
+    |> repo().single()
+
+    # |> debug("custom acl")
+  end
+
+  def get_or_create_object_custom_acl(object, caretaker \\ nil) do
+    case get_object_custom_acl(object) do
+      {:ok, acl} ->
+        {:ok, acl}
+
+      _ ->
+        with {:ok, acl} <-
+               create(
+                 prepare_custom_acl(ULID.generate()),
+                 current_user: caretaker
+               ),
+             {:ok, _} <- Controlleds.add_acls(object, acl) do
+          {:ok, acl}
+        end
+    end
+  end
+
+  defp insert_custom_acl_and_grants(repo_or_changeset \\ repo(), acl_id, custom_grants)
+
+  defp insert_custom_acl_and_grants(%Ecto.Changeset{} = changeset, acl_id, custom_grants) do
+    insert_custom_acl_and_grants(changeset.repo, acl_id, custom_grants)
+    changeset
+  end
+
+  defp insert_custom_acl_and_grants(repo, acl_id, custom_grants) do
+    struct(Acl, prepare_custom_acl(acl_id))
+    |> repo.insert!()
+    |> debug()
+
+    repo.insert_all(Grant, custom_grants)
+    |> debug()
+  end
+
+  defp prepare_custom_acl(acl_id) do
+    %{
+      id: acl_id,
+      stereotyped: %Stereotyped{id: acl_id, stereotype_id: Fixtures.custom_acl()}
+    }
+  end
+
+  defp copy_acls_from_existing_object(controlled_object_id) do
+    {nil,
+     Controlleds.list_on_object(controlled_object_id)
+     |> Enum.map(&Map.take(&1, [:acl_id]))
+     |> debug()}
+  end
+
   ## invariants:
 
   ## * All a user's ACLs will have the user as an administrator but it
@@ -503,28 +538,6 @@ defmodule Bonfire.Boundaries.Acls do
 
   def simple_create(caretaker, name) do
     create(%{named: %{name: name}}, current_user: caretaker)
-  end
-
-  def get_or_create_object_custom_acl(object, caretaker \\ nil) do
-    case get_object_custom_acl(object) do
-      {:ok, acl} ->
-        {:ok, acl}
-
-      _ ->
-        acl_id = ULID.generate()
-
-        with {:ok, acl} <-
-               create(
-                 %{
-                   id: acl_id,
-                   stereotyped: %{id: acl_id, stereotype_id: Fixtures.custom_acl()}
-                 },
-                 current_user: caretaker
-               ),
-             {:ok, _} <- Controlleds.add_acls(object, acl) do
-          {:ok, acl}
-        end
-    end
   end
 
   def changeset(:create, attrs, opts) do
@@ -748,7 +761,13 @@ defmodule Bonfire.Boundaries.Acls do
       e(
         opts,
         :exclude_ids,
-        exclude_stereotypes()
+        exclude_stereotypes(
+          e(
+            opts,
+            :exclude_stereotypes,
+            nil
+          )
+        )
       )
 
     list_q(skip_boundary_check: true)
@@ -774,6 +793,20 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def find_caretaker_stereotypes(caretaker, stereotypes) do
+    find_caretaker_stereotypes_q(caretaker, stereotypes)
+    |> repo().all()
+
+    # |> debug("stereotype acls")
+  end
+
+  def find_caretaker_stereotype(caretaker, stereotype) do
+    find_caretaker_stereotypes_q(caretaker, stereotype)
+    |> repo().one()
+
+    # |> debug("stereotype acls")
+  end
+
+  def find_caretaker_stereotypes_q(caretaker, stereotypes) do
     from(a in Acl,
       join: c in Caretaker,
       on: a.id == c.id and c.caretaker_id == ^ulid!(caretaker),
@@ -781,21 +814,8 @@ defmodule Bonfire.Boundaries.Acls do
       on: a.id == s.id and s.stereotype_id in ^ulids(stereotypes),
       preload: [caretaker: c, stereotyped: s]
     )
-    |> repo().all()
 
     # |> debug("stereotype acls")
-  end
-
-  def get_object_custom_acl(object) do
-    from(a in Acl,
-      join: c in Controlled,
-      on: a.id == c.acl_id and c.id == ^id(object),
-      join: s in Stereotyped,
-      on: a.id == s.id and s.stereotype_id == ^Fixtures.custom_acl(),
-      preload: [stereotyped: s]
-    )
-    |> repo().single()
-    |> debug("custom acl")
   end
 
   def edit(%Acl{} = acl, %User{} = _user, params) do

@@ -19,7 +19,87 @@ defmodule Bonfire.Boundaries.Users do
   alias Pointers.ULID
 
   def create_default_boundaries(user, opts \\ []) do
-    debug(opts)
+    %{
+      acls: acls,
+      circles: circles,
+      grants: grants,
+      named: named,
+      controlleds: controlleds,
+      stereotypes: stereotypes
+    } =
+      params =
+      prepare_default_boundaries(
+        user,
+        default_profile_visibility(opts[:undiscoverable]) ++
+          maybe_request_before_follow(opts[:request_before_follow]),
+        opts
+      )
+
+    # first acls and circles
+    do_insert_main(user, params)
+
+    repo().insert_all_or_ignore(Stereotyped, stereotypes)
+
+    # Then grants
+    repo().insert_all_or_ignore(Grant, grants)
+    # Then the mixins
+    repo().insert_all_or_ignore(Named, named)
+    repo().insert_all_or_ignore(Controlled, controlleds)
+    # NOTE: The ACLs and Circles must be deleted when the user is deleted.
+    # Grants will take care of themselves because they have a strong pointer acl_id.
+  end
+
+  def create_missing_boundaries(user, opts \\ []) do
+    %{
+      acls: acls,
+      circles: circles,
+      grants: grants,
+      named: named,
+      controlleds: controlleds,
+      stereotypes: stereotypes
+    } = prepare_default_boundaries(user, [], opts)
+
+    # do not attempt re-creating any existing stereotypes...
+
+    existing_stereotypes =
+      stereotypes
+      |> Enum.map(&e(&1, :stereotype_id, nil))
+      |> debug("all stereos")
+      |> Acls.find_caretaker_stereotypes(user, ...)
+      |> Enum.map(&e(&1, :stereotyped, :stereotype_id, nil))
+      |> debug("existing stereos")
+
+    stereotypes =
+      stereotypes
+      |> Enum.reject(&(e(&1, :stereotype_id, nil) in existing_stereotypes))
+      |> debug("new stereos")
+
+    acls =
+      acls
+      |> debug("missing acls")
+      |> Enum.reject(&(e(&1, :stereotype_id, nil) in existing_stereotypes))
+
+    circles =
+      circles
+      |> debug("missing circles")
+      |> Enum.reject(&(e(&1, :stereotype_id, nil) in existing_stereotypes))
+
+    # first acls and circles
+    do_insert_main(user, %{acls: acls, circles: circles, stereotypes: stereotypes})
+
+    repo().insert_or_ignore(Stereotyped, stereotypes)
+
+    # Then grants
+    repo().insert_or_ignore(Grant, grants)
+    # Then the mixins
+    repo().insert_or_ignore(Named, named)
+    repo().insert_or_ignore(Controlled, controlleds)
+    # NOTE: The ACLs and Circles must be deleted when the user is deleted.
+    # Grants will take care of themselves because they have a strong pointer acl_id.
+  end
+
+  def prepare_default_boundaries(user, acls_extra, opts) do
+    # debug(opts)
 
     user_default_boundaries = Boundaries.user_default_boundaries()
     #  |> debug("create_default_boundaries")
@@ -65,11 +145,8 @@ defmodule Bonfire.Boundaries.Users do
 
     ### control access to the user themselves (e.g. to view their profile or mention them)
     controlleds =
-      for {:SELF, acls2} <- Map.fetch!(user_default_boundaries, :controlleds),
-          acl <-
-            acls2 ++
-              default_profile_visibility(opts[:undiscoverable]) ++
-              maybe_request_before_follow(opts[:request_before_follow]) do
+      for {:SELF, acls_default} <- Map.fetch!(user_default_boundaries, :controlleds),
+          acl <- acls_default ++ acls_extra do
         %{id: user.id, acl_id: default_acl_id(acls, acl)}
       end
 
@@ -89,16 +166,20 @@ defmodule Bonfire.Boundaries.Users do
       |> Enum.filter(& &1[:stereotype_id])
       |> Enum.map(&Map.take(&1, [:id, :stereotype_id]))
 
-    # First the pointables
+    %{
+      acls: acls,
+      circles: circles,
+      grants: grants,
+      named: named,
+      controlleds: controlleds,
+      stereotypes: stereotypes
+    }
+  end
+
+  def do_insert_main(user, %{acls: acls, circles: circles, stereotypes: stereotypes}) do
     repo().insert_all_or_ignore(Acl, Enum.map(acls, &Map.take(&1, [:id])))
     repo().insert_all_or_ignore(Circle, Enum.map(circles, &Map.take(&1, [:id])))
-    repo().insert_all_or_ignore(Grant, grants)
-    # Then the mixins
-    repo().insert_all_or_ignore(Named, named)
-    repo().insert_all_or_ignore(Controlled, controlleds)
-    repo().insert_all_or_ignore(Stereotyped, stereotypes)
-    # NOTE: The ACLs and Circles must be deleted when the user is deleted.
-    # Grants will take care of themselves because they have a strong pointer acl_id.
+    # repo().insert_all_or_ignore(Stereotyped, stereotypes)
     Boundaries.take_care_of!(acls ++ circles, user)
   end
 

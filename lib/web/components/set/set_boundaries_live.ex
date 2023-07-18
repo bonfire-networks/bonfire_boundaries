@@ -9,6 +9,8 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   prop exclude_circles, :list, default: []
   prop custom_acls, :list, default: nil
 
+  prop my_circles, :list, default: nil
+
   prop showing_within, :atom, default: nil
   prop show_select_recipients, :boolean, default: false
   prop open_boundaries, :boolean, default: false
@@ -21,9 +23,10 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
 
   def presets, do: @presets
 
-  def render(%{read_only: false} = assigns) do
+  def render(%{read_only: false, my_circles: nil} = assigns) do
+    # TODO: only load this once per persistent session, or when we open the composer
     assigns
-    |> assign_new(:my_circles, fn -> list_my_circles(current_user(assigns[:__context__])) end)
+    |> assign(:my_circles, list_my_circles(current_user(assigns[:__context__])))
     |> assign_new(:roles_for_dropdown, fn ->
       Bonfire.Boundaries.Roles.roles_for_dropdown(nil, scope: nil, context: assigns[:__context__])
     end)

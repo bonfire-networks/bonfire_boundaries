@@ -19,9 +19,14 @@ defmodule Bonfire.Boundaries.Circles do
   # alias Pointers.Pointer
 
   # don't show "others who silenced me" in circles
-  @default_q_opts [exclude_circles: ["0KF1NEY0VD0N0TWANTT0HEARME"]]
-  @exclude_block_stereotypes ["7N010NGERWANTT011STENT0Y0V", "7N010NGERC0NSENTT0Y0VN0WTY"]
+  @reverse_stereotypes ["0KF1NEY0VD0N0TWANTT0HEARME"]
+  @default_q_opts [exclude_circles: @reverse_stereotypes]
+  @block_stereotypes ["7N010NGERWANTT011STENT0Y0V", "7N010NGERC0NSENTT0Y0VN0WTY"]
   # @exclude_stereotypes ["7N010NGERWANTT011STENT0Y0V", "7N010NGERC0NSENTT0Y0VN0WTY", "4THEPE0P1ES1CH00SET0F0110W", "7DAPE0P1E1PERM1TT0F0110WME"]
+  @follow_stereotypes [
+    "7DAPE0P1E1PERM1TT0F0110WME",
+    "4THEPE0P1ES1CH00SET0F0110W"
+  ]
 
   # special built-in circles (eg, guest, local, activity_pub)
   def circles, do: Config.get([:circles], %{})
@@ -32,6 +37,9 @@ defmodule Bonfire.Boundaries.Circles do
     |> Enum.filter(&e(&1, :stereotype, nil))
     |> Enum.map(& &1.id)
   end
+
+  def stereotypes(:follow), do: @follow_stereotypes
+  def stereotypes(:block), do: @block_stereotypes ++ @reverse_stereotypes
 
   def is_stereotype?(acl) do
     ulid(acl) in stereotype_ids()
@@ -297,7 +305,7 @@ defmodule Bonfire.Boundaries.Circles do
           else:
             [] ++
               if(e(opts, :exclude_block_stereotypes, nil),
-                do: @exclude_block_stereotypes,
+                do: @block_stereotypes,
                 else: []
               )
 

@@ -1,20 +1,17 @@
 defmodule Bonfire.Boundaries.Web.EditCircleLive do
   use Bonfire.UI.Common.Web, :stateful_component
-
-  @follow_stereotypes [
-    "7DAPE0P1E1PERM1TT0F0110WME",
-    "4THEPE0P1ES1CH00SET0F0110W"
-  ]
+  alias Bonfire.Boundaries.Circles
 
   def update(assigns, socket) do
     # FIXME: what's the difference with EditCircleLive?
 
     id =
       e(assigns, :__context__, :current_params, "id", nil)
-      |> debug()
+
+    # |> debug()
 
     with {:ok, circle} <-
-           Bonfire.Boundaries.Circles.get_for_caretaker(
+           Circles.get_for_caretaker(
              id,
              current_user(assigns)
            )
@@ -43,6 +40,8 @@ defmodule Bonfire.Boundaries.Web.EditCircleLive do
 
       # |> debug
 
+      follow_stereotypes = Circles.stereotypes(:follow)
+
       {:ok,
        socket
        |> assign(assigns)
@@ -51,8 +50,8 @@ defmodule Bonfire.Boundaries.Web.EditCircleLive do
          followers: followers,
          followed: followed,
          read_only:
-           e(circle, :stereotyped, :stereotype_id, nil) in @follow_stereotypes or
-             ulid(circle) in @follow_stereotypes,
+           e(circle, :stereotyped, :stereotype_id, nil) in follow_stereotypes or
+             ulid(circle) in follow_stereotypes,
          settings_section_title: "View " <> e(circle, :named, :name, "Circle name") <> " circle",
          settings_section_description: l("Create and manage your circle.")
        )}

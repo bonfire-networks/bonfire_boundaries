@@ -428,6 +428,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: "People who silenced me can not discover me",
           stereotype: true
         },
+        followed_may_reply: %{
+          id: "1HANDP1CKEDZEPE0P1E1F0110W",
+          name: "People who I follow may read, interact, and reply",
+          stereotype: true
+        },
         no_follow: %{
           id: "1MVSTREQVESTBEF0REF0110W1N",
           name: "People must request to follow"
@@ -512,7 +517,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
           my_ghosted_cannot_anything: %{stereotype: :ghosted_cannot_anything},
           my_silenced_cannot_reach_me: %{stereotype: :silenced_cannot_reach_me},
-          my_cannot_discover_if_silenced: %{stereotype: :cannot_discover_if_silenced}
+          my_cannot_discover_if_silenced: %{stereotype: :cannot_discover_if_silenced},
+          my_followed_may_reply: %{stereotype: :followed_may_reply}
         },
         ### Data structure:
         ### * The outer keys are ACL names declared above.
@@ -534,7 +540,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           },
           # People who silence me can't see me or my objects in feeds and such (but can still read them if they have a
           # direct link or come across my objects in a thread structure or such).
-          my_cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])}
+          my_cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])},
+          my_followed_may_reply: %{followed: verbs_participate_and_message}
         },
         ### This lets us control access to the user themselves (e.g. to view their profile or mention them)
         controlleds: %{
