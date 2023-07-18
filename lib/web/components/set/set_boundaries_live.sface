@@ -11,7 +11,7 @@
       }"
       class="border rounded-box border-base-content/20 p-4"
     >
-      <div class="font-medium mb-3 text-base text-base-content/90">{l("Preset boundary")}</div>
+      <div class="font-semibold mb-3 text-base-content/70 text-xs uppercase">{l("Preset boundary")}</div>
 
       <div class="">
         <div class="flex items-center w-full  gap-3">
@@ -69,12 +69,12 @@
 
     {#if @is_caretaker}
       <div class="flex items-center mt-8 mb-4 justify-between">
-        <div class="font-medium flex-1">{l("Custom permissions")}</div>
+        <div class="font-semibold text-base-content/70 text-xs uppercase">{l("Custom permissions")}</div>
         <button
           :if={@showing_within in [:smart_input]}
           type="button"
           phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#roles_detail")}
-          class="btn !border-base-content/30 !border btn-outline rounded-full btn-sm normal-case text-sm font-medium flex items-center gap-2"
+          class="link link-hover text-sm flex items-center gap-2"
         >
           <#Icon iconify="mingcute:hat-fill" class="w-4 h-4" />
           <span>{l("View roles")}</span>
