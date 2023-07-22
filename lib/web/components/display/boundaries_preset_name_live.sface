@@ -56,14 +56,17 @@
       <span :if={@with_icon} class={@icon_wrapper}>
         <#Icon iconify="fluent:globe-person-20-regular" class={@icon_class} />
       </span>
-       <div class="flex flex-col gap-0 items-start">
-      <span class={
-        "text-sm normal-case",
-        "sr-only": !@with_label,
-        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
-      }>{boundary_name || l("Open")}</span>
-      <span :if={@with_description} class="flex-1 w-full text-xs font-normal text-base-content/70 text-left">{l("Anyone can join and participate")}</span>
-    </div>
+      <div class="flex flex-col gap-0 items-start">
+        <span class={
+          "text-sm normal-case",
+          "sr-only": !@with_label,
+          "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+        }>{boundary_name || l("Open")}</span>
+        <span
+          :if={@with_description}
+          class="flex-1 w-full text-xs font-normal text-base-content/70 text-left"
+        >{l("Anyone can join and participate")}</span>
+      </div>
     </div>
   {#match {"visible" = preset, boundary_name}}
     <div

@@ -5,8 +5,6 @@
   /> -->
 
   <div class="flex flex-col relative h-full multiselect_in_composer flex-1 min-h-[376px]">
-    
-
     {#if @is_caretaker}
       <Bonfire.UI.Common.MultiselectLive
         :if={!@read_only}
@@ -29,26 +27,26 @@
         </button>
       </div>
       <div class="flex h-full flex-1 flex-col gap-2">
-         <div class="flex mt-3 justify-between items-center">
-         <Bonfire.UI.Common.ProfileItemLive
+        <div class="flex mt-3 justify-between items-center">
+          <Bonfire.UI.Common.ProfileItemLive
             avatar_class="w-9 h-9 rounded-full bg-base-100"
             profile={e(current_user(@__context__), :profile, nil)}
             character={e(current_user(@__context__), :character, nil)}
             show_controls={[]}
           />
-          <div class="btn btn-sm btn-disabled rounded-full normal-case">{l"Owner"}</div>
-          </div>
+          <div class="btn btn-sm btn-disabled rounded-full normal-case">{l("Owner")}</div>
+        </div>
         {#if !@custom_acls}
           <div class="">
-              <Bonfire.Boundaries.Web.BoundaryItemsLive
-                to_boundaries={[]}
-                circles={@to_circles}
-                roles_for_dropdown={@roles_for_dropdown
-                |> Enum.reject(fn
-                  {"cannot_" <> _, _} -> true
-                  {key, _} -> String.starts_with?(to_string(key), "cannot_")
-                end)}
-              />
+            <Bonfire.Boundaries.Web.BoundaryItemsLive
+              to_boundaries={[]}
+              circles={@to_circles}
+              roles_for_dropdown={@roles_for_dropdown
+              |> Enum.reject(fn
+                {"cannot_" <> _, _} -> true
+                {key, _} -> String.starts_with?(to_string(key), "cannot_")
+              end)}
+            />
             <!-- </div> -->
           </div>
 
@@ -94,7 +92,7 @@
         {/if}
       </div>
     {/if}
-      <!-- <div class="flex gap-2 py-2 scrollable">
+    <!-- <div class="flex gap-2 py-2 scrollable">
         {#for acl <- Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
           |> Enum.map(fn
             %Bonfire.Data.AccessControl.Acl{} = acl ->
@@ -113,9 +111,9 @@
           </button>
         {/for}
       </div> -->
-      <!-- </div> -->
+    <!-- </div> -->
 
-      <!-- <Bonfire.UI.Common.ProfileItemLive
+    <!-- <Bonfire.UI.Common.ProfileItemLive
       wrapper_class="flex items-center justify-between"
       profile={e(current_user(@__context__), :profile, %{name: l("Me")})}
       character={e(current_user(@__context__), :character, nil)}
@@ -126,11 +124,10 @@
       </div>
     </Bonfire.UI.Common.ProfileItemLive> -->
 
-      <!-- Next already-choosen boundaries or Circles/Users -->
-      <!-- <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive boundary_preset={@boundary_preset} /> -->
-      <!-- </div>
+    <!-- Next already-choosen boundaries or Circles/Users -->
+    <!-- <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive boundary_preset={@boundary_preset} /> -->
+    <!-- </div>
 </div> -->
-
 
     <div class="mt-4 mb-3">
       <div class="font-semibold text-base-content/90 text-base">{l("Preset boundary")}</div>
@@ -146,26 +143,24 @@
               to_boundaries={@to_boundaries}
             /></span>
           <div>
-
-            <div 
-              :if={@showing_within in [:smart_input]}
-              class="dropdown dropdown-end dropdown-top">
-              <label tabindex="0" class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case">{l "Change"}</label>
+            <div :if={@showing_within in [:smart_input]} class="dropdown dropdown-end dropdown-top">
+              <label
+                tabindex="0"
+                class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+              >{l("Change")}</label>
               <div tabindex="0">
                 <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive
                   boundary_preset={@boundary_preset}
                   to_boundaries={@to_boundaries}
-                  is_dropdown={true}
+                  is_dropdown
                 />
               </div>
             </div>
           </div>
         </div>
       </div>
-
     </div>
 
     <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={@showing_within in [:smart_input] && @is_caretaker} />
-
   </div>
 </div>
