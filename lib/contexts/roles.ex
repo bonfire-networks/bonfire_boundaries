@@ -215,12 +215,12 @@ defmodule Bonfire.Boundaries.Roles do
   end
 
   def create(name, usage, opts) do
-    debug(opts, "opts")
+    # debug(opts, "opts")
     # TODO: whether to show an instance role to all users
     role_verbs(:all, opts)
     |> Enum.into(%{})
-    |> debug("existing roles")
     |> Map.merge(%{name => %{usage: usage}})
+    |> debug("merged with existing roles")
     |> Settings.put([@config_key], ..., opts)
   end
 

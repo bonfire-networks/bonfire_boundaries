@@ -485,7 +485,7 @@ defmodule Bonfire.Boundaries.Acls do
       _ ->
         with {:ok, acl} <-
                create(
-                 prepare_custom_acl(ULID.generate()),
+                 prepare_custom_acl_maps(ULID.generate()),
                  current_user: caretaker
                ),
              {:ok, _} <- Controlleds.add_acls(object, acl) do
@@ -502,7 +502,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp insert_custom_acl_and_grants(repo, acl_id, custom_grants) do
-    struct(Acl, prepare_custom_acl(acl_id))
+    prepare_custom_acl(acl_id)
     |> repo.insert!()
     |> debug()
 
@@ -511,9 +511,16 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp prepare_custom_acl(acl_id) do
-    %{
+    %Acl{
       id: acl_id,
       stereotyped: %Stereotyped{id: acl_id, stereotype_id: Fixtures.custom_acl()}
+    }
+  end
+
+  defp prepare_custom_acl_maps(acl_id) do
+    %{
+      id: acl_id,
+      stereotyped: %{id: acl_id, stereotype_id: Fixtures.custom_acl()}
     }
   end
 

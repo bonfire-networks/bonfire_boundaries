@@ -11,6 +11,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   # alias Bonfire.Common.Config
   # alias Bonfire.Common.Cache
   alias Bonfire.Boundaries.Acls
+  alias Bonfire.Boundaries.Grants
   alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Boundaries.Verbs
   alias Bonfire.Data.AccessControl.Controlled
@@ -233,7 +234,7 @@ defmodule Bonfire.Boundaries.Controlleds do
 
   def grant_role(subject_id, object, role, opts \\ []) do
     with {:ok, acl} <- Acls.get_or_create_object_custom_acl(object, current_user(opts)) do
-      Controlleds.grant_role(subject_id, acl, role, opts)
+      Grants.grant_role(subject_id, acl, role, opts)
     end
   end
 end

@@ -306,7 +306,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
     with {:ok, _} <-
            Roles.create(
-             attrs,
+             input_to_atoms(attrs),
              scope: scope,
              current_user: current_user
            ) do
