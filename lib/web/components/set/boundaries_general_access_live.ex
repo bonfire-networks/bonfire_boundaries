@@ -19,7 +19,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
         current_user(assigns),
         Bonfire.Boundaries.Acls.opts_for_dropdown()
       )
-      |> debug("myacccl")
+      # |> debug("myacccl")
       |> Enum.map(fn
         %Bonfire.Data.AccessControl.Acl{id: acl_id} = acl ->
           %{

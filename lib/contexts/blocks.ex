@@ -188,7 +188,7 @@ defmodule Bonfire.Boundaries.Blocks do
       is_blocked_by?(
         user_or_instance,
         block_type,
-        opts[:user_ids] || current_user(opts)
+        e(opts, :user_ids, nil) || current_user(opts)
       )
   end
 

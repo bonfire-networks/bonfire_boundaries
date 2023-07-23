@@ -246,10 +246,10 @@
 
     {#if !@only_user}
       <div
-        :if={((@scope |> debug("scooooop")) not in [nil, :user, :instance] and
-           Bonfire.Me.Users.is_admin?(@current_user)) ||
-          Bonfire.Boundaries.can?(@__context__, :block, @scope) ||
-          Bonfire.Boundaries.can?(@__context__, :block, :instance)}
+        :if={@scope not in [nil, :user, :instance] and
+          (Bonfire.Me.Users.is_admin?(@current_user) ||
+             Bonfire.Boundaries.can?(@__context__, :block, @scope) ||
+             Bonfire.Boundaries.can?(@__context__, :block, :instance))}
         class=""
       >
         <!-- {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, @scope) && Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, @scope)}
