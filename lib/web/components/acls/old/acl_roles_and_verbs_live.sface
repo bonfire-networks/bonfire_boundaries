@@ -146,7 +146,7 @@
                 <div class="flex items-center gap-2" :if={!@read_only}>
                   <Bonfire.Boundaries.Web.RolesDropdownLive
                     circle_id={subject_id}
-                    role={Bonfire.Boundaries.Verbs.role_from_verb_ids(Map.keys(e(l, :verb_grants, %{})))
+                    role={Bonfire.Boundaries.Verbs.role_from_verb_ids(Map.keys(e(l, :grants, %{})))
                     |> debug("role_from_verbs")}
                     extra_roles={[{:custom, l("Custom")}]}
                   />
@@ -217,7 +217,7 @@
                         {/if}
                       </div>
                       <Bonfire.Boundaries.Web.YesMaybeFalseLive
-                        value={Map.get(e(l, :subject_grants, subject_id, %{}), :value, nil)}
+                        value={Map.get(e(l, :subject_verb_grants, subject_id, %{}), :value, nil)}
                         field_name={"subject[#{subject_id}][#{verb_id}]"}
                       />
                     </div>

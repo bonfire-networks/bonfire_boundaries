@@ -29,7 +29,9 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Boundaries.Verbs
+  alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Fixtures
+  alias Bonfire.Boundaries.Grants
   alias Bonfire.Boundaries.Roles
   alias Ecto.Changeset
   alias Pointers.Changesets
@@ -185,21 +187,7 @@ defmodule Bonfire.Boundaries.Acls do
           copy_acls_from_existing_object(context_id)
 
         to_boundaries ->
-          to_boundaries =
-            Boundaries.boundaries_normalise(to_boundaries)
-            |> debug("validated to_boundaries")
-
-          preset =
-            Boundaries.preset_name(to_boundaries)
-            |> debug("preset_name")
-
-          # add ACLs based on any boundary presets (eg. public/local/mentions)
-          # + add any ACLs directly specified in input
-          control_acls =
-            base_acls(creator, preset, opts) ++
-              maybe_add_direct_acl_ids(to_boundaries)
-
-          {preset, control_acls}
+          preset_acls_tuple(creator, to_boundaries, opts)
       end
 
     debug(control_acls, "preset + inputted ACLs to set")
@@ -230,22 +218,101 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
+  defp preset_acls_tuple(creator, to_boundaries, opts \\ []) do
+    {preset, base_acls, direct_acl_ids} =
+      preset_stereotypes_and_acls(
+        creator,
+        to_boundaries,
+        opts
+        |> Keyword.put_new_lazy(:universal_boundaries, fn ->
+          Config.get!([:object_default_boundaries, :acls])
+        end)
+      )
+
+    {preset,
+     Enum.map(
+       find_acls(base_acls, creator) ++ direct_acl_ids,
+       &%{acl_id: &1.id}
+     )}
+  end
+
+  def acls_from_preset(creator, to_boundaries, opts \\ []) do
+    {preset, base_acls, direct_acl_ids} =
+      preset_stereotypes_and_acls(
+        creator,
+        to_boundaries,
+        opts
+      )
+
+    find_acls(base_acls, creator) ++ list(ids: direct_acl_ids, current_user: creator)
+  end
+
+  def grants_from_preset(creator, to_boundaries, opts \\ []) do
+    {preset, base_acls, direct_acl_ids} =
+      preset_stereotypes_and_acls(
+        creator,
+        to_boundaries,
+        opts
+      )
+
+    # list(ids: direct_acl_ids, current_user: creator)
+    # |> repo().maybe_preload(:grants)
+    (Grants.get(base_acls)
+     |> Enum.flat_map(
+       &Enum.map(
+         &1,
+         fn {slug, role} ->
+           {Circles.get(slug), role}
+         end
+       )
+     )) ++
+      (Grants.list_for_acl(direct_acl_ids, current_user: creator, skip_boundary_check: true)
+       |> repo().maybe_preload(:subject)
+       |> repo().maybe_preload(subject: [:named, stereotyped: [:named]])
+       |> repo().maybe_preload(subject: [:profile])
+       |> Grants.subject_grants()
+       |> Enum.map(fn
+         {_subject_id, %{subject: subject, grants: grants}} ->
+           {subject, Roles.role_from_grants(grants, current_user: creator)}
+       end))
+  end
+
+  defp preset_stereotypes_and_acls(creator, to_boundaries, opts \\ []) do
+    {to_boundaries, preset} = to_boundaries_preset_tuple(to_boundaries)
+
+    # add ACLs based on any boundary presets (eg. public/local/mentions)
+    # + add any ACLs directly specified in input     
+
+    {preset, base_acls(creator, preset, opts), maybe_add_direct_acl_ids(to_boundaries)}
+  end
+
+  defp to_boundaries_preset_tuple(to_boundaries) do
+    to_boundaries =
+      Boundaries.boundaries_normalise(to_boundaries)
+      |> debug("validated to_boundaries")
+
+    preset =
+      Boundaries.preset_name(to_boundaries)
+      |> debug("preset_name")
+
+    {to_boundaries, preset}
+  end
+
+  def base_acls_from_preset(creator, preset, opts \\ []) do
+    {_preset, control_acls} = preset_acls_tuple(creator, preset, opts)
+    control_acls
+  end
+
   # when the user picks a preset, this maps to a set of base acls
-  defp base_acls(user, preset, _opts) do
-    (Config.get!([:object_default_boundaries, :acls]) ++
+  defp base_acls(user, preset, opts) do
+    (List.wrap(opts[:universal_boundaries]) ++
        Boundaries.acls_from_preset_boundary_names(preset))
     |> info("preset ACLs to set (based on preset #{preset}) ")
-    |> find_acls(user)
   end
 
-  defp maybe_add_direct_acl_ids(acls) when is_list(acls) do
+  defp maybe_add_direct_acl_ids(acls) do
     ulids(acls)
     |> filter_empty([])
-    |> Enum.map(&maybe_add_direct_acl_id/1)
-  end
-
-  defp maybe_add_direct_acl_id(id) when is_binary(id) do
-    %{acl_id: id}
   end
 
   defp custom_recipients(changeset_or_obj, preset, opts) do
@@ -386,7 +453,7 @@ defmodule Bonfire.Boundaries.Acls do
           # |> info("stereos")
       end
 
-    Enum.map(globals ++ stereo, &%{acl_id: &1.id})
+    globals ++ stereo
   end
 
   defp find_acls(_acls, _) do
@@ -451,17 +518,6 @@ defmodule Bonfire.Boundaries.Acls do
         value: value
       }
     ]
-  end
-
-  def base_acls_from_preset(creator, preset, opts \\ []) do
-    preset =
-      Boundaries.boundaries_normalise(preset)
-      |> debug("validated to_boundaries")
-      |> Boundaries.preset_name()
-      |> debug("preset_name")
-
-    # add ACLs based on any boundary presets (eg. public/local/mentions)
-    base_acls(creator, preset, opts)
   end
 
   def get_object_custom_acl(object) do
@@ -615,20 +671,35 @@ defmodule Bonfire.Boundaries.Acls do
   """
   def list(opts \\ []) do
     list_q(opts)
+    |> where(
+      [caretaker: caretaker],
+      caretaker.caretaker_id in ^[ulid(opts[:current_user]), Fixtures.admin_circle()]
+    )
     |> repo().many()
   end
 
   def list_q(opts \\ []) do
     from(acl in Acl, as: :acl)
-    |> boundarise(acl.id, opts)
+    # |> boundarise(acl.id, opts)
     |> proload([
       :caretaker,
       :named,
       :extra_info,
       stereotyped: {"stereotype_", [:named]}
     ])
+    |> maybe_by_ids(opts[:ids])
     |> maybe_search(opts[:search])
   end
+
+  def maybe_by_ids(query, ids) when is_binary(ids) or is_list(ids) do
+    query
+    |> where(
+      [acl],
+      acl.id in ^Types.ulids(ids)
+    )
+  end
+
+  def maybe_by_ids(query, _), do: query
 
   def maybe_search(query, text) when is_binary(text) and text != "" do
     query

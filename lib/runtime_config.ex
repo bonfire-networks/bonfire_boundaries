@@ -449,26 +449,26 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         ### Public ACLs need their permissions filled out
         # admins can care for every aspect of the instance
         instance_care: %{
-          admin: all_verb_names,
-          local: verbs_contribute,
-          activity_pub: verbs_interact_incl_boost,
-          guest: verbs_see_read_request
+          admin: :administer,
+          local: :contribute,
+          activity_pub: :interact,
+          guest: :read
         },
-        guests_may_see_read: %{guest: verbs_see_read_request},
+        guests_may_see_read: %{guest: :read},
         guests_may_see: %{guest: verbs_see_request},
         guests_may_read: %{guest: verbs_read_request},
         # interact but NOT reply/message/mention
-        remotes_may_interact: %{activity_pub: verbs_interact_incl_boost},
+        remotes_may_interact: %{activity_pub: :interact},
         # interact and reply/message/mention
-        remotes_may_reply: %{activity_pub: verbs_participate_and_message},
-        locals_may_read: %{local: verbs_see_read_request},
+        remotes_may_reply: %{activity_pub: :participate},
+        locals_may_read: %{local: :read},
         # interact but NOT reply/message/mention
-        locals_may_interact: %{local: verbs_interact_incl_boost},
+        locals_may_interact: %{local: :interact},
         # interact and reply/message/mention
-        locals_may_reply: %{local: verbs_participate_and_message},
+        locals_may_reply: %{local: :participate},
         # join + interact + contribute
-        locals_may_contribute: %{local: verbs_contribute},
-        remotes_may_contribute: %{activity_pub: verbs_contribute},
+        locals_may_contribute: %{local: :contribute},
+        remotes_may_contribute: %{activity_pub: :contribute},
         # negative grants:
         ghosted_cannot_anything: %{ghost_them: verbs_negative.(all_verb_names)},
         silenced_cannot_reach_me: %{

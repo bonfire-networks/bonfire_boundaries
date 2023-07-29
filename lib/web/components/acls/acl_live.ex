@@ -106,7 +106,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
       # verbs = e(socket.assigns, :verbs, [])
 
-      list_by_subject = subject_verb_grant(e(acl, :grants, []))
+      list_by_subject = Grants.subject_verb_grants(e(acl, :grants, []))
       # list_by_verb = verb_subject_grant(e(acl, :grants, []))
 
       socket
@@ -337,7 +337,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     id = ulid(subject)
     # |> debug("id")
 
-    subject_map = %{id => %{subject: subject, verb_grants: nil}}
+    subject_map = %{id => %{subject: subject, grants: nil}}
 
     # subject_name = LiveHandler.subject_name(subject)
     # |> debug("name")
@@ -351,12 +351,12 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       # list_by_verb:
       #   e(socket.assigns, :list_by_verb, %{})
       #   |> Enum.map(fn
-      #     {verb_id, %{verb: verb, subject_grants: subject_grants}} ->
+      #     {verb_id, %{verb: verb, subject_verb_grants: subject_verb_grants}} ->
       #       {
       #         verb_id,
       #         %{
       #           verb: verb,
-      #           subject_grants: Map.merge(subject_grants, subject_map)
+      #           subject_verb_grants: Map.merge(subject_verb_grants, subject_map)
       #         }
       #       }
 
@@ -365,7 +365,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       #         verb_id,
       #         %{
       #           verb: verb,
-      #           subject_grants: subject_map
+      #           subject_verb_grants: subject_map
       #         }
       #       }
       #   end)
@@ -430,80 +430,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   def maybe_join(_, _) do
     nil
   end
-
-  # def subjects(grants) when is_list(grants) and length(grants) > 0 do
-  #   # TODO: rewrite this whole thing tbh
-  #   Enum.reduce(grants, [], fn grant, subjects_acc ->
-  #     subjects_acc ++ [grant.subject]
-  #   end)
-  #   |> Enum.uniq()
-  # end
-
-  # def subjects(_), do: %{}
-
-  def subject_verb_grant(grants) when is_list(grants) and length(grants) > 0 do
-    # TODO: rewrite this whole thing tbh
-    Enum.reduce(grants, %{}, fn grant, subjects_acc ->
-      new_grant = %{grant.verb_id => Map.drop(grant, [:subject])}
-      new_subject = %{subject: grant.subject, verb_grants: new_grant}
-
-      Map.update(
-        subjects_acc,
-        # key
-        grant.subject_id,
-        # first entry
-        new_subject,
-        fn existing_subject ->
-          Map.update(
-            existing_subject,
-            # key
-            :verb_grants,
-            # first entry
-            new_grant,
-            fn existing_grants ->
-              Map.merge(existing_grants, new_grant)
-            end
-          )
-        end
-      )
-    end)
-
-    # |> debug
-  end
-
-  def subject_verb_grant(_), do: %{}
-
-  def verb_subject_grant(grants) when is_list(grants) and length(grants) > 0 do
-    # TODO: rewrite this whole thing tbh
-    Enum.reduce(grants, %{}, fn grant, verbs_acc ->
-      new_grant = %{grant.subject_id => Map.drop(grant, [:verb])}
-      new_verb = %{verb: grant.verb, subject_grants: new_grant}
-
-      Map.update(
-        verbs_acc,
-        # key
-        grant.verb_id,
-        # first entry
-        new_verb,
-        fn existing_verb ->
-          Map.update(
-            existing_verb,
-            # key
-            :subject_grants,
-            # first entry
-            new_grant,
-            fn existing_grants ->
-              Map.merge(existing_grants, new_grant)
-            end
-          )
-        end
-      )
-    end)
-
-    # |> debug
-  end
-
-  def verb_subject_grant(_), do: %{}
 
   # def columns(context) do
   #  if context[:ui_compact], do: 3, else: 2

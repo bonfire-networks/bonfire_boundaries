@@ -21,17 +21,31 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
       )
       # |> debug("myacccl")
       |> Enum.map(fn
-        %Bonfire.Data.AccessControl.Acl{id: acl_id} = acl ->
-          %{
-            id: acl_id,
-            field: :to_boundaries,
-            description: e(acl, :extra_info, :summary, nil),
-            name: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil)
-          }
+        %Bonfire.Data.AccessControl.Acl{id: _acl_id} = acl ->
+          acl_meta(acl)
       end)
       |> Enum.reject(&is_nil(&1.name))
     )
     |> render_sface()
+  end
+
+  def acl_meta(%{id: acl_id, stereotyped: %{stereotype_id: "1HANDP1CKEDZEPE0P1E1F0110W"}} = acl) do
+    %{
+      id: acl_id,
+      field: :to_boundaries,
+      description: e(acl, :stereotyped, :named, :name, nil),
+      name: l("Follows"),
+      icon: "fluent:people-list-16-filled"
+    }
+  end
+
+  def acl_meta(%{id: acl_id} = acl) do
+    %{
+      id: acl_id,
+      field: :to_boundaries,
+      description: e(acl, :extra_info, :summary, nil),
+      name: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil)
+    }
   end
 
   def render(assigns) do

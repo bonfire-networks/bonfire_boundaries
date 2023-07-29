@@ -1,5 +1,13 @@
 <div class="">
-  <div>
+  <!-- <button
+                    phx-click={JS.toggle(to: "#boundaries_preview") |> JS.toggle(to: "#extra_boundaries")}
+                    type="button"
+                    class="btn mt-2 btn-outline rounded-full ml-4 btn-primary normal-case"
+                  >
+                    <#Icon iconify="ri:arrow-left-line" class="w-5 h-5" />
+                    <span>{l("Back")}</span>
+                  </button> -->
+  <div class="min-h-[300px]">
     <div class="flex flex-col">
       <div class="p-4 rounded-md bg-info/10">
         <div class="flex">
@@ -64,4 +72,6 @@
       }
     </style>
   </div>
+
+  <Bonfire.Boundaries.Web.BoundaryComposerActionsLive done_label={l("Back")} hide_preview />
 </div>

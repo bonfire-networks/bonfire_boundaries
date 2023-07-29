@@ -1,11 +1,11 @@
 <select
   name={"to_circles[#{@circle_id}][]"}
   class={
-    "font-normal select-ghost select-sm text-sm rounded-full select",
+    "font-normal select-sm text-sm rounded-full select",
     "select-xs text-xs pl-1 px-0": !@setting_boundaries
   }
 >
-  <option />
+  <option value="">{l("Select role")}</option>
   <option
     :for={{id, name} <-
       @roles ||

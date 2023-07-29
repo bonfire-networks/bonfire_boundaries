@@ -14,7 +14,7 @@
         preloaded_options={results_for_multiselect(@my_circles)}
         label={l("Add circles or people")}
       />
-      <div class="flex items-center mt-5 justify-between">
+      <!-- <div class="flex items-center mt-5 justify-between">
         <div class="font-semibold text-base-content/90 text-base">{l("Custom permissions")}</div>
         <button
           :if={@showing_within in [:smart_input]}
@@ -25,17 +25,8 @@
           <#Icon iconify="mingcute:hat-fill" class="w-4 h-4" />
           <span>{l("View roles")}</span>
         </button>
-      </div>
+      </div> -->
       <div class="flex h-full flex-1 flex-col gap-2">
-        <div class="flex mt-3 justify-between items-center">
-          <Bonfire.UI.Common.ProfileItemLive
-            avatar_class="w-9 h-9 rounded-full bg-base-100"
-            profile={e(current_user(@__context__), :profile, nil)}
-            character={e(current_user(@__context__), :character, nil)}
-            show_controls={[]}
-          />
-          <div class="btn btn-sm btn-disabled rounded-full normal-case">{l("Owner")}</div>
-        </div>
         {#if !@custom_acls}
           <div class="">
             <Bonfire.Boundaries.Web.BoundaryItemsLive
@@ -46,11 +37,29 @@
                 {"cannot_" <> _, _} -> true
                 {key, _} -> String.starts_with?(to_string(key), "cannot_")
               end)}
-            />
-            <!-- </div> -->
+            >
+              <button
+                :if={@showing_within in [:smart_input]}
+                type="button"
+                phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#roles_detail")}
+                class="link link-hover text-sm flex items-center gap-2"
+              >
+                <#Icon iconify="mingcute:hat-fill" class="w-4 h-4" />
+              </button>
+            </Bonfire.Boundaries.Web.BoundaryItemsLive>
+
+            <div class="flex mt-3 justify-between items-center">
+              <Bonfire.UI.Common.ProfileItemLive
+                avatar_class="w-9 h-9 rounded-full bg-base-100"
+                profile={e(current_user(@__context__), :profile, nil)}
+                character={e(current_user(@__context__), :character, nil)}
+                show_controls={[]}
+              />
+              <div class="btn btn-sm btn-disabled rounded-full normal-case">{l("Caretaker")}</div>
+            </div>
           </div>
 
-          <div class="collapse !overflow-visible  collapse-arrow bg-error/10">
+          <div class="collapse !overflow-visible collapse-arrow bg-error/10 mt-2">
             <input type="radio" checked={@exclude_circles != []}>
             <div class="collapse-title text-sm font-medium">
               <div class="flex items-center gap-3 text-error">
@@ -92,6 +101,7 @@
         {/if}
       </div>
     {/if}
+
     <!-- <div class="flex gap-2 py-2 scrollable">
         {#for acl <- Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
           |> Enum.map(fn
@@ -129,7 +139,7 @@
     <!-- </div>
 </div> -->
 
-    <div class="mt-4 mb-3">
+    <!-- <div class="mt-4 mb-3">
       <div class="font-semibold text-base-content/90 text-base">{l("Preset boundary")}</div>
 
       <div class="flex items-center w-full mt-4 gap-3">
@@ -159,7 +169,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={@showing_within in [:smart_input] && @is_caretaker} />
   </div>

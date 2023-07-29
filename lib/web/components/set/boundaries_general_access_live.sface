@@ -6,7 +6,9 @@
   <div class="flex px-2 items-center gap-3 justify-between">
     <button
       class="text-base-content"
-      phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
+      phx-click={JS.hide(to: "#boundaries_picker")
+      |> JS.show(to: "#compose_content_wrapper")
+      |> JS.push("Bonfire.Boundaries:replace_boundary",
         value: %{id: "public", name: l("Public")},
         target: "#smart_input"
       )}
@@ -35,23 +37,19 @@
         </div>
       </div>
     </button>
-    <div :if={matches?(@boundary_preset, "public") && !@is_dropdown} class="flex items-center gap-3">
+    <div :if={!@is_dropdown} class="flex items-center gap-3">
       <button
         type="button"
-        phx-click={JS.hide(to: "#boundaries_picker")
-        |> JS.hide(to: "#extra_boundaries")
-        |> JS.show(to: "#boundaries_preview")}
-        class="btn-sm !border-base-content/30 !border normal-case btn-circle btn btn-outline"
-      >
-        <#Icon iconify="mdi:eye-outline" class="w-4 h-4" />
-        <span class="sr-only">{l("Preview")}</span>
-      </button>
-      <button
-        type="button"
-        phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
+        phx-click={JS.toggle(to: "#extra_boundaries")
+        |> JS.toggle(to: "#boundaries_picker")
+        |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
+          value: %{boundary: "public"},
+          target: "#smart_input"
+        )}
         class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
+        title={l("Customise or add extra boundaries")}
       >
-        <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
+        <#Icon iconify="bxs:customize" class="w-4 h-4" />
         <span class="sr-only">{l("Customise")}</span>
       </button>
     </div>
@@ -59,7 +57,9 @@
   <div class="flex px-2 items-center gap-3 justify-between">
     <button
       class="text-base-content"
-      phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
+      phx-click={JS.hide(to: "#boundaries_picker")
+      |> JS.show(to: "#compose_content_wrapper")
+      |> JS.push("Bonfire.Boundaries:replace_boundary",
         value: %{id: "local", name: l("Local")},
         target: "#smart_input"
       )}
@@ -76,7 +76,10 @@
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
-              <#Icon iconify="ph:campfire-bold" class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
+              <#Icon
+                iconify="ph:campfire-bold"
+                class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
+              />
             </span>
           </div>
           <div class="flex flex-col ml-3">
@@ -88,23 +91,19 @@
         </div>
       </div>
     </button>
-    <div :if={matches?(@boundary_preset, "local") && !@is_dropdown} class="flex items-center gap-3">
+    <div :if={!@is_dropdown} class="flex items-center gap-3">
       <button
         type="button"
-        phx-click={JS.hide(to: "#boundaries_picker")
-        |> JS.hide(to: "#extra_boundaries")
-        |> JS.show(to: "#boundaries_preview")}
-        class="btn-sm !border-base-content/30 !border normal-case btn-circle btn btn-outline"
-      >
-        <#Icon iconify="mdi:eye-outline" class="w-4 h-4" />
-        <span class="sr-only">{l("Preview")}</span>
-      </button>
-      <button
-        type="button"
-        phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
+        phx-click={JS.toggle(to: "#extra_boundaries")
+        |> JS.toggle(to: "#boundaries_picker")
+        |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
+          value: %{boundary: "local"},
+          target: "#smart_input"
+        )}
         class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
+        title={l("Customise or add extra boundaries")}
       >
-        <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
+        <#Icon iconify="bxs:customize" class="w-4 h-4" />
         <span class="sr-only">{l("Customise")}</span>
       </button>
     </div>
@@ -113,7 +112,9 @@
   <div class="flex px-2 items-center gap-3 justify-between">
     <button
       class="text-base-content"
-      phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
+      phx-click={JS.hide(to: "#boundaries_picker")
+      |> JS.show(to: "#compose_content_wrapper")
+      |> JS.push("Bonfire.Boundaries:replace_boundary",
         value: %{id: "mentions", name: l("Mentions")},
         target: "#smart_input"
       )}
@@ -140,28 +141,7 @@
         </div>
       </div>
     </button>
-    <div
-      :if={matches?(@boundary_preset, "mentions") && !@is_dropdown}
-      class="flex items-center gap-3"
-    >
-      <button
-        type="button"
-        phx-click={JS.hide(to: "#boundaries_picker")
-        |> JS.hide(to: "#extra_boundaries")
-        |> JS.show(to: "#boundaries_preview")}
-        class="btn-sm !border-base-content/30 !border normal-case btn-circle btn btn-outline"
-      >
-        <#Icon iconify="mdi:eye-outline" class="w-4 h-4" />
-        <span class="sr-only">{l("Preview")}</span>
-      </button>
-      <button
-        type="button"
-        phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
-        class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
-      >
-        <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
-        <span class="sr-only">{l("Customise")}</span>
-      </button>
+    <div :if={!@is_dropdown} class="flex items-center gap-3">
     </div>
   </div>
 
@@ -169,7 +149,9 @@
     <div class="flex px-2 items-center gap-3 justify-between">
       <button
         class="text-base-content"
-        phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
+        phx-click={JS.hide(to: "#boundaries_picker")
+        |> JS.show(to: "#compose_content_wrapper")
+        |> JS.push("Bonfire.Boundaries:replace_boundary",
           value: %{id: acl_id, name: e(acl, :name, nil)},
           target: "#smart_input"
         )}
@@ -186,7 +168,15 @@
           <div class="p-1.5 flex items-center text-left">
             <div class="flex-shrink-0">
               <span class="text-xl">
-                <#Icon iconify="fluent:door-tag-20-filled" class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
+                {#case e(acl, :icon, nil)}
+                  {#match nil}
+                    <#Icon
+                      iconify="fluent:door-tag-20-filled"
+                      class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
+                    />
+                  {#match icon}
+                    <Iconify.iconify icon={icon} class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
+                {/case}
               </span>
             </div>
             <div class="flex flex-col ml-3">
@@ -197,24 +187,19 @@
         </div>
       </button>
 
-      <div :if={matches?(@to_boundaries, acl_id) && !@is_dropdown} class="flex items-center gap-3">
+      <div :if={!@is_dropdown} class="flex items-center gap-3">
         <button
           type="button"
-          phx-click={JS.hide(to: "#boundaries_picker")
-          |> JS.hide(to: "#extra_boundaries")
-          |> JS.show(to: "#boundaries_preview")}
-          class="btn-sm !border-base-content/30 !border normal-case btn-circle btn btn-outline"
-        >
-          <#Icon iconify="mdi:eye-outline" class="w-4 h-4" />
-          <span class="sr-only">{l("Preview")}</span>
-        </button>
-
-        <button
-          type="button"
-          phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#boundaries_picker")}
+          phx-click={JS.toggle(to: "#extra_boundaries")
+          |> JS.toggle(to: "#boundaries_picker")
+          |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
+            value: %{boundary: acl_id},
+            target: "#smart_input"
+          )}
           class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
+          title={l("Customise or add extra boundaries")}
         >
-          <#Icon iconify="ph:gear-fill" class="w-4 h-4" />
+          <#Icon iconify="bxs:customize" class="w-4 h-4" />
           <span class="sr-only">{l("Customise")}</span>
         </button>
       </div>
@@ -223,12 +208,12 @@
   <div class="flex px-2 items-center gap-3 justify-between">
     <button
       class="text-base-content"
-      phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
+      phx-click={JS.hide(to: "#boundaries_picker")
+      |> JS.show(to: "#extra_boundaries")
+      |> JS.push("Bonfire.Boundaries:replace_boundary",
         value: %{id: "custom", name: l("Custom")},
         target: "#smart_input"
-      )
-      |> JS.toggle(to: "#boundaries_picker")
-      |> JS.toggle(to: "#extra_boundaries")}
+      )}
       type="button"
     >
       <div class="flex items-center gap-2">
@@ -242,7 +227,10 @@
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
-              <#Icon iconify="ph:gear-fill" class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
+              <#Icon
+                iconify="pajamas:todo-add"
+                class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
+              />
             </span>
           </div>
           <div class="flex flex-col ml-3">
@@ -255,18 +243,6 @@
   </div>
 </div>
 
-<!-- <div class="flex items-center justify-between px-3 pb-3 mt-4">
-  <div>
-  </div>
-  <button
-    type="button"
-    phx-click={JS.toggle(to: "#compose_content_wrapper") |> JS.toggle(to: "#boundaries_picker")}
-    class="w-full gap-2 normal-case rounded-full btn btn-primary btn-outline"
-  >
-    <span class="">{l("Done")}</span>
-  </button> 
-  </div> -->
-
 <div :if={!@is_dropdown} class="px-4 pb-4">
-  <Bonfire.Boundaries.Web.BoundaryComposerActionsLive />
+  <Bonfire.Boundaries.Web.BoundaryComposerActionsLive done_label={l("Back")} />
 </div>

@@ -62,8 +62,8 @@
                   {#if !@setting_boundaries}
                     {#if e(acl, :grants_count, 0) > 0}
                       <div class="flex gap-1 avatar-group">
-                        {#for {_subject_id, %{subject: subject, verb_grants: _verb_grants}} <-
-                            AclLive.subject_verb_grant(e(acl, :grants, [])) |> Enum.take(2)}
+                        {#for subject <-
+                            Grants.subjects(e(acl, :grants, [])) |> Enum.take(2)}
                           {#if e(subject, :profile, :id, nil)}
                             <Bonfire.UI.Common.AvatarLive
                               parent_id="acls"

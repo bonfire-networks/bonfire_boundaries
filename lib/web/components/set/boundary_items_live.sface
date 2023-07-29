@@ -35,7 +35,7 @@
     </div>
   </div> -->
 
-    <div :for={{data, id} <- @circles || []} class="flex py-2 items-center w-full justify-between">
+    <div :for={{data, role} <- @circles || []} class="flex py-2 items-center w-full justify-between">
       {#case data}
         {#match %{"icon" => _}}
           <!-- <p class="text-sm truncate max-w-[200px] pl-1.5 text-base-content">
@@ -59,16 +59,19 @@
             <span class="w-8 h-8 rounded-full bg-base-content/10 flex items-center place-content-center">
               <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/70" />
             </span>
-            <div class="text-sm font-bold group-hover:underline text-base-content">{e(data, :name, nil) || l("Unknown circle or user")}</div>
+            <div class="text-sm font-bold group-hover:underline text-base-content">{e(data, :name, nil) || e(data, :named, :name, nil) || e(data, :stereotyped, :named, :name, nil) ||
+                l("Unknown circle or user")}</div>
           </div>
       {/case}
       <div class="items-center flex gap-2">
         <div class="flex items-center gap-1" phx-update="ignore">
           <Bonfire.Boundaries.Web.RolesDropdownLive
             setting_boundaries
-            circle_id={id}
+            circle_id={id(data)}
+            role={role}
             roles={@roles_for_dropdown}
           />
+          <#slot />
         </div>
 
         <div
@@ -78,9 +81,13 @@
           |> JS.show(to: "#boundaries_preview")
           |> JS.push("assign",
             value: %{
-              preview_boundary_for_id: id,
+              preview_boundary_for_id: id(data),
               preview_boundary_for_username:
-                e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)
+                e(data, :name, nil) ||
+                  if(is_tuple(data),
+                    do: elem(data, 1),
+                    else: e(data, :named, :name, nil) || e(data, :stereotyped, :named, :name, nil) || data
+                  )
             },
             target: "#boundaries_preview"
           )}
@@ -91,7 +98,15 @@
 
         <div
           phx-click={JS.push("Bonfire.Boundaries:remove_circle",
-            value: %{id: id, name: e(data, :name, nil) || if(is_tuple(data), do: elem(data, 1), else: data)},
+            value: %{
+              id: id(data),
+              name:
+                e(data, :name, nil) ||
+                  if(is_tuple(data),
+                    do: elem(data, 1),
+                    else: e(data, :named, :name, nil) || e(data, :stereotyped, :named, :name, nil) || data
+                  )
+            },
             target: "#smart_input"
           )}
           class="btn btn-sm btn-circle btn-ghost"

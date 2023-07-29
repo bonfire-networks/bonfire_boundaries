@@ -12,7 +12,7 @@ defmodule Bonfire.Boundaries.Debug do
   # import Ecto.Query, only: [from: 2]
 
   defp get_user_acls(user) do
-    Acls.list(current_user: user, skip_boundary_check: true)
+    Acls.list(current_user: user)
     |> repo().preload([:grants])
   end
 

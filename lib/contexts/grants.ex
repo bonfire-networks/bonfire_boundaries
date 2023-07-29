@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Grants do
   import Bonfire.Boundaries.Queries
   import Bonfire.Boundaries.Integration
   import Ecto.Query
-  # import EctoSparkles
+  import EctoSparkles
 
   alias Ecto.Changeset
   alias Bonfire.Data.AccessControl.Grant
@@ -19,6 +19,9 @@ defmodule Bonfire.Boundaries.Grants do
   alias Bonfire.Boundaries.Roles
 
   def grants, do: Config.get([:grants])
+
+  def get(slug) when is_atom(slug), do: Config.get([:grants, slug])
+  def get(slugs) when is_list(slugs), do: Enum.map(slugs, &get/1)
 
   ## invariants:
 
@@ -189,7 +192,7 @@ defmodule Bonfire.Boundaries.Grants do
   """
   def list(opts) do
     list_q(opts)
-    |> preload(:named)
+    |> proload(:named)
     |> repo().many()
   end
 
@@ -207,9 +210,121 @@ defmodule Bonfire.Boundaries.Grants do
   def list_my(%{} = user), do: repo().many(list_my_q(user))
 
   @doc "query for `list_my`"
-  def list_my_q(%{id: user_id} = user) do
+  defp list_my_q(%{id: user_id} = user) do
     list_q(user)
     |> join(:inner, [grant: grant], caretaker in assoc(grant, :caretaker), as: :caretaker)
     |> where([caretaker: caretaker], caretaker.caretaker_id == ^user_id)
   end
+
+  def list_for_acl(acl, opts), do: repo().many(list_for_acl_q(acl, opts))
+
+  defp list_for_acl_q(acl, opts) do
+    list_q(opts)
+    |> where([grant: grant], grant.acl_id in ^ulids(acl))
+  end
+
+  def subjects(grants) when is_list(grants) and length(grants) > 0 do
+    Enum.reduce(grants, [], fn grant, subjects_acc ->
+      subjects_acc ++ [grant.subject]
+    end)
+    |> Enum.uniq()
+  end
+
+  def subjects(_), do: %{}
+
+  def subject_grants(grants) when is_list(grants) and length(grants) > 0 do
+    # TODO: rewrite this whole thing tbh
+    Enum.reduce(grants, %{}, fn grant, subjects_acc ->
+      new_grant = [Map.drop(grant, [:subject])]
+      new_subject = %{subject: grant.subject, grants: new_grant}
+
+      Map.update(
+        subjects_acc,
+        # key
+        grant.subject_id,
+        # first entry
+        new_subject,
+        fn existing_subject ->
+          Map.update(
+            existing_subject,
+            # key
+            :grants,
+            # first entry
+            new_grant,
+            fn existing_grants ->
+              existing_grants ++ new_grant
+            end
+          )
+        end
+      )
+    end)
+
+    # |> debug
+  end
+
+  def subject_grants(_), do: %{}
+
+  def subject_verb_grants(grants) when is_list(grants) and length(grants) > 0 do
+    # TODO: rewrite this whole thing tbh
+    Enum.reduce(grants, %{}, fn grant, subjects_acc ->
+      new_grant = %{grant.verb_id => Map.drop(grant, [:subject])}
+      new_subject = %{subject: grant.subject, grants: new_grant}
+
+      Map.update(
+        subjects_acc,
+        # key
+        grant.subject_id,
+        # first entry
+        new_subject,
+        fn existing_subject ->
+          Map.update(
+            existing_subject,
+            # key
+            :grants,
+            # first entry
+            new_grant,
+            fn existing_grants ->
+              Map.merge(existing_grants, new_grant)
+            end
+          )
+        end
+      )
+    end)
+
+    # |> debug
+  end
+
+  def subject_verb_grants(_), do: %{}
+
+  def verb_subject_grant(grants) when is_list(grants) and length(grants) > 0 do
+    # TODO: rewrite this whole thing tbh
+    Enum.reduce(grants, %{}, fn grant, verbs_acc ->
+      new_grant = %{grant.subject_id => Map.drop(grant, [:verb])}
+      new_verb = %{verb: grant.verb, subject_verb_grants: new_grant}
+
+      Map.update(
+        verbs_acc,
+        # key
+        grant.verb_id,
+        # first entry
+        new_verb,
+        fn existing_verb ->
+          Map.update(
+            existing_verb,
+            # key
+            :subject_verb_grants,
+            # first entry
+            new_grant,
+            fn existing_grants ->
+              Map.merge(existing_grants, new_grant)
+            end
+          )
+        end
+      )
+    end)
+
+    # |> debug
+  end
+
+  def verb_subject_grant(_), do: %{}
 end

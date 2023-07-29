@@ -31,6 +31,19 @@ defmodule Bonfire.Boundaries.Fixtures do
       admin_circle()
     ]
 
+  defp list_verbs(verbs) when is_list(verbs) or is_map(verbs), do: verbs
+
+  defp list_verbs(role) when is_atom(role) do
+    role = Boundaries.Roles.get(role)
+
+    (role
+     |> e(:can_verbs, [])
+     |> Enum.map(&{&1, true})) ++
+      (role
+       |> e(:cannot_verbs, [])
+       |> Enum.map(&{&1, false}))
+  end
+
   def insert() do
     # e.g. public, read_only
     acls = Map.values(Acls.acls())
@@ -42,8 +55,8 @@ defmodule Bonfire.Boundaries.Fixtures do
 
     grants =
       for {acl, entries} <- Grants.grants(),
-          {circle, verbs} <- entries,
-          verb <- verbs do
+          {circle, role_or_verbs} <- entries,
+          verb <- list_verbs(role_or_verbs) |> debug("list_verbs") do
         %{
           id: ULID.generate(),
           acl_id: Acls.get_id!(acl),

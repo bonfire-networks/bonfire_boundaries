@@ -19,7 +19,7 @@ defmodule Bonfire.Boundaries.Roles do
         _ -> true
       end)
 
-  def get(role_name, opts) do
+  def get(role_name, opts \\ []) do
     do_get([@config_key, role_name], opts)
     |> Enum.into(%{})
   end

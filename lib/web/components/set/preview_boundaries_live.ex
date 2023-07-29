@@ -61,7 +61,7 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
     {:noreply, preview(socket, id, username)}
   end
 
-  def preview(socket, id, username) when is_binary(id) do
+  def preview(socket, id, username) do
     current_user = current_user(socket)
 
     boundaries =
@@ -100,8 +100,8 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
       socket
       |> assign(
         role_name: role_name,
-        preview_boundary_for_username: username,
-        preview_boundary_for_id: id,
+        preview_boundary_for_username: username || l("guests"),
+        preview_boundary_for_id: id || :guests,
         preview_boundary_verbs: verbs
       )
 

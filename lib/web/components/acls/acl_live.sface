@@ -74,7 +74,7 @@
           <form id="edit_grants" :on-change="edit_grant_role">
             <ul class="flex flex-col divide-y divide-base-content/10 px-4 mt-2">
               <li
-                :for={{{subject_id, %{subject: subject, verb_grants: verb_grants} = _subject_verb_grant}, _i} <-
+                :for={{{subject_id, %{subject: subject, grants: grants} = _subject_verb_grants}, _i} <-
                   Enum.with_index(@list_by_subject || [])}
                 class="flex items-center justify-between py-4"
               >
@@ -100,7 +100,7 @@
                     scope={@scope}
                     usage={@usage}
                     setting_boundaries
-                    role={Bonfire.Boundaries.Roles.role_from_grants(Map.values(verb_grants || %{}),
+                    role={Bonfire.Boundaries.Roles.role_from_grants(Map.values(grants || %{}),
                       scope: @scope,
                       current_user: @current_user
                     )}
@@ -115,8 +115,8 @@
                       <!-- <li :if={!@setting_boundaries}>
                         <Bonfire.Boundaries.Web.AclModalLive
                           subject_id={subject_id}
-                          role_title={Bonfire.Boundaries.Verbs.role_from_verb_ids(Map.keys(verb_grants || %{}))}
-                          verb_grants={verb_grants}
+                          role_title={Bonfire.Boundaries.Verbs.role_from_verb_ids(Map.keys(grants || %{}))}
+                          grants={grants}
                           verbs={@verbs}
                           myself={@myself}
                         />

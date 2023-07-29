@@ -56,7 +56,7 @@
       </div>
       <div class="grid max-h-[400px] w-full grid-cols-3 gap-3 p-3 overflow-x-auto">
         <div
-          x-data={"{active: #{Enum.count(e(l, :verb_grants, %{})) < 1}}"}
+          x-data={"{active: #{Enum.count(e(l, :grants, %{})) < 1}}"}
           role="region"
           :for={{id, l} <- e(@list, [])}
           class="p-4 pb-2"
@@ -78,12 +78,12 @@
                     e(l, :subject, :character, :username, nil) || e(l, :subject, :name, nil) || id}</div>
               </div>
               <div class="flex flex-wrap gap-2 mt-2" x-show="!active">
-                {#for verb <- can(e(l, :verb_grants, %{}))}
+                {#for verb <- can(e(l, :grants, %{}))}
                   <span class="badge badge-success">
                     <#Icon outline="Check" class="w-4 h-4 mr-1" />
                     {verb}</span>
                 {/for}
-                {#for verb <- cannot(e(l, :verb_grants, %{}))}
+                {#for verb <- cannot(e(l, :grants, %{}))}
                   <span class="badge badge-error">
                     <#Icon outline="X" class="w-4 h-4 mr-1" />
                     {verb}</span>
@@ -109,7 +109,7 @@
             class="border divide-y rounded rounded-t-none border-base-content/30 divide-base-content/30"
           >
             <div
-              :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :verb_grants, %{}))}
+              :for={{verb_id, grant} <- Map.merge(@verbs, e(l, :grants, %{}))}
               class="flex items-center p-3 space-x-3"
             >
               <div class="flex-1 text-base font-semibold">

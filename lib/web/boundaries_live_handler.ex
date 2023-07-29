@@ -319,6 +319,16 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
+  def handle_event("custom_from_preset_template", %{"boundary" => boundary}, socket) do
+    to_circles =
+      Acls.grants_from_preset(current_user_required!(socket), boundary)
+      |> debug("custom_from_preset_template")
+
+    {:noreply,
+     socket
+     |> assign(to_circles: to_circles)}
+  end
+
   def unblock(id, block_type, scope, socket)
       when is_binary(id) do
     current_user = current_user_required!(socket)
