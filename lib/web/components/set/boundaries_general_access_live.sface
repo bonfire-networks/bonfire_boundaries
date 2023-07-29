@@ -23,7 +23,7 @@
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
-              <#Icon iconify="ph:globe" class={"w-6 h-6", "!w-4 !h-4": @is_dropdown} />
+              <#Icon iconify="ph:globe" class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
             </span>
           </div>
           <div class="flex flex-col ml-3">
@@ -76,7 +76,7 @@
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
-              <#Icon iconify="ph:campfire-bold" class={"w-6 h-6", "!w-4 !h-4": @is_dropdown} />
+              <#Icon iconify="ph:campfire-bold" class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
             </span>
           </div>
           <div class="flex flex-col ml-3">
@@ -186,7 +186,7 @@
           <div class="p-1.5 flex items-center text-left">
             <div class="flex-shrink-0">
               <span class="text-xl">
-                <#Icon iconify="fluent:door-tag-20-filled" class={"w-6 h-6", "!w-4 !h-4": @is_dropdown} />
+                <#Icon iconify="fluent:door-tag-20-filled" class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
               </span>
             </div>
             <div class="flex flex-col ml-3">
@@ -242,7 +242,7 @@
         <div class="p-1.5 flex items-center text-left">
           <div class="flex-shrink-0">
             <span class="text-xl">
-              <#Icon iconify="ph:gear-fill" class={"w-6 h-6", "!w-4 !h-4": @is_dropdown} />
+              <#Icon iconify="ph:gear-fill" class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
             </span>
           </div>
           <div class="flex flex-col ml-3">

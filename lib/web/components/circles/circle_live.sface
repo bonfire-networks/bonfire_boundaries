@@ -73,7 +73,7 @@
                     :if={!@read_only}
                     phx-value-subject={id}
                     :on-click="remove"
-                    class="btn border-base-content/50 btn-outline rounded normal-case btn-xs"
+                    class="btn border-base-content/50 btn-outline rounded-full normal-case btn-sm"
                   >
                     {l("Remove")}
                   </button>
