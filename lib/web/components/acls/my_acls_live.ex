@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Web.MyAclsLive do
   use Bonfire.UI.Common.Web, :stateful_component
   alias Bonfire.Boundaries.Acls
-  # alias Bonfire.Boundaries.Verbs
+  alias Bonfire.Boundaries.Grants
   alias Bonfire.Boundaries.Web.AclLive
   alias Bonfire.Boundaries.Integration
 
