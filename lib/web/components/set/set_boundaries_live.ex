@@ -12,7 +12,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   prop my_circles, :list, default: nil
 
   prop showing_within, :atom, default: nil
-  prop show_select_recipients, :boolean, default: false
+
   prop open_boundaries, :boolean, default: false
   prop hide_breakdown, :boolean, default: false
   prop click_override, :boolean, default: false
@@ -161,10 +161,10 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
       case field do
         :to_boundaries ->
           e(socket.assigns, field, [{"public", l("Public")}]) ++
-            [{data["id"], data}]
+            [{id(data), data}]
 
         _ ->
-          e(socket.assigns, field, []) ++ [{data, data["id"]}]
+          e(socket.assigns, field, []) ++ [{data, id(data)}]
       end
       |> Enum.uniq()
 
