@@ -37,14 +37,14 @@
 
       <div :if={@preview_boundary_for_id}>
         <span class="mt-6 block mb-3 text-base-content/90 tracking-wide uppercase text-xs font-semibold">{l("Previewing boundaries for")} {@preview_boundary_for_username}</span>
-          <input type="hidden" name="preview_boundary_for_id" value={@preview_boundary_for_id}>
-         <div class="bg-base-content/5 rounded-box">
-            <Bonfire.Boundaries.Web.YourRoleLive
-              is_caretaker={nil}
-              role_name={@role_name}
-              label={l("")}
-              scope={:preview}
-            />
+        <input type="hidden" name="preview_boundary_for_id" value={@preview_boundary_for_id}>
+        <div class="bg-base-content/5 rounded-box">
+          <Bonfire.Boundaries.Web.YourRoleLive
+            is_caretaker={nil}
+            role_name={@role_name}
+            label={l("")}
+            scope={:preview}
+          />
 
           <ul :if={@preview_boundary_verbs} role="list" class="flex flex-col">
             {#for verb <- @preview_boundary_verbs || []}

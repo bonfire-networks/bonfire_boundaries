@@ -1,8 +1,10 @@
-<div 
-  x-data="{open: false}" 
+<div
+  x-data="{open: false}"
   class={
     "bg-base-content/5 rounded-box mb-6 w-full": @scope != :preview,
-    "border-b border-base-content/20": @scope == :preview}>
+    "border-b border-base-content/20": @scope == :preview
+  }
+>
   <div class="flex items-center w-full p-4 gap-3">
     <div class="flex items-center w-full flex-1 justify-between">
       <div class="text-sm font-medium flex items-center gap-2">
