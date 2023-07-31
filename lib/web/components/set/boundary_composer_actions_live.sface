@@ -1,5 +1,5 @@
 <div class="flex items-center justify-between mt-4 gap-2">
-  <button
+  <!-- <button
     :if={!@hide_preview}
     type="button"
     phx-click={JS.hide(to: "#boundaries_picker")
@@ -9,14 +9,14 @@
   >
     <#Icon iconify="mdi:eye-outline" class="w-4 h-4" />
     <span class="sr-only">{l("Preview")}</span>
-  </button>
+  </button> -->
   <button
     type="button"
     phx-click={JS.hide(to: "#boundaries_picker")
     |> JS.hide(to: "#extra_boundaries")
     |> JS.hide(to: "#boundaries_preview")
     |> JS.show(to: "#compose_content_wrapper")}
-    class="normal-case grow rounded-full btn btn-primary"
+    class="normal-case grow rounded-full btn btn-outline btn-primary"
   >
     <span class="">{@done_label || l("Done")}</span>
   </button>

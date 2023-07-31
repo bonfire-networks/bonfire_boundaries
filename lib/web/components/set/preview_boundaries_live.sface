@@ -26,7 +26,7 @@
       <div class="w-full">
         <Bonfire.UI.Common.MultiselectLive.UserSelectorLive
           selected_options={[]}
-          class="!h-10 !w-full !rounded-full !input !input-bordered !bg-transparent"
+          class="w-full h-10 input rounded-full select_recipients_input"
           label={l("Search for a user to preview")}
           form_input_name={__MODULE__}
           event_target={@myself}
@@ -36,21 +36,22 @@
       </div>
 
       <div :if={@preview_boundary_for_id}>
-        {l("Previewing boundaries for")} {@preview_boundary_for_username}:
-        <input type="hidden" name="preview_boundary_for_id" value={@preview_boundary_for_id}>
+        <span class="mt-6 block mb-3 text-base-content/90 tracking-wide uppercase text-xs font-semibold">{l("Previewing boundaries for")} {@preview_boundary_for_username}</span>
+          <input type="hidden" name="preview_boundary_for_id" value={@preview_boundary_for_id}>
+         <div class="bg-base-content/5 rounded-box">
+            <Bonfire.Boundaries.Web.YourRoleLive
+              is_caretaker={nil}
+              role_name={@role_name}
+              label={l("")}
+              scope={:preview}
+            />
 
-        <Bonfire.Boundaries.Web.YourRoleLive
-          is_caretaker={nil}
-          role_name={@role_name}
-          label={l("Their role")}
-          scope={:preview}
-        />
-
-        <ul :if={@preview_boundary_verbs} role="list" class="flex flex-col gap-2">
-          {#for verb <- @preview_boundary_verbs || []}
-            <Bonfire.Boundaries.Web.RoleVerbLive value read_only verb={verb} all_verbs={@all_verbs} />
-          {/for}
-        </ul>
+          <ul :if={@preview_boundary_verbs} role="list" class="flex flex-col">
+            {#for verb <- @preview_boundary_verbs || []}
+              <Bonfire.Boundaries.Web.RoleVerbLive value read_only verb={verb} all_verbs={@all_verbs} />
+            {/for}
+          </ul>
+        </div>
       </div>
     </div>
 
