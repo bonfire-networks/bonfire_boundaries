@@ -64,7 +64,7 @@
           </div>
       {/case}
       <div class="items-center flex gap-2">
-        <div class="flex items-center gap-1" phx-update="ignore">
+        <div class="flex items-center gap-2" phx-update="ignore">
           <Bonfire.Boundaries.Web.RolesDropdownLive
             setting_boundaries
             circle_id={id(data)}
@@ -111,7 +111,7 @@
           )}
           class="btn btn-sm btn-circle btn-ghost"
         >
-          <#Icon iconify="ph:trash-fill" class="w-5 h-5 md:w-4 md:h-4" />
+          <#Icon iconify="ph:trash-fill" class="w-5 h-5 text-error/80 md:w-4 md:h-4" />
         </div>
       </div>
     </div>

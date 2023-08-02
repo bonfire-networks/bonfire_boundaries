@@ -1,158 +1,17 @@
-<div class={
-  "menu flex flex-col gap-3 menu-lg",
-  "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-100 rounded-box w-[328px]":
-    @is_dropdown
-}>
-  <div class="flex px-2 items-center gap-3 justify-between">
-    <button
-      class="text-base-content"
-      phx-click={JS.hide(to: "#boundaries_picker")
-      |> JS.show(to: "#compose_content_wrapper")
-      |> JS.push("Bonfire.Boundaries:replace_boundary",
-        value: %{id: "public", name: l("Public")},
-        target: "#smart_input"
-      )}
-      type="button"
-    >
-      <div class="flex items-center gap-2">
-        <input
-          :if={!@is_dropdown}
-          type="radio"
-          name="radio-1"
-          class="radio"
-          checked={matches?(@boundary_preset, "public")}
-        />
-        <div class="p-1.5 flex items-center text-left">
-          <div class="flex-shrink-0">
-            <span class="text-xl">
-              <#Icon iconify="ph:globe" class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
-            </span>
-          </div>
-          <div class="flex flex-col ml-3">
-            <div class="text-sm font-semibold text-base-content/90">{l("Public")}</div>
-            <p class="text-xs text-base-content/70">
-              {l("Publicly visible to everyone. Discoverable by search engines.")}
-            </p>
-          </div>
-        </div>
-      </div>
-    </button>
-    <div :if={!@is_dropdown} class="flex items-center gap-3">
-      <button
-        type="button"
-        phx-click={JS.toggle(to: "#extra_boundaries")
-        |> JS.toggle(to: "#boundaries_picker")
-        |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
-          value: %{boundary: "public"},
-          target: "#smart_input"
-        )}
-        class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
-        title={l("Customise or add extra boundaries")}
-      >
-        <#Icon iconify="bxs:customize" class="w-4 h-4" />
-        <span class="sr-only">{l("Customise")}</span>
-      </button>
-    </div>
-  </div>
-  <div class="flex px-2 items-center gap-3 justify-between">
-    <button
-      class="text-base-content"
-      phx-click={JS.hide(to: "#boundaries_picker")
-      |> JS.show(to: "#compose_content_wrapper")
-      |> JS.push("Bonfire.Boundaries:replace_boundary",
-        value: %{id: "local", name: l("Local")},
-        target: "#smart_input"
-      )}
-      type="button"
-    >
-      <div class="flex items-center gap-2">
-        <input
-          :if={!@is_dropdown}
-          type="radio"
-          name="radio-1"
-          class="radio"
-          checked={matches?(@boundary_preset, "local")}
-        />
-        <div class="p-1.5 flex items-center text-left">
-          <div class="flex-shrink-0">
-            <span class="text-xl">
-              <#Icon
-                iconify="ph:campfire-bold"
-                class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
-              />
-            </span>
-          </div>
-          <div class="flex flex-col ml-3">
-            <div class="text-sm font-semibold text-base-content/90">{l("Local")}</div>
-            <p class="text-xs text-base-content/70">
-              {l("Everyone on this instance will be able to see, interact, and reply.")}
-            </p>
-          </div>
-        </div>
-      </div>
-    </button>
-    <div :if={!@is_dropdown} class="flex items-center gap-3">
-      <button
-        type="button"
-        phx-click={JS.toggle(to: "#extra_boundaries")
-        |> JS.toggle(to: "#boundaries_picker")
-        |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
-          value: %{boundary: "local"},
-          target: "#smart_input"
-        )}
-        class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
-        title={l("Customise or add extra boundaries")}
-      >
-        <#Icon iconify="bxs:customize" class="w-4 h-4" />
-        <span class="sr-only">{l("Customise")}</span>
-      </button>
-    </div>
-  </div>
+<div class="h-full flex-1 px-2">
+  <div class={
+    "menu flex flex-col gap-3 menu-lg flex-1 h-full",
+    "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-100 rounded-box w-[328px]":
+      @is_dropdown
+  }>
 
-  <div class="flex px-2 items-center gap-3 justify-between">
-    <button
-      class="text-base-content"
-      phx-click={JS.hide(to: "#boundaries_picker")
-      |> JS.show(to: "#compose_content_wrapper")
-      |> JS.push("Bonfire.Boundaries:replace_boundary",
-        value: %{id: "mentions", name: l("Mentions")},
-        target: "#smart_input"
-      )}
-      type="button"
-    >
-      <div class="flex items-center gap-2">
-        <input
-          :if={!@is_dropdown}
-          type="radio"
-          name="radio-1"
-          class="radio"
-          checked={matches?(@boundary_preset, "mentions")}
-        />
-        <div class="p-1.5 flex items-center text-left">
-          <div class="flex-shrink-0">
-            <span class={"text-2xl", "!text-lg": @is_dropdown}>﹫</span>
-          </div>
-          <div class="flex flex-col ml-3">
-            <div class="text-sm font-semibold text-base-content/90">{l("Mentions")}</div>
-            <p class="text-xs text-base-content/70">
-              {l("Anyone mentioned will be able to see, interact, and reply.")}
-            </p>
-          </div>
-        </div>
-      </div>
-    </button>
-    <div :if={!@is_dropdown} class="flex items-center gap-3">
-    </div>
-  </div>
-
-  {#for %{id: acl_id} = acl <- @my_acls}
-    <div class="flex px-2 items-center gap-3 justify-between">
+    <div class="flex items-center gap-3 justify-between">
       <button
         class="text-base-content"
         phx-click={JS.hide(to: "#boundaries_picker")
-        |> JS.show(to: "#compose_content_wrapper")
+        |> JS.show(to: "#composer_container")
         |> JS.push("Bonfire.Boundaries:replace_boundary",
-          value: %{id: acl_id, name: e(acl, :name, nil)},
+          value: %{id: "public", name: l("Public")},
           target: "#smart_input"
         )}
         type="button"
@@ -163,86 +22,227 @@
             type="radio"
             name="radio-1"
             class="radio"
-            checked={matches?(@to_boundaries, acl_id)}
+            checked={matches?(@boundary_preset, "public")}
           />
           <div class="p-1.5 flex items-center text-left">
             <div class="flex-shrink-0">
               <span class="text-xl">
-                {#case e(acl, :icon, nil)}
-                  {#match nil}
-                    <#Icon
-                      iconify="fluent:door-tag-20-filled"
-                      class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
-                    />
-                  {#match icon}
-                    <Iconify.iconify icon={icon} class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
-                {/case}
+                <#Icon iconify="ph:globe" class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
               </span>
             </div>
             <div class="flex flex-col ml-3">
-              <div class="text-sm font-semibold text-base-content/90">{e(acl, :name, nil)}</div>
-              <p class="text-xs text-base-content/70">{e(acl, :description, nil)}</p>
+              <div class="text-sm font-semibold text-base-content/90">{l("Public")}</div>
+              <p class="text-xs text-base-content/70">
+                {l("Publicly visible to everyone. Discoverable by search engines.")}
+              </p>
             </div>
           </div>
         </div>
       </button>
-
       <div :if={!@is_dropdown} class="flex items-center gap-3">
         <button
           type="button"
           phx-click={JS.toggle(to: "#extra_boundaries")
           |> JS.toggle(to: "#boundaries_picker")
           |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
-            value: %{boundary: acl_id},
+            value: %{boundary: "public"},
             target: "#smart_input"
           )}
           class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
           title={l("Customise or add extra boundaries")}
         >
-          <#Icon iconify="bxs:customize" class="w-4 h-4" />
+          <#Icon iconify="ri:settings-4-line" class="w-4 h-4 text-base-content/70" />
           <span class="sr-only">{l("Customise")}</span>
         </button>
       </div>
     </div>
-  {/for}
-  <div class="flex px-2 items-center gap-3 justify-between">
-    <button
-      class="text-base-content"
-      phx-click={JS.hide(to: "#boundaries_picker")
-      |> JS.show(to: "#extra_boundaries")
-      |> JS.push("Bonfire.Boundaries:replace_boundary",
-        value: %{id: "custom", name: l("Custom")},
-        target: "#smart_input"
-      )}
-      type="button"
-    >
-      <div class="flex items-center gap-2">
-        <input
-          :if={!@is_dropdown}
-          type="radio"
-          name="radio-1"
-          class="radio"
-          checked={matches?(@boundary_preset, "custom")}
-        />
-        <div class="p-1.5 flex items-center text-left">
-          <div class="flex-shrink-0">
-            <span class="text-xl">
-              <#Icon
-                iconify="pajamas:todo-add"
-                class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
-              />
-            </span>
-          </div>
-          <div class="flex flex-col ml-3">
-            <div class="text-sm font-semibold text-base-content/90">{l("Custom")}</div>
-            <p class="text-xs text-base-content/70">{l("Specify custom boundaries, starting with a blank slate.")}</p>
+    <div class="flex items-center gap-3 justify-between">
+      <button
+        class="text-base-content"
+        phx-click={JS.hide(to: "#boundaries_picker")
+        |> JS.show(to: "#composer_container")
+        |> JS.push("Bonfire.Boundaries:replace_boundary",
+          value: %{id: "local", name: l("Local")},
+          target: "#smart_input"
+        )}
+        type="button"
+      >
+        <div class="flex items-center gap-2">
+          <input
+            :if={!@is_dropdown}
+            type="radio"
+            name="radio-1"
+            class="radio"
+            checked={matches?(@boundary_preset, "local")}
+          />
+          <div class="p-1.5 flex items-center text-left">
+            <div class="flex-shrink-0">
+              <span class="text-xl">
+                <#Icon
+                  iconify="ph:campfire-bold"
+                  class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
+                />
+              </span>
+            </div>
+            <div class="flex flex-col ml-3">
+              <div class="text-sm font-semibold text-base-content/90">{l("Local")}</div>
+              <p class="text-xs text-base-content/70">
+                {l("Everyone on this instance will be able to see, interact, and reply.")}
+              </p>
+            </div>
           </div>
         </div>
+      </button>
+      <div :if={!@is_dropdown} class="flex items-center gap-3">
+        <button
+          type="button"
+          phx-click={JS.toggle(to: "#extra_boundaries")
+          |> JS.toggle(to: "#boundaries_picker")
+          |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
+            value: %{boundary: "local"},
+            target: "#smart_input"
+          )}
+          class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
+          title={l("Customise or add extra boundaries")}
+        >
+          <#Icon iconify="ri:settings-4-line" class="w-4 h-4 text-base-content/70" />
+          <span class="sr-only">{l("Customise")}</span>
+        </button>
       </div>
-    </button>
-  </div>
-</div>
+    </div>
 
-<div :if={!@is_dropdown} class="px-4 pb-4">
-  <Bonfire.Boundaries.Web.BoundaryComposerActionsLive done_label={l("Back")} />
+    <div class="flex items-center gap-3 justify-between">
+      <button
+        class="text-base-content"
+        phx-click={JS.hide(to: "#boundaries_picker")
+        |> JS.show(to: "#composer_container")
+        |> JS.push("Bonfire.Boundaries:replace_boundary",
+          value: %{id: "mentions", name: l("Mentions")},
+          target: "#smart_input"
+        )}
+        type="button"
+      >
+        <div class="flex items-center gap-2">
+          <input
+            :if={!@is_dropdown}
+            type="radio"
+            name="radio-1"
+            class="radio"
+            checked={matches?(@boundary_preset, "mentions")}
+          />
+          <div class="p-1.5 flex items-center text-left">
+            <div class="flex-shrink-0">
+              <span class={"text-2xl", "!text-lg": @is_dropdown}>﹫</span>
+            </div>
+            <div class="flex flex-col ml-3">
+              <div class="text-sm font-semibold text-base-content/90">{l("Mentions")}</div>
+              <p class="text-xs text-base-content/70">
+                {l("Anyone mentioned will be able to see, interact, and reply.")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </button>
+      <div :if={!@is_dropdown} class="flex items-center gap-3">
+      </div>
+    </div>
+
+    {#for %{id: acl_id} = acl <- @my_acls}
+      <div class="flex items-center gap-3 justify-between">
+        <button
+          class="text-base-content"
+          phx-click={JS.hide(to: "#boundaries_picker")
+          |> JS.show(to: "#composer_container")
+          |> JS.push("Bonfire.Boundaries:replace_boundary",
+            value: %{id: acl_id, name: e(acl, :name, nil)},
+            target: "#smart_input"
+          )}
+          type="button"
+        >
+          <div class="flex items-center gap-2">
+            <input
+              :if={!@is_dropdown}
+              type="radio"
+              name="radio-1"
+              class="radio"
+              checked={matches?(@to_boundaries, acl_id)}
+            />
+            <div class="p-1.5 flex items-center text-left">
+              <div class="flex-shrink-0">
+                <span class="text-xl">
+                  {#case e(acl, :icon, nil)}
+                    {#match nil}
+                      <#Icon
+                        iconify="fluent:door-tag-20-filled"
+                        class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
+                      />
+                    {#match icon}
+                      <Iconify.iconify icon={icon} class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
+                  {/case}
+                </span>
+              </div>
+              <div class="flex flex-col ml-3">
+                <div class="text-sm font-semibold text-base-content/90">{e(acl, :name, nil)}</div>
+                <p class="text-xs text-base-content/70">{e(acl, :description, nil)}</p>
+              </div>
+            </div>
+          </div>
+        </button>
+
+        <div :if={!@is_dropdown} class="flex items-center gap-3">
+          <button
+            type="button"
+            phx-click={JS.toggle(to: "#extra_boundaries")
+            |> JS.toggle(to: "#boundaries_picker")
+            |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
+              value: %{boundary: acl_id},
+              target: "#smart_input"
+            )}
+            class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
+            title={l("Customise or add extra boundaries")}
+          >
+            <#Icon iconify="ri:settings-4-line" class="w-4 h-4 text-base-content/70" />
+            <span class="sr-only">{l("Customise")}</span>
+          </button>
+        </div>
+      </div>
+    {/for}
+    <div class="flex items-center gap-3 justify-between">
+      <button
+        class="text-base-content"
+        phx-click={JS.hide(to: "#boundaries_picker")
+        |> JS.show(to: "#extra_boundaries")
+        |> JS.push("Bonfire.Boundaries:replace_boundary",
+          value: %{id: "custom", name: l("Custom")},
+          target: "#smart_input"
+        )}
+        type="button"
+      >
+        <div class="flex items-center gap-2">
+          <input
+            :if={!@is_dropdown}
+            type="radio"
+            name="radio-1"
+            class="radio"
+            checked={matches?(@boundary_preset, "custom")}
+          />
+          <div class="p-1.5 flex items-center text-left">
+            <div class="flex-shrink-0">
+              <span class="text-xl">
+                <#Icon
+                  iconify="pajamas:todo-add"
+                  class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
+                />
+              </span>
+            </div>
+            <div class="flex flex-col ml-3">
+              <div class="text-sm font-semibold text-base-content/90">{l("Custom")}</div>
+              <p class="text-xs text-base-content/70">{l("Specify custom boundaries, starting with a blank slate.")}</p>
+            </div>
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+  <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={!@is_dropdown}  done_label={l("Back")} />
 </div>

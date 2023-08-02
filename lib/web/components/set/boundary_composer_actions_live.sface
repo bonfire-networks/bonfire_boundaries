@@ -1,4 +1,4 @@
-<div class="flex items-center justify-between mt-4 gap-2">
+<div class="flex sticky bottom-0 py-2 bg-base-300 z-50 items-center justify-between gap-2">
   <!-- <button
     :if={!@hide_preview}
     type="button"
@@ -15,7 +15,7 @@
     phx-click={JS.hide(to: "#boundaries_picker")
     |> JS.hide(to: "#extra_boundaries")
     |> JS.hide(to: "#boundaries_preview")
-    |> JS.show(to: "#compose_content_wrapper")}
+    |> JS.show(to: "#composer_container")}
     class="normal-case grow rounded-full btn btn-outline btn-primary"
   >
     <span class="">{@done_label || l("Done")}</span>

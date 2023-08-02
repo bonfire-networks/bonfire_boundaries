@@ -1,10 +1,10 @@
 {#case clone_context(@to_boundaries)}
   {#match false}
-    <div class="flex items-center flex-1 gap-2 mt-1">
+    <div class="flex items-center flex-1 gap-2">
       <div class="flex relative z-50 items-center flex-1 gap-2">
         <button
           type="button"
-          phx-click={JS.toggle(to: "#compose_content_wrapper") |> JS.toggle(to: "#boundaries_picker")}
+          phx-click={JS.toggle(to: "#composer_container") |> JS.toggle(to: "#boundaries_picker")}
           class="flex w-fit items-center justify-between gap-2 btn-ghost normal-case rounded-full border btn-sm btn border-base-content/30 text-primary"
         >
           <Bonfire.Boundaries.Web.BoundariesPresetNameLive

@@ -10,7 +10,7 @@
         :if={!@read_only}
         implementation={:live_select}
         form_input_name={__MODULE__}
-        class="input-bordered text-sm rounded-full w-full input liveselect"
+        class="input-bordered text-sm rounded-full w-full input h-10 liveselect"
         preloaded_options={results_for_multiselect(@my_circles)}
         label={l("Add circles or people")}
       />
@@ -29,6 +29,16 @@
       <div class="flex h-full flex-1 flex-col gap-2">
         {#if !@custom_acls}
           <div class="">
+            <div class="mt-4 flex my-2 justify-between items-center">
+              <Bonfire.UI.Common.ProfileItemLive
+                avatar_class="w-8 h-8 rounded-full bg-base-100"
+                profile={e(current_user(@__context__), :profile, nil)}
+                character={e(current_user(@__context__), :character, nil)}
+                show_controls={[]}
+              />
+              <div class="btn btn-sm btn-disabled rounded-full normal-case">{l("Caretaker")}</div>
+            </div>
+
             <Bonfire.Boundaries.Web.BoundaryItemsLive
               to_boundaries={[]}
               circles={@to_circles}
@@ -42,21 +52,13 @@
                 :if={@showing_within in [:smart_input]}
                 type="button"
                 phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#roles_detail")}
-                class="link link-hover text-sm flex items-center gap-2"
+                class="btn btn-ghost btn-circle btn-sm"
               >
-                <#Icon iconify="mingcute:hat-fill" class="w-4 h-4" />
+                <#Icon iconify="mingcute:hat-fill" class="w-4 h-4 text-opacity-70" />
               </button>
             </Bonfire.Boundaries.Web.BoundaryItemsLive>
 
-            <div class="flex mt-3 justify-between items-center">
-              <Bonfire.UI.Common.ProfileItemLive
-                avatar_class="w-9 h-9 rounded-full bg-base-100"
-                profile={e(current_user(@__context__), :profile, nil)}
-                character={e(current_user(@__context__), :character, nil)}
-                show_controls={[]}
-              />
-              <div class="btn btn-sm btn-disabled rounded-full normal-case">{l("Caretaker")}</div>
-            </div>
+            
           </div>
 
           <div class="collapse !overflow-visible collapse-arrow bg-error/10 mt-2">

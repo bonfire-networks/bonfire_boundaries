@@ -1,4 +1,4 @@
-<div class="">
+<div class="h-full flex-1 grow">
   <!-- <button
                     phx-click={JS.toggle(to: "#boundaries_preview") |> JS.toggle(to: "#extra_boundaries")}
                     type="button"
@@ -7,7 +7,7 @@
                     <#Icon iconify="ri:arrow-left-line" class="w-5 h-5" />
                     <span>{l("Back")}</span>
                   </button> -->
-  <div class="min-h-[300px]">
+  <div class="h-full flex-1 grow">
     <div class="flex flex-col">
       <div class="p-4 rounded-md bg-info/10">
         <div class="flex">
