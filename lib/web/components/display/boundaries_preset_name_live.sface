@@ -119,6 +119,23 @@
         "btn btn-sm btn-outline border-base-content/30": @with_icon != true
       }>{e(name, :name, nil) || name || l("Preset Boundary")}</span>
     </span>
+  {#match {id, name} when is_binary(name)}
+    <span
+      title={name}
+      class={
+        @class,
+        "flex items-center gap-4": @with_label && @with_icon
+      }
+    >
+      <span :if={@with_icon} class={@icon_wrapper}>
+        <#Icon iconify="ph:gear-fill" class={@icon_class} />
+      </span>
+      <span class={
+        "text-sm normal-case",
+        "sr-only": !@with_label,
+        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+      }>{name}</span>
+    </span>
   {#match other}
     <span
       title={debug(other, "cuubbb") && l("Custom Boundaries")}

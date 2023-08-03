@@ -44,7 +44,7 @@
           phx-click={JS.toggle(to: "#extra_boundaries")
           |> JS.toggle(to: "#boundaries_picker")
           |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
-            value: %{boundary: "public"},
+            value: %{boundary: "public", name: l("Local")},
             target: "#smart_input"
           )}
           class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
@@ -98,7 +98,7 @@
           phx-click={JS.toggle(to: "#extra_boundaries")
           |> JS.toggle(to: "#boundaries_picker")
           |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
-            value: %{boundary: "local"},
+            value: %{boundary: "local", name: l("Local")},
             target: "#smart_input"
           )}
           class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
@@ -194,7 +194,7 @@
             phx-click={JS.toggle(to: "#extra_boundaries")
             |> JS.toggle(to: "#boundaries_picker")
             |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
-              value: %{boundary: acl_id},
+              value: %{boundary: acl_id, name: e(acl, :name, nil)},
               target: "#smart_input"
             )}
             class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"

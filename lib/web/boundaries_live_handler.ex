@@ -319,14 +319,21 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
-  def handle_event("custom_from_preset_template", %{"boundary" => boundary}, socket) do
+  def handle_event(
+        "custom_from_preset_template",
+        %{"boundary" => boundary, "name" => name} = params,
+        socket
+      ) do
     to_circles =
       Acls.grants_from_preset(current_user_required!(socket), boundary)
       |> debug("custom_from_preset_template")
 
     {:noreply,
      socket
-     |> assign(to_circles: to_circles)}
+     |> assign(
+       to_circles: to_circles,
+       to_boundaries: [{"custom", l("Custom based on %{boundary_name}", boundary_name: name)}]
+     )}
   end
 
   def unblock(id, block_type, scope, socket)

@@ -232,7 +232,7 @@ defmodule Bonfire.Boundaries.Acls do
     {preset,
      Enum.map(
        find_acls(base_acls, creator) ++ direct_acl_ids,
-       &%{acl_id: &1.id}
+       &%{acl_id: id(&1)}
      )}
   end
 
