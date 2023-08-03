@@ -40,5 +40,7 @@
       with_label={@with_label}
       icon_class="w-4 h-4 text-base-content/60"
     />
+  {#else}
+  <span class="loading loading-ring loading-sm"></span>
   {/if}
 </div>
