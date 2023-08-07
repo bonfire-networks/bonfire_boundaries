@@ -44,7 +44,7 @@
           phx-click={JS.toggle(to: "#extra_boundaries")
           |> JS.toggle(to: "#boundaries_picker")
           |> JS.push("Bonfire.Boundaries:custom_from_preset_template",
-            value: %{boundary: "public", name: l("Local")},
+            value: %{boundary: "public", name: l("Public")},
             target: "#smart_input"
           )}
           class="btn btn-sm !border-base-content/30 !border btn-outline btn-circle normal-case"
