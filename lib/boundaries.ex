@@ -14,7 +14,8 @@ defmodule Bonfire.Boundaries do
   alias Bonfire.Boundaries.Roles
   alias Bonfire.Boundaries.Queries
   alias Pointers
-  # alias Pointers.Pointer
+  alias Bonfire.Data.AccessControl.Stereotyped
+  alias Pointers.Pointer
   import Queries, only: [boundarise: 3]
   import Ecto.Query
   import EctoSparkles
@@ -477,5 +478,33 @@ defmodule Bonfire.Boundaries do
     (opts[:from] || Pointers.query_base(if opts[:include_deleted], do: :include_deleted))
     |> where([p], p.id in ^List.wrap(ids))
     |> boundarise(main_object.id, opts)
+  end
+
+  def find_caretaker_stereotypes(caretaker, stereotypes, from \\ Pointer)
+
+  def find_caretaker_stereotypes(caretaker, stereotypes, from) do
+    find_caretaker_stereotypes_q(caretaker, stereotypes, from)
+    |> repo().all()
+
+    # |> debug("stereotype acls")
+  end
+
+  def find_caretaker_stereotype(caretaker, stereotype, from) do
+    find_caretaker_stereotypes_q(caretaker, stereotype, from)
+    |> repo().one()
+
+    # |> debug("stereotype acls")
+  end
+
+  def find_caretaker_stereotypes_q(caretaker, stereotypes, from) do
+    from(a in from,
+      join: c in Caretaker,
+      on: a.id == c.id and c.caretaker_id == ^ulid!(caretaker),
+      join: s in Stereotyped,
+      on: a.id == s.id and s.stereotype_id in ^ulids(stereotypes),
+      preload: [caretaker: c, stereotyped: s]
+    )
+
+    # |> debug("stereotype acls")
   end
 end

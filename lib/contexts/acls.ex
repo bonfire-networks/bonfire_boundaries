@@ -448,7 +448,7 @@ defmodule Bonfire.Boundaries.Acls do
         stereo ->
           stereo
           |> Enum.map(&elem(&1, 1).id)
-          |> find_caretaker_stereotypes(user, ...)
+          |> Boundaries.find_caretaker_stereotypes(user, ..., Acl)
 
           # |> info("stereos")
       end
@@ -868,32 +868,6 @@ defmodule Bonfire.Boundaries.Acls do
   def user_default_acls() do
     Map.fetch!(Boundaries.user_default_boundaries(), :acls)
     # |> debug
-  end
-
-  def find_caretaker_stereotypes(caretaker, stereotypes) do
-    find_caretaker_stereotypes_q(caretaker, stereotypes)
-    |> repo().all()
-
-    # |> debug("stereotype acls")
-  end
-
-  def find_caretaker_stereotype(caretaker, stereotype) do
-    find_caretaker_stereotypes_q(caretaker, stereotype)
-    |> repo().one()
-
-    # |> debug("stereotype acls")
-  end
-
-  def find_caretaker_stereotypes_q(caretaker, stereotypes) do
-    from(a in Acl,
-      join: c in Caretaker,
-      on: a.id == c.id and c.caretaker_id == ^ulid!(caretaker),
-      join: s in Stereotyped,
-      on: a.id == s.id and s.stereotype_id in ^ulids(stereotypes),
-      preload: [caretaker: c, stereotyped: s]
-    )
-
-    # |> debug("stereotype acls")
   end
 
   def edit(%Acl{} = acl, %User{} = _user, params) do

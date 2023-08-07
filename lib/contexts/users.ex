@@ -65,7 +65,7 @@ defmodule Bonfire.Boundaries.Users do
       stereotypes
       |> Enum.map(&e(&1, :stereotype_id, nil))
       |> debug("all stereos")
-      |> Acls.find_caretaker_stereotypes(user, ...)
+      |> Boundaries.find_caretaker_stereotypes(user, ...)
       |> Enum.map(&e(&1, :stereotyped, :stereotype_id, nil))
       |> debug("existing stereos")
 
@@ -76,13 +76,13 @@ defmodule Bonfire.Boundaries.Users do
 
     acls =
       acls
-      |> debug("missing acls")
       |> Enum.reject(&(e(&1, :stereotype_id, nil) in existing_stereotypes))
+      |> debug("missing acls")
 
     circles =
       circles
-      |> debug("missing circles")
       |> Enum.reject(&(e(&1, :stereotype_id, nil) in existing_stereotypes))
+      |> debug("missing circles")
 
     # first acls and circles
     do_insert_main(user, %{acls: acls, circles: circles, stereotypes: stereotypes})
@@ -90,6 +90,7 @@ defmodule Bonfire.Boundaries.Users do
     repo().insert_or_ignore(Stereotyped, stereotypes)
 
     # Then grants
+    # TODO: can we avoid attempting to re-insert existing grants
     repo().insert_or_ignore(Grant, grants)
     # Then the mixins
     repo().insert_or_ignore(Named, named)
