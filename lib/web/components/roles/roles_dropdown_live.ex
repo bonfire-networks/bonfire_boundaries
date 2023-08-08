@@ -8,4 +8,5 @@ defmodule Bonfire.Boundaries.Web.RolesDropdownLive do
   prop usage, :any, default: nil
   prop extra_roles, :list, default: []
   prop setting_boundaries, :boolean, default: false
+  prop field, :atom, default: :to_circles
 end

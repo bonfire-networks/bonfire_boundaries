@@ -70,6 +70,7 @@
             circle_id={id(data)}
             role={role}
             roles={@roles_for_dropdown}
+            field={@field}
           />
           <#slot />
         </div>
@@ -100,6 +101,7 @@
           phx-click={JS.push("Bonfire.Boundaries:remove_circle",
             value: %{
               id: id(data),
+              field: @field,
               name:
                 e(data, :name, nil) ||
                   if(is_tuple(data),

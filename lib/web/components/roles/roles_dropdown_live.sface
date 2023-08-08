@@ -1,5 +1,5 @@
 <select
-  name={"to_circles[#{@circle_id}][]"}
+  name={"#{@field}[#{@circle_id}][]"}
   class={
     "font-normal select-sm text-sm rounded-full select",
     "select-xs text-xs pl-1 px-0": !@setting_boundaries

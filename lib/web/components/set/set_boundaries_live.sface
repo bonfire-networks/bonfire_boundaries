@@ -13,6 +13,7 @@
       <Bonfire.UI.Common.MultiselectLive
         :if={!@read_only}
         implementation={:live_select}
+        field={:exclude_circles}
         form_input_name={__MODULE__}
         class="input-bordered text-sm rounded-full w-full input h-10 liveselect"
         preloaded_options={results_for_multiselect(@my_circles)}
@@ -82,6 +83,7 @@
               <Bonfire.UI.Common.MultiselectLive
                 :if={!@read_only}
                 implementation={:live_select}
+                field={:exclude_circles}
                 form_input_name={Bonfire.Boundaries.Web.ExcludeBoundaries}
                 preloaded_options={results_for_multiselect(@my_circles, :exclude_circles)}
                 label={l("Select or search for circles or people to exclude")}
@@ -90,6 +92,7 @@
               <Bonfire.Boundaries.Web.BoundaryItemsLive
                 to_boundaries={[]}
                 circles={@exclude_circles}
+                field={:exclude_circles}
                 roles_for_dropdown={@roles_for_dropdown
                 |> Enum.filter(fn
                   {"cannot_" <> _, _} -> true

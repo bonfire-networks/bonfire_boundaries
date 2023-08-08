@@ -160,27 +160,44 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     appended_data =
       case field do
         :to_boundaries ->
-          e(socket.assigns, field, [{"public", l("Public")}]) ++
-            [{id(data), data}]
+          # [{"public", l("Public")}]
+          []
+          |> (e(socket.assigns, field, ...) ++
+                [{id(data), data}])
+
+        :to_circles ->
+          e(socket.assigns, field, []) ++
+            [{data, nil}]
+
+        :exclude_circles ->
+          e(socket.assigns, field, []) ++
+            [{data, nil}]
 
         _ ->
-          e(socket.assigns, field, []) ++ [{data, id(data)}]
+          e(socket.assigns, field, []) ++
+            [{data, id(data)}]
       end
+      |> debug("list")
       |> Enum.uniq()
+      |> debug("uniq")
 
     {:noreply,
      socket
      |> assign(
        field,
        appended_data
+     )
+     |> assign_global(
+       _already_live_selected_:
+         Enum.uniq(e(socket.assigns, :__context, :_already_live_selected_, []) ++ [field])
      )}
   end
 
-  def handle_event("tagify_add", attrs, socket) do
-    handle_event("select_boundary", attrs, socket)
+  def do_handle_event("tagify_add", attrs, socket) do
+    do_handle_event("select_boundary", attrs, socket)
   end
 
-  def handle_event("tagify_remove", attrs, socket) do
-    handle_event("remove_boundary", attrs, socket)
+  def do_handle_event("tagify_remove", attrs, socket) do
+    do_handle_event("remove_boundary", attrs, socket)
   end
 end

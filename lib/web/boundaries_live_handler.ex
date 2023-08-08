@@ -183,21 +183,51 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event(action, %{"id" => selected} = _attrs, socket)
       when action in ["select", "select_circle"] and is_binary(selected) do
-    {:noreply,
-     assign(socket,
-       to_circles: set_circles([selected], e(socket, :assigns, :to_circles, []), true)
-     )}
+    {:noreply, Bonfire.Boundaries.LiveHandler.set_circles_tuples(:to_circles, [selected], socket)}
+    # 
+    #  assign(socket,
+    #    to_circles: set_circles([selected], e(socket, :assigns, :to_circles, []), true)
+    #  )
   end
 
-  def handle_event(action, %{"id" => deselected} = _attrs, socket)
-      when action in ["deselect", "remove_circle"] and is_binary(deselected) do
+  def handle_event(
+        "select",
+        %{"to_circles" => to_circles, "exclude_circles" => exclude_circles} = _params,
+        socket
+      ) do
     {:noreply,
-     assign(socket,
-       to_circles:
-         remove_from_circle_tuples(
-           [deselected],
-           e(socket, :assigns, :to_circles, [])
-         )
+     socket
+     |> Bonfire.Boundaries.LiveHandler.set_circles_tuples(:to_circles, to_circles, ...)
+     |> Bonfire.Boundaries.LiveHandler.set_circles_tuples(:exclude_circles, exclude_circles, ...)}
+  end
+
+  def handle_event("select", %{"to_circles" => circles} = _params, socket) do
+    {:noreply,
+     socket
+     |> Bonfire.Boundaries.LiveHandler.set_circles_tuples(:to_circles, circles, ...)}
+  end
+
+  def handle_event("select", %{"exclude_circles" => circles} = _params, socket) do
+    {:noreply,
+     Bonfire.Boundaries.LiveHandler.set_circles_tuples(:exclude_circles, circles, socket)}
+  end
+
+  def handle_event("select", _params, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event(action, %{"id" => deselected} = attrs, socket)
+      when action in ["deselect", "remove_circle"] and is_binary(deselected) do
+    field = e(attrs, "field", nil) |> Types.maybe_to_atom() || :to_circles
+
+    {:noreply,
+     assign(
+       socket,
+       field,
+       remove_from_circle_tuples(
+         [deselected],
+         e(socket, :assigns, field, [])
+       )
      )}
   end
 
@@ -416,60 +446,114 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
-  def set_circles(selected_circles, previous_circles, add_to_previous \\ false) do
-    # debug(previous_circles: previous_circles)
-    # selected_circles = Enum.uniq(selected_circles)
-    # debug(selected_circles: selected_circles)
+  # def set_circles(selected_circles, previous_circles, add_to_previous \\ false) do
+  #   # debug(previous_circles: previous_circles)
+  #   # selected_circles = Enum.uniq(selected_circles)
+  #   # debug(selected_circles: selected_circles)
 
-    previous_ids =
-      Enum.map(previous_circles, fn
-        {_name, id} -> id
-        _ -> nil
+  #   previous_ids =
+  #     Enum.map(previous_circles, fn
+  #       {_name, id} -> id
+  #       _ -> nil
+  #     end)
+
+  #   # debug(previous_ids: previous_ids)
+
+  #   public = Bonfire.Boundaries.Circles.circles()[:guest]
+
+  #   # public/guests defaults to also being visible to local users and federating
+  #   selected_circles =
+  #     if public in selected_circles and public not in previous_ids do
+  #       selected_circles ++
+  #         [
+  #           Bonfire.Boundaries.Circles.circles()[:local],
+  #           Bonfire.Boundaries.Circles.circles()[:admin],
+  #           Bonfire.Boundaries.Circles.circles()[:activity_pub]
+  #         ]
+  #     else
+  #       selected_circles
+  #     end
+
+  #   # debug(new_selected_circles: selected_circles)
+
+  #   existing =
+  #     if add_to_previous,
+  #       do: previous_circles,
+  #       else: known_circle_tuples(selected_circles, previous_circles)
+
+  #   # fix this ugly thing
+  #   (existing ++
+  #      Enum.map(selected_circles, &Bonfire.Boundaries.Circles.get_tuple/1))
+  #   |> Enums.filter_empty([])
+  #   |> Enum.uniq()
+
+  #   # |> debug()
+  # end
+
+  # def known_circle_tuples(selected_circles, previous_circles) do
+  #   Enum.filter(previous_circles, fn
+  #     {%{id: id} = circle, _old_role} -> id in selected_circles
+  #     {id, _role} -> id in selected_circles
+  #     _ -> nil
+  #   end)
+  # end
+
+  def set_circles_tuples(field, circles, socket) do
+    # raise nil
+    debug(circles, "set roles for #{field}")
+
+    previous_value =
+      e(socket.assigns, field, [])
+      |> debug("previous_value")
+
+    known_circles =
+      previous_value
+      |> Enum.map(fn
+        {%{id: id} = circle, _old_role} ->
+          {id, circle}
+
+        {%{"id" => id} = circle, _old_role} ->
+          {id, circle}
+
+        _ ->
+          nil
       end)
+      |> debug("known_circles")
 
-    # debug(previous_ids: previous_ids)
+    circles =
+      (circles || [])
+      |> Enum.map(fn
+        {circle, roles} ->
+          Enum.map(roles, &{e(known_circles, id(circle), nil) || circle, &1})
+      end)
+      |> List.flatten()
+      |> debug("computed")
 
-    public = Bonfire.Boundaries.Circles.circles()[:guest]
-
-    # public/guests defaults to also being visible to local users and federating
-    selected_circles =
-      if public in selected_circles and public not in previous_ids do
-        selected_circles ++
-          [
-            Bonfire.Boundaries.Circles.circles()[:local],
-            Bonfire.Boundaries.Circles.circles()[:admin],
-            Bonfire.Boundaries.Circles.circles()[:activity_pub]
-          ]
-      else
-        selected_circles
-      end
-
-    # debug(new_selected_circles: selected_circles)
-
-    existing =
-      if add_to_previous,
-        do: previous_circles,
-        else: known_circle_tuples(selected_circles, previous_circles)
-
-    # fix this ugly thing
-    (existing ++
-       Enum.map(selected_circles, &Bonfire.Boundaries.Circles.get_tuple/1))
-    |> Enums.filter_empty([])
-    |> Enum.uniq()
-
-    # |> debug()
+    if previous_value != circles do
+      socket
+      |> assign(field, circles)
+      |> assign(
+        reset_smart_input: false
+        #  ^to avoid un-reset the input
+      )
+      |> assign_global(
+        _already_live_selected_:
+          Enum.uniq(e(socket.assigns, :__context, :_already_live_selected_, []) ++ [field])
+      )
+    else
+      socket
+    end
   end
 
-  def known_circle_tuples(selected_circles, previous_circles) do
-    Enum.filter(previous_circles, fn
-      {_name, id} -> id in selected_circles
-      _ -> nil
-    end)
-  end
+  def remove_from_circle_tuples(ids, previous_circles) do
+    deselected_circles = ids(ids)
 
-  def remove_from_circle_tuples(deselected_circles, previous_circles) do
-    Enum.filter(previous_circles, fn
-      {_name, id} -> id not in deselected_circles
+    previous_circles
+    |> debug()
+    |> Enum.reject(fn
+      {circle, _role} -> id(circle) in deselected_circles
+      # {_name, id} -> id(circle) in deselected_circles
+      circle -> id(circle) in deselected_circles
       _ -> nil
     end)
   end
