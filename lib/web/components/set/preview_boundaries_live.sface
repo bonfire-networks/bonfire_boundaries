@@ -14,7 +14,7 @@
       </div>
     </div>
 
-    <div class="my-4">
+    <div class="my-4 mb-8">
       <div class="w-full">
         <Bonfire.UI.Common.MultiselectLive.UserSelectorLive
           selected_options={[]}
