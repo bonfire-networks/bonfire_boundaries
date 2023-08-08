@@ -4,7 +4,11 @@
     class="w-5 h-5 mx-1 mt-2 shrink-0 text-base-content/70"
   /> -->
 
-    <div style="height: 320px" id="set_boundaries"  class="flex flex-col relative h-full overflow-y-auto flex-nowrap flex-1">
+  <div
+    style="height: 320px"
+    id="set_boundaries"
+    class="flex flex-col relative h-full overflow-y-auto flex-nowrap flex-1"
+  >
     {#if @is_caretaker}
       <Bonfire.UI.Common.MultiselectLive
         :if={!@read_only}
@@ -106,6 +110,6 @@
         {/if}
       </div>
     {/if}
-    </div>
-    <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={@showing_within in [:smart_input] && @is_caretaker} />
+  </div>
+  <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={@showing_within in [:smart_input] && @is_caretaker} />
 </div>

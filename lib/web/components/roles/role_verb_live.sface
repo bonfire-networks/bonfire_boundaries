@@ -1,58 +1,60 @@
 {#if !e(assigns, :mini, false)}
-<li class="flex items-center justify-between gap-8 p-3">
-  <div class="flex flex-col gap-0.5">
-    {#case Bonfire.Boundaries.Verbs.get(@verb, @all_verbs)}
-      {#match nil}
-        <div class="flex-1 text-sm font-semibold capitalize">
-          <#Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
-          {@verb}
-        </div>
-      {#match verb}
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 min-w-[2.5rem] flex-1 shrink-0 rounded-full bg-info/10 flex place-content-center items-center">
-            <Iconify.iconify
-              icon={e(verb, :icon, "ri:shield-user-fill")}
-              class="w-5 h-5 text-base-content"
-              fill="currentColor"
-            />
+  <li class="flex items-center justify-between gap-8 p-3">
+    <div class="flex flex-col gap-0.5">
+      {#case Bonfire.Boundaries.Verbs.get(@verb, @all_verbs)}
+        {#match nil}
+          <div class="flex-1 text-sm font-semibold capitalize">
+            <#Icon iconify="ri:shield-user-fill" class="w-4 h-4 text-secondary-content/70" />
+            {@verb}
           </div>
-          <div class="flex flex-col">
-            <div class="flex-1 text-sm font-semibold capitalize">
-              {e(verb, :verb, nil) || verb}
+        {#match verb}
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 min-w-[2.5rem] flex-1 shrink-0 rounded-full bg-info/10 flex place-content-center items-center">
+              <Iconify.iconify
+                icon={e(verb, :icon, "ri:shield-user-fill")}
+                class="w-5 h-5 text-base-content"
+                fill="currentColor"
+              />
             </div>
-            <div class="text-[13px] text-base-content/70">{e(verb, :summary, nil)}</div>
+            <div class="flex flex-col">
+              <div class="flex-1 text-sm font-semibold capitalize">
+                {e(verb, :verb, nil) || verb}
+              </div>
+              <div class="text-[13px] text-base-content/70">{e(verb, :summary, nil)}</div>
+            </div>
           </div>
-        </div>
-    {/case}
-  </div>
-  <Bonfire.Boundaries.Web.YesMaybeFalseLive
-    value={@value}
-    read_only={@read_only}
-    event_target={@event_target}
-    field_name={"#{@field_name}[#{Enums.elem_or(@verb, 0) || @verb}]"}
-  />
-</li>
+      {/case}
+    </div>
+    <Bonfire.Boundaries.Web.YesMaybeFalseLive
+      value={@value}
+      read_only={@read_only}
+      event_target={@event_target}
+      field_name={"#{@field_name}[#{Enums.elem_or(@verb, 0) || @verb}]"}
+    />
+  </li>
 {#else}
-{#case Bonfire.Boundaries.Verbs.get(@verb, @all_verbs)}
-  {#match nil}
-     <li 
-      title={e(@verb, :summary, nil)} 
-      class={
-        "badge",
-        "badge-success": @value,
-        "badge-error": !@value
-      }>
-      {@verb}
-    </li>
+  {#case Bonfire.Boundaries.Verbs.get(@verb, @all_verbs)}
+    {#match nil}
+      <li
+        title={e(@verb, :summary, nil)}
+        class={
+          "badge",
+          "badge-success": @value,
+          "badge-error": !@value
+        }
+      >
+        {@verb}
+      </li>
     {#match verb}
-    <li 
-      title={e(verb, :summary, nil)} 
-      class={
-        "badge",
-        "badge-success": @value,
-        "badge-error": !@value
-      }>
-      {e(verb, :verb, nil) || verb}
-    </li>
-{/case}
+      <li
+        title={e(verb, :summary, nil)}
+        class={
+          "badge",
+          "badge-success": @value,
+          "badge-error": !@value
+        }
+      >
+        {e(verb, :verb, nil) || verb}
+      </li>
+  {/case}
 {/if}

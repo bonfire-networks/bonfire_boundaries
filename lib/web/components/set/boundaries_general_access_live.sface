@@ -1,12 +1,13 @@
 <div class="h-full flex-1 px-2">
-  <div 
+  <div
     style="height: 320px"
     id="boundaries_general_access"
     class={
-    "menu flex flex-col gap-3 menu-lg flex-1 h-full flex-nowrap overflow-y-auto",
-    "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-100 rounded-box w-[328px]":
-      @is_dropdown
-  }>
+      "menu flex flex-col gap-3 menu-lg flex-1 h-full flex-nowrap overflow-y-auto",
+      "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-100 rounded-box w-[328px]":
+        @is_dropdown
+    }
+  >
     <div class="flex items-center gap-3 justify-between">
       <button
         class="text-base-content"
