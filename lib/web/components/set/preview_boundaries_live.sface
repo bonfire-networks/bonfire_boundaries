@@ -1,7 +1,7 @@
 <div class="h-full flex-1 grow">
   <div
     id="preview_boundaries_container"
-    style="height: 320px"
+    style="min-height: 320px"
     class="h-full flex-1 grow flex-nowrap overflow-y-auto"
   >
     <div class="flex flex-col">

@@ -10,6 +10,28 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
   prop boundary_preset, :any, default: nil
   prop to_circles, :list, default: []
 
+  def update(
+        %{preview_boundary_for_id: preview_boundary_for_id} = assigns,
+        %{assigns: %{preview_boundary_for_id: preview_boundary_for_id}} = socket
+      ) do
+    {
+      :ok,
+      socket
+      |> assign(assigns)
+    }
+  end
+
+  def update(%{preview_boundary_for_id: preview_boundary_for_id} = assigns, socket)
+      when not is_nil(preview_boundary_for_id) do
+    {
+      :ok,
+      socket
+      |> assign(assigns)
+      |> preview(preview_boundary_for_id, assigns[:preview_boundary_for_username])
+      #  |> debug()
+    }
+  end
+
   def update(assigns, socket) do
     # current_user =(current_user(assigns) || current_user(socket))
 
@@ -40,7 +62,7 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
         all_verbs: Bonfire.Boundaries.Verbs.verbs()
         # available_verbs: available_verbs
       )
-      |> preview(assigns[:preview_boundary_for_id], assigns[:preview_boundary_for_username])
+      |> preview(nil, l("guests"))
       #  |> debug()
     }
   end
@@ -100,7 +122,7 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
       socket
       |> assign(
         role_name: role_name,
-        preview_boundary_for_username: username || l("guests"),
+        preview_boundary_for_username: username,
         preview_boundary_for_id: id || :guests,
         preview_boundary_verbs: verbs
       )

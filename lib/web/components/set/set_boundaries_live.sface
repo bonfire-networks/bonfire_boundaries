@@ -5,7 +5,7 @@
   /> -->
 
   <div
-    style="height: 320px"
+    style="min-height: 320px"
     id="set_boundaries"
     class="flex flex-col relative h-full overflow-y-auto flex-nowrap flex-1"
   >
