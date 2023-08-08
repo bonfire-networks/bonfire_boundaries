@@ -106,7 +106,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
       # verbs = e(socket.assigns, :verbs, [])
 
-      list_by_subject = Grants.subject_verb_grants(e(acl, :grants, []))
+      feed_by_subject = Grants.subject_verb_grants(e(acl, :grants, []))
       # list_by_verb = verb_subject_grant(e(acl, :grants, []))
 
       socket
@@ -114,7 +114,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         loaded: true,
         settings_section_title: "View " <> e(acl, :named, :name, "") <> " boundary",
         acl: acl,
-        list_by_subject: list_by_subject,
+        feed_by_subject: feed_by_subject,
         # list_by_verb: Map.merge(verbs, list_by_verb),
         # subjects: subjects(e(acl, :grants, [])),
         read_only:
@@ -347,7 +347,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       # subjects: ([subject] ++ e(socket.assigns, :subjects, [])) |> Enum.uniq_by(&ulid/1),
       # so tagify doesn't remove it as invalid
       # suggestions: Map.put(e(socket.assigns, :suggestions, %{}), id, subject_name),
-      list_by_subject: e(socket.assigns, :list_by_subject, %{}) |> Map.merge(subject_map)
+      feed_by_subject: e(socket.assigns, :feed_by_subject, %{}) |> Map.merge(subject_map)
       # list_by_verb:
       #   e(socket.assigns, :list_by_verb, %{})
       #   |> Enum.map(fn

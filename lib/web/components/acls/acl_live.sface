@@ -67,7 +67,7 @@
           </form>
         </div>
 
-        {#if is_list(@list_by_subject) or (is_map(@list_by_subject) and not Enum.empty?(@list_by_subject))}
+        {#if is_list(@feed_by_subject) or (is_map(@feed_by_subject) and not Enum.empty?(@feed_by_subject))}
           <!-- <div class="text-xl font-medium collapse-title">
             Role per circle or person
           </div> -->
@@ -75,7 +75,7 @@
             <ul class="flex flex-col divide-y divide-base-content/10 px-4 mt-2">
               <li
                 :for={{{subject_id, %{subject: subject, grants: grants} = _subject_verb_grants}, _i} <-
-                  Enum.with_index(@list_by_subject || [])}
+                  Enum.with_index(@feed_by_subject || [])}
                 class="flex items-center justify-between py-4"
               >
                 {#if e(subject, :profile, :id, nil)}
