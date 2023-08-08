@@ -1,10 +1,10 @@
-<div class="w-full flex-1">
+<div class="w-full h-full multiselect_in_composer flex-1 grow">
   <!-- <#Icon
     iconify="carbon:subnet-acl-rules"
     class="w-5 h-5 mx-1 mt-2 shrink-0 text-base-content/70"
   /> -->
 
-  <div class="flex flex-col relative h-full multiselect_in_composer flex-1">
+    <div style="height: 320px" id="set_boundaries"  class="flex flex-col relative h-full overflow-y-auto flex-nowrap flex-1">
     {#if @is_caretaker}
       <Bonfire.UI.Common.MultiselectLive
         :if={!@read_only}
@@ -106,76 +106,6 @@
         {/if}
       </div>
     {/if}
-
-    <!-- <div class="flex gap-2 py-2 scrollable">
-        {#for acl <- Bonfire.Boundaries.Acls.list_my(current_user(@__context__))
-          |> Enum.map(fn
-            %Bonfire.Data.AccessControl.Acl{} = acl ->
-            %{
-              id: e(acl, :id, nil),
-              field: :to_boundaries,
-              name: e(acl, :named, :name, nil) || e(acl, :sterotyped, :named, :name, nil)
-            } end)
-          |> Enum.filter(fn acl -> acl[:name] != nil end)
-        }
-          <button 
-            :key={e(acl, :id, nil)}
-            type="button" 
-            class="btn hover:bg-base-content hover:!text-base-300 btn-xs !max-h-[1.75rem] !min-h-[1.75rem] !h-[1.75rem] rounded font-normal capitalize bg-base-content/10 text-base-content/70 feed_tab border-none">
-            {e(acl, :name, nil)}
-          </button>
-        {/for}
-      </div> -->
-    <!-- </div> -->
-
-    <!-- <Bonfire.UI.Common.ProfileItemLive
-      wrapper_class="flex items-center justify-between"
-      profile={e(current_user(@__context__), :profile, %{name: l("Me")})}
-      character={e(current_user(@__context__), :character, nil)}
-      show_controls={[]}
-    >
-      <div class="flex items-center gap-2">
-        <button disabled class="normal-case btn btn-sm btn-outline btn-disabled">{l("Caretaker")}</button>
-      </div>
-    </Bonfire.UI.Common.ProfileItemLive> -->
-
-    <!-- Next already-choosen boundaries or Circles/Users -->
-    <!-- <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive boundary_preset={@boundary_preset} /> -->
-    <!-- </div>
-</div> -->
-
-    <!-- <div class="mt-4 mb-3">
-      <div class="font-semibold text-base-content/90 text-base">{l("Preset boundary")}</div>
-
-      <div class="flex items-center w-full mt-4 gap-3">
-        <div class="flex items-center w-full flex-1 justify-between">
-          <span class="flex items-center gap-2 text-sm font-semibold tracking-wider text-center text-base-content">
-            <Bonfire.Boundaries.Web.BoundariesPresetNameLive
-              boundary_preset={@boundary_preset}
-              icon_wrapper="w-10 h-10 rounded-full flex items-center place-content-center bg-info/10"
-              icon_class="w-6 h-6 text-info"
-              with_description
-              to_boundaries={@to_boundaries}
-            /></span>
-          <div>
-            <div :if={@showing_within in [:smart_input]} class="dropdown dropdown-end dropdown-top">
-              <label
-                tabindex="0"
-                class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
-              >{l("Change")}</label>
-              <div tabindex="0">
-                <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive
-                  boundary_preset={@boundary_preset}
-                  to_boundaries={@to_boundaries}
-                  is_dropdown
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
+    </div>
     <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={@showing_within in [:smart_input] && @is_caretaker} />
-  </div>
 </div>

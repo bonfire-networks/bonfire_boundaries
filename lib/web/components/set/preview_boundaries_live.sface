@@ -1,13 +1,5 @@
 <div class="h-full flex-1 grow">
-  <!-- <button
-                    phx-click={JS.toggle(to: "#boundaries_preview") |> JS.toggle(to: "#extra_boundaries")}
-                    type="button"
-                    class="btn mt-2 btn-outline rounded-full ml-4 btn-primary normal-case"
-                  >
-                    <#Icon iconify="ri:arrow-left-line" class="w-5 h-5" />
-                    <span>{l("Back")}</span>
-                  </button> -->
-  <div class="h-full flex-1 grow">
+  <div id="preview_boundaries_container" style="height: 320px" class="h-full flex-1 grow flex-nowrap overflow-y-auto">
     <div class="flex flex-col">
       <div class="p-4 rounded-md bg-info/10">
         <div class="flex">
@@ -38,7 +30,7 @@
       <div :if={@preview_boundary_for_id}>
         <span class="mt-6 block mb-3 text-base-content/90 tracking-wide uppercase text-xs font-normal">{l("Previewing boundaries for")} <b>{@preview_boundary_for_username}</b></span>
         <input type="hidden" name="preview_boundary_for_id" value={@preview_boundary_for_id}>
-        <div class="bg-base-content/5 rounded-box">
+        <div class="border border-base-content/20 rounded-box">
           <Bonfire.Boundaries.Web.YourRoleLive
             is_caretaker={nil}
             role_name={@role_name}
@@ -46,9 +38,9 @@
             scope={:preview}
           />
 
-          <ul :if={@preview_boundary_verbs} role="list" class="flex flex-col max-h-[230px] overflow-y-auto">
+          <ul :if={@preview_boundary_verbs} role="list" class="p-3 flex gap-3 flex-wrap">
             {#for verb <- @preview_boundary_verbs || []}
-              <Bonfire.Boundaries.Web.RoleVerbLive value read_only verb={verb} all_verbs={@all_verbs} />
+              <Bonfire.Boundaries.Web.RoleVerbLive mini value read_only verb={verb} all_verbs={@all_verbs} />
             {/for}
           </ul>
         </div>

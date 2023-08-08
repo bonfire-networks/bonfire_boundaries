@@ -4,7 +4,7 @@ defmodule Bonfire.Boundaries.Web.RoleVerbLive do
   prop verb, :any, required: true
   prop value, :boolean, default: nil
   prop read_only, :boolean, default: false
-
+  prop mini, :boolean, default: false
   prop all_verbs, :list
   # prop exclude_verbs, :list, default: []
 
