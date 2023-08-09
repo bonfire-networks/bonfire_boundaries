@@ -267,9 +267,10 @@ defmodule Bonfire.Boundaries.Acls do
        )
      )) ++
       (Grants.list_for_acl(direct_acl_ids, current_user: creator, skip_boundary_check: true)
-       |> repo().maybe_preload(:subject)
+       # |> repo().maybe_preload(:subject)
        |> repo().maybe_preload(subject: [:named, stereotyped: [:named]])
-       |> repo().maybe_preload(subject: [:profile])
+       |> repo().maybe_preload(subject: [:profile, :character])
+       |> debug()
        |> Grants.subject_grants()
        |> Enum.map(fn
          {_subject_id, %{subject: subject, grants: grants}} ->

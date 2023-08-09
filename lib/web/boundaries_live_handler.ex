@@ -354,14 +354,18 @@ defmodule Bonfire.Boundaries.LiveHandler do
         %{"boundary" => boundary, "name" => name} = params,
         socket
       ) do
-    to_circles =
+    {to_circles, exclude_circles} =
       Acls.grants_from_preset(current_user_required!(socket), boundary)
+      |> Enum.split_with(fn {_circle, role} ->
+        not String.starts_with?(to_string(role), "cannot_")
+      end)
       |> debug("custom_from_preset_template")
 
     {:noreply,
      socket
      |> assign(
        to_circles: to_circles,
+       exclude_circles: exclude_circles,
        to_boundaries: [{"custom", l("Custom based on %{boundary_name}", boundary_name: name)}]
      )}
   end
