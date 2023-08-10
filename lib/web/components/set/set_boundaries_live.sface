@@ -1,4 +1,4 @@
-<div class="w-full h-full multiselect_in_composer flex-1 grow">
+<div :if={@is_caretaker} class="w-full h-full multiselect_in_composer flex-1 grow">
   <!-- <#Icon
     iconify="carbon:subnet-acl-rules"
     class="w-5 h-5 mx-1 mt-2 shrink-0 text-base-content/70"
@@ -9,7 +9,6 @@
     id="set_boundaries"
     class="flex flex-col relative h-full overflow-y-auto flex-nowrap flex-1"
   >
-    {#if @is_caretaker}
       <Bonfire.UI.Common.MultiselectLive
         :if={!@read_only}
         implementation={:live_select}
@@ -112,7 +111,7 @@
           </div>
         {/if}
       </div>
-    {/if}
+   
   </div>
   <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={@showing_within in [:smart_input] && @is_caretaker} />
 </div>
