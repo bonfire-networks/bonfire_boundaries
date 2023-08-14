@@ -1,6 +1,6 @@
 <div class="h-full flex-1 px-2">
   <div
-    style="min-height: 320px"
+    style="min-height: 320px; height: 360px"
     id="boundaries_general_access"
     class={
       "menu flex flex-col gap-3 menu-lg flex-1 h-full flex-nowrap overflow-y-auto",
