@@ -52,14 +52,14 @@
               {key, _} -> String.starts_with?(to_string(key), "cannot_")
             end)}
           >
-            <button
+            <!-- <button
               :if={@showing_within in [:smart_input]}
               type="button"
               phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#roles_detail")}
               class="btn btn-ghost btn-circle btn-sm"
             >
-              <#Icon iconify="mingcute:hat-fill" class="w-4 h-4 text-opacity-70" />
-            </button>
+              <#Icon iconify="heroicons-outline:information-circle" class="w-4 h-4 text-opacity-70" />
+            </button> -->
           </Bonfire.Boundaries.Web.BoundaryItemsLive>
         </div>
 
