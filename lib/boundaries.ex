@@ -409,6 +409,11 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  def can?(_subject, _verbs, object) do
+    warn(object, "no object or boundary data")
+    nil
+  end
+
   defp do_can_instance(subject, verbs, key) do
     val =
       can?(subject, verbs, Bonfire.Boundaries.Fixtures.instance_acl())
