@@ -49,10 +49,6 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
     # |> IO.inspect
   end
 
-  # def handle_info(:clear_flash, socket) do
-  #   {:noreply, clear_flash(socket)}
-  # end
-
   defp nav_items(tab \\ nil)
 
   defp nav_items("instance"),
