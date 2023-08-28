@@ -14,8 +14,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     opts = [current_user: current_user]
 
     can_instance_wide =
-      Bonfire.Boundaries.can?(current_user, :block, :instance) ||
-        is_admin?(current_user)
+      Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
 
     with {:ok, a} <-
            if(attrs["silence"],
@@ -48,8 +47,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     current_user = current_user_required!(socket)
 
     can_instance_wide =
-      Bonfire.Boundaries.can?(current_user, :block, :instance) ||
-        is_admin?(current_user)
+      Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
 
     with {:ok, status} <-
            (if can_instance_wide do
@@ -375,8 +373,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     current_user = current_user_required!(socket)
 
     can_instance_wide =
-      Bonfire.Boundaries.can?(current_user, :block, :instance) ||
-        is_admin?(current_user)
+      Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
 
     with {:ok, status} <-
            (if can_instance_wide do

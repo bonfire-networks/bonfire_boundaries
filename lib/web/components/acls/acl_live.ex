@@ -121,7 +121,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
           Acls.is_stereotype?(acl) or
             (!Acls.is_object_custom?(acl) and
                (Acls.is_stereotyped?(acl) and
-                  !Bonfire.Boundaries.can?(current_user, :grant, :instance)))
+                  !Bonfire.Boundaries.can?(socket.assigns[:__context__], :grant, :instance)))
       )
     end
   end

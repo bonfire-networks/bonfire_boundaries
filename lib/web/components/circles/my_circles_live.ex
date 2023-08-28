@@ -21,13 +21,13 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
   end
 
   def update(assigns, socket) do
-    current_user = current_user(assigns)
+    context = assigns[:__context__] || socket.assigns[:__context__]
+    current_user = current_user(context)
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
 
     user =
       if scope == :instance and
-           (Integration.is_admin?(current_user) ||
-              Bonfire.Boundaries.can?(current_user, :assign, :instance)),
+           Bonfire.Boundaries.can?(context, :assign, :instance),
          do: Bonfire.Boundaries.Fixtures.admin_circle(),
          else: current_user
 

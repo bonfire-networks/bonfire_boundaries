@@ -96,6 +96,11 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
       follow_stereotypes = Circles.stereotypes(:follow)
 
+      read_only =
+        e(assigns, :read_only, nil) || e(socket.assigns, :read_only, nil) ||
+          stereotype_id in follow_stereotypes ||
+          id(circle) in follow_stereotypes
+
       send_self(
         page_title: e(circle, :named, :name, nil) || e(socket.assigns, :name, nil) || e(circle, :stereotyped, :named, :name, nil) || l("Circle"),
         back: true,
@@ -106,10 +111,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
              circle: circle,
              stereotype_id: stereotype_id,
              #  suggestions: suggestions,
-             read_only:
-               e(socket.assigns, :read_only, nil) ||
-                 e(circle, :stereotyped, :stereotype_id, nil) in follow_stereotypes ||
-                 ulid(circle) in follow_stereotypes
+             read_only: read_only
            ]}
         ]
       )
@@ -122,9 +124,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
         #  page_title: l("Circle"),
          #  suggestions: suggestions,
          stereotype_id: stereotype_id,
-         read_only:
-           stereotype_id in follow_stereotypes or
-             ulid(circle) in follow_stereotypes,
+         read_only: read_only,
          settings_section_title: "View " <> e(circle, :named, :name, "") <> " circle"
        )}
 

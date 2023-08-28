@@ -73,11 +73,7 @@
       {/if}
     {/if}
     {#if !@only_user}
-      <div
-        :if={Bonfire.Me.Users.is_admin?(@current_user) ||
-          Bonfire.Boundaries.can?(@__context__, :block, :instance)}
-        class=""
-      >
+      <div :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)} class="">
         {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, :instance_wide)}
           <div class="">
             <p class="mt-0 text-sm text-base-content/70">
@@ -177,11 +173,7 @@
       {/if}
     {/if}
     {#if !@only_user}
-      <div
-        :if={Bonfire.Me.Users.is_admin?(@current_user) ||
-          Bonfire.Boundaries.can?(@__context__, :block, :instance)}
-        class=""
-      >
+      <div :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)} class="">
         {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, :instance_wide)}
           <div class="">
             <p class="mt-0 text-sm text-base-content/70">
@@ -247,8 +239,7 @@
     {#if !@only_user}
       <div
         :if={@scope not in [nil, :user, :instance] and
-          (Bonfire.Me.Users.is_admin?(@current_user) ||
-             Bonfire.Boundaries.can?(@__context__, :block, @scope) ||
+          (Bonfire.Boundaries.can?(@__context__, :block, @scope) ||
              Bonfire.Boundaries.can?(@__context__, :block, :instance))}
         class=""
       >
@@ -284,11 +275,7 @@
         <!-- {/if} -->
       </div>
 
-      <div
-        :if={Bonfire.Me.Users.is_admin?(@current_user) ||
-          Bonfire.Boundaries.can?(@__context__, :block, :instance)}
-        class=""
-      >
+      <div :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)} class="">
         {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, :instance) &&
             Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, :instance)}
           <div class="">

@@ -9,7 +9,8 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
   prop scope, :any, default: nil
 
   def update(assigns, socket) do
-    current_user = current_user(assigns)
+    context = assigns[:__context__] || socket.assigns[:__context__]
+    current_user = current_user(context)
     tab = e(assigns, :selected_tab, nil)
 
     scope = e(assigns, :scope, nil)
@@ -17,8 +18,7 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
 
     read_only =
       (scope == :instance_wide and
-         (Integration.is_admin?(current_user) ||
-            Bonfire.Boundaries.can?(current_user, :block, :instance)) != true)
+         Bonfire.Boundaries.can?(context, :block, :instance) != true)
       |> debug("read_only?")
 
     block_type = if tab == "ghosted", do: :ghost, else: :silence

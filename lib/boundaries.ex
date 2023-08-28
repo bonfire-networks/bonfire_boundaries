@@ -352,66 +352,93 @@ defmodule Bonfire.Boundaries do
     Config.get!(:user_default_boundaries)
   end
 
-  def can?(_subject, can_verbs?, %{verbs: can_verbs!, value: true} = object_boundary)
+  def can?(circle_name, verbs, object, opts \\ [])
+
+  def can?(subject, can_verbs?, %{verbs: can_verbs!, value: true} = object_boundary, opts)
       when is_list(can_verbs!) do
-    warn(object_boundary, "WIP for preloaded object_boundary")
-    Enum.all?(List.wrap(can_verbs?), &Enum.member?(can_verbs!, Verbs.get(&1)[:verb]))
+    debug(object_boundary, " preloaded object_boundary")
+
+    skip? = Queries.skip_boundary_check?(opts)
+
+    skip? =
+      skip? == true ||
+        (skip? == :admins and Bonfire.Me.Accounts.is_admin?(subject)) ||
+        Enum.all?(List.wrap(can_verbs?), &Enum.member?(can_verbs!, Verbs.get(&1)[:verb]))
   end
 
-  def can?(circle_name, verbs, object) when is_atom(circle_name) do
+  def can?(circle_name, verbs, object, opts) when is_atom(circle_name) do
     # lookup if a built-in circle (eg. local users) has permission (note that some circle members may NOT have permission if they're also in another circle with negative permissions)
-    can?([current_user: Bonfire.Boundaries.Circles.get_id(circle_name)], verbs, object)
+    can?([current_user: Bonfire.Boundaries.Circles.get_id(circle_name)], verbs, object, opts)
   end
 
-  def can?(subject, verbs, object)
+  def can?(subject, verbs, object, opts)
       when is_map(object) or is_binary(object) or is_list(object) do
     debug(object, "check object")
-    current_user = current_user(subject)
-    current_user_id = ulid(current_user)
 
-    creator_id =
-      e(object, :created, :creator_id, nil) || e(object, :created, :creator, :id, nil) ||
-        e(object, :creator_id, nil) || e(object, :creator, :id, nil)
+    skip? = Queries.skip_boundary_check?(opts)
 
-    case (not is_nil(current_user_id) and creator_id == current_user_id) or
-           pointer_permitted?(object,
-             current_user: current_user,
-             current_account: current_account(subject),
-             verbs: verbs,
-             ids_only: true
-           ) do
-      true ->
-        true
+    skip? =
+      skip? == true ||
+        (skip? == :admins and Bonfire.Me.Accounts.is_admin?(subject)) ||
+        (
+          current_user = current_user(subject)
+          current_user_id = id(current_user)
 
-      %{id: _} ->
-        true
+          creator_id =
+            e(object, :created, :creator_id, nil) || e(object, :created, :creator, :id, nil) ||
+              e(object, :creator_id, nil) || e(object, :creator, :id, nil)
 
-      other ->
-        debug(verbs, "no permission to")
-        debug(other)
-        false
-    end
+          case (not is_nil(current_user_id) and creator_id == current_user_id) or
+                 pointer_permitted?(object,
+                   current_user: current_user,
+                   current_account: current_account(subject),
+                   verbs: verbs,
+                   ids_only: true
+                 ) do
+            true ->
+              true
+
+            %{id: _} ->
+              true
+
+            other ->
+              debug(verbs, "no permission to")
+              debug(other)
+              false
+          end
+        )
   end
 
-  def can?(_subject, _verbs, object)
+  def can?(_subject, _verbs, object, _opts)
       when is_nil(object) or object in [:skip, :skip_boundary_check, :loading] do
     debug("no object or boundary data")
     nil
   end
 
-  def can?(subject, verbs, :instance) do
-    # cache needed for eg. for extension page
-    key =
-      "can:#{ulid(current_user(subject) || current_account(subject))}:#{inspect(verbs)}:instance"
+  def can?(subject, verbs, :instance, _opts) do
+    current_account = current_account(subject)
 
-    with :not_set <- Process.get(key, :not_set) |> debug("from cache?") do
-      do_can_instance(subject, verbs, key)
-    end
+    Bonfire.Me.Accounts.is_admin?(current_account) ||
+      (
+        current_user = current_user(subject)
+        # cache needed for eg. for extension page
+        key =
+          "can:#{id(current_user)}:#{inspect(verbs)}:instance"
+
+        with :not_set <- Process.get(key, :not_set) |> debug("from cache?") do
+          do_can_instance(current_user, verbs, key)
+        end
+      )
   end
 
-  def can?(_subject, _verbs, object) do
+  def can?(_subject, _verbs, object, _opts) do
     warn(object, "no object or boundary data")
     nil
+  end
+
+  defp do_can_instance(%{shared_user: %{id: _}} = _subject, _verbs, _key) do
+    debug("do not share instance-wide permission on SharedUser")
+    false
   end
 
   defp do_can_instance(subject, verbs, key) do

@@ -31,7 +31,8 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
 
   def update(assigns, socket) do
     debug("update2")
-    current_user = current_user(assigns)
+    context = assigns[:__context__] || socket.assigns[:__context__]
+    current_user = current_user(context)
     built_in_ids = Acls.built_in_ids()
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
 
@@ -40,8 +41,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
         [current_user, Acls.opts_for_dropdown()]
       else
         if scope == :instance and
-             (Integration.is_admin?(current_user) ||
-                Bonfire.Boundaries.can?(current_user, :grant, :instance)) do
+             Bonfire.Boundaries.can?(context, :grant, :instance) do
           [
             Bonfire.Boundaries.Fixtures.admin_circle(),
             [extra_ids_to_include: built_in_ids]

@@ -635,7 +635,7 @@ defmodule Bonfire.Boundaries.Acls do
       {:ok, acl}
     else
       {:error, :not_found} ->
-        if is_admin?(caretaker),
+        if Bonfire.Boundaries.can?(current_account(opts) || caretaker, :assign, :instance),
           do:
             repo().single(
               get_for_caretaker_q(

@@ -220,16 +220,17 @@ defmodule Bonfire.Boundaries.Circles do
       {:ok, circle}
     else
       {:error, :not_found} ->
-        if is_admin?(caretaker) || opts[:scope] == :instance_wide,
-          do:
-            repo().single(
-              query_my_by_id(
-                id,
-                Bonfire.Boundaries.Fixtures.admin_circle(),
-                opts ++ @default_q_opts
-              )
-            ),
-          else: {:error, :not_found}
+        if Bonfire.Boundaries.can?(current_account(opts) || caretaker, :assign, :instance) ||
+             opts[:scope] == :instance_wide,
+           do:
+             repo().single(
+               query_my_by_id(
+                 id,
+                 Bonfire.Boundaries.Fixtures.admin_circle(),
+                 opts ++ @default_q_opts
+               )
+             ),
+           else: {:error, :not_found}
     end
   end
 
