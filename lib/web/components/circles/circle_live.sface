@@ -1,10 +1,10 @@
 <div id="circle_preview" class="">
   <div class="">
-    <div class="p-4 text-2xl font-bold mt-3 text-center pb-0">
+    <!-- <div class="p-4 text-2xl font-bold mt-3 text-center pb-0">
       <h1 data-role="circle_title">{@name || e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil)}</h1>
-    </div>
+    </div> -->
     <#slot />
-    <div :if={!@read_only} class="p-2 mt-4 border-b border-t border-base-content/20">
+    <div :if={!@read_only} class="p-2">
       <form id="edit_circle_participant" :on-change="select">
         <Bonfire.UI.Common.MultiselectLive
           implementation={:live_select}
@@ -60,12 +60,7 @@
                   </div>
                 </LiveRedirect>
               </td>
-              <!-- <td>
-            Zemlak, Daniel and Leannon
-            <br/>
-            <span class="badge badge-ghost badge-sm">Desktop Support Technician</span>
-          </td>
-          <td>Purple</td> -->
+
               <td class="!bg-transparent">
                 <div class="flex items-center justify-end">
                   <button
@@ -73,7 +68,7 @@
                     :if={!@read_only}
                     phx-value-subject={id}
                     :on-click="remove"
-                    class="btn border-base-content/50 btn-outline rounded-full normal-case btn-sm"
+                    class="btn !border-base-content/30 btn-outline rounded-full normal-case btn-sm"
                   >
                     {l("Remove")}
                   </button>

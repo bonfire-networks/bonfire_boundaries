@@ -26,7 +26,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
       assign(
         socket,
         selected_tab: "user",
-        page_title: l("Boundaries & Circles"),
+        # page_title: l("Boundaries & Circles"),
         nav_items: [],
         id: nil,
         back: true,
