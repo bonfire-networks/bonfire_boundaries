@@ -377,6 +377,8 @@ defmodule Bonfire.Boundaries.Circles do
 
   @doc "query for `list_my`"
   def query_my(caretaker, opts \\ [])
+
+  def query_my(caretaker, opts)
       when (is_binary(caretaker) or is_map(caretaker) or is_list(caretaker)) and caretaker != [] do
     query(opts)
     |> where(
@@ -385,6 +387,8 @@ defmodule Bonfire.Boundaries.Circles do
         circle.id in ^e(opts, :extra_ids_to_include, [])
     )
   end
+
+  def query_my(:instance, opts), do: Bonfire.Boundaries.Fixtures.admin_circle() |> query_my(opts)
 
   @doc "query for `get`"
   def query_my_by_id(id, caretaker, opts \\ []) do
