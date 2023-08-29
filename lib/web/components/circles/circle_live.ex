@@ -28,10 +28,10 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   end
 
   def update(assigns, socket) do
-    current_user = current_user(assigns)
+    current_user = current_user(assigns) || current_user(socket.assigns)
 
-    assigns
-    |> debug("assigns")
+    # assigns
+    # |> debug("assigns")
 
     params =
       e(assigns, :__context__, :current_params, %{})
@@ -161,7 +161,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
       )
       when is_binary(id) and circle_type in [:silence, :ghost] do
     with {:ok, _} <-
-           Blocks.unblock(id, circle_type, scope || current_user(socket)) do
+           Blocks.unblock(id, circle_type, scope || current_user(socket.assigns)) do
       {:noreply,
        socket
        |> update(:members, &Map.drop(&1, [id]))
@@ -237,7 +237,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   def add_member(subject, %{assigns: %{scope: scope, circle_type: circle_type}} = socket)
       when circle_type in [:silence, :ghost] do
     with id when is_binary(id) <- ulid(subject),
-         {:ok, _} <- Blocks.block(id, circle_type, scope || current_user(socket)) do
+         {:ok, _} <- Blocks.block(id, circle_type, scope || current_user(socket.assigns)) do
       {:noreply,
        socket
        |> assign_flash(:info, l("Blocked!"))

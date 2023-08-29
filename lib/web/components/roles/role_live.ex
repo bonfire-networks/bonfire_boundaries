@@ -9,7 +9,7 @@ defmodule Bonfire.Boundaries.Web.RoleLive do
   end
 
   # def update(assigns, socket) do
-  #   current_user = current_user(assigns)
+  #   current_user = current_user(assigns) 
   #   IO.inspect("QUIII")
   #   params = e(assigns, :__context__, :current_params, %{})
 

@@ -26,7 +26,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def update(assigns, socket) do
-    current_user = current_user(assigns)
+    current_user = current_user(assigns) || current_user(socket.assigns)
     params = e(assigns, :__context__, :current_params, %{})
 
     acl_id = e(assigns, :acl_id, nil) || e(socket.assigns, :acl_id, nil) || e(params, "id", nil)
@@ -76,7 +76,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def assign_updated(socket, force? \\ false) do
-    current_user = current_user(socket)
+    current_user = current_user(socket.assigns)
 
     acl_id = e(socket.assigns, :acl_id, nil)
     acl = e(socket.assigns, :acl, nil)
@@ -258,7 +258,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         %{"id" => live_select_id, "text" => search},
         %{assigns: %{scope: :user}} = socket
       ) do
-    current_user = current_user(socket)
+    current_user = current_user(socket.assigns)
 
     (Bonfire.Boundaries.Circles.list_my_with_global(
        [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
@@ -285,7 +285,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
-    current_user = current_user(socket)
+    current_user = current_user(socket.assigns)
     # for groups and the like 
     # TODO: should they have their own circles?
     (Bonfire.Boundaries.Circles.list_my_with_global(

@@ -33,7 +33,7 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
   end
 
   def update(assigns, socket) do
-    # current_user =(current_user(assigns) || current_user(socket))
+    # current_user =(current_user(assigns) || current_user(socket.assigns))
 
     # params = e(assigns, :__context__, :current_params, %{})
 
@@ -84,7 +84,7 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
   end
 
   def preview(socket, id, username) do
-    current_user = current_user(socket)
+    current_user = current_user(socket.assigns)
 
     boundaries =
       Enum.map(

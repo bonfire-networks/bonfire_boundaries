@@ -5,9 +5,13 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
 
   def handle_event("unblock", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
-           Bonfire.Boundaries.Blocks.unblock(id, :ghost, current_user: current_user(socket)),
+           Bonfire.Boundaries.Blocks.unblock(id, :ghost,
+             current_user: current_user(socket.assigns)
+           ),
          {:ok, _} <-
-           Bonfire.Boundaries.Blocks.unblock(id, :silence, current_user: current_user(socket)) do
+           Bonfire.Boundaries.Blocks.unblock(id, :silence,
+             current_user: current_user(socket.assigns)
+           ) do
       Bonfire.UI.Common.OpenModalLive.close()
 
       # ComponentID.send_assigns(
@@ -29,9 +33,11 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
 
   def handle_event("block", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
-           Bonfire.Boundaries.Blocks.block(id, :ghost, current_user: current_user(socket)),
+           Bonfire.Boundaries.Blocks.block(id, :ghost, current_user: current_user(socket.assigns)),
          {:ok, _} <-
-           Bonfire.Boundaries.Blocks.block(id, :silence, current_user: current_user(socket)) do
+           Bonfire.Boundaries.Blocks.block(id, :silence,
+             current_user: current_user(socket.assigns)
+           ) do
       Bonfire.UI.Common.OpenModalLive.close()
 
       # ComponentID.send_assigns(
@@ -123,7 +129,9 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
 
   def handle_event("unghost", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
-           Bonfire.Boundaries.Blocks.unblock(id, :ghost, current_user: current_user(socket)) do
+           Bonfire.Boundaries.Blocks.unblock(id, :ghost,
+             current_user: current_user(socket.assigns)
+           ) do
       Bonfire.UI.Common.OpenModalLive.close()
 
       # ComponentID.send_assigns(
@@ -145,7 +153,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
 
   def handle_event("ghost", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
-           Bonfire.Boundaries.Blocks.block(id, :ghost, current_user: current_user(socket)) do
+           Bonfire.Boundaries.Blocks.block(id, :ghost, current_user: current_user(socket.assigns)) do
       Bonfire.UI.Common.OpenModalLive.close()
 
       # ComponentID.send_assigns(
@@ -211,7 +219,9 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
 
   def handle_event("unsilence", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
-           Bonfire.Boundaries.Blocks.unblock(id, :silence, current_user: current_user(socket)) do
+           Bonfire.Boundaries.Blocks.unblock(id, :silence,
+             current_user: current_user(socket.assigns)
+           ) do
       Bonfire.UI.Common.OpenModalLive.close()
 
       # ComponentID.send_assigns(
@@ -233,7 +243,9 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
 
   def handle_event("silence", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
-           Bonfire.Boundaries.Blocks.block(id, :silence, current_user: current_user(socket)) do
+           Bonfire.Boundaries.Blocks.block(id, :silence,
+             current_user: current_user(socket.assigns)
+           ) do
       Bonfire.UI.Common.OpenModalLive.close()
 
       # ComponentID.send_assigns(

@@ -7,7 +7,7 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
 
   def update(assigns, socket) do
     current_user =
-      (current_user(assigns) || current_user(socket))
+      (current_user(assigns) || current_user(socket.assigns))
       |> debug("cuuu")
 
     # params = e(assigns, :__context__, :current_params, %{})
