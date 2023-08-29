@@ -10,7 +10,7 @@
 >
   {#if @type == "silence"}
     {#if !@only_admin}
-      {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, current_user: @current_user)}
+      {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, current_user: current_user(@__context__))}
         <div class="text-sm mt-3">{l("By unsilencing %{user_or_instance_name}, you will see things they publish again.",
             user_or_instance_name: @label
           )}</div>
@@ -107,7 +107,7 @@
     {/if}
   {#elseif @type == "ghost"}
     {#if !@only_admin}
-      {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, current_user: @current_user)}
+      {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, current_user: current_user(@__context__))}
         <div class="text-sm mt-3">{l("By unghosting %{user_or_instance_name}, they will see things you publish again.",
             user_or_instance_name: @label
           )}</div>
@@ -207,8 +207,10 @@
     {/if}
   {#else}
     {#if !@only_admin and
-        Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, current_user: @current_user) &&
-        Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, current_user: @current_user)}
+        Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence,
+          current_user: current_user(@__context__)
+        ) &&
+        Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, current_user: current_user(@__context__))}
       <div class="text-sm mt-3">{l("By unblocking %{user_or_instance_name}, you will be able to interact together with them.",
           user_or_instance_name: @label
         )}</div>

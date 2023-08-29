@@ -102,7 +102,7 @@
                     setting_boundaries
                     role={Bonfire.Boundaries.Roles.role_from_grants(Map.values(grants || %{}),
                       scope: @scope,
-                      current_user: @current_user
+                      current_user: current_user(@__context__)
                     )}
                     extra_roles={[{:custom, l("Custom")}]}
                     no_actions
