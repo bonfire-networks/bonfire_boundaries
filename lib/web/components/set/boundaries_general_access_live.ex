@@ -11,12 +11,13 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
   def matches?(_, _), do: false
 
   def render(%{my_acls: nil} = assigns) do
+    # debug(assigns)
     # TODO: only load this once per persistent session, or when we open the composer
     assigns
     |> assign(
       :my_acls,
       Bonfire.Boundaries.Acls.list_my(
-        current_user(assigns),
+        current_user_id(assigns),
         Bonfire.Boundaries.Acls.opts_for_dropdown()
       )
       # |> debug("myacccl")
