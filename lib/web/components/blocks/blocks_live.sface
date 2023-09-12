@@ -23,7 +23,7 @@
             type="button"
             x-on:click="active_info = ! active_info"
             :aria-expanded="active_info"
-            class="flex items-center w-full place-content-center font-medium text-sm"
+            class="px-4 font-medium text-sm"
           >
             <span x-show="!active_info" class="underline">{l("Read more")}</span>
             <span x-show="active_info" class="underline">{l("Read less")}</span>
