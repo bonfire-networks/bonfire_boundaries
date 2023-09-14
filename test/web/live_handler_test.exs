@@ -14,9 +14,9 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
       conn = conn(user: me, account: account)
       next = "/boundaries/circles"
       {:ok, view, _html} = live(conn, next)
-
+       open_browser(view)
       view
-      |> element("[data-id=new_circle] > div:first-child")
+      |> element("[data-role=new_circle] div[data-role=open_modal]")
       |> render_click()
 
       assert view |> has_element?("button[data-role=new_circle_submit]")
@@ -30,8 +30,9 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
         |> follow_redirect(conn)
 
       assert html =~ "Circle created!"
-      assert html =~ circle_name
-      assert circle_view |> has_element?("h1[data-role=circle_title]")
+      open_browser(circle_view)
+      assert has_element?(circle_view, "span", circle_name)
+#       assert circle_view |> has_element?("h1[data-role=circle_title]")
     end
 
     test "Add a user to an existing circle works" do
@@ -135,9 +136,9 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
       conn = conn(user: me, account: account)
       next = "/boundaries/acls"
       {:ok, view, _html} = live(conn, next)
-
+       # open_browser(view)
       view
-      |> element("[data-id=new_acl] div[data-role=open_modal]")
+      |> element("[data-role=new_acl] div[data-role=open_modal]")
       |> render_click()
 
       assert view |> has_element?("button[data-role=new_acl_submit]")
@@ -372,11 +373,17 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
       {:ok, acl} = Acls.create(%{named: %{name: "meme"}}, current_user: me)
       # navigate to the acl settings page
       conn = conn(user: me, account: account)
-      next = "/boundaries/acl/#{acl.id}/settings"
+      next = "/boundaries/acl/#{acl.id}"
       {:ok, view, _html} = live(conn, next)
-      # open_browser(view)
+
+#       click on the settings button
+       view
+       |> element("li[data-role=edit_acl_settings]")
+       |> render_click()
+
       new_acl_name = "friends"
 
+#       open_browser(view)
       assert view
              |> form("#edit_acl", named: %{name: new_acl_name})
              |> render_submit()

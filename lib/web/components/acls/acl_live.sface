@@ -40,6 +40,7 @@
           to={~p"/boundaries/circle/#{ulid(@acl)}/settings"}
           phx-click="assign"
           phx-value-section="settings"
+          data-role="edit_acl_settings"
           phx-target={@myself}
           class="cursor-pointer hover:bg-base-content/5 flex-1 flex place-content-center"
         >

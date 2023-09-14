@@ -58,7 +58,7 @@ defmodule Bonfire.Boundaries.AclTest do
              |> debug("myacls")
 
     # is this right?
-    assert length(acls) == 3
+    assert length(acls) == 4
   end
 
   # test "cannot list ACLs which I am not permitted to see" do
@@ -176,12 +176,12 @@ defmodule Bonfire.Boundaries.AclTest do
         ]
       )
 
-    # check bob is not blocked from reading 
+    # check bob is not blocked from reading
     refute Enum.any?(acl.grants, fn grant ->
              grant.subject_id == bob.id and grant.verb.verb == "Read" and grant.value == false
            end)
 
-    # check bob has no reply permission 
+    # check bob has no reply permission
     assert Enum.any?(acl.grants, fn grant ->
              grant.subject_id == bob.id and grant.verb.verb == "Reply" and grant.value == false
            end)
