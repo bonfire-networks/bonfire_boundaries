@@ -14,7 +14,8 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
       conn = conn(user: me, account: account)
       next = "/boundaries/circles"
       {:ok, view, _html} = live(conn, next)
-       open_browser(view)
+      open_browser(view)
+
       view
       |> element("[data-role=new_circle] div[data-role=open_modal]")
       |> render_click()
@@ -32,7 +33,7 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
       assert html =~ "Circle created!"
       open_browser(circle_view)
       assert has_element?(circle_view, "span", circle_name)
-#       assert circle_view |> has_element?("h1[data-role=circle_title]")
+      #       assert circle_view |> has_element?("h1[data-role=circle_title]")
     end
 
     test "Add a user to an existing circle works" do
@@ -136,7 +137,7 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
       conn = conn(user: me, account: account)
       next = "/boundaries/acls"
       {:ok, view, _html} = live(conn, next)
-       # open_browser(view)
+      # open_browser(view)
       view
       |> element("[data-role=new_acl] div[data-role=open_modal]")
       |> render_click()
@@ -376,14 +377,14 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
       next = "/boundaries/acl/#{acl.id}"
       {:ok, view, _html} = live(conn, next)
 
-#       click on the settings button
-       view
-       |> element("li[data-role=edit_acl_settings]")
-       |> render_click()
+      #       click on the settings button
+      view
+      |> element("li[data-role=edit_acl_settings]")
+      |> render_click()
 
       new_acl_name = "friends"
 
-#       open_browser(view)
+      #       open_browser(view)
       assert view
              |> form("#edit_acl", named: %{name: new_acl_name})
              |> render_submit()

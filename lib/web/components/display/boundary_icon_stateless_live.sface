@@ -1,5 +1,5 @@
-  {#if @object_boundary}
-<div class={@class}>
+{#if @object_boundary}
+  <div class={@class}>
     <Bonfire.UI.Common.OpenModalLive
       reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
       id={"modal_#{@parent_id || "boundary_#{@object_id}"}"}
@@ -33,18 +33,16 @@
         </button>
       </:open_btn>
     </Bonfire.UI.Common.OpenModalLive>
-</div>
-  {#elseif @boundary_preset}
+  </div>
+{#elseif @boundary_preset}
   <div class={@class}>
-
     <Bonfire.Boundaries.Web.BoundariesPresetNameLive
       boundary_preset={@boundary_preset}
       with_icon={@with_icon}
       with_label={@with_label}
       icon_class="w-4 h-4 text-base-content/60"
     />
-    </div>
-
-  {#else}
-    <span :if={current_user(@__context__)} class="loading loading-ring loading-sm" />
-  {/if}
+  </div>
+{#else}
+  <span :if={current_user(@__context__)} class="loading loading-ring loading-sm" />
+{/if}
