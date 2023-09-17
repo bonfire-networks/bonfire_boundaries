@@ -50,13 +50,15 @@ defmodule Bonfire.Boundaries.Queries do
               query
 
             :admins ->
-              case Bonfire.Common.Utils.current_user(opts) do
-                %{id: _, instance_admin: %{is_instance_admin: true}} ->
+              current_user = Bonfire.Common.Utils.current_user(opts)
+
+              case Bonfire.Me.Accounts.is_admin?(current_user) do
+                true ->
                   Untangle.debug("Skipping boundary checks for instance administrator")
 
                   query
 
-                current_user ->
+                _ ->
                   vis =
                     Bonfire.Boundaries.Queries.query_with_summary(
                       current_user,
@@ -70,7 +72,7 @@ defmodule Bonfire.Boundaries.Queries do
                   )
               end
 
-            false ->
+            _false ->
               current_user = Bonfire.Common.Utils.current_user(opts)
 
               # vis = Bonfire.Boundaries.Queries.query_with_summary(uscurrent_userer, verbs)
@@ -94,9 +96,6 @@ defmodule Bonfire.Boundaries.Queries do
                 unquote(query),
                 exists(vis)
               )
-
-            other ->
-              raise "Unexpected skip_boundary_check"
           end
         end
 
@@ -199,10 +198,10 @@ defmodule Bonfire.Boundaries.Queries do
   def skip_boundary_check?(opts, object \\ nil) do
     (Common.Config.env() != :prod and
        Common.Config.get(:skip_all_boundary_checks)) ||
-      (is_list(opts) and Keyword.get(opts, :skip_boundary_check) == true) ||
       (not is_nil(object) and
          (Common.Enums.id(object) == Common.Utils.current_user_id(opts) ||
-            Common.Enums.id(object) == Common.Enums.id(Common.Utils.current_account(opts))))
+            Common.Enums.id(object) == Common.Utils.current_account_id(opts))) ||
+      (is_list(opts) and Keyword.get(opts, :skip_boundary_check))
   end
 
   defp user_and_circle_ids(subjects) do

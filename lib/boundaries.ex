@@ -20,7 +20,9 @@ defmodule Bonfire.Boundaries do
   import Ecto.Query
   import EctoSparkles
 
-  def preset_name(boundaries) when is_list(boundaries) do
+  def preset_name(boundaries, include_remote? \\ false)
+
+  def preset_name(boundaries, include_remote?) when is_list(boundaries) do
     debug(boundaries, "inputted")
     # Note: only one applies, in priority from most to least restrictive
     cond do
@@ -36,6 +38,10 @@ defmodule Bonfire.Boundaries do
       "public" in boundaries ->
         "public"
 
+      "public_remote" in boundaries ->
+        # TODO: better
+        if include_remote?, do: "public_remote", else: "public"
+
       "open" in boundaries or "request" in boundaries or "invite" in boundaries or
           "visible" in boundaries ->
         boundaries
@@ -47,9 +53,9 @@ defmodule Bonfire.Boundaries do
     |> debug("computed")
   end
 
-  def preset_name(other) do
+  def preset_name(other, include_remote?) do
     boundaries_normalise(other)
-    |> preset_name()
+    |> preset_name(include_remote?)
   end
 
   def boundaries_or_default(to_boundaries, opts \\ [])
