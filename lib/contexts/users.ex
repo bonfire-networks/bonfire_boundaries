@@ -34,6 +34,7 @@ defmodule Bonfire.Boundaries.Users do
           maybe_request_before_follow(opts[:request_before_follow]),
         opts
       )
+      |> debug()
 
     # first acls and circles
     do_insert_main(user, params)
