@@ -5,7 +5,7 @@
         <button
           type="button"
           phx-click={JS.toggle(to: "#composer_container") |> JS.toggle(to: "#boundaries_picker")}
-          class="flex w-fit items-center justify-between gap-2 btn-ghost normal-case rounded-full border btn-sm btn border-base-content/30 text-primary"
+          class="flex items-center justify-between gap-2 btn-ghost normal-case rounded-full btn-xs btn text-primary"
         >
           <Bonfire.Boundaries.Web.BoundariesPresetNameLive
             icon_class="w-5 h-5 text-primary"

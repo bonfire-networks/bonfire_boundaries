@@ -3,7 +3,7 @@
     style="min-height: 320px; height: 360px"
     id="boundaries_general_access"
     class={
-      "menu flex flex-col gap-3 menu-lg flex-1 h-full flex-nowrap overflow-y-auto",
+      "menu flex flex-col gap-1 flex-1 h-full flex-nowrap overflow-y-auto",
       "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-100 rounded-box w-[328px]":
         @is_dropdown
     }
@@ -30,7 +30,7 @@
           <div class="p-1.5 flex items-center text-left">
             <div class="flex-shrink-0">
               <span class="text-xl">
-                <#Icon iconify="ph:globe" class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
+                <#Icon iconify="ph:globe" class={"w-4 h-4 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
               </span>
             </div>
             <div class="flex flex-col ml-3">
@@ -83,7 +83,7 @@
               <span class="text-xl">
                 <#Icon
                   iconify="ph:campfire-bold"
-                  class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
+                  class={"w-4 h-4 text-base-content/70", "!w-4 !h-4": @is_dropdown}
                 />
               </span>
             </div>
@@ -135,7 +135,8 @@
           />
           <div class="p-1.5 flex items-center text-left">
             <div class="flex-shrink-0">
-              <span class={"text-2xl", "!text-lg": @is_dropdown}>﹫</span>
+            <#Icon iconify="ri:at-line" class={"w-4 h-4 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
+              <!-- <span class={"text-2xl", "!text-lg": @is_dropdown}>﹫</span> -->
             </div>
             <div class="flex flex-col ml-3">
               <div class="text-sm font-semibold text-base-content/90">{l("Mentions")}</div>
@@ -177,10 +178,10 @@
                     {#match nil}
                       <#Icon
                         iconify="fluent:door-tag-20-filled"
-                        class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
+                        class={"w-4 h-4 text-base-content/70", "!w-4 !h-4": @is_dropdown}
                       />
                     {#match icon}
-                      <Iconify.iconify icon={icon} class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
+                      <Iconify.iconify icon={icon} class={"w-4 h-4 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
                   {/case}
                 </span>
               </div>
@@ -234,7 +235,7 @@
               <span class="text-xl">
                 <#Icon
                   iconify="pajamas:todo-add"
-                  class={"w-6 h-6 text-base-content/70", "!w-4 !h-4": @is_dropdown}
+                  class={"w-4 h-4 text-base-content/70", "!w-4 !h-4": @is_dropdown}
                 />
               </span>
             </div>

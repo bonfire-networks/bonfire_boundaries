@@ -4,7 +4,7 @@
       title={l("Public: visible to everyone. People on the fediverse can see, interact, and reply.")}
       class={
         @class,
-        "flex items-center gap-4": @with_label && @with_icon
+        "flex items-center gap-2": @with_label && @with_icon
       }
     >
       <span :if={@with_icon} class={@icon_wrapper}>
@@ -27,7 +27,7 @@
       title={l("Local: everyone on this instance can see, interact, and reply.")}
       class={
         @class,
-        "flex items-center gap-4": @with_label && @with_icon
+        "flex items-center gap-2": @with_label && @with_icon
       }
     >
       <span :if={@with_icon} class={@icon_wrapper}>
@@ -49,7 +49,7 @@
     <div
       class={
         @class,
-        "flex items-center gap-4": @with_label && @with_icon
+        "flex items-center gap-2": @with_label && @with_icon
       }
       title={l("Open") <> ": " <> Config.get([:ui, :group, :preset_descriptions, preset], "")}
     >
@@ -72,7 +72,7 @@
     <div
       class={
         @class,
-        "flex items-center gap-4": @with_label && @with_icon
+        "flex items-center gap-2": @with_label && @with_icon
       }
       title={l("Visible") <> ": " <> Config.get([:ui, :group, :preset_descriptions, preset], "")}
     >
@@ -89,7 +89,7 @@
     <div
       class={
         @class,
-        "flex items-center gap-4": @with_label && @with_icon
+        "flex items-center gap-2": @with_label && @with_icon
       }
       title={l("Private") <> ": " <> Config.get([:ui, :group, :preset_descriptions, preset], "")}
     >
@@ -107,7 +107,7 @@
       title={e(name, :named, nil) || e(name, :name, nil) || name || l("Preset Boundary")}
       class={
         @class,
-        "flex items-center gap-4": @with_label && @with_icon
+        "flex items-center gap-2": @with_label && @with_icon
       }
     >
       <span :if={@with_icon} class={@icon_wrapper}>
@@ -124,7 +124,7 @@
       title={name}
       class={
         @class,
-        "flex items-center gap-4": @with_label && @with_icon
+        "flex items-center gap-2": @with_label && @with_icon
       }
     >
       <span :if={@with_icon} class={@icon_wrapper}>
@@ -141,7 +141,7 @@
       title={debug(other, "cuubbb") && l("Custom Boundaries")}
       class={
         @class,
-        "flex items-center gap-4": @with_label && @with_icon
+        "flex items-center gap-2": @with_label && @with_icon
       }
     >
       <span :if={@with_icon} class={@icon_wrapper}>
