@@ -1,4 +1,4 @@
-<div class="flex sticky bottom-0 py-2 bg-base-300 z-50 items-center justify-between gap-2">
+<div class="flex sticky bottom-0 py-2 bg-base-100 z-50 items-center justify-between gap-2">
   <!-- <button
     :if={!@hide_preview}
     type="button"

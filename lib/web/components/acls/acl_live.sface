@@ -112,7 +112,7 @@
                     <label tabindex="0" class="rounded btn btn-square btn-ghost btn-sm">
                       <#Icon solid="DotsVertical" class="w-4 h-4" />
                     </label>
-                    <ul tabindex="0" class="w-48 p-1 rounded shadow dropdown-content menu menu-compact bg-base-100">
+                    <ul tabindex="0" class="w-48 p-1 rounded shadow dropdown-content menu menu-compact bg-base-200">
                       <!-- <li :if={!@setting_boundaries}>
                         <Bonfire.Boundaries.Web.AclModalLive
                           subject_id={subject_id}

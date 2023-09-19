@@ -12,10 +12,10 @@
       read_only={@read_only}
     >
       <div class="flex flex-col flex-1 gap-1 text-left prose prose-sm">
-        <p :if={@scope == :instance_wide} class="mt-3 px-4 mb-0">
+        <p :if={@scope == :instance_wide} class="px-4 mb-0">
           {l("Nobody on this instance will receive any updates from the users or instances on this list")}
         </p>
-        <p :if={@scope != :instance_wide} class="mt-3 px-4 mb-0">
+        <p :if={@scope != :instance_wide} class="px-4 mb-0">
           {l("You will not receive any updates from the users or instances on this list")}
         </p>
         <div x-data="{active_info: false}" role="region" class="">

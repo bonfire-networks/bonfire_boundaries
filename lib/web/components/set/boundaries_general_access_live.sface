@@ -4,7 +4,7 @@
     id="boundaries_general_access"
     class={
       "menu flex flex-col gap-1 flex-1 h-full flex-nowrap overflow-y-auto",
-      "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-100 rounded-box w-[328px]":
+      "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-200 rounded-box w-[328px]":
         @is_dropdown
     }
   >
