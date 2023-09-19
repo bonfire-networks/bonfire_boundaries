@@ -28,7 +28,7 @@
             boundary_preset={@boundary_preset}
             with_icon={@with_icon}
             with_label={@with_label}
-            icon_class="w-4 h-4 text-base-content/60"
+            icon_class="w-4 h-4 text-base-content/50"
           />
         </button>
       </:open_btn>
@@ -40,7 +40,7 @@
       boundary_preset={@boundary_preset}
       with_icon={@with_icon}
       with_label={@with_label}
-      icon_class="w-4 h-4 text-base-content/60"
+      icon_class="w-4 h-4 text-base-content/50"
     />
   </div>
 {#else}
