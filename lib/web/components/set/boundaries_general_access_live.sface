@@ -1,4 +1,4 @@
-    <!-- style="min-height: 320px; height: 360px" -->
+<!-- style="min-height: 320px; height: 360px" -->
 <div class="h-full flex-1">
   <div
     id="boundaries_general_access"
@@ -56,8 +56,8 @@
           class="btn btn-xs !border-base-content/30 !border btn-outline rounded-full normal-case"
           title={l("Customise or add extra boundaries")}
         >
-          <!-- <#Icon iconify="ri:settings-4-line" class="w-4 h-4" /> -->
-          <span class="">{l("Edit")}</span>
+          <#Icon iconify="ri:settings-4-line" class="w-4 h-4" />
+          <span class="sr-only">{l("Customise")}</span>
         </button>
       </div>
     </div>
@@ -66,7 +66,7 @@
     <div class={
       "flex items-center gap-3 p-2 rounded-lg justify-between hover:bg-base-content/5",
       "bg-base-content/5": matches?(@boundary_preset, "local")
-      }>
+    }>
       <button
         class="text-base-content"
         phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
@@ -113,8 +113,8 @@
           class="btn btn-xs !border-base-content/30 !border btn-outline rounded-full normal-case"
           title={l("Customise or add extra boundaries")}
         >
-          <!-- <#Icon iconify="ri:settings-4-line" class="w-4 h-4" /> -->
-          <span class="">{l("Edit")}</span>
+          <#Icon iconify="ri:settings-4-line" class="w-4 h-4" />
+          <span class="sr-only">{l("Customise")}</span>
         </button>
       </div>
     </div>
@@ -122,7 +122,8 @@
     <!-- MENTIONS -->
     <div class={
       "flex items-center gap-3 p-2 justify-between rounded-lg hover:bg-base-content/5",
-      "bg-base-content/5": matches?(@boundary_preset, "mentions")}>
+      "bg-base-content/5": matches?(@boundary_preset, "mentions")
+    }>
       <button
         class="text-base-content"
         phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
@@ -141,7 +142,7 @@
           /> -->
           <div class="flex items-center text-left">
             <div class="flex-shrink-0">
-            <#Icon iconify="ri:at-line" class={"w-5 h-5 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
+              <#Icon iconify="ri:at-line" class={"w-5 h-5 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
               <!-- <span class={"text-2xl", "!text-lg": @is_dropdown}>﹫</span> -->
             </div>
             <div class="flex flex-col ml-3">
@@ -160,7 +161,7 @@
       <div class={
         "p-2 flex items-center gap-3 justify-between rounded-lg hover:bg-base-content/5",
         "bg-base-content/5": matches?(@to_boundaries, acl_id)
-        }>
+      }>
         <button
           class="text-base-content"
           phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
@@ -211,35 +212,41 @@
             class="btn btn-xs !border-base-content/30 !border btn-outline rounded-full normal-case"
             title={l("Customise or add extra boundaries")}
           >
-            <!-- <#Icon iconify="ri:settings-4-line" class="w-4 h-4" /> -->
-            <span class="">{l("Edit")}</span>
+            <#Icon iconify="ri:settings-4-line" class="w-4 h-4" />
+            <span class="sr-only">{l("Customise")}</span>
           </button>
         </div>
       </div>
     {/for}
 
     <!-- CREATE A NEW ONE -->
-    <div class="pt-2 border-t border-base-content/10">
+    <div class="mt-1 pt-1 border-t border-base-content/10">
       <div class={
-        "p-2 hover:bg-base-content/5",
+        "flex items-center gap-3 p-2 justify-between rounded-lg hover:bg-base-content/5",
         "bg-base-content/5": matches?(@boundary_preset, "custom")
-        }>
-        
+      }>
         <button
           class="text-base-content"
-          phx-click={
-            JS.toggle(to: "#extra_boundaries")
-            |> JS.push("Bonfire.Boundaries:replace_boundary",
+          phx-click={JS.toggle(to: "#extra_boundaries")
+          |> JS.toggle(to: "#composer_container")
+          |> JS.push("Bonfire.Boundaries:replace_boundary",
             value: %{id: "custom", name: l("Custom")},
             target: "#smart_input"
           )}
           type="button"
         >
-          <div class="flex flex-col text-center">
-            <div class="text-sm font-semibold text-base-content/90">{l("Custom")}</div>
-            <p class="text-xs text-base-content/50">{l("Specify custom boundaries, starting with a blank slate.")}</p>
+          <div class="flex items-center text-left">
+            <div class="flex-shrink-0">
+              <#Icon
+                iconify="ri:settings-4-line"
+                class={"w-5 h-5 text-base-content/70", "!w-4 !h-4": @is_dropdown}
+              />
+            </div>
+            <div class="flex flex-col ml-3">
+              <div class="text-sm font-semibold text-base-content/90">{l("Custom")}</div>
+              <p class="text-xs text-base-content/50">{l("Specify custom boundaries, starting with a blank slate.")}</p>
+            </div>
           </div>
-          
         </button>
       </div>
     </div>
