@@ -1,6 +1,6 @@
 defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   use Bonfire.UI.Common.Web, :live_handler
-  import Untangle
+  # import Untangle
   # import Bonfire.UI.Common
 
   def handle_event("unblock", %{"id" => id} = _params, socket) do

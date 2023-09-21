@@ -1,6 +1,6 @@
 defmodule Bonfire.Boundaries.Web.RoleDetailsLive do
   use Bonfire.UI.Common.Web, :stateless_component
-  alias Bonfire.Boundaries.Verbs
+  # alias Bonfire.Boundaries.Verbs
 
   prop role, :any, required: true
   prop name, :string, default: nil

@@ -1,7 +1,7 @@
 <select
   name={"#{@field}[#{@circle_id}][]"}
   class={
-    "font-normal select-sm text-sm rounded-full select",
+    "font-normal select-sm text-sm rounded-full select select-bordered",
     "select-xs text-xs pl-1 px-0": !@setting_boundaries
   }
 >

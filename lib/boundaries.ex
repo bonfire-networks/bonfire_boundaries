@@ -3,7 +3,7 @@ defmodule Bonfire.Boundaries do
   import Bonfire.Boundaries.Integration
 
   # alias Bonfire.Data.Identity.User
-  alias Bonfire.Boundaries.Circles
+  # alias Bonfire.Boundaries.Circles
   # alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.Identity.Caretaker
@@ -18,7 +18,7 @@ defmodule Bonfire.Boundaries do
   alias Pointers.Pointer
   import Queries, only: [boundarise: 3]
   import Ecto.Query
-  import EctoSparkles
+  # import EctoSparkles
 
   def preset_name(boundaries, include_remote? \\ false)
 

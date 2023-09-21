@@ -30,6 +30,11 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
     |> render_sface()
   end
 
+  def render(assigns) do
+    assigns
+    |> render_sface()
+  end
+
   def acl_meta(%{id: acl_id, stereotyped: %{stereotype_id: "1HANDP1CKEDZEPE0P1E1F0110W"}} = acl) do
     %{
       id: acl_id,
@@ -49,8 +54,5 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
     }
   end
 
-  def render(assigns) do
-    assigns
-    |> render_sface()
-  end
+
 end

@@ -3,7 +3,7 @@ defmodule Bonfire.Boundaries.Acls do
   ACLs represent fully populated access control rules that can be reused.
   Can be reused to secure multiple objects, thus exists independently of any object.
 
-  The table doesn't have any fields of its own: 
+  The table doesn't have any fields of its own:
   ```
   has_many(:grants, Grant)
   has_many(:controlled, Controlled)
@@ -15,7 +15,7 @@ defmodule Bonfire.Boundaries.Acls do
   import Ecto.Query
   import EctoSparkles
   import Bonfire.Boundaries.Integration
-  import Bonfire.Boundaries.Queries
+  # import Bonfire.Boundaries.Queries
 
   alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.Identity.ExtraInfo
@@ -282,7 +282,7 @@ defmodule Bonfire.Boundaries.Acls do
     {to_boundaries, preset} = to_boundaries_preset_tuple(to_boundaries)
 
     # add ACLs based on any boundary presets (eg. public/local/mentions)
-    # + add any ACLs directly specified in input     
+    # + add any ACLs directly specified in input
 
     {preset, base_acls(creator, preset, opts), maybe_add_direct_acl_ids(to_boundaries)}
   end
@@ -339,7 +339,7 @@ defmodule Bonfire.Boundaries.Acls do
     |> debug()
     |> Enum.map(fn
       {key, val} ->
-        # with custom role 
+        # with custom role
         case ulid(key) do
           nil -> {ulid(val), key}
           subject_id -> {subject_id, val}

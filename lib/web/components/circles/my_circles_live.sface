@@ -1,28 +1,32 @@
-<div class="p-4">
-  <div class="p-4 mb-0 rounded-md bg-info/10">
-    <div class="flex">
-      <div class="flex-shrink-0">
-        <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-      </div>
-      <div class="flex-1 ml-3 md:flex md:justify-between">
-        <p class="text-sm text-info">
-          {l(
-            "Circles are a way to organize your connections and relationships with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors."
-          )}</p>
+<div class="">
+  <div class="p-4">
+    <div class="p-4 mb-0 rounded-md bg-info/10">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
+        </div>
+        <div class="flex-1 ml-3 md:flex md:justify-between">
+          <p class="text-sm text-info">
+            {l(
+              "Circles are a way to organize your connections and relationships with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors."
+            )}</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="mt-4">
-    <ul role="list" class="flex flex-col gap-2">
+  <div class="">
+    <ul role="list" class="flex flex-col divide-y divide-base-content/10">
       {#for circle <- e(@circles, [])}
-        <li class="rounded-md bg-base-content/5">
+        <li class="">
           <LiveRedirect
-            class="block rounded-md hover:bg-base-content/5"
+            class="block hover:bg-base-content/5"
             to={~p"/boundaries/scope/#{@scope}/circle/#{id(circle)}"}
           >
-            <div class="flex items-center gap-3 p-3">
-              <#Icon iconify="fluent:people-list-16-filled" class="w-5 h-5 text-base-content/70" />
+            <div class="flex items-center gap-3 p-5">
+              <span class="w-10 h-10 rounded bg-info flex items-center place-content-center">
+                <#Icon iconify="fluent:people-list-16-filled" class="w-6 h-6 text-info-content" />
+              </span>
               <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
                 <div class="truncate">
                   <div class="flex text-sm">

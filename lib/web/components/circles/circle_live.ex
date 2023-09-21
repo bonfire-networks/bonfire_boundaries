@@ -102,20 +102,21 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
           id(circle) in follow_stereotypes
 
       send_self(
+        read_only: read_only,
         page_title:
           e(circle, :named, :name, nil) || e(socket.assigns, :name, nil) ||
             e(circle, :stereotyped, :named, :name, nil) || l("Circle"),
         back: true,
-        circle: circle,
-        page_header_aside: [
-          {Bonfire.Boundaries.Web.HeaderCircleLive,
-           [
-             circle: circle,
-             stereotype_id: stereotype_id,
-             #  suggestions: suggestions,
-             read_only: read_only
-           ]}
-        ]
+        circle: circle
+        # page_header_aside: [
+        #   {Bonfire.Boundaries.Web.HeaderCircleLive,
+        #    [
+        #      circle: circle,
+        #      stereotype_id: stereotype_id,
+        #      #  suggestions: suggestions,
+        #      read_only: read_only
+        #    ]}
+        # ]
       )
 
       {:ok,
@@ -145,7 +146,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
-  def do_handle_event("multi_select", %{data: data, text: text}, socket) do
+  def do_handle_event("multi_select", %{data: data, text: _text}, socket) do
     add_member(data, socket)
   end
 

@@ -1,6 +1,6 @@
 defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
   use Bonfire.UI.Common.Web, :stateful_component
-  alias Bonfire.Boundaries.Roles
+  # alias Bonfire.Boundaries.Roles
 
   prop preview_boundary_for_id, :any, default: nil
   prop preview_boundary_for_username, :any, default: nil
@@ -131,7 +131,7 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
     end
   end
 
-  def preview(socket, id, username), do: socket
+  # def preview(socket, id, username), do: socket
 
   def handle_event(
         action,

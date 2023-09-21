@@ -74,7 +74,7 @@
             "Users or instances on this list will not be able to see or interact with anyone on this instance"
           )}
         </p>
-        <p :if={@scope != :instance_wide} class="mt-2 mb-0 px-4">
+        <p :if={@scope != :instance_wide} class="mt-2 mb-0 px-6">
           {l("Users or instances on this list will not be able to see or interact with you or your content")}
         </p>
         <div x-data="{active_info: false}" role="region" class="mb-4">
@@ -82,7 +82,7 @@
             type="button"
             x-on:click="active_info = ! active_info"
             :aria-expanded="active_info"
-            class="flex px-4   place-content-center font-medium text-sm"
+            class="flex px-6 place-content-center font-medium text-sm"
           >
             <span x-cloak x-show="!active_info" class="underline">{l("Read more")}</span>
             <span x-cloak x-show="active_info" class="underline">{l("Read less")}</span>

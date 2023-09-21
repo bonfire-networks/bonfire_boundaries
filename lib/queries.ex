@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.Queries do
   providing) the return type of a subquery.
 
   """
-  import Untangle
+  # import Untangle
   import Ecto.Query
   alias Bonfire.Boundaries.Summary
   alias Bonfire.Boundaries.Verbs

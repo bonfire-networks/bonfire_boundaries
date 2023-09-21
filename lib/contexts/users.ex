@@ -20,8 +20,8 @@ defmodule Bonfire.Boundaries.Users do
 
   def create_default_boundaries(user, opts \\ []) do
     %{
-      acls: acls,
-      circles: circles,
+      acls: _acls,
+      circles: _circles,
       grants: grants,
       named: named,
       controlleds: controlleds,
@@ -100,7 +100,7 @@ defmodule Bonfire.Boundaries.Users do
     # Grants will take care of themselves because they have a strong pointer acl_id.
   end
 
-  def prepare_default_boundaries(user, acls_extra, opts) do
+  def prepare_default_boundaries(user, acls_extra, _opts) do
     # debug(opts)
 
     user_default_boundaries = Boundaries.user_default_boundaries()
@@ -178,7 +178,7 @@ defmodule Bonfire.Boundaries.Users do
     }
   end
 
-  def do_insert_main(user, %{acls: acls, circles: circles, stereotypes: stereotypes}) do
+  def do_insert_main(user, %{acls: acls, circles: circles, stereotypes: _stereotypes}) do
     repo().insert_all_or_ignore(Acl, Enum.map(acls, &Map.take(&1, [:id])))
     repo().insert_all_or_ignore(Circle, Enum.map(circles, &Map.take(&1, [:id])))
     # repo().insert_all_or_ignore(Stereotyped, stereotypes)
