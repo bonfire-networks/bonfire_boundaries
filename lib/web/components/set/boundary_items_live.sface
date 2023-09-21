@@ -28,7 +28,7 @@
             <span class="w-8 h-8 rounded-full bg-base-content/10 flex items-center place-content-center">
               <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/70" />
             </span>
-            <div class="text-base font-medium text-base-content">{data}</div>
+            <div class="text-base font-medium text-base-content truncate max-w-[210px]">{data}</div>
           </div>
         {#match _}
           <div class="flex items-center gap-3 grow">
@@ -79,7 +79,7 @@
           </Bonfire.UI.Common.OpenModalLive>
         </div>
 
-        <div
+        <!-- <div
           :if={e(data, :type, nil) == "user"}
           phx-click={JS.hide(to: "#boundaries_picker")
           |> JS.hide(to: "#extra_boundaries")
@@ -94,7 +94,7 @@
           class="btn btn-sm btn-circle btn-ghost"
         >
           <#Icon iconify="heroicons-outline:eye" class="w-5 h-5 md:w-4 md:h-4" />
-        </div>
+        </div> -->
 
         <div
           phx-click={JS.push("Bonfire.Boundaries:remove_circle",
