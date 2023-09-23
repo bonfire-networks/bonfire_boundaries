@@ -177,6 +177,7 @@
                       <div class="flex items-center p-2 space-x-2 bg-base-content/5">
                         {#case Bonfire.Boundaries.Verbs.get(verb_id)}
                           {#match nil}
+                            <div />
                           {#match verb}
                             <span class="tooltip" data-tip={e(verb, :summary, nil)}>
                               <Iconify.iconify

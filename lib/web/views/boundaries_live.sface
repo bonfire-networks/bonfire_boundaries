@@ -70,7 +70,6 @@
         scope={:instance}
       /> -->
     {#match "instance_acl"}
-      <!-- boundaries placed on the instance itself -->
       <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.AclLive) and current_user(@__context__)}
         module={Bonfire.Boundaries.Web.AclLive}

@@ -1,7 +1,7 @@
 {#if current_user(@__context__) != nil}
   {#case {current_user_id(@__context__) != id(@object), e(peered(@object, @peered), :peer_id, false)}}
     {#match {false, false}}
-      <!-- can't block ourselves -->
+      <div />  
     {#match {block_object, block_peer}}
       <li>
         <details>
