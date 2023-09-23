@@ -53,6 +53,4 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
       name: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil)
     }
   end
-
-
 end

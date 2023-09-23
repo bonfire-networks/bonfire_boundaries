@@ -6,12 +6,15 @@
     <#slot />
     <ul :if={!@stereotype_id and !@read_only} class="menu menu-horizontal gap-3 bg-base-100 mx-4">
       <li>
-        <button @click="search = !search" class="btn btn-active hover:!bg-opacity/80 btn-outline normal-case !border !border-base-content/30 rounded-full btn-sm">
+        <button
+          @click="search = !search"
+          class="btn btn-active hover:!bg-opacity/80 btn-outline normal-case !border !border-base-content/30 rounded-full btn-sm"
+        >
           <#Icon solid="search" class="w-4 h-4" />
-          <span>{l "Add users"}</span>
+          <span>{l("Add users")}</span>
         </button>
       </li>
-     <li data-role="edit_circle_name" class="edit_name">
+      <li data-role="edit_circle_name" class="edit_name">
         <Bonfire.UI.Common.OpenModalLive
           id="edit_name"
           title_text={l("Edit circle name")}
@@ -50,7 +53,10 @@
             </div> -->
           <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
           <:open_btn>
-            <button type="button" class="btn btn-outline normal-case !border !border-base-content/30 rounded-full btn-sm">
+            <button
+              type="button"
+              class="btn btn-outline normal-case !border !border-base-content/30 rounded-full btn-sm"
+            >
               {l("Edit circle")}</button>
           </:open_btn>
         </Bonfire.UI.Common.OpenModalLive>
@@ -67,8 +73,11 @@
               )}</p>
           </div>
           <:open_btn>
-            <button type="button" class="btn btn-outline normal-case btn-circle !border !border-base-content/30 rounded-full btn-sm"><#Icon iconify="ph:trash-fill" class="w-4 h-4" />
-            <span class="sr-only">{l("Delete circle")}</span></button>
+            <button
+              type="button"
+              class="btn btn-outline normal-case btn-circle !border !border-base-content/30 rounded-full btn-sm"
+            ><#Icon iconify="ph:trash-fill" class="w-4 h-4" />
+              <span class="sr-only">{l("Delete circle")}</span></button>
           </:open_btn>
           <:action_btns>
             <button
@@ -78,7 +87,7 @@
               phx-value-go="/boundaries/circles"
               class="normal-case rounded-full btn btn-error btn-sm"
             >
-            {l("Delete this circle")}</button>
+              {l("Delete this circle")}</button>
           </:action_btns>
         </Bonfire.UI.Common.OpenModalLive>
       </li>
@@ -96,28 +105,27 @@
   </div>
   {#if Enum.count(@members) > 0}
     <div class="">
-      
-          <!-- row 1 -->
-          {#for {id, member} <- @members}
-            <div class="flex items-center">
-              <input
-                type="hidden"
-                name={"circle[encircle][#{id}][circle_id]"}
-                value={e(@circle, :id, @circle_id)}
-              />
-              <input
-                type="hidden"
-                name={"circle[encircle][#{id}][subject_id]"}
-                value={e(member, :subject_id, id)}
-              />
-              
-              <Bonfire.UI.Common.ProfileItemLive
-                profile={e(member, :subject, :profile, nil)}
-                avatar_class="w-10 h-10 rounded-full"
-                character={e(member, :subject, :character, nil)}
-                show_controls={[]}
-              />
-              <!-- <td class="flex-1">
+      <!-- row 1 -->
+      {#for {id, member} <- @members}
+        <div class="flex items-center">
+          <input
+            type="hidden"
+            name={"circle[encircle][#{id}][circle_id]"}
+            value={e(@circle, :id, @circle_id)}
+          />
+          <input
+            type="hidden"
+            name={"circle[encircle][#{id}][subject_id]"}
+            value={e(member, :subject_id, id)}
+          />
+
+          <Bonfire.UI.Common.ProfileItemLive
+            profile={e(member, :subject, :profile, nil)}
+            avatar_class="w-10 h-10 rounded-full"
+            character={e(member, :subject, :character, nil)}
+            show_controls={[]}
+          />
+          <!-- <td class="flex-1">
                 <LiveRedirect
                   to={path(e(member, :subject, :character, nil))}
                   class="group flex items-center space-x-3"
@@ -137,20 +145,19 @@
                   </div>
                 </LiveRedirect>
               </td> -->
-                <div class="flex items-center justify-end">
-                  <button
-                    data-role="remove_user"
-                    :if={!@read_only}
-                    phx-value-subject={id}
-                    :on-click="remove"
-                    class="btn !border-base-content/30 btn-outline rounded-full normal-case btn-sm"
-                  >
-                    {l("Remove")}
-                  </button>
-                </div>
-             </div>
-          {/for}
-        
+          <div class="flex items-center justify-end">
+            <button
+              data-role="remove_user"
+              :if={!@read_only}
+              phx-value-subject={id}
+              :on-click="remove"
+              class="btn !border-base-content/30 btn-outline rounded-full normal-case btn-sm"
+            >
+              {l("Remove")}
+            </button>
+          </div>
+        </div>
+      {/for}
     </div>
 
     <!-- 

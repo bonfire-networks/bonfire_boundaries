@@ -100,7 +100,6 @@
             />
           </div>
         </div>
-        
       {#else}
         <div :for={acl <- @custom_acls}>
           <Bonfire.Boundaries.Web.AclLive
