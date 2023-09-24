@@ -1,6 +1,6 @@
 defmodule Bonfire.Boundaries.Web.BlocksLive do
   use Bonfire.UI.Common.Web, :stateful_component
-  alias Bonfire.Boundaries.Integration
+  # alias Bonfire.Boundaries.Integration
 
   prop selected_tab, :string
   prop name, :string, default: nil

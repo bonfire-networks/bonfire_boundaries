@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.LiveHandler do
   use Bonfire.UI.Common.Web, :live_handler
   use Untangle
-  import Bonfire.Boundaries.Integration
+  # import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Roles
@@ -182,7 +182,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   def handle_event(action, %{"id" => selected} = _attrs, socket)
       when action in ["select", "select_circle"] and is_binary(selected) do
     {:noreply, Bonfire.Boundaries.LiveHandler.set_circles_tuples(:to_circles, [selected], socket)}
-    # 
+    #
     #  assign(socket,
     #    to_circles: set_circles([selected], e(socket, :assigns, :to_circles, []), true)
     #  )

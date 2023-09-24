@@ -6,7 +6,7 @@
 
   <!-- <div class="text-center  p-4 font-medium bg-base-200 rounded-box my-2">{"Grant custom permissions to specific users or circles"}</div> -->
 {#else}
-  <div class="flex flex-1 flex-col mt-3 flex-wrap">
+  <div class="flex flex-1 flex-col flex-wrap">
     <div :for={{data, role} <- @circles || []} class="flex py-2 items-center w-full justify-between">
       {#case debug(data, "idata")}
         {#match %{profile: profile, character: character} when not is_nil(profile)}

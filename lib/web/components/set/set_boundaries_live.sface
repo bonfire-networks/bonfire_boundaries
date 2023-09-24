@@ -7,14 +7,14 @@
   <div
     style="min-height: 320px; height: 360px"
     id="set_boundaries"
-    class="flex flex-col relative h-full overflow-y-auto flex-nowrap flex-1 p-2"
+    class="flex flex-col relative h-full overflow-y-auto flex-nowrap flex-1"
   >
     <Bonfire.UI.Common.MultiselectLive
       :if={!@read_only}
       implementation={:live_select}
       field={:exclude_circles}
       form_input_name={__MODULE__}
-      class="input-bordered text-sm rounded-full w-full input h-10 liveselect"
+      class="focus:outline-0 border-0 border-b h-10 !bg-transparent rounded-none border-base-content/20  !bg-transparent rounded-none text-sm liveselect"
       preloaded_options={results_for_multiselect(@my_circles)}
       label={l("Add circles or people")}
     />
@@ -30,7 +30,7 @@
           <span>{l("View roles")}</span>
         </button>
       </div> -->
-    <div class="flex h-full flex-1 flex-col gap-2">
+    <div class="flex h-full flex-1 flex-col gap-2 px-2">
       {#if !@custom_acls}
         <div class="">
           <div class="mt-4 flex my-2 justify-between items-center">
@@ -79,14 +79,14 @@
             </span>
           </button>
           <div x-show="open" x-cloak x-collapse class="mt-4">
-            <Bonfire.UI.Common.MultiselectLive
+            <!-- <Bonfire.UI.Common.MultiselectLive
               :if={!@read_only}
               implementation={:live_select}
               field={:exclude_circles}
               form_input_name={Bonfire.Boundaries.Web.ExcludeBoundaries}
               preloaded_options={results_for_multiselect(@my_circles, :exclude_circles)}
               label={l("Select or search for circles or people to exclude")}
-            />
+            /> -->
 
             <Bonfire.Boundaries.Web.BoundaryItemsLive
               to_boundaries={[]}
