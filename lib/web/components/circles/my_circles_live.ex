@@ -23,6 +23,7 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
   def update(assigns, socket) do
     context = assigns[:__context__] || socket.assigns[:__context__]
     current_user = current_user(context)
+    debug(current_user, "TETETETE")
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
 
     user =
@@ -36,7 +37,6 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
       Bonfire.Boundaries.Circles.list_my_with_counts(user, exclude_stereotypes: true)
       |> repo().maybe_preload(encircles: [subject: [:profile]])
 
-    # debug(circles, "Circles")
 
     {:ok,
      socket

@@ -20,8 +20,6 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
         %{assigns: %{loaded: true, scope: existing_scope}} = socket
       )
       when scope == existing_scope do
-    debug("update1")
-
     {:ok,
      assign(
        socket,
@@ -30,7 +28,6 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
   end
 
   def update(assigns, socket) do
-    debug("update2")
     context = assigns[:__context__] || socket.assigns[:__context__]
     current_user = current_user(context)
     built_in_ids = Acls.built_in_ids()

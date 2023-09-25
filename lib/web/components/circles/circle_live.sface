@@ -104,10 +104,10 @@
     </div>
   </div>
   {#if Enum.count(@members) > 0}
-    <div class="">
+    <div class="p-6">
       <!-- row 1 -->
       {#for {id, member} <- @members}
-        <div class="flex items-center">
+        <div class="flex items-center w-full justify-between">
           <input
             type="hidden"
             name={"circle[encircle][#{id}][circle_id]"}

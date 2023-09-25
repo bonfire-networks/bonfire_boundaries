@@ -4,15 +4,12 @@
     <button
       phx-click={JS.toggle(to: "#circles_list")
       |> JS.toggle(to: "#new_circle_from_modal")}
-      class="border-b w-full block text-left mt-1 border-base-content/20 hover:bg-base-content/5 py-3 px-4"
-    >
-      <div class="flex items-center gap-2 text-primary text-sm font-medium">
-        <#Icon solid="Plus" class="w-4 h-4" />
-        <span>{l("Create a new circle")}</span>
-      </div>
+      class="btn btn-sm normal-case !border !border-base-content/30 rounded-full btn-outline mt-4 mx-2">
+      <#Icon solid="Plus" class="w-4 h-4" />
+      <span>{l("Create a new circle")}</span>
     </button>
 
-    <ul class="menu">
+    <ul class="menu menu-sm gap-1 mt-3">
       {#if Enum.empty?(@circles)}
         <Bonfire.UI.Common.EmptyFeed feedback_title={l("You need to create at list one circle")} />
       {#else}
@@ -23,9 +20,9 @@
               phx-value-id={@user_id}
               phx-value-circle={id(circle)}
               :on-click="remove"
-              class="bg-base-content/20"
+              class="bg-base-content/5 rounded-md"
             >
-              <div class="flex items-center justify-between">
+              <div class="flex !px-2 items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="w-12 h-12 flex place-content-center items-center rounded bg-info/80">
                     <#Icon iconify="fluent:people-list-16-filled" class="w-5 h-5 text-info-content" />
@@ -48,7 +45,7 @@
               :on-click="add"
               class=""
             >
-              <div class="flex items-center justify-between">
+              <div class="flex !px-2 items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="w-12 h-12 flex place-content-center items-center rounded bg-info/80">
                     <#Icon iconify="fluent:people-list-16-filled" class="w-5 h-5 text-info-content" />

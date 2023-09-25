@@ -27,7 +27,7 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
       # JS.toggle(to: "#circles_list")
       {:noreply,
        socket
-       |> update(:circles, &(&1 ++ [circle]))
+      |> update(:circles, &[circle | &1])
        |> assign_flash(:info, "Circle created!")}
     else
       other ->
@@ -97,12 +97,12 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
   end
 
   def update(assigns, socket) do
-    debug("initial load of circles")
-    current_user = current_user(assigns) || current_user(socket.assigns)
+    context = assigns[:__context__] || socket.assigns[:__context__]
+    current_user = current_user(context)
 
     circles =
       Bonfire.Boundaries.Circles.list_my_with_counts(current_user, exclude_stereotypes: true)
-      |> Circles.preload_encircled_by(e(assigns, :user_id, nil), ...)
+      |> repo().maybe_preload(encircles: [subject: [:profile]])
 
     {:ok,
      socket
