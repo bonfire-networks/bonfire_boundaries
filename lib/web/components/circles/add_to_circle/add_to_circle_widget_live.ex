@@ -27,7 +27,7 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
       # JS.toggle(to: "#circles_list")
       {:noreply,
        socket
-      |> update(:circles, &[circle | &1])
+       |> update(:circles, &[circle | &1])
        |> assign_flash(:info, "Circle created!")}
     else
       other ->

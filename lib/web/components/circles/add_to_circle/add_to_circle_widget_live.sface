@@ -4,7 +4,8 @@
     <button
       phx-click={JS.toggle(to: "#circles_list")
       |> JS.toggle(to: "#new_circle_from_modal")}
-      class="btn btn-sm normal-case !border !border-base-content/30 rounded-full btn-outline mt-4 mx-2">
+      class="btn btn-sm normal-case !border !border-base-content/30 rounded-full btn-outline mt-4 mx-2"
+    >
       <#Icon solid="Plus" class="w-4 h-4" />
       <span>{l("Create a new circle")}</span>
     </button>
@@ -30,7 +31,11 @@
                   <div class="">
                     <div class="flex flex-col">
                       <p class="text-sm font-bold capitalize truncate">{e(circle, :named, :name, nil)}</p>
-                      <span class="text-xs font-normal text-base-content/70">{e(circle, :encircles_count, 0)} {l("members")}</span>
+                      {#case e(circle, :encircles_count, 0)}
+                        {#match 0}
+                        {#match encircles_count}
+                          <span class="text-xs font-normal text-base-content/70">{encircles_count} {l("members")}</span>
+                      {/case}
                     </div>
                   </div>
                 </div>
@@ -53,7 +58,11 @@
                   <div class="">
                     <div class="flex flex-col">
                       <p class="text-sm font-bold capitalize truncate">{e(circle, :named, :name, nil)}</p>
-                      <span class="text-xs font-normal text-base-content/70">{e(circle, :encircles_count, 0)} {l("members")}</span>
+                      {#case e(circle, :encircles_count, 0)}
+                        {#match 0}
+                        {#match encircles_count}
+                          <span class="text-xs font-normal text-base-content/70">{encircles_count} {l("members")}</span>
+                      {/case}
                     </div>
                   </div>
                 </div>

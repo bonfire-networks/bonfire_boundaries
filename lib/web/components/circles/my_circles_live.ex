@@ -37,7 +37,6 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
       Bonfire.Boundaries.Circles.list_my_with_counts(user, exclude_stereotypes: true)
       |> repo().maybe_preload(encircles: [subject: [:profile]])
 
-
     {:ok,
      socket
      |> assign(assigns)
