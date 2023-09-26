@@ -58,7 +58,7 @@
           <#Icon outline="ChevronLeft" class="w-4 h-4" />
           <span>{l("Back")}</span>
         </div>
-        <!-- <p class="mt-1 text-base font-regular text-base-content/70">{l "This is a sample description to help remember what this boundary is about."}</p> -->
+        {!-- <p class="mt-1 text-base font-regular text-base-content/70">{l "This is a sample description to help remember what this boundary is about."}</p> --}
       </div>
     </div>
 
@@ -75,7 +75,7 @@
               {l("Define a new circle")}
             </div>
           </div>
-          <!-- <div class="flex items-center mt-3 space-x-2">
+          {!-- <div class="flex items-center mt-3 space-x-2">
           <span 
             :for={subject <- @subjects}
             class="inline-flex rounded-full items-center py-0.5 pl-2.5 pr-1 text-sm font-medium bg-info text-info-content">
@@ -89,7 +89,7 @@
               <#Icon solid="X" class="w-4 h-4" />
             </span>
           </span>
-        </div> -->
+        </div> --}
 
           <div>
             <div class="flex items-center mt-3">
@@ -100,7 +100,7 @@
                     form_input_name={__MODULE__}
                     label={l("Search for circles or users to add")}
                   /></form>
-                <!-- <div class="flex-1" id={:select_more_acl} phx-update="ignore" phx-hook="InputOrSelectOne">
+                {!-- <div class="flex-1" id={:select_more_acl} phx-update="ignore" phx-hook="InputOrSelectOne">
                   <input
                     value={predefined_subjects(@subjects)}
                     placeholder={l("Add more users or circles")}
@@ -113,7 +113,7 @@
                       <option class="" value={id}>{name}</option>
                     {/for}
                   </select>
-                </div> -->
+                </div> --}
               </div>
             </div>
           </div>
@@ -306,7 +306,7 @@
         </form>
         <div :if={!e(@acl, :stereotyped, nil)} class="pb-3 mt-6 text-lg font-medium">{l("Danger zone")}</div>
         <div :if={!e(@acl, :stereotyped, nil)} class="p-4 border rounded-lg border-error/30">
-          <!-- <div class="flex items-center space-x-8">
+          {!-- <div class="flex items-center space-x-8">
           <div class="flex flex-col">
             <div class="flex-1 text-base font-bold">{l "Archive this boundary"}</div>
             <div class="text-sm text-base-content/70">{l "If you no longer want to use this boundary, but still want existing permissions using it to be preserved."}</div>
@@ -330,7 +330,7 @@
               </button>
             </:action_btns>
           </Bonfire.UI.Common.OpenModalLive>
-        </div> -->
+        </div> --}
 
           <div class="flex items-center space-x-8">
             <div class="flex flex-col">

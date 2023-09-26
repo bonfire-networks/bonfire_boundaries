@@ -1,5 +1,5 @@
 <div class="">
-  <!-- <div class="flex items-center space-x-2">
+  {!-- <div class="flex items-center space-x-2">
     <div
       :if={@parent_back}
       x-on:click="show_boundary_list = true"
@@ -10,10 +10,10 @@
       <#Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
     </div>
     <span>{l("Back")}</span>
-  </div> -->
+  </div> --}
 
   <div x-data="{name: ''}" class="w-full mt-3">
-    <!-- <div 
+    {!-- <div 
     x-data="{
       name: '',
       open: false,
@@ -50,7 +50,7 @@
         </div>
       </div>
     </div>
-  </div> -->
+  </div> --}
 
     <div class="w-full form-control">
       <label class="sr-only label">
@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <!-- <div class="w-full mt-4 form-control">
+    {!-- <div class="w-full mt-4 form-control">
     <label class="label">
       <span class="font-medium label-text">{l "Enter an optional description"}</span>
     </label>
@@ -78,10 +78,10 @@
         rows="3" 
         class="w-full h-24 textarea textarea-bordered"></textarea>
     </div>
-  </div> -->
+  </div> --}
 
-    <!-- :phx-value-name="name" -->
-    <!-- phx-value-no_redirect={if @setting_boundaries, do: "1"} -->
+    {!-- :phx-value-name="name" --}
+    {!-- phx-value-no_redirect={if @setting_boundaries, do: "1"} --}
     <button
       x-on:click="show_boundary_list = true"
       x-bind:disabled="name.length == 0"

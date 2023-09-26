@@ -11,9 +11,9 @@
     </div>
     <div class="w-full mt-4">
       <div class="w-full form-control">
-        <!-- <label class="label">
+        {!-- <label class="label">
           <span class="font-medium label-text">{l("Enter a name for the role")}</span>
-        </label> -->
+        </label> --}
         <div class="flex items-center">
           <input
             name="name"
@@ -24,12 +24,12 @@
         </div>
       </div>
 
-      <!-- <div class="form-control mt-4">
+      {!-- <div class="form-control mt-4">
       <label class="label !justify-start gap-2 cursor-pointer">
         <input type="radio" class="radio" name="usage" value="">
         <span class="label-text">{l("Use this role to set boundaries when posting")}</span>
       </label>
-    </div> -->
+    </div> --}
 
       <div class="form-control bg-info/30 rounded p-3 mt-2">
         <label class="label !justify-start items-start gap-4 cursor-pointer">
@@ -45,12 +45,12 @@
         </label>
       </div>
 
-      <!-- <div class="form-control mt-2">
+      {!-- <div class="form-control mt-2">
       <label class="label !justify-start gap-2 cursor-pointer">
         <input type="checkbox" class="toggle">
         <span class="label-text">{l("Show the role members separated from the others in lists")}</span>
       </label>
-    </div> -->
+    </div> --}
 
       <button type="submit" class="w-full mt-3 normal-case btn btn-primary">
         {l("Create role")}

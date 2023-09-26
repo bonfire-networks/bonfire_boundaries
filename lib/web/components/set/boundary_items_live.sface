@@ -1,10 +1,10 @@
 {#if Enum.empty?(@circles)}
-  <!-- <Bonfire.UI.Common.EmptyFeed
+  {!-- <Bonfire.UI.Common.EmptyFeed
     feedback_title={l("Grant custom permissions")}
     feedback_message={l("Here you can grant specific permissions to one or more users or circles.")}
-  /> -->
+  /> --}
 
-  <!-- <div class="text-center  p-4 font-medium bg-base-200 rounded-box my-2">{"Grant custom permissions to specific users or circles"}</div> -->
+  {!-- <div class="text-center  p-4 font-medium bg-base-200 rounded-box my-2">{"Grant custom permissions to specific users or circles"}</div> --}
 {#else}
   <div class="flex flex-1 flex-col flex-wrap">
     <div :for={{data, role} <- @circles || []} class="flex py-2 items-center w-full justify-between">
@@ -63,23 +63,23 @@
                 scope={:preview}
               />
 
-              <!-- <ul :if={@preview_boundary_verbs} role="list" class="p-3 flex gap-3 flex-wrap">
+              {!-- <ul :if={@preview_boundary_verbs} role="list" class="p-3 flex gap-3 flex-wrap">
                 {#for verb <- @preview_boundary_verbs || []}
                   <Bonfire.Boundaries.Web.RoleVerbLive mini value read_only verb={verb} all_verbs={@all_verbs} />
                 {/for}
-              </ul> -->
+              </ul> --}
             </div>
 
             <:open_btn>
               <button type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="Add description">
                 <#Icon iconify="heroicons-outline:information-circle" class="w-4 h-4 text-base-content/70" />
               </button>
-              <!-- <input type="hidden" name={"upload_metadata[#{entry.ref}][label]"} value={value}> -->
+              {!-- <input type="hidden" name={"upload_metadata[#{entry.ref}][label]"} value={value}> --}
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
         </div>
 
-        <!-- <div
+        {!-- <div
           :if={e(data, :type, nil) == "user"}
           phx-click={JS.hide(to: "#boundaries_picker")
           |> JS.hide(to: "#extra_boundaries")
@@ -94,7 +94,7 @@
           class="btn btn-sm btn-circle btn-ghost"
         >
           <#Icon iconify="heroicons-outline:eye" class="w-5 h-5 md:w-4 md:h-4" />
-        </div> -->
+        </div> --}
 
         <div
           phx-click={JS.push("Bonfire.Boundaries:remove_circle",

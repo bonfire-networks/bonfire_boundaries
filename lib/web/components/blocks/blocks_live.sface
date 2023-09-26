@@ -55,7 +55,7 @@
       </div>
     </Bonfire.Boundaries.Web.CircleLive>
   {#else}
-    <!-- ghost -->
+    {!-- ghost --}
 
     <Bonfire.Boundaries.Web.CircleLive
       id={@circle_id || @id}
@@ -115,7 +115,7 @@
         </div>
       </div>
     </Bonfire.Boundaries.Web.CircleLive>
-    <!-- </div>
-  </div> -->
+    {!-- </div>
+  </div> --}
   {/if}
 </div>

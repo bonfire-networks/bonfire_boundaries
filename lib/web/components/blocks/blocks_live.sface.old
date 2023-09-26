@@ -1,7 +1,7 @@
 {#if @selected_tab == "silenced"}
   <div class="p-3">
 
-<!-- TODO: consolidate this view and the boundary editing one (so you can directly add people/circles here as well) -->
+{!-- TODO: consolidate this view and the boundary editing one (so you can directly add people/circles here as well) --}
 
     <div class="shadow-lg alert alert-info">
       <div class="flex items-start">
@@ -61,17 +61,17 @@
     <div class="flex flex-col">
       {#if length(@blocks) > 0}
         <div class="relative overflow-hidden border shadow ring-1 ring-black ring-opacity-5 md:rounded-lg border-base-content/20">
-          <!-- Selected row actions, only show when rows are selected. -->
-          <!-- <div class="absolute top-0 flex items-center h-12 space-x-3 right-3 bg-gray-50">
+          {!-- Selected row actions, only show when rows are selected. --}
+          {!-- <div class="absolute top-0 flex items-center h-12 space-x-3 right-3 bg-gray-50">
           <button type="button" class="inline-flex items-center rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30">Delete all</button>
-        </div> -->
+        </div> --}
 
           <table class="min-w-full divide-y table-fixed divide-base-content/10">
             <thead class="bg-base-200">
               <tr>
-                <!-- <th scope="col" class="relative w-12 px-6 sm:w-16 sm:px-8">
+                {!-- <th scope="col" class="relative w-12 px-6 sm:w-16 sm:px-8">
                 <input type="checkbox" class="absolute w-4 h-4 -mt-2 text-indigo-600 border-gray-300 rounded left-4 top-1/2 focus:ring-indigo-500 sm:left-6">
-              </th> -->
+              </th> --}
                 <th
                   scope="col"
                   class="min-w-[12rem] py-3.5 pl-6 text-left text-sm font-semibold text-base-content"
@@ -82,14 +82,14 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-base-100/60">
-              <!-- Selected: "bg-gray-50" -->
+              {!-- Selected: "bg-gray-50" --}
               {#for block <- @blocks}
                 <tr>
-                  <!-- <td class="relative w-12 px-6 sm:w-16 sm:px-8">
+                  {!-- <td class="relative w-12 px-6 sm:w-16 sm:px-8">
                   <div class="absolute inset-y-0 left-0 w-0.5 bg-indigo-600"></div> 
                   <input type="checkbox" class="absolute w-4 h-4 -mt-2 text-indigo-600 border-gray-300 rounded left-4 top-1/2 focus:ring-indigo-500 sm:left-6">
-                </td> -->
-                  <!-- Selected: "text-indigo-600", Not Selected: "text-gray-900" -->
+                </td> --}
+                  {!-- Selected: "text-indigo-600", Not Selected: "text-gray-900" --}
                   <td class="flex items-center py-4 pl-6 space-x-3 text-sm font-medium text-base-content whitespace-nowrap">
                     <Bonfire.UI.Common.AvatarLive user={e(block, :subject, nil) || %{name: e(block, :peer, :display_hostname, nil)}} />
                     <div class="flex flex-col font-medium whitespace-nowrap">
@@ -186,17 +186,17 @@
     <div class="flex flex-col">
       {#if length(@blocks) > 0}
         <div class="relative overflow-hidden border shadow ring-1 ring-black ring-opacity-5 md:rounded-lg border-base-content/20">
-          <!-- Selected row actions, only show when rows are selected. -->
-          <!-- <div class="absolute top-0 flex items-center h-12 space-x-3 right-3 bg-gray-50">
+          {!-- Selected row actions, only show when rows are selected. --}
+          {!-- <div class="absolute top-0 flex items-center h-12 space-x-3 right-3 bg-gray-50">
           <button type="button" class="inline-flex items-center rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-30">Delete all</button>
-        </div> -->
+        </div> --}
 
           <table class="min-w-full divide-y table-fixed divide-base-content/10">
             <thead class="bg-base-200">
               <tr>
-                <!-- <th scope="col" class="relative w-12 px-6 sm:w-16 sm:px-8">
+                {!-- <th scope="col" class="relative w-12 px-6 sm:w-16 sm:px-8">
                 <input type="checkbox" class="absolute w-4 h-4 -mt-2 text-indigo-600 border-gray-300 rounded left-4 top-1/2 focus:ring-indigo-500 sm:left-6">
-              </th> -->
+              </th> --}
                 <th
                   scope="col"
                   class="min-w-[12rem] py-3.5 pl-6 text-left text-sm font-semibold text-base-content"
@@ -207,14 +207,14 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-base-100/60">
-              <!-- Selected: "bg-gray-50" -->
+              {!-- Selected: "bg-gray-50" --}
               {#for block <- @blocks}
                 <tr>
-                  <!-- <td class="relative w-12 px-6 sm:w-16 sm:px-8">
+                  {!-- <td class="relative w-12 px-6 sm:w-16 sm:px-8">
                   <div class="absolute inset-y-0 left-0 w-0.5 bg-indigo-600"></div> 
                   <input type="checkbox" class="absolute w-4 h-4 -mt-2 text-indigo-600 border-gray-300 rounded left-4 top-1/2 focus:ring-indigo-500 sm:left-6">
-                </td> -->
-                  <!-- Selected: "text-indigo-600", Not Selected: "text-gray-900" -->
+                </td> --}
+                  {!-- Selected: "text-indigo-600", Not Selected: "text-gray-900" --}
                   <td class="flex items-center py-4 pl-6 space-x-3 text-sm font-medium text-base-content whitespace-nowrap">
                     <Bonfire.UI.Common.AvatarLive profile={e(block, :subject, nil) || %{name: e(block, :peer, :display_hostname, nil)}} />
                     <div class="flex flex-col font-medium whitespace-nowrap">

@@ -69,9 +69,9 @@
         </div>
 
         {#if is_list(@feed_by_subject) or (is_map(@feed_by_subject) and not Enum.empty?(@feed_by_subject))}
-          <!-- <div class="text-xl font-medium collapse-title">
+          {!-- <div class="text-xl font-medium collapse-title">
             Role per circle or person
-          </div> -->
+          </div> --}
           <form id="edit_grants" :on-change="edit_grant_role">
             <ul class="flex flex-col divide-y divide-base-content/10 px-4 mt-2">
               <li
@@ -113,7 +113,7 @@
                       <#Icon solid="DotsVertical" class="w-4 h-4" />
                     </label>
                     <ul tabindex="0" class="w-48 p-1 rounded shadow dropdown-content menu menu-compact bg-base-200">
-                      <!-- <li :if={!@setting_boundaries}>
+                      {!-- <li :if={!@setting_boundaries}>
                         <Bonfire.Boundaries.Web.AclModalLive
                           subject_id={subject_id}
                           role_title={Bonfire.Boundaries.Verbs.role_from_verb_ids(Map.keys(grants || %{}))}
@@ -121,7 +121,7 @@
                           verbs={@verbs}
                           myself={@myself}
                         />
-                      </li> -->
+                      </li> --}
                       <li data-role="remove_from_boundary">
                         <Bonfire.UI.Common.OpenModalLive
                           id={"remove_from_acl_#{ulid(subject)}"}

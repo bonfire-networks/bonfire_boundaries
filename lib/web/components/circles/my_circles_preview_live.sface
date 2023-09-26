@@ -42,7 +42,7 @@
             </LiveRedirect>
           </li>
         {/for}
-        <!-- if circles length == 0 show an empty banner -->
+        {!-- if circles length == 0 show an empty banner --}
         {#if Enum.count(e(@circles, [])) == 0}
           0 circles
         {/if}

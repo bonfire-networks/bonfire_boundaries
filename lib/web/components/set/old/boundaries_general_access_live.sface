@@ -1,6 +1,6 @@
 <div class="flex items-center justify-between flex-1  mb-8 mt-4">
   <label class="flex gap-16 items-center w-full">
-    <!-- <div class="flex items-center ml-4 space-x-2">
+    {!-- <div class="flex items-center ml-4 space-x-2">
         <div
           :if={@to_boundaries_ids |> Enum.member?("public") == false}
           class="btn btn-outline btn-sm btn-circle opacity-80"
@@ -14,11 +14,11 @@
         >
           <#Icon solid="Minus" class="w-5 h-5" />
         </div>
-      </div> -->
+      </div> --}
   </label>
 </div>
 
-<!-- <div x-data="{show_boundary_list: true}">
+{!-- <div x-data="{show_boundary_list: true}">
   <ul :if={@open_boundaries != false} class="pt-2" x-show="show_boundary_list">
     <li class={
       "flex items-center justify-between flex-1 p-2 mb-2 rounded hover:bg-base-content/10",
@@ -162,4 +162,4 @@
     setting_boundaries={@setting_boundaries}
     click_override={@click_override}
   />
-</div> -->
+</div> --}

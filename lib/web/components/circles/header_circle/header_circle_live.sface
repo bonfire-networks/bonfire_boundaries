@@ -1,5 +1,5 @@
 <div class="flex items-center gap-2">
-  <!-- <Bonfire.UI.Common.OpenModalLive
+  {!-- <Bonfire.UI.Common.OpenModalLive
     id="add_members"
     title_text={l("Add members")}
     form_opts={%{"phx-change"=> "select"}
@@ -60,7 +60,7 @@
         <span>{l("Add member")}</span>
       </div>
     </:open_btn>
-  </Bonfire.UI.Common.OpenModalLive> -->
+  </Bonfire.UI.Common.OpenModalLive> --}
 
   <div :if={!@read_only and !@stereotype_id} aria-haspopup="true" class="dropdown dropdown-end">
     <label tabindex="0" class="rounded btn btn-xs btn-ghost btn-square">
@@ -81,9 +81,9 @@
           form_opts={%{"phx-submit" => "Bonfire.Boundaries:edit"}}
         >
           <div class="w-full mt-4 form-control">
-            <!-- <label class="label">
+            {!-- <label class="label">
                 <span class="text-xs font-semibold tracking-wider text-base-content/70">{l("Edit the circle name")}</span>
-              </label> -->
+              </label> --}
             <input type="hidden" name="id" value={e(@circle, :id, nil)}>
             <div class="flex items-center">
               <input
@@ -96,7 +96,7 @@
             </div>
           </div>
 
-          <!-- <div class="w-full mt-4 form-control">
+          {!-- <div class="w-full mt-4 form-control">
               <label class="label">
                 <span class="text-xs font-semibold tracking-wider text-base-content/70">{l("Edit the circle description")}</span>
               </label>
@@ -108,7 +108,7 @@
                   class="w-full h-24 text-sm textarea textarea-bordered"
                 >{e(@circle, :extra_info, :summary, nil)}</textarea>
               </div>
-            </div> -->
+            </div> --}
           <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
           <:open_btn>
             <button type="button" class="">{l("Edit name")}</button>

@@ -1,8 +1,8 @@
 <div :if={@is_caretaker} class="w-full h-full multiselect_in_composer flex-1 grow">
-  <!-- <#Icon
+  {!-- <#Icon
     iconify="carbon:subnet-acl-rules"
     class="w-5 h-5 mx-1 mt-2 shrink-0 text-base-content/70"
-  /> -->
+  /> --}
 
   <div
     style="min-height: 320px; height: 360px"
@@ -18,7 +18,7 @@
       preloaded_options={results_for_multiselect(@my_circles)}
       label={l("Add circles or people")}
     />
-    <!-- <div class="flex items-center mt-5 justify-between">
+    {!-- <div class="flex items-center mt-5 justify-between">
         <div class="font-semibold text-base-content/90 text-base">{l("Custom permissions")}</div>
         <button
           :if={@showing_within in [:smart_input]}
@@ -29,7 +29,7 @@
           <#Icon iconify="mingcute:hat-fill" class="w-4 h-4" />
           <span>{l("View roles")}</span>
         </button>
-      </div> -->
+      </div> --}
     <div class="flex h-full flex-1 flex-col gap-2 px-2">
       {#if !@custom_acls}
         <div class="">
@@ -52,14 +52,14 @@
               {key, _} -> String.starts_with?(to_string(key), "cannot_")
             end)}
           >
-            <!-- <button
+            {!-- <button
               :if={@showing_within in [:smart_input]}
               type="button"
               phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#roles_detail")}
               class="btn btn-ghost btn-circle btn-sm"
             >
               <#Icon iconify="heroicons-outline:information-circle" class="w-4 h-4 text-opacity-70" />
-            </button> -->
+            </button> --}
           </Bonfire.Boundaries.Web.BoundaryItemsLive>
         </div>
 
@@ -79,14 +79,14 @@
             </span>
           </button>
           <div x-show="open" x-cloak x-collapse class="mt-4">
-            <!-- <Bonfire.UI.Common.MultiselectLive
+            {!-- <Bonfire.UI.Common.MultiselectLive
               :if={!@read_only}
               implementation={:live_select}
               field={:exclude_circles}
               form_input_name={Bonfire.Boundaries.Web.ExcludeBoundaries}
               preloaded_options={results_for_multiselect(@my_circles, :exclude_circles)}
               label={l("Select or search for circles or people to exclude")}
-            /> -->
+            /> --}
 
             <Bonfire.Boundaries.Web.BoundaryItemsLive
               to_boundaries={[]}

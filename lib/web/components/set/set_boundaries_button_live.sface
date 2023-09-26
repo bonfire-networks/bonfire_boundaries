@@ -13,7 +13,7 @@
             tabindex="0"
             class="tooltip z-[9999] menu shadow bg-base-200 rounded-lg p-0 w-96 absolute top-0 left-0 hidden"
           >
-            <!-- <Dynamic.LiveComponent
+            {!-- <Dynamic.LiveComponent
               :if={module_enabled?(Bonfire.Boundaries.Web.PreviewBoundariesLive)}
               module={Bonfire.Boundaries.Web.PreviewBoundariesLive}
               id="boundaries_preview"
@@ -23,7 +23,7 @@
               boundary_preset={@boundary_preset}
               to_boundaries={@to_boundaries}
               to_circles={@to_circles}
-            /> -->
+            /> --}
             <Dynamic.Component
               :if={module_enabled?(Bonfire.Boundaries.Web.BoundariesGeneralAccessLive)}
               module={Bonfire.Boundaries.Web.BoundariesGeneralAccessLive}
@@ -32,7 +32,7 @@
             />
           </ul>
         </div>
-        <!-- <div class="w-full dropdown">
+        {!-- <div class="w-full dropdown">
           <label
             type="button"
             tabindex="0"
@@ -52,7 +52,7 @@
           >
             <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive boundary_preset={Bonfire.Boundaries.Web.SetBoundariesLive.boundaries_to_preset(@to_boundaries)} />
           </ul>
-        </div> -->
+        </div> --}
       </div>
     </div>
   {#match boundary_name}

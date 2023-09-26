@@ -38,7 +38,7 @@
           />
         </li>
 
-        <!-- <li class="" x-data="{open: false}" :for={{name, role} <- debug(@cannot_role_verbs || [])}>
+        {!-- <li class="" x-data="{open: false}" :for={{name, role} <- debug(@cannot_role_verbs || [])}>
           <Bonfire.Boundaries.Web.RoleDetailsLive
             default_value={false}
             name={l("Cannot") <> " " <> to_string(e(role, :name, nil) || name)}
@@ -48,7 +48,7 @@
             all_verbs={@all_verbs}
             event_target={@myself}
           />
-        </li> -->
+        </li> --}
       </ul>
     </div>
 

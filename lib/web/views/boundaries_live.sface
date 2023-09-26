@@ -1,4 +1,4 @@
-<!-- <Bonfire.UI.Common.PageTitleLive page_title={@page_title} /> -->
+{!-- <Bonfire.UI.Common.PageTitleLive page_title={@page_title} /> --}
 
 <section class="">
   {#case @selected_tab}
@@ -54,7 +54,7 @@
         selected_tab="ghosted"
         name={l("Ghosted instance-wide")}
       />
-      <!-- {#match "instance_circles"}
+      {!-- {#match "instance_circles"}
       <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyCirclesLive) and current_user(@__context__)}
         module={Bonfire.Boundaries.Web.MyCirclesLive}
@@ -68,7 +68,7 @@
         selected_tab="acls"
         id="my_acls"
         scope={:instance}
-      /> -->
+      /> --}
     {#match "instance_acl"}
       <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.AclLive) and current_user(@__context__)}

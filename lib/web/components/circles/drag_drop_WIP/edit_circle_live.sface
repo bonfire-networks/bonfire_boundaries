@@ -2,13 +2,13 @@
   <div class="sticky top-0">
     <div class="mt-6">
       <div class="flex items-center pb-10 border-b-4">
-        <!-- <div class="flex items-center justify-center flex-shrink-0 w-24 h-24 text-sm font-medium text-white bg-pink-600 rounded-full shadow-2xl ring-4 ring-white">
+        {!-- <div class="flex items-center justify-center flex-shrink-0 w-24 h-24 text-sm font-medium text-white bg-pink-600 rounded-full shadow-2xl ring-4 ring-white">
             GA
-        </div> -->
+        </div> --}
         <div class="flex flex-col ml-4">
           <h3 class="text-2xl font-bold text-base-content opacity-80">{e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) ||
               l("Untitled circle")}</h3>
-          <!-- <p class="mt-1 text-base font-regular text-base-content opacity-80">This is a sample description to help remember what this circle is about.</p> -->
+          {!-- <p class="mt-1 text-base font-regular text-base-content opacity-80">This is a sample description to help remember what this circle is about.</p> --}
           <div :if={!e(@circle, :stereotyped, nil)} class="flex items-center mt-3 space-x-3">
             <button
               :on-click="Bonfire.Boundaries:circle_delete"
@@ -41,7 +41,7 @@
             x-on:dragover.prevent="adding = true"
             x-on:dragleave.prevent="adding = false"
           >
-            <!-- loop through current circle members -->
+            {!-- loop through current circle members --}
 
             {#for member <- e(@circle, :encircles, [])}
               <li
@@ -105,7 +105,7 @@
             x-on:dragover.prevent="removing = true"
             x-on:dragleave.prevent="removing = false"
           >
-            <!-- loop through people that can be added -->
+            {!-- loop through people that can be added --}
 
             {#for suggested <- @followed}
               <li

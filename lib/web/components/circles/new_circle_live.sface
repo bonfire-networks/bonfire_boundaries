@@ -13,9 +13,9 @@
       </div>
     </div>
 
-    <!-- phx-click="Bonfire.Boundaries:circle_create"
+    {!-- phx-click="Bonfire.Boundaries:circle_create"
       phx-value-no_redirect={if @setting_boundaries, do: "1"}
-      :phx-value-name="name" -->
+      :phx-value-name="name" --}
     <button
       x-bind:disabled="name.length == 0"
       type="submit"

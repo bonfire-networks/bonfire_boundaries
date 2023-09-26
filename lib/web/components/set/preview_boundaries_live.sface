@@ -28,7 +28,7 @@
           event_target={@myself}
           implementation={:live_select}
         />
-        <!-- context_id={@context_id} -->
+        {!-- context_id={@context_id} --}
       </div>
 
       <div class="px-3" :if={@preview_boundary_for_id}>

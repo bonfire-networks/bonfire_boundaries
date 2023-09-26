@@ -116,7 +116,7 @@
     </LiveRedirect>
   </li>
 
-  <!-- <li
+  {!-- <li
     class={
       "",
       "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
@@ -171,5 +171,5 @@
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>...</p>
       </div>
     </LiveRedirect>
-  </li> -->
+  </li> --}
 </ul>

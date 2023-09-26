@@ -1,4 +1,4 @@
-<!-- style="min-height: 320px; height: 360px" -->
+{!-- style="min-height: 320px; height: 360px" --}
 <div class="h-full flex-1">
   <div
     id="boundaries_general_access"
@@ -8,7 +8,7 @@
         @is_dropdown
     }
   >
-    <!-- PUBLIC -->
+    {!-- PUBLIC --}
     <div class={
       "flex items-center gap-3 p-2 rounded-lg justify-between hover:bg-base-content/5",
       "bg-base-content/5": matches?(@boundary_preset, "public")
@@ -22,13 +22,13 @@
         type="button"
       >
         <div class="flex items-center gap-2">
-          <!-- <input
+          {!-- <input
             :if={!@is_dropdown}
             type="radio"
             name="radio-1"
             class="radio"
             checked={matches?(@boundary_preset, "public")}
-          /> -->
+          /> --}
           <div class="pr-2 flex items-center text-left">
             <div class="flex-shrink-0">
               <span class="text-xl">
@@ -62,7 +62,7 @@
       </div>
     </div>
 
-    <!-- LOCAL -->
+    {!-- LOCAL --}
     <div class={
       "flex items-center gap-3 p-2 rounded-lg justify-between hover:bg-base-content/5",
       "bg-base-content/5": matches?(@boundary_preset, "local")
@@ -76,13 +76,13 @@
         type="button"
       >
         <div class="flex items-center gap-2">
-          <!-- <input
+          {!-- <input
             :if={!@is_dropdown}
             type="radio"
             name="radio-1"
             class="radio"
             checked={matches?(@boundary_preset, "local")}
-          /> -->
+          /> --}
           <div class="flex items-center text-left">
             <div class="flex-shrink-0">
               <span class="text-xl">
@@ -119,7 +119,7 @@
       </div>
     </div>
 
-    <!-- MENTIONS -->
+    {!-- MENTIONS --}
     <div class={
       "flex items-center gap-3 p-2 justify-between rounded-lg hover:bg-base-content/5",
       "bg-base-content/5": matches?(@boundary_preset, "mentions")
@@ -133,17 +133,17 @@
         type="button"
       >
         <div class="flex items-center gap-2">
-          <!-- <input
+          {!-- <input
             :if={!@is_dropdown}
             type="radio"
             name="radio-1"
             class="radio"
             checked={matches?(@boundary_preset, "mentions")}
-          /> -->
+          /> --}
           <div class="flex items-center text-left">
             <div class="flex-shrink-0">
               <#Icon iconify="ri:at-line" class={"w-5 h-5 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
-              <!-- <span class={"text-2xl", "!text-lg": @is_dropdown}>﹫</span> -->
+              {!-- <span class={"text-2xl", "!text-lg": @is_dropdown}>﹫</span> --}
             </div>
             <div class="flex flex-col ml-3">
               <div class="text-sm font-semibold text-base-content/90">{l("Mentions")}</div>
@@ -156,7 +156,7 @@
       </button>
     </div>
 
-    <!-- CUSTOM -->
+    {!-- CUSTOM --}
     {#for %{id: acl_id} = acl <- @my_acls}
       <div class={
         "p-2 flex items-center gap-3 justify-between rounded-lg hover:bg-base-content/5",
@@ -171,13 +171,13 @@
           type="button"
         >
           <div class="flex items-center gap-2">
-            <!-- <input
+            {!-- <input
               :if={!@is_dropdown}
               type="radio"
               name="radio-1"
               class="radio"
               checked={matches?(@to_boundaries, acl_id)}
-            /> -->
+            /> --}
             <div class="flex items-center text-left">
               <div class="flex-shrink-0">
                 <span class="text-xl">
@@ -219,7 +219,7 @@
       </div>
     {/for}
 
-    <!-- CREATE A NEW ONE -->
+    {!-- CREATE A NEW ONE --}
     <div class="mt-1 pt-1 border-t border-base-content/10">
       <div class={
         "flex items-center gap-3 p-2 justify-between rounded-lg hover:bg-base-content/5",
@@ -251,5 +251,5 @@
       </div>
     </div>
   </div>
-  <!-- <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={!@is_dropdown} done_label={l("Back")} /> -->
+  {!-- <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={!@is_dropdown} done_label={l("Back")} /> --}
 </div>
