@@ -104,8 +104,8 @@
     </div>
   </div>
   {#if Enum.count(@members) > 0}
-    <div class="p-6">
-      {!-- row 1 --}
+    <div class="p-6 menu gap-4">
+      <!-- row 1 -->
       {#for {id, member} <- @members}
         <div class="flex items-center w-full justify-between">
           <input
@@ -121,7 +121,7 @@
 
           <Bonfire.UI.Common.ProfileItemLive
             profile={e(member, :subject, :profile, nil)}
-            avatar_class="w-10 h-10 rounded-full"
+            avatar_class="w-10 h-10 bg-base-content/10 rounded-full"
             character={e(member, :subject, :character, nil)}
             show_controls={[]}
           />
