@@ -112,7 +112,7 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
     end
   end
 
-  defp maybe_assign_settings(socket, %{assign_context: assigns}) do
+  defp maybe_assign_settings(socket, %{__context__: assigns}) do
     debug(assigns, "assign updated data with settings")
 
     socket
