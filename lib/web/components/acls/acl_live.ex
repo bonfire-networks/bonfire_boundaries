@@ -285,8 +285,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
-    current_user = current_user(socket.assigns)
-    # for groups and the like 
+    # current_user = current_user(socket.assigns)
+    # for groups and the like
     # TODO: should they have their own circles?
     (Bonfire.Boundaries.Circles.list_my_with_global(
        [Bonfire.Boundaries.Fixtures.activity_pub_circle()],

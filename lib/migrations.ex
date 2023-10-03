@@ -2,7 +2,7 @@ defmodule Bonfire.Boundaries.Migrations do
   @moduledoc false
   # alias Bonfire.Boundaries.Verbs
 
-  alias Pointers.Pointer
+  # alias Pointers.Pointer
 
   @create_add_perms """
   create or replace function add_perms(bool, bool)

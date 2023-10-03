@@ -148,7 +148,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
 
   def do_handle_event(
         "multi_select",
-        %{data: data, text: text},
+        %{data: data, text: _text},
         socket
       ) do
     # debug(data, text)

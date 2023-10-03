@@ -44,7 +44,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("block", %{"id" => id, "scope" => scope} = attrs, socket)
       when is_binary(id) do
-    current_user = current_user_required!(socket)
+    # current_user = current_user_required!(socket)
 
     can_instance_wide =
       Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
@@ -349,7 +349,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event(
         "custom_from_preset_template",
-        %{"boundary" => boundary, "name" => name} = params,
+        %{"boundary" => boundary, "name" => name} = _params,
         socket
       ) do
     {to_circles, exclude_circles} =
@@ -370,7 +370,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def unblock(id, block_type, scope, socket)
       when is_binary(id) do
-    current_user = current_user_required!(socket)
+    # current_user = current_user_required!(socket)
 
     can_instance_wide =
       Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
