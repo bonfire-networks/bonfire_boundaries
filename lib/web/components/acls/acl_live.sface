@@ -56,7 +56,7 @@
     </div>
 
     <div date-role="edit-acl">
-      <div class="p-2 border rounded-box border-base-content/10" :if={@section != "settings"}>
+      <div class="p-2 m-3 border rounded-box border-base-content/10" :if={@section != "settings"}>
         <div :if={!@read_only}>
           <form id="edit_acl_members" class="p-2" :on-change="select">
             <Bonfire.UI.Common.MultiselectLive
