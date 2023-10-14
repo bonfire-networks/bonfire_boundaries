@@ -49,6 +49,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     List.wrap(to_boundaries)
     |> Enum.filter(fn
       {x, _} when x in @presets -> true
+      x when x in @presets -> true
       _ -> false
     end)
     |> List.first()

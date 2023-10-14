@@ -74,10 +74,25 @@ defmodule Bonfire.Boundaries do
     default_boundaries(opts)
   end
 
-  def default_boundaries(_opts \\ []) do
+  def default_boundaries(context \\ []) do
     # default boundaries for new stuff
-    # TODO: make default user-configurable
-    [{"public", l("Public")}]
+    case Settings.get([:ui, :boundary_preset], :public, context) do
+      :public ->
+        [{"public", l("Public")}]
+
+      :local ->
+        [{"local", l("Local")}]
+
+      :mentions ->
+        [{"mentions", l("Mentions")}]
+
+      other when is_binary(other) or is_atom(other) ->
+        other = other |> to_string()
+        [{other, other}]
+
+      other ->
+        other
+    end
   end
 
   def boundaries_normalise(text) when is_binary(text) do

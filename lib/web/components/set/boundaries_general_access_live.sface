@@ -1,13 +1,10 @@
 {!-- style="min-height: 320px; height: 360px" --}
 <div class="h-full flex-1">
-  <div
-    id="boundaries_general_access"
-    class={
-      "menu flex flex-col gap-1 flex-1 h-full flex-nowrap overflow-y-auto",
-      "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-200 rounded-box w-[328px]":
-        @is_dropdown
-    }
-  >
+  <div class={
+    "boundaries_general_access menu flex flex-col gap-1 flex-1 h-full flex-nowrap overflow-y-auto",
+    "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-200 rounded-box w-[328px]":
+      @is_dropdown
+  }>
     {!-- PUBLIC --}
     <div class={
       "flex items-center gap-3 p-2 rounded-lg justify-between hover:bg-base-content/5",
@@ -15,11 +12,15 @@
     }>
       <button
         class="text-base-content"
-        phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
-          value: %{id: "public", name: l("Public")},
-          target: "#smart_input"
-        )}
+        phx-click={@set_action ||
+          JS.push("Bonfire.Boundaries:replace_boundary",
+            value: %{id: "public", name: l("Public")},
+            target: "#smart_input"
+          )}
+        phx-value-id="public"
+        phx-value-name={l("Public")}
         type="button"
+        {...@set_opts}
       >
         <div class="flex items-center gap-2">
           {!-- <input
@@ -44,7 +45,7 @@
           </div>
         </div>
       </button>
-      <div :if={!@is_dropdown} class="flex items-center gap-3">
+      <div :if={!@is_dropdown and !@hide_custom} class="flex items-center gap-3">
         <button
           type="button"
           phx-click={JS.toggle(to: "#extra_boundaries")
@@ -69,11 +70,15 @@
     }>
       <button
         class="text-base-content"
-        phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
-          value: %{id: "local", name: l("Local")},
-          target: "#smart_input"
-        )}
+        phx-click={@set_action ||
+          JS.push("Bonfire.Boundaries:replace_boundary",
+            value: %{id: "local", name: l("Local")},
+            target: "#smart_input"
+          )}
+        phx-value-id="local"
+        phx-value-name={l("Local")}
         type="button"
+        {...@set_opts}
       >
         <div class="flex items-center gap-2">
           {!-- <input
@@ -101,7 +106,7 @@
           </div>
         </div>
       </button>
-      <div :if={!@is_dropdown} class="flex items-center gap-3">
+      <div :if={!@is_dropdown and !@hide_custom} class="flex items-center gap-3">
         <button
           type="button"
           phx-click={JS.toggle(to: "#extra_boundaries")
@@ -126,11 +131,15 @@
     }>
       <button
         class="text-base-content"
-        phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
-          value: %{id: "mentions", name: l("Mentions")},
-          target: "#smart_input"
-        )}
+        phx-click={@set_action ||
+          JS.push("Bonfire.Boundaries:replace_boundary",
+            value: %{id: "mentions", name: l("Mentions")},
+            target: "#smart_input"
+          )}
+        phx-value-id="mentions"
+        phx-value-name={l("Mentions")}
         type="button"
+        {...@set_opts}
       >
         <div class="flex items-center gap-2">
           {!-- <input
@@ -164,11 +173,15 @@
       }>
         <button
           class="text-base-content"
-          phx-click={JS.push("Bonfire.Boundaries:replace_boundary",
-            value: %{id: acl_id, name: e(acl, :name, nil)},
-            target: "#smart_input"
-          )}
+          phx-click={@set_action ||
+            JS.push("Bonfire.Boundaries:replace_boundary",
+              value: %{id: acl_id, name: e(acl, :name, nil)},
+              target: "#smart_input"
+            )}
+          phx-value-id={acl_id}
+          phx-value-name={e(acl, :name, nil)}
           type="button"
+          {...@set_opts}
         >
           <div class="flex items-center gap-2">
             {!-- <input
@@ -200,7 +213,7 @@
           </div>
         </button>
 
-        <div :if={!@is_dropdown} class="flex items-center gap-3">
+        <div :if={!@is_dropdown and !@hide_custom} class="flex items-center gap-3">
           <button
             type="button"
             phx-click={JS.toggle(to: "#extra_boundaries")
@@ -220,7 +233,7 @@
     {/for}
 
     {!-- CREATE A NEW ONE --}
-    <div class="mt-1 pt-1 border-t border-base-content/10">
+    <div :if={!@hide_custom} class="mt-1 pt-1 border-t border-base-content/10">
       <div class={
         "flex items-center gap-3 p-2 justify-between rounded-lg hover:bg-base-content/5",
         "bg-base-content/5": matches?(@boundary_preset, "custom")
