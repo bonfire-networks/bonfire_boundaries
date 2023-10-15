@@ -118,7 +118,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         # list_by_verb: Map.merge(verbs, list_by_verb),
         # subjects: subjects(e(acl, :grants, [])),
         read_only:
-          Acls.is_stereotype?(acl) or
+          (Acls.is_built_in?(acl) and id(acl) != Bonfire.Boundaries.Fixtures.instance_acl()) or
             (!Acls.is_object_custom?(acl) and
                (Acls.is_stereotyped?(acl) and
                   !Bonfire.Boundaries.can?(socket.assigns[:__context__], :grant, :instance)))

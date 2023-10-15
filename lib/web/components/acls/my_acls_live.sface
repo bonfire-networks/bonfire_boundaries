@@ -90,7 +90,7 @@
                       </div>
                     {/if}
                     <div class="flex items-center gap-3">
-                      {#case Acls.is_stereotype?(acl)}
+                      {#case Acls.is_built_in?(acl)}
                         {#match true}
                           <#Icon outline="InformationCircle" class="w-5 h-5" />
                         {#match _}

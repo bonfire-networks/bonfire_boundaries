@@ -98,8 +98,8 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
       read_only =
         e(assigns, :read_only, nil) || e(socket.assigns, :read_only, nil) ||
-          stereotype_id in follow_stereotypes ||
-          id(circle) in follow_stereotypes
+          Circles.is_built_in?(circle) ||
+          stereotype_id in follow_stereotypes
 
       send_self(
         read_only: read_only,

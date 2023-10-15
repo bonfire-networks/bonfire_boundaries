@@ -33,22 +33,26 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
     built_in_ids = Acls.built_in_ids()
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
 
-    args =
+    {scoped, args} =
       if e(assigns, :setting_boundaries, nil) do
-        [current_user, Acls.opts_for_dropdown()]
+        {current_user, Acls.opts_for_dropdown()}
       else
         if scope == :instance and
              Bonfire.Boundaries.can?(context, :grant, :instance) do
-          [
+          {
             Bonfire.Boundaries.Fixtures.admin_circle(),
             [extra_ids_to_include: built_in_ids]
-          ]
+          }
         else
-          [current_user, Acls.opts_for_list()]
+          {
+            current_user,
+            # Acls.opts_for_list()
+            [exclude_ids: built_in_ids]
+          }
         end
       end
 
-    acls = Acls.list_my_with_counts(List.first(args), Enum.at(args, 1))
+    acls = Acls.list_my_with_counts(scoped, args)
 
     acls =
       if e(assigns, :hide_breakdown, nil),

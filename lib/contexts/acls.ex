@@ -45,16 +45,20 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def exclude_stereotypes(_true) do
-    # don't show custom per-object ACLs
-    exclude_stereotypes(false) ++ ["7HECVST0MAC1F0RAN0BJECTETC"]
+    # don't show "others who silenced me" and custom per-object ACLs
+    ["2HEYS11ENCEDMES0CAN0TSEEME", "7HECVST0MAC1F0RAN0BJECTETC"]
   end
 
   def default_exclude_ids(including_custom? \\ true) do
     exclude_stereotypes(including_custom?) ++
       [
+        # admin
         "71MAYADM1N1STERMY0WNSTVFFS",
+        #  ghosting
         "0H0STEDCANTSEE0RD0ANYTH1NG",
+        # silencing
         "1S11ENCEDTHEMS0CAN0TP1NGME"
+        # "1HANDP1CKEDZEPE0P1E1F0110W" # following
       ]
   end
 
@@ -655,7 +659,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp maybe_for_caretaker(query, id, caretaker) do
-    if id in built_in_ids() do
+    if is_built_in?(id) do
       where(query, [acl], acl.id == ^ulid!(id))
     else
       # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
@@ -724,14 +728,14 @@ defmodule Bonfire.Boundaries.Acls do
   def built_in_ids do
     acls()
     |> Map.values()
-    |> Enum.map(& &1.id)
+    |> Enums.ids()
   end
 
   def stereotype_ids do
     acls()
     |> Map.values()
     |> Enum.filter(&e(&1, :stereotype, nil))
-    |> Enum.map(& &1.id)
+    |> Enums.ids()
   end
 
   def is_stereotyped?(%{stereotyped: %{stereotype_id: stereotype_id}} = _acl)
@@ -746,6 +750,11 @@ defmodule Bonfire.Boundaries.Acls do
   def is_stereotype?(acl) do
     # debug(acl)
     ulid(acl) in stereotype_ids()
+  end
+
+  def is_built_in?(acl) do
+    # debug(acl)
+    ulid(acl) in built_in_ids()
   end
 
   def is_object_custom?(%{stereotyped: %{stereotype_id: stereotype_id}} = _acl)

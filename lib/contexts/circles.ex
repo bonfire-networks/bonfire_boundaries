@@ -41,6 +41,17 @@ defmodule Bonfire.Boundaries.Circles do
   def stereotypes(:follow), do: @follow_stereotypes
   def stereotypes(:block), do: @block_stereotypes ++ @reverse_stereotypes
 
+  def built_in_ids do
+    circles()
+    |> Map.values()
+    |> Enums.ids()
+  end
+
+  def is_built_in?(circle) do
+    # debug(acl)
+    ulid(circle) in built_in_ids()
+  end
+
   def is_stereotype?(acl) do
     ulid(acl) in stereotype_ids()
   end
