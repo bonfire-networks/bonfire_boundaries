@@ -20,6 +20,8 @@ defmodule Bonfire.Boundaries do
   import Ecto.Query
   # import EctoSparkles
 
+  @skip_object_placeholders [:skip, :skip_boundary_check, :loading]
+
   def preset_name(boundaries, include_remote? \\ false)
 
   def preset_name(boundaries, include_remote?) when is_list(boundaries) do
@@ -405,12 +407,22 @@ defmodule Bonfire.Boundaries do
           current_user = current_user(subject)
           current_user_id = id(current_user)
 
+          {object, objects} =
+            if is_list(object) do
+              objects =
+                Enum.reject(object, fn o -> is_nil(o) or o in @skip_object_placeholders end)
+
+              {List.first(object), objects}
+            else
+              {object, nil}
+            end
+
           creator_id =
             e(object, :created, :creator_id, nil) || e(object, :created, :creator, :id, nil) ||
               e(object, :creator_id, nil) || e(object, :creator, :id, nil)
 
           case (not is_nil(current_user_id) and creator_id == current_user_id) or
-                 pointer_permitted?(object,
+                 pointer_permitted?(objects || object,
                    current_user: current_user,
                    current_account: current_account(subject),
                    verbs: verbs,
@@ -431,7 +443,7 @@ defmodule Bonfire.Boundaries do
   end
 
   def can?(_subject, _verbs, object, _opts)
-      when is_nil(object) or object in [:skip, :skip_boundary_check, :loading] do
+      when is_nil(object) or object in @skip_object_placeholders do
     debug("no object or boundary data")
     nil
   end
@@ -472,9 +484,9 @@ defmodule Bonfire.Boundaries do
   end
 
   def pointer_permitted?(item, opts) do
-    case ulid(item) do
-      id when is_binary(id) ->
-        load_query(id, e(opts, :ids_only, nil), opts ++ [limit: 1])
+    case ulids(item) do
+      ids when is_list(ids) and ids != [] ->
+        load_query(ids, e(opts, :ids_only, nil), opts ++ [limit: 1])
         |> repo().exists?()
 
       _ ->
@@ -488,9 +500,9 @@ defmodule Bonfire.Boundaries do
   end
 
   def load_pointer(item, opts) do
-    case ulid(item) do
-      id when is_binary(id) ->
-        load_query(id, e(opts, :ids_only, nil), opts ++ [limit: 1])
+    case ulids(item) do
+      ids when is_list(ids) and ids != [] ->
+        load_query(ids, e(opts, :ids_only, nil), opts ++ [limit: 1])
         |> repo().one()
 
       _ ->
