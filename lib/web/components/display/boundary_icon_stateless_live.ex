@@ -65,7 +65,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
 
     # TODO: query only custom per-object ACL (stereotype 7HECVST0MAC1F0RAN0BJECTETC) instead?
     object_acls =
-      Bonfire.Boundaries.list_object_acls(object_id, exclude_ids: global_preset_acl_ids)
+      Bonfire.Boundaries.list_object_boundaries(object_id, exclude_ids: global_preset_acl_ids)
       |> debug("acls_to_boundaries")
 
     {my_presets, other_acls} =

@@ -38,7 +38,55 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   @doc """
-  List ALL boundaries applied to an object.
+  List ACLs applied to an object.
+  Only call this as an admin or curator of the object.
+  """
+  def list_acls_on_object(object, opts \\ [])
+
+  def list_acls_on_object(%{} = object, opts) do
+    exclude =
+      e(
+        opts,
+        :exclude_ids,
+        []
+      ) ++ Acls.default_exclude_ids(false)
+
+    object
+    |> repo().maybe_preload(
+      :controlled,
+      force: true
+    )
+    |> debug()
+    |> repo().maybe_preload(
+      controlled: [
+        acl: [
+          :named,
+          stereotyped: [:named]
+        ]
+      ]
+    )
+    |> Map.get(
+      :controlled,
+      []
+    )
+    |> Enum.reject(&(e(&1, :acl_id, nil) in exclude))
+  end
+
+  def list_acls_on_object(object, opts) do
+    list_objects_q(object, opts)
+    |> proload(
+      acl:
+        {"acl_",
+         [
+           :named,
+           stereotyped: {"stereotyped_", [:named]}
+         ]}
+    )
+    |> repo().many()
+  end
+
+  @doc """
+  List ALL boundaries (ACLs and grants) applied to an object.
   Only call this as an admin or curator of the object.
   """
   def list_on_object(object, opts \\ [])

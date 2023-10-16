@@ -180,7 +180,9 @@ defmodule Bonfire.Boundaries.Roles do
 
       true ->
         debug(roles, "available roles")
-        error(role, "This role is not properly defined.")
+        e = "This role is not properly defined."
+        error(role, e)
+        raise e
     end
   end
 

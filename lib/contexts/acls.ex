@@ -62,7 +62,9 @@ defmodule Bonfire.Boundaries.Acls do
       ]
   end
 
-  def remote_public_acl_ids, do: ["5REM0TEPE0P1E1NTERACTREACT", "5REM0TEPE0P1E1NTERACTREP1Y"]
+  @doc "Built-in ACLs for things that should federate"
+  def remote_public_acl_ids,
+    do: ["5REM0TEPE0P1E1NTERACTREACT", "5REM0TEPE0P1E1NTERACTREP1Y", "7REM0TEACT0RSCANC0NTR1BVTE"]
 
   def public_acl_ids(preset_acls \\ Config.get!(:preset_acls_match)),
     do:
@@ -201,6 +203,8 @@ defmodule Bonfire.Boundaries.Acls do
         {:ok, control_acls}
 
       custom_recipients ->
+        debug(custom_recipients, "custom_recipients")
+
         # TODO: enable using cast on existing objects by using `get_or_create_object_custom_acl(object)` to check if a custom Acl already exists?
         acl_id = ULID.generate()
 
@@ -326,7 +330,7 @@ defmodule Bonfire.Boundaries.Acls do
        List.wrap(maybe_custom_circles_or_users(maybe_from_opts(opts, :to_circles, []))))
     |> debug()
     |> Enum.map(fn
-      {subject, role} -> {subject, role}
+      {subject, role} -> {subject, Types.maybe_to_atom!(role)}
       subject -> {subject, nil}
     end)
     |> debug()

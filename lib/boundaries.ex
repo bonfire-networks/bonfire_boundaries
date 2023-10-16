@@ -113,6 +113,12 @@ defmodule Bonfire.Boundaries do
   end
 
   def list_object_acls(object, opts \\ []) do
+    Controlleds.list_acls_on_object(object, opts)
+    # |> debug()
+    |> Enum.map(& &1.acl)
+  end
+
+  def list_object_boundaries(object, opts \\ []) do
     Controlleds.list_on_object(object, opts)
     # |> debug()
     |> Enum.map(& &1.acl)
