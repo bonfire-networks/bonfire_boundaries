@@ -3,4 +3,5 @@ defmodule Bonfire.Boundaries.Web.NewCircleLive do
 
   prop setting_boundaries, :boolean, default: false
   prop event_target, :any, default: %{}
+  prop scope, :any, default: nil
 end

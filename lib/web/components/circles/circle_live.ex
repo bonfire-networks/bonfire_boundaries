@@ -9,7 +9,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   prop name, :string, default: nil
   prop parent_back, :any, default: nil
   prop setting_boundaries, :boolean, default: false
-  prop scope, :any, default: :user
+  prop scope, :any, default: nil
   prop showing_within, :atom, default: nil
   prop feedback_title, :string, default: nil
   prop feedback_message, :string, default: nil

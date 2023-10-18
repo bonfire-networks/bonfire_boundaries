@@ -2,7 +2,7 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
   use Bonfire.UI.Common.Web, :stateful_component
   alias Bonfire.Boundaries.Roles
 
-  prop scope, :any, default: :user
+  prop scope, :any, default: nil
   prop load_roles, :boolean, default: true
 
   def update(assigns, socket) do

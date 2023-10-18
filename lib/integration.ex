@@ -10,4 +10,29 @@ defmodule Bonfire.Boundaries.Integration do
       Bonfire.Federate.ActivityPub.AdapterUtils.is_local?(thing)
     end
   end
+
+  def many(query, paginate?, opts \\ [])
+
+  def many(query, false, opts) do
+    case opts[:return] do
+      :query ->
+        query
+
+      _ ->
+        repo().many(query, opts)
+    end
+  end
+
+  def many(query, _, opts) do
+    case opts[:return] do
+      :query ->
+        query
+
+      # :csv ->
+      # query
+      _ ->
+        repo().many_paginated(query, opts)
+    end
+  end
+
 end

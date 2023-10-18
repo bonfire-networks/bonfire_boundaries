@@ -6,7 +6,7 @@
     no_actions
   >
     <div>
-      <Bonfire.Boundaries.Web.NewCircleLive setting_boundaries={@setting_boundaries} />
+      <Bonfire.Boundaries.Web.NewCircleLive scope={@scope} setting_boundaries={@setting_boundaries} />
     </div>
 
     <:open_btn>

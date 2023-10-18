@@ -305,7 +305,7 @@ defmodule Bonfire.Boundaries.Circles do
     )
     |> select_merge([encircles: encircles], %{encircles_count: encircles.count})
     |> order_by([encircles: encircles], desc_nulls_last: encircles.count)
-    |> repo().many()
+    |> many(opts[:paginate?], opts)
   end
 
   @doc "query for `list_visible`"

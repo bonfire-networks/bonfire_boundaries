@@ -6,7 +6,7 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
   prop setting_boundaries, :boolean, default: false
   prop section, :any, default: nil
   prop parent_back, :any, default: nil
-  prop scope, :any, default: :user
+  prop scope, :any, default: nil
 
   def update(
         %{scope: scope} = assigns,
@@ -21,28 +21,18 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
   end
 
   def update(assigns, socket) do
-    context = assigns[:__context__] || socket.assigns[:__context__]
-    current_user = current_user(context)
-    debug(current_user, "TETETETE")
-    scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
+    scope = LiveHandler.scope_origin(assigns, socket)
+        # |> IO.inspect
+    %Paginator.Page{page_info: page_info, edges: edges} = LiveHandler.my_circles_paginated(scope)
 
-    user =
-      if scope == :instance and
-           Bonfire.Boundaries.can?(context, :assign, :instance),
-         do: Bonfire.Boundaries.Fixtures.admin_circle(),
-         else: current_user
-
-    # |> IO.inspect
-    circles =
-      Bonfire.Boundaries.Circles.list_my_with_counts(user, exclude_stereotypes: true)
-      |> repo().maybe_preload(encircles: [subject: [:profile]])
 
     {:ok,
      socket
      |> assign(assigns)
      |> assign(
        loaded: true,
-       circles: circles,
+       circles: edges,
+       page_info: page_info,
        settings_section_title: "Create and manage your circles",
        settings_section_description: "Create and manage your circles."
      )}

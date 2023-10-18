@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   prop selected_tab, :any, default: nil
   prop section, :any, default: nil
   prop setting_boundaries, :boolean, default: false
-  prop scope, :any, default: :user
+  prop scope, :any, default: nil
   prop usage, :any, default: :all
 
   def update(assigns, %{assigns: %{loaded: true}} = socket) do
@@ -65,7 +65,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        global_circles: global_circles,
        my_circles:
          Bonfire.Boundaries.Web.SetBoundariesLive.list_my_circles(
-           if is_nil(scope) or scope == :user, do: current_user, else: scope
+           if is_nil(scope), do: current_user, else: scope
          )
          |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect(),
        settings_section_title: "View boundary",
@@ -256,21 +256,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   def do_handle_event(
         "live_select_change",
         %{"id" => live_select_id, "text" => search},
-        %{assigns: %{scope: :user}} = socket
-      ) do
-    current_user = current_user(socket.assigns)
-
-    (Bonfire.Boundaries.Circles.list_my_with_global(
-       [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
-       search: search
-     ) ++
-       Bonfire.Me.Users.search(search))
-    |> results_for_multiselect(live_select_id, socket)
-  end
-
-  def do_handle_event(
-        "live_select_change",
-        %{"id" => live_select_id, "text" => search},
         %{assigns: %{scope: :instance}} = socket
       ) do
     (Bonfire.Boundaries.Circles.list_my_with_global(
@@ -284,7 +269,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     |> results_for_multiselect(live_select_id, socket)
   end
 
-  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+  def do_handle_event("live_select_change",
+    %{"id" => live_select_id, "text" => search},
+    %{assigns: %{scope: %schema{}}} = socket
+  ) when schema == Bonfire.Classify.Category do
     # current_user = current_user(socket.assigns)
     # for groups and the like
     # TODO: should they have their own circles?
@@ -295,6 +283,25 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        Bonfire.Me.Users.search(search))
     |> results_for_multiselect(live_select_id, socket)
   end
+
+  def do_handle_event(
+        "live_select_change",
+        %{"id" => live_select_id, "text" => search},
+        socket
+      ) do
+    current_user = current_user(socket.assigns)
+
+    (Bonfire.Boundaries.Circles.list_my_with_global(
+       [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
+       search: search
+     ) ++
+       Bonfire.Me.Users.search(search))
+    |> results_for_multiselect(live_select_id, socket)
+  end
+
+
+
+
 
   defp results_for_multiselect(results, live_select_id, socket) do
     results

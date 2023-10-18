@@ -240,7 +240,7 @@
 
     {#if !@only_user}
       <div
-        :if={@scope not in [nil, :user, :instance] and
+        :if={@scope not in [nil, :instance] and
           (Bonfire.Boundaries.can?(@__context__, :block, @scope) ||
              Bonfire.Boundaries.can?(@__context__, :block, :instance))}
         class=""

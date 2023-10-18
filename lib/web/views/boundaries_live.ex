@@ -30,7 +30,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
         id: nil,
         back: true,
         page: "boundaries",
-        scope: :user,
+        scope: nil,
         current_params: params,
         sidebar_widgets: [
           users: [
@@ -68,11 +68,12 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
        selected_tab: tab,
        nav_items: nav_items(params["scope"] || tab),
        id: id,
-       scope: maybe_to_atom(params["scope"]) || :user
+       scope: maybe_to_atom(params["scope"])
      )}
   end
 
   def do_handle_params(%{"tab" => "circles" = tab} = params, _url, socket) do
+    scope = maybe_to_atom(params["scope"])
     {:noreply,
      assign(
        socket,
@@ -82,16 +83,17 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
        page_header_aside: [
          {Bonfire.Boundaries.Web.NewCircleButtonLive,
           [
-            scope: :user,
+            scope: scope,
             setting_boundaries: false
           ]}
        ],
        nav_items: nav_items(params["scope"] || tab),
-       scope: maybe_to_atom(params["scope"]) || :user
+       scope: scope
      )}
   end
 
   def do_handle_params(%{"tab" => "acls" = tab} = params, _url, socket) do
+    scope = maybe_to_atom(params["scope"])
     {:noreply,
      assign(
        socket,
@@ -100,11 +102,12 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
        page_header_aside: [
          {Bonfire.Boundaries.Web.NewAclButtonLive,
           [
-            setting_boundaries: false
+            setting_boundaries: false,
+            scope: scope
           ]}
        ],
        nav_items: nav_items(params["scope"] || tab),
-       scope: maybe_to_atom(params["scope"]) || :user
+       scope: scope
      )}
   end
 
@@ -115,7 +118,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
        selected_tab: tab,
        page_title: l("Default roles"),
        nav_items: nav_items(params["scope"] || tab),
-       scope: maybe_to_atom(params["scope"]) || :user
+       scope: maybe_to_atom(params["scope"])
      )}
   end
 
@@ -125,7 +128,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
        socket,
        selected_tab: tab,
        nav_items: nav_items(params["scope"] || tab),
-       scope: maybe_to_atom(params["scope"]) || :user
+       scope: maybe_to_atom(params["scope"])
      )}
   end
 
@@ -133,7 +136,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
     {:noreply,
      assign(socket,
        nav_items: nav_items(params["scope"]),
-       scope: maybe_to_atom(params["scope"]) || :user
+       scope: maybe_to_atom(params["scope"])
      )}
   end
 

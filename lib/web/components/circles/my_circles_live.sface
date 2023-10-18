@@ -48,5 +48,12 @@
         </li>
       {/for}
     </ul>
+      <Bonfire.UI.Common.LoadMoreLive
+        :if={@page_info}
+        live_handler={Bonfire.Boundaries}
+        page_info={@page_info}
+        hide_guest_fallback={true}
+        target={@myself}
+      />
   </div>
 </div>
