@@ -32,24 +32,28 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
     current_user = current_user(context)
     built_in_ids = Acls.built_in_ids()
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
-
     {scoped, args} =
       if e(assigns, :setting_boundaries, nil) do
         {current_user, Acls.opts_for_dropdown()}
       else
-        if scope == :instance and
-             Bonfire.Boundaries.can?(context, :grant, :instance) do
-          {
-            Bonfire.Boundaries.Fixtures.admin_circle(),
-            [extra_ids_to_include: built_in_ids]
-          }
-        else
-          {
-            current_user,
-            # Acls.opts_for_list()
-            [exclude_ids: built_in_ids]
-          }
-        end
+        {
+          current_user,
+          # Acls.opts_for_list()
+          [exclude_ids: built_in_ids]
+        }
+        # if scope == :instance and
+        #      Bonfire.Boundaries.can?(context, :grant, :instance) do
+        #   {
+        #     Bonfire.Boundaries.Fixtures.admin_circle(),
+        #     [extra_ids_to_include: built_in_ids]
+        #   }
+        # else
+        #   {
+        #     current_user,
+        #     # Acls.opts_for_list()
+        #     [exclude_ids: built_in_ids]
+        #   }
+        # end
       end
 
     acls = Acls.list_my_with_counts(scoped, args)
@@ -82,12 +86,14 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
      |> assign(
        loaded: true,
        acls: acls,
+       section: :acls,
        # built_ins: Bonfire.Boundaries.Acls.list_built_ins,
        built_in_ids: built_in_ids,
        settings_section_title: "Create and manage your boundaries",
        settings_section_description: "Create and manage your boundaries."
      )}
   end
+
 
   def do_handle_event("boundary_edit", %{"id" => id}, socket) do
     debug(id, "boundary_edit")

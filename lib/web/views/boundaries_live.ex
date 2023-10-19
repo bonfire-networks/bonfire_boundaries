@@ -72,6 +72,17 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      )}
   end
 
+  def do_handle_params(%{"tab" => tab, "id" => id, "section" => section} = params, _url, socket) do
+    {:noreply,
+     assign(socket,
+       selected_tab: tab,
+       nav_items: nav_items(params["scope"] || tab),
+       id: id,
+       section: section,
+       scope: maybe_to_atom(params["scope"])
+     )}
+  end
+
   def do_handle_params(%{"tab" => "circles" = tab} = params, _url, socket) do
     scope = maybe_to_atom(params["scope"])
     {:noreply,
@@ -94,10 +105,12 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
 
   def do_handle_params(%{"tab" => "acls" = tab} = params, _url, socket) do
     scope = maybe_to_atom(params["scope"])
+    debug(params, "QUIII")
     {:noreply,
      assign(
        socket,
        selected_tab: tab,
+       section: params["id"],
        page_title: l("Boundary Presets"),
        page_header_aside: [
          {Bonfire.Boundaries.Web.NewAclButtonLive,
@@ -123,6 +136,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
   end
 
   def do_handle_params(%{"tab" => tab} = params, _url, socket) do
+    debug("QUAAA")
     {:noreply,
      assign(
        socket,

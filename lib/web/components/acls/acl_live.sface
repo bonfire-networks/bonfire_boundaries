@@ -37,7 +37,7 @@
         </li>
 
         <li
-          to={~p"/boundaries/circle/#{ulid(@acl)}/settings"}
+          to={~p"/boundaries/acl/#{ulid(@acl)}/settings"}
           phx-click="assign"
           phx-value-section="settings"
           data-role="edit_acl_settings"

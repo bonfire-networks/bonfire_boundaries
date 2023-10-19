@@ -33,6 +33,7 @@
         :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and current_user(@__context__)}
         module={Bonfire.Boundaries.Web.MyAclsLive}
         selected_tab="acls"
+        section={@current_params["section"]}
         id="acls"
         scope={@scope}
       />

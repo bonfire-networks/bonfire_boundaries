@@ -755,7 +755,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def my_circles_paginated(scope, attrs \\ nil) do
-    Bonfire.Boundaries.Circles.list_my_with_counts(scope, exclude_stereotypes: true, paginate?: true, paginate: attrs)
+    Bonfire.Boundaries.Circles.list_my_with_counts(scope, exclude_stereotypes: true, exclude_built_ins: true, paginate?: true, paginate: attrs)
     |> repo().maybe_preload(encircles: [subject: [:profile]])
   end
 

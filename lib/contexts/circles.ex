@@ -312,6 +312,8 @@ defmodule Bonfire.Boundaries.Circles do
   def query(opts \\ []) do
     exclude_circles =
       e(opts, :exclude_circles, []) ++
+      (if e(opts, :exclude_built_ins, nil),
+        do: built_in_ids(), else: []) ++
         if e(opts, :exclude_stereotypes, nil),
           do: stereotype_ids(),
           else:

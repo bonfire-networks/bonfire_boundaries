@@ -23,7 +23,40 @@
           </div>
         </div>
       </div>
+      <!-- {#if !@setting_boundaries}
+        <ul
+        role="tablist"
+        class="flex justify-evenly items-stretch gap-3 mt-4 text-sm font-medium border-b border-base-content/20"
+      >
+        <LivePatch
+          to={~p"/boundaries/scope/instance/acls"}
+          class="cursor-pointer hover:bg-base-content/5 flex-1 flex place-content-center"
+        >
+          <div
+            class={
+              "border-b-4 border-transparent inline-flex px-5 pb-3 pt-5 text-base-content/70",
+              "border-primary !text-base-content": @section == :acls
+            }
+            role="tab"
+          >
+            {l("Custom Permissions")}
+          </div>
+        </LivePatch>
 
+        <LivePatch
+          to={~p"/boundaries/scope/instance/acls/system"}
+          class="cursor-pointer hover:bg-base-content/5 flex-1 flex place-content-center"
+        >
+          <div
+            class={
+              "border-b-4 border-transparent inline-flex px-5 pb-3 pt-5 text-base-content/70",
+              "border-primary !text-base-content": @section == :system
+            }
+            role="tab"
+          >{l("System")}</div>
+        </LivePatch>
+      </ul>
+      {/if} -->
       <ul class="flex flex-col gap-2 mt-4">
         {#for %{id: acl_id} = acl <- e(@acls, []) ++ e(@built_ins, [])}
           <li class={
@@ -92,7 +125,7 @@
                     <div class="flex items-center gap-3">
                       {#case Acls.is_built_in?(acl)}
                         {#match true}
-                          <#Icon outline="InformationCircle" class="w-5 h-5" />
+                          <#Icon outline="InformationCircle" class="w-5 h-5 text-base-content/70" />
                         {#match _}
                           <#Icon solid="ChevronRight" class="w-5 h-5 text-base-content/70" />
                       {/case}
