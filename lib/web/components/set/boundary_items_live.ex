@@ -8,6 +8,11 @@ defmodule Bonfire.Boundaries.Web.BoundaryItemsLive do
 
   slot default, required: false
 
+  def acls_from_role(role) do
+    {:ok, permissions, []} = Bonfire.Boundaries.Roles.verbs_for_role(maybe_to_atom(role), %{})
+    permissions
+  end
+
   def name(data) when is_binary(data), do: data
   def name(data) when is_tuple(data), do: elem(data, 1)
 

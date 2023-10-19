@@ -1,8 +1,7 @@
 <div
   x-data="{open: false}"
   class={
-    "bg-base-content/5 rounded-box w-full": @scope != :preview,
-    "border-b border-base-content/20": @scope == :preview
+    "bg-base-content/5 rounded-box w-full": @scope != :preview
   }
 >
   <div class="flex items-center w-full p-4 gap-3">
@@ -13,7 +12,6 @@
         <span class="text-sm font-semibold tracking-wider text-center uppercase text-base-content">{@role_name || l("Custom")}</span>
       </div>
       <button
-        :if={@scope != :preview}
         x-show="!open"
         type="button"
         x-on:click="open = !open"
@@ -33,7 +31,7 @@
     </div>
   </div>
 
-  <div :if={@scope != :preview} x-show="open" x-cloak x-collapse>
+  <div x-show="open" x-cloak x-collapse>
     <div class="flex flex-col gap-3">
       <div class="">
         {#if @is_caretaker}
@@ -60,7 +58,7 @@
             <div class="mb-4 text-xs font-medium tracking-wider uppercase text-base-content/90">{l("Allowed actions")}</div>
             <div class="">
               <div
-                :for={permission_or_verb <- List.wrap(@role_permissions)}
+                :for={permission_or_verb <- List.wrap(@role_permissions) }
                 class="flex items-start gap-3 mb-3"
               >
                 {#case Bonfire.Boundaries.Verbs.get(permission_or_verb)}

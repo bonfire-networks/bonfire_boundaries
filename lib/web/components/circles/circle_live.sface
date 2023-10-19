@@ -1,8 +1,6 @@
 <div id="circle_preview" x-data="{search: false}" class="">
   <div class="">
-    {!-- <div class="p-4 text-2xl font-bold mt-3 text-center pb-0">
-      <h1 data-role="circle_title">{@name || e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil)}</h1>
-    </div> --}
+
     <#slot />
     <ul :if={!@stereotype_id and !@read_only} class="menu menu-horizontal gap-3 bg-base-100 mx-4">
       <li>
@@ -23,9 +21,7 @@
           form_opts={%{"phx-submit" => "Bonfire.Boundaries:edit"}}
         >
           <div class="w-full mt-4 form-control">
-            {!-- <label class="label">
-                <span class="text-xs font-semibold tracking-wider text-base-content/70">{l("Edit the circle name")}</span>
-              </label> --}
+
             <input type="hidden" name="id" value={e(@circle, :id, nil)}>
             <div class="flex items-center">
               <input
@@ -38,19 +34,7 @@
             </div>
           </div>
 
-          {!-- <div class="w-full mt-4 form-control">
-              <label class="label">
-                <span class="text-xs font-semibold tracking-wider text-base-content/70">{l("Edit the circle description")}</span>
-              </label>
-              <div class="flex flex-col space-y-3">
-                <textarea
-                  name="extra_info[summary]"
-                  placeholder="A short description to help you remember what this circle is about"
-                  rows="3"
-                  class="w-full h-24 text-sm textarea textarea-bordered"
-                >{e(@circle, :extra_info, :summary, nil)}</textarea>
-              </div>
-            </div> --}
+
           <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
           <:open_btn>
             <button
@@ -125,26 +109,7 @@
             character={e(member, :subject, :character, nil)}
             show_controls={[]}
           />
-          {!-- <td class="flex-1">
-                <LiveRedirect
-                  to={path(e(member, :subject, :character, nil))}
-                  class="group flex items-center space-x-3"
-                >
-                  <Bonfire.UI.Common.AvatarLive
-                    parent_id="user_preview"
-                    class="flex-1 inline-block object-cover w-12 h-12 mx-auto rounded-full md:w-12 md:h-12 bg-base-300"
-                    size="42"
-                    user={e(member, :subject, nil) || e(member, nil) || member}
-                    src={e(member, "icon", nil)}
-                  />
-                  <div>
-                    <div class="group-hover:underline font-bold">{e(member, :subject, :profile, :name, nil) || e(member, :profile, :name, nil) ||
-                        e(member, :name, "Unknown")}</div>
-                    <div class="text-sm opacity-50">@{e(member, :subject, :character, :username, nil) || e(member, :character, :username, nil) ||
-                        e(member, :username, nil)}</div>
-                  </div>
-                </LiveRedirect>
-              </td> --}
+
           <div class="flex items-center justify-end">
             <button
               data-role="remove_user"
@@ -160,51 +125,6 @@
       {/for}
     </div>
 
-    {!-- 
-    <div class="grid grid-cols-3 gap-3 px-4 lg:gap-6 lg:grid-cols-4">
-      {#for {id, member} <- @members}
-        <div class="col-span-1 group">
-          <input
-            type="hidden"
-            name={"circle[encircle][#{id}][circle_id]"}
-            value={e(@circle, :id, @circle_id)}
-          />
-          <input
-            type="hidden"
-            name={"circle[encircle][#{id}][subject_id]"}
-            value={e(member, :subject_id, id)}
-          />
-          <div class="relative flex flex-col items-center justify-center text-center place-content-center">
-            <div :if={!@read_only} class="absolute top-0 z-50 hidden group-hover:block right-3">
-              <button
-                phx-value-subject={id}
-                :on-click="remove"
-                class="normal-case btn-square btn btn-error btn-sm"
-              >
-                <#Icon iconify="ph:trash-fill" class="w-5 h-5" />
-              </button>
-            </div>
-            <Bonfire.UI.Common.AvatarLive
-              parent_id="user_preview"
-              class="flex-1 inline-block object-cover w-20 h-20 mx-auto rounded-full md:w-24 md:h-24 bg-base-300"
-              size="42"
-              user={e(member, :subject, nil) || e(member, nil) || member}
-              src={e(member, "icon", nil)}
-            />
-
-            <LiveRedirect
-              to={"/@#{e(member, :subject, :character, :username, "") || e(member, :character, :username, "")}"}
-              class="mt-1.5 text-base md:text-lg truncate w-full font-bold link link-hover text-base-content"
-            >{e(member, :subject, :profile, :name, nil) || e(member, :profile, :name, nil) ||
-                e(member, :name, "Unknown")}</LiveRedirect>
-            <div class="w-full text-sm font-normal truncate text-base-content/70">
-              @{e(member, :subject, :character, :username, nil) || e(member, :character, :username, nil) ||
-                e(member, :username, nil)}
-            </div>
-          </div>
-        </div>
-      {/for}
-    </div> --}
   {#else}
     <li id="no-members" class="flex items-center place-content-center">
       <Bonfire.UI.Common.EmptyFeed
@@ -214,218 +134,5 @@
     </li>
   {/if}
 
-  {!-- <div class="text-xs font-medium tracking-wider uppercase text-base-content/70">{l("Members")}</div>
-  <ul id="circle_members" class="divide-y divide-base-content/10">
-    {#if Enum.count(@members) > 0}
-      {#for {id, member} <- @members}
-        <li id={"item-" <> id} class="flex items-center py-3">
-          <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
-          <input
-            type="hidden"
-            name={"circle[encircle][#{id}][subject_id]"}
-            value={e(member, :subject_id, "")}
-          />
-          <div class="flex-1">
-            <Bonfire.UI.Common.ProfileItemLive
-              show_controls={[]}
-              profile={e(member, :subject, :profile, nil) || e(member, :profile, nil) || member}
-              character={e(member, :subject, :character, nil) || e(member, :character, nil) || member}
-            />
-          </div>
-          <div :if={!@read_only} class="flex">
-            <button
-              class="flex items-center normal-case rounded btn btn-error btn-xs"
-              phx-value-subject={id}
-              :on-click="remove"
-            >
-              <span>{l("Remove")}</span>
-            </button>
-          </div>
-        </li>
-      {/for}
-    {#else}
-      <li id="no-members" class="flex items-center place-content-center">
-        <Bonfire.UI.Common.EmptyFeed
-          feedback_title={e(@feedback_title, l("This circle has no members yet"))}
-          feedback_message={@feedback_message}
-        />
-      </li>
-    {/if}
-  </ul> --}
-
-  {!-- <div class="rounded-lg bg-base-content/5">
-    <div class="flex items-center p-4">
-
-      <div class="flex flex-col">
-        <div class="flex items-center space-x-2 text-lg font-semibold text-base-content">
-          <div
-            :if={@parent_back}
-            phx-click="back"
-            phx-target={@parent_back}
-            class="btn btn-outline btn-sm btn-circle"
-          >
-            <#Icon solid="ChevronLeft" class="w-6 h-6 text-base-content/70" />
-          </div>
-          <div>{@title || e(@circle, :named, :name, nil) || e(@circle, :stereotyped, :named, :name, nil) ||
-              l("Untitled circle")}</div>
-        </div>
-        <p class="mt-1 text-sm font-regular text-base-content/70">{@description || e(@circle, :extra_info, :summary, nil)}</p>
-      </div>
-    </div>
-    <ul role="tablist" class="flex items-stretch gap-3 text-sm font-medium rounded-b-lg bg-base-content/5">
-      <li :if={!@setting_boundaries}>
-        <div
-          to={~p"/boundaries/circle/#{ulid(@circle)}/members"}
-          phx-click="assign"
-          phx-value-section="members"
-          phx-target={@myself}
-          class={
-            "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-3 py-2 text-base-content/70",
-            "border-rounded border-primary !text-primary": @section == "members"
-          }
-          role="tab"
-        >
-          {l("Members")}
-        </div>
-      </li>
-
-      <li :if={!@read_only and !@setting_boundaries}>
-        <div
-          to={~p"/boundaries/circle/#{ulid(@circle)}/suggestions"}
-          phx-click="assign"
-          phx-value-section="suggestions"
-          phx-target={@myself}
-          class={
-            "cursor-pointer border-b-2 border-transparent hover:bg-base-content/5 inline-flex px-3 py-2 text-base-content/70",
-            "border-rounded border-primary !text-primary": @section == "suggestions"
-          }
-          role="tab"
-        >{l("Suggestions")}</div>
-      </li>
-
-      <li :if={!@read_only and !@setting_boundaries and !@stereotype_id}>
-        <div
-          to={~p"/boundaries/circle/#{ulid(@circle)}/settings"}
-          phx-click="assign"
-          phx-value-section="settings"
-          phx-target={@myself}
-          class={
-            "cursor-pointer border-b-4 border-transparent hover:bg-base-content/5 inline-flex px-5 py-2.5 text-base-content/70",
-            "border-rounded border-primary !text-base-content": @section == "settings"
-          }
-          role="tab"
-        >{l("Settings")}</div>
-      </li>
-    </ul>
-  </div>
-
-  <div class="">
-    <div role="tabpanels" class="">
-      <section :if={@section == "members"} role="tabpanel" class="">
-        <div class="">
-          <div :if={!@read_only} class="mt-4">
-            <div class="flex items-center rounded-lg">
-              <form class="flex-1" :on-change="select">
-                <Bonfire.UI.Common.MultiselectLive
-                  implementation={:live_select}
-                  form_input_name={__MODULE__}
-                  label={l("Search for users to add")}
-                />
-              </form>
-            </div>
-          </div>
-
-          <ul id="circle_members" class="divide-y divide-base-content/30">
-            {#if is_list(@members) && length(@members) > 0} 
-            
-            {#for {id, member} <- @members}
-              <li id={"item-" <> id} class="flex items-center py-3">
-                <input type="hidden" name={"circle[encircle][#{id}][circle_id]"} value={e(@circle, :id, "")}>
-                <input
-                  type="hidden"
-                  name={"circle[encircle][#{id}][subject_id]"}
-                  value={e(member, :subject_id, "")}
-                />
-                <div class="flex-1">
-                  <Bonfire.UI.Common.ProfileItemLive
-                    show_controls={[]}
-                    profile={e(member, :subject, :profile, nil) || e(member, :profile, nil) || member}
-                    character={e(member, :subject, :character, nil) || e(member, :character, nil) || member}
-                  />
-                </div>
-                <div :if={!@read_only} class="flex">
-                  <button
-                    class="flex items-center normal-case rounded btn btn-error btn-sm"
-                    phx-value-subject={id}
-                    :on-click="remove"
-                  >
-                    <span>{l("Remove")}</span>
-                  </button>
-                </div>
-              </li>
-            {/for}
-            {#else}
-              <li id="no-members" class="flex items-center place-content-center">
-                <Bonfire.UI.Common.EmptyFeed
-                  feedback_title={e(@feedback_title, l("This circle has no members yet"))}
-                  feedback_message={@feedback_message}
-                />
-              </li>
-            {/if}
-          </ul>
-        </div>
-      </section>
-
-      <section role="tabpanel" class="" :if={!@read_only && @section == "suggestions"}>
-        <div>
-          <div class="">
-            <div class="p-4 my-4 mb-0 rounded-md bg-info/10">
-              <div class="flex">
-                <div class="flex-shrink-0">
-                  <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-                </div>
-                <div class="flex-1 ml-3 md:flex md:justify-between">
-                  <p class="text-sm text-info">
-                    {l("This is simply a list of people you follow and who follow you.")}</p>
-                </div>
-              </div>
-            </div>
-            <ul id="circle_suggestions" class="flex flex-col divide-y divide-base-content/10">
-              
-              {#for {id, suggested} <- @suggestions}
-                <li id={"item-" <> id} class="flex items-center py-3">
-                  <div class="flex-1">
-                    <Bonfire.UI.Common.ProfileItemLive
-                      show_controls={[]}
-                      profile={e(suggested, :profile, nil)}
-                      character={e(suggested, :character, nil)}
-                    />
-                  </div>
-
-                  <div :if={!@read_only} class="flex mr-1">
-                    <button
-                      class="flex items-center normal-case rounded btn btn-primary btn-sm"
-                      phx-value-subject={id}
-                      :on-click="add"
-                    >
-                      <span>{l("Add")}</span>
-                    </button>
-                  </div>
-                </li>
-              {#else}
-                <li id="nobody" class="flex items-center my-12 place-content-center">
-                  <Bonfire.UI.Common.EmptyFeed
-                    feedback_title={e(@feedback_title, l("Follow some people first..."))}
-                    feedback_message={@feedback_message}
-                  />
-                </li>
-              {/for}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      
-    </div>
-  </div> --}
+ 
 </div>

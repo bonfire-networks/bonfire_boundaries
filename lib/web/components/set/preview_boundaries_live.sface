@@ -42,7 +42,7 @@
             scope={:preview}
           />
 
-          <ul :if={@preview_boundary_verbs} role="list" class="p-3 flex gap-3 flex-wrap">
+          <ul :if={@preview_boundary_verbs} role="list" class="p-3 pt-0 flex gap-3 flex-wrap">
             {#for verb <- @preview_boundary_verbs || []}
               <Bonfire.Boundaries.Web.RoleVerbLive mini value read_only verb={verb} all_verbs={@all_verbs} />
             {/for}
