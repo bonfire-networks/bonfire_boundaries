@@ -58,7 +58,7 @@
             <div class="mb-4 text-xs font-medium tracking-wider uppercase text-base-content/90">{l("Allowed actions")}</div>
             <div class="">
               <div
-                :for={permission_or_verb <- List.wrap(@role_permissions) }
+                :for={permission_or_verb <- List.wrap(@role_permissions)}
                 class="flex items-start gap-3 mb-3"
               >
                 {#case Bonfire.Boundaries.Verbs.get(permission_or_verb)}

@@ -266,20 +266,19 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
-
   def handle_event("load_more", attrs, socket) do
-
     scope = scope_origin(socket)
 
-    %Paginator.Page{page_info: page_info, edges: edges} = my_circles_paginated(scope, input_to_atoms(attrs))
+    %Paginator.Page{page_info: page_info, edges: edges} =
+      my_circles_paginated(scope, input_to_atoms(attrs))
 
     {:noreply,
      socket
      |> assign(
        loaded: true,
        circles: e(socket.assigns, :circles, []) ++ edges,
-       page_info: page_info )
-    }
+       page_info: page_info
+     )}
   end
 
   # TODO
@@ -428,18 +427,24 @@ defmodule Bonfire.Boundaries.LiveHandler do
          section: nil
        )
        |> assign_flash(:info, l("Boundary created!"))
-       |> maybe_redirect_to(if(is_atom(scope) && not is_nil(scope), do: ~p"/boundaries/scope/instance/acl/" <> id, else:  ~p"/boundaries/acl/" <> id),  attrs)
-      }
+       |> maybe_redirect_to(
+         if(is_atom(scope) && not is_nil(scope),
+           do: ~p"/boundaries/scope/instance/acl/" <> id,
+           else: ~p"/boundaries/acl/" <> id
+         ),
+         attrs
+       )}
     end
   end
 
   def circle_create(attrs, socket) do
     current_user = current_user_required!(socket)
     scope = maybe_to_atom(e(attrs, :scope, nil))
+
     with {:ok, %{id: id} = circle} <-
            Circles.create(
-            scope || current_user,
-            attrs
+             scope || current_user,
+             attrs
            ) do
       # Bonfire.UI.Common.OpenModalLive.close()
 
@@ -449,7 +454,11 @@ defmodule Bonfire.Boundaries.LiveHandler do
         circles: [circle] ++ e(socket.assigns, :circles, []),
         section: nil
       )
-      |> maybe_redirect_to(~p"/boundaries/scope/#{if is_atom(scope) && not is_nil(scope), do: scope, else: "user"}/circle/" <> id, attrs)
+      |> maybe_redirect_to(
+        ~p"/boundaries/scope/#{if is_atom(scope) && not is_nil(scope), do: scope, else: "user"}/circle/" <>
+          id,
+        attrs
+      )
       |> maybe_add_to_acl(circle)
     end
   end
@@ -743,20 +752,24 @@ defmodule Bonfire.Boundaries.LiveHandler do
       e(subject, :name, nil) || ulid(subject)
   end
 
-
   def scope_origin(assigns \\ nil, socket) do
     context = e(assigns, :__context__, nil) || socket.assigns[:__context__]
     current_user = current_user(context)
     scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
+
     if scope == :instance and
-        Bonfire.Boundaries.can?(context, :assign, :instance),
-      do: Bonfire.Boundaries.Fixtures.admin_circle(),
-      else:  current_user
+         Bonfire.Boundaries.can?(context, :assign, :instance),
+       do: Bonfire.Boundaries.Fixtures.admin_circle(),
+       else: current_user
   end
 
   def my_circles_paginated(scope, attrs \\ nil) do
-    Bonfire.Boundaries.Circles.list_my_with_counts(scope, exclude_stereotypes: true, exclude_built_ins: true, paginate?: true, paginate: attrs)
+    Bonfire.Boundaries.Circles.list_my_with_counts(scope,
+      exclude_stereotypes: true,
+      exclude_built_ins: true,
+      paginate?: true,
+      paginate: attrs
+    )
     |> repo().maybe_preload(encircles: [subject: [:profile]])
   end
-
 end

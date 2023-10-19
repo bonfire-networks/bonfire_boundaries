@@ -67,7 +67,7 @@
       </div>
     </div>
 
-    <input type="hidden" name="scope" value={@scope}/>
+    <input type="hidden" name="scope" value={@scope}>
     {!-- <div class="w-full mt-4 form-control">
     <label class="label">
       <span class="font-medium label-text">{l "Enter an optional description"}</span>

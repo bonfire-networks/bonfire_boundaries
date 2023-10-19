@@ -85,6 +85,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
 
   def do_handle_params(%{"tab" => "circles" = tab} = params, _url, socket) do
     scope = maybe_to_atom(params["scope"])
+
     {:noreply,
      assign(
        socket,
@@ -106,6 +107,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
   def do_handle_params(%{"tab" => "acls" = tab} = params, _url, socket) do
     scope = maybe_to_atom(params["scope"])
     debug(params, "QUIII")
+
     {:noreply,
      assign(
        socket,
@@ -137,6 +139,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
 
   def do_handle_params(%{"tab" => tab} = params, _url, socket) do
     debug("QUAAA")
+
     {:noreply,
      assign(
        socket,

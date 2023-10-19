@@ -34,5 +34,4 @@ defmodule Bonfire.Boundaries.Integration do
         repo().many_paginated(query, opts)
     end
   end
-
 end

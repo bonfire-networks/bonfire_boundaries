@@ -269,10 +269,12 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     |> results_for_multiselect(live_select_id, socket)
   end
 
-  def do_handle_event("live_select_change",
-    %{"id" => live_select_id, "text" => search},
-    %{assigns: %{scope: %schema{}}} = socket
-  ) when schema == Bonfire.Classify.Category do
+  def do_handle_event(
+        "live_select_change",
+        %{"id" => live_select_id, "text" => search},
+        %{assigns: %{scope: %schema{}}} = socket
+      )
+      when schema == Bonfire.Classify.Category do
     # current_user = current_user(socket.assigns)
     # for groups and the like
     # TODO: should they have their own circles?
@@ -298,10 +300,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        Bonfire.Me.Users.search(search))
     |> results_for_multiselect(live_select_id, socket)
   end
-
-
-
-
 
   defp results_for_multiselect(results, live_select_id, socket) do
     results

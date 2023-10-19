@@ -12,7 +12,7 @@
         />
       </div>
     </div>
-    <input type="hidden" name="scope" value={@scope} />
+    <input type="hidden" name="scope" value={@scope}>
     {!-- phx-click="Bonfire.Boundaries:circle_create"
       phx-value-no_redirect={if @setting_boundaries, do: "1"}
       :phx-value-name="name" --}

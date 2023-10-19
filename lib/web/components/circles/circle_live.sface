@@ -1,6 +1,5 @@
 <div id="circle_preview" x-data="{search: false}" class="">
   <div class="">
-
     <#slot />
     <ul :if={!@stereotype_id and !@read_only} class="menu menu-horizontal gap-3 bg-base-100 mx-4">
       <li>
@@ -21,7 +20,6 @@
           form_opts={%{"phx-submit" => "Bonfire.Boundaries:edit"}}
         >
           <div class="w-full mt-4 form-control">
-
             <input type="hidden" name="id" value={e(@circle, :id, nil)}>
             <div class="flex items-center">
               <input
@@ -33,7 +31,6 @@
               />
             </div>
           </div>
-
 
           <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
           <:open_btn>
@@ -124,7 +121,6 @@
         </div>
       {/for}
     </div>
-
   {#else}
     <li id="no-members" class="flex items-center place-content-center">
       <Bonfire.UI.Common.EmptyFeed
@@ -133,6 +129,4 @@
       />
     </li>
   {/if}
-
- 
 </div>

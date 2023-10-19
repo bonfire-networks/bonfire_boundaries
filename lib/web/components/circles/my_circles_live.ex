@@ -22,9 +22,8 @@ defmodule Bonfire.Boundaries.Web.MyCirclesLive do
 
   def update(assigns, socket) do
     scope = LiveHandler.scope_origin(assigns, socket)
-        # |> IO.inspect
+    # |> IO.inspect
     %Paginator.Page{page_info: page_info, edges: edges} = LiveHandler.my_circles_paginated(scope)
-
 
     {:ok,
      socket

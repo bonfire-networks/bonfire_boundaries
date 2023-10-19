@@ -312,16 +312,17 @@ defmodule Bonfire.Boundaries.Circles do
   def query(opts \\ []) do
     exclude_circles =
       e(opts, :exclude_circles, []) ++
-      (if e(opts, :exclude_built_ins, nil),
-        do: built_in_ids(), else: []) ++
-        if e(opts, :exclude_stereotypes, nil),
-          do: stereotype_ids(),
+        if opts[:exclude_built_ins],
+          do: built_in_ids(),
           else:
-            [] ++
-              if(e(opts, :exclude_block_stereotypes, nil),
-                do: @block_stereotypes,
-                else: []
-              )
+            if(opts[:exclude_stereotypes],
+              do: stereotype_ids(),
+              else:
+                if(opts[:exclude_block_stereotypes],
+                  do: @block_stereotypes,
+                  else: []
+                )
+            )
 
     from(circle in Circle, as: :circle)
     |> proload([
@@ -365,6 +366,8 @@ defmodule Bonfire.Boundaries.Circles do
 
   @doc "query for `list_visible`"
   def query_visible(user, opts \\ []) do
+    opts = to_options(opts)
+
     query(opts)
     |> boundarise(circle.id, opts ++ [current_user: user])
   end
@@ -393,6 +396,8 @@ defmodule Bonfire.Boundaries.Circles do
 
   def query_my(caretaker, opts)
       when (is_binary(caretaker) or is_map(caretaker) or is_list(caretaker)) and caretaker != [] do
+    opts = to_options(opts)
+
     query(opts)
     |> where(
       [circle, caretaker: caretaker],
