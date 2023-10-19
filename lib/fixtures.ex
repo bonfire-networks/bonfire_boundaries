@@ -20,6 +20,7 @@ defmodule Bonfire.Boundaries.Fixtures do
   def custom_acl, do: "7HECVST0MAC1F0RAN0BJECTETC"
   def instance_acl, do: "01SETT1NGSF0R10CA11NSTANCE"
   def admin_circle, do: "0ADM1NSVSERW1THSVPERP0WERS"
+  def mod_circle, do: "10VE1YM0DSHE1PHEA1THYC0MMS"
   def activity_pub_circle, do: "7EDERATEDW1THANACT1V1TYPVB"
 
   # TODO: generate from config

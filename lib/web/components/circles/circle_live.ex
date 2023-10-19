@@ -51,7 +51,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
         settings_section_description: l("Create and manage your circle.")
       )
 
-    with %{} = circle <-
+    with %{id: id} = circle <-
            (e(assigns, :circle, nil) ||
               Circles.get_for_caretaker(id, current_user, scope: e(socket.assigns, :scope, nil)))
            |> repo().maybe_preload(encircles: [subject: [:profile, :character]])
@@ -98,8 +98,9 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
       read_only =
         e(assigns, :read_only, nil) || e(socket.assigns, :read_only, nil) ||
-          Circles.is_built_in?(circle) ||
-          stereotype_id in follow_stereotypes
+          (id != Bonfire.Boundaries.Fixtures.mod_circle() and
+             (Circles.is_built_in?(circle) ||
+                stereotype_id in follow_stereotypes))
 
       send_self(
         read_only: read_only,

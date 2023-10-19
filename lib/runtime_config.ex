@@ -187,11 +187,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_see_request = [:see, :request]
     verbs_read_request = [:read, :request]
     verbs_see_read_request = [:read, :see, :request]
-    verbs_interaction = [:like, :follow]
+    verbs_interaction = [:like, :follow, :flag]
     verbs_sharing = [:boost, :pin]
     verbs_ping = [:reply, :mention, :message]
-    verbs_edit = [:edit, :tag, :describe]
     verbs_contrib = [:create, :tag, :describe]
+    verbs_edit = [:edit, :tag, :describe]
+    verbs_mod = [:invite, :label, :mediate, :block, :delete]
 
     # verbs_interact_minus_follow =
     #   verbs_see_read_request ++ [:like]
@@ -211,6 +212,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_contribute = verbs_participate_and_message ++ verbs_contrib
 
     # verbs_join_and_contribute = verbs_contribute ++ [:invite]
+
+    verbs_moderate = verbs_contribute ++ verbs_mod
 
     public_acls = [
       :guests_may_see_read,
@@ -240,6 +243,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         participate: %{can_verbs: verbs_participate_and_message, read_only: true},
         edit: %{can_verbs: verbs_editor, read_only: true},
         contribute: %{usage: :ops, can_verbs: verbs_contribute, read_only: true},
+        moderate: %{usage: :ops, can_verbs: verbs_moderate, read_only: false},
         administer: %{can_verbs: all_verb_names, read_only: true},
         cannot_read: %{cannot_verbs: cannot_read, read_only: true},
         cannot_interact: %{cannot_verbs: cannot_interact, read_only: true},
@@ -315,6 +319,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: "Remote ActivityPub Actors"
         },
         admin: %{id: "0ADM1NSVSERW1THSVPERP0WERS", name: "Instance Admins"},
+        mod: %{id: "10VE1YM0DSHE1PHEA1THYC0MMS", name: "Instance Moderators"},
 
         ### Stereotypes - placeholders for special per-user circles the system will manage.
         followers: %{
@@ -450,6 +455,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # admins can care for every aspect of the instance
         instance_care: %{
           admin: :administer,
+          mod: :moderate,
           local: :contribute,
           activity_pub: :interact,
           guest: :read

@@ -28,6 +28,24 @@
         scope={@scope}
         circle_id={@current_params["id"]}
       />
+    {#match "admin_circle"}
+      <Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.CircleLive) and current_user(@__context__)}
+        module={Bonfire.Boundaries.Web.CircleLive}
+        selected_tab={@selected_tab}
+        id="view_circle"
+        scope={@scope}
+        circle_id={Bonfire.Boundaries.Fixtures.admin_circle()}
+      />
+    {#match "mod_circle"}
+      <Dynamic.LiveComponent
+        :if={module_enabled?(Bonfire.Boundaries.Web.CircleLive) and current_user(@__context__)}
+        module={Bonfire.Boundaries.Web.CircleLive}
+        selected_tab={@selected_tab}
+        id="view_circle"
+        scope={@scope}
+        circle_id={Bonfire.Boundaries.Fixtures.mod_circle()}
+      />
     {#match "acls"}
       <Dynamic.LiveComponent
         :if={module_enabled?(Bonfire.Boundaries.Web.MyAclsLive) and current_user(@__context__)}

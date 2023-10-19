@@ -93,15 +93,16 @@ defmodule Bonfire.Boundaries.Roles do
     cond do
       positive != [] and negative == [] ->
         verb_ids_from_grants(positive)
-        # |> debug("YES")
+        |> debug("this is a role with only positive permissions")
         |> role_from_verb(:id, all_role_verbs)
 
       positive == [] and negative != [] ->
         verb_ids_from_grants(negative)
-        # |> debug("NO")
+        |> debug("this is a role with only negative permissions")
         |> cannot_role_from_verb(:id, all_role_verbs)
 
       true ->
+        debug("this is a role with both positive and negative permissions")
         nil
     end || :custom
   end
@@ -133,13 +134,15 @@ defmodule Bonfire.Boundaries.Roles do
       case all_role_verbs
            |> debug("all_role_verbs")
            |> Enum.filter(fn
-             {_role, %{^verbs_field => a_role_verbs}} ->
+             {role, %{^verbs_field => a_role_verbs}} ->
                verbs ==
-                 Enum.map(a_role_verbs, &e(Verbs.get(&1), verb_field, []))
+                 a_role_verbs
+                 |> Enum.map(&e(Verbs.get(&1), verb_field, []))
                  |> Enum.sort()
+                 |> debug("#{role} role_verbs")
 
-             # |> debug
-             _ ->
+             other ->
+               # debug(other, "other")
                false
            end) do
         [{role, _verbs}] ->
@@ -152,6 +155,8 @@ defmodule Bonfire.Boundaries.Roles do
     end
     |> debug()
   end
+
+  def verbs_for_role(role, opts \\ [])
 
   def verbs_for_role([role], opts) do
     verbs_for_role(role, opts)
