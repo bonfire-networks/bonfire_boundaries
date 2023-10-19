@@ -72,7 +72,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
       object_acls
       |> Enum.split_with(&e(&1, :named, nil))
 
-    # TODO ^ check that we're the caretaker of an ACL to include it in my_presets
+      # TODO ^ check that we're the caretaker of an ACL to include it in my_presets
 
     my_presets =
       my_presets
@@ -80,7 +80,8 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
       |> Enum.map(&{id(&1), e(&1, :named, :name, l("Unnamed preset boundary"))})
       |> debug("my_presets")
 
-    [
+      debug(other_acls, "JONNYYYY")
+      [
       boundary_preset: e(List.first(my_presets), boundary_preset),
       to_boundaries: my_presets,
       to_circles: [],

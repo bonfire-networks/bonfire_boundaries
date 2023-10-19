@@ -65,7 +65,7 @@
           }>
             <LiveRedirect
               class="block p-3 rounded-md hover:bg-base-content/5"
-              to={~p"/boundaries/scope/#{@scope}/acl/#{id(acl)}"}
+              to={if @scope != nil, do: ~p"/boundaries/scope/instance/acl/#{id(acl)}", else: ~p"/boundaries/acl/#{id(acl)}"}
             >
               <label
                 class="flex items-center w-full gap-3 cursor-pointer"
@@ -84,7 +84,7 @@
                       target: "#smart_input"
                     )}
               >
-                <#Icon iconify="fluent:door-tag-20-filled" class="w-5 h-5 text-base-content/70" />
+                <#Icon iconify="ph:hand-fill" class="w-5 h-5 text-base-content/70" />
                 <div class="flex-1">
                   <div class="flex items-center space-x-4">
                     <div class="text-sm font-bold capitalize">{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) ||
