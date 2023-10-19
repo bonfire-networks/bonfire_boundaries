@@ -65,7 +65,9 @@
           }>
             <LiveRedirect
               class="block p-3 rounded-md hover:bg-base-content/5"
-              to={if @scope != nil, do: ~p"/boundaries/scope/instance/acl/#{id(acl)}", else: ~p"/boundaries/acl/#{id(acl)}"}
+              to={if @scope != nil,
+                do: ~p"/boundaries/scope/instance/acl/#{id(acl)}",
+                else: ~p"/boundaries/acl/#{id(acl)}"}
             >
               <label
                 class="flex items-center w-full gap-3 cursor-pointer"
@@ -165,6 +167,13 @@
             </LiveRedirect>
           </li>
         {/for}
+        <Bonfire.UI.Common.LoadMoreLive
+          :if={@page_info}
+          live_handler={__MODULE__}
+          page_info={@page_info}
+          hide_guest_fallback
+          target={@myself}
+        />
       </ul>
       <div
         :if={@setting_boundaries}

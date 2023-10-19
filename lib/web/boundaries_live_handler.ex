@@ -269,7 +269,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   def handle_event("load_more", attrs, socket) do
     scope = scope_origin(socket)
 
-    %Paginator.Page{page_info: page_info, edges: edges} =
+    %{page_info: page_info, edges: edges} =
       my_circles_paginated(scope, input_to_atoms(attrs))
 
     {:noreply,

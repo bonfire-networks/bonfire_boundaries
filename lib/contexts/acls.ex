@@ -844,7 +844,7 @@ defmodule Bonfire.Boundaries.Acls do
       desc_nulls_last: controlled.count,
       desc_nulls_last: grants.count
     )
-    |> repo().many()
+    |> many(opts[:paginate?], opts)
   end
 
   @doc "query for `list_my`"

@@ -3,7 +3,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Grants
   # alias Bonfire.Boundaries.Web.AclLive
-  # alias Bonfire.Boundaries.Integration
+  alias Bonfire.Boundaries.LiveHandler
 
   prop hide_breakdown, :boolean, default: false
   prop setting_boundaries, :boolean, default: false
@@ -28,23 +28,88 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
   end
 
   def update(assigns, socket) do
-    context = assigns[:__context__] || socket.assigns[:__context__]
-    current_user = current_user(context)
     built_in_ids = Acls.built_in_ids()
-    scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
+
+    socket =
+      socket
+      |> assign(assigns)
+      |> assign(:built_in_ids, built_in_ids)
+
+    scope = LiveHandler.scope_origin(socket)
+
+    %{page_info: page_info, edges: acls} = my_acls_paginated(scope, socket.assigns)
+
+    {:ok,
+     socket
+     |> assign(
+       loaded: true,
+       acls: acls,
+       page_info: page_info,
+       section: :acls,
+       # built_ins: Bonfire.Boundaries.Acls.list_built_ins,
+       settings_section_title: "Create and manage your boundaries",
+       settings_section_description: "Create and manage your boundaries."
+     )}
+  end
+
+  def handle_event("load_more", attrs, socket) do
+    scope = LiveHandler.scope_origin(socket)
+
+    %{page_info: page_info, edges: edges} =
+      my_acls_paginated(scope, socket.assigns, input_to_atoms(attrs))
+
+    {:noreply,
+     socket
+     |> assign(
+       loaded: true,
+       acls: e(socket.assigns, :acls, []) ++ edges,
+       page_info: page_info
+     )}
+  end
+
+  def do_handle_event("boundary_edit", %{"id" => id}, socket) do
+    debug(id, "boundary_edit")
+
+    {:noreply, assign(socket, :edit_acl_id, id)}
+  end
+
+  # TODO
+  def do_handle_event("back", _, socket) do
+    {:noreply,
+     socket
+     |> assign(:edit_acl_id, nil)
+     |> assign(:section, nil)}
+  end
+
+  def handle_event(
+        action,
+        attrs,
+        socket
+      ),
+      do:
+        Bonfire.UI.Common.LiveHandlers.handle_event(
+          action,
+          attrs,
+          socket,
+          __MODULE__,
+          &do_handle_event/3
+        )
+
+  def my_acls_paginated(scope, assigns, attrs \\ nil) do
+    built_in_ids = e(assigns, :built_in_ids, nil) || Acls.built_in_ids()
 
     {scoped, args} =
       if e(assigns, :setting_boundaries, nil) do
-        {current_user, Acls.opts_for_dropdown()}
+        {scope, Acls.opts_for_dropdown()}
       else
         {
-          current_user,
+          scope,
           # Acls.opts_for_list()
           [exclude_ids: built_in_ids]
         }
 
         # if scope == :instance and
-        #      Bonfire.Boundaries.can?(context, :grant, :instance) do
+        #      Bonfire.Boundaries.can?(assigns, :grant, :instance) do
         #   {
         #     Bonfire.Boundaries.Fixtures.admin_circle(),
         #     [extra_ids_to_include: built_in_ids]
@@ -81,46 +146,5 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
 
     # acls |> Ecto.assoc(:grants) |> repo().aggregate(:count, :id)
     # |> debug("counts")
-
-    {:ok,
-     socket
-     |> assign(assigns)
-     |> assign(
-       loaded: true,
-       acls: acls,
-       section: :acls,
-       # built_ins: Bonfire.Boundaries.Acls.list_built_ins,
-       built_in_ids: built_in_ids,
-       settings_section_title: "Create and manage your boundaries",
-       settings_section_description: "Create and manage your boundaries."
-     )}
   end
-
-  def do_handle_event("boundary_edit", %{"id" => id}, socket) do
-    debug(id, "boundary_edit")
-
-    {:noreply, assign(socket, :edit_acl_id, id)}
-  end
-
-  # TODO
-  def do_handle_event("back", _, socket) do
-    {:noreply,
-     socket
-     |> assign(:edit_acl_id, nil)
-     |> assign(:section, nil)}
-  end
-
-  def handle_event(
-        action,
-        attrs,
-        socket
-      ),
-      do:
-        Bonfire.UI.Common.LiveHandlers.handle_event(
-          action,
-          attrs,
-          socket,
-          __MODULE__,
-          &do_handle_event/3
-        )
 end
