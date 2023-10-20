@@ -23,7 +23,7 @@
           class="btn btn-active hover:!bg-opacity/80 btn-outline normal-case !border !border-base-content/30 rounded-full btn-sm"
         >
           <#Icon solid="search" class="w-4 h-4" />
-          <span>{l("Add users")}</span>
+          <span>{l("Add circle/users")}</span>
         </button>
       </li>
       <li data-role="edit_boundary" class="edit_name">
