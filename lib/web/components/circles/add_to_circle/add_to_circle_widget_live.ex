@@ -1,6 +1,7 @@
 defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
   use Bonfire.UI.Common.Web, :stateful_component
   alias Bonfire.Boundaries.Circles
+  alias Bonfire.Boundaries.LiveHandler
 
   prop circles, :list, default: []
   prop user_id, :any, default: nil
@@ -100,16 +101,17 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
     context = assigns[:__context__] || socket.assigns[:__context__]
     current_user = current_user(context)
 
-    circles =
-      Bonfire.Boundaries.Circles.list_my_with_counts(current_user, exclude_stereotypes: true)
-      # |> repo().maybe_preload(encircles: [subject: [:profile]])
-      |> Circles.preload_encircled_by(e(assigns, :user_id, nil), ...)
-      |> debug("circles")
+    %{page_info: page_info, edges: edges} = LiveHandler.my_circles_paginated(current_user)
+      # Bonfire.Boundaries.Circles.list_my_with_counts(current_user, exclude_stereotypes: true)
+      # # |> repo().maybe_preload(encircles: [subject: [:profile]])
+      # |> Circles.preload_encircled_by(e(assigns, :user_id, nil), ...)
+      # |> debug("circles")
 
     {:ok,
      socket
      |> assign(assigns)
-     |> assign(circles: circles)}
+     |> assign(page_info: page_info)
+     |> assign(circles: edges)}
   end
 
   def handle_event(
