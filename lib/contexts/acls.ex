@@ -255,8 +255,8 @@ defmodule Bonfire.Boundaries.Acls do
     find_acls(base_acls, creator) ++ list(ids: direct_acl_ids, current_user: creator)
   end
 
-  def grants_from_preset(creator, to_boundaries, opts \\ []) do
-    {preset, base_acls, direct_acl_ids} =
+  def grant_tuples_from_preset(creator, to_boundaries, opts \\ []) do
+    {_preset, base_acls, direct_acl_ids} =
       preset_stereotypes_and_acls(
         creator,
         to_boundaries,
@@ -275,15 +275,7 @@ defmodule Bonfire.Boundaries.Acls do
        )
      )) ++
       (Grants.list_for_acl(direct_acl_ids, current_user: creator, skip_boundary_check: true)
-       # |> repo().maybe_preload(:subject)
-       |> repo().maybe_preload(subject: [:named, stereotyped: [:named]])
-       |> repo().maybe_preload(subject: [:profile, :character])
-       |> debug()
-       |> Grants.subject_grants()
-       |> Enum.map(fn
-         {_subject_id, %{subject: subject, grants: grants}} ->
-           {subject, Roles.role_from_grants(grants, current_user: creator)}
-       end))
+       |> Grants.grants_to_tuples())
   end
 
   defp preset_stereotypes_and_acls(creator, to_boundaries, opts \\ []) do
@@ -883,6 +875,15 @@ defmodule Bonfire.Boundaries.Acls do
     Map.fetch!(Boundaries.user_default_boundaries(), :acls)
     # |> debug
   end
+
+  def acl_grants_to_tuples(creator, acls) when is_list(acls) do
+    acls
+    |> Enum.flat_map(fn %{grants: grants} -> grants end)
+    |> Grants.grants_to_tuples(creator, ...)
+  end
+
+  def acl_grants_to_tuples(creator, %{grants: grants}),
+    do: Grants.grants_to_tuples(creator, grants)
 
   def edit(%Acl{} = acl, %User{} = _user, params) do
     acl = repo().maybe_preload(acl, [:named, :extra_info])

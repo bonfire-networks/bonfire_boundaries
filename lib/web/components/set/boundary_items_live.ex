@@ -5,6 +5,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryItemsLive do
   prop circles, :any, default: []
   prop roles_for_dropdown, :any, default: nil
   prop field, :atom, default: :to_circles
+  prop read_only, :boolean, default: false
 
   slot default, required: false
 

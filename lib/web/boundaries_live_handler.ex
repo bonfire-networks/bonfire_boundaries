@@ -367,10 +367,8 @@ defmodule Bonfire.Boundaries.LiveHandler do
         socket
       ) do
     {to_circles, exclude_circles} =
-      Acls.grants_from_preset(current_user_required!(socket), boundary)
-      |> Enum.split_with(fn {_circle, role} ->
-        not String.starts_with?(to_string(role), "cannot_")
-      end)
+      Acls.grant_tuples_from_preset(current_user_required!(socket), boundary)
+      |> Roles.split_tuples_can_cannot()
       |> debug("custom_from_preset_template")
 
     {:noreply,

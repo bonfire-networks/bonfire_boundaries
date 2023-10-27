@@ -276,4 +276,11 @@ defmodule Bonfire.Boundaries.Roles do
     Settings.put([@config_key], nil, scope: :instance, skip_boundary_check: true)
     Config.delete(@config_key, :bonfire)
   end
+
+  def split_tuples_can_cannot(tuples) do
+    tuples
+    |> Enum.split_with(fn {_circle, role} ->
+      not String.starts_with?(to_string(role), "cannot_")
+    end)
+  end
 end

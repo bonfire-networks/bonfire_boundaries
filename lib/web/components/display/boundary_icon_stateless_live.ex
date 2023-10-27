@@ -1,6 +1,9 @@
 defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
   use Bonfire.UI.Common.Web, :stateless_component
 
+  alias Bonfire.Boundaries.Acls
+  alias Bonfire.Boundaries.Roles
+
   # Tip: use `BoundaryIconLive` unless you don't want to preload boundaries, and instead a parent component is providing the `object_boundary` data
   prop object_id, :string, required: true
   prop parent_id, :string, default: nil
@@ -24,7 +27,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
       assigns[:object_boundary]
       |> debug("object_boundary")
 
-    role = Bonfire.Boundaries.Roles.preset_boundary_role_from_acl(object_boundary)
+    role = Roles.preset_boundary_role_from_acl(object_boundary)
 
     role_name =
       case role do
@@ -60,35 +63,41 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
     |> render_sface()
   end
 
-  defp for_view_edit(true, object_id, boundary_preset) when is_binary(object_id) do
-    global_preset_acl_ids = Bonfire.Boundaries.Acls.preset_acl_ids()
+  defp for_view_edit(true, object_id, boundary_preset, context) when is_binary(object_id) do
+    # for caretaker
+    # global_preset_acl_ids = Bonfire.Boundaries.Acls.preset_acl_ids()
 
     # TODO: query only custom per-object ACL (stereotype 7HECVST0MAC1F0RAN0BJECTETC) instead?
+    # , exclude_ids: global_preset_acl_ids
     object_acls =
-      Bonfire.Boundaries.list_object_boundaries(object_id, exclude_ids: global_preset_acl_ids)
+      Bonfire.Boundaries.list_object_boundaries(object_id)
       |> debug("acls_to_boundaries")
 
-    {my_presets, other_acls} =
+    {my_presets, custom_acls} =
       object_acls
       |> Enum.split_with(&e(&1, :named, nil))
 
-    # TODO ^ check that we're the caretaker of an ACL to include it in my_presets
+    # TODO ^ check that we're the caretaker of an ACL (or it's a preset) to include it in my_presets
 
     my_presets =
       my_presets
       #    |> Enum.reject(& id(&1) in global_preset_acl_ids)
       |> Enum.map(&{id(&1), e(&1, :named, :name, l("Unnamed preset boundary"))})
-      |> debug("my_presets")
 
-    debug(other_acls, "JONNYYYY")
+    {to_circles, exclude_circles} =
+      Acls.acl_grants_to_tuples(current_user_required!(context), object_acls)
+      |> Roles.split_tuples_can_cannot()
 
     [
       boundary_preset: e(List.first(my_presets), boundary_preset),
+      #  TODO: this seems unused by SetBoundariesLive, do we need to compute to_circles instead?
       to_boundaries: my_presets,
-      to_circles: [],
-      custom_acls: other_acls
+      custom_acls: custom_acls,
+      to_circles: to_circles,
+      exclude_circles: exclude_circles
     ]
+    |> debug("view boundaries")
   end
 
-  defp for_view_edit(_, _, boundary_preset), do: [boundary_preset: boundary_preset]
+  defp for_view_edit(_, _, boundary_preset, _), do: [boundary_preset: boundary_preset]
 end

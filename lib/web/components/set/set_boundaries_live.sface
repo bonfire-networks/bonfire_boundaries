@@ -6,8 +6,7 @@
 
   <div
     style="min-height: 320px; height: 360px"
-    id="set_boundaries"
-    class="flex flex-col relative h-full overflow-y-auto flex-nowrap flex-1"
+    class="set_boundaries flex flex-col relative h-full overflow-y-auto flex-nowrap flex-1"
   >
     <Bonfire.UI.Common.MultiselectLive
       :if={!@read_only}
@@ -31,7 +30,7 @@
         </button>
       </div> --}
     <div class="flex h-full flex-1 flex-col gap-2 px-2">
-      {#if !@custom_acls}
+      {#if !@custom_acls or @custom_acls == []}
         <div class="">
           <div class="mt-4 flex my-2 justify-between items-center">
             <Bonfire.UI.Common.ProfileItemLive
@@ -44,6 +43,8 @@
           </div>
 
           <Bonfire.Boundaries.Web.BoundaryItemsLive
+            :if={@to_circles && @to_circles != []}
+            read_only={@read_only}
             to_boundaries={[]}
             circles={@to_circles}
             roles_for_dropdown={@roles_for_dropdown
@@ -89,6 +90,8 @@
             />
 
             <Bonfire.Boundaries.Web.BoundaryItemsLive
+              :if={@exclude_circles && @exclude_circles != []}
+              read_only={@read_only}
               to_boundaries={[]}
               circles={@exclude_circles}
               field={:exclude_circles}
@@ -108,6 +111,7 @@
             acl_id={id(acl)}
             acl={acl}
           />
+          <!-- read_only={@read_only} -->
         </div>
       {/if}
     </div>

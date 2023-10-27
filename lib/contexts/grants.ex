@@ -327,4 +327,19 @@ defmodule Bonfire.Boundaries.Grants do
   end
 
   def verb_subject_grant(_), do: %{}
+
+  def grants_to_tuples(creator, %{grants: grants}), do: grants_to_tuples(creator, grants)
+
+  def grants_to_tuples(creator, grants) when is_list(grants) do
+    grants
+    # |> repo().maybe_preload(:subject)
+    |> repo().maybe_preload(subject: [:named, stereotyped: [:named]])
+    |> repo().maybe_preload(subject: [:profile, :character])
+    |> debug()
+    |> subject_grants()
+    |> Enum.map(fn
+      {_subject_id, %{subject: subject, grants: grants}} ->
+        {subject, Roles.role_from_grants(grants, current_user: creator)}
+    end)
+  end
 end

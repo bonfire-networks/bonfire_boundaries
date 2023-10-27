@@ -16,10 +16,13 @@
           label={l("Your role")}
         />
 
+        <!-- 
+          TODO: https://github.com/bonfire-networks/bonfire-app/issues/630 
+          read_only={!@is_caretaker} -->
         <Bonfire.Boundaries.Web.SetBoundariesLive
           read_only
           is_caretaker={@is_caretaker}
-          {...for_view_edit(@is_caretaker, @object_id, @boundary_preset)}
+          {...for_view_edit(@is_caretaker, @object_id, @boundary_preset, @__context__)}
         />
       </div>
       <:open_btn>
