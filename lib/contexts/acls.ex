@@ -330,7 +330,7 @@ defmodule Bonfire.Boundaries.Acls do
        List.wrap(maybe_custom_circles_or_users(maybe_from_opts(opts, :to_circles, []))))
     |> debug()
     |> Enum.map(fn
-      {subject, role} -> {subject, Types.maybe_to_atom!(role)}
+      {subject, role} -> {subject, if(preset != "mentions", do: Types.maybe_to_atom!(role))}
       subject -> {subject, nil}
     end)
     |> debug()

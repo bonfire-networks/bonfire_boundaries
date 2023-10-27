@@ -34,7 +34,8 @@ defmodule Bonfire.Boundaries.Roles do
     else
       Settings.get(key, %{}, opts)
     end
-    |> debug("gottt")
+
+    # |> debug("gottt")
   end
 
   # def cannot_role_verbs(usage \\ nil)
@@ -186,8 +187,8 @@ defmodule Bonfire.Boundaries.Roles do
       true ->
         debug(roles, "available roles")
         e = "This role is not properly defined."
+        # raise e
         error(role, e)
-        raise e
     end
   end
 

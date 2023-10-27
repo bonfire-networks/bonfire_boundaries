@@ -7,5 +7,4 @@ defmodule Bonfire.Boundaries.Web.RoleLive do
      |> assign(assigns)
      |> assign(page_title: l("Role"))}
   end
-
 end

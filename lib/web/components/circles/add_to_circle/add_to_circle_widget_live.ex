@@ -102,10 +102,10 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
     current_user = current_user(context)
 
     %{page_info: page_info, edges: edges} = LiveHandler.my_circles_paginated(current_user)
-      # Bonfire.Boundaries.Circles.list_my_with_counts(current_user, exclude_stereotypes: true)
-      # # |> repo().maybe_preload(encircles: [subject: [:profile]])
-      # |> Circles.preload_encircled_by(e(assigns, :user_id, nil), ...)
-      # |> debug("circles")
+    # Bonfire.Boundaries.Circles.list_my_with_counts(current_user, exclude_stereotypes: true)
+    # # |> repo().maybe_preload(encircles: [subject: [:profile]])
+    # |> Circles.preload_encircled_by(e(assigns, :user_id, nil), ...)
+    # |> debug("circles")
 
     {:ok,
      socket
