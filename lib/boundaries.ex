@@ -290,7 +290,7 @@ defmodule Bonfire.Boundaries do
       preset_boundary_tuple_from_acl(%Acl{id: other}, object_type)
     else
       warn(other, "No boundary pattern matched")
-      nil
+      {"mentions", l("Mentions")}
     end
   end
 
