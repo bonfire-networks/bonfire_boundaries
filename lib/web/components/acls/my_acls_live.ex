@@ -123,26 +123,17 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
         # end
       end
 
-    acls = Acls.list_my_with_counts(scoped, args)
-
-    acls =
-      if e(assigns, :hide_breakdown, nil),
-        do: acls,
-        else:
-          repo().maybe_preload(
-            acls,
-            grants: [
-              :verb,
-              subject: [
-                :named,
-                :profile,
-                encircle_subjects: [:profile],
-                stereotyped: [:named]
-              ]
-            ]
-          )
-
-    debug(acls, "Acls")
+    # Acls.list_my_with_counts
+    Acls.list_my(
+      scoped,
+      args ++
+        [
+          paginate?: true,
+          paginate: attrs,
+          preload_n_subjects: if(!e(assigns, :hide_breakdown, nil), do: 2)
+        ]
+    )
+    |> debug("list of Acls")
 
     # acls |> Ecto.assoc(:grants) |> repo().aggregate(:count, :id)
     # |> debug("counts")

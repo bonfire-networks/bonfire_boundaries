@@ -304,7 +304,7 @@ defmodule Bonfire.Boundaries.Circles do
       as: :encircles
     )
     |> select_merge([encircles: encircles], %{encircles_count: encircles.count})
-    |> order_by([encircles: encircles], desc_nulls_last: encircles.count)
+    # |> order_by([encircles: encircles], desc_nulls_last: encircles.count) # custom order messes with pagination
     |> many(opts[:paginate?], opts)
   end
 

@@ -24,7 +24,7 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Data.AccessControl.Controlled
   alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.AccessControl.Stereotyped
-
+  alias Pointers.Pointer
   alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Controlleds
@@ -676,7 +676,7 @@ defmodule Bonfire.Boundaries.Acls do
       [caretaker: caretaker],
       caretaker.caretaker_id in ^[ulid(opts[:current_user]), Fixtures.admin_circle()]
     )
-    |> repo().many()
+    |> many_with_opts(opts)
   end
 
   def list_q(opts \\ []) do
@@ -718,7 +718,7 @@ defmodule Bonfire.Boundaries.Acls do
   # def list_all do
   #   from(u in Acl, as: :acl)
   #   |> proload([:named, :controlled, :stereotyped, :caretaker])
-  #   |> repo().many()
+  # |> many_with_opts(opts)
   # end
 
   def built_in_ids do
@@ -763,10 +763,10 @@ defmodule Bonfire.Boundaries.Acls do
     id(acl) == Fixtures.custom_acl()
   end
 
-  def list_built_ins do
+  def list_built_ins(opts \\ []) do
     list_q(skip_boundary_check: true)
     |> where([acl], acl.id in ^built_in_ids())
-    |> repo().many()
+    |> many_with_opts(opts)
   end
 
   # TODO
@@ -795,12 +795,21 @@ defmodule Bonfire.Boundaries.Acls do
     list_my_with_counts(current_user(opts), opts ++ opts_for_dropdown())
   end
 
+  defp many_with_opts(query, opts) do
+    query
+    |> many(opts[:paginate?], opts)
+    |> maybe_preload_n_subjects(opts[:preload_n_subjects])
+  end
+
   @doc """
   Lists the ACLs we are the registered caretakers of that we are
   permitted to see. If any are created without permitting the
   user to see them, they will not be shown.
   """
-  def list_my(user, opts \\ []), do: repo().many(list_my_q(user, opts))
+  def list_my(user, opts \\ []),
+    do:
+      list_my_q(user, opts)
+      |> many_with_opts(opts)
 
   def list_my_with_counts(user, opts \\ []) do
     list_my_q(user, opts)
@@ -816,6 +825,16 @@ defmodule Bonfire.Boundaries.Acls do
       on: grants.acl_id == acl.id,
       as: :grants
     )
+    |> select_merge([grants: grants], %{
+      grants_count: grants.count
+    })
+    # because otherwise we need to handle special cursors for pagination
+    |> q_maybe_order(!opts[:paginate?])
+    |> many_with_opts(opts)
+  end
+
+  defp q_maybe_order(query, true) do
+    query
     |> join(
       :left,
       [acl],
@@ -828,16 +847,20 @@ defmodule Bonfire.Boundaries.Acls do
       on: controlled.acl_id == acl.id,
       as: :controlled
     )
-    |> select_merge([grants: grants, controlled: controlled], %{
-      grants_count: grants.count,
+    |> select_merge([controlled: controlled], %{
       controlled_count: controlled.count
     })
-    |> order_by([grants: grants, controlled: controlled],
+    |> order_by(
+      [
+        controlled: controlled,
+        grants: grants
+      ],
       desc_nulls_last: controlled.count,
       desc_nulls_last: grants.count
     )
-    |> many(opts[:paginate?], opts)
   end
+
+  defp q_maybe_order(query, _), do: query
 
   @doc "query for `list_my`"
   def list_my_q(user, opts \\ []) do
@@ -867,6 +890,30 @@ defmodule Bonfire.Boundaries.Acls do
         stereotyped.stereotype_id not in ^exclude
     )
   end
+
+  defp maybe_preload_n_subjects(acls, limit) when is_integer(limit) and limit > 0 do
+    grant_query = from g in Grant, limit: ^limit
+    pointer_query = from p in Pointer, limit: ^limit
+
+    repo().maybe_preload(
+      acls,
+      grants:
+        {grant_query,
+         [
+           # :verb,
+           subject:
+             {pointer_query,
+              [
+                :named,
+                :profile,
+                # encircle_subjects: [:profile],
+                stereotyped: [:named]
+              ]}
+         ]}
+    )
+  end
+
+  defp maybe_preload_n_subjects(acls, _), do: acls
 
   def user_default_acl(name), do: user_default_acls()[name]
 

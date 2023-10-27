@@ -95,35 +95,33 @@
                 </div>
                 <div class="flex ml-4 space-x-2">
                   {#if !@setting_boundaries}
-                    {#if e(acl, :grants_count, 0) > 0}
-                      <div class="flex gap-1 avatar-group">
-                        {#for subject <-
-                            Grants.subjects(e(acl, :grants, [])) |> Enum.take(2)}
-                          {#if e(subject, :profile, :id, nil)}
-                            <Bonfire.UI.Common.AvatarLive
-                              parent_id="acls"
-                              user={e(subject, nil)}
+                    {!-- {#if e(acl, :grants_count, 0) > 0} --}
+                    <div class="flex gap-1 avatar-group">
+                      {#for subject <-
+                          Grants.subjects(e(acl, :grants, []))}
+                        {#if e(subject, :profile, :id, nil)}
+                          <Bonfire.UI.Common.AvatarLive
+                            parent_id="acls"
+                            user={e(subject, nil)}
+                            title={e(subject, :profile, :name, nil) ||
+                              e(subject, :character, :username, nil) || id(subject)}
+                            class="w-8 h-8"
+                            bg_class="bg-base-content/5 rounded-xl"
+                          />
+                        {#else}
+                          <div class="flex items-center gap-3">
+                            <span
                               title={e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) ||
-                                e(subject, :name, nil) || e(subject, :profile, :name, nil) ||
-                                e(subject, :character, :username, nil) || ulid(subject)}
-                              class="w-8 h-8"
-                              bg_class="bg-base-content/5 rounded-xl"
-                            />
-                          {#else}
-                            <div class="flex items-center gap-3">
-                              <span
-                                title={e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) ||
-                                  e(subject, :name, nil) || e(subject, :profile, :name, nil) ||
-                                  e(subject, :character, :username, nil) || ulid(subject)}
-                                class="flex items-center w-8 h-8 rounded-full place-content-center bg-info/30"
-                              >
-                                <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-info" />
-                              </span>
-                            </div>
-                          {/if}
-                        {/for}
-                      </div>
-                    {/if}
+                                e(subject, :name, nil) || id(subject)}
+                              class="flex items-center w-8 h-8 rounded-full place-content-center bg-info/30"
+                            >
+                              <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-info" />
+                            </span>
+                          </div>
+                        {/if}
+                      {/for}
+                    </div>
+                    {!-- {/if} --}
                     <div class="flex items-center gap-3">
                       {#case Acls.is_built_in?(acl)}
                         {#match true}
