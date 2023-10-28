@@ -29,31 +29,31 @@
           <span>{l("View roles")}</span>
         </button>
       </div> --}
-    <div class="flex h-full flex-1 flex-col gap-2 px-2">
-      {#if !@custom_acls or @custom_acls == []}
-        <div class="">
-          <div class="mt-4 flex my-2 justify-between items-center">
-            <Bonfire.UI.Common.ProfileItemLive
-              avatar_class="w-8 h-8 rounded-full bg-base-100"
-              profile={e(current_user(@__context__), :profile, nil)}
-              character={e(current_user(@__context__), :character, nil)}
-              show_controls={[]}
-            />
-            <div class="btn btn-sm btn-disabled rounded-full normal-case">{l("Caretaker")}</div>
-          </div>
 
-          <Bonfire.Boundaries.Web.BoundaryItemsLive
-            :if={@to_circles && @to_circles != []}
-            read_only={@read_only}
-            to_boundaries={[]}
-            circles={@to_circles}
-            roles_for_dropdown={@roles_for_dropdown
-            |> Enum.reject(fn
-              {"cannot_" <> _, _} -> true
-              {key, _} -> String.starts_with?(to_string(key), "cannot_")
-            end)}
-          >
-            {!-- <button
+    <div class="flex h-full flex-1 flex-col gap-2 px-2">
+      <div class="">
+        <div class="mt-4 flex my-2 justify-between items-center">
+          <Bonfire.UI.Common.ProfileItemLive
+            avatar_class="w-8 h-8 rounded-full bg-base-100"
+            profile={e(current_user(@__context__), :profile, nil)}
+            character={e(current_user(@__context__), :character, nil)}
+            show_controls={[]}
+          />
+          <div class="btn btn-sm btn-disabled rounded-full normal-case">{l("Caretaker")}</div>
+        </div>
+
+        <Bonfire.Boundaries.Web.BoundaryItemsLive
+          :if={@to_circles && @to_circles != []}
+          read_only={@read_only}
+          to_boundaries={[]}
+          circles={@to_circles}
+          roles_for_dropdown={@roles_for_dropdown
+          |> Enum.reject(fn
+            {"cannot_" <> _, _} -> true
+            {key, _} -> String.starts_with?(to_string(key), "cannot_")
+          end)}
+        >
+          {!-- <button
               :if={@showing_within in [:smart_input]}
               type="button"
               phx-click={JS.toggle(to: "#extra_boundaries") |> JS.toggle(to: "#roles_detail")}
@@ -61,59 +61,52 @@
             >
               <#Icon iconify="heroicons-outline:information-circle" class="w-4 h-4 text-opacity-70" />
             </button> --}
-          </Bonfire.Boundaries.Web.BoundaryItemsLive>
-        </div>
+        </Bonfire.Boundaries.Web.BoundaryItemsLive>
+      </div>
 
-        <div x-data="{open: false}" class="py-4 border-t w-full border-base-content/20">
-          <button type="button" x-on:click="open = !open" class="flex items-center w-full  justify-between">
-            <div class="flex w-full items-center gap-3 text-error text-sm">
-              <span class="w-6 h-6 bg-error/10 rounded-full flex items-center place-content-center">
-                <#Icon iconify="mingcute:user-remove-2-fill" class="w-4 h-4 text-error" />
-              </span>
-              <span>{l("Exclude users or circles")}</span>
-            </div>
-            <span x-show="open" x-cloak>
-              <#Icon solid="ChevronUp" class="w-6 h-6 text-error/70" />
+      <div
+        :if={!@read_only or (is_list(@exclude_circles) and @exclude_circles != [])}
+        x-data="{open: false}"
+        class="py-4 border-t w-full border-base-content/20"
+      >
+        <button type="button" x-on:click="open = !open" class="flex items-center w-full  justify-between">
+          <div class="flex w-full items-center gap-3 text-error text-sm">
+            <span class="w-6 h-6 bg-error/10 rounded-full flex items-center place-content-center">
+              <#Icon iconify="mingcute:user-remove-2-fill" class="w-4 h-4 text-error" />
             </span>
-            <span x-show="!open" x-cloak>
-              <#Icon solid="ChevronDown" class="w-6 h-6 text-error/70" />
-            </span>
-          </button>
-          <div x-show="open" x-cloak x-collapse class="mt-4">
-            <Bonfire.UI.Common.MultiselectLive
-              :if={!@read_only}
-              implementation={:live_select}
-              field={:exclude_circles}
-              form_input_name={Bonfire.Boundaries.Web.ExcludeBoundaries}
-              preloaded_options={results_for_multiselect(@my_circles, :exclude_circles)}
-              label={l("Select or search for circles or people to exclude")}
-            />
-
-            <Bonfire.Boundaries.Web.BoundaryItemsLive
-              :if={@exclude_circles && @exclude_circles != []}
-              read_only={@read_only}
-              to_boundaries={[]}
-              circles={@exclude_circles}
-              field={:exclude_circles}
-              roles_for_dropdown={@roles_for_dropdown
-              |> Enum.filter(fn
-                {"cannot_" <> _, _} -> true
-                {key, _} -> String.starts_with?(to_string(key), "cannot_")
-              end)}
-            />
+            <span>{l("Exclude users or circles")}</span>
           </div>
-        </div>
-      {#else}
-        <div :for={acl <- @custom_acls}>
-          <Bonfire.Boundaries.Web.AclLive
-            id={"set_acl_#{id(acl)}"}
-            setting_boundaries
-            acl_id={id(acl)}
-            acl={acl}
+          <span x-show="open" x-cloak>
+            <#Icon solid="ChevronUp" class="w-6 h-6 text-error/70" />
+          </span>
+          <span x-show="!open" x-cloak>
+            <#Icon solid="ChevronDown" class="w-6 h-6 text-error/70" />
+          </span>
+        </button>
+        <div x-show="open" x-cloak x-collapse class="mt-4">
+          <Bonfire.UI.Common.MultiselectLive
+            :if={!@read_only}
+            implementation={:live_select}
+            field={:exclude_circles}
+            form_input_name={Bonfire.Boundaries.Web.ExcludeBoundaries}
+            preloaded_options={results_for_multiselect(@my_circles, :exclude_circles)}
+            label={l("Select or search for circles or people to exclude")}
           />
-          <!-- read_only={@read_only} -->
+
+          <Bonfire.Boundaries.Web.BoundaryItemsLive
+            :if={@exclude_circles && @exclude_circles != []}
+            read_only={@read_only}
+            to_boundaries={[]}
+            circles={@exclude_circles}
+            field={:exclude_circles}
+            roles_for_dropdown={@roles_for_dropdown
+            |> Enum.filter(fn
+              {"cannot_" <> _, _} -> true
+              {key, _} -> String.starts_with?(to_string(key), "cannot_")
+            end)}
+          />
         </div>
-      {/if}
+      </div>
     </div>
   </div>
   <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={@showing_within in [:smart_input] && @is_caretaker} />

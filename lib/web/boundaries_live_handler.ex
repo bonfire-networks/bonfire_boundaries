@@ -380,6 +380,32 @@ defmodule Bonfire.Boundaries.LiveHandler do
      )}
   end
 
+  def handle_event(
+        "remove_object_acl",
+        %{"object_id" => object, "acl_id" => acl} = _params,
+        socket
+      ) do
+    with {1, nil} <-
+           Bonfire.Boundaries.Controlleds.remove_acls(
+             object,
+             acl
+           )
+           |> debug("removed?") do
+      Bonfire.UI.Common.OpenModalLive.close()
+
+      {
+        :noreply,
+        socket
+        |> assign_flash(:info, l("Boundary removed!"))
+        #  |> assign(   
+        #  )
+      }
+    else
+      e ->
+        error(e)
+    end
+  end
+
   def unblock(id, block_type, scope, socket)
       when is_binary(id) do
     # current_user = current_user_required!(socket)

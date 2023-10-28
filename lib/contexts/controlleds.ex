@@ -251,7 +251,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   def remove_acls(_object, acls)
-      when is_nil(acls) or (is_list(acls) and length(acls) == 0),
+      when is_nil(acls) or acls == [],
       do: error("No acl ID provided, so could not remove")
 
   def remove_acls(object, acls) do

@@ -2,27 +2,19 @@
   <div class={@class}>
     <Bonfire.UI.Common.OpenModalLive
       reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
-      id={"modal_#{@parent_id || "boundary_#{@object_id}"}"}
+      id={@modal_id}
       no_actions
       open_btn_wrapper_class="flex flex-1 w-full"
       title_text={l("Current boundary")}
     >
       <div class="mt-4">
-        <Bonfire.Boundaries.Web.YourRoleLive
-          is_caretaker={@is_caretaker}
-          role_name={@role_name}
+        <Bonfire.Boundaries.Web.BoundaryDetailsLive
           scope={@scope}
-          role_permissions={@role_permissions}
-          label={l("Your role")}
-        />
-
-        <!-- 
-          TODO: https://github.com/bonfire-networks/bonfire-app/issues/630 
-          read_only={!@is_caretaker} -->
-        <Bonfire.Boundaries.Web.SetBoundariesLive
-          read_only
-          is_caretaker={@is_caretaker}
-          {...for_view_edit(@is_caretaker, @object_id, @boundary_preset, @__context__)}
+          object_id={@object_id}
+          object_type={@object_type}
+          object_boundary={@object_boundary}
+          boundary_preset={@boundary_preset}
+          phx_target={"##{@modal_id}"}
         />
       </div>
       <:open_btn>

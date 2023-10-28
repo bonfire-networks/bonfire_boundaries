@@ -275,7 +275,7 @@ defmodule Bonfire.Boundaries.Acls do
        )
      )) ++
       (Grants.list_for_acl(direct_acl_ids, current_user: creator, skip_boundary_check: true)
-       |> Grants.grants_to_tuples())
+       |> Grants.grants_to_tuples(creator, ...))
   end
 
   defp preset_stereotypes_and_acls(creator, to_boundaries, opts \\ []) do
