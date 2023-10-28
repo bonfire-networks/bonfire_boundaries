@@ -94,16 +94,12 @@
             name={"circle[encircle][#{id}][circle_id]"}
             value={e(@circle, :id, @circle_id)}
           />
-          <input
-            type="hidden"
-            name={"circle[encircle][#{id}][subject_id]"}
-            value={e(member, :subject_id, id)}
-          />
+          <input type="hidden" name={"circle[encircle][#{id}][subject_id]"} value={id}>
 
           <Bonfire.UI.Common.ProfileItemLive
-            profile={e(member, :subject, :profile, nil)}
+            profile={e(member, :subject, :profile, nil) || member}
             avatar_class="w-10 h-10 bg-base-content/10 rounded-full"
-            character={e(member, :subject, :character, nil)}
+            character={e(member, :subject, :character, nil) || member}
             show_controls={[]}
           />
 

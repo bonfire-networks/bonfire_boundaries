@@ -148,12 +148,12 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   end
 
   def do_handle_event("multi_select", %{data: data, text: _text}, socket) do
-    add_member(data, socket)
+    add_member(input_to_atoms(data), socket)
   end
 
   def do_handle_event("select", %{"id" => id}, socket) do
     # debug(attrs)
-    add_member(e(socket.assigns, :suggestions, %{})[id] || id, socket)
+    add_member(input_to_atoms(e(socket.assigns, :suggestions, %{})[id]) || id, socket)
   end
 
   def do_handle_event(
