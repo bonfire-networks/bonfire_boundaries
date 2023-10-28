@@ -8,7 +8,7 @@
       :if={!@hide_tabs}
       selected_tab={@selected_tab}
       path_prefix={"/@#{e(current_user(@__context__), :character, :username, "")}/"}
-      tabs={if id(current_user(@__context__)) == id(@user),
+      tabs={if current_user_id(@__context__) == id(@user),
         do: Config.get([:ui, :profile, :my_network], circles: l("circles")),
         else: Config.get([:ui, :profile, :network], followers: l("Followers"))}
     />
