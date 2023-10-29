@@ -60,20 +60,20 @@ defmodule Bonfire.Boundaries do
     |> preset_name(include_remote?)
   end
 
-  def boundaries_or_default(to_boundaries, opts \\ [])
+  def boundaries_or_default(to_boundaries, context \\ [])
 
-  def boundaries_or_default(to_boundaries, _opts)
+  def boundaries_or_default(to_boundaries, _)
       when is_list(to_boundaries) and to_boundaries != [] do
     to_boundaries
   end
 
-  def boundaries_or_default(to_boundaries, _opts)
+  def boundaries_or_default(to_boundaries, _)
       when is_tuple(to_boundaries) do
     [to_boundaries]
   end
 
-  def boundaries_or_default(_, opts) do
-    default_boundaries(opts)
+  def boundaries_or_default(_, context) do
+    default_boundaries(context)
   end
 
   def default_boundaries(context \\ []) do
@@ -89,8 +89,9 @@ defmodule Bonfire.Boundaries do
         [{"mentions", l("Mentions")}]
 
       other when is_binary(other) or is_atom(other) ->
+        # debug(context, "zzzz")
         other = other |> to_string()
-        [{other, other}]
+        [{other, e(context, :my_acls, other, nil) || other}]
 
       other ->
         other

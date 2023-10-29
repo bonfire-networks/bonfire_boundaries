@@ -796,4 +796,65 @@ defmodule Bonfire.Boundaries.LiveHandler do
     )
     |> repo().maybe_preload(encircles: [subject: [:profile]])
   end
+
+  def prepare_assigns({reply, socket}) do
+    {reply, socket |> prepare_assigns()}
+  end
+
+  def prepare_assigns(socket) do
+    current_user = current_user(socket.assigns)
+    my_acls = e(socket.assigns[:__context__], :my_acls, nil) || my_acls(id(current_user))
+
+    to_boundaries =
+      e(socket.assigns, :to_boundaries, nil)
+      |> debug("existing")
+      |> Bonfire.Boundaries.boundaries_or_default(current_user: current_user, my_acls: my_acls)
+      |> debug()
+
+    socket
+    |> assign_global(
+      :my_acls,
+      my_acls
+    )
+    |> assign(
+      to_boundaries: to_boundaries,
+      boundary_preset:
+        Bonfire.Boundaries.Web.SetBoundariesLive.boundaries_to_preset(to_boundaries)
+    )
+  end
+
+  def my_acls(current_user_id) do
+    Bonfire.Boundaries.Acls.list_my(
+      current_user_id,
+      Bonfire.Boundaries.Acls.opts_for_dropdown()
+    )
+    |> Enum.map(fn
+      %Bonfire.Data.AccessControl.Acl{id: acl_id} = acl ->
+        {acl_id, acl_meta(acl)}
+    end)
+    |> Enum.reject(fn
+      {_, %{name: nil}} -> true
+      _ -> false
+    end)
+    |> debug("myacccl")
+  end
+
+  defp acl_meta(%{id: acl_id, stereotyped: %{stereotype_id: "1HANDP1CKEDZEPE0P1E1F0110W"}} = acl) do
+    %{
+      id: acl_id,
+      field: :to_boundaries,
+      description: e(acl, :stereotyped, :named, :name, nil),
+      name: l("Follows"),
+      icon: "fluent:people-list-16-filled"
+    }
+  end
+
+  defp acl_meta(%{id: acl_id} = acl) do
+    %{
+      id: acl_id,
+      field: :to_boundaries,
+      description: e(acl, :extra_info, :summary, nil),
+      name: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil)
+    }
+  end
 end

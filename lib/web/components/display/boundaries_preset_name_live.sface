@@ -104,6 +104,7 @@
     </div>
   {#match {id, name} when id != "custom"}
     <span
+      data-id="preset"
       title={e(name, :named, nil) || e(name, :name, nil) || name || l("Preset Boundary")}
       class={
         @class,
@@ -121,6 +122,7 @@
     </span>
   {#match {id, name} when is_binary(name)}
     <span
+      data-id="custom"
       title={name}
       class={
         @class,
@@ -138,7 +140,8 @@
     </span>
   {#match other}
     <span
-      title={debug(other, "cuubbb") && l("Custom Boundaries")}
+      data-id="other"
+      title={l("Custom Boundaries")}
       class={
         @class,
         "flex items-center gap-2": @with_label && @with_icon
@@ -151,6 +154,6 @@
         "text-sm normal-case",
         "sr-only": !@with_label,
         "btn btn-sm btn-outline border-base-content/30": @with_icon != true
-      }>{l("Custom Boundaries")}</span>
+      }>{e(@__context__, :my_acls, other, nil) || l("Custom Boundaries")}</span>
     </span>
 {/case}

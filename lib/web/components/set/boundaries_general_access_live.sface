@@ -166,7 +166,7 @@
     </div>
 
     {!-- CUSTOM --}
-    {#for %{id: acl_id} = acl <- @my_acls}
+    {#for {acl_id, acl} <- @my_acls}
       <div class={
         "p-2 flex items-center gap-3 justify-between rounded-lg hover:bg-base-content/5",
         "bg-base-content/5": matches?(@to_boundaries, acl_id)
