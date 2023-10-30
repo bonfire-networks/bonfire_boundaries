@@ -3,7 +3,8 @@
     <Bonfire.UI.Common.AvatarLive
       :for={member <- @members |> Enum.take(2)}
       parent_id={@parent_id}
-      user={e(member, :subject, nil) || member}
+      user_id={id(e(member, :subject, nil)) || id(member)}
+      src={Media.avatar_url(e(member, :subject, member))}
       class={"w-#{@size} h-#{@size} "}
       bg_class="fill-base-content/5 bg-base-content/5 rounded-xl h-full"
     />

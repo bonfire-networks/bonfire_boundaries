@@ -102,7 +102,8 @@
                         {#if e(subject, :profile, :id, nil)}
                           <Bonfire.UI.Common.AvatarLive
                             parent_id="acls"
-                            user={e(subject, nil)}
+                            src={Media.avatar_url(e(subject, nil))}
+                            user_id={id(e(subject, nil))}
                             title={e(subject, :profile, :name, nil) ||
                               e(subject, :character, :username, nil) || id(subject)}
                             class="w-8 h-8"

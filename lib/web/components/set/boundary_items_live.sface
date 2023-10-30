@@ -44,7 +44,7 @@
             field={@field}
           />
         {/if}
-        <Bonfire.UI.Common.OpenModalLive
+        <!-- <Bonfire.UI.Common.OpenModalLive
           reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
           id={"explain_role#{id(data)}"}
           title_text={l("Role details")}
@@ -59,39 +59,15 @@
               label={l("")}
               scope={:preview}
             />
-
-            {!-- <ul :if={@preview_boundary_verbs} role="list" class="p-3 flex gap-3 flex-wrap">
-                {#for verb <- @preview_boundary_verbs || []}
-                  <Bonfire.Boundaries.Web.RoleVerbLive mini value read_only verb={verb} all_verbs={@all_verbs} />
-                {/for}
-              </ul> --}
           </div>
 
           <:open_btn>
             <button type="button" class="btn btn-sm btn-circle btn-ghost" aria-label="Add description">
               <#Icon iconify="heroicons-outline:information-circle" class="w-4 h-4 text-base-content/70" />
             </button>
-            {!-- <input type="hidden" name={"upload_metadata[#{entry.ref}][label]"} value={value}> --}
           </:open_btn>
-        </Bonfire.UI.Common.OpenModalLive>
+        </Bonfire.UI.Common.OpenModalLive> -->
       </div>
-
-      {!-- <div
-          :if={e(data, :type, nil) == "user"}
-          phx-click={JS.hide(to: "#boundaries_picker")
-          |> JS.hide(to: "#extra_boundaries")
-          |> JS.show(to: "#boundaries_preview")
-          |> JS.push("assign",
-            value: %{
-              preview_boundary_for_id: id(data),
-              preview_boundary_for_username: name(data)
-            },
-            target: "#boundaries_preview"
-          )}
-          class="btn btn-sm btn-circle btn-ghost"
-        >
-          <#Icon iconify="heroicons-outline:eye" class="w-5 h-5 md:w-4 md:h-4" />
-        </div> --}
 
       <div
         :if={!@read_only}
@@ -105,7 +81,7 @@
         )}
         class="btn btn-sm btn-circle btn-ghost"
       >
-        <#Icon iconify="ph:trash-fill" class="w-5 h-5 text-error/80 md:w-4 md:h-4" />
+        <#Icon iconify="ph:trash-fill" class="w-5 h-5 text-base-content/80 md:w-4 md:h-4" />
       </div>
     </div>
   </div>

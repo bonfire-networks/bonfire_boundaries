@@ -13,7 +13,7 @@
       implementation={:live_select}
       field={:exclude_circles}
       form_input_name={__MODULE__}
-      class="focus:outline-0 border-0 border-b h-10 !bg-transparent rounded-none border-base-content/20  !bg-transparent rounded-none text-sm liveselect"
+      class="focus:outline-0 border-0 border-b h-10 !bg-transparent rounded-none border-base-content/2 rounded-none text-sm liveselect !bg-transparent"
       preloaded_options={results_for_multiselect(@my_circles)}
       label={l("Add circles or people")}
     />

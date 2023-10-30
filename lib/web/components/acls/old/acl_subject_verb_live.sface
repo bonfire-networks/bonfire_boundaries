@@ -69,8 +69,9 @@
               <div class="flex items-center flex-1 space-x-2">
                 <Bonfire.UI.Common.AvatarLive
                   parent_id="acl_sv"
+                  src={Media.avatar_url(e(l, :subject, nil))}
                   :if={e(l, :subject, :profile, :id, nil)}
-                  user={e(l, :subject, nil)}
+                  user_id={id(e(l, :subject, nil))}
                 />
                 <div class="font-bold">{e(l, :subject, :named, :name, nil) ||
                     e(l, :subject, :stereotyped, :named, :name, nil) ||
