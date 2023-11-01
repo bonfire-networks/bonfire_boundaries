@@ -31,6 +31,7 @@
             class="radio"
             checked={matches?(@boundary_preset, "public")}
           /> --}
+<<<<<<< HEAD
             <div class="pr-2 flex items-center text-left">
               <div class="flex-shrink-0">
                 <span class="text-xl">
@@ -43,6 +44,19 @@
                   {l("Publicly visible to everyone. Discoverable by search engines.")}
                 </p>
               </div>
+=======
+          <div class="pr-2 flex items-center text-left">
+            <div class="flex-shrink-0">
+              <span class="text-xl">
+                <#Icon iconify="ph:globe" class={"w-5 h-5 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
+              </span>
+            </div>
+            <div class="flex flex-col ml-3">
+              <div class="text-sm font-semibold text-base-content/90">{l("Public")}</div>
+              <p class="text-xs text-base-content/70">
+                {l("Publicly visible to everyone. Discoverable by search engines.")}
+              </p>
+>>>>>>> 144b7c6 (ui)
             </div>
           </div>
         </button>
@@ -89,6 +103,7 @@
             class="radio"
             checked={matches?(@boundary_preset, "local")}
           /> --}
+<<<<<<< HEAD
             <div class="flex items-center text-left">
               <div class="flex-shrink-0">
                 <span class="text-xl">
@@ -104,6 +119,22 @@
                   {l("Everyone on this instance will be able to see, interact, and reply.")}
                 </p>
               </div>
+=======
+          <div class="flex items-center text-left">
+            <div class="flex-shrink-0">
+              <span class="text-xl">
+                <#Icon
+                  iconify="ph:campfire-bold"
+                  class={"w-5 h-5 text-base-content/70", "!w-4 !h-4": @is_dropdown}
+                />
+              </span>
+            </div>
+            <div class="flex flex-col ml-3">
+              <div class="text-sm font-semibold text-base-content/90">{l("Local")}</div>
+              <p class="text-xs text-base-content/70">
+                {l("Everyone on this instance will be able to see, interact, and reply.")}
+              </p>
+>>>>>>> 144b7c6 (ui)
             </div>
           </div>
         </button>
@@ -150,6 +181,7 @@
             class="radio"
             checked={matches?(@boundary_preset, "mentions")}
           /> --}
+<<<<<<< HEAD
             <div class="flex items-center text-left">
               <div class="flex-shrink-0">
                 <#Icon iconify="ri:at-line" class={"w-5 h-5 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
@@ -161,6 +193,18 @@
                   {l("Anyone mentioned will be able to see, interact, and reply.")}
                 </p>
               </div>
+=======
+          <div class="flex items-center text-left">
+            <div class="flex-shrink-0">
+              <#Icon iconify="ri:at-line" class={"w-5 h-5 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
+              {!-- <span class={"text-2xl", "!text-lg": @is_dropdown}>﹫</span> --}
+            </div>
+            <div class="flex flex-col ml-3">
+              <div class="text-sm font-semibold text-base-content/90">{l("Mentions")}</div>
+              <p class="text-xs text-base-content/70">
+                {l("Anyone mentioned will be able to see, interact, and reply.")}
+              </p>
+>>>>>>> 144b7c6 (ui)
             </div>
           </div>
         </button>
@@ -209,7 +253,7 @@
               </div>
               <div class="flex flex-col ml-3">
                 <div class="text-sm font-semibold text-base-content/90">{e(acl, :name, nil)}</div>
-                <p class="text-xs text-base-content/50">{e(acl, :description, nil)}</p>
+                <p class="text-xs text-base-content/70">{e(acl, :description, nil)}</p>
               </div>
             </div>
           </div>
@@ -259,7 +303,7 @@
             </div>
             <div class="flex flex-col ml-3">
               <div class="text-sm font-semibold text-base-content/90">{l("Custom")}</div>
-              <p class="text-xs text-base-content/50">{l("Specify custom boundaries, starting with a blank slate.")}</p>
+              <p class="text-xs text-base-content/70">{l("Specify custom boundaries, starting with a blank slate.")}</p>
             </div>
           </div>
         </button>
