@@ -339,6 +339,7 @@ defmodule Bonfire.Boundaries.Grants do
     |> subject_grants()
     |> Enum.map(fn
       {_subject_id, %{subject: subject, grants: grants}} ->
+        # TODO: compute positive/negative permissions?
         {subject, Roles.role_from_grants(grants, current_user: creator)}
     end)
   end

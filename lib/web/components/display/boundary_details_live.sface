@@ -49,6 +49,27 @@
         </div>
       {/if}
 
+      <details class="dropdown">
+        <summary class="btn btn-active hover:!bg-opacity/80 btn-outline normal-case !border !border-base-content/30 rounded-full btn-sm">
+          {l("Add a boundary preset")}
+        </summary>
+        <ul class="z-[1] menu shadow bg-base-200 rounded-lg p-0">
+          <Dynamic.Component
+            :if={module_enabled?(Bonfire.Boundaries.Web.BoundariesGeneralAccessLive)}
+            module={Bonfire.Boundaries.Web.BoundariesGeneralAccessLive}
+            set_action="Bonfire.Boundaries:add_object_acl"
+            set_opts={%{"phx-value-object_id" => @object_id}}
+            boundary_preset={@boundary_preset}
+            my_acls={e(@__context__, :my_acls, nil) ||
+              LiveHandler.my_acls(current_user_id(@__context__), Bonfire.Boundaries.Acls.opts_for_dropdown())}
+            include_stereotypes
+            hide_presets
+            hide_custom
+            is_dropdown
+          />
+        </ul>
+      </details>
+
       {#if is_list(@presets_acls) and @presets_acls != []}
         <ul class="flex flex-col divide-y divide-base-content/10 px-4 mt-2">
           <li :for={acl <- @presets_acls} class="flex items-center justify-between py-4">

@@ -406,6 +406,27 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
+  def handle_event("add_object_acl", %{"id" => acl, "object_id" => object}, socket) do
+    with {:ok, _} <-
+           Bonfire.Boundaries.Controlleds.add_acls(
+             object,
+             acl
+           ) do
+      Bonfire.UI.Common.OpenModalLive.close()
+
+      {
+        :noreply,
+        socket
+        |> assign_flash(:info, l("Boundary added!"))
+        #  |> assign(   
+        #  )
+      }
+    else
+      e ->
+        error(e)
+    end
+  end
+
   def unblock(id, block_type, scope, socket)
       when is_binary(id) do
     # current_user = current_user_required!(socket)
@@ -823,10 +844,10 @@ defmodule Bonfire.Boundaries.LiveHandler do
     )
   end
 
-  def my_acls(current_user_id) do
+  def my_acls(current_user_id, opts \\ nil) do
     Bonfire.Boundaries.Acls.list_my(
       current_user_id,
-      Bonfire.Boundaries.Acls.opts_for_dropdown()
+      opts || Bonfire.Boundaries.Acls.opts_for_list()
     )
     |> Enum.map(fn
       %Bonfire.Data.AccessControl.Acl{id: acl_id} = acl ->

@@ -100,7 +100,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
 
     {scoped, args} =
       if e(assigns, :setting_boundaries, nil) do
-        {scope, Acls.opts_for_dropdown()}
+        {scope, Acls.opts_for_list()}
       else
         {
           scope,

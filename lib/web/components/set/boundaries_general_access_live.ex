@@ -6,6 +6,8 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
   prop to_boundaries, :any, default: nil
   prop my_acls, :any, default: nil
   prop is_dropdown, :boolean, default: false
+  prop include_stereotypes, :boolean, default: false
+  prop hide_presets, :boolean, default: false
   prop hide_custom, :boolean, default: false
   prop set_action, :string, default: nil
   prop set_opts, :map, default: %{}

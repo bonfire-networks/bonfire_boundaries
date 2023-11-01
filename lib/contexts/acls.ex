@@ -524,7 +524,7 @@ defmodule Bonfire.Boundaries.Acls do
   def get_object_custom_acl(object) do
     from(a in Acl,
       join: c in Controlled,
-      on: a.id == c.acl_id and c.id == ^id(object),
+      on: a.id == c.acl_id and c.id == ^ulid(object),
       join: s in Stereotyped,
       on: a.id == s.id and s.stereotype_id == ^Fixtures.custom_acl(),
       preload: [stereotyped: s]
@@ -771,7 +771,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   # TODO
   defp built_ins_for_dropdown do
-    filter = Config.get(:acls_to_present)
+    filter = Config.get(:acls_for_dropdown)
 
     acls()
     |> Enum.filter(fn {name, _acl} -> name in filter end)
@@ -791,9 +791,9 @@ defmodule Bonfire.Boundaries.Acls do
     ]
   end
 
-  def for_dropdown(opts) do
-    list_my_with_counts(current_user(opts), opts ++ opts_for_dropdown())
-  end
+  # def for_dropdown(opts) do
+  #   list_my_with_counts(current_user(opts), opts ++ opts_for_dropdown())
+  # end
 
   defp many_with_opts(query, opts) do
     query

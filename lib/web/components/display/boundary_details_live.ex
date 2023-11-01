@@ -2,6 +2,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryDetailsLive do
   use Bonfire.UI.Common.Web, :stateless_component
   # TODO: make stateful?
 
+  alias Bonfire.Boundaries.LiveHandler
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Roles
 
@@ -71,6 +72,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryDetailsLive do
       #    |> Enum.reject(& id(&1) in global_preset_acl_ids)
       |> Enum.map(&{id(&1), e(&1, :named, :name, l("Unnamed preset boundary"))})
 
+    # TODO: use boundary summary instead so we get the computed boundary?
     # NOTE: custom_acls will be editable within AclLive, so only use presets_acls here
     {to_circles, exclude_circles} =
       Acls.acl_grants_to_tuples(current_user_required!(context), presets_acls)
@@ -81,7 +83,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryDetailsLive do
       #  TODO: this seems unused by SetBoundariesLive, do we need to compute to_circles instead?
       to_boundaries: to_boundaries,
       presets_acls: presets_acls,
-      custom_acls: custom_acls,
+      custom_acls: e(custom_acls, nil) || init_object_custom_acl(object_id, context),
       to_circles: to_circles,
       exclude_circles: exclude_circles
     ]
@@ -89,4 +91,15 @@ defmodule Bonfire.Boundaries.Web.BoundaryDetailsLive do
   end
 
   defp for_view_edit(_, _, boundary_preset, _), do: [boundary_preset: boundary_preset]
+
+  defp init_object_custom_acl(object_id, context) do
+    case Acls.get_or_create_object_custom_acl(object_id, current_user(context)) do
+      {:ok, acl} ->
+        [acl]
+
+      e ->
+        error(e)
+        []
+    end
+  end
 end

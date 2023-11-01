@@ -215,15 +215,21 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     verbs_moderate = verbs_contribute ++ verbs_mod
 
-    public_acls = [
+    basic_acls = [
       :guests_may_see_read,
-      :guests_may_read,
       :remotes_may_interact,
       :remotes_may_reply,
-      :locals_may_read,
       :locals_may_interact,
       :locals_may_reply
     ]
+
+    public_acls =
+      basic_acls ++
+        [
+          :guests_may_see,
+          :guests_may_read,
+          :locals_may_read
+        ]
 
     cannot_read = Enum.reject(all_verb_names, fn v -> v == :request end)
     cannot_interact = Enum.reject(all_verb_names, fn v -> v in verbs_see_read_request end)
@@ -258,10 +264,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         default: verbs_participate_and_message,
         message: verbs_participate_message_minus_boost
       ],
-      # preset ACLs to show in smart input
-      acls_to_present: [],
+      # preset ACLs to show when editing boundaries
+      acls_for_dropdown: basic_acls,
       # what boundaries we can display to everyone when applied on objects
-      public_acls_on_objects: public_acls ++ [:guests_may_see],
+      public_acls_on_objects: public_acls,
       #  used for setting boundaries
       preset_acls: %{
         "public" => [
