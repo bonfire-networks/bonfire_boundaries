@@ -41,7 +41,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       boost: %{
         id: "300ST0R0RANN0VCEANACT1V1TY",
         verb: "Boost",
-        icon: "bx:Repost",
+        icon: "system-uicons:retweet",
         summary: "Boost an object (and notify the author)"
       },
       flag: %{
