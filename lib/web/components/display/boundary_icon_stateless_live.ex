@@ -33,7 +33,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
          {"custom", l("Custom")})
       |> debug("boundary_preset")
     end)
-    |> assign(modal_id: "modal_#{assigns[:parent_id] || "boundary_#{assigns[:object_id]}"}")
+    |> assign(modal_id: "icon_modal_#{assigns[:parent_id] || "boundary_#{assigns[:object_id]}"}")
     |> render_sface()
   end
 end

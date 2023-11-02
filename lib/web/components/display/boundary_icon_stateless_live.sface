@@ -39,5 +39,5 @@
     />
   </div>
 {#else}
-  <span :if={current_user(@__context__)} class="loading loading-ring loading-sm" />
+  <span :if={current_user(@__context__)} class="loading loading-spinner loading-sm" />
 {/if}
