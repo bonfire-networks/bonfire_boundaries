@@ -14,7 +14,7 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
       conn = conn(user: me, account: account)
       next = "/boundaries/circles"
       {:ok, view, _html} = live(conn, next)
-      open_browser(view)
+      #       open_browser(view)
 
       view
       |> element("[data-role=new_circle] div[data-role=open_modal]")
@@ -31,7 +31,7 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
         |> follow_redirect(conn)
 
       assert html =~ "Circle created!"
-      open_browser(circle_view)
+      #       open_browser(circle_view)
       assert has_element?(circle_view, "span", circle_name)
       #       assert circle_view |> has_element?("h1[data-role=circle_title]")
     end
@@ -365,7 +365,7 @@ defmodule Bonfire.Boundaries.LiveHandlerTest do
              |> render() =~ "Cannot Read"
     end
 
-    test "Edit Settings to a boundary works" do
+    test "Edit Settings of a boundary works" do
       # create a bunch of users
       account = fake_account!()
       me = fake_user!(account)

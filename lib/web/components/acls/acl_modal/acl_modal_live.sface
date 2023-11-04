@@ -56,6 +56,7 @@
           <div class="flex items-end px-2 py-1 mt-px">
             <Bonfire.Boundaries.Web.YesMaybeFalseLive
               value={e(l, :value, nil)}
+              id={"role_#{@subject_id}_#{verb_id}"}
               field_name={"subject[#{@subject_id}][#{verb_id}]"}
               event_target={@myself}
             />

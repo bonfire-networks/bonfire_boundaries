@@ -102,23 +102,25 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
              (Circles.is_built_in?(circle) ||
                 stereotype_id in follow_stereotypes))
 
-      send_self(
-        read_only: read_only,
-        page_title:
-          e(circle, :named, :name, nil) || e(socket.assigns, :name, nil) ||
-            e(circle, :stereotyped, :named, :name, nil) || l("Circle"),
-        back: true,
-        circle: circle
-        # page_header_aside: [
-        #   {Bonfire.Boundaries.Web.HeaderCircleLive,
-        #    [
-        #      circle: circle,
-        #      stereotype_id: stereotype_id,
-        #      #  suggestions: suggestions,
-        #      read_only: read_only
-        #    ]}
-        # ]
-      )
+      if socket_connected?(socket),
+        do:
+          send_self(
+            read_only: read_only,
+            page_title:
+              e(circle, :named, :name, nil) || e(socket.assigns, :name, nil) ||
+                e(circle, :stereotyped, :named, :name, nil) || l("Circle"),
+            back: true,
+            circle: circle
+            # page_header_aside: [
+            #   {Bonfire.Boundaries.Web.HeaderCircleLive,
+            #    [
+            #      circle: circle,
+            #      stereotype_id: stereotype_id,
+            #      #  suggestions: suggestions,
+            #      read_only: read_only
+            #    ]}
+            # ]
+          )
 
       {:ok,
        assign(

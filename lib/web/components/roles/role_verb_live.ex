@@ -9,7 +9,7 @@ defmodule Bonfire.Boundaries.Web.RoleVerbLive do
   # prop exclude_verbs, :list, default: []
 
   prop event_target, :any, default: nil
-  prop field_name, :any, default: nil
+  prop name, :any, default: nil
 
   def update(assigns, socket) do
     {:ok,

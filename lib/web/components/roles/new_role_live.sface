@@ -1,5 +1,5 @@
 <div class="px-2">
-  <form phx-submit="Bonfire.Boundaries:role_create" phx-target={@event_target}>
+  <form id="new_role_form" phx-submit="Bonfire.Boundaries:role_create" phx-target={@event_target}>
     <div class="flex flex-col items-center place-content-center">
       <div class="w-16 h-16 rounded-full flex place-content-center items-center bg-info/30">
         <#Icon iconify="mingcute:hat-fill" class="w-8 h-8 text-info" />
@@ -52,7 +52,7 @@
       </label>
     </div> --}
 
-      <button type="submit" class="w-full mt-3 normal-case btn btn-primary">
+      <button type="submit" data-role="new_role_submit" class="w-full mt-3 normal-case btn btn-primary">
         {l("Create role")}
       </button>
     </div>

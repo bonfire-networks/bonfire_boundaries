@@ -95,7 +95,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
            ) do
       debug(acl, "acllll")
 
-      if e(socket.assigns, :scope_type, nil) not in [:group, Bonfire.Classify.Category] do
+      if socket_connected?(socket) and
+           e(socket.assigns, :scope_type, nil) not in [:group, Bonfire.Classify.Category] do
         send_self(
           back: true,
           page_title: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil),

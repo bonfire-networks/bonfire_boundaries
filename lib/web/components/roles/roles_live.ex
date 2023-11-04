@@ -20,15 +20,17 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
 
     if scope_type not in [:smart_input, :group, Bonfire.Classify.Category] do
       # not for groups
-      send_self(
-        scope: scope,
-        scope_type: scope_type,
-        page_title: e(socket.assigns, :name, nil) || l("Roles"),
-        back: true,
-        page_header_aside: [
-          {Bonfire.Boundaries.Web.NewRoleButtonLive, [scope: scope, scope_type: scope_type]}
-        ]
-      )
+      if socket_connected?(socket),
+        do:
+          send_self(
+            scope: scope,
+            scope_type: scope_type,
+            page_title: e(socket.assigns, :name, nil) || l("Roles"),
+            back: true,
+            page_header_aside: [
+              {Bonfire.Boundaries.Web.NewRoleButtonLive, [scope: scope, scope_type: scope_type]}
+            ]
+          )
 
       # else
       #   send_self(
@@ -80,29 +82,33 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
     current_user = current_user_required!(socket)
     scope = e(socket.assigns, :scope, nil)
     # verb_value = List.first(Map.values(roles))
-    grant =
-      Enum.flat_map(roles, fn {role_name, verb_value} ->
-        Enum.flat_map(verb_value, fn {verb, value} ->
-          debug(scope, "edit #{role_name} -- #{verb} = #{value} - scope:")
 
-          [
-            Roles.edit_verb_permission(role_name, verb, value,
-              scope: scope,
-              current_user: current_user
-            )
-          ]
-        end)
-      end)
+    with [ok: edited] <-
+           Enum.flat_map(roles, fn {role_name, verb_value} ->
+             Enum.flat_map(verb_value, fn {verb, value} ->
+               case Types.maybe_to_atom!(verb) do
+                 nil ->
+                   [{:error, "Invalid verb"}]
 
-    # |> debug("done")
-    with [ok: edited] <- grant do
+                 verb ->
+                   debug(scope, "edit #{role_name} -- #{verb} = #{value} - scope:")
+
+                   [
+                     Roles.edit_verb_permission(role_name, verb, value,
+                       scope: scope,
+                       current_user: current_user
+                     )
+                   ]
+               end
+             end)
+           end) do
       debug(edited, "settings with edited role")
 
       {
         :noreply,
         socket
         |> assign_flash(:info, l("Permission edited!"))
-        # |> maybe_assign_settings(edited)
+        |> maybe_assign_settings(edited)
       }
     else
       other ->

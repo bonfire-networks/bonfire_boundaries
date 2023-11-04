@@ -19,6 +19,7 @@
   </div>
 </div>
 <div x-cloak x-show="open" x-collapse>
+  {!-- TODO: don't render until opened (using LV instead of Alpine) --}
   <div class="">
     <ul class="">
       {#for verb <- e(@role, :can_verbs, nil) || []}
@@ -28,7 +29,7 @@
           verb={verb}
           all_verbs={@all_verbs}
           event_target={@event_target}
-          field_name={"role[#{@name}]"}
+          name={@name}
         />
       {/for}
 
@@ -39,7 +40,7 @@
           verb={verb}
           all_verbs={@all_verbs}
           event_target={@event_target}
-          field_name={"role[#{@name}]"}
+          name={@name}
         />
       {/for}
 
@@ -52,7 +53,7 @@
             verb={verb}
             all_verbs={[]}
             event_target={@event_target}
-            field_name={"role[#{@name}]"}
+            name={@name}
           />
         {/for}
       {/if}

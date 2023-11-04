@@ -232,44 +232,53 @@ defmodule Bonfire.Boundaries.Roles do
     |> Settings.put([@config_key], ..., opts)
   end
 
-  def edit_verb_permission(role_name, verb, value, opts) when value in [true, 1, "true", "1"] do
-    current_role = get(role_name, opts)
-
-    remove_cannot(current_role, role_name, verb, opts)
-
-    current_role
+  def edit_verb_permission(role_name, verb, value, opts)
+      when value in [true, 1, "true", "1"] and is_atom(verb) do
+    # positive permission
+    get(role_name, opts)
+    |> remove_cannot(verb, opts)
     |> Enums.deep_merge(%{can_verbs: [verb]})
-    |> Settings.put([@config_key, role_name], ..., opts)
+    |> do_put(role_name, ..., opts)
   end
 
-  def edit_verb_permission(role_name, verb, value, opts) when value in [false, 0, "false", "0"] do
-    current_role = get(role_name, opts)
-
-    remove_can(current_role, role_name, verb, opts)
-
-    current_role
+  def edit_verb_permission(role_name, verb, value, opts)
+      when value in [false, 0, "false", "0"] and is_atom(verb) do
+    # negative permission
+    get(role_name, opts)
+    |> remove_can(verb, opts)
     |> Enums.deep_merge(%{cannot_verbs: [verb]})
-    |> Settings.put([@config_key, role_name], ..., opts)
+    |> do_put(role_name, ..., opts)
   end
 
-  def edit_verb_permission(role_name, verb, value, opts) do
-    current_role = get(role_name, opts)
-
-    remove_can(current_role, role_name, verb, opts)
-
-    remove_cannot(current_role, role_name, verb, opts)
+  def edit_verb_permission(role_name, verb, value, opts) when is_atom(verb) do
+    # reset to default (nil)
+    get(role_name, opts)
+    |> remove_can(verb, opts)
+    |> remove_cannot(verb, opts)
+    |> do_put(role_name, ..., opts)
   end
 
-  defp remove_can(current_role, role_name, verb, opts) do
-    e(current_role, :can_verbs, [])
-    |> Enum.reject(&(&1 == verb))
-    |> Settings.put([@config_key, role_name, :can_verbs], ..., opts)
+  defp do_put(role_name, values, opts) do
+    debug(values, "updated role")
+    Settings.put([@config_key, role_name], values, opts)
   end
 
-  def remove_cannot(current_role, role_name, verb, opts) do
-    e(current_role, :cannot_verbs, [])
-    |> Enum.reject(&(&1 == verb))
-    |> Settings.put([@config_key, role_name, :cannot_verbs], ..., opts)
+  defp remove_can(current_role, verb, opts) do
+    do_remove_verb(:can_verbs, current_role, verb, opts)
+  end
+
+  defp remove_cannot(current_role, verb, opts) do
+    do_remove_verb(:cannot_verbs, current_role, verb, opts)
+  end
+
+  defp do_remove_verb(key, current_role, verb, opts) do
+    debug(verb, "remove verb")
+
+    Map.put(
+      current_role,
+      key,
+      Enum.reject(e(current_role, key, []), &(&1 == verb)) |> debug() |> Enums.filter_empty([])
+    )
   end
 
   def reset_instance_roles do

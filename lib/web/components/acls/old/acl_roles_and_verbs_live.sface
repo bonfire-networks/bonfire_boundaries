@@ -219,6 +219,7 @@
                       </div>
                       <Bonfire.Boundaries.Web.YesMaybeFalseLive
                         value={Map.get(e(l, :subject_verb_grants, subject_id, %{}), :value, nil)}
+                        id={"role_#{subject_id}_#{verb_id}"}
                         field_name={"subject[#{subject_id}][#{verb_id}]"}
                       />
                     </div>
