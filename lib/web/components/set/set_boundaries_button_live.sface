@@ -1,6 +1,6 @@
 {#case clone_context(@to_boundaries)}
   {#match false}
-    <div class="flex items-center px-1 gap-2 border-l border-r border-base-content/10">
+    <div class="flex items-center px-1 gap-2 border-l border-r border-base-content/20">
       <div class="flex relative z-50 items-center flex-1 gap-2">
         <div phx-hook="Tooltip" id="popup_boundaries" class="">
           <label class="tooltip-button flex items-center justify-between gap-2 btn-ghost normal-case rounded-full btn-xs btn text-primary">

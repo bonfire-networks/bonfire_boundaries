@@ -1,9 +1,6 @@
 <div>
   <#slot {@header} />
-  <div class={
-    "grid items-start grid-cols-1 mt-2 md:mt-0",
-    "max-w-[680px] mx-auto": !current_user(@__context__)
-  }>
+  <div class="grid items-start grid-cols-1 mt-2 md:mt-0">
     <Bonfire.UI.Common.TabsLive
       :if={!@hide_tabs}
       selected_tab={@selected_tab}

@@ -24,7 +24,7 @@
         </div>
       </div>
     </div>
-    <ul id="circle_suggestions" class="flex flex-col divide-y divide-base-content/10">
+    <ul id="circle_suggestions" class="flex flex-col divide-y divide-base-content/20">
       {#for {id, suggested} <- @suggestions}
         <li id={"item-" <> id} class="flex items-center py-3">
           <div class="flex-1">

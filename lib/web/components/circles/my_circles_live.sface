@@ -16,7 +16,7 @@
   </div>
 
   <div class="">
-    <ul role="list" class="flex flex-col divide-y divide-base-content/10">
+    <ul role="list" class="flex flex-col divide-y divide-base-content/20">
       {#for circle <- e(@circles, [])}
         <li class="">
           <LiveRedirect
