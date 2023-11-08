@@ -633,12 +633,14 @@ defmodule Bonfire.Boundaries.LiveHandler do
   def maybe_preload_and_check_boundaries(assigns_sockets, opts \\ []) do
     assigns_sockets
     |> maybe_check_boundaries(opts)
-    |> update_many(opts)
+    |> do_update_many(opts)
   end
 
   @decorate time()
   def maybe_check_boundaries(assigns_sockets, opts \\ []) do
-    current_user = current_user(List.first(assigns_sockets))
+    current_user =
+      current_user(elem(List.first(assigns_sockets), 0)) ||
+        current_user(elem(List.first(assigns_sockets), 1))
 
     # |> debug("current_user")
 
@@ -672,37 +674,37 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
       debug(my_visible_ids, "my_visible_ids")
 
-      Enum.map(assigns_sockets, fn assigns ->
+      Enum.map(assigns_sockets, fn {assigns, socket} ->
         object_id = ulid(the_object(assigns))
 
-        if object_id in list_of_ids and object_id not in my_visible_ids do
-          # not allowed
-          assigns
-          |> Map.put(
-            :activity,
-            nil
-          )
-          |> Map.put(
-            :object,
-            nil
-          )
-          |> Map.put(
-            :object_boundary,
-            :not_visible
-          )
-        else
-          # allowed
-          assigns
-          |> Map.put(
-            :boundary_can,
-            true
-          )
-          # to avoid checking again
-          |> Map.put(
-            :check_object_boundary,
-            false
-          )
-        end
+        {if object_id in list_of_ids and object_id not in my_visible_ids do
+           # not allowed
+           assigns
+           |> Map.put(
+             :activity,
+             nil
+           )
+           |> Map.put(
+             :object,
+             nil
+           )
+           |> Map.put(
+             :object_boundary,
+             :not_visible
+           )
+         else
+           # allowed
+           assigns
+           |> Map.put(
+             :boundary_can,
+             true
+           )
+           # to avoid checking again
+           |> Map.put(
+             :check_object_boundary,
+             false
+           )
+         end, socket}
       end)
     else
       debug("skip")
@@ -710,10 +712,11 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
-  def update_many(assigns_sockets, opts \\ []) do
+  defp do_update_many(assigns_sockets, opts \\ []) do
     # debug(assigns_sockets, "preload from given assigns")
 
-    if current_user(assigns_sockets) do
+    if current_user(elem(List.first(assigns_sockets), 0)) ||
+         current_user(elem(List.first(assigns_sockets), 1)) do
       preload_assigns_async(
         assigns_sockets,
         &assigns_to_params/1,
@@ -722,8 +725,18 @@ defmodule Bonfire.Boundaries.LiveHandler do
       )
     else
       debug("no need to preload list of boundaries for guests")
-      assigns_sockets
+      nil
     end
+  end
+
+  def update_many(assigns_sockets, opts \\ []) do
+    # debug(assigns_sockets, "preload from given assigns")
+
+    (do_update_many(assigns_sockets, opts) || assigns_sockets)
+    |> Enum.map(fn {assigns, socket} ->
+      socket
+      |> Phoenix.Component.assign(assigns)
+    end)
   end
 
   defp assigns_to_params(assigns) do
