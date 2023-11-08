@@ -14,9 +14,9 @@ defmodule Bonfire.Boundaries.Web.IfCan do
   slot default
   slot if_not
 
-  def preload(list_of_assigns),
+  def update_many(assigns_sockets),
     do:
-      Bonfire.Boundaries.LiveHandler.maybe_check_boundaries(list_of_assigns,
+      Bonfire.Boundaries.LiveHandler.maybe_check_boundaries(assigns_sockets,
         caller_module: __MODULE__
       )
 

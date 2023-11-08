@@ -630,21 +630,21 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end)
   end
 
-  def maybe_preload_and_check_boundaries(list_of_assigns, opts \\ []) do
-    list_of_assigns
+  def maybe_preload_and_check_boundaries(assigns_sockets, opts \\ []) do
+    assigns_sockets
     |> maybe_check_boundaries(opts)
-    |> preload(opts)
+    |> update_many(opts)
   end
 
   @decorate time()
-  def maybe_check_boundaries(list_of_assigns, opts \\ []) do
-    current_user = current_user(List.first(list_of_assigns))
+  def maybe_check_boundaries(assigns_sockets, opts \\ []) do
+    current_user = current_user(List.first(assigns_sockets))
 
     # |> debug("current_user")
 
     list_of_objects =
-      list_of_assigns
-      # |> debug("list_of_assigns")
+      assigns_sockets
+      # |> debug("assigns_sockets")
       # only check when explicitly asked
       |> Enum.reject(&(e(&1, :check_object_boundary, nil) != true))
       |> Enum.map(&the_object/1)
@@ -672,7 +672,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
       debug(my_visible_ids, "my_visible_ids")
 
-      Enum.map(list_of_assigns, fn assigns ->
+      Enum.map(assigns_sockets, fn assigns ->
         object_id = ulid(the_object(assigns))
 
         if object_id in list_of_ids and object_id not in my_visible_ids do
@@ -706,23 +706,23 @@ defmodule Bonfire.Boundaries.LiveHandler do
       end)
     else
       debug("skip")
-      list_of_assigns
+      assigns_sockets
     end
   end
 
-  def preload(list_of_assigns, opts \\ []) do
-    # debug(list_of_assigns, "preload from given assigns")
+  def update_many(assigns_sockets, opts \\ []) do
+    # debug(assigns_sockets, "preload from given assigns")
 
-    if current_user(list_of_assigns) do
+    if current_user(assigns_sockets) do
       preload_assigns_async(
-        list_of_assigns,
+        assigns_sockets,
         &assigns_to_params/1,
         &do_preload/3,
         opts ++ [skip_if_set: :object_boundary, preload_status_key: :preloaded_async_boundaries]
       )
     else
       debug("no need to preload list of boundaries for guests")
-      list_of_assigns
+      assigns_sockets
     end
   end
 

@@ -17,9 +17,9 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconLive do
 
   prop class, :css_class, default: nil
 
-  def preload(list_of_assigns),
+  def update_many(assigns_sockets),
     do:
-      Bonfire.Boundaries.LiveHandler.preload(list_of_assigns,
+      Bonfire.Boundaries.LiveHandler.update_many(assigns_sockets,
         caller_module: __MODULE__
       )
 
