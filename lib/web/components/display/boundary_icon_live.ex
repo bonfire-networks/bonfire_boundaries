@@ -16,7 +16,6 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconLive do
   prop with_label, :boolean, default: false
 
   prop class, :css_class, default: nil
-  prop parent_id, :any, default: nil
 
   def update_many(assigns_sockets),
     do:

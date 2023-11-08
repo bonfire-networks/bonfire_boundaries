@@ -62,7 +62,7 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
         all_verbs: Bonfire.Boundaries.Verbs.verbs()
         # available_verbs: available_verbs
       )
-      |> preview(nil, l("guests"))
+      # |> preview(nil, l("guests"))
       #  |> debug()
     }
   end
