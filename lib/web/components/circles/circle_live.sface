@@ -120,8 +120,8 @@
   {#else}
     <li id="no-members" class="flex items-center place-content-center">
       <Bonfire.UI.Common.EmptyFeed
-        feedback_title={e(@feedback_title, l("This circle has no members yet"))}
-        feedback_message={e(@feedback_message, l("Add some users to get started!"))}
+        feedback_title={@feedback_title || l("This circle has no members yet")}
+        feedback_message={@feedback_message || l("Add some users to get started!")}
       />
     </li>
   {/if}

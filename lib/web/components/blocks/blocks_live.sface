@@ -10,6 +10,8 @@
       setting_boundaries={false}
       showing_within={@block_type}
       read_only={@read_only}
+      feedback_title={l("This list is empty")}
+      feedback_message=""
     >
       <div class="flex flex-col flex-1 gap-1 text-left prose prose-sm">
         <p :if={@scope == :instance_wide} class="px-4 mb-0">
@@ -67,6 +69,8 @@
       setting_boundaries={false}
       showing_within={@block_type}
       read_only={@read_only}
+      feedback_title={l("This list is empty")}
+      feedback_message=""
     >
       <div class="flex flex-col flex-1 gap-1 text-left prose prose-sm">
         <p :if={@scope == :instance_wide} class="mt-2 px-4 mb-0">
