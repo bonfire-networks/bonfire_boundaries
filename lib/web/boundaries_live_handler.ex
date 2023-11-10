@@ -712,6 +712,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
+  @decorate time()
   defp do_update_many(assigns_sockets, opts \\ []) do
     # debug(assigns_sockets, "preload from given assigns")
 
