@@ -734,9 +734,13 @@ defmodule Bonfire.Boundaries.LiveHandler do
     # debug(assigns_sockets, "preload from given assigns")
 
     (do_update_many(assigns_sockets, opts) || assigns_sockets)
-    |> Enum.map(fn {assigns, socket} ->
-      socket
-      |> Phoenix.Component.assign(assigns)
+    |> Enum.map(fn
+      {assigns, socket} ->
+        socket
+        |> Phoenix.Component.assign(assigns)
+
+      socket ->
+        socket
     end)
   end
 
