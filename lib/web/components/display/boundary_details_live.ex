@@ -14,6 +14,12 @@ defmodule Bonfire.Boundaries.Web.BoundaryDetailsLive do
   prop scope, :any, default: nil
   prop phx_target, :any, default: nil
 
+  prop to_circles, :list, default: []
+  prop exclude_circles, :list, default: []
+
+  prop presets_acls, :list, default: []
+  prop custom_acls, :list, default: []
+
   def render(%{object_boundary: none} = assigns) when none in [nil, false] do
     assigns
     |> render_sface()
