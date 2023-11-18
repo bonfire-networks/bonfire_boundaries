@@ -376,7 +376,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
      |> assign(
        to_circles: to_circles,
        exclude_circles: exclude_circles,
-       to_boundaries: [{"custom", l("Custom based on %{boundary_name}", boundary_name: name)}]
+       to_boundaries: [{"custom", l("%{boundary_name} (custom)", boundary_name: name)}]
      )}
   end
 
@@ -397,7 +397,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
         :noreply,
         socket
         |> assign_flash(:info, l("Boundary removed!"))
-        #  |> assign(   
+        #  |> assign(
         #  )
       }
     else
@@ -418,7 +418,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
         :noreply,
         socket
         |> assign_flash(:info, l("Boundary added!"))
-        #  |> assign(   
+        #  |> assign(
         #  )
       }
     else

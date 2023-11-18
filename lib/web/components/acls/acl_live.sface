@@ -234,13 +234,13 @@
 
     <style>
       .boundaries-switches label div.btn {
-      color: hsl(var(--bc));
+      color: oklch(var(--bc));
       }
       .boundaries-switches label input:checked ~ div.btn-yes {
-      background: hsl(var(--su) / 0.90);
+      background: oklch(var(--su) / 0.90);
       }
       .boundaries-switches label input:checked ~ div.btn-no {
-      background: hsl(var(--er) / 0.90);
+      background: oklch(var(--er) / 0.90);
       }
       .boundaries-switches label input:checked ~ div.btn-maybe {
       background: white;
