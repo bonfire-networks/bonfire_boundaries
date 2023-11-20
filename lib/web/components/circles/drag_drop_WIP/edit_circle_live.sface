@@ -69,7 +69,7 @@
                 <div class="flex-1">
                   <Bonfire.UI.Common.ProfileItemLive
                     show_controls={[]}
-                    avatar_class="w-10 h-10 rounded bg-base-100"
+                    avatar_class="w-10 h-10 rounded bg-base-300"
                     profile={e(member, :subject, :profile, nil)}
                     character={e(member, :subject, :character, nil)}
                   />
@@ -134,7 +134,7 @@
                 />
                 <div class="flex-1">
                   <Bonfire.UI.Common.ProfileItemLive
-                    avatar_class="w-10 h-10 rounded bg-base-100"
+                    avatar_class="w-10 h-10 rounded bg-base-300"
                     show_controls={[]}
                     profile={e(suggested, :edge, :object, :profile, nil)}
                     character={e(suggested, :edge, :object, :character, nil)}
@@ -180,7 +180,7 @@
                 <div class="flex-1">
                   <Bonfire.UI.Common.ProfileItemLive
                     show_controls={[]}
-                    avatar_class="w-10 h-10 rounded bg-base-100"
+                    avatar_class="w-10 h-10 rounded bg-base-300"
                     profile={e(suggested, :edge, :subject, :profile, nil)}
                     character={e(suggested, :edge, :subject, :character, nil)}
                   />

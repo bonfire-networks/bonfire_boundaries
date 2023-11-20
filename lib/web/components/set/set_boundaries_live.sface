@@ -34,7 +34,7 @@
       <div class="">
         <div class="mt-4 flex my-2 justify-between items-center">
           <Bonfire.UI.Common.ProfileItemLive
-            avatar_class="w-8 h-8 rounded-full bg-base-100"
+            avatar_class="w-8 h-8 rounded-full bg-base-300"
             profile={e(current_user(@__context__), :profile, nil)}
             character={e(current_user(@__context__), :character, nil)}
             show_controls={[]}
