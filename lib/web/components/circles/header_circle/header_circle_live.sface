@@ -13,17 +13,7 @@
         />
       </div>
     </div>
-    <div class="p-4 my-4 mb-0 rounded-md bg-info/10">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-        </div>
-        <div class="flex-1 ml-3 md:flex md:justify-between">
-          <p class="text-sm text-info">
-            {l("This is a list of people you follow and who follow you.")}</p>
-        </div>
-      </div>
-    </div>
+
     <ul id="circle_suggestions" class="flex flex-col divide-y divide-base-content/20">
       {#for {id, suggested} <- @suggestions}
         <li id={"item-" <> id} class="flex items-center py-3">

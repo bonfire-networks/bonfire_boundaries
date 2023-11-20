@@ -74,8 +74,8 @@
         <ul class="flex flex-col divide-y divide-base-content/20 px-4 mt-2">
           <li :for={acl <- @presets_acls} class="flex items-center justify-between py-4">
             <div class="flex items-center gap-3">
-              <span class="flex items-center w-8 h-8 rounded-full place-content-center bg-info/30">
-                <#Icon iconify="ph:hand-fill" class="inline-block w-5 h-5 text-info" />
+              <span class="flex items-center w-8 h-8 rounded-full place-content-center bg-info">
+                <#Icon iconify="ph:hand-fill" class="inline-block w-5 h-5 text-info-content" />
               </span>
               <div class="text-sm truncate max-w-full font-medium text-base-content">{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil)}</div>
             </div>

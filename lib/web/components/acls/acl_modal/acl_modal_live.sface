@@ -4,21 +4,16 @@
   title_text={l("Edit Role") <> " - " <> Atom.to_string(@role_title)}
 >
   <div class="mt-4 overflow-x-hidden">
-    <div class="p-4 mb-4 rounded-md bg-info/10">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-        </div>
-        <div class="flex-1 ml-3 md:flex md:justify-between">
-          <p class="text-sm text-info">
-            {l(
-              "You can explicitly enable or disable a verb from this role to grant or forbid a specific permission. 
-              By removing the verb from the list, the user will inherit that permission from the other boundaries applied.
-              If no other boundaries are present the default will be false."
-            )}</p>
-        </div>
-      </div>
+    <div class="alert mb-4 alert-info" role="alert">
+      <#Icon solid="InformationCircle" class="w-5 h-5 shrink-0" />
+      <span class="">
+        {l(
+          "You can explicitly enable or disable a verb from this role to grant or forbid a specific permission. 
+                By removing the verb from the list, the user will inherit that permission from the other boundaries applied.
+                If no other boundaries are present the default will be false."
+        )}</span>
     </div>
+
     <div class="flex flex-col divide-y divide-base-content/20">
       {#for {verb_id, l} <- Enum.concat(@grants || [], @verbs || []) |> Enum.uniq_by(&elem(&1, 0))}
         <div class={

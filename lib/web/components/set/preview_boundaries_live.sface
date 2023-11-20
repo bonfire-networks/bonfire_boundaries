@@ -5,16 +5,10 @@
     class="flex flex-col  flex-1 h-full flex-nowrap overflow-y-auto"
   >
     <div class="flex flex-col">
-      <div class="p-4 bg-info/10">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-          </div>
-          <div class="flex-1 ml-3 md:flex md:justify-between">
-            <p class="text-sm text-info">
-              {l("Here you can preview how boundaries will be applied for a specific user.")}</p>
-          </div>
-        </div>
+      <div class="alert alert-info" role="alert">
+        <#Icon solid="InformationCircle" class="w-5 h-5 shrink-0" />
+        <span class="">
+          {l("Here you can preview how boundaries will be applied for a specific user.")}</span>
       </div>
     </div>
 

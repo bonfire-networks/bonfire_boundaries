@@ -9,18 +9,12 @@
   {#else}
     <div>
       <div :if={!@setting_boundaries}>
-        <div class="p-4 mb-0 rounded-md bg-info/10">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-            </div>
-            <div class="flex-1 ml-3 md:flex md:justify-between">
-              <p class="text-sm text-info">
-                {l(
-                  "Boundaries define and enforce rules that can be used to control access and permissions to content or functionality. A boundary can apply to one or more users and circles."
-                )}</p>
-            </div>
-          </div>
+        <div class="alert alert-info" role="alert">
+          <#Icon solid="InformationCircle" class="w-5 h-5 shrink-0" />
+          <span class="">
+            {l(
+              "Boundaries define and enforce rules that can be used to control access and permissions to content or functionality. A boundary can apply to one or more users and circles."
+            )}</span>
         </div>
       </div>
       <!-- {#if !@setting_boundaries}
@@ -114,9 +108,9 @@
                             <span
                               title={e(subject, :named, :name, nil) || e(subject, :stereotyped, :named, :name, nil) ||
                                 e(subject, :name, nil) || id(subject)}
-                              class="flex items-center w-8 h-8 rounded-full place-content-center bg-info/30"
+                              class="flex items-center w-8 h-8 rounded-full place-content-center bg-info"
                             >
-                              <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-info" />
+                              <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-info-content" />
                             </span>
                           </div>
                         {/if}

@@ -1,20 +1,13 @@
 <div class="">
-  <div class="p-4">
-    <div class="p-4 mb-0 rounded-md bg-info/10">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <#Icon solid="InformationCircle" class="w-5 h-5 text-info" />
-        </div>
-        <div class="flex-1 ml-3 md:flex md:justify-between">
-          <p class="text-sm text-info">
-            {l(
-              "Circles are a way to organize your connections and relationships with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors."
-            )}</p>
-        </div>
-      </div>
+  <div class="m-4">
+    <div class="alert alert-info" role="alert">
+      <#Icon solid="InformationCircle" class="w-5 h-5 shrink-0" />
+      <span class="">
+        {l(
+          "Circles are a way to organize your connections and relations with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors."
+        )}</span>
     </div>
   </div>
-
   <div class="">
     <ul role="list" class="flex flex-col divide-y divide-base-content/20">
       {#for circle <- e(@circles, [])}
