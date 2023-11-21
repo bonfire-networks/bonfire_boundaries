@@ -33,7 +33,9 @@
     <div class="flex h-full flex-1 flex-col gap-2 px-2">
       <div class="">
         <div class="mt-4 flex my-2 justify-between items-center">
-          <Bonfire.UI.Common.ProfileItemLive
+          <Dynamic.Component
+            :if={module_enabled?(Bonfire.UI.Me.ProfileItemLive)}
+            module={Bonfire.UI.Me.ProfileItemLive}
             avatar_class="w-8 h-8 rounded-full bg-base-300"
             profile={e(current_user(@__context__), :profile, nil)}
             character={e(current_user(@__context__), :character, nil)}

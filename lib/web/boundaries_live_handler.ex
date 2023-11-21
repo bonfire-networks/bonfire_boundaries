@@ -630,13 +630,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end)
   end
 
-  def maybe_preload_and_check_boundaries(assigns_sockets, opts \\ []) do
-    assigns_sockets
-    |> maybe_check_boundaries(opts)
-    |> do_update_many(opts)
-  end
-
-  @decorate time()
+  # @decorate time()
   def maybe_check_boundaries(assigns_sockets, opts \\ []) do
     current_user =
       current_user(elem(List.first(assigns_sockets), 0)) ||
@@ -712,36 +706,22 @@ defmodule Bonfire.Boundaries.LiveHandler do
     end
   end
 
-  @decorate time()
-  defp do_update_many(assigns_sockets, opts \\ []) do
-    # debug(assigns_sockets, "preload from given assigns")
-
-    if current_user(elem(List.first(assigns_sockets), 0)) ||
-         current_user(elem(List.first(assigns_sockets), 1)) do
-      preload_assigns_async(
-        assigns_sockets,
-        &assigns_to_params/1,
-        &do_preload/3,
-        opts ++ [skip_if_set: :object_boundary, preload_status_key: :preloaded_async_boundaries]
-      )
-    else
-      debug("no need to preload list of boundaries for guests")
-      nil
-    end
+  # @decorate time()
+  def update_many(assigns_sockets, opts \\ []) do
+    update_many_async(
+      assigns_sockets,
+      update_many_opts(opts)
+    )
   end
 
-  def update_many(assigns_sockets, opts \\ []) do
-    # debug(assigns_sockets, "preload from given assigns")
-
-    (do_update_many(assigns_sockets, opts) || assigns_sockets)
-    |> Enum.map(fn
-      {assigns, socket} ->
-        socket
-        |> Phoenix.Component.assign(assigns)
-
-      socket ->
-        socket
-    end)
+  def update_many_opts(opts \\ []) do
+    opts ++
+      [
+        skip_if_set: :object_boundary,
+        preload_status_key: :preloaded_async_boundaries,
+        assigns_to_params_fn: &assigns_to_params/1,
+        preload_fn: &do_preload/3
+      ]
   end
 
   defp assigns_to_params(assigns) do

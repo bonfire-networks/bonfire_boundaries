@@ -141,7 +141,9 @@
                 class="flex items-center justify-between py-4"
               >
                 {#if e(subject, :profile, :id, nil)}
-                  <Bonfire.UI.Common.ProfileItemLive
+                  <Dynamic.Component
+                    :if={module_enabled?(Bonfire.UI.Me.ProfileItemLive)}
+                    module={Bonfire.UI.Me.ProfileItemLive}
                     profile={e(subject, :profile, nil)}
                     avatar_class="w-8 h-8 rounded-full bg-base-300"
                     character={e(subject, :character, nil)}

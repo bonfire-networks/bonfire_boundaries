@@ -2,14 +2,18 @@
   <div :for={{data, role} <- @circles || []} class="flex py-2 items-center w-full justify-between">
     {#case debug(data, "idata")}
       {#match %{profile: profile, character: character} when not is_nil(profile)}
-        <Bonfire.UI.Common.ProfileItemLive
+        <Dynamic.Component
+          :if={module_enabled?(Bonfire.UI.Me.ProfileItemLive)}
+          module={Bonfire.UI.Me.ProfileItemLive}
           avatar_class="w-9 h-9 rounded-full bg-base-300"
           profile={profile}
           character={character}
           show_controls={[]}
         />
       {#match %{"icon" => _}}
-        <Bonfire.UI.Common.ProfileItemLive
+        <Dynamic.Component
+          :if={module_enabled?(Bonfire.UI.Me.ProfileItemLive)}
+          module={Bonfire.UI.Me.ProfileItemLive}
           avatar_class="w-9 h-9 rounded-full bg-base-300"
           profile={data}
           character={data}

@@ -4,7 +4,7 @@
       reusable_modal_id={if @__context__[:sticky], do: "persistent_modal"}
       id={@modal_id}
       no_actions
-      open_btn_wrapper_class="flex flex-1 w-full"
+      open_btn_wrapper_class={@open_btn_wrapper_class}
       title_text={l("Current boundary")}
     >
       <div class="mt-4">
@@ -18,12 +18,12 @@
         />
       </div>
       <:open_btn>
-        <button type="button" class="btn btn-ghost btn-xs btn-circle">
+        <button type="button" class={@class}>
           <Bonfire.Boundaries.Web.BoundariesPresetNameLive
             boundary_preset={@boundary_preset}
             with_icon={@with_icon}
             with_label={@with_label}
-            icon_class="w-4 h-4 text-base-content/50"
+            icon_class={@icon_class}
           />
         </button>
       </:open_btn>
@@ -35,7 +35,7 @@
       boundary_preset={@boundary_preset}
       with_icon={@with_icon}
       with_label={@with_label}
-      icon_class="w-4 h-4 text-base-content/50"
+      icon_class={@icon_class}
     />
   </div>
 {#else}
