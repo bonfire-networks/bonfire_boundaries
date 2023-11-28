@@ -11,11 +11,14 @@
         <#Icon iconify="ph:globe" class={@icon_class} />
       </span>
       <div class="flex flex-col gap-0 items-start">
-        <span class={
-          "text-sm normal-case",
-          "sr-only": !@with_label,
-          "btn btn-sm btn-outline border-base-content/30": @with_icon != true
-        }>{l("Public")}</span>
+        <span
+          data-scope="public-boundary-set"
+          class={
+            "text-sm normal-case",
+            "sr-only": !@with_label,
+            "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+          }
+        >{l("Public")}</span>
         <span
           :if={@with_description}
           class="flex-1 w-full text-xs font-normal text-base-content/70 text-left"
@@ -34,11 +37,14 @@
         <#Icon iconify="ph:campfire-bold" class={@icon_class} />
       </span>
       <div class="flex flex-col gap-0 items-start">
-        <span class={
-          "text-sm normal-case",
-          "sr-only": !@with_label,
-          "btn btn-sm btn-outline border-base-content/30": @with_icon != true
-        }>{l("Local")}</span>
+        <span
+          data-scope="local-boundary-set"
+          class={
+            "text-sm normal-case",
+            "sr-only": !@with_label,
+            "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+          }
+        >{l("Local")}</span>
         <span
           :if={@with_description}
           class="flex-1 w-full text-xs font-normal text-base-content/70 text-left"

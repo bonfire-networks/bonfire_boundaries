@@ -70,6 +70,7 @@
         "bg-base-content/5": matches?(@boundary_preset, "local")
       }>
         <button
+          data-scope="local_boundary"
           class="text-base-content"
           phx-click={@set_action ||
             JS.push("Bonfire.Boundaries:replace_boundary",
