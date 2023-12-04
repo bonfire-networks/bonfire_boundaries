@@ -102,7 +102,6 @@ defmodule Bonfire.Boundaries.Users do
 
   def prepare_default_boundaries(user, acls_extra, _opts) do
     # debug(opts)
-
     user_default_boundaries = Boundaries.user_default_boundaries()
     #  |> debug("create_default_boundaries")
     circles =
