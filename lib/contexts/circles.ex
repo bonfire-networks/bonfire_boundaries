@@ -256,7 +256,7 @@ defmodule Bonfire.Boundaries.Circles do
     query_my(subject, skip_boundary_check: true)
     |> where(
       [circle: circle, stereotyped: stereotyped],
-      stereotyped.stereotype_id in ^ulid(stereotypes)
+      stereotyped.stereotype_id in ^ulids(stereotypes)
     )
     |> repo().all()
   end
