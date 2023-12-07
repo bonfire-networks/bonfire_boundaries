@@ -45,28 +45,53 @@ defmodule Bonfire.Boundaries.Fixtures do
        |> Enum.map(&{&1, false}))
   end
 
-  def insert() do
+  def fixtures() do
     # e.g. public, read_only
     acls = Map.values(Acls.acls())
+    # |> debug("ACLs")
+
     # eg, guest, local, activity_pub
     circles = Map.values(Circles.circles())
+
     # eg, read, see, create...
     verbs = Keyword.values(Verbs.verbs())
+
     named = Enum.filter(acls ++ circles, & &1[:name])
 
     grants =
       for {acl, entries} <- Grants.grants(),
           {circle, role_or_verbs} <- entries,
           verb <- list_verbs(role_or_verbs) |> debug("list_verbs") do
+        debug(verb)
+
         %{
           id: ULID.generate(),
           acl_id: Acls.get_id!(acl),
           subject_id: Circles.get_id!(circle),
-          verb_id: Verbs.get_id!(Enums.elem_or(verb, 0, verb)),
+          verb_id: Verbs.get_id!(Enums.maybe_elem(verb, 0) || verb),
           # if no monoid specified in config, default to positive grant
-          value: Enums.elem_or(verb, 1, true)
+          value: Enums.maybe_elem(verb, 1, true)
         }
       end
+      |> dump("grants")
+
+    %{
+      acls: acls,
+      circles: circles,
+      verbs: verbs,
+      named: named,
+      grants: grants
+    }
+  end
+
+  def insert() do
+    %{
+      acls: acls,
+      circles: circles,
+      verbs: verbs,
+      named: named,
+      grants: grants
+    } = fixtures()
 
     repo().insert_all_or_ignore(Acl, Enum.map(acls, &Map.take(&1, [:id])))
     |> info("Init ACLs")
@@ -81,9 +106,8 @@ defmodule Bonfire.Boundaries.Fixtures do
     |> info("Init verbs")
 
     # then grants
-    repo().insert_all_or_ignore(Grant, grants)
-    |> debug("grants added")
-    |> info("Init grants")
+    repo().upsert_all(Grant, grants, [:acl_id, :subject_id, :verb_id])
+    |> info("Init or update grants")
 
     # Then the mixins
     repo().insert_all_or_ignore(

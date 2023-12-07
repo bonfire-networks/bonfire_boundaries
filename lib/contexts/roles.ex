@@ -95,17 +95,35 @@ defmodule Bonfire.Boundaries.Roles do
       positive != [] and negative == [] ->
         verb_ids_from_grants(positive)
         |> debug("this is a role with only positive permissions")
-        |> role_from_verb(:id, all_role_verbs)
+        |> role_from_verb(:id, all_role_verbs) ||
+          if(opts[:fallback_to_list], do: Enum.join(display_verb_grants(positive, l("Can")), ";"))
 
       positive == [] and negative != [] ->
         verb_ids_from_grants(negative)
         |> debug("this is a role with only negative permissions")
-        |> cannot_role_from_verb(:id, all_role_verbs)
+        |> cannot_role_from_verb(:id, all_role_verbs) ||
+          if(opts[:fallback_to_list],
+            do: Enum.join(display_verb_grants(negative, l("Cannot")), ";")
+          )
 
       true ->
         debug("this is a role with both positive and negative permissions")
-        nil
-    end || :custom
+
+        if(opts[:fallback_to_list],
+          do:
+            Enum.join(
+              display_verb_grants(positive, l("Can")) ++
+                display_verb_grants(negative, l("Cannot")),
+              " ; "
+            )
+        )
+    end
+    |> debug("computed role") ||
+      :custom
+  end
+
+  defp display_verb_grants(grants, prefix) do
+    Enum.map(grants, &"#{prefix} #{e(&1, :verb, :verb, nil)}")
   end
 
   defp verb_ids_from_grants(grants) do

@@ -57,7 +57,7 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   def get(slug) when is_atom(slug), do: circles()[slug]
-  def get(id) when is_binary(id), do: get_tuple(id) |> elem_or(1, nil)
+  def get(id) when is_binary(id), do: get_tuple(id) |> maybe_elem(1)
 
   def get!(slug) when is_atom(slug) do
     get(slug) ||

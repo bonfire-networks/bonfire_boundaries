@@ -29,8 +29,8 @@
       value={@value}
       read_only={@read_only}
       event_target={@event_target}
-      id={"role_#{@name}_#{Enums.elem_or(@verb, 0) || @verb}"}
-      field_name={"role[#{@name}][#{Enums.elem_or(@verb, 0) || @verb}]"}
+      id={"role_#{@name}_#{Enums.maybe_elem(@verb, 0) || @verb}"}
+      field_name={"role[#{@name}][#{Enums.maybe_elem(@verb, 0) || @verb}]"}
     />
   </li>
 {#else}
