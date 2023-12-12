@@ -26,7 +26,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
         socket,
         selected_tab: "user",
         # page_title: l("Boundaries & Circles"),
-        nav_items: [],
+        nav_items: Bonfire.Common.ExtensionModule.default_nav(:bonfire_ui_social),
         id: nil,
         back: true,
         page: "boundaries",
@@ -66,7 +66,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
     {:noreply,
      assign(socket,
        selected_tab: tab,
-       nav_items: nav_items(params["scope"] || tab),
+       #  nav_items: nav_items(params["scope"] || tab),
        id: id,
        scope: maybe_to_atom(params["scope"])
      )}
@@ -76,7 +76,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
     {:noreply,
      assign(socket,
        selected_tab: tab,
-       nav_items: nav_items(params["scope"] || tab),
+       #  nav_items: nav_items(params["scope"] || tab),
        id: id,
        section: section,
        scope: maybe_to_atom(params["scope"])
@@ -99,7 +99,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
             setting_boundaries: false
           ]}
        ],
-       nav_items: nav_items(params["scope"] || tab),
+       #  nav_items: nav_items(params["scope"] || tab),
        scope: scope
      )}
   end
@@ -120,7 +120,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
             scope: scope
           ]}
        ],
-       nav_items: nav_items(params["scope"] || tab),
+       #  nav_items: nav_items(params["scope"] || tab),
        scope: scope
      )}
   end
@@ -131,7 +131,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
        socket,
        selected_tab: tab,
        page_title: l("Default roles"),
-       nav_items: nav_items(params["scope"] || tab),
+       #  nav_items: nav_items(params["scope"] || tab),
        scope: maybe_to_atom(params["scope"])
      )}
   end
@@ -143,7 +143,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      assign(
        socket,
        selected_tab: tab,
-       nav_items: nav_items(params["scope"] || tab),
+       #  nav_items: nav_items(params["scope"] || tab),
        scope: maybe_to_atom(params["scope"])
      )}
   end
@@ -151,7 +151,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
   def do_handle_params(params, _url, socket) do
     {:noreply,
      assign(socket,
-       nav_items: nav_items(params["scope"]),
+       #  nav_items: nav_items(params["scope"]),
        scope: maybe_to_atom(params["scope"])
      )}
   end

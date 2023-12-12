@@ -17,7 +17,7 @@
         "bg-base-content/10": @selected_tab == "circles"
       }
     >
-      <#Icon iconify="fluent:people-list-16-filled" class="w-5 h-5 font-normal text-base-content/70" />
+      <#Icon iconify="fluent:people-list-16-regular" class="w-5 h-5 font-normal text-base-content/70" />
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/70",
@@ -42,7 +42,7 @@
       }
     >
       <#Icon
-        iconify="mingcute:hat-fill"
+        iconify="mingcute:hat-line"
         class={
           "w-5 h-5 font-normal text-base-content/70",
           "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
@@ -72,7 +72,7 @@
         }
       >
         <#Icon
-          iconify="fluent:door-tag-20-filled"
+          iconify="ph:hand-bold"
           class={"w-5 h-5 font-normal text-base-content/70", "!text-primary": @selected_tab == "acls"}
         />
         <div class="flex flex-col">
@@ -98,7 +98,7 @@
         }
       >
         <#Icon
-          iconify="bxs:EditLocation"
+          iconify="ri:shield-line"
           class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "instance_acl"}
         />
         <div class="flex flex-col">
@@ -124,14 +124,14 @@
         }
       >
         <#Icon
-          iconify="bxs:EditLocation"
+          iconify="material-symbols:admin-panel-settings-outline"
           class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "admin_circle"}
         />
         <div class="flex flex-col">
           <span class={
             "text-sm text-base-content/70",
             "font-semibold": @showing_within == :dashboard
-          }>{l("Instance Admins")}</span>
+          }>{l("Admins list")}</span>
           <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("See which users can administer the instance.")}</p>
         </div>
       </LiveRedirect>
@@ -150,14 +150,14 @@
         }
       >
         <#Icon
-          iconify="bxs:EditLocation"
+          iconify="solar:help-outline"
           class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "mod_circle"}
         />
         <div class="flex flex-col">
           <span class={
             "text-sm text-base-content/70",
             "font-semibold": @showing_within == :dashboard
-          }>{l("Instance Moderators")}</span>
+          }>{l("Moderators list")}</span>
           <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define which users can moderate the instance.")}</p>
         </div>
       </LiveRedirect>

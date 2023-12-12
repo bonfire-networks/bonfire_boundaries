@@ -4,8 +4,8 @@
     style="min-height: 320px; height: 360px"
     class="flex flex-col  flex-1 h-full flex-nowrap overflow-y-auto"
   >
-    <div class="flex flex-col">
-      <div class="alert alert-info" role="alert">
+    <div class="flex m-1 flex-col">
+      <div class="alert text-xs alert-info" role="alert">
         <#Icon solid="InformationCircle" class="w-5 h-5 shrink-0" />
         <span class="">
           {l("Here you can preview how boundaries will be applied for a specific user.")}</span>

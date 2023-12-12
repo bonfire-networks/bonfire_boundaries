@@ -16,9 +16,9 @@
       }
     >
       <#Icon
-        iconify="fluent:people-list-16-filled"
+        iconify="fluent:people-list-16-regular"
         class={
-          "w-4 h-4 font-normal text-base-content/70",
+          "w-5 h-5 font-normal text-base-content/70",
           "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
         }
       />
@@ -46,9 +46,9 @@
       }
     >
       <#Icon
-        iconify="mingcute:hat-fill"
+        iconify="mingcute:hat-line"
         class={
-          "w-4 h-4 font-normal text-base-content/70",
+          "w-5 h-5 font-normal text-base-content/70",
           "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
         }
       />
@@ -76,9 +76,9 @@
       }
     >
       <#Icon
-        iconify="fluent:door-tag-20-filled"
+        iconify="ph:hand-bold"
         class={
-          "w-4 h-4 font-normal text-base-content/70",
+          "w-5 h-5 font-normal text-base-content/70",
           "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
         }
       />
