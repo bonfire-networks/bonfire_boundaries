@@ -19,6 +19,26 @@
   </div>
 
   {#if @is_caretaker}
+    {#if @object_id}
+      <button
+        x-show="!edit"
+        type="button"
+        x-on:click="edit = !edit"
+        type="button"
+        class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+      >
+        {l("Edit boundaries")}
+      </button>
+      <button
+        x-show="edit"
+        type="button"
+        x-on:click="edit = !edit"
+        class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+      >
+        {l("Done")}
+      </button>
+    {/if}
+
     <div x-show="!edit">
       {#if (is_list(@to_circles) and @to_circles != []) or
           (is_list(@exclude_circles) and @exclude_circles != [])}
@@ -124,25 +144,5 @@
         </ul>
       {/if}
     </div>
-
-    {#if @object_id}
-      <button
-        x-show="!edit"
-        type="button"
-        x-on:click="edit = !edit"
-        type="button"
-        class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
-      >
-        {l("Edit boundaries")}
-      </button>
-      <button
-        x-show="edit"
-        type="button"
-        x-on:click="edit = !edit"
-        class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
-      >
-        {l("Done")}
-      </button>
-    {/if}
   {/if}
 </div>

@@ -5,7 +5,7 @@
       id={@modal_id}
       no_actions
       open_btn_wrapper_class={@open_btn_wrapper_class}
-      title_text={l("Current boundary")}
+      title_text={l("Activity boundary")}
     >
       <div class="mt-4">
         <Bonfire.Boundaries.Web.BoundaryDetailsLive

@@ -41,30 +41,31 @@
               )}</div>
           </div>
         {#else}
-          <div class="alert mt-4 alert-info" role="alert">
-            <#Icon solid="InformationCircle" class="w-5 h-5 shrink-0" />
-            <span class="">{l(
-                "These permissions are set by the creator or caretaker. They specify which actions you can perform on this content."
-              )}</span>
+          <div class="mx-2">
+            <div class="alert text-sm alert-info" role="alert">
+              <#Icon solid="InformationCircle" class="w-5 h-5 shrink-0" />
+              <span class="">{l(
+                  "These permissions are set by the creator or caretaker. They specify which actions you can perform on this content."
+                )}</span>
+            </div>
           </div>
-
           <div class="gap-2 m-4">
             <div class="mb-4 text-xs font-medium tracking-wider uppercase text-base-content/90">{l("Allowed actions")}</div>
-            <div class="">
+            <div class="flex flex-wrap items-center gap-2">
               <div
                 :for={permission_or_verb <- List.wrap(@role_permissions)}
-                class="flex items-start gap-3 mb-3"
+                class="border border-success p-1 px-2 flex items-center gap-2 rounded bg-success/20"
               >
                 {#case Bonfire.Boundaries.Verbs.get(permission_or_verb)}
                   {#match nil}
-                    <#Icon iconify="mingcute:hat-fill" class="w-4 h-4 text-secondary-content/70" />
+                    <#Icon iconify="mingcute:hat-fill" class="w-5 h-5 text-success" />
                     <div class="text-sm font-medium traking-wide text-base-content/70">{permission_or_verb}</div>
                   {#match verb}
-                    <Iconify.iconify icon={e(verb, :icon, "")} class="w-4 h-4 text-info" fill="currentColor" />
-                    <div class="flex flex-col">
-                      <div class="text-sm font-medium traking-wide text-base-content/90">{e(verb, :verb, nil) || permission_or_verb}</div>
-                      <div class="text-xs text-base-content/70">{e(verb, :summary, nil)}</div>
-                    </div>
+                    <Iconify.iconify icon={e(verb, :icon, "")} class="w-5 h-5 text-success" fill="currentColor" />
+                    <!-- <div class="flex flex-col"> -->
+                    <div class="text-sm font-medium traking-wide text-success">{e(verb, :verb, nil) || permission_or_verb}</div>
+                    <!-- <div class="text-xs text-base-content/70">{e(verb, :summary, nil)}</div> -->
+                    <!-- </div> -->
                 {/case}
               </div>
             </div>

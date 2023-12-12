@@ -4,10 +4,7 @@
     class="w-5 h-5 mx-1 mt-2 shrink-0 text-base-content/70"
   /> --}
 
-  <div
-    style="min-height: 320px; height: 360px"
-    class="set_boundaries flex flex-col relative h-full overflow-y-auto flex-nowrap flex-1"
-  >
+  <div class="set_boundaries min-h-[320px] h-[360px] flex flex-col relative h-full overflow-y-auto flex-nowrap flex-1">
     <Bonfire.UI.Common.MultiselectLive
       :if={!@read_only}
       implementation={:live_select}
