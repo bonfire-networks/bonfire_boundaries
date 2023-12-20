@@ -118,7 +118,14 @@
       }
     >
       <span :if={@with_icon} class={@icon_wrapper}>
-        <#Icon iconify="fluent:door-tag-20-filled" class={@icon_class} />
+        {#case e(name, :named, nil) || e(name, :name, nil) || name}
+          {#match "Mentions"}
+            <span class="text-base">@</span>
+          {#match "Follows"}
+            <#Icon iconify="fluent:people-list-16-filled" class={@icon_class} />
+          {#match _}
+            <#Icon iconify="fluent:door-tag-20-filled" class={@icon_class} />
+        {/case}
       </span>
       <span class={
         "text-sm normal-case",
