@@ -6,6 +6,7 @@ defmodule Bonfire.Boundaries.Blocks do
   # alias Bonfire.Data.AccessControl.Grant
   # alias Bonfire.Data.Identity.Caretaker
 
+  @behaviour Bonfire.Federate.ActivityPub.FederationModules
   def federation_module,
     do: [
       "Block"
