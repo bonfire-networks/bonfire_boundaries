@@ -1,8 +1,8 @@
 defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
   use Bonfire.UI.Common.Web, :stateless_component
 
-  alias Bonfire.Boundaries.Acls
-  alias Bonfire.Boundaries.Roles
+  # alias Bonfire.Boundaries.Acls
+  # alias Bonfire.Boundaries.Roles
 
   # Tip: use `BoundaryIconLive` unless you don't want to preload boundaries, and instead a parent component is providing the `object_boundary` data
   prop object_id, :string, required: true

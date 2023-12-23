@@ -135,7 +135,8 @@
     </span>
   {#match {id, name} when is_binary(name)}
     <span
-      data-id="custom"
+      data-id={id}
+      data-role="custom"
       title={name}
       class={
         @class,

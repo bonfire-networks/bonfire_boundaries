@@ -15,7 +15,6 @@
         x-show="!open"
         type="button"
         x-on:click="open = !open"
-        type="button"
         class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
       >
         {l("Details")}

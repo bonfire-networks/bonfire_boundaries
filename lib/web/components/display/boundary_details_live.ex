@@ -57,7 +57,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryDetailsLive do
     |> render_sface()
   end
 
-  defp for_view_edit(true, object_id, boundary_preset, context) when is_binary(object_id) do
+  defp for_view_edit(true, object_id, _boundary_preset, context) when is_binary(object_id) do
     # for caretaker
     # global_preset_acl_ids = Bonfire.Boundaries.Acls.preset_acl_ids()
 

@@ -52,7 +52,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
      )}
   end
 
-  def handle_event("load_more", attrs, socket) do
+  def do_handle_event("load_more", attrs, socket) do
     scope = LiveHandler.scope_origin(socket)
 
     %{page_info: page_info, edges: edges} =

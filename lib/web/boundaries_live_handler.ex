@@ -376,7 +376,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
      |> assign(
        to_circles: to_circles,
        exclude_circles: exclude_circles,
-       to_boundaries: [{"custom", "%{name} (#{l("customised")})"}]
+       to_boundaries: [{"custom", "#{name} (#{l("customised")})"}]
      )}
   end
 
@@ -623,10 +623,13 @@ defmodule Bonfire.Boundaries.LiveHandler do
     previous_circles
     |> debug()
     |> Enum.reject(fn
-      {circle, _role} -> id(circle) in deselected_circles
+      {circle, _role} ->
+        id(circle) in deselected_circles
+
       # {_name, id} -> id(circle) in deselected_circles
-      circle -> id(circle) in deselected_circles
-      _ -> nil
+      circle ->
+        id(circle) in deselected_circles
+        # _ -> nil
     end)
   end
 

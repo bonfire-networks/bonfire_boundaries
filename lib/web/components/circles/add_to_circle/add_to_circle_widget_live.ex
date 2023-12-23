@@ -7,69 +7,6 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
   prop user_id, :any, default: nil
   prop name, :any, default: nil
 
-  def do_handle_event("circle_create_from_modal", %{"name" => name} = attrs, socket) do
-    circle_create_from_modal(Map.merge(attrs, %{named: %{name: name}}), socket)
-  end
-
-  def do_handle_event("circle_create_from_modal", attrs, socket) do
-    circle_create_from_modal(attrs, socket)
-  end
-
-  def circle_create_from_modal(attrs, socket) do
-    current_user = current_user_required!(socket)
-
-    with {:ok, %{id: _id} = circle} <-
-           Circles.create(
-             e(socket.assigns, :scope, nil) || current_user,
-             attrs
-           ) do
-      # Bonfire.UI.Common.OpenModalLive.close()
-      # JS.toggle(to: "#new_circle_from_modal")
-      # JS.toggle(to: "#circles_list")
-      {:noreply,
-       socket
-       |> update(:circles, &[circle | &1])
-       |> assign_flash(:info, "Circle created!")}
-    else
-      other ->
-        error(other)
-
-        {:noreply, assign_flash(socket, :error, "Could not create circle")}
-    end
-  end
-
-  def do_handle_event("add", %{"id" => id, "circle" => circle}, socket) do
-    # TODO: check permission
-    # current_user = current_user(socket.assigns)
-    with {:ok, _} <- Circles.add_to_circles(id, circle) do
-      {:noreply,
-       socket
-       |> update(:circles, &Circles.preload_encircled_by(id, &1, force: true))
-       |> assign_flash(:info, l("Added to circle!"))}
-    else
-      other ->
-        error(other)
-
-        {:noreply, assign_flash(socket, :error, l("Could not add to circle"))}
-    end
-  end
-
-  def do_handle_event("remove", %{"id" => id, "circle" => circle}, socket) do
-    # TODO: check permission
-    # current_user = current_user(socket.assigns)
-    with {1, _} <- Circles.remove_from_circles(id, circle) do
-      {:noreply,
-       socket
-       |> update(:circles, &Circles.preload_encircled_by(id, &1, force: true))
-       |> assign_flash(:info, l("removed from circle!"))}
-    else
-      other ->
-        error(other)
-
-        {:noreply, assign_flash(socket, :error, l("Could not remove to circle"))}
-    end
-  end
-
   def update(%{circles: circles_passed_down} = assigns, socket) when circles_passed_down != [] do
     debug("use circles passed down by parent component")
     # current_user = current_user(assigns) || current_user(socket.assigns)
@@ -112,6 +49,69 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
      |> assign(assigns)
      |> assign(page_info: page_info)
      |> assign(circles: edges)}
+  end
+
+  def do_handle_event("circle_create_from_modal", %{"name" => name} = attrs, socket) do
+    circle_create_from_modal(Map.merge(attrs, %{named: %{name: name}}), socket)
+  end
+
+  def do_handle_event("circle_create_from_modal", attrs, socket) do
+    circle_create_from_modal(attrs, socket)
+  end
+
+  def do_handle_event("add", %{"id" => id, "circle" => circle}, socket) do
+    # TODO: check permission
+    # current_user = current_user(socket.assigns)
+    with {:ok, _} <- Circles.add_to_circles(id, circle) do
+      {:noreply,
+       socket
+       |> update(:circles, &Circles.preload_encircled_by(id, &1, force: true))
+       |> assign_flash(:info, l("Added to circle!"))}
+    else
+      other ->
+        error(other)
+
+        {:noreply, assign_flash(socket, :error, l("Could not add to circle"))}
+    end
+  end
+
+  def do_handle_event("remove", %{"id" => id, "circle" => circle}, socket) do
+    # TODO: check permission
+    # current_user = current_user(socket.assigns)
+    with {1, _} <- Circles.remove_from_circles(id, circle) do
+      {:noreply,
+       socket
+       |> update(:circles, &Circles.preload_encircled_by(id, &1, force: true))
+       |> assign_flash(:info, l("removed from circle!"))}
+    else
+      other ->
+        error(other)
+
+        {:noreply, assign_flash(socket, :error, l("Could not remove to circle"))}
+    end
+  end
+
+  def circle_create_from_modal(attrs, socket) do
+    current_user = current_user_required!(socket)
+
+    with {:ok, %{id: _id} = circle} <-
+           Circles.create(
+             e(socket.assigns, :scope, nil) || current_user,
+             attrs
+           ) do
+      # Bonfire.UI.Common.OpenModalLive.close()
+      # JS.toggle(to: "#new_circle_from_modal")
+      # JS.toggle(to: "#circles_list")
+      {:noreply,
+       socket
+       |> update(:circles, &[circle | &1])
+       |> assign_flash(:info, "Circle created!")}
+    else
+      other ->
+        error(other)
+
+        {:noreply, assign_flash(socket, :error, "Could not create circle")}
+    end
   end
 
   def handle_event(
