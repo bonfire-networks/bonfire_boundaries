@@ -24,7 +24,7 @@ defmodule Bonfire.Boundaries.Web.EditCircleLive do
 
       # TODO: handle pagination
       followed =
-        Bonfire.Social.Follows.list_my_followed(current_user_required!(assigns),
+        Bonfire.Social.Graph.Follows.list_my_followed(current_user_required!(assigns),
           paginate: false,
           exclude_ids: member_ids
         )
@@ -33,7 +33,7 @@ defmodule Bonfire.Boundaries.Web.EditCircleLive do
 
       # |> debug
       followers =
-        Bonfire.Social.Follows.list_my_followers(current_user_required!(assigns),
+        Bonfire.Social.Graph.Follows.list_my_followers(current_user_required!(assigns),
           paginate: false,
           exclude_ids: already_seen_ids
         )

@@ -75,12 +75,20 @@ defmodule Bonfire.Boundaries.Blocks do
         # TODO: what about if I block and later unblock someone? they should probably not have to re-follow...
         if :ghost_them in types_blocked do
           debug("make the person I am ghosting unfollow me - TODO: do not federate this?")
-          Utils.maybe_apply(Bonfire.Social.Follows, :unfollow, [user_or_instance_to_block, me])
+
+          Utils.maybe_apply(Bonfire.Social.Graph.Follows, :unfollow, [
+            user_or_instance_to_block,
+            me
+          ])
         end
 
         if :silence_them in types_blocked do
           debug("unfollow the person I am silencing")
-          Utils.maybe_apply(Bonfire.Social.Follows, :unfollow, [me, user_or_instance_to_block])
+
+          Utils.maybe_apply(Bonfire.Social.Graph.Follows, :unfollow, [
+            me,
+            user_or_instance_to_block
+          ])
         end
       end
 

@@ -68,7 +68,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
       # TODO: handle pagination
       # followed =
-      #   Bonfire.Social.Follows.list_my_followed(current_user,
+      #   Bonfire.Social.Graph.Follows.list_my_followed(current_user,
       #     paginate: false,
       #     exclude_ids: member_ids
       #   )
@@ -77,7 +77,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
       # # |> debug
       # followers =
-      #   Bonfire.Social.Follows.list_my_followers(current_user,
+      #   Bonfire.Social.Graph.Follows.list_my_followers(current_user,
       #     paginate: false,
       #     exclude_ids: already_seen_ids
       #   )

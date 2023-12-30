@@ -1,9 +1,9 @@
 defmodule Bonfire.Boundaries.LiveHandlerTest do
   use Bonfire.Boundaries.ConnCase, async: true
   alias Bonfire.Social.Fake
-  alias Bonfire.Social.Posts
+  alias Bonfire.Posts
   alias Bonfire.Social.Boosts
-  alias Bonfire.Social.Follows
+  alias Bonfire.Social.Graph.Follows
   import Bonfire.Common.Enums
   alias Bonfire.Boundaries.{Circles, Acls, Grants}
 
