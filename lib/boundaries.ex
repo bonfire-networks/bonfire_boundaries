@@ -13,9 +13,9 @@ defmodule Bonfire.Boundaries do
   alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Boundaries.Roles
   alias Bonfire.Boundaries.Queries
-  alias Pointers
+  alias Needle
   alias Bonfire.Data.AccessControl.Stereotyped
-  alias Pointers.Pointer
+  alias Needle.Pointer
   import Queries, only: [boundarise: 3]
   import Ecto.Query
   # import EctoSparkles
@@ -548,7 +548,7 @@ defmodule Bonfire.Boundaries do
   end
 
   defp load_query(ids, _, opts) do
-    (opts[:from] || Pointers.query_base(if opts[:include_deleted], do: :include_deleted))
+    (opts[:from] || Needle.Pointers.query_base(if opts[:include_deleted], do: :include_deleted))
     |> where([p], p.id in ^List.wrap(ids))
     |> boundarise(main_object.id, opts)
   end

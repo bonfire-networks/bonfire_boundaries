@@ -1,7 +1,7 @@
 # defmodule Bonfire.Boundaries.Permitted do
 
 #   use Ecto.Schema
-#   alias Pointers.{Pointer, ULID}
+#   alias Needle.{Pointer, ULID}
 #   # alias Bonfire.Data.AccessControl.Verb
 
 #   @primary_key false

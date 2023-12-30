@@ -2,7 +2,7 @@ defmodule Bonfire.Boundaries.Migrations do
   @moduledoc false
   # alias Bonfire.Boundaries.Verbs
 
-  # alias Pointers.Pointer
+  # alias Needle.Pointer
 
   @create_add_perms """
   create or replace function add_perms(bool, bool)
@@ -105,8 +105,8 @@ defmodule Bonfire.Boundaries.Migrations do
   #   {:ok, id} =
   #     Verbs.declare_verbs()[:verbs]
   #     |> Map.fetch!(id)
-  #     |> Pointers.ULID.cast!()
-  #     |> Pointers.ULID.dump()
-  #   Pointers.UUID.cast!(id)
+  #     |> Needle.ULID.cast!()
+  #     |> Needle.ULID.dump()
+  #   Needle.UUID.cast!(id)
   # end
 end

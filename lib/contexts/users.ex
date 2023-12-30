@@ -16,7 +16,7 @@ defmodule Bonfire.Boundaries.Users do
   alias Bonfire.Data.AccessControl.Grant
 
   alias Bonfire.Data.Identity.Named
-  alias Pointers.ULID
+  alias Needle.ULID
 
   def create_default_boundaries(user, opts \\ []) do
     %{

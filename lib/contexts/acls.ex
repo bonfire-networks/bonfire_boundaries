@@ -24,7 +24,7 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Data.AccessControl.Controlled
   alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.AccessControl.Stereotyped
-  alias Pointers.Pointer
+  alias Needle.Pointer
   alias Bonfire.Data.Identity.User
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Controlleds
@@ -34,8 +34,8 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Boundaries.Grants
   alias Bonfire.Boundaries.Roles
   alias Ecto.Changeset
-  alias Pointers.Changesets
-  alias Pointers.ULID
+  alias Needle.Changesets
+  alias Needle.ULID
 
   def exclude_stereotypes(including_custom? \\ true)
 
@@ -144,7 +144,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp generate_object do
-    Pointers.Pointer.create(Bonfire.Data.Social.Post)
+    Needle.Pointer.create(Bonfire.Data.Social.Post)
     |> Bonfire.Common.Repo.insert!()
   end
 

@@ -3,3 +3,4 @@ jason = "~> 1.0"
 # ex_spirit = "~> 0.4"
 scribe = "~> 0.10" # debug printing tables
 surface = "~> 0.11.0"
+needle = "~> 0.7"

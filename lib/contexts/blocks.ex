@@ -54,7 +54,7 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   def block(id, block_type, scope) when is_binary(id) do
-    with {:ok, user_or_circle} <- Bonfire.Common.Pointers.get(id, skip_boundary_check: true) do
+    with {:ok, user_or_circle} <- Bonfire.Common.Needle.get(id, skip_boundary_check: true) do
       debug(user_or_circle, "found by ID or username")
       block(user_or_circle, block_type, scope)
     else

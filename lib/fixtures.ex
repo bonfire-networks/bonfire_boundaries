@@ -15,7 +15,7 @@ defmodule Bonfire.Boundaries.Fixtures do
   alias Bonfire.Boundaries.Grants
 
   alias Bonfire.Boundaries.Circles
-  alias Pointers.ULID
+  alias Needle.ULID
 
   def custom_acl, do: "7HECVST0MAC1F0RAN0BJECTETC"
   def instance_acl, do: "01SETT1NGSF0R10CA11NSTANCE"

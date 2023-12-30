@@ -15,8 +15,8 @@ defmodule Bonfire.Boundaries.Circles do
 
   alias Bonfire.Data.Identity.Caretaker
   # alias Ecto.Changeset
-  alias Pointers.Changesets
-  # alias Pointers.Pointer
+  alias Needle.Changesets
+  # alias Needle.Pointer
 
   # don't show "others who silenced me" in circles
   @reverse_stereotypes ["0KF1NEY0VD0N0TWANTT0HEARME"]

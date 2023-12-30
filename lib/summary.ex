@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Summary do
   use Ecto.Schema
-  alias Pointers.Pointer
-  alias Pointers.ULID
+  alias Needle.Pointer
+  alias Needle.ULID
   alias Bonfire.Data.AccessControl.Circle
   alias Bonfire.Data.AccessControl.Controlled
   alias Bonfire.Data.AccessControl.Encircle
