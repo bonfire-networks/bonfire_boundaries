@@ -13,9 +13,7 @@
             tabindex="0"
             class="tooltip z-[9999] menu shadow bg-base-200 rounded-lg p-0 w-96 absolute top-0 left-0 hidden"
           >
-            <Dynamic.Component
-              :if={module_enabled?(Bonfire.Boundaries.Web.BoundariesGeneralAccessLive)}
-              module={Bonfire.Boundaries.Web.BoundariesGeneralAccessLive}
+            <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive
               to_boundaries={@to_boundaries}
               boundary_preset={@boundary_preset}
             />

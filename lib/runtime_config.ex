@@ -8,10 +8,6 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
   def config do
     import Config
 
-    config :bonfire_boundaries,
-      # you wouldn't want to do that.
-      disabled: false
-
     ### Verbs are like permissions. Each represents some activity or operation that may or may not be able to perform.
     verbs = [
       request: %{

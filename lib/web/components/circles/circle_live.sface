@@ -96,9 +96,8 @@
           />
           <input type="hidden" name={"circle[encircle][#{id}][subject_id]"} value={id}>
 
-          <Dynamic.Component
-            :if={module_enabled?(Bonfire.UI.Me.ProfileItemLive)}
-            module={Bonfire.UI.Me.ProfileItemLive}
+          <StatelessComponent
+            module={maybe_component(Bonfire.UI.Me.ProfileItemLive)}
             profile={e(member, :subject, :profile, nil) || member}
             avatar_class="w-10 h-10 bg-base-300 rounded-full"
             character={e(member, :subject, :character, nil) || member}

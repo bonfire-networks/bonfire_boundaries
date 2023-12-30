@@ -74,9 +74,7 @@
           {l("Add a boundary preset")}
         </summary>
         <ul class="z-[1] menu shadow bg-base-200 rounded-lg p-0">
-          <Dynamic.Component
-            :if={module_enabled?(Bonfire.Boundaries.Web.BoundariesGeneralAccessLive)}
-            module={Bonfire.Boundaries.Web.BoundariesGeneralAccessLive}
+          <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive
             set_action="Bonfire.Boundaries:add_object_acl"
             set_opts={%{"phx-value-object_id" => @object_id}}
             boundary_preset={@boundary_preset}

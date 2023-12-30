@@ -67,9 +67,8 @@
                   value={e(member, :subject_id, "")}
                 />
                 <div class="flex-1">
-                  <Dynamic.Component
-                    :if={module_enabled?(Bonfire.UI.Me.ProfileItemLive)}
-                    module={Bonfire.UI.Me.ProfileItemLive}
+                  <StatelessComponent
+                    module={maybe_component(Bonfire.UI.Me.ProfileItemLive)}
                     show_controls={[]}
                     avatar_class="w-10 h-10 rounded bg-base-300"
                     profile={e(member, :subject, :profile, nil)}
@@ -135,9 +134,8 @@
                   value={e(suggested, :edge, :object, :id, "")}
                 />
                 <div class="flex-1">
-                  <Dynamic.Component
-                    :if={module_enabled?(Bonfire.UI.Me.ProfileItemLive)}
-                    module={Bonfire.UI.Me.ProfileItemLive}
+                  <StatelessComponent
+                    module={maybe_component(Bonfire.UI.Me.ProfileItemLive)}
                     avatar_class="w-10 h-10 rounded bg-base-300"
                     show_controls={[]}
                     profile={e(suggested, :edge, :object, :profile, nil)}
@@ -182,9 +180,8 @@
                   value={e(suggested, :edge, :subject, :id, "")}
                 />
                 <div class="flex-1">
-                  <Dynamic.Component
-                    :if={module_enabled?(Bonfire.UI.Me.ProfileItemLive)}
-                    module={Bonfire.UI.Me.ProfileItemLive}
+                  <StatelessComponent
+                    module={maybe_component(Bonfire.UI.Me.ProfileItemLive)}
                     show_controls={[]}
                     avatar_class="w-10 h-10 rounded bg-base-300"
                     profile={e(suggested, :edge, :subject, :profile, nil)}
