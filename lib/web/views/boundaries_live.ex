@@ -26,7 +26,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
         socket,
         selected_tab: "user",
         # page_title: l("Boundaries & Circles"),
-        nav_items: Bonfire.Common.ExtensionModule.default_nav(:bonfire_ui_social),
+        nav_items: Bonfire.Common.ExtensionModule.default_nav(),
         id: nil,
         back: true,
         page: "boundaries",
