@@ -137,7 +137,6 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
   end
 
   def do_handle_params(%{"tab" => tab} = params, _url, socket) do
-    debug("QUAAA")
 
     {:noreply,
      assign(

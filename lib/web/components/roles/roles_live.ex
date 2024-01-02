@@ -67,7 +67,7 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
             scope: scope,
             current_user: current_user
           )
-          |> debug("role_verbs"),
+          |> debug("role_verbsssss"),
         #  cannot_role_verbs: Bonfire.Boundaries.Roles.cannot_role_verbs(),
         all_verbs: Bonfire.Boundaries.Verbs.verbs(),
         available_verbs: available_verbs
