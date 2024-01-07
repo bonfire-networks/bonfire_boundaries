@@ -1,9 +1,10 @@
-role page 
-{#case Bonfire.Boundaries.Roles.get("gfgfgfgf", current_user: current_user(@__context__)) |> debug("CACCA")}
+role page
+{#case Bonfire.Boundaries.Roles.get("gfgfgfgf", current_user: current_user(@__context__))
+  |> debug("CACCA")}
   {#match obj}
-  eripaeeria
+    eripaeeria
   {#match _}
-  error
+    error
 {/case}
 <!-- <Bonfire.Boundaries.Web.RoleDetailsLive
   name={to_string(e(@role, :name, nil) || @name)}
