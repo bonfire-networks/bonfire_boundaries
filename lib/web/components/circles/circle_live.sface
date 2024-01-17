@@ -85,7 +85,7 @@
     </div>
   </div>
   {#if Enum.count(@members) > 0}
-    <div class="menu m-4 border border-base-content/20 rounded-box">
+    <div class="menu m-4 border gap-4 border-base-content/20 rounded-box">
       <!-- row 1 -->
       {#for {id, member} <- @members}
         <div class="flex items-center w-full justify-between">
