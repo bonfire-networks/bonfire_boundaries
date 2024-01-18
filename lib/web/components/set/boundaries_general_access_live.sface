@@ -46,7 +46,10 @@
             </div>
           </div>
         </button>
-        <div :if={!@is_dropdown and !@hide_custom} class="flex items-center gap-3">
+        <div
+          :if={!@is_dropdown and !@hide_custom}
+          class="flex items-center gap-3 border-l border-base-content/30 pl-1"
+        >
           <button
             type="button"
             phx-click={JS.toggle(to: "#extra_boundaries")
@@ -55,10 +58,10 @@
               value: %{boundary: "public", name: l("Public")},
               target: "#smart_input"
             )}
-            class="btn btn-xs !border-base-content/30 !border btn-outline rounded-full normal-case"
+            class="btn btn-xs btn-ghost normal-case btn-circle"
             title={l("Customise or add extra boundaries")}
           >
-            <#Icon iconify="ri:settings-4-line" class="w-4 h-4" />
+            <#Icon iconify="ri:settings-4-line" class="w-4 h-4 text-base-content/70" />
             <span class="sr-only">{l("Customise")}</span>
           </button>
         </div>
@@ -108,7 +111,10 @@
             </div>
           </div>
         </button>
-        <div :if={!@is_dropdown and !@hide_custom} class="flex items-center gap-3">
+        <div
+          :if={!@is_dropdown and !@hide_custom}
+          class="flex items-center gap-3 border-l border-base-content/30 pl-1"
+        >
           <button
             type="button"
             phx-click={JS.toggle(to: "#extra_boundaries")
@@ -117,10 +123,10 @@
               value: %{boundary: "local", name: l("Local")},
               target: "#smart_input"
             )}
-            class="btn btn-xs !border-base-content/30 !border btn-outline rounded-full normal-case"
+            class="btn btn-xs btn-ghost normal-case btn-circle"
             title={l("Customise or add extra boundaries")}
           >
-            <#Icon iconify="ri:settings-4-line" class="w-4 h-4" />
+            <#Icon iconify="ri:settings-4-line" class="w-4 h-4 text-base-content/70" />
             <span class="sr-only">{l("Customise")}</span>
           </button>
         </div>
@@ -216,7 +222,10 @@
           </div>
         </button>
 
-        <div :if={!@is_dropdown and !@hide_custom} class="flex items-center gap-3">
+        <div
+          :if={!@is_dropdown and !@hide_custom}
+          class="flex items-center gap-3 border-l border-base-content/30 pl-1"
+        >
           <button
             type="button"
             phx-click={JS.toggle(to: "#extra_boundaries")
@@ -225,10 +234,10 @@
               value: %{boundary: acl_id, name: e(acl, :name, nil)},
               target: "#smart_input"
             )}
-            class="btn btn-xs !border-base-content/30 !border btn-outline rounded-full normal-case"
+            class="btn btn-xs btn-ghost normal-case btn-circle"
             title={l("Customise or add extra boundaries")}
           >
-            <#Icon iconify="ri:settings-4-line" class="w-4 h-4" />
+            <#Icon iconify="ri:settings-4-line" class="w-4 h-4 text-base-content/70" />
             <span class="sr-only">{l("Customise")}</span>
           </button>
         </div>

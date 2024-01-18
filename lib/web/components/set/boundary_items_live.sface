@@ -4,7 +4,7 @@
       {#match %{profile: profile, character: character} when not is_nil(profile)}
         <StatelessComponent
           module={maybe_component(Bonfire.UI.Me.ProfileItemLive)}
-          avatar_class="w-9 h-9 rounded-full bg-base-300"
+          avatar_class="w-9 h-9 rounded-full bg-base-content/10"
           profile={profile}
           character={character}
           show_controls={[]}
@@ -12,21 +12,21 @@
       {#match %{"icon" => _}}
         <StatelessComponent
           module={maybe_component(Bonfire.UI.Me.ProfileItemLive)}
-          avatar_class="w-9 h-9 rounded-full bg-base-300"
+          avatar_class="w-9 h-9 rounded-full bg-base-content/10"
           profile={data}
           character={data}
           show_controls={[]}
         />
       {#match _ when is_binary(data)}
         <div class="flex items-center gap-3 grow">
-          <span class="w-8 h-8 rounded-full bg-base-content/10 flex items-center place-content-center">
+          <span class="w-9 h-9 rounded-full bg-base-content/10 flex items-center place-content-center">
             <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/70" />
           </span>
           <div class="text-base font-medium text-base-content truncate max-w-[210px]">{data}</div>
         </div>
       {#match _}
         <div class="flex items-center gap-3 grow">
-          <span class="w-8 h-8 rounded-full bg-base-content/10 flex items-center place-content-center">
+          <span class="w-9 h-9 rounded-full bg-base-content/10 flex items-center place-content-center">
             <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/70" />
           </span>
           <div class="text-sm font-bold group-hover:underline text-base-content">{name(data) ||

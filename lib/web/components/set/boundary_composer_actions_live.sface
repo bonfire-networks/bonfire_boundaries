@@ -16,7 +16,7 @@
     |> JS.hide(to: "#extra_boundaries")
     |> JS.hide(to: "#boundaries_preview")
     |> JS.show(to: "#composer_container")}
-    class="normal-case grow rounded-full btn btn-outline btn-primary"
+    class="normal-case grow rounded-full btn border-primary/30 btn-outline btn-primary"
   >
     <span class="">{@done_label || l("Done")}</span>
   </button>

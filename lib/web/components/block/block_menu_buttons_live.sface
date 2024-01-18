@@ -5,7 +5,7 @@
     {#match {block_object, block_peer}}
       <li>
         <details>
-          <summary>
+          <summary class="text-base-content/70">
             <div class="flex items-center w-full gap-2 text-sm text-base-content/70">
               <#Icon iconify="heroicons-solid:ban" class="w-4 h-4 shrink-0" />
               <span class="truncate ellipsis">{l("Block")}</span>

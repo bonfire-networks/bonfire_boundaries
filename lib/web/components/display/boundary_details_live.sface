@@ -46,13 +46,13 @@
           WIP: https://github.com/bonfire-networks/bonfire-app/issues/630
           NOTE: we set read_only here because editing only happens in AclLive
            --}
-        <Bonfire.Boundaries.Web.SetBoundariesLive
+        <!-- <Bonfire.Boundaries.Web.SetBoundariesLive
           read_only
           is_caretaker={@is_caretaker}
           to_boundaries={@to_boundaries}
           to_circles={@to_circles}
           exclude_circles={@exclude_circles}
-        />
+        /> -->
       {/if}
     </div>
 
