@@ -5,8 +5,7 @@ defmodule Bonfire.Boundaries.Web.EditCircleLive do
   def update(assigns, socket) do
     # FIXME: what's the difference with EditCircleLive?
 
-    id =
-      e(assigns, :__context__, :current_params, "id", nil)
+    id = e(assigns, :__context__, :current_params, "id", nil)
 
     # |> debug()
 

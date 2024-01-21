@@ -13,8 +13,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     current_user = current_user_required!(socket)
     opts = [current_user: current_user]
 
-    can_instance_wide =
-      Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
+    can_instance_wide = Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
 
     with {:ok, a} <-
            if(attrs["silence"],
@@ -46,8 +45,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       when is_binary(id) do
     # current_user = current_user_required!(socket)
 
-    can_instance_wide =
-      Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
+    can_instance_wide = Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
 
     with {:ok, status} <-
            (if can_instance_wide do
@@ -269,8 +267,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   def handle_event("load_more", attrs, socket) do
     scope = scope_origin(socket)
 
-    %{page_info: page_info, edges: edges} =
-      my_circles_paginated(scope, input_to_atoms(attrs))
+    %{page_info: page_info, edges: edges} = my_circles_paginated(scope, input_to_atoms(attrs))
 
     {:noreply,
      socket
@@ -431,8 +428,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       when is_binary(id) do
     # current_user = current_user_required!(socket)
 
-    can_instance_wide =
-      Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
+    can_instance_wide = Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
 
     with {:ok, status} <-
            (if can_instance_wide do

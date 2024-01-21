@@ -463,8 +463,7 @@ defmodule Bonfire.Boundaries do
       (
         current_user = current_user(subject)
         # cache needed for eg. for extension page
-        key =
-          "can:#{id(current_user)}:#{inspect(verbs)}:instance"
+        key = "can:#{id(current_user)}:#{inspect(verbs)}:instance"
 
         with :not_set <- Process.get(key, :not_set) |> debug("from cache?") do
           do_can_instance(current_user, verbs, key)
