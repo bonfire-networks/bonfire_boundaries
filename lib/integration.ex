@@ -5,9 +5,9 @@ defmodule Bonfire.Boundaries.Integration do
 
   def repo, do: Config.repo()
 
-  def is_local?(thing) do
+  def is_local?(thing, opts \\ []) do
     if Bonfire.Common.Extend.module_enabled?(Bonfire.Federate.ActivityPub.AdapterUtils) do
-      Bonfire.Federate.ActivityPub.AdapterUtils.is_local?(thing)
+      Bonfire.Federate.ActivityPub.AdapterUtils.is_local?(thing, opts)
     end
   end
 
