@@ -81,7 +81,6 @@
             implementation={:live_select}
             field={:exclude_circles}
             form_input_name={__MODULE__}
-            text_input_class="focus:outline-0 h-10 !bg-transparent  border-base-content/20 text-sm liveselect !bg-transparent"
             preloaded_options={results_for_multiselect(@my_circles)}
             label={l("Add circles or people")}
           />
@@ -176,5 +175,5 @@
     </div>
   </div>
 
-  <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={@showing_within in [:smart_input] && @is_caretaker} />
+  <Bonfire.Boundaries.Web.BoundaryComposerActionsLive :if={@showing_within in [:smart_input, :page] && @is_caretaker} />
 </div>
