@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Web.InstanceSidebarNavLive do
   use Bonfire.UI.Common.Web, :stateless_component
 
-  prop selected_tab, :string
+  prop selected_tab, :any
   prop id, :string, default: nil
 
   prop class, :css_class, default: "p-0 m-0"

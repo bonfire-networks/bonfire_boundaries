@@ -2,7 +2,7 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
   use Bonfire.UI.Common.Web, :stateful_component
   # alias Bonfire.Boundaries.Integration
 
-  prop selected_tab, :string
+  prop selected_tab, :any
   prop name, :string, default: nil
   prop blocks, :list, default: []
   prop page_info, :any
