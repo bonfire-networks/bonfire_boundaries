@@ -58,7 +58,7 @@ defmodule Bonfire.Boundaries.AclTest do
              |> debug("myacls")
 
     # is this right?
-    assert length(acls) == 4
+    assert length(acls.edges) == 4
   end
 
   # test "cannot list ACLs which I am not permitted to see" do
