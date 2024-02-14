@@ -1,4 +1,4 @@
-<div class="p-4">
+<div class="">
   {#if @edit_acl_id}
     <Bonfire.Boundaries.Web.AclLive
       id={@edit_acl_id}
@@ -9,62 +9,26 @@
   {#else}
     <div>
       <div :if={!@setting_boundaries}>
-        <div class="alert alert-info" role="alert">
-          <#Icon solid="InformationCircle" class="w-5 h-5 shrink-0" />
-          <span class="">
+        <div class="p-4 border-b border-base-content/20">
+          <span class="text-base-content/70">
             {l(
               "Boundaries define and enforce rules that can be used to control access and permissions to content or functionality. A boundary can apply to one or more users and circles."
-            )}</span>
+            )}
+          </span>
         </div>
       </div>
-      <!-- {#if !@setting_boundaries}
-        <ul
-        role="tablist"
-        class="flex justify-evenly items-stretch gap-3 mt-4 text-sm font-medium border-b border-base-content/20"
-      >
-        <LivePatch
-          to={~p"/boundaries/scope/instance/acls"}
-          class="cursor-pointer hover:bg-base-content/5 flex-1 flex place-content-center"
-        >
-          <div
-            class={
-              "border-b-4 border-transparent inline-flex px-5 pb-3 pt-5 text-base-content/70",
-              "border-primary !text-base-content": @section == :acls
-            }
-            role="tab"
-          >
-            {l("Custom Permissions")}
-          </div>
-        </LivePatch>
 
-        <LivePatch
-          to={~p"/boundaries/scope/instance/acls/system"}
-          class="cursor-pointer hover:bg-base-content/5 flex-1 flex place-content-center"
-        >
-          <div
-            class={
-              "border-b-4 border-transparent inline-flex px-5 pb-3 pt-5 text-base-content/70",
-              "border-primary !text-base-content": @section == :system
-            }
-            role="tab"
-          >{l("System")}</div>
-        </LivePatch>
-      </ul>
-      {/if} -->
-      <ul class="flex flex-col gap-2 mt-4">
+      <ul role="list" class="flex flex-col divide-y divide-base-content/20">
         {#for %{id: acl_id} = acl <- e(@acls, []) ++ e(@built_ins, [])}
-          <li class={
-            "rounded-md bg-base-content/5",
-            "bg-base-content/10": @to_boundaries_ids |> Enum.member?(acl_id)
-          }>
+          <li>
             <LiveRedirect
-              class="block p-3 rounded-md hover:bg-base-content/5"
+              class="block cursor-pointer hover:bg-base-content/5"
               to={if @scope != nil,
                 do: ~p"/boundaries/scope/instance/acl/#{id(acl)}",
                 else: ~p"/boundaries/acl/#{id(acl)}"}
             >
               <label
-                class="flex items-center w-full gap-3 cursor-pointer"
+                class="flex items-center gap-3 p-5"
                 phx-click={if @setting_boundaries,
                   do:
                     JS.push(
@@ -80,10 +44,10 @@
                       target: "#smart_input"
                     )}
               >
-                <#Icon iconify="ph:hand-fill" class="w-5 h-5 text-base-content/70" />
+                <#Icon iconify="ph:hand-fill" class="w-8 h-8 text-base-content/70" />
                 <div class="flex-1">
                   <div class="flex items-center space-x-4">
-                    <div class="text-sm font-bold capitalize">{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) ||
+                    <div class="font-bold capitalize">{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) ||
                         l("Untitled")}</div>
                   </div>
                 </div>
@@ -160,14 +124,14 @@
             </LiveRedirect>
           </li>
         {/for}
-        <Bonfire.UI.Common.LoadMoreLive
-          :if={@page_info}
-          live_handler={__MODULE__}
-          page_info={@page_info}
-          hide_guest_fallback
-          target={@myself}
-        />
       </ul>
+      <Bonfire.UI.Common.LoadMoreLive
+        :if={@page_info}
+        live_handler={__MODULE__}
+        page_info={@page_info}
+        hide_guest_fallback
+        target={@myself}
+      />
       <div
         :if={@setting_boundaries}
         :on-click="assign"

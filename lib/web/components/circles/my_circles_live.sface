@@ -1,12 +1,9 @@
 <div class="">
-  <div class="m-4">
-    <div class="alert alert-info" role="alert">
-      <#Icon solid="InformationCircle" class="w-5 h-5 shrink-0" />
-      <span class="">
-        {l(
-          "Circles are a way to organize your connections and relations with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors."
-        )}</span>
-    </div>
+  <div class="p-4 border-b border-base-content/20">
+    <span class="text-base-content/70">
+      {l(
+        "Circles are a way to organize your connections and relations with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors."
+      )}</span>
   </div>
   <div class="">
     <ul role="list" class="flex flex-col divide-y divide-base-content/20">
@@ -19,13 +16,13 @@
               else: ~p"/boundaries/scope/user/circle/#{id(circle)}"}
           >
             <div class="flex items-center gap-3 p-5">
-              <span class="w-10 h-10 rounded bg-info flex items-center place-content-center">
+              <span class="w-12 h-12 rounded bg-info flex items-center place-content-center">
                 <#Icon iconify="fluent:people-list-16-filled" class="w-6 h-6 text-info-content" />
               </span>
               <div class="flex-1 min-w-0 sm:flex sm:items-center sm:justify-between">
                 <div class="truncate">
-                  <div class="flex text-sm">
-                    <p class="text-sm font-bold capitalize truncate">{LiveHandler.subject_name(circle)}</p>
+                  <div class="flex">
+                    <p class="font-bold capitalize truncate">{LiveHandler.subject_name(circle)}</p>
                   </div>
                 </div>
                 <Bonfire.Boundaries.Web.CirclePreviewLive

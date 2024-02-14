@@ -1,12 +1,10 @@
 <div class="">
   <div>
-    <div class="flex m-4 flex-col">
-      <div class="alert alert-info" role="alert">
-        <#Icon solid="InformationCircle" class="w-5 h-5 shrink-0" />
-        <span class="">
+    <div class="flex flex-col">
+      <div class="p-4 border-b border-base-content/20">
+        <span class="text-base-content/70">
           {l("Roles define sets of permissions which you can assign to users and circles")}</span>
       </div>
-
       <div :if={@scope_type in [:group, Bonfire.Classify.Category]} class="mt-3 flex-shrink-0">
         <Bonfire.Boundaries.Web.NewRoleButtonLive
           scope={@scope}

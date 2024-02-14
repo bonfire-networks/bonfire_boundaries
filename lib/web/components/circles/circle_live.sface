@@ -1,7 +1,10 @@
 <div id="circle_preview" x-data="{search: false}" class="">
   <div class="">
     <#slot />
-    <ul :if={!@stereotype_id and !@read_only} class="menu menu-horizontal gap-3 bg-base-100 mx-4">
+    <ul
+      :if={!@stereotype_id and !@read_only}
+      class="menu mt-4 menu-horizontal gap-3 bg-base-100 mx-4"
+    >
       <li>
         <button
           @click="search = !search"
@@ -85,10 +88,10 @@
     </div>
   </div>
   {#if Enum.count(@members) > 0}
-    <div class="menu m-4 border gap-4 border-base-content/20 rounded-box">
+    <div class="menu menu divide-y divide-base-content/20 gap-4 px-0 gap-4">
       <!-- row 1 -->
       {#for {id, member} <- @members}
-        <div class="flex items-center w-full justify-between">
+        <div class="flex items-center w-full justify-between p-4">
           <input
             type="hidden"
             name={"circle[encircle][#{id}][circle_id]"}
@@ -101,6 +104,7 @@
             profile={e(member, :subject, :profile, nil) || member}
             avatar_class="w-10 h-10 bg-base-300 rounded-full"
             character={e(member, :subject, :character, nil) || member}
+            show_summary
             show_controls={[]}
           />
 

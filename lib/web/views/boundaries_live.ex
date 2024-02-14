@@ -130,7 +130,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      assign(
        socket,
        selected_tab: tab,
-       page_title: l("Default roles"),
+       page_title: l("Roles"),
        #  nav_items: nav_items(params["scope"] || tab),
        scope: maybe_to_atom(params["scope"])
      )}
