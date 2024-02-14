@@ -266,7 +266,11 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        ],
        search: search
      ) ++
-       Bonfire.Me.Users.search(search))
+       Utils.maybe_apply(
+         Bonfire.Me.Users,
+         :search,
+         [search]
+       ))
     |> results_for_multiselect(live_select_id, socket)
   end
 
@@ -283,7 +287,11 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        [Bonfire.Boundaries.Fixtures.activity_pub_circle()],
        search: search
      ) ++
-       Bonfire.Me.Users.search(search))
+       Utils.maybe_apply(
+         Bonfire.Me.Users,
+         :search,
+         [search]
+       ))
     |> results_for_multiselect(live_select_id, socket)
   end
 
@@ -298,7 +306,11 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
        search: search
      ) ++
-       Bonfire.Me.Users.search(search))
+       Utils.maybe_apply(
+         Bonfire.Me.Users,
+         :search,
+         [search]
+       ))
     |> results_for_multiselect(live_select_id, socket)
   end
 

@@ -15,10 +15,17 @@
       name={@name}
     />
     <:open_btn>
-      <div class="flex items-center w-full gap-2 text-sm text-base-content/70">
-        <#Icon iconify="fluent:people-list-16-filled" class="w-4 h-4 shrink-0" />
-        <span>{l("Add/remove from circle(s)")}</span>
-      </div>
+      {#if !@as_icon}
+        <div class="flex items-center w-full gap-2 text-sm text-base-content/70">
+          <#Icon iconify="fluent:people-list-16-filled" class="w-4 h-4 shrink-0" />
+          <span>{l("Add/remove from circle(s)")}</span>
+        </div>
+      {#else}
+        <div class="btn h-[34px] w-[34px] btn-sm btn-circle btn-outline border-base-content/30">
+          <#Icon iconify="fluent:people-list-16-filled" class="w-4 h-4 shrink-0" />
+          <span class="sr-only">{l("Add/remove from circle(s)")}</span>
+        </div>
+      {/if}
     </:open_btn>
   </Bonfire.UI.Common.OpenModalLive>
 </div>

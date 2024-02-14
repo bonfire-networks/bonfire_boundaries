@@ -68,7 +68,11 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
   end
 
   def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
-    Bonfire.Me.Users.search(search)
+    Utils.maybe_apply(
+      Bonfire.Me.Users,
+      :search,
+      [search]
+    )
     |> Bonfire.UI.Common.SelectRecipientsLive.results_for_multiselect()
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
 

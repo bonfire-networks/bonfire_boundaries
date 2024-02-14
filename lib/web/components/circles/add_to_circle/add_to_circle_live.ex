@@ -6,4 +6,5 @@ defmodule Bonfire.Boundaries.Web.AddToCircleLive do
   prop user_id, :any, default: nil
   prop parent_id, :any, default: nil
   prop name, :any, default: nil
+  prop as_icon, :boolean, default: false
 end
