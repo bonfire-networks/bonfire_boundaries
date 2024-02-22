@@ -6,7 +6,7 @@
       user_id={id(e(member, :subject, nil)) || id(member)}
       src={Media.avatar_url(e(member, :subject, member))}
       class={"w-#{@size} h-#{@size} "}
-      bg_class="fill-base-content/5 bg-base-content/5 rounded-xl h-full"
+      bg_class="fill-base-content/5 rounded-lg h-full"
     />
     <div
       :if={(@count || Enum.count(@members)) > 3}

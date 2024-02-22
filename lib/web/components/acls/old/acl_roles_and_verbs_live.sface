@@ -132,7 +132,7 @@
                 {#if e(l, :subject, :profile, :id, nil)}
                   <StatelessComponent
                     module={maybe_component(Bonfire.UI.Me.ProfileItemLive)}
-                    avatar_class="w-10 h-10 rounded bg-base-300"
+                    avatar_class="w-10 h-10"
                     profile={e(l, :subject, :profile, nil)}
                     character={e(l, :subject, :character, nil)}
                     show_controls={[]}

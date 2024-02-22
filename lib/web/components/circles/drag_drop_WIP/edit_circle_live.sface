@@ -70,7 +70,7 @@
                   <StatelessComponent
                     module={maybe_component(Bonfire.UI.Me.ProfileItemLive)}
                     show_controls={[]}
-                    avatar_class="w-10 h-10 rounded bg-base-300"
+                    avatar_class="w-10 h-10 rounded"
                     profile={e(member, :subject, :profile, nil)}
                     character={e(member, :subject, :character, nil)}
                   />
@@ -136,7 +136,7 @@
                 <div class="flex-1">
                   <StatelessComponent
                     module={maybe_component(Bonfire.UI.Me.ProfileItemLive)}
-                    avatar_class="w-10 h-10 rounded bg-base-300"
+                    avatar_class="w-10 h-10 rounded"
                     show_controls={[]}
                     profile={e(suggested, :edge, :object, :profile, nil)}
                     character={e(suggested, :edge, :object, :character, nil)}
@@ -183,7 +183,7 @@
                   <StatelessComponent
                     module={maybe_component(Bonfire.UI.Me.ProfileItemLive)}
                     show_controls={[]}
-                    avatar_class="w-10 h-10 rounded bg-base-300"
+                    avatar_class="w-10 h-10 rounded"
                     profile={e(suggested, :edge, :subject, :profile, nil)}
                     character={e(suggested, :edge, :subject, :character, nil)}
                   />
