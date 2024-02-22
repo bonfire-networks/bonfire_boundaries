@@ -9,7 +9,7 @@
     <ul role="list" class="flex flex-col divide-y divide-base-content/20">
       {#for circle <- e(@circles, [])}
         <li class="">
-          <LiveRedirect
+          <LinkLive
             class="block hover:bg-base-content/5"
             to={if @scope != nil,
               do: ~p"/boundaries/scope/instance/circle/#{id(circle)}",
@@ -36,7 +36,7 @@
                 <#Icon solid="ChevronRight" class="w-5 h-5 text-base-content/70" />
               </div>
             </div>
-          </LiveRedirect>
+          </LinkLive>
         </li>
       {/for}
     </ul>

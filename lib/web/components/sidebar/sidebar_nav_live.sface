@@ -7,7 +7,7 @@
     "hover: flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
       @showing_within == :dashboard
   }>
-    <LiveRedirect
+    <LinkLive
       to={~p"/boundaries/circles"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2 w-full",
@@ -29,7 +29,7 @@
         }>{l("Circles")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Group your contacts based on shared characteristics")}</p>
       </div>
-    </LiveRedirect>
+    </LinkLive>
   </li>
 
   <li class={
@@ -37,7 +37,7 @@
     "hover: flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
       @showing_within == :dashboard
   }>
-    <LiveRedirect
+    <LinkLive
       to={~p"/boundaries/roles"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2 w-full",
@@ -59,7 +59,7 @@
         }>{l("Roles")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define sets of permissions which you can assign to users and circles")}</p>
       </div>
-    </LiveRedirect>
+    </LinkLive>
   </li>
 
   <li class={
@@ -67,7 +67,7 @@
     "hover: flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
       @showing_within == :dashboard
   }>
-    <LiveRedirect
+    <LinkLive
       to={~p"/boundaries/acls"}
       class={
         "flex items-center gap-3 rounded-md py-2 px-2 w-full",
@@ -89,6 +89,6 @@
         }>{l("Boundary Presets")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define and enforce rules for access and permissions to content or functionality")}</p>
       </div>
-    </LiveRedirect>
+    </LinkLive>
   </li>
 </ul>

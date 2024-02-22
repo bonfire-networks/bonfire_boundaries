@@ -13,7 +13,7 @@
       <ul role="list" class="flex flex-col gap-2 p-3">
         {#for circle <- e(@circles, [])}
           <li class="rounded-md bg-base-content/5">
-            <LiveRedirect
+            <LinkLive
               class="block rounded-md hover:bg-base-content/5"
               to={~p"/boundaries/circle/" <> id(circle)}
             >
@@ -36,7 +36,7 @@
                   <#Icon solid="ChevronRight" class="w-5 h-5 text-base-content/70" />
                 </div>
               </div>
-            </LiveRedirect>
+            </LinkLive>
           </li>
         {/for}
         {!-- if circles length == 0 show an empty banner --}
