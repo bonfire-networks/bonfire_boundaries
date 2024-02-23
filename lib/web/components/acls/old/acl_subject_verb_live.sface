@@ -42,7 +42,7 @@
                 <input
                   placeholder={l("Add more users or circles")}
                   name="add"
-                  class="w-full h-10 mt-3 rounded-full tagify input input-bordered"
+                  class="w-full h-10 mt-3 tagify input input-bordered"
                 />
                 <select class="tagify hide">
                   {#for {id, name} <- @suggestions}

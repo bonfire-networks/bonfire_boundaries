@@ -3,7 +3,7 @@
     <div class="flex items-center px-1 gap-2 border-l border-r border-base-content/20">
       <div class="flex relative z-50 items-center flex-1 gap-2">
         <div phx-hook="Tooltip" id="popup_boundaries" class="">
-          <label class="tooltip-button flex items-center justify-between gap-2 btn-ghost normal-case rounded-full btn-xs btn text-primary">
+          <label class="tooltip-button flex items-center justify-between gap-2 btn-ghost normal-case  btn-xs btn text-primary">
             <Bonfire.Boundaries.Web.BoundariesPresetNameLive
               icon_class="w-5 h-5 text-primary"
               to_boundaries={@to_boundaries}
@@ -25,7 +25,7 @@
             tabindex="0"
             aria-haspopup="true"
             aria-expanded="true"
-            class="flex w-fit items-center justify-between gap-2 btn-ghost normal-case rounded-full border btn-sm btn border-base-content/30 text-primary"
+            class="flex w-fit items-center justify-between gap-2 btn-ghost normal-case  border btn-sm btn border-base-content/30 text-primary"
           >
             <Bonfire.Boundaries.Web.BoundariesPresetNameLive to_boundaries={@to_boundaries} />
             <#Icon iconify="ri:arrow-down-s-line" class="w-4 h-4 text-primary/80" />
@@ -44,7 +44,7 @@
     </div>
   {#match boundary_name}
     <div class="flex items-center gap-2 mx">
-      <div class="flex items-center gap-2 normal-case rounded-full btn-active btn-ghost btn-sm btn opacity-90 cursor-default">
+      <div class="flex items-center gap-2 normal-case  btn-active btn-ghost btn-sm btn opacity-90 cursor-default">
         <span>{boundary_name}</span>
       </div>
     </div>

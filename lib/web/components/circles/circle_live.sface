@@ -8,7 +8,7 @@
       <li>
         <button
           @click="search = !search"
-          class="btn btn-active hover:!bg-opacity/80 btn-outline normal-case !border !border-base-content/30 rounded-full btn-sm"
+          class="btn btn-active hover:!bg-opacity/80 btn-outline normal-case !border !border-base-content/30 btn-sm"
         >
           <#Icon solid="search" class="w-4 h-4" />
           <span>{l("Add users")}</span>
@@ -37,10 +37,7 @@
 
           <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
           <:open_btn>
-            <button
-              type="button"
-              class="btn btn-outline normal-case !border !border-base-content/30 rounded-full btn-sm"
-            >
+            <button type="button" class="btn btn-outline normal-case !border !border-base-content/30  btn-sm">
               {l("Edit circle")}</button>
           </:open_btn>
         </Bonfire.UI.Common.OpenModalLive>
@@ -59,7 +56,7 @@
           <:open_btn>
             <button
               type="button"
-              class="btn btn-outline normal-case btn-circle !border !border-base-content/30 rounded-full btn-sm"
+              class="btn btn-outline normal-case btn-circle !border !border-base-content/30  btn-sm"
             ><#Icon iconify="ph:trash-fill" class="w-4 h-4" />
               <span class="sr-only">{l("Delete circle")}</span></button>
           </:open_btn>
@@ -69,7 +66,7 @@
               type="button"
               :on-click="Bonfire.Boundaries:circle_delete"
               phx-value-go="/boundaries/circles"
-              class="normal-case rounded-full btn btn-error btn-sm"
+              class="normal-case  btn btn-error btn-sm"
             >
               {l("Delete this circle")}</button>
           </:action_btns>
@@ -114,7 +111,7 @@
               :if={!@read_only}
               phx-value-subject={id}
               :on-click="remove"
-              class="btn !border-base-content/30 btn-outline rounded-full normal-case btn-sm"
+              class="btn !border-base-content/30 btn-outline  normal-case btn-sm"
             >
               {l("Remove")}
             </button>

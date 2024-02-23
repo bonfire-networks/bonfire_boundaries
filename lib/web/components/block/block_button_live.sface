@@ -19,7 +19,7 @@
           :on-click="Bonfire.Boundaries.Blocks:unsilence"
           phx-value-id={e(@object, :id, @object)}
           type="button"
-          class="btn my-3 rounded-full w-full btn-warning normal-case"
+          class="btn my-3 w-full btn-warning normal-case"
         >{l("Unsilence")}
         </button>
       {#else}
@@ -67,7 +67,7 @@
           :on-click="Bonfire.Boundaries.Blocks:silence"
           phx-value-id={e(@object, :id, @object)}
           type="button"
-          class="btn rounded-full w-full btn-warning normal-case"
+          class="btn w-full btn-warning normal-case"
         >{l("Silence")}
         </button>
       {/if}
@@ -85,7 +85,7 @@
           <button
             :on-click="Bonfire.Boundaries.Blocks:unsilence_instance_wide"
             phx-value-id={e(@object, :id, @object)}
-            class="btn btn-error mt-3 w-full rounded-full normal-case"
+            class="btn btn-error mt-3 w-full  normal-case"
           >{l("Unsilence instance-wide")}</button>
         {#else}
           <div class="flex flex-col p-2 mt-5 space-y-3 border rounded border-error/30 bg-error/5">
@@ -99,7 +99,7 @@
             <button
               :on-click="Bonfire.Boundaries.Blocks:silence_instance_wide"
               phx-value-id={e(@object, :id, @object)}
-              class="btn btn-error rounded-full btn-outline normal-case"
+              class="btn btn-error  btn-outline normal-case"
             >{l("Silence instance-wide")}</button>
           </div>
         {/if}
@@ -116,7 +116,7 @@
           :on-click="Bonfire.Boundaries.Blocks:unghost"
           phx-value-id={e(@object, :id, @object)}
           type="button"
-          class="btn my-3 rounded-full w-full btn-warning normal-case"
+          class="btn my-3  w-full btn-warning normal-case"
         >{l("Unghost")}
         </button>
       {#else}
@@ -167,7 +167,7 @@
           :on-click="Bonfire.Boundaries.Blocks:ghost"
           phx-value-id={e(@object, :id, @object)}
           type="button"
-          class="btn rounded-full w-full btn-warning normal-case"
+          class="btn  w-full btn-warning normal-case"
         >{l("Ghost")}
         </button>
       {/if}
@@ -185,7 +185,7 @@
           <button
             :on-click="Bonfire.Boundaries.Blocks:unghost_instance_wide"
             phx-value-id={e(@object, :id, @object)}
-            class="btn btn-error mt-3 w-full rounded-full normal-case"
+            class="btn btn-error mt-3 w-full  normal-case"
           >{l("Unghost instance-wide")}</button>
         {#else}
           <div class="flex flex-col p-2 mt-5 space-y-3 border rounded border-error/30 bg-error/5">
@@ -199,7 +199,7 @@
             <button
               :on-click="Bonfire.Boundaries.Blocks:ghost_instance_wide"
               phx-value-id={e(@object, :id, @object)}
-              class="btn btn-error rounded-full btn-outline normal-case"
+              class="btn btn-error  btn-outline normal-case"
             >{l("Ghost instance-wide")}</button>
           </div>
         {/if}
@@ -219,7 +219,7 @@
         :on-click="Bonfire.Boundaries.Blocks:unblock"
         phx-value-id={e(@object, :id, @object)}
         type="button"
-        class="btn my-3 rounded-full w-full btn-error normal-case"
+        class="btn my-3  w-full btn-error normal-case"
       >{l("Unblock")}
       </button>
     {#else}
@@ -233,7 +233,7 @@
         :on-click="Bonfire.Boundaries.Blocks:block"
         phx-value-id={e(@object, :id, @object)}
         type="button"
-        class="btn rounded-full w-full btn-warning normal-case"
+        class="btn  w-full btn-warning normal-case"
       >{l("Block")}
       </button>
     {/if}
@@ -256,7 +256,7 @@
           <button
             :on-click="Bonfire.Boundaries.Blocks:unblock_scope"
             phx-value-id={e(@object, :id, @object)}
-            class="btn btn-error mt-3 w-full rounded-full normal-case"
+            class="btn btn-error mt-3 w-full  normal-case"
           >{l("Unblock instance-wide")}</button>
         {#else} --}
         <div class="flex flex-col p-2 mt-5 space-y-3 border rounded border-error/30 bg-error/5">
@@ -271,7 +271,7 @@
             :on-click="Bonfire.Boundaries.Blocks:block_scoped"
             phx-value-id={e(@object, :id, @object)}
             phx-value-scope={id(@scope) || @scope}
-            class="btn btn-error rounded-full btn-outline normal-case"
+            class="btn btn-error  btn-outline normal-case"
           >{l("Block from the group")}</button>
         </div>
         {!-- {/if} --}
@@ -290,7 +290,7 @@
           <button
             :on-click="Bonfire.Boundaries.Blocks:unblock_instance_wide"
             phx-value-id={e(@object, :id, @object)}
-            class="btn btn-error mt-3 w-full rounded-full normal-case"
+            class="btn btn-error mt-3 w-full  normal-case"
           >{l("Unblock instance-wide")}</button>
         {#else}
           <div class="flex flex-col p-2 mt-5 space-y-3 border rounded border-error/30 bg-error/5">
@@ -304,7 +304,7 @@
             <button
               :on-click="Bonfire.Boundaries.Blocks:block_instance_wide"
               phx-value-id={e(@object, :id, @object)}
-              class="btn btn-error rounded-full btn-outline normal-case"
+              class="btn btn-error  btn-outline normal-case"
             >{l("Block instance-wide")}</button>
           </div>
         {/if}
@@ -314,7 +314,7 @@
   {!-- </div> --}
 
   <:open_btn>
-    <div class={e(@class, "btn btn-sm flex items-center gap-2 btn-outline rounded-full")}>
+    <div class={e(@class, "btn btn-sm flex items-center gap-2 btn-outline ")}>
       <#Icon
         :if={@with_icon && @type == "ghost"}
         iconify="mingcute:ghost-fill"

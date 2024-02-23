@@ -15,7 +15,7 @@
         x-show="!open"
         type="button"
         x-on:click="open = !open"
-        class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+        class="btn btn-sm !border-base-content/30 !border btn-outline  normal-case"
       >
         {l("Details")}
       </button>
@@ -23,7 +23,7 @@
         x-show="open"
         type="button"
         x-on:click="open = !open"
-        class="btn btn-sm !border-base-content/30 !border btn-outline rounded-full normal-case"
+        class="btn btn-sm !border-base-content/30 !border btn-outline  normal-case"
       >
         {l("Collapse")}
       </button>

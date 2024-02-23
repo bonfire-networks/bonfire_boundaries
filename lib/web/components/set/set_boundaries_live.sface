@@ -94,7 +94,7 @@
                 character={e(current_user(@__context__), :character, nil)}
                 show_controls={[]}
               />
-              <div class="btn btn-sm btn-disabled rounded-full normal-case">{l("Caretaker")}</div>
+              <div class="btn btn-sm btn-disabled  normal-case">{l("Caretaker")}</div>
             </div>
             {#if @to_circles && @to_circles != []}
               <Bonfire.Boundaries.Web.BoundaryItemsLive
@@ -146,7 +146,7 @@
               character={e(current_user(@__context__), :character, nil)}
               show_controls={[]}
             />
-            <div class="btn btn-sm btn-disabled rounded-full normal-case">{l("Caretaker")}</div>
+            <div class="btn btn-sm btn-disabled  normal-case">{l("Caretaker")}</div>
           </div>
           {#if @exclude_circles && @exclude_circles != []}
             <Bonfire.Boundaries.Web.BoundaryItemsLive

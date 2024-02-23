@@ -23,7 +23,7 @@
         <li>
           <button
             @click="search = !search"
-            class="btn btn-active hover:!bg-opacity/80 btn-outline normal-case !border !border-base-content/30 rounded-full btn-sm"
+            class="btn btn-active hover:!bg-opacity/80 btn-outline normal-case !border !border-base-content/30 btn-sm"
           >
             <#Icon solid="search" class="w-4 h-4" />
             <span>{l("Add circle/users")}</span>
@@ -69,7 +69,7 @@
                   </div>
                   <button
                     type="submit"
-                    class="w-full mt-3 normal-case btn-outline rounded-full !border-primary/30 btn btn-primary"
+                    class="w-full mt-3 normal-case btn-outline  !border-primary/30 btn btn-primary"
                   >{l("Save")}</button>
                 </form>
                 <div
@@ -92,7 +92,7 @@
                             "The boundary will be permanently deleted. This action will affect everything that was shared on the local instance using the boundary."
                           )}</div>
                         <:open_btn>
-                          <div class="normal-case rounded-full btn btn-outline btn-error btn-sm">{l("Delete")}</div>
+                          <div class="normal-case btn btn-outline btn-error btn-sm">{l("Delete")}</div>
                         </:open_btn>
                         <:action_btns>
                           <button
@@ -112,10 +112,7 @@
               </section>
 
               <:open_btn>
-                <button
-                  type="button"
-                  class="btn btn-outline normal-case !border !border-base-content/30 rounded-full btn-sm"
-                >
+                <button type="button" class="btn btn-outline normal-case !border !border-base-content/30  btn-sm">
                   {l("Edit boundary")}</button>
               </:open_btn>
             </Bonfire.UI.Common.OpenModalLive>
