@@ -53,7 +53,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
       # You can handle errors here
       error ->
         IO.inspect(error, label: "Error")
-        {:noreply, assign_flash(socket, :error, l("Could not unblock"))}
+        {:noreply, assign_flash(socket, :error, l("Could not block"))}
     end
   end
 
@@ -309,55 +309,82 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
     end
   end
 
-  def update_many(assigns_sockets, opts \\ []) do
-    update_many_async(assigns_sockets, update_many_opts(opts))
-  end
+  # def update_many(assigns_sockets, opts \\ []) do
+  #   update_many_async(assigns_sockets, update_many_opts(opts))
+  # end
 
-  def update_many_opts(opts \\ []) do
-    opts ++
-      [
-        assigns_to_params_fn: &assigns_to_params/1,
-        preload_fn: &do_preload/3
-      ]
-  end
+  # def update_many_opts(opts \\ []) do
+  #   opts ++
+  #     [
+  #       assigns_to_params_fn: &assigns_to_params/1,
+  #       preload_fn: &do_preload/3
+  #     ]
+  # end
 
-  defp assigns_to_params(assigns) do
-    object = e(assigns, :object, nil)
+  # defp assigns_to_params(assigns) do
+  #   object = e(assigns, :object, nil)
 
-    %{
-      component_id: assigns.id,
-      object: object,
-      object_id: e(assigns, :object_id, nil) || ulid(object)
-    }
-  end
+  #   %{
+  #     component_id: assigns.id,
+  #     object: object,
+  #     object_id: e(assigns, :object_id, nil) || ulid(object)
+  #   }
+  # end
 
-  defp do_preload(list_of_components, list_of_ids, current_user) do
+  # defp do_preload(list_of_components, list_of_ids, current_user) do
+  # FIXME: this shouldn't be doing List.first()
+  #   # Here we're checking if the user is ghosted / silenced by user or instance
+  #   ghosted? =
+  #     Bonfire.Boundaries.Blocks.is_blocked?(List.first(list_of_ids), :ghost,
+  #       current_user: current_user
+  #     )
+
+  #   ghosted_instance_wide? =
+  #     Bonfire.Boundaries.Blocks.is_blocked?(List.first(list_of_ids), :ghost, :instance_wide)
+
+  #   silenced? =
+  #     Bonfire.Boundaries.Blocks.is_blocked?(List.first(list_of_ids), :silence,
+  #       current_user: current_user
+  #     )
+
+  #   silenced_instance_wide? =
+  #     Bonfire.Boundaries.Blocks.is_blocked?(List.first(list_of_ids), :silence, :instance_wide)
+
+  #   list_of_components
+  #   |> Map.new(fn component ->
+  #     {component.component_id,
+  #      %{
+  #        ghosted?: ghosted?,
+  #        ghosted_instance_wide?: ghosted_instance_wide?,
+  #        silenced?: silenced?,
+  #        silenced_instance_wide?: silenced_instance_wide?
+  #      }}
+  #   end)
+
+  # end
+
+  def preload_one(object, opts) do
+    current_user = current_user(opts)
+
     # Here we're checking if the user is ghosted / silenced by user or instance
     ghosted? =
-      Bonfire.Boundaries.Blocks.is_blocked?(List.first(list_of_ids), :ghost,
-        current_user: current_user
-      )
+      Bonfire.Boundaries.Blocks.is_blocked?(object, :ghost, current_user: current_user)
 
     ghosted_instance_wide? =
-      Bonfire.Boundaries.Blocks.is_blocked?(List.first(list_of_ids), :ghost, :instance_wide)
+      Bonfire.Boundaries.Blocks.is_blocked?(object, :ghost, :instance_wide)
 
     silenced? =
-      Bonfire.Boundaries.Blocks.is_blocked?(List.first(list_of_ids), :silence,
-        current_user: current_user
-      )
+      Bonfire.Boundaries.Blocks.is_blocked?(object, :silence, current_user: current_user)
 
     silenced_instance_wide? =
-      Bonfire.Boundaries.Blocks.is_blocked?(List.first(list_of_ids), :silence, :instance_wide)
+      Bonfire.Boundaries.Blocks.is_blocked?(object, :silence, :instance_wide)
 
-    list_of_components
-    |> Map.new(fn component ->
-      {component.component_id,
-       %{
-         ghosted?: ghosted?,
-         ghosted_instance_wide?: ghosted_instance_wide?,
-         silenced?: silenced?,
-         silenced_instance_wide?: silenced_instance_wide?
-       }}
-    end)
+    [
+      ghosted?: ghosted?,
+      ghosted_instance_wide?: ghosted_instance_wide?,
+      silenced?: silenced?,
+      silenced_instance_wide?: silenced_instance_wide?
+    ]
+    |> debug()
   end
 end

@@ -249,7 +249,8 @@ defmodule Bonfire.Boundaries.Circles do
     repo().single(query_basic_my(caretaker, name: name))
   end
 
-  def get_stereotype_circles(subject, stereotypes) when is_list(stereotypes) do
+  def get_stereotype_circles(subject, stereotypes)
+      when is_list(stereotypes) and stereotypes != [] do
     stereotypes = Enum.map(stereotypes, &Bonfire.Boundaries.Circles.get_id!/1)
 
     # skip boundaries since we should only use this query internally
@@ -261,8 +262,9 @@ defmodule Bonfire.Boundaries.Circles do
     |> repo().all()
   end
 
-  def get_stereotype_circles(subject, stereotype),
-    do: get_stereotype_circles(subject, [stereotype])
+  def get_stereotype_circles(subject, stereotype)
+      when not is_nil(stereotype) and stereotype != [],
+      do: get_stereotype_circles(subject, [stereotype])
 
   @doc """
   Lists the circles that we are permitted to see.
@@ -451,6 +453,10 @@ defmodule Bonfire.Boundaries.Circles do
     end
   end
 
+  def add_to_circles(_subject, circles)
+      when is_nil(circles) or (is_list(circles) and length(circles) == 0),
+      do: error("No circle ID provided, so could not add")
+
   def add_to_circles(subject, circles) when is_list(circles) and circles != [] do
     # TODO: optimise
     Enum.map(circles, &add_to_circles(subject, &1))
@@ -461,7 +467,7 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   def remove_from_circles(_subject, circles)
-      when is_nil(circles) or length(circles) == 0,
+      when is_nil(circles) or (is_list(circles) and length(circles) == 0),
       do: error("No circle ID provided, so could not remove")
 
   def remove_from_circles(subject, circles) when is_list(circles) do

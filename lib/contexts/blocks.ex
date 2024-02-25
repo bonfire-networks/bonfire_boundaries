@@ -181,24 +181,28 @@ defmodule Bonfire.Boundaries.Blocks do
   """
   def is_blocked?(user_or_instance, block_type \\ :any, opts \\ [])
 
-  def is_blocked?(user_or_instance, block_type, :instance_wide) do
+  def is_blocked?(user_or_instance, block_type, :instance_wide)
+      when not is_nil(user_or_instance) do
     instance_wide_circles(types_blocked(block_type))
-    |> info("instance_wide_circles_blocked")
+    # |> debug("instance_wide_circles_blocked")
     |> Bonfire.Boundaries.Circles.is_encircled_by?(user_or_instance, ...)
   end
 
-  def is_blocked?(user_or_instance, block_type, opts) do
-    info(
-      opts,
-      "check if blocked #{inspect(block_type)} instance-wide or per-user, if any has/have been provided in opts"
-    )
-
+  def is_blocked?(user_or_instance, block_type, opts) when not is_nil(user_or_instance) do
     is_blocked?(user_or_instance, block_type, :instance_wide) ||
       is_blocked_by?(
         user_or_instance,
         block_type,
-        e(opts, :user_ids, nil) || current_user(opts)
+        debug(
+          e(opts, :user_ids, nil) || current_user(opts),
+          "check if blocked #{inspect(block_type)} per-user, if any has/have been provided in opts"
+        )
       )
+  end
+
+  def is_blocked?(_user_or_instance, _block_type, _opts) do
+    warn("no object provided to check")
+    false
   end
 
   # only for admins
@@ -287,7 +291,7 @@ defmodule Bonfire.Boundaries.Blocks do
   defp is_blocked_by?(user_or_peer, block_type, current_user_ids)
        when not is_nil(user_or_peer) and is_list(current_user_ids) and current_user_ids != [] do
     # info(user_or_peer, "user_or_peer to check")
-    info(current_user_ids, "current_user_ids")
+    debug(current_user_ids, "current_user_ids")
 
     block_types = types_blocked(block_type)
 

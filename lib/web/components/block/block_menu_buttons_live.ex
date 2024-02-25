@@ -1,5 +1,6 @@
 defmodule Bonfire.Boundaries.Web.BlockMenuButtonsLive do
   use Bonfire.UI.Common.Web, :stateless_component
+  import Bonfire.Boundaries.Integration
 
   prop object, :any, default: nil
   prop parent_id, :string, default: nil
@@ -8,6 +9,7 @@ defmodule Bonfire.Boundaries.Web.BlockMenuButtonsLive do
   prop scope, :any, default: nil
 
   def peered(object, peered) do
-    peered || e(object, :peered, nil) || e(object, :character, :peered, nil)
+    (peered || e(object, :peered, nil) || e(object, :character, :peered, nil))
+    |> debug()
   end
 end

@@ -1,8 +1,12 @@
 defmodule Bonfire.Boundaries.Web.BlockButtonLive do
   use Bonfire.UI.Common.Web, :stateless_component
+  import Bonfire.Boundaries.Integration
+
   # TODO: make stateful and preload block status?
 
   prop object, :any
+  prop is_local_user, :any, default: nil
+
   prop scope, :any, default: nil
   prop type, :string, default: nil
   prop my_block, :any, default: nil
