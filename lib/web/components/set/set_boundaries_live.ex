@@ -142,11 +142,11 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     {:noreply, socket}
   end
 
-  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+  def handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
     live_select_change(live_select_id, search, :to_circles, socket)
   end
 
-  def do_handle_event(
+  def handle_event(
         "multi_select",
         %{data: data, text: _text},
         socket
@@ -193,11 +193,11 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
      )}
   end
 
-  def do_handle_event("tagify_add", attrs, socket) do
-    do_handle_event("select_boundary", attrs, socket)
+  def handle_event("tagify_add", attrs, socket) do
+    handle_event("select_boundary", attrs, socket)
   end
 
-  def do_handle_event("tagify_remove", attrs, socket) do
-    do_handle_event("remove_boundary", attrs, socket)
+  def handle_event("tagify_remove", attrs, socket) do
+    handle_event("remove_boundary", attrs, socket)
   end
 end

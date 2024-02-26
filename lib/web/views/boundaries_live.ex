@@ -61,7 +61,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
 
   # defp nav_items(_), do: [Bonfire.UI.Common.SidebarSettingsNavLive.declared_nav()]
 
-  def do_handle_params(%{"tab" => tab, "id" => id} = params, _url, socket) do
+  def handle_params(%{"tab" => tab, "id" => id} = params, _url, socket) do
     # debug(id)
     {:noreply,
      assign(socket,
@@ -72,7 +72,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      )}
   end
 
-  def do_handle_params(%{"tab" => tab, "id" => id, "section" => section} = params, _url, socket) do
+  def handle_params(%{"tab" => tab, "id" => id, "section" => section} = params, _url, socket) do
     {:noreply,
      assign(socket,
        selected_tab: tab,
@@ -83,7 +83,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      )}
   end
 
-  def do_handle_params(%{"tab" => "circles" = tab} = params, _url, socket) do
+  def handle_params(%{"tab" => "circles" = tab} = params, _url, socket) do
     scope = maybe_to_atom(params["scope"])
 
     {:noreply,
@@ -104,7 +104,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      )}
   end
 
-  def do_handle_params(%{"tab" => "acls" = tab} = params, _url, socket) do
+  def handle_params(%{"tab" => "acls" = tab} = params, _url, socket) do
     scope = maybe_to_atom(params["scope"])
 
     {:noreply,
@@ -125,7 +125,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      )}
   end
 
-  def do_handle_params(%{"tab" => "roles" = tab} = params, _url, socket) do
+  def handle_params(%{"tab" => "roles" = tab} = params, _url, socket) do
     {:noreply,
      assign(
        socket,
@@ -136,7 +136,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      )}
   end
 
-  def do_handle_params(%{"tab" => tab} = params, _url, socket) do
+  def handle_params(%{"tab" => tab} = params, _url, socket) do
     {:noreply,
      assign(
        socket,
@@ -146,38 +146,11 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
      )}
   end
 
-  def do_handle_params(params, _url, socket) do
+  def handle_params(params, _url, socket) do
     {:noreply,
      assign(socket,
        #  nav_items: nav_items(params["scope"]),
        scope: maybe_to_atom(params["scope"])
      )}
   end
-
-  def handle_params(params, uri, socket),
-    do:
-      Bonfire.UI.Common.LiveHandlers.handle_params(
-        params,
-        uri,
-        socket,
-        __MODULE__,
-        &do_handle_params/3
-      )
-
-  def handle_event(
-        action,
-        attrs,
-        socket
-      ),
-      do:
-        Bonfire.UI.Common.LiveHandlers.handle_event(
-          action,
-          attrs,
-          socket,
-          __MODULE__
-          # &do_handle_event/3
-        )
-
-  def handle_info(info, socket),
-    do: Bonfire.UI.Common.LiveHandlers.handle_info(info, socket, __MODULE__)
 end

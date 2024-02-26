@@ -76,7 +76,7 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
     }
   end
 
-  def do_handle_event("edit_verb_value", %{"role" => roles} = attrs, socket) do
+  def handle_event("edit_verb_value", %{"role" => roles} = attrs, socket) do
     debug(attrs)
 
     current_user = current_user_required!(socket)
@@ -143,18 +143,4 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
     debug(ret, "cannot assign updated data with settings")
     socket
   end
-
-  def handle_event(
-        action,
-        attrs,
-        socket
-      ),
-      do:
-        Bonfire.UI.Common.LiveHandlers.handle_event(
-          action,
-          attrs,
-          socket,
-          __MODULE__,
-          &do_handle_event/3
-        )
 end

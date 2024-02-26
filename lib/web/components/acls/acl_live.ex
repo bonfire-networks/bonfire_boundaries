@@ -127,7 +127,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
-  def do_handle_event("edit", attrs, socket) do
+  def handle_event("edit", attrs, socket) do
     debug(attrs)
 
     with {:ok, acl} <-
@@ -144,31 +144,31 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
-  def do_handle_event("add_to_acl", %{"id" => id} = _attrs, socket) do
+  def handle_event("add_to_acl", %{"id" => id} = _attrs, socket) do
     add_to_acl(id, socket)
   end
 
-  def do_handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
+  def handle_event("remove_from_acl", %{"subject_id" => subject}, socket) do
     remove_from_acl(subject, socket)
   end
 
-  def do_handle_event("tagify_remove", %{"id" => subject} = _attrs, socket) do
+  def handle_event("tagify_remove", %{"id" => subject} = _attrs, socket) do
     remove_from_acl(subject, socket)
   end
 
-  def do_handle_event("tagify_add", %{"id" => id} = _attrs, socket) do
+  def handle_event("tagify_add", %{"id" => id} = _attrs, socket) do
     add_to_acl(id, socket)
   end
 
-  def do_handle_event("select", %{"id" => id} = _attrs, socket) do
+  def handle_event("select", %{"id" => id} = _attrs, socket) do
     add_to_acl(id, socket)
   end
 
-  def do_handle_event("multi_select", %{data: data}, socket) do
+  def handle_event("multi_select", %{data: data}, socket) do
     add_to_acl(data, socket)
   end
 
-  def do_handle_event("edit_verb_value", %{"subject" => subjects} = _attrs, socket) do
+  def handle_event("edit_verb_value", %{"subject" => subjects} = _attrs, socket) do
     # debug(attrs)
     current_user = current_user_required!(socket)
     acl = e(socket.assigns, :acl, nil)
@@ -206,7 +206,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
-  def do_handle_event("edit_grant_role", %{"to_circles" => subjects} = _attrs, socket) do
+  def handle_event("edit_grant_role", %{"to_circles" => subjects} = _attrs, socket) do
     # debug(attrs)
     current_user = current_user_required!(socket)
     acl = e(socket.assigns, :acl, nil)
@@ -238,14 +238,14 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     end
   end
 
-  def do_handle_event("edit_circle", %{"id" => id}, socket) do
+  def handle_event("edit_circle", %{"id" => id}, socket) do
     debug(id, "circle_edit")
 
     {:noreply, assign(socket, :edit_circle_id, id)}
   end
 
   # TODO
-  def do_handle_event("back", _, socket) do
+  def handle_event("back", _, socket) do
     {:noreply,
      assign(
        socket,
@@ -254,7 +254,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
      )}
   end
 
-  def do_handle_event(
+  def handle_event(
         "live_select_change",
         %{"id" => live_select_id, "text" => search},
         %{assigns: %{scope: :instance}} = socket
@@ -274,7 +274,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     |> results_for_multiselect(live_select_id, socket)
   end
 
-  def do_handle_event(
+  def handle_event(
         "live_select_change",
         %{"id" => live_select_id, "text" => search},
         %{assigns: %{scope: %schema{}}} = socket
@@ -295,7 +295,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     |> results_for_multiselect(live_select_id, socket)
   end
 
-  def do_handle_event(
+  def handle_event(
         "live_select_change",
         %{"id" => live_select_id, "text" => search},
         socket
@@ -321,20 +321,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
     {:noreply, socket}
   end
-
-  def handle_event(
-        action,
-        attrs,
-        socket
-      ),
-      do:
-        Bonfire.UI.Common.LiveHandlers.handle_event(
-          action,
-          attrs,
-          socket,
-          __MODULE__,
-          &do_handle_event/3
-        )
 
   def add_to_acl(id, socket) when is_binary(id) do
     {:noreply,

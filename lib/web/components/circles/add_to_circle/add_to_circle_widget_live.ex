@@ -51,15 +51,15 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
      |> assign(circles: edges)}
   end
 
-  def do_handle_event("circle_create_from_modal", %{"name" => name} = attrs, socket) do
+  def handle_event("circle_create_from_modal", %{"name" => name} = attrs, socket) do
     circle_create_from_modal(Map.merge(attrs, %{named: %{name: name}}), socket)
   end
 
-  def do_handle_event("circle_create_from_modal", attrs, socket) do
+  def handle_event("circle_create_from_modal", attrs, socket) do
     circle_create_from_modal(attrs, socket)
   end
 
-  def do_handle_event("add", %{"id" => id, "circle" => circle}, socket) do
+  def handle_event("add", %{"id" => id, "circle" => circle}, socket) do
     # TODO: check permission
     # current_user = current_user(socket.assigns)
     with {:ok, _} <- Circles.add_to_circles(id, circle) do
@@ -75,7 +75,7 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
     end
   end
 
-  def do_handle_event("remove", %{"id" => id, "circle" => circle}, socket) do
+  def handle_event("remove", %{"id" => id, "circle" => circle}, socket) do
     # TODO: check permission
     # current_user = current_user(socket.assigns)
     with {1, _} <- Circles.remove_from_circles(id, circle) do
@@ -113,18 +113,4 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
         {:noreply, assign_flash(socket, :error, "Could not create circle")}
     end
   end
-
-  def handle_event(
-        action,
-        attrs,
-        socket
-      ),
-      do:
-        Bonfire.UI.Common.LiveHandlers.handle_event(
-          action,
-          attrs,
-          socket,
-          __MODULE__,
-          &do_handle_event/3
-        )
 end

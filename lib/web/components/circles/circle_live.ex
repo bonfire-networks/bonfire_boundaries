@@ -156,16 +156,16 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
-  def do_handle_event("multi_select", %{data: data, text: _text}, socket) do
+  def handle_event("multi_select", %{data: data, text: _text}, socket) do
     add_member(input_to_atoms(data), socket)
   end
 
-  def do_handle_event("select", %{"id" => id}, socket) do
+  def handle_event("select", %{"id" => id}, socket) do
     # debug(attrs)
     add_member(input_to_atoms(e(socket.assigns, :suggestions, %{})[id]) || id, socket)
   end
 
-  def do_handle_event(
+  def handle_event(
         "remove",
         %{"subject" => id} = _attrs,
         %{assigns: %{scope: scope, circle_type: circle_type}} = socket
@@ -185,7 +185,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
-  def do_handle_event("remove", %{"subject" => id} = _attrs, socket) when is_binary(id) do
+  def handle_event("remove", %{"subject" => id} = _attrs, socket) when is_binary(id) do
     with {1, _} <-
            Circles.remove_from_circles(id, e(socket.assigns, :circle, nil)) do
       {:noreply,
@@ -200,7 +200,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     end
   end
 
-  def do_handle_event(
+  def handle_event(
         "live_select_change",
         %{"id" => live_select_id, "text" => search},
         %{assigns: %{circle_type: circle_type}} = socket
@@ -217,7 +217,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     {:noreply, socket}
   end
 
-  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+  def handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
     debug(socket.assigns)
 
     do_results_for_multiselect(search)
@@ -230,20 +230,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
     Bonfire.Me.Users.search(search)
     |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
   end
-
-  def handle_event(
-        action,
-        attrs,
-        socket
-      ),
-      do:
-        Bonfire.UI.Common.LiveHandlers.handle_event(
-          action,
-          attrs,
-          socket,
-          __MODULE__,
-          &do_handle_event/3
-        )
 
   def add_member(subject, %{assigns: %{scope: scope, circle_type: circle_type}} = socket)
       when circle_type in [:silence, :ghost] do

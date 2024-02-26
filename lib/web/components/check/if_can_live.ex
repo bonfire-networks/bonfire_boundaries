@@ -19,18 +19,4 @@ defmodule Bonfire.Boundaries.Web.IfCan do
       Bonfire.Boundaries.LiveHandler.maybe_check_boundaries(assigns_sockets,
         caller_module: __MODULE__
       )
-
-  def handle_event(
-        action,
-        attrs,
-        socket
-      ),
-      do:
-        Bonfire.UI.Common.LiveHandlers.handle_event(
-          action,
-          attrs,
-          socket,
-          __MODULE__
-          # &do_handle_event/3
-        )
 end

@@ -52,7 +52,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
      )}
   end
 
-  def do_handle_event("load_more", attrs, socket) do
+  def handle_event("load_more", attrs, socket) do
     scope = LiveHandler.scope_origin(socket)
 
     %{page_info: page_info, edges: edges} =
@@ -67,33 +67,19 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
      )}
   end
 
-  def do_handle_event("boundary_edit", %{"id" => id}, socket) do
+  def handle_event("boundary_edit", %{"id" => id}, socket) do
     debug(id, "boundary_edit")
 
     {:noreply, assign(socket, :edit_acl_id, id)}
   end
 
   # TODO
-  def do_handle_event("back", _, socket) do
+  def handle_event("back", _, socket) do
     {:noreply,
      socket
      |> assign(:edit_acl_id, nil)
      |> assign(:section, nil)}
   end
-
-  def handle_event(
-        action,
-        attrs,
-        socket
-      ),
-      do:
-        Bonfire.UI.Common.LiveHandlers.handle_event(
-          action,
-          attrs,
-          socket,
-          __MODULE__,
-          &do_handle_event/3
-        )
 
   def my_acls_paginated(scope, assigns, attrs \\ nil) do
     built_in_ids = e(assigns, :built_in_ids, nil) || Acls.built_in_ids()

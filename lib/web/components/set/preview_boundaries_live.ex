@@ -67,7 +67,7 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
     }
   end
 
-  def do_handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
+  def handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
     Utils.maybe_apply(
       Bonfire.Me.Users,
       :search,
@@ -79,7 +79,7 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
     {:noreply, socket}
   end
 
-  def do_handle_event(
+  def handle_event(
         "multi_select",
         %{data: %{"id" => id, "username" => username}},
         socket
@@ -136,18 +136,4 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
   end
 
   # def preview(socket, id, username), do: socket
-
-  def handle_event(
-        action,
-        attrs,
-        socket
-      ),
-      do:
-        Bonfire.UI.Common.LiveHandlers.handle_event(
-          action,
-          attrs,
-          socket,
-          __MODULE__,
-          &do_handle_event/3
-        )
 end
