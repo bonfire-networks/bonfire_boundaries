@@ -14,6 +14,8 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   prop feedback_title, :string, default: nil
   prop feedback_message, :string, default: nil
   prop read_only, :boolean, default: false
+  prop show_add, :boolean, default: nil
+  prop show_remove, :boolean, default: nil
 
   slot default, required: false
 
@@ -55,6 +57,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
            (e(assigns, :circle, nil) ||
               Circles.get_for_caretaker(id, current_user, scope: e(socket.assigns, :scope, nil)))
            |> repo().maybe_preload(encircles: [subject: [:profile, :character]])
+           |> repo().maybe_preload(encircles: [subject: [:named]])
            |> ok_unwrap() do
       debug(circle, "circle")
 
@@ -96,11 +99,15 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
       follow_stereotypes = Circles.stereotypes(:follow)
 
+      read_only = e(assigns, :read_only, nil) || e(socket.assigns, :read_only, nil)
+
       read_only =
-        e(assigns, :read_only, nil) || e(socket.assigns, :read_only, nil) ||
-          (id != Bonfire.Boundaries.Fixtures.mod_circle() and
-             (Circles.is_built_in?(circle) ||
-                stereotype_id in follow_stereotypes))
+        if is_nil(read_only) do
+          Circles.is_built_in?(circle) ||
+            stereotype_id in follow_stereotypes
+        else
+          read_only
+        end
 
       if socket_connected?(socket),
         do:

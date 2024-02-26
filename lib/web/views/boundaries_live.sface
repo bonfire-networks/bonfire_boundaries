@@ -35,6 +35,8 @@
         selected_tab={@selected_tab}
         id="view_circle"
         scope={@scope}
+        show_add={false}
+        read_only
         circle_id={Bonfire.Boundaries.Fixtures.admin_circle()}
       />
     {#match "mod_circle"}
@@ -44,6 +46,8 @@
         selected_tab={@selected_tab}
         id="view_circle"
         scope={@scope}
+        show_add={maybe_apply(Bonfire.Me.Accounts, :is_admin?, @__context__) == true}
+        read_only
         circle_id={Bonfire.Boundaries.Fixtures.mod_circle()}
       />
     {#match "acls"}
