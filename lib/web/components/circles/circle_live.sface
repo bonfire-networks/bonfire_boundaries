@@ -2,7 +2,7 @@
   <div class="">
     <#slot />
     <ul
-      class="menu mt-4 menu-horizontal gap-3 bg-base-100 mx-4"
+      class="menu mt-2 menu-horizontal gap-3 bg-base-100 mx-2"
       :if={@show_add || (!@stereotype_id and !@read_only)}
     >
       <li :if={@show_add || !@read_only}>
@@ -87,7 +87,7 @@
     </div>
   </div>
   {#if Enum.count(@members) > 0}
-    <div class="menu menu divide-y divide-base-content/20 gap-4 px-0 gap-4">
+    <div class="divide-y divide-base-content/20 gap-4 px-0 gap-4">
       <!-- row 1 -->
       {#for {id, member} <- @members}
         <div class="flex items-center w-full justify-between p-4">
