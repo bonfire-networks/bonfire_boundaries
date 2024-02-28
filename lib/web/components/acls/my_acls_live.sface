@@ -28,7 +28,7 @@
                 else: ~p"/boundaries/acl/#{id(acl)}"}
             >
               <label
-                class="flex items-center gap-3 p-5"
+                class="flex items-center gap-3 p-5 cursor-pointer"
                 phx-click={if @setting_boundaries,
                   do:
                     JS.push(
@@ -44,7 +44,7 @@
                       target: "#smart_input"
                     )}
               >
-                <#Icon iconify="ph:hand-fill" class="w-8 h-8 text-base-content/70" />
+                <#Icon iconify="ph:hand-fill" class="w-6 h-6 text-base-content/70" />
                 <div class="flex-1">
                   <div class="flex items-center space-x-4">
                     <div class="font-bold capitalize">{e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil) ||
@@ -82,12 +82,7 @@
                     </div>
                     {!-- {/if} --}
                     <div class="flex items-center gap-3">
-                      {#case Acls.is_built_in?(acl)}
-                        {#match true}
-                          <#Icon outline="InformationCircle" class="w-5 h-5 text-base-content/70" />
-                        {#match _}
-                          <#Icon solid="ChevronRight" class="w-5 h-5 text-base-content/70" />
-                      {/case}
+                      <#Icon solid="ChevronRight" class="w-5 h-5" />
                     </div>
                   {#else}
                     <div
@@ -97,12 +92,7 @@
                       phx-value-id={acl.id}
                       x-on:click="show_boundary_list = false"
                     >
-                      {#case Acls.is_stereotype?(acl)}
-                        {#match true}
-                          <#Icon outline="InformationCircle" class="w-5 h-5" />
-                        {#match _}
-                          <#Icon solid="Pencil" class="w-4 h-4" />
-                      {/case}
+                      <#Icon solid="ChevronRight" class="w-5 h-5" />
                     </div>
 
                     <div

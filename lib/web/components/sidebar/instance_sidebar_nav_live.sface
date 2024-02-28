@@ -13,11 +13,11 @@
     <LinkLive
       to={~p"/boundaries/scope/instance/circles"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
+        "flex items-center gap-3 rounded-md px-2 w-full",
         "bg-base-content/10": @selected_tab == "circles"
       }
     >
-      <#Icon iconify="fluent:people-list-16-regular" class="w-5 h-5 font-normal text-base-content/70" />
+      <!-- <#Icon iconify="fluent:people-list-16-regular" class="w-5 h-5 font-normal text-base-content/70" /> -->
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/70",
@@ -36,18 +36,18 @@
     <LinkLive
       to={~p"/boundaries/scope/instance/roles"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
+        "flex items-center gap-3 rounded-md px-2 w-full",
         "!gap-8": @showing_within == :dashboard,
         "bg-base-content/10 ": @selected_tab == "roles"
       }
     >
-      <#Icon
+      <!-- <#Icon
         iconify="mingcute:hat-line"
         class={
           "w-5 h-5 font-normal text-base-content/70",
           "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
         }
-      />
+      /> -->
       <div class="flex flex-col">
         <span class={
           "text-sm text-base-content/70",
@@ -67,14 +67,14 @@
       <LinkLive
         to={~p"/boundaries/scope/instance/acls"}
         class={
-          "flex items-center gap-3 rounded-md py-2 px-2 w-full",
+          "flex items-center gap-3 rounded-md px-2 w-full",
           "bg-base-content/10": @selected_tab == "acls"
         }
       >
-        <#Icon
+        <!-- <#Icon
           iconify="ph:hand-bold"
           class={"w-5 h-5 font-normal text-base-content/70", "!text-primary": @selected_tab == "acls"}
-        />
+        /> -->
         <div class="flex flex-col">
           <span class={
             "text-sm text-base-content/70",
@@ -93,14 +93,14 @@
       <LinkLive
         to={~p"/boundaries/scope/instance/instance_acl"}
         class={
-          "flex items-center gap-3 rounded-md py-2 px-2 w-full",
+          "flex items-center gap-3 rounded-md px-2 w-full",
           "bg-base-content/10": @selected_tab == "instance_acl"
         }
       >
-        <#Icon
+        <!-- <#Icon
           iconify="ri:shield-line"
           class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "instance_acl"}
-        />
+        /> -->
         <div class="flex flex-col">
           <span class={
             "text-sm text-base-content/70",
@@ -119,14 +119,14 @@
       <LinkLive
         to={~p"/boundaries/scope/instance/admin_circle"}
         class={
-          "flex items-center gap-3 rounded-md py-2 px-2 w-full",
+          "flex items-center gap-3 rounded-md px-2 w-full",
           "bg-base-content/10": @selected_tab == "admin_circle"
         }
       >
-        <#Icon
+        <!-- <#Icon
           iconify="material-symbols:admin-panel-settings-outline"
           class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "admin_circle"}
-        />
+        /> -->
         <div class="flex flex-col">
           <span class={
             "text-sm text-base-content/70",
@@ -145,14 +145,14 @@
       <LinkLive
         to={~p"/boundaries/scope/instance/mod_circle"}
         class={
-          "flex items-center gap-3 rounded-md py-2 px-2 w-full",
+          "flex items-center gap-3 rounded-md px-2 w-full",
           "bg-base-content/10": @selected_tab == "mod_circle"
         }
       >
-        <#Icon
+        <!-- <#Icon
           iconify="solar:help-outline"
           class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "mod_circle"}
-        />
+        /> -->
         <div class="flex flex-col">
           <span class={
             "text-sm text-base-content/70",
@@ -175,7 +175,7 @@
     <LinkLive
       to={~p"/boundaries/instance_ghosted"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
+        "flex items-center gap-3 rounded-md px-2 w-full",
         "bg-base-content/10": @selected_tab == "instance_ghosted"
       }
     >
@@ -203,7 +203,7 @@
     <LinkLive
       to={~p"/boundaries/instance_silenced"}
       class={
-        "flex items-center gap-3 rounded-md py-2 px-2 w-full",
+        "flex items-center gap-3 rounded-md px-2 w-full",
         "bg-base-content/10": @selected_tab == "instance_silenced"
       }
     >
