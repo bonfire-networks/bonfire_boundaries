@@ -224,13 +224,13 @@
                         </ul>
                       </div>
                     {#else}
-                    <button type="disabled" disabled class="btn btn-disabled btn-sm">
-                      {Bonfire.Boundaries.Roles.role_from_grants(Map.values(grants || %{}),
-                        scope: @scope,
-                        current_user: current_user(@__context__),
-                        fallback_to_list: true
-                      )}
-                    </button>
+                      <button type="disabled" disabled class="btn btn-disabled btn-sm">
+                        {Bonfire.Boundaries.Roles.role_from_grants(Map.values(grants || %{}),
+                          scope: @scope,
+                          current_user: current_user(@__context__),
+                          fallback_to_list: true
+                        )}
+                      </button>
                     {/if}
                   </div>
                 </li>
