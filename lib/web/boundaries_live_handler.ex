@@ -373,7 +373,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
      |> assign(
        to_circles: to_circles,
        exclude_circles: exclude_circles,
-       to_boundaries: [{"custom", "#{name} (#{l("customised")})"}]
+       to_boundaries: [{"custom", "#{name}*"}]
      )}
   end
 
