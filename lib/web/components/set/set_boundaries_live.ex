@@ -2,6 +2,13 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   use Bonfire.UI.Common.Web, :stateless_component
   use Bonfire.Common.Utils
 
+  declare_module_optional(l("Custom boundaries in composer"),
+    description:
+      l(
+        "Enable selecting custom roles for specific circles or users directly when drafting a post. If disabled you'll only be able tp pick from reusable boundaries that you set up in settings beforehand."
+      )
+  )
+
   prop create_object_type, :any, default: nil
   prop to_boundaries, :any, default: nil
   prop boundary_preset, :any, default: nil
@@ -19,7 +26,6 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   prop is_caretaker, :boolean, default: true
 
   @presets ["public", "local", "mentions", "custom"]
-
   def presets, do: @presets
 
   def render(%{read_only: false, my_circles: nil} = assigns) do

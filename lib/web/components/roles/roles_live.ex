@@ -3,6 +3,7 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
   alias Bonfire.Boundaries.Roles
 
   prop scope, :any, default: nil
+  prop read_only, :boolean, default: false
   prop load_roles, :boolean, default: true
 
   def update(assigns, socket) do
@@ -28,7 +29,11 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
             page_title: e(socket.assigns, :name, nil) || l("Roles"),
             back: true,
             page_header_aside: [
-              {Bonfire.Boundaries.Web.NewRoleButtonLive, [scope: scope, scope_type: scope_type]}
+              if(!assigns[:read_only],
+                do:
+                  {Bonfire.Boundaries.Web.NewRoleButtonLive,
+                   [scope: scope, scope_type: scope_type]}
+              )
             ]
           )
 

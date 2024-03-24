@@ -56,8 +56,38 @@
         <span class={
           "text-sm text-base-content/70",
           "font-semibold": @showing_within == :dashboard
-        }>{l("Roles")}</span>
+        }>{l("Custom roles")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define sets of permissions which you can assign to users and circles")}</p>
+      </div>
+    </LinkLive>
+  </li>
+
+  <li class={
+    "",
+    "hover: flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
+      @showing_within == :dashboard
+  }>
+    <LinkLive
+      to={~p"/boundaries/instance_roles"}
+      class={
+        "flex items-center gap-3 rounded-md px-2 w-full",
+        "!gap-8": @showing_within == :dashboard,
+        " ": @selected_tab == "instance_roles"
+      }
+    >
+      <#Icon
+        iconify="mingcute:hat-fill"
+        class={
+          "w-5 h-5 font-normal text-base-content/70",
+          "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
+        }
+      />
+      <div class="flex flex-col">
+        <span class={
+          "text-sm text-base-content/70",
+          "font-semibold": @showing_within == :dashboard
+        }>{l("Default roles")}</span>
+        {!-- <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define sets of permissions which you can assign to users and circles")}</p> --}
       </div>
     </LinkLive>
   </li>

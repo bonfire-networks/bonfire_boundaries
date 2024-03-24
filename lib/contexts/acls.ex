@@ -806,7 +806,13 @@ defmodule Bonfire.Boundaries.Acls do
   permitted to see. If any are created without permitting the
   user to see them, they will not be shown.
   """
-  def list_my(user, opts \\ []),
+
+  def list_my(user, opts \\ [])
+
+  def list_my(:instance, opts),
+    do: list_my(Bonfire.Boundaries.Fixtures.admin_circle(), opts)
+
+  def list_my(user, opts),
     do:
       list_my_q(user, opts)
       |> many_with_opts(opts)

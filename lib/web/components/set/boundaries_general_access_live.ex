@@ -5,6 +5,7 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
   prop boundary_preset, :any, default: nil
   prop to_boundaries, :any, default: nil
   prop my_acls, :any, default: nil
+  prop scope, :any, default: :user
   prop is_dropdown, :boolean, default: false
   prop include_stereotypes, :boolean, default: false
   prop hide_presets, :boolean, default: false
@@ -22,8 +23,12 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
     # should be loading this only once per persistent session, or when we open the composer
     assigns
     |> assign(
-      :my_acls,
-      e(assigns[:__context__], :my_acls, nil) || LiveHandler.my_acls(current_user_id(assigns))
+      my_acls:
+        if assigns[:scope] == :user do
+          e(assigns[:__context__], :my_acls, nil) || LiveHandler.my_acls(current_user_id(assigns))
+        else
+          LiveHandler.my_acls(:instance)
+        end
     )
     |> render_sface()
   end

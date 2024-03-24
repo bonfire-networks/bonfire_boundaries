@@ -5,7 +5,10 @@
         <span class="text-base-content/70">
           {l("Roles define sets of permissions which you can assign to users and circles")}</span>
       </div>
-      <div :if={@scope_type in [:group, Bonfire.Classify.Category]} class="mt-3 flex-shrink-0">
+      <div
+        :if={!@read_only and @scope_type in [:group, Bonfire.Classify.Category]}
+        class="mt-3 flex-shrink-0"
+      >
         <Bonfire.Boundaries.Web.NewRoleButtonLive
           scope={@scope}
           scope_type={@scope_type}
@@ -23,7 +26,7 @@
           <Bonfire.Boundaries.Web.RoleDetailsLive
             name={to_string(e(role, :name, nil) || name)}
             role={role}
-            read_only={e(role, :read_only, false)}
+            read_only={@read_only || e(role, :read_only, false)}
             available_verbs={@available_verbs}
             all_verbs={@all_verbs}
             event_target={@myself}
@@ -36,7 +39,7 @@
             default_value={false}
             name={l("Cannot") <> " " <> to_string(e(role, :name, nil) || name)}
             role={role}
-            read_only={e(role, :read_only, false)}
+            read_only={@read_only || e(role, :read_only, false)}
             available_verbs={@available_verbs}
             all_verbs={@all_verbs}
             event_target={@myself}

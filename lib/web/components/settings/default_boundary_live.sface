@@ -1,0 +1,32 @@
+<div x-data="{open: true}" class="p-4 cursor-pointer">
+  <div x-on:click="open = !open" class="flex items-center justify-between gap-4">
+    <div class="flex flex-col gap-1">
+      <!-- <div class="text-sm font-medium">{l("Default boundary")}</div> -->
+      <div class="text-sm font-light text-base-content/70">{l("Specify your default boundary when publishing a new activity")}</div>
+    </div>
+    <button type="button" x-cloak class="btn btn-circle btn-sm btn-ghost" x-show="open">
+      <#Icon iconify="fluent:triangle-down-12-filled" class="w-3 h-3 text-base-content/70" />
+    </button>
+    <button type="button" class="btn btn-circle btn-sm btn-ghost" x-show="!open">
+      <#Icon iconify="fluent:triangle-right-12-filled" class="w-3 h-3 text-base-content/70" />
+    </button>
+  </div>
+  <div x-show="open" x-cloak x-collapse>
+    <div data-scope="safety_boundary_default" class="mt-3 border border-base-content/20 rounded-box">
+      <StatelessComponent
+        module={maybe_component(Bonfire.Boundaries.Web.BoundariesGeneralAccessLive, @__context__)}
+        hide_custom
+        scope={@scope}
+        set_action="Bonfire.Common.Settings:set_default_boundary"
+        set_opts={%{"phx-value-scope" => @scope}}
+        boundary_preset={Settings.get(
+          [:ui, :boundary_preset],
+          "public",
+          Bonfire.Common.Settings.LiveHandler.scoped(@scope, @__context__)
+          |> debug("scopped")
+        )
+        |> to_string()}
+      />
+    </div>
+  </div>
+</div>

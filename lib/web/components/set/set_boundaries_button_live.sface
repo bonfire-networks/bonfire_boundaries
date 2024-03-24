@@ -16,6 +16,7 @@
             <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive
               to_boundaries={@to_boundaries}
               boundary_preset={@boundary_preset}
+              hide_custom={!debug(module_enabled?(Bonfire.Boundaries.Web.SetBoundariesLive, @__context__))}
             />
           </ul>
         </div>
