@@ -8,6 +8,10 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
     "Boundaries",
     icon: "twemoji:handshake",
     emoji: "🤝",
+    description:
+      l(
+        "Circles, roles, and boundaries for user control around sharing, privacy, and collaboration."
+      ),
     exclude_from_nav: true
   )
 
