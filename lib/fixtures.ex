@@ -130,4 +130,16 @@ defmodule Bonfire.Boundaries.Fixtures do
 
     :ok
   end
+
+  def upsert_verbs() do
+    verbs = Keyword.values(Verbs.verbs())
+
+    repo().insert_all_or_ignore(
+      Verb,
+      Enum.map(verbs, &Map.take(&1, [:id, :verb]))
+    )
+    |> info("Init verbs")
+
+    :ok
+  end
 end

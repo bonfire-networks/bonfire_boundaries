@@ -113,6 +113,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "bxs:TrashAlt",
         summary: "Delete an object"
       },
+      vote: %{
+        id: "7V0TEMEANSC0NSENT0RREFVSA1",
+        verb: "Vote",
+        icon: "material-symbols:how-to-vote",
+        summary: "Vote on something"
+      },
 
       # WIP adding verbs, see: https://github.com/bonfire-networks/bonfire-app/issues/406
 
