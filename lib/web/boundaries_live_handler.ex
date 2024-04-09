@@ -741,7 +741,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
         do: boundaries_on_objects(list_of_ids, current_user),
         else: %{}
 
-    debug(my_states, "boundaries_on_objects")
+    # debug(my_states, "boundaries_on_objects")
 
     list_of_components
     |> Map.new(fn component ->
@@ -765,8 +765,8 @@ defmodule Bonfire.Boundaries.LiveHandler do
           custom
           |> Map.new(&{&1.object_id, Map.take(&1, [:verbs, :value])})
           |> debug("my_grants_on")
-          |> deep_merge(presets)
-          |> debug("merged")
+          |> deep_merge(presets, replace_lists: false)
+          |> debug("merged boundaries")
 
         _empty ->
           presets

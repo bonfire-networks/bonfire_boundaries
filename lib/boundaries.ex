@@ -541,6 +541,17 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  def load_pointers!(items, opts) do
+    pointers = load_pointers(items, opts)
+
+    if Enum.count(pointers) == Enum.count(items) do
+      # TODO: actually compare IDs?
+      pointers
+    else
+      raise(Bonfire.Fail.Auth, :not_permitted)
+    end
+  end
+
   defp load_query(ids, true, opts) do
     load_query(ids, nil, opts)
     |> select([main], [:id])
