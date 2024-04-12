@@ -1,14 +1,12 @@
 defmodule Bonfire.Boundaries.Integration do
   alias Bonfire.Common.Config
-  # alias Bonfire.Common.Utils
+  alias Bonfire.Common.Utils
   # import Untangle
 
   def repo, do: Config.repo()
 
   def is_local?(thing, opts \\ []) do
-    if Bonfire.Common.Extend.module_enabled?(Bonfire.Federate.ActivityPub.AdapterUtils) do
-      Bonfire.Federate.ActivityPub.AdapterUtils.is_local?(thing, opts)
-    end
+    Utils.maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :is_local?, [thing, opts], opts)
   end
 
   def many(query, paginate?, opts \\ [])
