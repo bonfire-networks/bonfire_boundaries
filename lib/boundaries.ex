@@ -1,4 +1,6 @@
 defmodule Bonfire.Boundaries do
+  @moduledoc "./README.md" |> File.stream!() |> Enum.drop(1) |> Enum.join()
+
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
 
