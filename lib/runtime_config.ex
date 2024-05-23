@@ -489,9 +489,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           silence_them: verbs_negative.([:mention, :message, :reply])
         },
         cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])},
-        no_follow:
-          %{local: verbs_negative.([:follow]), activity_pub: verbs_negative.([:follow])}
-          |> IO.inspect(label: "no_follow")
+        no_follow: %{local: verbs_negative.([:follow]), activity_pub: verbs_negative.([:follow])}
+        # |> IO.inspect(label: "no_follow")
       }
 
     # end of global boundaries
