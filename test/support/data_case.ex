@@ -22,6 +22,7 @@ defmodule Bonfire.Boundaries.DataCase do
       import Ecto
       import Ecto.Changeset
       import Ecto.Query
+      use Bonfire.Common.Utils
       use Bonfire.Common.Repo
       # import Bonfire.Boundaries.DataCase
       import Bonfire.UI.Common.Testing.Helpers

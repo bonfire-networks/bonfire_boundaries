@@ -1,5 +1,8 @@
 defmodule Bonfire.Boundaries.Web.RolesTest do
   use Bonfire.Boundaries.ConnCase, async: true
+
+  @moduletag :ui
+
   alias Bonfire.Social.Fake
   alias Bonfire.Posts
   alias Bonfire.Social.Boosts

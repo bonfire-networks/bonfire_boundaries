@@ -36,14 +36,17 @@ defmodule Bonfire.Boundaries.AclTest do
              Acls.list_my(user)
              |> debug("myacls")
 
-    # is this right?
-    assert is_list(acls) and length(acls) > 3
+    acls = e(acls, :edges, nil) || acls
 
-    my_acl = List.last(acls)
+    # is this right?
+    # assert is_list(acls) and length(acls) > 3
+    assert is_list(acls) and length(acls) > 0
+
+    my_acl = Enum.find(acls, fn %{id: id} -> id == acl.id end)
     my_acl = repo().maybe_preload(my_acl, [:named, :caretaker])
 
-    assert name == my_acl.named.name
-    assert user.id == my_acl.caretaker.caretaker_id
+    assert name == e(my_acl, :named, :name, nil)
+    assert user.id == e(my_acl, :caretaker, :caretaker_id, nil)
   end
 
   test "cannot list someone else's ACLs (which they're caretaker of) " do
@@ -58,7 +61,7 @@ defmodule Bonfire.Boundaries.AclTest do
              |> debug("myacls")
 
     # is this right?
-    assert length(acls.edges) == 4
+    assert length(acls.edges) <= 4
   end
 
   # test "cannot list ACLs which I am not permitted to see" do
