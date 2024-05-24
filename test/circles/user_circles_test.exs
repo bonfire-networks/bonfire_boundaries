@@ -1,5 +1,7 @@
 defmodule Bonfire.Boundaries.UserCirclesTest do
   use Bonfire.Boundaries.DataCase, async: true
+  @moduletag :backend
+
   alias Bonfire.Data.AccessControl.Circle
   alias Bonfire.Me.Fake
   alias Bonfire.Me.Users

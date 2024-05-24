@@ -1,5 +1,7 @@
-defmodule Bonfire.Posts.Boundaries.SilenceActorFeedsPerUserTest do
-  use Bonfire.Social.DataCase
+defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
+  use Bonfire.Boundaries.DataCase
+  @moduletag :backend
+
   import Tesla.Mock
   import Bonfire.Boundaries.Debug
   alias ActivityPub.Config

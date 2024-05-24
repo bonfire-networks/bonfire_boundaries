@@ -1,5 +1,7 @@
-defmodule Bonfire.Posts.PostBoundariesTest do
-  use Bonfire.Social.DataCase, async: true
+defmodule Bonfire.Boundaries.PostBoundariesTest do
+  use Bonfire.Boundaries.DataCase, async: true
+  @moduletag :backend
+
   import Bonfire.Boundaries.Debug
   alias Bonfire.Me.Fake
   alias Bonfire.Posts
