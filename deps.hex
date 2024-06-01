@@ -4,3 +4,4 @@ jason = "~> 1.0"
 scribe = "~> 0.10" # debug printing tables
 surface = "~> 0.11.2"
 needle = "~> 0.7"
+ecto_vista = "~> 0.2" # postgres views

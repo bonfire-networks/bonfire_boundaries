@@ -1,0 +1,12 @@
+defmodule Bonfire.Boundaries.Repo.Migrations.Materialized do
+  @moduledoc false
+  use Ecto.Migration
+
+  import Bonfire.Boundaries.Summary
+
+  def up do
+     drop_views()
+     migrate(:up)
+  end
+  def down, do: migrate(:down)
+end

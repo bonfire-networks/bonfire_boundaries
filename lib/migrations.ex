@@ -4,35 +4,6 @@ defmodule Bonfire.Boundaries.Migrations do
 
   # alias Needle.Pointer
 
-  @create_add_perms """
-  create or replace function add_perms(bool, bool)
-  returns bool as $$
-  begin
-    if $1 is null then return $2; end if;
-    if $2 is null then return $1; end if;
-    return ($1 and $2);
-  end;
-  $$ language plpgsql
-  """
-
-  @create_agg_perms """
-  create or replace aggregate agg_perms(bool) (
-    sfunc = add_perms,
-    stype = bool,
-    combinefunc = add_perms,
-    parallel = safe
-  )
-  """
-
-  @drop_add_perms "drop function add_perms(bool, bool)"
-  @drop_agg_perms "drop aggregate agg_perms(bool)"
-
-  def migrate_functions do
-    # this has the appearance of being muddled, but it's intentional.
-    Ecto.Migration.execute(@create_add_perms, @drop_agg_perms)
-    Ecto.Migration.execute(@create_agg_perms, @drop_add_perms)
-  end
-
   defp mb(:up) do
     quote do
       require Bonfire.Data.AccessControl.Acl.Migration
@@ -57,8 +28,7 @@ defmodule Bonfire.Boundaries.Migrations do
 
       Ecto.Migration.flush()
 
-      Bonfire.Boundaries.Migrations.migrate_functions()
-      Bonfire.Boundaries.Summary.migrate_views()
+      Bonfire.Boundaries.Summary.migrate(:up)
     end
   end
 
@@ -73,8 +43,7 @@ defmodule Bonfire.Boundaries.Migrations do
       require Bonfire.Data.AccessControl.Verb.Migration
       require Bonfire.Data.AccessControl.Stereotyped.Migration
 
-      Bonfire.Boundaries.Summary.migrate_views()
-      Bonfire.Boundaries.Migrations.migrate_functions()
+      Bonfire.Boundaries.Summary.migrate(:down)
 
       Bonfire.Data.AccessControl.Stereotyped.Migration.migrate_stereotype()
 
