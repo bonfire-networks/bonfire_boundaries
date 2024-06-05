@@ -4,7 +4,7 @@
     <button
       phx-click={JS.toggle(to: "#circles_list")
       |> JS.toggle(to: "#new_circle_from_modal")}
-      class="btn btn-sm normal-case !border !border-base-content/30  btn-outline mt-4 mx-2"
+      class="btn btn-sm normal-case !border !border-base-content/30  btn-outline mt-4 mx-4"
     >
       <#Icon solid="Plus" class="w-4 h-4" />
       <span>{l("Create a new circle")}</span>

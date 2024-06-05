@@ -1,4 +1,4 @@
-<div data-role="add_to_circle">
+<div class="flex-1" data-role="add_to_circle">
   <Bonfire.UI.Common.OpenModalLive
     id={ComponentID.new(
       Bonfire.UI.Common.OpenModalLive,
@@ -18,12 +18,12 @@
       {#if !@as_icon}
         <div class="flex items-center w-full gap-2 text-sm text-base-content/70">
           <#Icon iconify="fluent:people-list-16-filled" class="w-4 h-4 shrink-0" />
-          <span>{l("Add/remove from circle(s)")}</span>
+          <span>{l("Add to circles")}</span>
         </div>
       {#else}
-        <div class="btn h-[34px] w-[34px] btn-sm btn-circle btn-outline border-base-content/30">
+        <div class="btn btn-sm w-full flex-1 btn-outline border-base-content/30">
           <#Icon iconify="fluent:people-list-16-filled" class="w-4 h-4 shrink-0" />
-          <span class="sr-only">{l("Add/remove from circle(s)")}</span>
+          <span class="font-semibold">{l("Add to circles")}</span>
         </div>
       {/if}
     </:open_btn>
