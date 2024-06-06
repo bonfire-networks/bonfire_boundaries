@@ -6,10 +6,7 @@
       :if={@show_add || (!@stereotype_id and !@read_only)}
     >
       <li :if={@show_add || !@read_only}>
-        <button
-          @click="search = !search"
-          class="btn btn-active hover:!bg-opacity/80 btn-outline normal-case !border !border-base-content/30 btn-sm"
-        >
+        <button @click="search = !search" class="btn btn-active  btn-outline btn-sm">
           <#Icon solid="search" class="w-4 h-4" />
           <span>{l("Add users")}</span>
         </button>
@@ -38,7 +35,7 @@
 
             <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
             <:open_btn>
-              <button type="button" class="btn btn-outline normal-case !border !border-base-content/30  btn-sm">
+              <button type="button" class="btn btn-outline btn-sm">
                 {l("Edit circle")}</button>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
@@ -55,10 +52,7 @@
                 )}</p>
             </div>
             <:open_btn>
-              <button
-                type="button"
-                class="btn btn-outline normal-case btn-circle !border !border-base-content/30  btn-sm"
-              ><#Icon iconify="ph:trash-fill" class="w-4 h-4" />
+              <button type="button" class="btn btn-outline normal-case btn-circle btn-sm"><#Icon iconify="ph:trash-fill" class="w-4 h-4" />
                 <span class="sr-only">{l("Delete circle")}</span></button>
             </:open_btn>
             <:action_btns>
@@ -120,7 +114,7 @@
               :if={@show_remove || !@read_only}
               phx-value-subject={id}
               :on-click="remove"
-              class="btn !border-base-content/30 btn-outline  normal-case btn-sm"
+              class="btn btn-outline btn-sm"
             >
               {l("Remove")}
             </button>

@@ -16,7 +16,7 @@
           class={
             "text-sm normal-case",
             "sr-only": !@with_label,
-            "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+            "btn btn-sm btn-outline": @with_icon != true
           }
         >{l("Public")}</span>
         <span
@@ -42,7 +42,7 @@
           class={
             "text-sm normal-case",
             "sr-only": !@with_label,
-            "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+            "btn btn-sm btn-outline": @with_icon != true
           }
         >{l("Local")}</span>
         <span
@@ -66,7 +66,7 @@
         <span class={
           "text-sm normal-case",
           "sr-only": !@with_label,
-          "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+          "btn btn-sm btn-outline": @with_icon != true
         }>{boundary_name || l("Open")}</span>
         <span
           :if={@with_description}
@@ -88,7 +88,7 @@
       <span class={
         "text-sm normal-case",
         "sr-only": !@with_label,
-        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+        "btn btn-sm btn-outline": @with_icon != true
       }>{boundary_name || l("Visible")}</span>
     </div>
   {#match {"private" = preset, boundary_name}}
@@ -105,7 +105,7 @@
       <span class={
         "text-sm normal-case",
         "sr-only": !@with_label,
-        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+        "btn btn-sm btn-outline": @with_icon != true
       }>{boundary_name || l("Private")}</span>
     </div>
   {#match {id, name} when id != "custom"}
@@ -130,7 +130,7 @@
       <span class={
         "text-sm normal-case",
         "sr-only": !@with_label,
-        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+        "btn btn-sm btn-outline": @with_icon != true
       }>{e(name, :name, nil) || name || l("Preset Boundary")}</span>
     </span>
   {#match {id, name} when is_binary(name)}
@@ -149,7 +149,7 @@
       <span class={
         "text-sm normal-case",
         "sr-only": !@with_label,
-        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+        "btn btn-sm btn-outline": @with_icon != true
       }>{name}</span>
     </span>
   {#match other}
@@ -167,7 +167,7 @@
       <span class={
         "text-sm normal-case",
         "sr-only": !@with_label,
-        "btn btn-sm btn-outline border-base-content/30": @with_icon != true
+        "btn btn-sm btn-outline": @with_icon != true
       }>{e(@__context__, :my_acls, other, nil) || l("Custom Boundaries")}</span>
     </span>
 {/case}

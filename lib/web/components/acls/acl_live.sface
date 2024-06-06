@@ -21,10 +21,7 @@
     {#else}
       <ul :if={!@read_only} class="menu menu-horizontal gap-3 bg-base-100 px-0 mb-0 m-4 mt-2">
         <li>
-          <button
-            @click="search = !search"
-            class="btn btn-active hover:!bg-opacity/80 btn-outline normal-case !border !border-base-content/30 btn-sm"
-          >
+          <button @click="search = !search" class="btn btn-active btn-outline normal-case  btn-sm">
             <#Icon solid="search" class="w-4 h-4" />
             <span>{l("Add circle/users")}</span>
           </button>
@@ -112,7 +109,7 @@
               </section>
 
               <:open_btn>
-                <button type="button" class="btn btn-outline normal-case !border !border-base-content/30  btn-sm">
+                <button type="button" class="btn btn-outline btn-sm">
                   {l("Edit boundary")}</button>
               </:open_btn>
             </Bonfire.UI.Common.OpenModalLive>

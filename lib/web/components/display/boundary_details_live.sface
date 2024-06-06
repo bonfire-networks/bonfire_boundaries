@@ -25,16 +25,11 @@
         type="button"
         x-on:click="edit = !edit"
         type="button"
-        class="btn btn-sm !border-base-content/30 !border btn-outline  normal-case"
+        class="btn btn-sm btn-outline"
       >
         {l("Edit boundaries")}
       </button>
-      <button
-        x-show="edit"
-        type="button"
-        x-on:click="edit = !edit"
-        class="btn btn-sm !border-base-content/30 !border btn-outline  normal-case"
-      >
+      <button x-show="edit" type="button" x-on:click="edit = !edit" class="btn btn-sm btn-outline">
         {l("Done")}
       </button>
     {/if}
@@ -70,7 +65,7 @@
       {/if}
 
       <details class="dropdown">
-        <summary class="btn btn-active hover:!bg-opacity/80 btn-outline normal-case !border !border-base-content/30  btn-sm">
+        <summary class="btn btn-active btn-outline btn-sm">
           {l("Add a boundary preset")}
         </summary>
         <ul class="z-[1] menu shadow bg-base-200 rounded-lg p-0">
