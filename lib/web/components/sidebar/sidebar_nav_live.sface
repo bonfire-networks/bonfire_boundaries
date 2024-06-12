@@ -56,13 +56,13 @@
         <span class={
           "text-sm text-base-content/70",
           "font-semibold": @showing_within == :dashboard
-        }>{l("Custom roles")}</span>
+        }>{l("Roles")}</span>
         <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define sets of permissions which you can assign to users and circles")}</p>
       </div>
     </LinkLive>
   </li>
 
-  <li class={
+  <!-- <li class={
     "",
     "hover: flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
       @showing_within == :dashboard
@@ -90,7 +90,7 @@
         {!-- <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define sets of permissions which you can assign to users and circles")}</p> --}
       </div>
     </LinkLive>
-  </li>
+  </li> -->
 
   <li class={
     "",
