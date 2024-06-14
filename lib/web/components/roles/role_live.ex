@@ -12,7 +12,7 @@ defmodule Bonfire.Boundaries.Web.RoleLive do
       e(params, "id", nil)
       |> debug("role_id")
 
-    role = Bonfire.Boundaries.Roles.get(id, current_user: current_user) |> debug("CACCA")
+    role = Bonfire.Boundaries.Roles.get(id, current_user: current_user)
 
     {:ok,
      socket

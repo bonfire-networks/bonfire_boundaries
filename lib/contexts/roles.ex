@@ -22,7 +22,6 @@ defmodule Bonfire.Boundaries.Roles do
   def get(role_name, opts \\ []) do
     do_get([@config_key, role_name], opts)
     |> Enum.into(%{})
-    |> debug("CACCA")
   end
 
   defp do_get(key, opts) do
