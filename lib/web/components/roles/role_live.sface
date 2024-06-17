@@ -1,6 +1,5 @@
 role page
-{#case Bonfire.Boundaries.Roles.get("gfgfgfgf", current_user: current_user(@__context__))
-  }
+{#case Bonfire.Boundaries.Roles.get("gfgfgfgf", current_user: current_user(@__context__))}
   {#match obj}
     eripaeeria
   {#match _}
