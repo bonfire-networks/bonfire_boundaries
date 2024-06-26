@@ -16,7 +16,7 @@ defmodule Bonfire.Boundaries.Web.BoundaryIconStatelessLive do
   prop with_label, :boolean, default: false
 
   prop class, :css_class, default: "btn btn-ghost btn-xs btn-circle"
-  prop icon_class, :css_class, default: "w-4 h-4 text-base-content/50"
+  prop icon_class, :css_class, default: "w-4 h-4"
   prop open_btn_wrapper_class, :css_class, default: "flex flex-1 w-full"
 
   def render(%{object_boundary: none} = assigns) when none in [nil, false] do
