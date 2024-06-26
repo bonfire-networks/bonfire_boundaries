@@ -1,77 +1,33 @@
-<ul
-  role="navigation"
-  class={if @showing_within != :dashboard, do: @class, else: "grid grid-cols-1 gap-3 mt-4"}
->
-  <li class={
-    "",
-    "hover: flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-      @showing_within == :dashboard
-  }>
+<ul role="navigation" class={@class}>
+  <li>
     <LinkLive
       to={~p"/boundaries/circles"}
       class={
-        "flex items-center gap-3 rounded-md px-2 w-full",
-        "!gap-8": @showing_within == :dashboard,
-        "": @selected_tab == "circles"
+        "!px-4 !py-2",
+        "bg-base-content/10 ": @selected_tab == "circles"
       }
     >
-      <#Icon
-        iconify="fluent:people-list-16-regular"
-        class={
-          "w-5 h-5 font-normal text-base-content/70",
-          "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
-        }
-      />
-      <div class="flex flex-col">
-        <span class={
-          "text-sm text-base-content/70",
-          "font-semibold": @showing_within == :dashboard
-        }>{l("Circles")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Group your contacts based on shared characteristics")}</p>
-      </div>
+      <span class="text-sm">{l("Circles")}</span>
     </LinkLive>
   </li>
 
-  <li class={
-    "",
-    "hover: flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-      @showing_within == :dashboard
-  }>
+  <li>
     <LinkLive
       to={~p"/boundaries/roles"}
       class={
-        "flex items-center gap-3 rounded-md px-2 w-full",
-        "!gap-8": @showing_within == :dashboard,
-        " ": @selected_tab == "roles"
+        "!px-4 !py-2",
+        "bg-base-content/10 ": @selected_tab == "roles"
       }
     >
-      <#Icon
-        iconify="mingcute:hat-line"
-        class={
-          "w-5 h-5 font-normal text-base-content/70",
-          "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
-        }
-      />
-      <div class="flex flex-col">
-        <span class={
-          "text-sm text-base-content/70",
-          "font-semibold": @showing_within == :dashboard
-        }>{l("Roles")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define sets of permissions which you can assign to users and circles")}</p>
-      </div>
+      <span class="text-sm">{l("Roles")}</span>
     </LinkLive>
   </li>
 
-  <!-- <li class={
-    "",
-    "hover: flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-      @showing_within == :dashboard
-  }>
+  <!-- <li>
     <LinkLive
       to={~p"/boundaries/instance_roles"}
       class={
-        "flex items-center gap-3 rounded-md px-2 w-full",
-        "!gap-8": @showing_within == :dashboard,
+        "!px-4 !py-2",
         " ": @selected_tab == "instance_roles"
       }
     >
@@ -92,33 +48,15 @@
     </LinkLive>
   </li> -->
 
-  <li class={
-    "",
-    "hover: flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-      @showing_within == :dashboard
-  }>
+  <li>
     <LinkLive
       to={~p"/boundaries/acls"}
       class={
-        "flex items-center gap-3 rounded-md px-2 w-full",
-        "!gap-8": @showing_within == :dashboard,
-        "": @selected_tab == "acls"
+        "!px-4 !py-2",
+        "bg-base-content/10 ": @selected_tab == "acls"
       }
     >
-      <#Icon
-        iconify="ph:hand-bold"
-        class={
-          "w-5 h-5 font-normal text-base-content/70",
-          "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
-        }
-      />
-      <div class="flex flex-col">
-        <span class={
-          "text-sm text-base-content/70",
-          "font-semibold": @showing_within == :dashboard
-        }>{l("Boundary Presets")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define and enforce rules for access and permissions to content or functionality")}</p>
-      </div>
+      <span class="text-sm">{l("Boundaries")}</span>
     </LinkLive>
   </li>
 </ul>

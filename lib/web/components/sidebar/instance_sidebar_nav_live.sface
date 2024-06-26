@@ -1,165 +1,74 @@
-<ul
-  role="navigation"
-  class={if @showing_within != :dashboard, do: @class, else: "grid grid-cols-1 gap-3 mt-4"}
->
-  <li
-    class={
-      "",
-      "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-        @showing_within == :dashboard
-    }
-    :if={Bonfire.Boundaries.can?(@__context__, :assign, :instance)}
-  >
+<ul role="navigation" class={@class}>
+  <li :if={Bonfire.Boundaries.can?(@__context__, :assign, :instance)}>
     <LinkLive
       to={~p"/boundaries/scope/instance/circles"}
       class={
-        "flex items-center gap-3 rounded-md px-2 w-full",
+        "!px-4 !py-2",
         "bg-base-content/10": @selected_tab == "circles"
       }
     >
-      <#Icon iconify="fluent:people-list-16-regular" class="w-5 h-5 font-normal text-base-content/70" />
-      <div class="flex flex-col">
-        <span class={
-          "text-sm text-base-content/70",
-          "font-semibold": @showing_within == :dashboard
-        }>{l("Instance Circles")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Group users based on shared characteristics or roles")}</p>
-      </div>
+      <span class="text-sm">{l("Instance Circles")}</span>
     </LinkLive>
   </li>
 
-  <li class={
-    "",
-    "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-      @showing_within == :dashboard
-  }>
+  <li>
     <LinkLive
       to={~p"/boundaries/scope/instance/roles"}
       class={
-        "flex items-center gap-3 rounded-md px-2 w-full",
-        "!gap-8": @showing_within == :dashboard,
+        "!px-4 !py-2",
         "bg-base-content/10 ": @selected_tab == "roles"
       }
     >
-      <#Icon
-        iconify="mingcute:hat-line"
-        class={
-          "w-5 h-5 font-normal text-base-content/70",
-          "w-6 h-6 ml-2 text-info/70": @showing_within == :dashboard
-        }
-      />
-      <div class="flex flex-col">
-        <span class={
-          "text-sm text-base-content/70",
-          "font-semibold": @showing_within == :dashboard
-        }>{l("Instance Roles")}</span>
-        <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define sets of permissions which you can assign to users and circles")}</p>
-      </div>
+      <span class="text-sm">{l("Instance Roles")}</span>
     </LinkLive>
   </li>
 
   {#if Bonfire.Boundaries.can?(@__context__, :grant, :instance)}
-    <li class={
-      "",
-      "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-        @showing_within == :dashboard
-    }>
+    <li>
       <LinkLive
         to={~p"/boundaries/scope/instance/acls"}
         class={
-          "flex items-center gap-3 rounded-md px-2 w-full",
+          "!px-4 !py-2",
           "bg-base-content/10": @selected_tab == "acls"
         }
       >
-        <#Icon
-          iconify="ph:hand-bold"
-          class={"w-5 h-5 font-normal text-base-content/70", "!text-primary": @selected_tab == "acls"}
-        />
-        <div class="flex flex-col">
-          <span class={
-            "text-sm text-base-content/70",
-            "font-semibold": @showing_within == :dashboard
-          }>{l("Boundary Presets")}</span>
-          <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define and enforce instance-wide rules for access and permissions to content or functionality")}</p>
-        </div>
+        <span class="text-sm">{l("Boundary Presets")}</span>
       </LinkLive>
     </li>
 
-    <li class={
-      "",
-      "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-        @showing_within == :dashboard
-    }>
+    <li>
       <LinkLive
         to={~p"/boundaries/scope/instance/instance_acl"}
         class={
-          "flex items-center gap-3 rounded-md px-2 w-full",
+          "!px-4 !py-2",
           "bg-base-content/10": @selected_tab == "instance_acl"
         }
       >
-        <#Icon
-          iconify="ri:shield-line"
-          class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "instance_acl"}
-        />
-        <div class="flex flex-col">
-          <span class={
-            "text-sm text-base-content/70",
-            "font-semibold": @showing_within == :dashboard
-          }>{l("Instance Permissions")}</span>
-          <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define which circles or users can control different aspects of the instance")}</p>
-        </div>
+        <span class="text-sm">{l("Instance Permissions")}</span>
       </LinkLive>
     </li>
 
-    <li class={
-      "",
-      "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-        @showing_within == :dashboard
-    }>
+    <li>
       <LinkLive
         to={~p"/boundaries/scope/instance/admin_circle"}
         class={
-          "flex items-center gap-3 rounded-md px-2 w-full",
+          "!px-4 !py-2",
           "bg-base-content/10": @selected_tab == "admin_circle"
         }
       >
-        <#Icon
-          iconify="material-symbols:admin-panel-settings-outline"
-          class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "admin_circle"}
-        />
-        <div class="flex flex-col">
-          <span class={
-            "text-sm text-base-content/70",
-            "font-semibold": @showing_within == :dashboard
-          }>{l("Admins list")}</span>
-          <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("See which users can administer the instance.")}</p>
-        </div>
+        <span class="text-sm">{l("Admins list")}</span>
       </LinkLive>
     </li>
 
-    <li class={
-      "",
-      "hover:bg-base-content/10 flex items-center gap-4 p-3 rounded-md shadow bg-base-content/5 group":
-        @showing_within == :dashboard
-    }>
+    <li>
       <LinkLive
         to={~p"/boundaries/scope/instance/mod_circle"}
         class={
-          "flex items-center gap-3 rounded-md px-2 w-full",
+          "!px-4 !py-2",
           "bg-base-content/10": @selected_tab == "mod_circle"
         }
       >
-        <#Icon
-          iconify="solar:help-outline"
-          class={"w-5 h-5 font-normal text-base-content/70", "": @selected_tab == "mod_circle"}
-        />
-        <div class="flex flex-col">
-          <span class={
-            "text-sm text-base-content/70",
-            "font-semibold": @showing_within == :dashboard
-          }>{l("Moderators list")}</span>
-          <p class="text-sm text-base-content/70" :if={@showing_within == :dashboard}>{l("Define which users can moderate the instance.")}</p>
-        </div>
+        <span class="text-sm">{l("Moderators list")}</span>
       </LinkLive>
     </li>
   {/if}

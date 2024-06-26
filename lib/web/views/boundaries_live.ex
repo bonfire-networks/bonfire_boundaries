@@ -25,27 +25,16 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
   def mount(params, _session, socket) do
     {
       :ok,
-      # |> assign(:without_sidebar,  true)
       assign(
         socket,
         selected_tab: "user",
-        # page_title: l("Boundaries & Circles"),
-        nav_items: Bonfire.Common.ExtensionModule.default_nav(),
+        without_secondary_widgets: true,
+        nav_items: [Bonfire.UI.Common.SidebarSettingsNavLive.declared_nav()],
         id: nil,
         back: true,
         page: "boundaries",
         scope: nil,
-        current_params: params,
-        sidebar_widgets: [
-          users: [
-            secondary: [
-              {Bonfire.Tag.Web.WidgetTagsLive, []}
-            ]
-          ],
-          guests: [
-            secondary: nil
-          ]
-        ]
+        current_params: params
       )
     }
 
