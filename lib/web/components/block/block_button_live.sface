@@ -76,7 +76,7 @@
       <div :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)} class="">
         {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, :instance_wide)}
           <div class="">
-            <p class="mt-0 text-sm text-base-content/70">
+            <p class="mt-0 text-sm text-base-content">
               {l("Do you want to unsilence %{user_or_instance_name} instance-wide?",
                 user_or_instance_name: @label
               )}
@@ -176,7 +176,7 @@
       <div :if={Bonfire.Boundaries.can?(@__context__, :block, :instance)} class="">
         {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, :instance_wide)}
           <div class="">
-            <p class="mt-0 text-sm text-base-content/70">
+            <p class="mt-0 text-sm text-base-content">
               {l("Do you want to unghost %{user_or_instance_name} instance-wide?",
                 user_or_instance_name: @label
               )}
@@ -283,7 +283,7 @@
           {#case if(is_nil(@is_local_user), do: is_local?(@object), else: @is_local_user)}
             {#match true}
               <div class="">
-                <p class="mt-0 text-sm text-base-content/70">
+                <p class="mt-0 text-sm text-base-content">
                   {l("Do you want to unblock and re-enable %{user_or_instance_name} so they can use the instance?",
                     user_or_instance_name: @label
                   )}
@@ -296,7 +296,7 @@
               >{l("Re-enable user")}</button>
             {#match _}
               <div class="">
-                <p class="mt-0 text-sm text-base-content/70">
+                <p class="mt-0 text-sm text-base-content">
                   {l("Do you want to unblock %{user_or_instance_name} instance-wide?",
                     user_or_instance_name: @label
                   )}
