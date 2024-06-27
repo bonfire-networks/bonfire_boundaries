@@ -16,7 +16,7 @@
     />
     <:open_btn>
       {#if !@as_icon}
-        <div class="flex items-center w-full gap-2 text-sm text-base-content/70">
+        <div class="flex items-center w-full gap-2 text-sm text-base-content">
           <#Icon iconify="fluent:people-list-16-filled" class="w-4 h-4 shrink-0" />
           <span>{l("Add to circles")}</span>
         </div>
