@@ -14,7 +14,7 @@
       feedback_title={l("This list is empty")}
       feedback_message=""
     >
-      <div class="flex flex-col flex-1 gap-1 text-left prose prose-sm">
+      <div class="flex flex-col flex-1 gap-1 text-left prose prose-sm max-w-full">
         <p :if={@scope == :instance_wide} class="px-4 mb-0">
           {l("Nobody on this instance will receive any updates from the users or instances on this list")}
         </p>
@@ -74,7 +74,7 @@
       feedback_title={l("This list is empty")}
       feedback_message=""
     >
-      <div class="flex flex-col flex-1 gap-1 text-left prose prose-sm">
+      <div class="flex flex-col flex-1 gap-1 text-left prose prose-sm max-w-full">
         <p :if={@scope == :instance_wide} class="mt-2 px-4 mb-0">
           {l(
             "Users or instances on this list will not be able to see or interact with anyone on this instance"
