@@ -1,4 +1,4 @@
-<div class="flex-1" data-role="add_to_circle">
+<div class="flex-1 flex" data-role="add_to_circle">
   <Bonfire.UI.Common.OpenModalLive
     id={ComponentID.new(
       Bonfire.UI.Common.OpenModalLive,

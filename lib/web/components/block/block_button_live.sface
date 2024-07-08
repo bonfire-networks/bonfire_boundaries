@@ -199,7 +199,7 @@
             <button
               :on-click="Bonfire.Boundaries.Blocks:ghost_instance_wide"
               phx-value-id={e(@object, :id, @object)}
-              class="btn btn-error  btn-outline normal-case"
+              class="btn btn-error !border-error btn-outline normal-case"
             >{l("Ghost instance-wide")}</button>
           </div>
         {/if}
@@ -363,7 +363,7 @@
       />
       <span :if={!@hide_text} class="text-left truncate ellipsis">
         {@open_btn_label ||
-          l("%{type} the author", type: @type, user_or_instance_name: @label)}
+          l("%{type} %{user_or_instance_name}", type: @type, user_or_instance_name: @label)}
       </span>
     </div>
   </:open_btn>
