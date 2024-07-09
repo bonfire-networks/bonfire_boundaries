@@ -1,13 +1,13 @@
-defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
-  use Bonfire.UI.Common.Web, :stateless_component
+defmodule Bonfire.Boundaries.Web.SetCirclesPermissionsLive do
+  use Bonfire.UI.Common.Web, :stateful_component
   use Bonfire.Common.Utils
 
-  declare_module_optional(l("Custom boundaries in composer"),
-    description:
-      l(
-        "Enable selecting custom roles for specific circles or users in the composer when drafting a post. "
-      )
-  )
+  # declare_module_optional(l("Custom boundaries in composer"),
+  #   description:
+  #     l(
+  #       "Enable selecting custom roles for specific circles or users in the composer when drafting a post."
+  #     )
+  # )
 
   prop create_object_type, :any, default: nil
   prop to_boundaries, :any, default: nil
@@ -19,7 +19,6 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
 
   prop showing_within, :atom, default: nil
 
-  prop open_boundaries, :boolean, default: false
   prop hide_breakdown, :boolean, default: false
   prop click_override, :boolean, default: false
   prop read_only, :boolean, default: false
@@ -129,8 +128,9 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
 
   def list_my_circles(scope) do
     # TODO: load using LivePlug to avoid re-loading on render?
-    Bonfire.Boundaries.Circles.list_my_with_global(scope,
-      exclude_block_stereotypes: true
+    Bonfire.Boundaries.Circles.list_my(scope,
+      exclude_stereotypes: true,
+      exclude_built_ins: true
     )
   end
 
@@ -150,6 +150,40 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
 
   def handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
     live_select_change(live_select_id, search, :to_circles, socket)
+  end
+
+  def handle_event("multi_select", %{"add_circles" => circle_id}, socket) do
+    debug(circle_id, "QUIII")
+    circles_list = list_my_circles(current_user(socket.assigns))
+
+    # Find the circle by ID
+    circle = Enum.find(circles_list, fn c -> c.id == circle_id end)
+
+    circles =
+      e(socket.assigns, :to_circles, []) ++
+        [{circle, nil}]
+
+    {:noreply,
+     socket
+     |> assign(to_circles: circles)}
+  end
+
+  def acls_from_role(role) do
+    {:ok, permissions, []} = Bonfire.Boundaries.Roles.verbs_for_role(maybe_to_atom(role), %{})
+    permissions
+  end
+
+  def name(data) when is_binary(data), do: data
+  def name(data) when is_tuple(data), do: elem(data, 1)
+
+  def name(data) when is_map(data),
+    do:
+      e(data, :name, nil) || e(data, :profile, :name, nil) || e(data, :named, :name, nil) ||
+        e(data, :stereotyped, :named, :name, nil)
+
+  def name(data) do
+    warn(data, "Dunno how to display")
+    nil
   end
 
   def handle_event(

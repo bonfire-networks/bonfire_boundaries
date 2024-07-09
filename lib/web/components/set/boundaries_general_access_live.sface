@@ -5,6 +5,7 @@
     "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-200 rounded-box w-[328px]":
       @is_dropdown
   }>
+    <div class="items-start text-left text-base font-medium px-2 pt-2">{l("General access")}</div>
     {#if !@hide_presets}
       {!-- PUBLIC --}
       <div class={
@@ -133,7 +134,7 @@
       </div>
 
       {!-- MENTIONS --}
-      <div class={
+      <!-- <div class={
         "flex items-center gap-3 p-2 justify-between rounded-lg hover:bg-base-content/5",
         "bg-base-content/5": matches?(@boundary_preset, "mentions")
       }>
@@ -150,13 +151,6 @@
           {...@set_opts}
         >
           <div class="flex items-center gap-2">
-            {!-- <input
-            :if={!@is_dropdown}
-            type="radio"
-            name="radio-1"
-            class="radio"
-            checked={matches?(@boundary_preset, "mentions")}
-          /> --}
             <div class="flex items-center text-left">
               <div class="flex-shrink-0">
                 <#Icon iconify="ri:at-line" class={"w-5 h-5 text-base-content/70", "!w-4 !h-4": @is_dropdown} />
@@ -171,7 +165,7 @@
             </div>
           </div>
         </button>
-      </div>
+      </div> -->
     {/if}
 
     {!-- CUSTOM --}
@@ -244,6 +238,21 @@
       </div>
     {/for}
 
+    <!-- <div class="my-3 px-2 text-left items-start border-t border-base-content/10">
+      <div class="items-start text-left text-base font-medium mb-3 pt-3">{l "Specific access"}</div>
+      <StatefulComponent
+        :if={Bonfire.Boundaries.Web.SetBoundariesButtonLive.clone_context(@to_boundaries) == false}
+        module={maybe_component(Bonfire.Boundaries.Web.SetCirclesPermissionsLive, @__context__)}
+        to_boundaries={@to_boundaries}
+        boundary_preset={@boundary_preset}
+        create_object_type={:post}
+        hide_breakdown
+        id={:set_circles_permissions}
+        click_override
+        to_circles={@to_circles}
+        exclude_circles={@exclude_circles}
+      />
+    </div> -->
     {!-- CREATE A NEW ONE --}
     <div :if={!@hide_custom} class="mt-1 pt-1 border-t border-base-content/20">
       <div class={

@@ -1,0 +1,62 @@
+<div>
+  <select
+    phx-change="multi_select"
+    name="add_circles"
+    phx-target={@myself}
+    class="select select-bordered flex-1 w-full"
+  >
+    <option disabled selected>{l("Add a circle")}</option>
+    {#for circle <- @my_circles}
+      <option value={circle.id}>{circle.named.name}</option>
+    {/for}
+  </select>
+  <div class="flex h-full flex-1 flex-col gap-1">
+    {#if @to_circles && @to_circles != []}
+      <div class="flex flex-1 flex-col flex-wrap">
+        <div
+          :for={{data, role} <- @to_circles || []}
+          class="flex py-2 items-center w-full justify-between"
+        >
+          <div class="flex items-center gap-3 grow">
+            <span class="w-9 h-9 rounded-full bg-base-content/10 flex items-center place-content-center">
+              <#Icon iconify="fluent:people-list-16-filled" class="inline-block w-5 h-5 text-base-content/70" />
+            </span>
+            <div class="text-base font-medium text-base-content truncate max-w-[210px]">{name(data)}</div>
+          </div>
+
+          <div class="items-center flex gap-2">
+            <div class="flex items-center">
+              {#if @read_only}
+                {role}
+              {#else}
+                <Bonfire.Boundaries.Web.RolesDropdownLive
+                  setting_boundaries
+                  circle_id={id(data)}
+                  role={role}
+                  roles={@roles_for_dropdown}
+                />
+              {/if}
+            </div>
+
+            <div
+              :if={!@read_only}
+              phx-click={JS.push("Bonfire.Boundaries:remove_circle",
+                value: %{
+                  id: id(data),
+                  field: :to_circles,
+                  name: name(data)
+                },
+                target: "#smart_input"
+              )}
+              class="btn btn-sm btn-circle btn-ghost"
+            >
+              <#Icon iconify="ph:trash-fill" class="w-5 h-5 text-base-content/80 md:w-4 md:h-4" />
+            </div>
+          </div>
+        </div>
+      </div>
+    {#else}
+      <div />
+    {/if}
+  </div>
+</div>

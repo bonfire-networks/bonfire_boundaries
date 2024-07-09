@@ -12,6 +12,8 @@ defmodule Bonfire.Boundaries.Web.BoundariesGeneralAccessLive do
   prop hide_custom, :boolean, default: false
   prop set_action, :string, default: nil
   prop set_opts, :map, default: %{}
+  prop to_circles, :any, default: nil
+  prop exclude_circles, :any, default: nil
 
   def matches?({preset, _}, preset), do: true
   def matches?([{preset, _}], preset), do: true

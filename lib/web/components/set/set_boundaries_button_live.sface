@@ -11,7 +11,7 @@
           </label>
           <ul
             tabindex="0"
-            class="tooltip z-[9999] menu shadow-sm bg-base-100 border border-base-content/10 rounded-lg p-0 w-96 absolute top-0 left-0 hidden"
+            class="tooltip z-[9999] menu shadow-sm bg-base-100 border border-base-content/10 rounded-lg p-0 w-full lg:w-[29rem] absolute top-0 left-0 hidden"
           >
             <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive
               to_boundaries={@to_boundaries}
@@ -20,27 +20,6 @@
             />
           </ul>
         </div>
-        {!-- <div class="w-full dropdown">
-          <label
-            type="button"
-            tabindex="0"
-            aria-haspopup="true"
-            aria-expanded="true"
-            class="flex w-fit items-center justify-between gap-2 btn-ghost normal-case  border btn-sm btn border-base-content/30 text-primary"
-          >
-            <Bonfire.Boundaries.Web.BoundariesPresetNameLive to_boundaries={@to_boundaries} />
-            <#Icon iconify="ri:arrow-down-s-line" class="w-4 h-4 text-primary/80" />
-          </label>
-          <ul
-            tabindex="0"
-            class="mt-1 rounded !block shadow w-full menu-compact menu dropdown-content bg-base-100"
-            role="menu"
-            aria-orientation="vertical"
-            aria-labelledby="user-profile-menu"
-          >
-            <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive boundary_preset={Bonfire.Boundaries.Web.SetBoundariesLive.boundaries_to_preset(@to_boundaries)} />
-          </ul>
-        </div> --}
       </div>
     </div>
   {#match boundary_name}
