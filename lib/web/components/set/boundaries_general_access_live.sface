@@ -5,7 +5,7 @@
     "dropdown-content z-[99999] mt-1 !gap-2 !menu-sm p-1.5 shadow bg-base-200 rounded-box w-[328px]":
       @is_dropdown
   }>
-    <div class="items-start text-left text-base font-medium px-2 pt-2">{l("General access")}</div>
+    <!-- <div class="items-start text-left text-base font-medium px-2 pt-2">{l("General access")}</div> -->
     {#if !@hide_presets}
       {!-- PUBLIC --}
       <div class={
@@ -171,11 +171,11 @@
     {!-- CUSTOM --}
     {#for {acl_id, acl} <- @my_acls}
       <div class={
-        "p-2 flex items-center gap-3 justify-between rounded-lg hover:bg-base-content/5",
+        "flex items-center gap-3 justify-between rounded-lg hover:bg-base-content/5",
         "bg-base-content/5": matches?(@to_boundaries, acl_id)
       }>
         <button
-          class="text-base-content"
+          class="w-full p-2 text-base-content"
           phx-click={@set_action ||
             JS.push("Bonfire.Boundaries:replace_boundary",
               value: %{id: acl_id, name: e(acl, :name, nil)},
@@ -210,7 +210,7 @@
               </div>
               <div class="flex flex-col ml-3">
                 <div class="text-sm font-semibold text-base-content/90">{e(acl, :name, nil)}</div>
-                <p class="text-xs text-base-content/70">{e(acl, :description, nil)}</p>
+                <p class="text-xs text-base-content/70">{e(acl, :description, "A custom boundary")}</p>
               </div>
             </div>
           </div>
