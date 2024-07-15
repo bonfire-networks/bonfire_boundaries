@@ -227,7 +227,11 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   end
 
   def do_results_for_multiselect(search) do
-    Bonfire.Me.Users.search(search)
+    Common.Utils.maybe_apply(
+      Bonfire.Me.Users,
+      :search,
+      [search]
+    )
     |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
   end
 
