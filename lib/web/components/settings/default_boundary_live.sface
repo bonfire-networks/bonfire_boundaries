@@ -17,7 +17,7 @@
         module={maybe_component(Bonfire.Boundaries.Web.BoundariesGeneralAccessLive, @__context__)}
         hide_custom
         scope={@scope}
-        set_action="Bonfire.Common.Settings:set_default_boundary"
+        set_action="Bonfire.Boundaries:set_default_boundary"
         set_opts={%{"phx-value-scope" => @scope}}
         boundary_preset={Settings.get(
           [:ui, :boundary_preset],

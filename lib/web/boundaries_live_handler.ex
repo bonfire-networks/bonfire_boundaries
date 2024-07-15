@@ -7,6 +7,14 @@ defmodule Bonfire.Boundaries.LiveHandler do
   alias Bonfire.Boundaries.Roles
   # alias Bonfire.Boundaries.Grants
 
+  def handle_event("set_default_boundary", %{"id" => id, "scope" => scope} = _params, socket) do
+    Bonfire.Common.Settings.LiveHandler.handle_event(
+      "set",
+      %{"ui" => %{"boundary_preset" => id}, "scope" => scope},
+      socket
+    )
+  end
+
   def handle_event("blocks", %{"id" => id} = attrs, socket)
       when is_binary(id) do
     info(attrs)
