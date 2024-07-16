@@ -12,7 +12,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   # alias Bonfire.Common.Cache
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Grants
-  alias Bonfire.Boundaries.Controlleds
+  # alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Boundaries.Verbs
   alias Bonfire.Data.AccessControl.Controlled
   alias Bonfire.Data.AccessControl.Acl

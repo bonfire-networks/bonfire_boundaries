@@ -1,7 +1,7 @@
 defmodule Bonfire.Boundaries.Roles do
   use Bonfire.Common.Utils
   import Untangle
-  import Bonfire.Boundaries.Integration
+  # import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Verbs
   alias Bonfire.Data.AccessControl.Acl
 
@@ -160,7 +160,7 @@ defmodule Bonfire.Boundaries.Roles do
                  |> Enum.sort()
                  |> debug("#{role} role_verbs")
 
-             other ->
+             _other ->
                # debug(other, "other")
                false
            end) do
@@ -268,7 +268,7 @@ defmodule Bonfire.Boundaries.Roles do
     |> do_put(role_name, ..., opts)
   end
 
-  def edit_verb_permission(role_name, verb, value, opts) when is_atom(verb) do
+  def edit_verb_permission(role_name, verb, _value, opts) when is_atom(verb) do
     # reset to default (nil)
     get(role_name, opts)
     |> remove_can(verb, opts)
@@ -289,7 +289,7 @@ defmodule Bonfire.Boundaries.Roles do
     do_remove_verb(:cannot_verbs, current_role, verb, opts)
   end
 
-  defp do_remove_verb(key, current_role, verb, opts) do
+  defp do_remove_verb(key, current_role, verb, _opts) do
     debug(verb, "remove verb")
 
     Map.put(

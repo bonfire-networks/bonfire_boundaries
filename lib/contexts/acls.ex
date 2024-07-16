@@ -130,7 +130,7 @@ defmodule Bonfire.Boundaries.Acls do
   defp do_preview(creator, opts) do
     object = generate_object()
 
-    repo().transaction(fn repo ->
+    repo().transaction(fn _repo ->
       do_set(object, creator, opts)
 
       repo().rollback(
@@ -245,7 +245,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def acls_from_preset(creator, to_boundaries, opts \\ []) do
-    {preset, base_acls, direct_acl_ids} =
+    {_preset, base_acls, direct_acl_ids} =
       preset_stereotypes_and_acls(
         creator,
         to_boundaries,
@@ -305,7 +305,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   # when the user picks a preset, this maps to a set of base acls
-  defp base_acls(user, preset, opts) do
+  defp base_acls(_user, preset, opts) do
     (List.wrap(opts[:universal_boundaries]) ++
        Boundaries.acls_from_preset_boundary_names(preset))
     |> info("preset ACLs to set (based on preset #{preset}) ")
@@ -967,9 +967,12 @@ defmodule Bonfire.Boundaries.Acls do
       :stereotyped
     ]
 
-    Bonfire.Social.Objects.maybe_generic_delete(Acl, acl,
-      current_user: current_user(opts),
-      delete_associations: assocs
+    Common.Utils.maybe_apply(
+      Bonfire.Social.Objects,
+      :maybe_generic_delete,
+      [Acl, acl,
+      [current_user: current_user(opts),
+      delete_associations: assocs]]
     )
   end
 

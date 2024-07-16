@@ -14,7 +14,7 @@ defmodule Bonfire.Boundaries.Grants do
   # alias Bonfire.Data.AccessControl.Accesses
   alias Bonfire.Boundaries.Circles
   # alias Bonfire.Boundaries.Grants
-  alias Bonfire.Boundaries.Verbs
+  # alias Bonfire.Boundaries.Verbs
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Roles
 
@@ -77,7 +77,7 @@ defmodule Bonfire.Boundaries.Grants do
   end
 
   @doc """
-  Edits or adds a grant to an Acl 
+  Edits or adds a grant to an Acl
 
   Takes three parameters:
   - subject_id:  who we are granting access to

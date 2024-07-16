@@ -45,7 +45,7 @@ defmodule Bonfire.Boundaries.Blocks do
   def block(user_or_instance_to_block, block_type \\ nil, scope)
 
   def block(
-        %{__struct__: schema, display_hostname: display_hostname} = instance_to_block,
+        %{__struct__: schema, display_hostname: display_hostname} = _instance_to_block,
         block_type,
         scope
       )
@@ -272,7 +272,7 @@ defmodule Bonfire.Boundaries.Blocks do
     Circles.get_stereotype_circles(current_user, block_types)
   end
 
-  defp per_user_circles(nil, block_types) do
+  defp per_user_circles(nil, _block_types) do
     warn("no user provided")
     []
   end
@@ -311,7 +311,7 @@ defmodule Bonfire.Boundaries.Blocks do
     is_blocked_by?(user_or_peer, block_type, [user])
   end
 
-  defp is_blocked_by?(user_or_peer, _block_types, []) do
+  defp is_blocked_by?(_user_or_peer, _block_types, []) do
     debug("no current_user/current_user_ids")
 
     nil
@@ -334,7 +334,11 @@ defmodule Bonfire.Boundaries.Blocks do
     info("apply incoming Block")
 
     with {:ok, blocked} <-
-           Bonfire.Federate.ActivityPub.AdapterUtils.get_or_fetch_character_by_ap_id(blocked)
+           Common.Utils.maybe_apply(
+             Bonfire.Federate.ActivityPub.AdapterUtils,
+             :get_or_fetch_character_by_ap_id,
+             [blocked]
+           )
            |> debug(),
          {:ok, block} <- block(blocked, :all, current_user: blocker) |> debug() do
       {:ok, block}

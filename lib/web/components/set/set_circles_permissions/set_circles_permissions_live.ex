@@ -172,23 +172,7 @@ defmodule Bonfire.Boundaries.Web.SetCirclesPermissionsLive do
      |> assign(to_circles: circles)}
   end
 
-  def acls_from_role(role) do
-    {:ok, permissions, []} = Bonfire.Boundaries.Roles.verbs_for_role(maybe_to_atom(role), %{})
-    permissions
-  end
 
-  def name(data) when is_binary(data), do: data
-  def name(data) when is_tuple(data), do: elem(data, 1)
-
-  def name(data) when is_map(data),
-    do:
-      e(data, :name, nil) || e(data, :profile, :name, nil) || e(data, :named, :name, nil) ||
-        e(data, :stereotyped, :named, :name, nil)
-
-  def name(data) do
-    warn(data, "Dunno how to display")
-    nil
-  end
 
   def handle_event(
         "multi_select",
@@ -243,5 +227,23 @@ defmodule Bonfire.Boundaries.Web.SetCirclesPermissionsLive do
 
   def handle_event("tagify_remove", attrs, socket) do
     handle_event("remove_boundary", attrs, socket)
+  end
+
+  def acls_from_role(role) do
+    {:ok, permissions, []} = Bonfire.Boundaries.Roles.verbs_for_role(maybe_to_atom(role), %{})
+    permissions
+  end
+
+  def name(data) when is_binary(data), do: data
+  def name(data) when is_tuple(data), do: elem(data, 1)
+
+  def name(data) when is_map(data),
+    do:
+      e(data, :name, nil) || e(data, :profile, :name, nil) || e(data, :named, :name, nil) ||
+        e(data, :stereotyped, :named, :name, nil)
+
+  def name(data) do
+    warn(data, "Dunno how to display")
+    nil
   end
 end
