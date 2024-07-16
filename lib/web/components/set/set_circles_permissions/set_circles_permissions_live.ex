@@ -172,8 +172,6 @@ defmodule Bonfire.Boundaries.Web.SetCirclesPermissionsLive do
      |> assign(to_circles: circles)}
   end
 
-
-
   def handle_event(
         "multi_select",
         %{data: data, text: _text},

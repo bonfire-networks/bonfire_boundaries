@@ -970,9 +970,7 @@ defmodule Bonfire.Boundaries.Acls do
     Common.Utils.maybe_apply(
       Bonfire.Social.Objects,
       :maybe_generic_delete,
-      [Acl, acl,
-      [current_user: current_user(opts),
-      delete_associations: assocs]]
+      [Acl, acl, [current_user: current_user(opts), delete_associations: assocs]]
     )
   end
 
