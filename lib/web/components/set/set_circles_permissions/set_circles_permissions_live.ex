@@ -141,7 +141,7 @@ defmodule Bonfire.Boundaries.Web.SetCirclesPermissionsLive do
        [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
        search: search
      ) ++
-       Common.Utils.maybe_apply(
+       Bonfire.Common.Utils.maybe_apply(
          Bonfire.Me.Users,
          :search,
          [search]

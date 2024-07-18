@@ -492,7 +492,7 @@ defmodule Bonfire.Boundaries.Circles do
   Fully delete the circle, including membership and boundary information. This will affect all objects previously shared with members of this circle.
   """
   def delete(%Circle{} = circle, opts) do
-    Common.Utils.maybe_apply(
+    Bonfire.Common.Utils.maybe_apply(
       Bonfire.Social.Objects,
       :maybe_generic_delete,
       [

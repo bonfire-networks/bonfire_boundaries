@@ -300,9 +300,11 @@ defmodule Bonfire.Boundaries.LiveHandler do
   # end
 
   def handle_event("edit", attrs, socket) do
+    debug(attrs, "edit circlee")
+
     with {:ok, circle} <-
            Circles.edit(
-             e(attrs, :id, nil),
+             e(attrs, :circle_id, nil),
              current_user_required!(socket),
              attrs
            ) do

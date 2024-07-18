@@ -21,7 +21,7 @@
             form_opts={%{"phx-submit" => "Bonfire.Boundaries:edit"}}
           >
             <div class="w-full mt-4 form-control">
-              <input type="hidden" name="id" value={e(@circle, :id, nil)}>
+              <input type="hidden" name="circle_id" value={e(@circle, :id, nil)}>
               <div class="flex items-center">
                 <input
                   name="named[name]"

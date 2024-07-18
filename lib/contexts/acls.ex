@@ -967,7 +967,7 @@ defmodule Bonfire.Boundaries.Acls do
       :stereotyped
     ]
 
-    Common.Utils.maybe_apply(
+    Bonfire.Common.Utils.maybe_apply(
       Bonfire.Social.Objects,
       :maybe_generic_delete,
       [Acl, acl, [current_user: current_user(opts), delete_associations: assocs]]
