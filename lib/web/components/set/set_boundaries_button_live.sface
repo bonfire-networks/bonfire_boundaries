@@ -2,7 +2,29 @@
   {#match false}
     <div class="flex items-center px-1 gap-2 border-l border-r border-base-content/20">
       <div class="flex relative z-50 items-center flex-1 gap-2">
-        <div phx-hook="Tooltip" id="popup_boundaries" class="">
+        <!-- on mobile -->
+        <div class="lg:hidden">
+          <button type="button" class="flex items-center justify-between gap-2 btn-ghost normal-case  btn-xs btn text-primary" onclick="my_modal_5.showModal()">
+             <Bonfire.Boundaries.Web.BoundariesPresetNameLive
+              icon_class="w-5 h-5 text-primary"
+              to_boundaries={@to_boundaries}
+            />
+          </button>
+          <dialog id="my_modal_5" class="modal modal-bottom sm:modal-middle">
+            <div class="modal-box">
+                <h3 class="text-lg font-bold">{l "Select the audience"}</h3>
+                <div class="-mx-4 mt-2">
+                <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive
+                  to_boundaries={@to_boundaries}
+                  boundary_preset={@boundary_preset}
+                  hide_custom={!module_enabled?(Bonfire.Boundaries.Web.SetBoundariesLive, @__context__)}
+                />
+                </div>
+            </div>
+          </dialog>
+        </div>
+        <!-- / desktop -->
+        <div phx-hook="Tooltip" id="popup_boundaries" class="hidden lg:block">
           <label class="tooltip-button flex items-center justify-between gap-2 btn-ghost normal-case  btn-xs btn text-primary">
             <Bonfire.Boundaries.Web.BoundariesPresetNameLive
               icon_class="w-5 h-5 text-primary"
@@ -29,3 +51,21 @@
       </div>
     </div>
 {/case}
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const dialog = document.getElementById('my_modal_5');
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) {
+        dialog.close();
+      }
+    });
+
+    dialog.addEventListener('click', (event) => {
+      console.log(event.target.tagName)
+     if (event.target.closest('button')) {
+        dialog.close();
+      }
+    });
+  });
+</script>

@@ -9,11 +9,11 @@
     {#if !@hide_presets}
       {!-- PUBLIC --}
       <div class={
-        "flex items-center gap-3 p-2 rounded-lg justify-between hover:bg-base-content/5",
+        "flex items-center gap-3  rounded-lg justify-between hover:bg-base-content/5",
         "bg-base-content/5": matches?(@boundary_preset, "public")
       }>
         <button
-          class="text-base-content"
+          class="text-base-content w-full p-2"
           phx-click={@set_action ||
             JS.push("Bonfire.Boundaries:replace_boundary",
               value: %{id: "public", name: l("Public")},
@@ -70,12 +70,12 @@
 
       {!-- LOCAL --}
       <div class={
-        "flex items-center gap-3 p-2 rounded-lg justify-between hover:bg-base-content/5",
+        "flex items-center gap-3  rounded-lg justify-between hover:bg-base-content/5",
         "bg-base-content/5": matches?(@boundary_preset, "local")
       }>
         <button
           data-scope="local_boundary"
-          class="text-base-content"
+          class="text-base-content p-2 w-full"
           phx-click={@set_action ||
             JS.push("Bonfire.Boundaries:replace_boundary",
               value: %{id: "local", name: l("Local")},
