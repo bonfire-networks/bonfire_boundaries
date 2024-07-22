@@ -4,22 +4,26 @@
       <div class="flex relative z-50 items-center flex-1 gap-2">
         <!-- on mobile -->
         <div class="lg:hidden">
-          <button type="button" class="flex items-center justify-between gap-2 btn-ghost normal-case  btn-xs btn text-primary" onclick="my_modal_5.showModal()">
-             <Bonfire.Boundaries.Web.BoundariesPresetNameLive
+          <button
+            type="button"
+            class="flex items-center justify-between gap-2 btn-ghost normal-case  btn-xs btn text-primary"
+            onclick="my_modal_5.showModal()"
+          >
+            <Bonfire.Boundaries.Web.BoundariesPresetNameLive
               icon_class="w-5 h-5 text-primary"
               to_boundaries={@to_boundaries}
             />
           </button>
           <dialog id="my_modal_5" class="modal modal-bottom sm:modal-middle">
             <div class="modal-box">
-                <h3 class="text-lg font-bold">{l "Select the audience"}</h3>
-                <div class="-mx-4 mt-2">
+              <h3 class="text-lg font-bold">{l("Select the audience")}</h3>
+              <div class="-mx-4 mt-2">
                 <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive
                   to_boundaries={@to_boundaries}
                   boundary_preset={@boundary_preset}
                   hide_custom={!module_enabled?(Bonfire.Boundaries.Web.SetBoundariesLive, @__context__)}
                 />
-                </div>
+              </div>
             </div>
           </dialog>
         </div>

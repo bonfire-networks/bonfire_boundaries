@@ -29,7 +29,12 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
         socket,
         selected_tab: "user",
         without_secondary_widgets: true,
-        nav_items: [Bonfire.UI.Common.SidebarSettingsNavLive.declared_nav()],
+        nav_items:
+          List.wrap(
+            maybe_apply(Bonfire.UI.Me.SidebarSettingsNavLive, :declared_nav, [],
+              fallback_return: []
+            )
+          ),
         id: nil,
         back: true,
         page: "boundaries",
@@ -44,15 +49,15 @@ defmodule Bonfire.Boundaries.Web.BoundariesLive do
   # defp nav_items(tab \\ nil)
 
   # defp nav_items("instance"),
-  #   do: [Bonfire.UI.Common.InstanceSidebarSettingsNavLive.declared_nav()]
+  #   do: [Bonfire.UI.Me.InstanceSidebarSettingsNavLive.declared_nav()]
 
   # defp nav_items(:instance),
-  #   do: [Bonfire.UI.Common.InstanceSidebarSettingsNavLive.declared_nav()]
+  #   do: [Bonfire.UI.Me.InstanceSidebarSettingsNavLive.declared_nav()]
 
   # defp nav_items("instance" <> _),
-  #   do: [Bonfire.UI.Common.InstanceSidebarSettingsNavLive.declared_nav()]
+  #   do: [Bonfire.UI.Me.InstanceSidebarSettingsNavLive.declared_nav()]
 
-  # defp nav_items(_), do: [Bonfire.UI.Common.SidebarSettingsNavLive.declared_nav()]
+  # defp nav_items(_), do: [Bonfire.UI.Me.SidebarSettingsNavLive.declared_nav()]
 
   def handle_params(%{"tab" => tab, "id" => id} = params, _url, socket) do
     # debug(id)
