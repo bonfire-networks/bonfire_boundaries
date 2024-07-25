@@ -1,4 +1,7 @@
 defmodule Bonfire.Boundaries.Fixtures do
+  @moduledoc """
+  Provides functions to create default boundary fixtures for the instance.
+  """
   import Bonfire.Boundaries.Integration
   import Untangle
   use Bonfire.Common.Utils
@@ -45,6 +48,9 @@ defmodule Bonfire.Boundaries.Fixtures do
        |> Enum.map(&{&1, false}))
   end
 
+  @doc """
+  Prepares and returns the fixtures for ACLs, circles, verbs, named entities, and grants.
+  """
   def fixtures() do
     # e.g. public, read_only
     acls = Map.values(Acls.acls())
@@ -84,6 +90,9 @@ defmodule Bonfire.Boundaries.Fixtures do
     }
   end
 
+  @doc """
+  Prepares fixtures and inserts them into the database.
+  """
   def insert() do
     %{
       acls: acls,
@@ -131,6 +140,9 @@ defmodule Bonfire.Boundaries.Fixtures do
     :ok
   end
 
+  @doc """
+  Inserts or updates the verbs in the database.
+  """
   def upsert_verbs() do
     verbs = Keyword.values(Verbs.verbs())
 

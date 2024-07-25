@@ -24,6 +24,9 @@ defmodule Bonfire.Boundaries do
 
   @skip_object_placeholders [:skip, :skip_boundary_check, :loading]
 
+  @doc """
+  Returns the name of the preset boundary given a list of boundaries or other boundary representation.
+  """
   def preset_name(boundaries, include_remote? \\ false)
 
   def preset_name(boundaries, include_remote?) when is_list(boundaries) do
@@ -62,6 +65,9 @@ defmodule Bonfire.Boundaries do
     |> preset_name(include_remote?)
   end
 
+  @doc """
+  Returns the boundaries or a default set of boundaries based on the provided context.
+  """
   def boundaries_or_default(to_boundaries, context \\ [])
 
   def boundaries_or_default(to_boundaries, _)
@@ -78,6 +84,9 @@ defmodule Bonfire.Boundaries do
     default_boundaries(context)
   end
 
+  @doc """
+  Returns the default boundaries based on the provided context.
+  """
   def default_boundaries(context \\ []) do
     # default boundaries for new stuff
     case Settings.get([:ui, :boundary_preset], :public, context) do
@@ -100,6 +109,9 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  @doc """
+  Normalizes boundaries represented as text or list.
+  """
   def boundaries_normalise(text) when is_binary(text) do
     text
     |> String.split(",")
@@ -115,18 +127,27 @@ defmodule Bonfire.Boundaries do
     []
   end
 
+  @doc """
+  Lists ACLs for a given object 
+  """
   def list_object_acls(object, opts \\ []) do
     Controlleds.list_acls_on_object(object, opts)
     # |> debug()
     |> Enum.map(& &1.acl)
   end
 
+  @doc """
+  Lists boundaries for a given object 
+  """
   def list_object_boundaries(object, opts \\ []) do
     Controlleds.list_on_object(object, opts)
     # |> debug()
     |> Enum.map(& &1.acl)
   end
 
+  @doc """
+  Lists grants for a given set of objects.
+  """
   def list_grants_on(things) do
     from(s in Summary,
       where: s.object_id in ^Types.ulids(things)
@@ -134,7 +155,11 @@ defmodule Bonfire.Boundaries do
     |> all_grouped_by_verb()
   end
 
-  @doc "eg: `list_grants_on(id, [:see, :read])`"
+  @doc """
+  Lists grants for a given set of objects and verbs.
+
+  eg: `list_grants_on(id, [:see, :read])`
+  """
   def list_grants_on(things, verbs) do
     from(s in Summary,
       where: s.object_id in ^Types.ulids(things)
@@ -142,11 +167,17 @@ defmodule Bonfire.Boundaries do
     |> filter_grants_by_verbs(verbs)
   end
 
+  @doc """
+  Lists grants for a given set of users on a set of objects.
+  """
   def users_grants_on(users, things) do
     query_users_grants_on(users, things)
     |> all_grouped_by_verb()
   end
 
+  @doc """
+  Lists grants for a given set of users on a set of objects filtered by verbs.
+  """
   def users_grants_on(users, things, verbs) do
     query_users_grants_on(users, things)
     |> filter_grants_by_verbs(verbs)
@@ -191,6 +222,9 @@ defmodule Bonfire.Boundaries do
     # |> Enum.map(&Map.take(&1, [:subject_id, :object_id, :verbs, :value]))
   end
 
+  @doc """
+  Converts preset boundary names to ACLs.
+  """
   def acls_from_preset_boundary_names(presets) when is_list(presets),
     do: Enum.flat_map(presets, &acls_from_preset_boundary_names/1)
 
@@ -210,6 +244,9 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  @doc """
+  Converts an ACL to a preset boundary name based on the object type.
+  """
   def preset_boundary_from_acl(acl, object_type \\ nil)
 
   def preset_boundary_from_acl(
@@ -230,6 +267,9 @@ defmodule Bonfire.Boundaries do
     preset_boundary_tuple_from_acl(acl, object_type)
   end
 
+  @doc """
+  Converts an ACL to a preset boundary tuple based on the object type.
+  """
   def preset_boundary_tuple_from_acl(acl, object_type \\ nil)
 
   def preset_boundary_tuple_from_acl(acl, %{__struct__: schema} = _object),
@@ -298,6 +338,9 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  @doc """
+  Sets boundaries for a given object.
+  """
   def set_boundaries(creator, object, opts)
       when is_list(opts) and is_struct(object) do
     case opts[:remove_previous_preset] do
@@ -311,6 +354,9 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  @doc """
+  Replaces boundaries for a given object based on a previous preset.
+  """
   def replace_boundaries(creator, object, previous_preset, opts)
       when is_list(opts) and is_struct(object) do
     with object <-
@@ -356,6 +402,7 @@ defmodule Bonfire.Boundaries do
   Assigns the user as the caretaker of the given object or objects,
   replacing the existing caretaker, if any.
   """
+
   def take_care_of!(things, user) when is_list(things) do
     repo().upsert_all(
       Caretaker,
@@ -381,11 +428,17 @@ defmodule Bonfire.Boundaries do
 
   def take_care_of!(thing, user), do: hd(take_care_of!([thing], user))
 
+  @doc """
+  Returns the default boundaries for users from config.
+  """
   def user_default_boundaries() do
     Config.get!(:user_default_boundaries)
   end
 
-  def can?(circle_name, verbs, object, opts \\ [])
+  @doc """
+  Checks if a subject has permission for specified verb(s) on an object.
+  """
+  def can?(subject, verbs, object, opts \\ [])
 
   def can?(subject, can_verbs?, %{verbs: can_verbs!, value: true} = object_boundary, opts)
       when is_list(can_verbs!) do
@@ -494,6 +547,9 @@ defmodule Bonfire.Boundaries do
     val
   end
 
+  @doc """
+  Checks if a pointer is permitted based on the specified options.
+  """
   def pointer_permitted?(item, opts) do
     case ulids(item) do
       ids when is_list(ids) and ids != [] ->
@@ -510,6 +566,9 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  @doc """
+  Loads a pointer based on the permissions.
+  """
   def load_pointer(item, opts) do
     case ulids(item) do
       ids when is_list(ids) and ids != [] ->
@@ -527,8 +586,7 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Loads binaries according to boundaries (which are assumed to be ULID pointer IDs).
-  Lists which are iterated and return a [sub]list with only permitted pointers.
+  Loads pointers based on boundaries and returns a list of permitted pointers.
   """
   def load_pointers(items, opts) do
     # debug(items, "items")
@@ -545,6 +603,9 @@ defmodule Bonfire.Boundaries do
     end
   end
 
+  @doc """
+  Loads pointers based on boundaries and raises an error if not all pointers are permitted.
+  """
   def load_pointers!(items, opts) do
     pointers = load_pointers(items, opts)
 
@@ -567,6 +628,9 @@ defmodule Bonfire.Boundaries do
     |> boundarise(main_object.id, opts)
   end
 
+  @doc """
+  Finds caretaker stereotypes based on the specified caretaker and stereotype IDs.
+  """
   def find_caretaker_stereotypes(caretaker, stereotypes, from \\ Pointer)
 
   def find_caretaker_stereotypes(caretaker, stereotypes, from) do
@@ -576,6 +640,9 @@ defmodule Bonfire.Boundaries do
     # |> debug("stereotype acls")
   end
 
+  @doc """
+  Finds a caretaker stereotype based on the specified caretaker and stereotype IDs.
+  """
   def find_caretaker_stereotype(caretaker, stereotype, from) do
     find_caretaker_stereotypes_q(caretaker, stereotype, from)
     |> repo().one()
@@ -583,6 +650,9 @@ defmodule Bonfire.Boundaries do
     # |> debug("stereotype acls")
   end
 
+  @doc """
+  Query for caretaker stereotypes based on the specified caretaker and stereotype IDs.
+  """
   def find_caretaker_stereotypes_q(caretaker, stereotypes, from) do
     from(a in from,
       join: c in Caretaker,

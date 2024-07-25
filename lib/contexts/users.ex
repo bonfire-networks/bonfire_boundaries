@@ -2,6 +2,7 @@ defmodule Bonfire.Boundaries.Users do
   @moduledoc """
   Reads fixtures in configuration and creates a default boundaries setup for a user
   """
+
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries
@@ -18,6 +19,17 @@ defmodule Bonfire.Boundaries.Users do
   alias Bonfire.Data.Identity.Named
   alias Needle.ULID
 
+  @doc """
+  Creates the default boundaries setup for a newly-created user.
+
+  ## Parameters
+    - `user`: The user for whom to create the default boundaries.
+    - `opts`: Optional parameters for customizing the boundaries (such as whether the user is `undiscoverable` or requires `request_before_follow`)
+
+  ## Examples
+
+      > Bonfire.Boundaries.Users.create_default_boundaries(user)
+  """
   def create_default_boundaries(user, opts \\ []) do
     %{
       acls: _acls,
@@ -50,6 +62,17 @@ defmodule Bonfire.Boundaries.Users do
     # Grants will take care of themselves because they have a strong pointer acl_id.
   end
 
+  @doc """
+  Creates any missing boundaries for an existing user. Used when the app or config has defined some new types of default boundaries.
+
+  ## Parameters
+    - `user`: The user for whom to create the missing boundaries.
+    - `opts`: Optional parameters for customizing the boundaries (not currently used)
+
+  ## Examples
+
+      > Bonfire.Boundaries.Users.create_missing_boundaries(user)
+  """
   def create_missing_boundaries(user, opts \\ []) do
     %{
       acls: acls,
@@ -100,7 +123,7 @@ defmodule Bonfire.Boundaries.Users do
     # Grants will take care of themselves because they have a strong pointer acl_id.
   end
 
-  def prepare_default_boundaries(user, acls_extra, _opts) do
+  defp prepare_default_boundaries(user, acls_extra, _opts) do
     # debug(opts)
     user_default_boundaries = Boundaries.user_default_boundaries()
     #  |> debug("create_default_boundaries")
@@ -177,7 +200,7 @@ defmodule Bonfire.Boundaries.Users do
     }
   end
 
-  def do_insert_main(user, %{acls: acls, circles: circles, stereotypes: _stereotypes}) do
+  defp do_insert_main(user, %{acls: acls, circles: circles, stereotypes: _stereotypes}) do
     repo().insert_all_or_ignore(Acl, Enum.map(acls, &Map.take(&1, [:id])))
     repo().insert_all_or_ignore(Circle, Enum.map(circles, &Map.take(&1, [:id])))
     # repo().insert_all_or_ignore(Stereotyped, stereotypes)
