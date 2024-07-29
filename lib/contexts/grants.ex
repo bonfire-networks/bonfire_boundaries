@@ -86,14 +86,15 @@ defmodule Bonfire.Boundaries.Grants do
   - value: true, false, or nil
   """
   def grant(subject_id, acl_id, verb, value, opts \\ [])
-  # |> debug("mapped") # TODO: optimise?
+
+  # TODO: optimise?
   def grant(subject_ids, acl_id, verb, value, opts) when is_list(subject_ids),
     do:
       subject_ids
       |> Circles.circle_ids()
       |> Enum.map(&grant(&1, acl_id, verb, value, opts))
 
-  # |> debug("mapped") # TODO: optimise?
+  # TODO: optimise?
   def grant(subject_id, acl_id, verbs, value, opts) when is_list(verbs),
     do: Enum.map(verbs, &grant(subject_id, acl_id, &1, value, opts))
 

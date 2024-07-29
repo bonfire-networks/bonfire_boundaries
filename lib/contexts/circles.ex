@@ -457,13 +457,22 @@ defmodule Bonfire.Boundaries.Circles do
       when is_nil(circles) or (is_list(circles) and length(circles) == 0),
       do: error("No circle ID provided, so could not add")
 
-  def add_to_circles(subject, circles) when is_list(circles) and circles != [] do
+  def add_to_circles(subjects, _circles)
+      when is_nil(subjects) or (is_list(subjects) and length(subjects) == 0),
+      do: error("No subject ID provided, so could not add")
+
+  def add_to_circles(subjects, circle) when is_list(subjects) do
+    # TODO: optimise
+    Enum.map(subjects, &add_to_circles(&1, circle))
+  end
+
+  def add_to_circles(subject, circles) when is_list(circles) do
     # TODO: optimise
     Enum.map(circles, &add_to_circles(subject, &1))
   end
 
   def add_to_circles(subject, circle) when not is_nil(circle) do
-    repo().insert(Encircle.changeset(%{circle_id: ulid(circle), subject_id: ulid(subject)}))
+    repo().insert(Encircle.changeset(%{circle_id: ulid!(circle), subject_id: ulid!(subject)}))
   end
 
   def remove_from_circles(_subject, circles)

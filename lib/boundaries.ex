@@ -122,6 +122,10 @@ defmodule Bonfire.Boundaries do
     list
   end
 
+  def boundaries_normalise(%Bonfire.Data.AccessControl.Acl{id: id}) do
+    [id]
+  end
+
   def boundaries_normalise(other) do
     warn(other, "Invalid boundaries set")
     []
