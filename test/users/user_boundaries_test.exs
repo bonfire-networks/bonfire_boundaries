@@ -16,6 +16,10 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
   alias Bonfire.Boundaries.Circles
 
   describe "default boundaries from config should be inserted in the database when a new user is created" do
+    setup do
+      on_exit(fn -> Process.delete([:bonfire, :user_default_boundaries]) end)
+    end
+
     test "nothing should be created if the configs are empty" do
       Process.put([:bonfire, :user_default_boundaries], %{
         circles: %{},
@@ -49,7 +53,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
         acls: %{},
         grants: %{
           i_may_administer: %{
-            SELF: [:see]
+            SELF: [:see, :read]
           }
         },
         controlleds: %{}
@@ -57,7 +61,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
 
       %{id: user_id} = user = fake_user!()
 
-      assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 1
+      assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 2
     end
   end
 end
