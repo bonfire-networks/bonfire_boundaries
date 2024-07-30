@@ -14,6 +14,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
   alias Bonfire.Boundaries.Users
   alias Bonfire.Common.Config
   alias Bonfire.Boundaries.Circles
+  alias Bonfire.Boundaries.Acls
 
   describe "default boundaries from config should be inserted in the database when a new user is created" do
     setup do
@@ -60,8 +61,25 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
       })
 
       %{id: user_id} = user = fake_user!()
-
       assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 2
     end
+
+
+    test "acls should be created" do
+      Process.put([:bonfire, :user_default_boundaries], %{
+        circles: %{},
+        acls: %{i_may_administer: %{stereotype: :i_may_administer},},
+        grants: %{
+          i_may_administer: %{
+            SELF: [:see, :read]
+          }
+        },
+        controlleds: %{}
+      })
+
+      %{id: user_id} = user = fake_user!()
+
+      assert length(Acls.list_my(user,[paginate?: false])) == 1
+      end
   end
 end
