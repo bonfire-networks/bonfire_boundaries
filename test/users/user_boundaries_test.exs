@@ -1,19 +1,19 @@
 defmodule Bonfire.Boundaries.UserCirclesTest do
   use Bonfire.Boundaries.DataCase, async: true
   @moduletag :backend
-  alias Bonfire.Boundaries.Controlleds
-  alias Bonfire.Data.AccessControl.Stereotyped
+  # alias Bonfire.Boundaries.Controlleds
+  # alias Bonfire.Data.AccessControl.Stereotyped
   alias Bonfire.Data.AccessControl.Controlled
-  alias Absinthe.Blueprint.TypeReference.Name
-  alias Bonfire.Data.AccessControl.Circle
-  alias Bonfire.Data.AccessControl.Acl
+  # alias Absinthe.Blueprint.TypeReference.Name
+  # alias Bonfire.Data.AccessControl.Circle
+  # alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.AccessControl.Grant
-  alias Bonfire.Data.AccessControl.Encircle
-  alias Bonfire.Boundaries.Grants
-  alias Bonfire.Me.Fake
-  alias Bonfire.Me.Users
-  alias Bonfire.Boundaries.Users
-  alias Bonfire.Common.Config
+  # alias Bonfire.Data.AccessControl.Encircle
+  # alias Bonfire.Boundaries.Grants
+  # alias Bonfire.Me.Fake
+  # alias Bonfire.Me.Users
+  # alias Bonfire.Boundaries.Users
+  # alias Bonfire.Common.Config
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Acls
 
@@ -45,7 +45,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
         controlleds: %{}
       })
 
-      %{id: user_id} = user = fake_user!()
+      user = fake_user!()
       assert length(Circles.list_my(user)) == 1
     end
 
@@ -61,7 +61,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
         controlleds: %{}
       })
 
-      %{id: user_id} = user = fake_user!()
+      %{id: user_id} = fake_user!()
       assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 2
     end
 
@@ -77,39 +77,60 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
         controlleds: %{}
       })
 
-      %{id: user_id} = user = fake_user!()
+      user = fake_user!()
 
       assert length(Acls.list_my(user, paginate?: false)) == 1
     end
 
-    test "default visibility controlleds should be created" do
+    test "default discover/read controlleds should be created" do
       Process.put([:bonfire, :user_default_boundaries], %{
         circles: %{},
         acls: %{},
-        grants: %{ },
+        grants: %{},
         controlleds: %{SELF: []}
       })
 
-      %{id: user_id} = user = fake_user!()
+      %{id: user_id} = fake_user!()
+
+      assert %Bonfire.Data.AccessControl.Controlled{acl_id: "7W1DE1YAVA11AB1ET0SEENREAD"} =
+               repo().one(from c in Controlled, where: c.id == ^user_id)
+
       assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 1
-       end
+    end
 
-       test "controlleds should be created" do
-        Process.put([:bonfire, :user_default_boundaries], %{
-          circles: %{},
-          acls: %{},
-          grants: %{ },
-          controlleds: %{SELF: [
-          :locals_may_reply,
-          :remotes_may_reply,
-          :i_may_administer,]}
-        })
+    test "specified discover/read controlleds should be created" do
+      Process.put([:bonfire, :user_default_boundaries], %{
+        circles: %{},
+        acls: %{},
+        grants: %{},
+        controlleds: %{SELF: []}
+      })
 
-        %{id: user_id} = user = fake_user!()
-        assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 4
-         end
+      %{id: user_id} = fake_user!(%{}, %{}, undiscoverable: true)
 
+      assert %Bonfire.Data.AccessControl.Controlled{acl_id: "50VCANREAD1FY0VHAVETHE11NK"} =
+               repo().one(from c in Controlled, where: c.id == ^user_id)
 
+      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 1
+    end
+
+    test "controlleds should be created" do
+      Process.put([:bonfire, :user_default_boundaries], %{
+        circles: %{},
+        acls: %{},
+        grants: %{},
+        controlleds: %{
+          SELF: [
+            :locals_may_reply,
+            :remotes_may_reply,
+            :i_may_administer
+          ]
+        }
+      })
+
+      %{id: user_id} = fake_user!()
+      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 4
+      # ^ 4 instead of 3 because includes the visibility ACL
+    end
   end
-
 end
