@@ -18,7 +18,6 @@ defmodule Bonfire.Boundaries.Users do
 
   alias Bonfire.Data.Identity.Named
   alias Needle.ULID
-
   @doc """
   Creates the default boundaries setup for a newly-created user.
 
@@ -39,18 +38,22 @@ defmodule Bonfire.Boundaries.Users do
       controlleds: controlleds,
       stereotypes: stereotypes
     } =
-      params =
+      #TODO: document what this is and find a better variable name
+      acls_extra =
+      default_profile_visibility(opts[:undiscoverable]) ++
+        maybe_request_before_follow(opts[:request_before_follow])
+
+    prepared_boundaries =
       prepare_default_boundaries(
         user,
-        default_profile_visibility(opts[:undiscoverable]) ++
-          maybe_request_before_follow(opts[:request_before_follow]),
+        acls_extra,
         opts
       )
       |> debug()
 
     # first acls and circles
-    do_insert_main(user, params)
-
+    do_insert_main(user, prepared_boundaries)
+    add_caretaker(prepared_boundaries, user)
     repo().insert_all_or_ignore(Stereotyped, stereotypes)
 
     # Then grants
@@ -212,11 +215,12 @@ defmodule Bonfire.Boundaries.Users do
     }
   end
 
+  defp add_caretaker(%{acls: acls, circles: circles, stereotypes: _stereotypes}, circles, user), do: Boundaries.take_care_of!(acls ++ circles, user)
   defp do_insert_main(user, %{acls: acls, circles: circles, stereotypes: _stereotypes}) do
     repo().insert_all_or_ignore(Acl, Enum.map(acls, &Map.take(&1, [:id])))
     repo().insert_all_or_ignore(Circle, Enum.map(circles, &Map.take(&1, [:id])))
     # repo().insert_all_or_ignore(Stereotyped, stereotypes)
-    Boundaries.take_care_of!(acls ++ circles, user)
+
   end
 
   defp default_profile_visibility(bool) do
