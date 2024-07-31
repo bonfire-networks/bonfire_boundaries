@@ -7,6 +7,9 @@ defmodule Bonfire.Boundaries.Circles do
   > Circles are a tool that can be used to establish relationships. They are representations of multifaceted relationships that you have with people in your life. Circles can help you understand the different levels of intimacy and trust that you have with different people, as well the different contexts or topics which are relevant to particular relationships, and can help build stronger, healthier relationships.
 
   > In Bonfire, you can define circles based on your unique style of relationships and interests. For example, you might create a circle for your colleagues, which can help you keep track of work-related content and collaborate with them more efficiently. You could also have a locals circle, with which you may share and discover local events, news, and recommendations. You might also create a comrades circle, to stay connected with fellow activists and organise around shared goals. Finally, you could create a happy hour circle, to coordinate social gatherings with local friends or colleagues, and the crew for your inner circle. With circles, you have the flexibility to manage your relationships and social activities in a way that makes sense for you.
+
+  The corresponding Ecto schema are `Bonfire.Data.AccessControl.Circle` and `Bonfire.Data.AccessControl.Encircle` which is defined in a [seperate repo](https://github.com/bonfire-networks/bonfire_data_access_control).
+
   """
 
   use Bonfire.Common.Utils

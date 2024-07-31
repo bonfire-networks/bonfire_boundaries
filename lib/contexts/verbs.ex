@@ -1,6 +1,9 @@
 defmodule Bonfire.Boundaries.Verbs do
   @moduledoc """
   Verbs represent actions users can perform, such as reading a post or replying to a message. Each verb has a unique ID and are defined in configuration.
+
+  The corresponding Ecto schema is `Bonfire.Data.AccessControl.Verb` which is defined in a [seperate repo](https://github.com/bonfire-networks/bonfire_data_access_control).
+
   """
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration

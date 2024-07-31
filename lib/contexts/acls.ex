@@ -5,6 +5,8 @@ defmodule Bonfire.Boundaries.Acls do
   An `Acl` is a list of `Grant`s used to define access permissions for objects. It represents fully populated access control rules that can be reused. It can be used to secure multiple objects and exists independently of any object.
 
   > ACLs (also referred to as "preset boundaries") enable you to make a list of circles and users and then grant specific roles or permissions to each of those. For example, you might create a "Fitness" ACL and grant the "Participate" role to your gym buddies, allowing them to interact with your fitness-related content, while granting the "Interact" role to your family and friends, who can view and react to your posts but not comment on them.
+
+  The corresponding Ecto schema is `Bonfire.Data.AccessControl.Acl` which is defined in a [seperate repo](https://github.com/bonfire-networks/bonfire_data_access_control).
   """
   use Arrows
   use Bonfire.Common.Utils

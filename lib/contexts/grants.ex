@@ -7,6 +7,9 @@ defmodule Bonfire.Boundaries.Grants do
   * `true`: yes, the action is allowed
   * `false`: no, the action is explicitly denied (i.e. never permit)
   * `null`/`nil`: unknown, the action isn't explicitly allowed (defaults to not allowed) 
+
+  The corresponding Ecto schema is `Bonfire.Data.AccessControl.Grant` which is defined in a [seperate repo](https://github.com/bonfire-networks/bonfire_data_access_control).
+
   """
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Queries

@@ -4,6 +4,9 @@ defmodule Bonfire.Boundaries.Controlleds do
   Because it is a multimixin, a given object can have multiple ACLs applied. In the case of overlap, permissions are combined with `false` being prioritised.
 
   The `Controlled` multimixin link an object to one or more ACLs. This allows for applying multiple boundaries to the same object. In case of overlapping permissions, the system combines them following the logic described in `Bonfire.Boundaries`.
+
+  The corresponding Ecto schema is `Bonfire.Data.AccessControl.Controlled` which is defined in a [seperate repo](https://github.com/bonfire-networks/bonfire_data_access_control).
+
   """
   use Arrows
   import Bonfire.Boundaries.Integration
