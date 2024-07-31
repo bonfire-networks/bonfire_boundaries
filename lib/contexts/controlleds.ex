@@ -1,6 +1,9 @@
 defmodule Bonfire.Boundaries.Controlleds do
   @moduledoc """
-  An object is linked to one or more `Acl`s by the `Controlled` multimixin, which pairs an object ID with an ACL ID. Because it is a multimixin, a given object can have multiple ACLs applied. In the case of overlap, permissions are combined with `false` being prioritised.
+  An object is linked to one or more `Acl`s by the `Controlled` multimixin, which pairs an object ID with an ACL ID.
+  Because it is a multimixin, a given object can have multiple ACLs applied. In the case of overlap, permissions are combined with `false` being prioritised.
+
+  The `Controlled` multimixin link an object to one or more ACLs. This allows for applying multiple boundaries to the same object. In case of overlapping permissions, the system combines them following the logic described in `Bonfire.Boundaries`.
   """
   use Arrows
   import Bonfire.Boundaries.Integration
@@ -17,6 +20,15 @@ defmodule Bonfire.Boundaries.Controlleds do
   alias Bonfire.Data.AccessControl.Controlled
   alias Bonfire.Data.AccessControl.Acl
 
+  @doc """
+  Creates a `Controlled` record with the given attributes.
+
+  ## Examples
+
+      iex> create(%{field: value})
+      {:ok, %Controlled{}}
+
+  """
   def create(%{} = attrs) when not is_struct(attrs) do
     repo().insert(
       changeset(attrs),
@@ -24,10 +36,28 @@ defmodule Bonfire.Boundaries.Controlleds do
     )
   end
 
+  @doc """
+  Returns a changeset for a `Controlled` with the given attributes.
+
+  ## Examples
+
+      iex> changeset(%Controlled{}, %{field: value})
+      %Ecto.Changeset{}
+
+  """
   def changeset(c \\ %Controlled{}, attrs) do
     Controlled.changeset(c, attrs)
   end
 
+  @doc """
+  Lists ACLs applied to the given objects by the subject (current_user).
+
+  ## Examples
+
+      iex> list_on_objects_by_subject(objects, current_user)
+      %{object1_id => [%Acl{}], object2_id => [%Acl{}]}
+
+  """
   def list_on_objects_by_subject(objects, current_user) do
     repo().many(list_on_objects_by_subject_q(objects, current_user))
     |> Enum.reduce(%{}, fn c, acc ->
@@ -38,8 +68,13 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   @doc """
-  List ACLs applied to an object.
+  Lists ACLs applied to an object.
   Only call this as an admin or curator of the object.
+
+  ## Examples
+
+      iex> list_acls_on_object(object)
+      [%Acl{}]
   """
   def list_acls_on_object(object, opts \\ [])
 
@@ -86,8 +121,13 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   @doc """
-  List ALL boundaries (ACLs and grants) applied to an object.
+  Lists ALL boundaries (ACLs and grants) applied to an object.
   Only call this as an admin or curator of the object.
+
+  ## Examples
+
+      iex> list_on_object(object)
+      [%Boundary{}]
   """
   def list_on_object(object, opts \\ [])
 
@@ -137,12 +177,29 @@ defmodule Bonfire.Boundaries.Controlleds do
 
   # def list_all, do: repo().many(list_q())
 
+  @doc """
+  Gets a preset ACL applied to an object, if any.
+
+  ## Examples
+
+      iex> get_preset_on_object(object)
+      %ACL{}
+  """
   def get_preset_on_object(object) do
     list_presets_on_objects_q([object])
     |> limit(1)
     |> repo().one()
   end
 
+  @doc """
+  Lists presets ACLs applied to the given objects.
+
+  ## Examples
+
+      iex> list_presets_on_objects(objects)
+      %{object_id => %Preset{}}
+
+  """
   def list_presets_on_objects(objects) do
     # FIXME: caching currently ends up with everything appearing to be public...
     # Cache.cached_preloads_for_objects("object_acl", objects, &do_list_presets_on_objects/1)
@@ -164,6 +221,15 @@ defmodule Bonfire.Boundaries.Controlleds do
 
   defp do_list_presets_on_objects(_), do: %{}
 
+  @doc """
+  Lists subjects who have been granted a given verb on specified object(s).
+
+  ## Examples
+
+      iex> list_subjects_by_verb(objects, :read)
+
+      iex> list_subjects_by_verb(objects, :edit, false)
+  """
   def list_subjects_by_verb(objects, verb, value \\ true) when is_binary(verb) or is_atom(verb) do
     list_on_objects_by_verb_q(objects, Verbs.ids(verb), value)
     |> repo().many()
@@ -178,6 +244,15 @@ defmodule Bonfire.Boundaries.Controlleds do
     |> Map.values()
   end
 
+  @doc """
+  Lists grants of a given verb on specified object(s).
+
+  ## Examples
+
+      iex> list_grants_by_verbs(objects, :read)
+
+      iex> list_grants_by_verbs(objects, :edit, false)
+  """
   def list_grants_by_verbs(objects, verbs, value \\ true) when is_list(verbs) do
     list_on_objects_by_verb_q(objects, Verbs.ids(verbs), value)
     |> repo().many()
@@ -250,6 +325,13 @@ defmodule Bonfire.Boundaries.Controlleds do
     |> where([c], c.acl_id in ^Acls.preset_acl_ids())
   end
 
+  @doc """
+  Removes the given ACLs from an object.
+
+  ## Examples
+
+      iex> remove_acls(object, acls)
+  """
   def remove_acls(_object, acls)
       when is_nil(acls) or acls == [],
       do: error("No acl ID provided, so could not remove")
@@ -266,6 +348,15 @@ defmodule Bonfire.Boundaries.Controlleds do
   defp acl_id(%{acl_id: id}), do: id
   defp acl_id(id), do: Bonfire.Boundaries.Acls.get_id(id)
 
+  @doc """
+  Adds the given ACL to an object.
+
+  ## Examples
+
+      iex> add_acls(object, :acl)
+      {:ok, %Controlled{}}
+
+  """
   def add_acls(object, acl) when is_atom(acl) do
     Bonfire.Boundaries.Acls.get_id!(acl)
     |> add_acls(object, ...)
@@ -280,6 +371,15 @@ defmodule Bonfire.Boundaries.Controlleds do
     Enum.map(acls, &add_acls(object, &1))
   end
 
+  @doc """
+  Grants a role to a subject for an object.
+
+  ## Examples
+
+      iex> grant_role(subject_id, object, :editor)
+      {:ok, %Grant{}}
+
+  """
   def grant_role(subject_id, object, role, opts \\ []) do
     with {:ok, acl} <- Acls.get_or_create_object_custom_acl(object, current_user(opts)) do
       Grants.grant_role(subject_id, acl, role, opts)

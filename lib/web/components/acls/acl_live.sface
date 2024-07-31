@@ -1,7 +1,7 @@
 <div>
   <div class="p-4 border-b border-base-content/20">
     <span class="text-base-content/70">
-      {e(@acl, :extra_info, :summary, "No summary provided for this boundary.")}
+      {e(@acl, :extra_info, :summary, "No description provided for this boundary preset.")}
     </span>
   </div>
   <div class="" x-data="{search: false}">
@@ -30,7 +30,7 @@
           <li data-role="edit_boundary" class="edit_name">
             <Bonfire.UI.Common.OpenModalLive
               id="edit_boundary"
-              title_text={l("Edit boundary")}
+              title_text={l("Edit boundary preset")}
               no_actions
               open_btn_wrapper_class="flex flex-1 w-full"
             >
@@ -38,7 +38,7 @@
                 <form id="edit_acl" phx-submit="edit" phx-target={@myself} class="mt-4">
                   <div class="w-full form-control">
                     <label class="label">
-                      <span class="text-sm text-base-content/70">{l("Edit the boundary name")}</span>
+                      <span class="text-sm text-base-content/70">{l("Edit the boundary preset name")}</span>
                     </label>
                     <div class="flex items-center">
                       <input
@@ -53,7 +53,7 @@
 
                   <div class="w-full mt-4 form-control">
                     <label class="label">
-                      <span class="text-sm text-base-content/70">{l("Edit the boundary description")}</span>
+                      <span class="text-sm text-base-content/70">{l("Edit the boundary preset description")}</span>
                     </label>
                     <div class="flex flex-col space-y-3">
                       <textarea
@@ -83,10 +83,10 @@
                     <div data-role="delete_boundary_modal">
                       <Bonfire.UI.Common.OpenModalLive
                         id={"delete_#{@acl_id || id(@acl)}"}
-                        title_text={l("Delete this boundary")}
+                        title_text={l("Delete this boundary preset")}
                       >
                         <div class="mt-3 prose prose-sm">{l(
-                            "The boundary will be permanently deleted. This action will affect everything that was shared on the local instance using the boundary."
+                            "The boundary preset will be permanently deleted. This action will affect everything that was shared on the local instance using this preset."
                           )}</div>
                         <:open_btn>
                           <div class="normal-case btn btn-error btn-sm">{l("Delete")}</div>
@@ -99,7 +99,7 @@
                             phx-value-go="/boundaries/acls"
                             class="normal-case btn btn-error btn-sm"
                           >
-                            <span class="text-left truncate ellipsis">{l("Delete this boundary")}</span>
+                            <span class="text-left truncate ellipsis">{l("Delete this boundary preset")}</span>
                           </button>
                         </:action_btns>
                       </Bonfire.UI.Common.OpenModalLive>
@@ -110,7 +110,7 @@
 
               <:open_btn>
                 <button type="button" class="btn btn-outline btn-sm">
-                  {l("Edit boundary")}</button>
+                  {l("Edit boundary preset")}</button>
               </:open_btn>
             </Bonfire.UI.Common.OpenModalLive>
           </li>

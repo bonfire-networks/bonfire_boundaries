@@ -2,18 +2,24 @@
 
 Bonfire's boundaries framework provides a flexible way to control user access to specific actions and data. It ensures that users can only see and do what they're authorized to.
 
+You can create custom groups of contacts (circles) and grant them specific permissions to interact with you and your content. They can help you take control of your online presence and ensure that your data is shared only with the people you want.
+
+> Boundaries are limits that you set for yourself or others to define what you're comfortable with.
+> These limits can be physical, like curtains or doors; digital, like sharing settings on social media; in writing, like codes of conduct; emotional, like feeling comfortable to take time for self-care; or mental, like choosing what you pay attention to. In Bonfire, boundaries can help limit the type of interactions that others may have with you or things you post.
+> Boundaries are important because they help you protect yourself, maintain your autonomy, and communicate your needs and expectations clearly.
+
 ## Glossary 
 
 | Term        | Definition                                                                  |
 |-------------|-----------------------------------------------------------------------------|
-| **User**    | An individual who interacts with the system.                                |
-| **Circle**  | A categorization method for users, allowing users to group other users (e.g., colleagues, friends).    |
-| **Verb**    | An action that a user can perform (e.g., read, reply).                      |
+| **Subject** or **User**    | An individual who interacts with the system.                                |
+| **[Circle](Bonfire.Boundaries.Circles.html)**  | A categorization method for users, allowing users to group other users (e.g., colleagues, friends).    |
+| **[Verb](Bonfire.Boundaries.Verbs.html)**    | An action that a user can perform (e.g., read, reply).                      |
 | **Permission** | A value indicating whether an action is allowed (`true`), denied (`false`), or `nil`. |
-| **Grant**   | Links a user or circle with a verb and permission.                          |
-| **ACL**| Access Control List, a collection of grants. Also called "boundary" or "boundary preset" in the app.                          |
-| **Controlled** | Links an object to one or more ACLs, to determine access based on the grants. |
-| **Role**    | A group of verbs linked to a permission.                                  |
+| **[Grant](Bonfire.Boundaries.Grants.html)**   | Links a user or circle with a verb and permission.                          |
+| **[ACL](Bonfire.Boundaries.Acls.html)**| Access Control List, a collection of grants. Also called "boundary" or "boundary preset" in the app.                          |
+| **[Controlled](Bonfire.Boundaries.Controlleds.html)** | Links an object to one or more ACLs, to determine access based on the grants. |
+| **[Role](Bonfire.Boundaries.Roles.html)**    | A group of verbs linked to a permission.                                  |
 
 ## Users and Circles
 

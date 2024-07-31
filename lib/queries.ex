@@ -1,18 +1,20 @@
 defmodule Bonfire.Boundaries.Queries do
   @moduledoc """
-  Helpers for writing common queries. In particular, access control.
+  Helpers for writing common boundary-related queries, particularly for applying access control to queries.
 
-  Most of this stuff will probably move at some point when we figure
-  out how to better organise it.
-
-  Unfortunately, ecto is against the sort of thing we take for granted
-  in the bonfire ecosystem, so some of these patterns are a bit
-  convoluted to make ecto generate acceptable sql. In particular the
-  lateral join and the macro is a bit loltastic when we could just
-  return an arbitrary tuple if ecto would support inferring (or us
-  providing) the return type of a subquery.
-
+  This module provides macros and functions to assist with boundary checks and permission queries.
   """
+
+  # Most of this stuff will probably move at some point when we figure
+  # out how to better organise it.
+
+  # Unfortunately, ecto is against the sort of thing we take for granted
+  # in the bonfire ecosystem, so some of these patterns are a bit
+  # convoluted to make ecto generate acceptable sql. In particular the
+  # lateral join and the macro is a bit loltastic when we could just
+  # return an arbitrary tuple if ecto would support inferring (or us
+  # providing) the return type of a subquery.
+
   # import Untangle
   import Ecto.Query
   alias Bonfire.Boundaries.Summary
@@ -32,6 +34,18 @@ defmodule Bonfire.Boundaries.Queries do
     end
   end
 
+  @doc """
+  A macro to apply boundary checks to a query.
+
+  ## Examples
+
+      iex> import Bonfire.Boundaries.Queries
+      iex> query_visible_posts = from(p in Post)
+                                |> boundarise(p.id, current_user: user)
+
+      iex> query_editable_posts = from(p in Post)
+                                |> boundarise(p.id, verbs: [:edit], current_user: user)
+  """
   defmacro boundarise(query, field_ref, opts) do
     boundarise_impl(query, field_ref, opts)
   end
@@ -124,9 +138,20 @@ defmodule Bonfire.Boundaries.Queries do
   end
 
   @doc """
-  A subquery which filters out results the current user is not permitted to perform *all* of the specified verbs on.
+  Creates a subquery to filter results based on user permissions.
 
-  Parameters are an expression evaluating to the current user, a list of verbs, and optionally an initial query on `Summary` in order to filter what objects are checked.
+  Filters out results that the current user is not permitted to perform *all* of the specified verbs on.
+
+  ## Parameters
+
+  - `user`: The current user or their ID
+  - `verbs`: A list of verbs to check permissions for (default: [:see, :read])
+  - `query`: An initial query on `Summary` to filter objects (optional)
+
+  ## Examples
+
+      iex> user_id = "user123"
+      iex> Bonfire.Boundaries.Queries.query_with_summary(user_id, [:read, :write])
   """
   def query_with_summary(user, verbs \\ [:see, :read], query \\ Summary) do
     ids = user_and_circle_ids(user)
@@ -145,8 +170,24 @@ defmodule Bonfire.Boundaries.Queries do
     )
   end
 
+  @doc """
+  Queries for all permitted objects for a user.
+
+  ## Examples
+
+      iex> user_id = "user123"
+      iex> Bonfire.Boundaries.Queries.permitted(user_id)
+  """
   def permitted(user), do: permitted(user, Verbs.slugs())
 
+  @doc """
+  Queries for permitted objects for a user with specific verbs.
+
+  ## Examples
+
+      iex> user_id = "user123"
+      iex> Bonfire.Boundaries.Queries.permitted(user_id, [:read, :write])
+  """
   def permitted(user, verbs) do
     ids = user_and_circle_ids(user)
     verbs = Verbs.ids(verbs)
@@ -164,16 +205,38 @@ defmodule Bonfire.Boundaries.Queries do
     )
   end
 
-  @doc "Call the `add_perms(bool?, bool?)` postgres function for combining permissions."
+  @doc """
+  A macro that calls the `add_perms(bool?, bool?)` DB function
+
+  ## Examples
+
+      iex> import Bonfire.Boundaries.Queries
+      iex> query = from(p in Summary, select: add_perms(p.read, p.write))
+  """
   defmacro add_perms(l, r) do
     quote do: Ecto.Query.fragment("add_perms(?,?)", unquote(l), unquote(r))
   end
 
-  @doc "Call the `agg_perms(bool?)` postgres aggregate for combining permissions."
+  @doc """
+  A macro that calls the `agg_perms(bool?)` aggregate DB function for combining permissions.
+
+  ## Examples
+
+      iex> import Bonfire.Boundaries.Queries
+      iex> query = from(p in Summary, group_by: p.object_id, having: agg_perms(p.value))
+  """
   defmacro agg_perms(p) do
     quote do: Ecto.Query.fragment("agg_perms(?)", unquote(p))
   end
 
+  @doc """
+  Applies boundary checks to a query for a specific object.
+
+  ## Examples
+
+      iex> query = from(p in Post)
+      iex> Bonfire.Boundaries.Queries.object_boundarised(query, current_user: user)
+  """
   def object_boundarised(q, opts \\ nil) do
     if Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
       q
@@ -195,6 +258,20 @@ defmodule Bonfire.Boundaries.Queries do
     end
   end
 
+  @doc """
+  Checks if boundary checks should be skipped based on the provided options and object.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Queries.skip_boundary_check?([skip_boundary_check: true])
+      true
+
+      iex> Bonfire.Boundaries.Queries.skip_boundary_check?([], %{id: "user123"})
+      false
+
+      iex> Bonfire.Boundaries.Queries.skip_boundary_check?([current_user: %{id: "user123"}], %{id: "user123"})
+      true
+  """
   def skip_boundary_check?(opts, object \\ nil) do
     (Common.Config.env() != :prod and
        Common.Config.get(:skip_all_boundary_checks)) ||

@@ -1,13 +1,10 @@
 defmodule Bonfire.Boundaries.Acls do
   @moduledoc """
-  ACLs represent fully populated access control rules that can be reused.
-  Can be reused to secure multiple objects, thus exists independently of any object.
+  Provides functionality for managing Access Control Lists (ACLs) in the Bonfire system.
 
-  The table doesn't have any fields of its own:
-  ```
-  has_many(:grants, Grant)
-  has_many(:controlled, Controlled)
-  ```
+  An `Acl` is a list of `Grant`s used to define access permissions for objects. It represents fully populated access control rules that can be reused. It can be used to secure multiple objects and exists independently of any object.
+
+  > ACLs (also referred to as "preset boundaries") enable you to make a list of circles and users and then grant specific roles or permissions to each of those. For example, you might create a "Fitness" ACL and grant the "Participate" role to your gym buddies, allowing them to interact with your fitness-related content, while granting the "Interact" role to your family and friends, who can view and react to your posts but not comment on them.
   """
   use Arrows
   use Bonfire.Common.Utils
@@ -37,6 +34,17 @@ defmodule Bonfire.Boundaries.Acls do
   alias Needle.Changesets
   alias Needle.ULID
 
+  @doc """
+  Returns a list of stereotype IDs to exclude from queries.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.exclude_stereotypes()
+      ["2HEYS11ENCEDMES0CAN0TSEEME", "7HECVST0MAC1F0RAN0BJECTETC"]
+
+      iex> Bonfire.Boundaries.Acls.exclude_stereotypes(false)
+      ["2HEYS11ENCEDMES0CAN0TSEEME"]
+  """
   def exclude_stereotypes(including_custom? \\ true)
 
   def exclude_stereotypes(false) do
@@ -49,6 +57,14 @@ defmodule Bonfire.Boundaries.Acls do
     ["2HEYS11ENCEDMES0CAN0TSEEME", "7HECVST0MAC1F0RAN0BJECTETC"]
   end
 
+  @doc """
+  Returns a list of default IDs to exclude from queries.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.default_exclude_ids()
+      ["2HEYS11ENCEDMES0CAN0TSEEME", "7HECVST0MAC1F0RAN0BJECTETC", "71MAYADM1N1STERMY0WNSTVFFS", "0H0STEDCANTSEE0RD0ANYTH1NG", "1S11ENCEDTHEMS0CAN0TP1NGME"]
+  """
   def default_exclude_ids(including_custom? \\ true) do
     exclude_stereotypes(including_custom?) ++
       [
@@ -62,22 +78,24 @@ defmodule Bonfire.Boundaries.Acls do
       ]
   end
 
-  @doc "Built-in ACLs for things that should federate"
+  @doc """
+  Returns a list of ACL IDs for remote public access.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.remote_public_acl_ids()
+      ["5REM0TEPE0P1E1NTERACTREACT", "5REM0TEPE0P1E1NTERACTREP1Y", "7REM0TEACT0RSCANC0NTR1BVTE"]
+  """
   def remote_public_acl_ids,
     do: ["5REM0TEPE0P1E1NTERACTREACT", "5REM0TEPE0P1E1NTERACTREP1Y", "7REM0TEACT0RSCANC0NTR1BVTE"]
 
-  def public_acl_ids(preset_acls \\ Config.get!(:preset_acls_match)),
+  @doc """
+  Returns a list of ACL IDs for a preset (eg. "local" and "public").
+  """
+  def preset_acl_ids(preset, preset_acls \\ Config.get!(:preset_acls_match)),
     do:
-      preset_acls["public"]
+      (preset_acls[preset] || [])
       |> Enum.map(&get_id!/1)
-
-  def local_acl_ids(preset_acls \\ Config.get!(:preset_acls_match)),
-    do:
-      preset_acls["local"]
-      |> Enum.map(&get_id!/1)
-
-  # special built-in acls (eg, guest, local, activity_pub)
-  def acls, do: Config.get(:acls)
 
   def preset_acl_ids do
     Config.get(:public_acls_on_objects, [
@@ -88,14 +106,43 @@ defmodule Bonfire.Boundaries.Acls do
     |> Enum.map(&get_id!/1)
   end
 
+  @doc """
+    Returns a list of special built-in ACLs (e.g., guest, local, activity_pub).
+  """
+  def acls, do: Config.get(:acls)
+
+  @doc """
+  Retrieves an ACL by its slug.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.get(:instance_care)
+
+      iex> Bonfire.Boundaries.Acls.get(:non_existent)
+      nil
+  """
   def get(slug) when is_atom(slug), do: acls()[slug]
 
+  @doc """
+  Retrieves an ACL by its slug, raising an error if not found.
+  """
   def get!(slug) when is_atom(slug) do
     # || ( Bonfire.Boundaries.Fixtures.insert && get(slug) )
     get(slug) ||
       raise RuntimeError, message: "Missing default acl: #{inspect(slug)}"
   end
 
+  @doc """
+  Retrieves an ACL ID by its slug.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.get_id(:instance_care)
+      "01SETT1NGSF0R10CA11NSTANCE"
+
+      iex> Bonfire.Boundaries.Acls.get_id(:non_existent)
+      nil
+  """
   def get_id(slug), do: e(acls(), slug, :id, nil)
   def get_id!(slug), do: get!(slug)[:id]
 
@@ -107,6 +154,14 @@ defmodule Bonfire.Boundaries.Acls do
     ulid(obj) || get_id!(obj)
   end
 
+  @doc """
+  Sets ACLs (existing ones or creating some on-the-fly) and Controlled on an object.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.set(%{}, creator, [boundary: "local"])
+      {:ok, :granted}
+  """
   def set(object, creator, opts)
       when is_list(opts) and is_struct(object) do
     with {:ok, _pointer} <- do_set(object, creator, opts) do
@@ -114,6 +169,24 @@ defmodule Bonfire.Boundaries.Acls do
     end
   end
 
+  @doc """
+  Previews ACLs as they would be set based on provided opts.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.preview(creator, [
+        preview_for_id: object_id,
+        boundary: "mentions",
+        to_circles: mentioned_users_or_custom_circles
+      ])
+
+      iex> Bonfire.Boundaries.Acls.preview(creator, [
+        preview_for_id: object_id,
+        boundary: "clone_context",
+        context_id: context_object_id
+      ])
+      
+  """
   def preview(creator, opts)
       when is_list(opts) do
     with {:error, {:ok, [%{verbs: verbs}]}} <- do_preview(creator, opts) do
@@ -166,6 +239,13 @@ defmodule Bonfire.Boundaries.Acls do
     |> debug("inserted?")
   end
 
+  @doc """
+  Casts ACLs (existing ones or creating some on-the-fly) and Controlled on an object.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.cast(changeset, creator, [boundary: "local"])
+  """
   def cast(changeset, creator, opts) do
     case prepare_cast(changeset, creator, opts) do
       {:ok, control_acls} ->
@@ -593,6 +673,14 @@ defmodule Bonfire.Boundaries.Acls do
   ## * All a user's ACLs will have the user as an administrator but it
   ##   will be hidden from the user
 
+  @doc """
+  Creates a new ACL.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.create(%{named: %{name: "New ACL"}}, current_user: user)
+      {:ok, %Acl{}}
+  """
   def create(attrs \\ %{}, opts) do
     attrs
     |> input_to_atoms()
@@ -600,6 +688,14 @@ defmodule Bonfire.Boundaries.Acls do
     |> repo().insert()
   end
 
+  @doc """
+  Creates a simple ACL with a name.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.simple_create(user, "My ACL")
+      {:ok, %Acl{}}
+  """
   def simple_create(caretaker, name) do
     create(%{named: %{name: name}}, current_user: caretaker)
   end
@@ -630,6 +726,14 @@ defmodule Bonfire.Boundaries.Acls do
     |> Changesets.cast_assoc(:stereotyped)
   end
 
+  @doc """
+  Retrieves an ACL for a caretaker.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.get_for_caretaker("ACL_ID", user)
+      {:ok, %Acl{}}
+  """
   def get_for_caretaker(id, caretaker, opts \\ []) do
     with {:ok, acl} <- repo().single(get_for_caretaker_q(id, caretaker, opts)) do
       {:ok, acl}
@@ -668,7 +772,12 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   @doc """
-  Lists ACLs we are permitted to see.
+  Lists ACLs the current user is permitted to see.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.list(current_user: user)
+      [%Acl{}, %Acl{}]
   """
   def list(opts \\ []) do
     list_q(opts)
@@ -721,12 +830,28 @@ defmodule Bonfire.Boundaries.Acls do
   # |> many_with_opts(opts)
   # end
 
+  @doc """
+  Returns a list of built-in ACL IDs.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.built_in_ids()
+      ["BUILT_IN_ACL_ID1", "BUILT_IN_ACL_ID2"]
+  """
   def built_in_ids do
     acls()
     |> Map.values()
     |> Enums.ids()
   end
 
+  @doc """
+  Returns a list of stereotype ACL IDs.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.stereotype_ids()
+      ["STEREOTYPE_ACL_ID1", "STEREOTYPE_ACL_ID2"]
+  """
   def stereotype_ids do
     acls()
     |> Map.values()
@@ -734,6 +859,20 @@ defmodule Bonfire.Boundaries.Acls do
     |> Enums.ids()
   end
 
+  @doc """
+  Checks if an ACL is stereotyped.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.is_stereotyped?(%Acl{stereotyped: %{stereotype_id: "STEREOTYPE_ID"}})
+      true
+
+      iex> Bonfire.Boundaries.Acls.is_stereotyped?("STEREOTYPE_ID")
+      true
+
+      iex> Bonfire.Boundaries.Acls.is_stereotyped?(%Acl{})
+      false
+  """
   def is_stereotyped?(%{stereotyped: %{stereotype_id: stereotype_id}} = _acl)
       when is_binary(stereotype_id) do
     true
@@ -748,11 +887,33 @@ defmodule Bonfire.Boundaries.Acls do
     ulid(acl) in stereotype_ids()
   end
 
+  @doc """
+  Checks if an ACL is built-in.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.is_built_in?("BUILT_IN_ACL_ID")
+      true
+
+      iex> Bonfire.Boundaries.Acls.is_built_in?("CUSTOM_ACL_ID")
+      false
+  """
   def is_built_in?(acl) do
     # debug(acl)
     ulid(acl) in built_in_ids()
   end
 
+  @doc """
+  Checks if an ACL is a custom ACL for an object.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.is_object_custom?(%Acl{stereotyped: %{stereotype_id: "CUSTOM_ACL_ID"}})
+      true
+
+      iex> Bonfire.Boundaries.Acls.is_object_custom?(%Acl{})
+      false
+  """
   def is_object_custom?(%{stereotyped: %{stereotype_id: stereotype_id}} = _acl)
       when is_binary(stereotype_id) do
     is_object_custom?(stereotype_id)
@@ -763,6 +924,14 @@ defmodule Bonfire.Boundaries.Acls do
     id(acl) == Fixtures.custom_acl()
   end
 
+  @doc """
+  Lists built-in ACLs.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.list_built_ins()
+      [%Acl{}, %Acl{}]
+  """
   def list_built_ins(opts \\ []) do
     list_q(skip_boundary_check: true)
     |> where([acl], acl.id in ^built_in_ids())
@@ -778,6 +947,14 @@ defmodule Bonfire.Boundaries.Acls do
     |> Enum.map(fn {_name, acl} -> acl.id end)
   end
 
+  @doc """
+  Returns options to use when querying for ACLs to show in a dropdown in the UI.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.opts_for_dropdown()
+      [exclude_ids: [...], extra_ids_to_include: [...]]
+  """
   def opts_for_dropdown() do
     opts_for_list() ++
       [
@@ -785,6 +962,14 @@ defmodule Bonfire.Boundaries.Acls do
       ]
   end
 
+  @doc """
+  Returns options to use when querying for ACLs to show in a list.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.opts_for_list()
+      [exclude_ids: [...]]
+  """
   def opts_for_list() do
     [
       exclude_ids: default_exclude_ids()
@@ -802,11 +987,17 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   @doc """
-  Lists the ACLs we are the registered caretakers of that we are
+  Lists ACLs for a specific user.
+
+  Includes the ACLs we are the registered caretakers of that we are
   permitted to see. If any are created without permitting the
   user to see them, they will not be shown.
-  """
 
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.list_my(user)
+      [%Acl{}, %Acl{}]
+  """
   def list_my(user, opts \\ [])
 
   def list_my(:instance, opts),
@@ -817,6 +1008,14 @@ defmodule Bonfire.Boundaries.Acls do
       list_my_q(user, opts)
       |> many_with_opts(opts)
 
+  @doc """
+  Lists ACLs for a specific user with grant counts (how many rules ).
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.list_my_with_counts(user)
+      [%{acl: %Acl{}, grants_count: 5}, %{acl: %Acl{}, grants_count: 2}]
+  """
   def list_my_with_counts(user, opts \\ []) do
     list_my_q(user, opts)
     |> join(
@@ -938,7 +1137,17 @@ defmodule Bonfire.Boundaries.Acls do
   def acl_grants_to_tuples(creator, %{grants: grants}),
     do: Grants.grants_to_tuples(creator, grants)
 
+  @doc """
+  Edits an existing ACL.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.edit(acl_id, user, %{name: "Updated ACL"})
+
+      iex> Bonfire.Boundaries.Acls.edit(%Acl{}, user, %{name: "Updated ACL"})
+  """
   def edit(%Acl{} = acl, %User{} = _user, params) do
+    # TODO: check edit permission
     acl = repo().maybe_preload(acl, [:named, :extra_info])
 
     params

@@ -1,6 +1,12 @@
 defmodule Bonfire.Boundaries.Grants do
   @moduledoc """
-  A grant is part of an `Acl`, and defines a permission (`value` boolean on a `verb`) for a `subject`
+  A grant defines a permission (`value` boolean on a `Verb`) for a subject, within the context of an `Acl`. It defines the access rights for a specific user or circle in relation to a particular action.
+
+  A permission is a decision about whether the action may be performed or not. There are 3 possible values:
+
+  * `true`: yes, the action is allowed
+  * `false`: no, the action is explicitly denied (i.e. never permit)
+  * `null`/`nil`: unknown, the action isn't explicitly allowed (defaults to not allowed) 
   """
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Queries
@@ -18,8 +24,23 @@ defmodule Bonfire.Boundaries.Grants do
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Roles
 
+  @doc """
+  Gets the configuration for grants.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.grants()
+      %{}
+  """
   def grants, do: Config.get([:grants])
 
+  @doc """
+  Gets the grant configuration by a given slug.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.get(:guests_may_see_read)
+  """
   def get(slug) when is_atom(slug), do: Config.get([:grants, slug])
   def get(slugs) when is_list(slugs), do: Enum.map(slugs, &get/1)
 
@@ -28,33 +49,48 @@ defmodule Bonfire.Boundaries.Grants do
   ## * All a user's GRANTs will have the user as an administrator but it
   ##   will be hidden from the user
 
-  def create(attrs, opts) do
+  @doc """
+  Creates a new grant with the given attributes and options.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.create(%{subject_id: "123", acl_id: "456", verb_id: "789", value: true}, [])
+      {:ok, %Grant{}}
+  """
+  def create(attrs, opts \\ []) do
     changeset(:create, attrs, opts)
     |> repo().insert()
 
     # |> debug("Me.Grants - granted")
   end
 
-  def create(%{} = attrs) when not is_struct(attrs) do
-    repo().insert(changeset(attrs))
-  end
-
-  def changeset(grant \\ %Grant{}, attrs) do
+  defp changeset(grant \\ %Grant{}, attrs) do
     Grant.changeset(grant, attrs)
     |> Changeset.cast_assoc(:caretaker)
   end
 
-  def changeset(:create, attrs, opts) do
+  defp changeset(:create, attrs, opts) do
     changeset(:create, attrs, opts, Keyword.fetch!(opts, :current_user))
   end
 
-  defp changeset(:create, attrs, _opts, :system), do: changeset(attrs)
+  defp changeset(:create, attrs, _opts, :system) when not is_struct(attrs), do: changeset(attrs)
 
-  defp changeset(:create, attrs, _opts, %{id: id}) do
+  defp changeset(:create, attrs, _opts, %{id: id}) when not is_struct(attrs) do
     Changeset.cast(%Grant{}, %{caretaker: %{caretaker_id: id}}, [])
     |> changeset(attrs)
   end
 
+  @doc """
+  Inserts, updates, or deletes a grant based on the given attributes and options.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.upsert_or_delete(%{acl_id: "456", subject_id: "123", verb_id: "789", value: true}, [])
+      {:ok, %Grant{}}
+
+      iex> Bonfire.Boundaries.Grants.upsert_or_delete(%{acl_id: "456", subject_id: "123", verb_id: "789", value: nil}, [])
+      {:ok, _deleted}
+  """
   def upsert_or_delete(
         %{acl_id: acl_id, subject_id: subject_id, verb_id: verb_id, value: nil} = _attrs,
         _opts
@@ -77,13 +113,18 @@ defmodule Bonfire.Boundaries.Grants do
   end
 
   @doc """
-  Edits or adds a grant to an Acl
+  Adds or update a grant on an Acl.
 
-  Takes three parameters:
-  - subject_id:  who we are granting access to
-  - acl_id: what ACL we're applying a grant to
-  - verb: which verb/action
-  - value: true, false, or nil
+  Takes five parameters:
+  - `subject_id`: who we are granting access to
+  - `acl_id`: what ACL we're applying a grant to
+  - `verb`: which verb/action
+  - `value`: true, false, or nil
+  - `opts`: additional options
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.grant("subject_123", "acl_456", :read, true)
   """
   def grant(subject_id, acl_id, verb, value, opts \\ [])
 
@@ -146,7 +187,14 @@ defmodule Bonfire.Boundaries.Grants do
     nil
   end
 
-  @doc "Edits or adds grants to an Acl based on a role"
+  @doc """
+  Edits or adds grants to an ACL based on a role.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.grant_role("subject_123", "acl_456", :admin, [])
+      {:ok, %Grant{}}
+  """
   def grant_role(subject_id, acl_id, role, opts \\ []) do
     debug(opts, "opts")
 
@@ -173,6 +221,14 @@ defmodule Bonfire.Boundaries.Grants do
     end
   end
 
+  @doc """
+  Removes a subject's grants from an ACL or ACLs.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.remove_subject_from_acl("subject_123", ["acl_456", "acl_789"])
+      {:ok, %{}}
+  """
   def remove_subject_from_acl(_subject, acls)
       when is_nil(acls) or (is_list(acls) and length(acls) == 0),
       do: error("No boundary ID provided, so could not remove.")
@@ -217,6 +273,9 @@ defmodule Bonfire.Boundaries.Grants do
     |> where([caretaker: caretaker], caretaker.caretaker_id == ^user_id)
   end
 
+  @doc """
+    Lists the grants for a given ACL.
+  """
   def list_for_acl(acl, opts), do: repo().many(list_for_acl_q(acl, opts))
 
   defp list_for_acl_q(acl, opts) do
@@ -224,6 +283,9 @@ defmodule Bonfire.Boundaries.Grants do
     |> where([grant: grant], grant.acl_id in ^ulids(acl))
   end
 
+  @doc """
+    Returns the subject(s) from a list of grants.
+  """
   def subjects(grants) when is_list(grants) and length(grants) > 0 do
     Enum.reduce(grants, [], fn grant, subjects_acc ->
       subjects_acc ++ [grant.subject]
@@ -233,6 +295,9 @@ defmodule Bonfire.Boundaries.Grants do
 
   def subjects(_), do: %{}
 
+  @doc """
+    Returns a list of grants-per-subject from a list of grants.
+  """
   def subject_grants(grants) when is_list(grants) and length(grants) > 0 do
     # TODO: rewrite this whole thing tbh
     Enum.reduce(grants, %{}, fn grant, subjects_acc ->
@@ -265,6 +330,14 @@ defmodule Bonfire.Boundaries.Grants do
 
   def subject_grants(_), do: %{}
 
+  @doc """
+  Returns a list of grants-per-verb-per-subject from a list of grants.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.subject_verb_grants([%Grant{}])
+      %{}
+  """
   def subject_verb_grants(grants) when is_list(grants) and length(grants) > 0 do
     # TODO: rewrite this whole thing tbh
     Enum.reduce(grants, %{}, fn grant, subjects_acc ->
@@ -297,6 +370,14 @@ defmodule Bonfire.Boundaries.Grants do
 
   def subject_verb_grants(_), do: %{}
 
+  @doc """
+  Returns a list of grants-per-subject-per-verb from a list of grants.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.verb_subject_grant([%Grant{}])
+      %{}
+  """
   def verb_subject_grant(grants) when is_list(grants) and length(grants) > 0 do
     # TODO: rewrite this whole thing tbh
     Enum.reduce(grants, %{}, fn grant, verbs_acc ->
@@ -329,6 +410,14 @@ defmodule Bonfire.Boundaries.Grants do
 
   def verb_subject_grant(_), do: %{}
 
+  @doc """
+  Converts a list of grants to a list of tuples for a given creator.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.grants_to_tuples(%User{}, %{grants: [%Grant{}]})
+      [{%User{}, :some_role}]
+  """
   def grants_to_tuples(creator, %{grants: grants}), do: grants_to_tuples(creator, grants)
 
   def grants_to_tuples(creator, grants) when is_list(grants) do

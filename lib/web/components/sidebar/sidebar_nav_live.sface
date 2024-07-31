@@ -56,7 +56,7 @@
         "bg-base-content/10 ": @selected_tab == "acls"
       }
     >
-      <span class="text-sm">{l("Boundaries")}</span>
+      <span class="text-sm">{l("Boundary Presets")}</span>
     </LinkLive>
   </li>
 </ul>

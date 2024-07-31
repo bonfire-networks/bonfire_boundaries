@@ -1,4 +1,26 @@
 defmodule Bonfire.Boundaries.Roles do
+  @moduledoc """
+   Roles are groups of verbs associated with permissions. While not stored in the database, they are defined at the configuration level to enhance readability and user experience.
+
+  Here are some preset roles and their associated actions:
+
+  - **Read**: can discover the content in lists (like feeds) and read it; request permission for another verb (e.g., request to follow).
+  - **Interact**: can read, plus like an object (and notify the author); follow a user or thread; boost an object (and notify the author); pin something to highlight it.
+  - **Participate**: can interact, plus reply to an activity or post; mention a user or object (and notify them); send a message.
+  - **Contribute**: can participate, plus create a post or other object; tag a user or object or publish in a topic.
+  - **Caretaker**: can perform all of the above actions and more, including actions like deletion.
+
+  There are also negative roles, indicating actions which you specifically do not want to allow a particular circle or user to do, such as:
+
+  - **Cannot Read**: not discoverable in lists or readable, and also can't interact or participate.
+  - **Cannot Interact**: cannot perform any actions related to interaction, including liking, following, boosting, and pinning, and also can't participate.
+  - **Cannot Participate**: cannot perform any actions related to participation, including replying, mentioning, and sending messages.
+
+  Negative permissions always take precedence over positive or undefined permissions. For example, For example, if you share something giving permission to anyone to read and reply to it, and you assign the *Cannot Participate* role to your *Likely to troll* circle, the people in that circle will be able to read the content but will not be able to reply to it.
+
+  > Note that these negative roles do not grant any additional permissions. Assigning the Cannot Participate role to someone who wouldn't otherwise be able to read the content does not mean they will now have the ability to do so. Negative roles simply limit or override any permissions defined elsewhere, ensuring that the specified actions are explicitly restricted.
+  """
+
   use Bonfire.Common.Utils
   import Untangle
   # import Bonfire.Boundaries.Integration
@@ -7,6 +29,17 @@ defmodule Bonfire.Boundaries.Roles do
 
   @config_key :role_verbs
 
+  @doc """
+  Retrieves role verbs based on the given `usage`.
+
+  ## Examples
+
+      iex> role_verbs(:all, scope: :instance)
+      # returns all instance-level role verbs
+
+      iex> role_verbs(nil, current_user: me)
+      # returns my role verbs 
+  """
   def role_verbs(usage \\ :all, opts \\ [])
   def role_verbs(:ops, opts), do: role_verbs(:all, opts)
   def role_verbs(:all, opts), do: do_get(@config_key, opts)
@@ -19,6 +52,14 @@ defmodule Bonfire.Boundaries.Roles do
         _ -> true
       end)
 
+  @doc """
+  Retrieves the details of a role by `role_name`.
+
+  ## Examples
+
+      iex> get(:admin)
+      # returns admin role details
+  """
   def get(role_name, opts \\ []) do
     do_get([@config_key, role_name], opts)
     |> Enum.into(%{})
@@ -48,6 +89,13 @@ defmodule Bonfire.Boundaries.Roles do
   #       _ -> true
   #     end)
 
+  @doc """
+  Returns a list of roles to be used in a user's a dropdown menu.
+
+  ## Examples
+
+      iex> roles_for_dropdown(:ops, current_user: me)
+  """
   def roles_for_dropdown(usage \\ nil, opts) do
     opts =
       to_options(opts)
@@ -78,6 +126,13 @@ defmodule Bonfire.Boundaries.Roles do
     role_from_verb(verbs, :verb) || :custom
   end
 
+  @doc """
+  Determines the matching role (if any) from a list of verbs.
+
+  ## Examples
+
+      iex> role_from_grants(grants)
+  """
   def role_from_grants(grants, opts) do
     opts =
       to_options(opts)
@@ -130,6 +185,13 @@ defmodule Bonfire.Boundaries.Roles do
     Enum.map(grants, &e(&1, :verb_id, nil))
   end
 
+  @doc """
+  Determines a matching negative role (if any) from a list of verbs.
+
+  ## Examples
+
+      iex> cannot_role_from_verb(verbs)
+  """
   def cannot_role_from_verb(
         verbs,
         verb_field \\ :verb,
@@ -140,6 +202,13 @@ defmodule Bonfire.Boundaries.Roles do
     role_from_verb(verbs, verb_field, all_role_verbs, role_for_all, verbs_field)
   end
 
+  @doc """
+  Determines a matching positive role (if any) from a list of verbs.
+
+  ## Examples
+
+      iex> role_from_verb(verbs)
+  """
   def role_from_verb(
         verbs,
         verb_field \\ :verb,
@@ -175,6 +244,14 @@ defmodule Bonfire.Boundaries.Roles do
     |> debug()
   end
 
+  @doc """
+  Returns a list of positive and negative verbs for the given role.
+
+  ## Examples
+
+      iex> verbs_for_role(:admin)
+      {:ok, positive_verbs, negative_verbs}
+  """
   def verbs_for_role(role, opts \\ [])
 
   def verbs_for_role([role], opts) do
@@ -210,6 +287,15 @@ defmodule Bonfire.Boundaries.Roles do
     end
   end
 
+  @doc """
+  Determines the preset boundary role from an ACL summary or list of verbs.
+
+  ## Examples
+
+      iex> preset_boundary_role_from_acl(%{verbs: verbs})
+
+      iex> preset_boundary_role_from_acl(verbs)
+  """
   def preset_boundary_role_from_acl(%{verbs: verbs} = _summary) do
     preset_boundary_role_from_acl(verbs)
   end
@@ -231,6 +317,13 @@ defmodule Bonfire.Boundaries.Roles do
     end
   end
 
+  @doc """
+  Creates a role with given attributes and options.
+
+  ## Examples
+
+      iex> create(attrs, opts)
+  """
   def create(attrs, opts) do
     # Bonfire.Common.Text.slug
     create(
@@ -240,6 +333,14 @@ defmodule Bonfire.Boundaries.Roles do
     )
   end
 
+  @doc """
+  Creates a role with a given name, usage, and options.
+
+  ## Examples
+
+      iex> create("Admin", :admin, opts)
+      # creates an admin role with the provided options
+  """
   def create(name, usage, opts) do
     # debug(opts, "opts")
     # TODO: whether to show an instance role to all users
@@ -250,6 +351,20 @@ defmodule Bonfire.Boundaries.Roles do
     |> Settings.put([@config_key], ..., opts)
   end
 
+  @doc """
+  Edits a verb permission for a role 
+
+  ## Examples
+
+      iex> edit_verb_permission(:admin, :read, true, opts)
+      # updates the read permission for the admin role to true
+
+      iex> edit_verb_permission(:admin, :read, false, opts)
+      # updates the read permission for the admin role to false
+
+      iex> edit_verb_permission(:admin, :read, nil, opts)
+      # resets the read permission for the admin role to default
+  """
   def edit_verb_permission(role_name, verb, value, opts)
       when value in [true, 1, "true", "1"] and is_atom(verb) do
     # positive permission
@@ -299,11 +414,22 @@ defmodule Bonfire.Boundaries.Roles do
     )
   end
 
+  @doc """
+  Clears instance-wide roles from config.
+  """
   def reset_instance_roles do
     Settings.put([@config_key], nil, scope: :instance, skip_boundary_check: true)
     Config.delete(@config_key, :bonfire)
   end
 
+  @doc """
+  Splits a list of tuples into can and cannot categories.
+
+  ## Examples
+
+      iex> split_tuples_can_cannot(tuples)
+      # splits tuples into can and cannot categories
+  """
   def split_tuples_can_cannot(tuples) do
     tuples
     |> Enum.split_with(fn {_circle, role} ->

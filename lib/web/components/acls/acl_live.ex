@@ -68,8 +68,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
            if is_nil(scope), do: current_user, else: scope
          )
          |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect(),
-       settings_section_title: "View boundary",
-       settings_section_description: l("Create and manage your boundary."),
+       settings_section_title: "View boundary preset",
+       settings_section_description: l("Create and manage your boundary preset."),
        selected_tab: "acls"
      )
      |> assign_updated()}

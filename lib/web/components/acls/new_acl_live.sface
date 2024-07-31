@@ -54,14 +54,14 @@
 
     <div class="w-full form-control">
       <label class="sr-only label">
-        <span class="font-medium label-text">{l("Enter a name for the boundary")}</span>
+        <span class="font-medium label-text">{l("Enter a name for the boundary preset")}</span>
       </label>
       <div class="flex items-center">
         <input
           x-model="name"
           name="named[name]"
           type="text"
-          placeholder={l("Type the name of the boundary")}
+          placeholder={l("Type the name of the boundary preset")}
           class="w-full input input-bordered"
         />
       </div>

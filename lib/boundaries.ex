@@ -25,7 +25,15 @@ defmodule Bonfire.Boundaries do
   @skip_object_placeholders [:skip, :skip_boundary_check, :loading]
 
   @doc """
-  Returns the name of the preset boundary given a list of boundaries or other boundary representation.
+  Returns the name of a preset boundary given a list of boundaries or other boundary representation.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.preset_name(["admins", "mentions"])
+      "admins"
+
+      iex> Bonfire.Boundaries.preset_name("public_remote", true)
+      "public_remote"
   """
   def preset_name(boundaries, include_remote? \\ false)
 
@@ -66,7 +74,15 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Returns the boundaries or a default set of boundaries based on the provided context.
+  Returns custom boundaries or a default set of boundaries to use
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.boundaries_or_default(["local"])
+      ["local"]
+
+      iex> Bonfire.Boundaries.boundaries_or_default(nil, current_user: me)
+      [{"public", "Public"}]
   """
   def boundaries_or_default(to_boundaries, context \\ [])
 
@@ -85,7 +101,15 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Returns the default boundaries based on the provided context.
+  Returns default boundaries to use based on the provided context.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.default_boundaries()
+      [{"public", "Public"}]
+
+      iex> Bonfire.Boundaries.default_boundaries(current_user: me)
+      [{"local", "Local"}]
   """
   def default_boundaries(context \\ []) do
     # default boundaries for new stuff
@@ -111,6 +135,14 @@ defmodule Bonfire.Boundaries do
 
   @doc """
   Normalizes boundaries represented as text or list.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.boundaries_normalise("local,public")
+      ["local", "public"]
+
+      iex> Bonfire.Boundaries.boundaries_normalise(["local", "public"])
+      ["local", "public"]
   """
   def boundaries_normalise(text) when is_binary(text) do
     text
@@ -132,7 +164,12 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Lists ACLs for a given object 
+  Lists ACLs for a given object.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.list_object_acls(%{id: 1})
+      [%Bonfire.Data.AccessControl.Acl{id: 42}]
   """
   def list_object_acls(object, opts \\ []) do
     Controlleds.list_acls_on_object(object, opts)
@@ -141,7 +178,10 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Lists boundaries for a given object 
+  Lists boundaries (ACLs and grants) for a given object 
+
+      iex> Bonfire.Boundaries.list_object_boundaries(%{id: 1})
+      [%Bonfire.Data.AccessControl.Acl{id: 42, grants: [...]}]
   """
   def list_object_boundaries(object, opts \\ []) do
     Controlleds.list_on_object(object, opts)
@@ -151,6 +191,10 @@ defmodule Bonfire.Boundaries do
 
   @doc """
   Lists grants for a given set of objects.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.list_grants_on([1, 2, 3])
   """
   def list_grants_on(things) do
     from(s in Summary,
@@ -162,7 +206,9 @@ defmodule Bonfire.Boundaries do
   @doc """
   Lists grants for a given set of objects and verbs.
 
-  eg: `list_grants_on(id, [:see, :read])`
+  ## Examples
+
+      iex> Bonfire.Boundaries.list_grants_on([1, 2, 3], [:see, :read])
   """
   def list_grants_on(things, verbs) do
     from(s in Summary,
@@ -173,6 +219,10 @@ defmodule Bonfire.Boundaries do
 
   @doc """
   Lists grants for a given set of users on a set of objects.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.users_grants_on([%{id: 1}], [%{id: 2}])
   """
   def users_grants_on(users, things) do
     query_users_grants_on(users, things)
@@ -180,7 +230,12 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Lists grants for a given set of users on a set of objects filtered by verbs.
+  Lists grants for a given set of users on a set of objects, filtered by verbs.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.users_grants_on([%{id: 1}], [%{id: 2}], [:see, :read])
+      [%Bonfire.Boundaries.Summary{object_id: 2, subject_id: 1}]
   """
   def users_grants_on(users, things, verbs) do
     query_users_grants_on(users, things)
@@ -227,7 +282,11 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Converts preset boundary names to ACLs.
+  Returns ACLs for a set of preset boundary names.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.acls_from_preset_boundary_names(["public"])
   """
   def acls_from_preset_boundary_names(presets) when is_list(presets),
     do: Enum.flat_map(presets, &acls_from_preset_boundary_names/1)
@@ -250,6 +309,12 @@ defmodule Bonfire.Boundaries do
 
   @doc """
   Converts an ACL to a preset boundary name based on the object type.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.preset_boundary_from_acl(%Bonfire.Data.AccessControl.Acl{id: 1})
+      {"public", "Public"}
+      
   """
   def preset_boundary_from_acl(acl, object_type \\ nil)
 
@@ -273,6 +338,14 @@ defmodule Bonfire.Boundaries do
 
   @doc """
   Converts an ACL to a preset boundary tuple based on the object type.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.preset_boundary_tuple_from_acl(%Bonfire.Data.AccessControl.Acl{id: 1})
+      {"public", "Public"}
+
+      iex> Bonfire.Boundaries.preset_boundary_tuple_from_acl(%Bonfire.Data.AccessControl.Acl{id: 1}, :group)
+      {"open", "Open"}
   """
   def preset_boundary_tuple_from_acl(acl, object_type \\ nil)
 
@@ -305,9 +378,9 @@ defmodule Bonfire.Boundaries do
 
     preset_acls = Config.get!(:preset_acls_match)
 
-    public_acl_ids = Acls.public_acl_ids(preset_acls)
+    public_acl_ids = Acls.preset_acl_ids("public", preset_acls)
 
-    local_acl_ids = Acls.local_acl_ids(preset_acls)
+    local_acl_ids = Acls.preset_acl_ids("local", preset_acls)
 
     cond do
       acl_id in public_acl_ids -> {"public", l("Public")}
@@ -343,7 +416,17 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Sets boundaries for a given object.
+  Sets or replace boundaries for a given object.
+
+  ## Set boundaries on a black object
+
+      iex> Bonfire.Boundaries.set_boundaries(%User{id: 1}, %{id: 2}, [boundary: "public"])
+      {:ok, :granted}
+      
+  ## Replace boundaries on an existing object that previously had a preset applied
+
+      iex> Bonfire.Boundaries.set_boundaries(%User{id: 1}, %{id: 2}, [boundary: "local", remove_previous_preset: "public"])
+      {:ok, :granted}
   """
   def set_boundaries(creator, object, opts)
       when is_list(opts) and is_struct(object) do
@@ -358,11 +441,8 @@ defmodule Bonfire.Boundaries do
     end
   end
 
-  @doc """
-  Replaces boundaries for a given object based on a previous preset.
-  """
-  def replace_boundaries(creator, object, previous_preset, opts)
-      when is_list(opts) and is_struct(object) do
+  defp replace_boundaries(creator, object, previous_preset, opts)
+       when is_list(opts) and is_struct(object) do
     with object <-
            object
            # |> repo().maybe_preload(:controlled)
@@ -403,10 +483,13 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Assigns the user as the caretaker of the given object or objects,
-  replacing the existing caretaker, if any.
-  """
+  Assigns the user as the caretaker of the given object or objects, replacing the existing caretaker, if any.
 
+  ## Examples
+
+      iex> Bonfire.Boundaries.take_care_of!([%{id: 1}], %{id: 2})
+      [%{id: 1, caretaker: %{id: 1, caretaker_id: 2, caretaker: %{id: 2}}}]
+  """
   def take_care_of!(things, user) when is_list(things) do
     repo().upsert_all(
       Caretaker,
@@ -433,14 +516,24 @@ defmodule Bonfire.Boundaries do
   def take_care_of!(thing, user), do: hd(take_care_of!([thing], user))
 
   @doc """
-  Returns the default boundaries for users from config.
+  Returns the default boundaries to be set for new users from config.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.user_default_boundaries()
+      [{"public", "Public"}]
   """
   def user_default_boundaries() do
     Config.get!(:user_default_boundaries)
   end
 
   @doc """
-  Checks if a subject has permission for specified verb(s) on an object.
+  Checks if a subject has permission to conduct the specified action(s)/verb(s) on an object.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.can?(%User{id: 1}, [:see], %{id: 2})
+      false
   """
   def can?(subject, verbs, object, opts \\ [])
 
@@ -552,7 +645,12 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Checks if a pointer is permitted based on the specified options.
+  Checks if a pointer has permission based on the specified options.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.pointer_permitted?(%{id: 1}, verbs: [:edit], current_user: %{id: 2})
+      true
   """
   def pointer_permitted?(item, opts) do
     case ulids(item) do
@@ -571,7 +669,12 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Loads a pointer based on the permissions.
+  Loads a pointer based on the permissions which are checked based on provided options.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.load_pointer(%{id: 1}, verbs: [:read], current_user: %{id: 2})
+      %Needle.Pointer{id: 1}
   """
   def load_pointer(item, opts) do
     case ulids(item) do
@@ -590,7 +693,12 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Loads pointers based on boundaries and returns a list of permitted pointers.
+  Loads pointers based on boundaries (which are checked based on provided options) and returns a list of permitted pointers.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.load_pointers([%{id: 1}], verbs: [:read], current_user: %{id: 2})
+      [%Needle.Pointer{id: 1}]
   """
   def load_pointers(items, opts) do
     # debug(items, "items")
@@ -608,7 +716,7 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Loads pointers based on boundaries and raises an error if not all pointers are permitted.
+  Loads pointers based on boundaries (which are checked based on provided options) and raises an error if not all pointers are permitted.
   """
   def load_pointers!(items, opts) do
     pointers = load_pointers(items, opts)
@@ -634,6 +742,11 @@ defmodule Bonfire.Boundaries do
 
   @doc """
   Finds caretaker stereotypes based on the specified caretaker and stereotype IDs.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.find_caretaker_stereotypes(%User{id: 1}, [%{id: 2}])
+      [%Needle.Pointer{id: 1}]
   """
   def find_caretaker_stereotypes(caretaker, stereotypes, from \\ Pointer)
 
@@ -657,7 +770,7 @@ defmodule Bonfire.Boundaries do
   @doc """
   Query for caretaker stereotypes based on the specified caretaker and stereotype IDs.
   """
-  def find_caretaker_stereotypes_q(caretaker, stereotypes, from) do
+  defp find_caretaker_stereotypes_q(caretaker, stereotypes, from) do
     from(a in from,
       join: c in Caretaker,
       on: a.id == c.id and c.caretaker_id == ^ulid!(caretaker),

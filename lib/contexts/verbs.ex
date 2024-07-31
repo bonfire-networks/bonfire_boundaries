@@ -1,4 +1,7 @@
 defmodule Bonfire.Boundaries.Verbs do
+  @moduledoc """
+  Verbs represent actions users can perform, such as reading a post or replying to a message. Each verb has a unique ID and are defined in configuration.
+  """
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
   # import Ecto.Query
@@ -9,15 +12,34 @@ defmodule Bonfire.Boundaries.Verbs do
   """
   def verbs, do: Bonfire.Common.Config.get!(:verbs)
 
+  @doc """
+  Returns the count of verbs in the configuration.
+  """
   def verbs_count, do: Enum.count(verbs())
 
   @doc """
   Returns the list of verb slugs.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Verbs.slugs()
+      [:read, :write]
   """
   def slugs, do: Keyword.keys(verbs())
 
   @doc """
   Retrieves a verb by its slug or ID.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Verbs.get(:read)
+      %{id: "read_id", verb: :read}
+
+      iex> Bonfire.Boundaries.Verbs.get("read_id")
+      %{id: "read_id", verb: :read}
+
+      iex> Bonfire.Boundaries.Verbs.get("non_existent")
+      nil
   """
   def get(slug, all_verbs \\ verbs())
   def get(slug, all_verbs) when is_atom(slug), do: all_verbs[slug]
@@ -32,6 +54,17 @@ defmodule Bonfire.Boundaries.Verbs do
   def get({_, %Verb{} = verb}, _all_verbs), do: verb
   def get({_, %{id: _, verb: _} = verb}, _all_verbs), do: verb
 
+  @doc """
+  Retrieves a verb tuple by its ID or name.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Verbs.get_tuple("read_id")
+      {:read, %{id: "read_id", verb: :read}}
+
+      iex> Bonfire.Boundaries.Verbs.get_tuple("non_existent")
+      nil
+  """
   def get_tuple(id_or_name, all_verbs \\ verbs()) when is_binary(id_or_name) do
     Enum.find(all_verbs, fn {_slug, verb} ->
       verb[:id] == id_or_name or verb[:verb] == id_or_name
@@ -40,6 +73,11 @@ defmodule Bonfire.Boundaries.Verbs do
 
   @doc """
   Retrieves a verb slug by its ID or name.
+
+    ## Examples
+
+      iex> Bonfire.Boundaries.Verbs.get_slug("read_id")
+      :read
   """
   def get_slug(id_or_name, all_verbs \\ verbs()) do
     case get_tuple(id_or_name, all_verbs) do
@@ -67,6 +105,17 @@ defmodule Bonfire.Boundaries.Verbs do
 
   @doc """
   Retrieves a verb ID by its slug.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Verbs.get_id(:read)
+      "read_id"
+
+      iex> Bonfire.Boundaries.Verbs.get_id("read")
+      "read_id"
+
+      iex> Bonfire.Boundaries.Verbs.get_id("non_existent")
+      nil
   """
   def get_id(slug, all_verbs \\ verbs())
   def get_id(slug, all_verbs) when is_atom(slug), do: all_verbs[slug][:id]
@@ -80,11 +129,23 @@ defmodule Bonfire.Boundaries.Verbs do
 
   @doc """
   Retrieves a verb ID by its slug or ID, raising an error if not found.
+
+      iex> Bonfire.Boundaries.Verbs.get_id!(:read)
+      "read_id"
+
+      iex> Bonfire.Boundaries.Verbs.get_id!("non_existent")
+      ** (RuntimeError) Missing default verb: "non_existent"
   """
   def get_id!(slug, all_verbs \\ verbs()), do: get!(slug, all_verbs)[:id]
 
   @doc """
   Retrieves the IDs of the given verbs.
+
+      iex> Bonfire.Boundaries.Verbs.ids([:read, :write])
+      ["read_id", "write_id"]
+
+      iex> Bonfire.Boundaries.Verbs.ids(:read)
+      ["read_id"]
   """
   def ids(verbs, all_verbs \\ verbs())
 
@@ -98,8 +159,8 @@ defmodule Bonfire.Boundaries.Verbs do
 
   ## Examples
 
-      > Bonfire.Boundaries.Verbs.create(%{verb: :new_verb, description: "A new verb"})
-      {:ok, %Verb{...}} 
+  > Bonfire.Boundaries.Verbs.create(%{verb: :new_verb, description: "A new verb"})
+  {:ok, %Verb{id: "new_verb_id", verb: :new_verb, description: "A new verb"}}
   """
   def create(%{} = attrs) when not is_struct(attrs) do
     repo().insert(changeset(attrs))
@@ -121,9 +182,11 @@ defmodule Bonfire.Boundaries.Verbs do
 
   ## Examples
 
-      > Bonfire.Boundaries.Verbs.list(:db, :verb)
-      # Example output:
-      %{read: %Verb{...}, write: %Verb{...}, ...}  
+      iex> Bonfire.Boundaries.Verbs.list(:db, :verb)
+      %{read: %Verb{id: "read_id", verb: :read}, write: %Verb{id: "write_id", verb: :write}}
+
+      iex> Bonfire.Boundaries.Verbs.list(:instance, :id)
+      ["read_id", "write_id"]
   """
   def list(from \\ :db, key \\ :verb)
 

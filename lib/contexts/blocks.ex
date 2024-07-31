@@ -1,4 +1,12 @@
 defmodule Bonfire.Boundaries.Blocks do
+  @moduledoc """
+  Handles blocking of users and instances
+
+  This module provides functions to block and unblock users or instances, check
+  if a user or instance is blocked, and manage block lists. It also includes
+  federation support for ActivityPub.
+  """
+
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Circles
@@ -12,6 +20,20 @@ defmodule Bonfire.Boundaries.Blocks do
       "Block"
     ]
 
+  @doc """
+  Converts provided block types (eg. `:ghost` or `:silence`) into a list of internal block types.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Blocks.types_blocked([:ghost, :silence])
+      [:ghost_them, :silence_them]
+
+      iex> Bonfire.Boundaries.Blocks.types_blocked(:ghost)
+      [:ghost_them]
+
+      iex> Bonfire.Boundaries.Blocks.types_blocked(nil)
+      [:silence_them, :ghost_them]
+  """
   def types_blocked(types) when is_list(types) do
     Enum.flat_map(types, &types_blocked/1) |> Enum.uniq()
   end
@@ -29,12 +51,30 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   @doc """
-  Block something for everyone on the instance (only for admins)
+  Blocks a user or instance for everyone on the instance (for admin/mod use only).
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Blocks.instance_wide_block(user, :ghost)
+      {:ok, "Blocked"}
   """
   def instance_wide_block(user_or_instance_to_block, block_type \\ nil) do
     block(user_or_instance_to_block, block_type, :instance_wide)
   end
 
+  @doc """
+  Blocks a remote instance.
+
+  ## Block for current user
+
+      iex> Bonfire.Boundaries.Blocks.remote_instance_block("example.com", :silence, current_user)
+      {:ok, "Blocked"}
+
+  ## Block for everyone on the instance (as an admin/mod)
+
+      iex> Bonfire.Boundaries.Blocks.remote_instance_block("example.com", :silence, :instance_wide)
+      {:ok, "Blocked"}
+  """
   def remote_instance_block(display_hostname, block_type, scope) do
     with {:ok, circle} <- Bonfire.Boundaries.Circles.get_or_create(display_hostname) do
       debug(circle, "blocking (#{block_type}) an entire instance: #{display_hostname}")
@@ -42,6 +82,39 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
+  @doc """
+  Blocks, silences, or ghosts a user or instance.
+
+  ## Block a user for current user
+
+      iex> Bonfire.Boundaries.Blocks.block(user, current_user: blocker)
+      {:ok, "Blocked"}
+
+  ## Block a user for everyone on the instance (as an admin/mod)
+
+      iex> Bonfire.Boundaries.Blocks.block(user, :instance_wide)
+      {:ok, "Blocked"}
+
+  ## Silence a user for current user
+
+      iex> Bonfire.Boundaries.Blocks.block(user, :silence, current_user: blocker)
+      {:ok, "Blocked"}
+
+  ## Silence a user for everyone on the instance (as an admin/mod)
+
+      iex> Bonfire.Boundaries.Blocks.block(user, :silence, :instance_wide)
+      {:ok, "Blocked"}
+
+  ## Ghost a user for current user
+
+      iex> Bonfire.Boundaries.Blocks.block(user, :ghost, current_user: blocker)
+      {:ok, "Blocked"}
+
+  ## Ghost a user for everyone on the instance (as an admin/mod)
+
+      iex> Bonfire.Boundaries.Blocks.block(user, :ghost, :instance_wide)
+      {:ok, "Blocked"}
+  """
   def block(user_or_instance_to_block, block_type \\ nil, scope)
 
   def block(
@@ -96,10 +169,29 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
+  @doc """
+  Unblocks a user or instance.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Blocks.unblock(user, :ghost, current_user: unblocker)
+      {:ok, "Unblocked"}
+
+      iex> Bonfire.Boundaries.Blocks.unblock(user, :silence, :instance_wide)
+      {:ok, "Unblocked"}
+  """
   def unblock(user_or_instance_to_block, block_type \\ nil, scope) do
     mutate(:unblock, user_or_instance_to_block, block_type, scope)
   end
 
+  @doc """
+  Unblocks *all* users or instances for a given block type and scope (only used for debugging purposes)
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Blocks.unblock_all(:ghost, :instance_wide)
+      {:ok, "All unblocked"}
+  """
   def unblock_all(block_type \\ nil, scope)
 
   def unblock_all(block_type, :instance_wide) do
@@ -175,9 +267,15 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   @doc """
-  Checks if a `user_or_instance` is blocked
-  Pass a `block_type` (eg `:silence` or `:ghost`)
-  Pass a `current_user` in `opts` or check `:instance_wide`
+  Checks if a user or instance is blocked.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Blocks.is_blocked?(instance, :ghost, current_user: checker)
+      false
+
+      iex> Bonfire.Boundaries.Blocks.is_blocked?(user, :silence, :instance_wide)
+      true
   """
   def is_blocked?(user_or_instance, block_type \\ :any, opts \\ [])
 
@@ -205,7 +303,17 @@ defmodule Bonfire.Boundaries.Blocks do
     false
   end
 
-  # only for admins
+  @doc """
+  Lists blocked users or instances for a given block type and scope 
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Blocks.list(:ghost, :instance_wide)
+      [%{id: "123", type: :ghost}, %{id: "456", type: :ghost}]
+
+      iex> Bonfire.Boundaries.Blocks.list(:silence, current_user: user)
+      [%{id: "789", type: :silence}]
+  """
   def list(block_type, :instance_wide) do
     instance_wide_circles(types_blocked(block_type))
     |> Bonfire.Boundaries.Circles.list_by_ids()
@@ -326,6 +434,13 @@ defmodule Bonfire.Boundaries.Blocks do
     nil
   end
 
+  @doc """
+  Handles incoming Block activities from ActivityPub federation.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Blocks.ap_receive_activity(blocker, activity, blocked)
+  """
   def ap_receive_activity(
         blocker,
         %{data: %{"type" => "Block"} = _data} = _activity,

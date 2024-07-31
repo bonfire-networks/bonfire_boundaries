@@ -1,4 +1,14 @@
 defmodule Bonfire.Boundaries.Circles do
+  @moduledoc """
+  Functions to create, query, and manage circles, which are used to group users (for the purpose of control access to various resources).
+
+  Circles are a way of categorizing users. Each user can have their own set of circles to categorize other users. Circles allow a user to group work colleagues differently from friends for example, and to allow different interactions for users in each circle or limit content visibility on a per-item basis.
+
+  > Circles are a tool that can be used to establish relationships. They are representations of multifaceted relationships that you have with people in your life. Circles can help you understand the different levels of intimacy and trust that you have with different people, as well the different contexts or topics which are relevant to particular relationships, and can help build stronger, healthier relationships.
+
+  > In Bonfire, you can define circles based on your unique style of relationships and interests. For example, you might create a circle for your colleagues, which can help you keep track of work-related content and collaborate with them more efficiently. You could also have a locals circle, with which you may share and discover local events, news, and recommendations. You might also create a comrades circle, to stay connected with fellow activists and organise around shared goals. Finally, you could create a happy hour circle, to coordinate social gatherings with local friends or colleagues, and the crew for your inner circle. With circles, you have the flexibility to manage your relationships and social activities in a way that makes sense for you.
+  """
+
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
   import Bonfire.Boundaries.Queries
@@ -28,9 +38,14 @@ defmodule Bonfire.Boundaries.Circles do
     "4THEPE0P1ES1CH00SET0F0110W"
   ]
 
-  # special built-in circles (eg, guest, local, activity_pub)
+  @doc """
+  Returns a list of special built-in circles (e.g., guest, local, activity_pub).
+  """
   def circles, do: Config.get([:circles], %{})
 
+  @doc """
+  Returns a list of stereotype circle IDs.
+  """
   def stereotype_ids do
     circles()
     |> Map.values()
@@ -38,24 +53,61 @@ defmodule Bonfire.Boundaries.Circles do
     |> Enum.map(& &1.id)
   end
 
+  @doc """
+  Returns a list of stereotype IDs for a specific category.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.stereotypes(:follow)
+
+      iex> Bonfire.Boundaries.Circles.stereotypes(:block)
+  """
   def stereotypes(:follow), do: @follow_stereotypes
   def stereotypes(:block), do: @block_stereotypes ++ @reverse_stereotypes
 
+  @doc """
+  Returns a list of built-in circle IDs.
+  """
   def built_in_ids do
     circles()
     |> Map.values()
     |> Enums.ids()
   end
 
+  @doc """
+  Checks if a circle is a built-in circle.
+  """
   def is_built_in?(circle) do
     # debug(acl)
     ulid(circle) in built_in_ids()
   end
 
+  @doc """
+  Checks if a circle is a stereotype circle.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.is_stereotype?("7DAPE0P1E1PERM1TT0F0110WME")
+      true
+
+      iex> Bonfire.Boundaries.Circles.is_stereotype?("custom_circle_id")
+      false
+  """
   def is_stereotype?(acl) do
     ulid(acl) in stereotype_ids()
   end
 
+  @doc """
+  Retrieves a circle by its slug or ID.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.get(:guest)
+      %{id: "guest_circle_id", name: "Guest"}
+
+      iex> Bonfire.Boundaries.Circles.get("circle_id")
+      %Circle{id: "circle_id", name: "Custom Circle"}
+  """
   def get(slug) when is_atom(slug), do: circles()[slug]
   def get(id) when is_binary(id), do: get_tuple(id) |> Enums.maybe_elem(1)
 
@@ -64,10 +116,32 @@ defmodule Bonfire.Boundaries.Circles do
       raise RuntimeError, message: "Missing built-in circle: #{inspect(slug)}"
   end
 
+  @doc """
+  Retrieves the ID of a circle by its slug.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.get_id(:guest)
+      "guest_circle_id"
+
+      iex> Bonfire.Boundaries.Circles.get_id(:nonexistent)
+      nil
+  """
   def get_id(slug), do: Map.get(circles(), slug, %{})[:id]
 
   def get_id!(slug) when is_atom(slug), do: get!(slug).id
 
+  @doc """
+  Retrieves a tuple containing the name and ID of a circle by its slug or ID.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.get_tuple(:guest)
+      {"Guest", "guest_circle_id"}
+
+      iex> Bonfire.Boundaries.Circles.get_tuple("circle_id")
+      {:my_circle, %{id: "circle_id", name: "My Circle"}}
+  """
   def get_tuple(slug) when is_atom(slug) do
     {Config.get!([:circles, slug, :name]), Config.get!([:circles, slug, :id])}
   end
@@ -78,11 +152,27 @@ defmodule Bonfire.Boundaries.Circles do
     end)
   end
 
+  @doc """
+  Lists default circles for a user.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_my_defaults()
+      [{"Guest", "guest_circle_id"}, {"Local", "local_circle_id"}, {"ActivityPub", "activity_pub_circle_id"}]
+  """
   def list_my_defaults(_user \\ nil) do
     # TODO make configurable
     Enum.map([:guest, :local, :activity_pub], &Circles.get_tuple/1)
   end
 
+  @doc """
+  Lists all built-in circles.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_built_ins()
+      [%Circle{id: "guest_circle_id", name: "Guest"}, %Circle{id: "local_circle_id", name: "Local"}]
+  """
   def list_built_ins() do
     Enum.map(circles(), fn {_slug, %{id: id}} ->
       id
@@ -91,6 +181,15 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   # def list, do: repo().many(from(u in Circle, left_join: named in assoc(u, :named), preload: [:named]))
+
+  @doc """
+  Lists circles by their IDs.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_by_ids(["circle_id1", "circle_id2"])
+      [%Circle{id: "circle_id1", name: "Circle 1"}, %Circle{id: "circle_id2", name: "Circle 2"}]
+  """
   def list_by_ids(ids),
     do:
       repo().many(
@@ -101,17 +200,36 @@ defmodule Bonfire.Boundaries.Circles do
         )
       )
 
+  @doc """
+  Converts a list of circles to circle IDs.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.circle_ids([:guest, :local])
+      ["guest_circle_id", "local_circle_id"]
+
+      iex> Bonfire.Boundaries.Circles.circle_ids(%{id: "user_id"})
+      "user_id"
+  """
   def circle_ids(subjects) when is_list(subjects),
-    do: subjects |> Enum.map(&circle_ids/1) |> Enum.uniq()
+    do: subjects |> Enum.flat_map(&circle_ids/1) |> Enum.uniq()
 
   def circle_ids(circle_name)
       when is_atom(circle_name) and not is_nil(circle_name),
-      do: get_id(circle_name)
+      do: [get_id(circle_name)]
 
-  def circle_ids(%{id: subject_id}), do: subject_id
-  def circle_ids(subject_id) when is_binary(subject_id), do: subject_id
-  def circle_ids(_), do: nil
+  def circle_ids(%{id: subject_id}), do: [subject_id]
+  def circle_ids(subject_id) when is_binary(subject_id), do: [ulid(subject_id)]
+  def circle_ids(_), do: []
 
+  @doc """
+  Converts a list of circles to circle IDs, including adding default circles (such as local or activity_pub when relevant)
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.to_circle_ids([:guest, :custom])
+      ["guest_circle_id", "custom_circle_id", "local_circle_id", "activity_pub_circle_id"]
+  """
   def to_circle_ids(subjects) do
     public = get_id(:guest)
     selected_circles = circle_ids(subjects)
@@ -132,7 +250,14 @@ defmodule Bonfire.Boundaries.Circles do
   #   repo().insert(changeset(:create, attrs))
   # end
 
-  @doc "Create a circle for the provided user (and with the user in the circle?)"
+  @doc """
+  Creates a new circle for the provided user.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.create(user, %{named: %{name: "My Circle"}})
+      {:ok, %Circle{id: "new_circle_id", name: "My Circle"}}
+  """
   def create(user, %{} = attrs) when is_map(user) or is_binary(user) do
     with {:ok, circle} <-
            repo().insert(
@@ -186,7 +311,15 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc """
-  Lists the circles that we are permitted to see.
+  Checks if a subject is encircled by a circle or list of circles.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.is_encircled_by?(user, circle)
+      true
+
+      iex> Bonfire.Boundaries.Circles.is_encircled_by?(user, [circle1, circle2])
+      false
   """
   def is_encircled_by?(subject, circle)
       when is_nil(subject) or is_nil(circle) or subject == [] or circle == [],
@@ -199,8 +332,8 @@ defmodule Bonfire.Boundaries.Circles do
       when is_list(circles) or is_binary(circles) or is_map(circles),
       do: repo().exists?(is_encircled_by_q(subject, circles))
 
-  # @doc "query for `list_visible`"
-  def is_encircled_by_q(subject, circles) do
+  # @doc "query for `is_encircled_by`"
+  defp is_encircled_by_q(subject, circles) do
     encircled_by_q(subject)
     |> where(
       [encircle: encircle],
@@ -219,12 +352,21 @@ defmodule Bonfire.Boundaries.Circles do
   def preload_encircled_by(subject, circles, opts \\ []) do
     circles
     |> repo().preload([encircles: encircled_by_q(subject)], opts)
-    |> debug()
+
+    # |> debug()
   end
 
   ## invariants:
   ## * Created circles will have the user as a caretaker
 
+  @doc """
+  Retrieves a circle for a caretaker by ID.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.get_for_caretaker("circle_id", user)
+      {:ok, %Circle{id: "circle_id", name: "My Circle"}}
+  """
   def get_for_caretaker(id, caretaker, opts \\ []) do
     with {:ok, circle} <-
            repo().single(query_my_by_id(id, caretaker, opts ++ @default_q_opts)) do
@@ -245,10 +387,26 @@ defmodule Bonfire.Boundaries.Circles do
     end
   end
 
+  @doc """
+  Retrieves a circle by name for a caretaker.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.get_by_name("My Circle", user)
+      {:ok, %Circle{id: "circle_id", name: "My Circle"}}
+  """
   def get_by_name(name, caretaker) do
     repo().single(query_basic_my(caretaker, name: name))
   end
 
+  @doc """
+  Retrieves stereotype circles for a subject.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.get_stereotype_circles(user, [:follow, :block])
+      [%Circle{id: "follow_circle_id", name: "Follow"}, %Circle{id: "block_circle_id", name: "Block"}]
+  """
   def get_stereotype_circles(subject, stereotypes)
       when is_list(stereotypes) and stereotypes != [] do
     stereotypes = Enum.map(stereotypes, &Bonfire.Boundaries.Circles.get_id!/1)
@@ -267,19 +425,39 @@ defmodule Bonfire.Boundaries.Circles do
       do: get_stereotype_circles(subject, [stereotype])
 
   @doc """
-  Lists the circles that we are permitted to see.
+  Lists visible circles for a user.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_visible(user)
+      [%Circle{id: "circle_id1", name: "Circle 1"}, %Circle{id: "circle_id2", name: "Circle 2"}]
   """
   def list_visible(user, opts \\ []),
     do: repo().many(query_visible(user, opts ++ @default_q_opts))
 
   @doc """
-  Lists the circles we are the registered caretakers of that we are
+  Lists circles owned by a user.
+
+  Includes circles we are the registered caretakers of that we are
   permitted to see. If any circles are created without permitting the
   user to see them, they will not be shown.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_my(user)
+      [%Circle{id: "circle_id1", name: "My Circle 1"}, %Circle{id: "circle_id2", name: "My Circle 2"}]
   """
   def list_my(user, opts \\ []),
     do: repo().many(query_my(user, opts ++ @default_q_opts))
 
+  @doc """
+  Lists circles owned by a user and global/built-in circles.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_my_with_global(user)
+      [%Circle{id: "circle_id1", name: "My Circle"}, %Circle{id: "global_circle_id", name: "Global Circle"}]
+  """
   def list_my_with_global(user, opts \\ []) do
     list_my(
       user,
@@ -291,6 +469,14 @@ defmodule Bonfire.Boundaries.Circles do
     )
   end
 
+  @doc """
+  Lists circles owned by a user with member counts.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_my_with_counts(user)
+      [%Circle{id: "circle_id1", name: "My Circle", encircles_count: 5}]
+  """
   def list_my_with_counts(user, opts \\ []) do
     query_my(user, opts ++ @default_q_opts)
     |> join(
@@ -310,7 +496,13 @@ defmodule Bonfire.Boundaries.Circles do
     |> many(opts[:paginate?], opts)
   end
 
-  @doc "query for `list_visible`"
+  @doc """
+  Generates a query for circles 
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.query(exclude_built_ins: true)
+  """
   def query(opts \\ []) do
     exclude_circles =
       e(opts, :exclude_circles, []) ++
@@ -366,7 +558,14 @@ defmodule Bonfire.Boundaries.Circles do
 
   defp maybe_search(query, _), do: query
 
-  @doc "query for `list_visible`"
+  @doc """
+  Generates a query for visible circles for a user.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.query_visible(user)
+      #Ecto.Query<...>
+  """
   def query_visible(user, opts \\ []) do
     opts = to_options(opts)
 
@@ -393,7 +592,13 @@ defmodule Bonfire.Boundaries.Circles do
     )
   end
 
-  @doc "query for `list_my`"
+  @doc """
+  Generates a query for circles owned by a user.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.query_my(user)
+  """
   def query_my(caretaker, opts \\ [])
 
   def query_my(caretaker, opts)
@@ -410,7 +615,13 @@ defmodule Bonfire.Boundaries.Circles do
 
   def query_my(:instance, opts), do: Bonfire.Boundaries.Fixtures.admin_circle() |> query_my(opts)
 
-  @doc "query for `get`"
+  @doc """
+  Generates a query for a specific circle owned by a user.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.query_my_by_id("circle_id", user)
+  """
   def query_my_by_id(id, caretaker, opts \\ []) do
     query_my(caretaker, opts)
     # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
@@ -420,6 +631,14 @@ defmodule Bonfire.Boundaries.Circles do
     )
   end
 
+  @doc """
+  Retrieves or creates a circle by name for a caretaker.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.get_or_create("New Circle", user)
+      {:ok, %Circle{id: "new_circle_id", name: "New Circle"}}
+  """
   def get_or_create(name, caretaker \\ nil) when is_binary(name) do
     # instance-wide circle if not user provided
     caretaker = caretaker || Bonfire.Boundaries.Fixtures.admin_circle()
@@ -434,6 +653,14 @@ defmodule Bonfire.Boundaries.Circles do
     end
   end
 
+  @doc """
+  Edits a circle's attributes.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.edit(circle, user, %{name: "Updated Circle"})
+      {:ok, %Circle{id: "circle_id", name: "Updated Circle"}}
+  """
   def edit(%Circle{} = circle, %User{} = _user, params) do
     circle = repo().maybe_preload(circle, [:encircles, :named, :extra_info])
 
@@ -453,6 +680,17 @@ defmodule Bonfire.Boundaries.Circles do
     end
   end
 
+  @doc """
+  Adds subject(s) to circle(s).
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.add_to_circles(user, circle)
+      {:ok, %Encircle{}}
+
+      iex> Bonfire.Boundaries.Circles.add_to_circles([user1, user2], [circle1, circle2])
+      [{{:ok, %Encircle{}}, {:ok, %Encircle{}}}, {{:ok, %Encircle{}}, {:ok, %Encircle{}}}]
+  """
   def add_to_circles(_subject, circles)
       when is_nil(circles) or (is_list(circles) and length(circles) == 0),
       do: error("No circle ID provided, so could not add")
@@ -475,6 +713,17 @@ defmodule Bonfire.Boundaries.Circles do
     repo().insert(Encircle.changeset(%{circle_id: ulid!(circle), subject_id: ulid!(subject)}))
   end
 
+  @doc """
+  Removes a user from circles.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.remove_from_circles(user, circle)
+      {1, nil}
+
+      iex> Bonfire.Boundaries.Circles.remove_from_circles(user, [circle1, circle2])
+      {2, nil}
+  """
   def remove_from_circles(_subject, circles)
       when is_nil(circles) or (is_list(circles) and length(circles) == 0),
       do: error("No circle ID provided, so could not remove")
@@ -490,6 +739,14 @@ defmodule Bonfire.Boundaries.Circles do
     remove_from_circles(subject, [circle])
   end
 
+  @doc """
+  Empties circles by removing all members.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.empty_circles([circle1, circle2])
+      {10, nil}
+  """
   def empty_circles(circles) when is_list(circles) do
     from(e in Encircle,
       where: e.circle_id in ^ulid(circles)
@@ -498,7 +755,13 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc """
-  Fully delete the circle, including membership and boundary information. This will affect all objects previously shared with members of this circle.
+  Deletes a circle and its associated data, including membership and boundary information. This will affect all objects previously shared with members of this circle
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.delete(circle, [current_user: user])
+
+      iex> Bonfire.Boundaries.Circles.delete("circle_id", [current_user: user])
   """
   def delete(%Circle{} = circle, opts) do
     Bonfire.Common.Utils.maybe_apply(
