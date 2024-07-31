@@ -1,4 +1,4 @@
-defmodule Bonfire.Boundaries.UserCirclesTest do
+defmodule Bonfire.Boundaries.InitUserBoundariesTest do
   use Bonfire.Boundaries.DataCase, async: true
   @moduletag :backend
   # alias Bonfire.Boundaries.Controlleds
