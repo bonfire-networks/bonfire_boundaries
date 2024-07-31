@@ -141,33 +141,37 @@ defmodule Bonfire.Boundaries.Users do
     end
   end
 
-  defp format_verb(verb) when is_atom(verb) , do:   %{verb_id: Verbs.get_id!(verb), value: true}
-  defp format_verb(verb) when is_binary(verb) , do:   %{verb_id: verb, value: true}
-  defp format_verb({verb,v}) when is_atom(verb) and is_boolean(v) , do:   %{verb_id: Verbs.get_id!(verb), value: v}
-  defp format_verb({verb,v}) when is_binary(verb) and is_boolean(v) , do:   %{verb_id: verb, value: v}
+  defp format_verb(verb) when is_atom(verb), do: %{verb_id: Verbs.get_id!(verb), value: true}
+  defp format_verb(verb) when is_binary(verb), do: %{verb_id: verb, value: true}
+
+  defp format_verb({verb, v}) when is_atom(verb) and is_boolean(v),
+    do: %{verb_id: Verbs.get_id!(verb), value: v}
+
+  defp format_verb({verb, v}) when is_binary(verb) and is_boolean(v),
+    do: %{verb_id: verb, value: v}
 
   defp prepare_grants(user_default_boundaries, acls, circles, user) do
     for {acl, entries} <- Map.fetch!(user_default_boundaries, :grants),
         {circle, verbs} <- entries,
         verb <- verbs do
-          format_verb(verb) |> Map.merge(%{
+      format_verb(verb)
+      |> Map.merge(%{
         id: ULID.generate(),
         acl_id: default_acl_id(acls, acl),
         subject_id: default_subject_id(circles, user, circle)
       })
-        end
+    end
   end
 
   defp prepare_controlleds(user_default_boundaries, acls, acls_extra, user) do
     for {:SELF, acls_default} <- Map.fetch!(user_default_boundaries, :controlleds),
-    ### control access to the user themselves (e.g. to view their profile or mention them)
-    acl <- acls_default ++ acls_extra do
-  %{id: user.id, acl_id: default_acl_id(acls, acl)}
-end
+        ### control access to the user themselves (e.g. to view their profile or mention them)
+        acl <- acls_default ++ acls_extra do
+      %{id: user.id, acl_id: default_acl_id(acls, acl)}
+    end
   end
 
   defp prepare_nameds(nameds) do
-
     nameds
     |> Enum.filter(& &1[:name])
     |> Enum.map(&Map.take(&1, [:id, :name]))
@@ -177,7 +181,6 @@ end
     stereotypes
     |> Enum.filter(& &1[:stereotype_id])
     |> Enum.map(&Map.take(&1, [:id, :stereotype_id]))
-
   end
 
   defp prepare_default_boundaries(user, acls_extra, _opts) do
@@ -187,10 +190,9 @@ end
     circles = prepare_circles(user_default_boundaries)
     acls = prepare_acls(user_default_boundaries)
 
-    grants = prepare_grants(user_default_boundaries, acls,circles, user)
+    grants = prepare_grants(user_default_boundaries, acls, circles, user)
 
-    controlleds =prepare_controlleds(user_default_boundaries, acls, acls_extra,user)
-
+    controlleds = prepare_controlleds(user_default_boundaries, acls, acls_extra, user)
 
     # |> info("circles for #{e(user, :character, :username, nil)}")
     circles_values = Map.values(circles)
