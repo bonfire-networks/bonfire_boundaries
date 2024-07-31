@@ -1,6 +1,7 @@
 defmodule Bonfire.Boundaries.UserCirclesTest do
   use Bonfire.Boundaries.DataCase, async: true
   @moduletag :backend
+  alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Data.AccessControl.Stereotyped
   alias Bonfire.Data.AccessControl.Controlled
   alias Absinthe.Blueprint.TypeReference.Name
@@ -64,11 +65,10 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
       assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 2
     end
 
-
     test "acls should be created" do
       Process.put([:bonfire, :user_default_boundaries], %{
         circles: %{},
-        acls: %{i_may_administer: %{stereotype: :i_may_administer},},
+        acls: %{i_may_administer: %{stereotype: :i_may_administer}},
         grants: %{
           i_may_administer: %{
             SELF: [:see, :read]
@@ -79,7 +79,37 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
 
       %{id: user_id} = user = fake_user!()
 
-      assert length(Acls.list_my(user,[paginate?: false])) == 1
-      end
+      assert length(Acls.list_my(user, paginate?: false)) == 1
+    end
+
+    test "default visibility controlleds should be created" do
+      Process.put([:bonfire, :user_default_boundaries], %{
+        circles: %{},
+        acls: %{},
+        grants: %{ },
+        controlleds: %{SELF: []}
+      })
+
+      %{id: user_id} = user = fake_user!()
+      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 1
+       end
+
+       test "controlleds should be created" do
+        Process.put([:bonfire, :user_default_boundaries], %{
+          circles: %{},
+          acls: %{},
+          grants: %{ },
+          controlleds: %{SELF: [
+          :locals_may_reply,
+          :remotes_may_reply,
+          :i_may_administer,]}
+        })
+
+        %{id: user_id} = user = fake_user!()
+        assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 4
+         end
+
+
   end
+
 end
