@@ -123,76 +123,86 @@ defmodule Bonfire.Boundaries.Users do
     # Grants will take care of themselves because they have a strong pointer acl_id.
   end
 
+  defp prepare_circles(user_default_boundaries) do
+    for {k, v} <- Map.fetch!(user_default_boundaries, :circles), into: %{} do
+      {k,
+       v
+       |> Map.put(:id, ULID.generate())
+       |> stereotype(Circles)}
+    end
+  end
+
+  defp prepare_acls(user_default_boundaries) do
+    for {k, v} <- Map.fetch!(user_default_boundaries, :acls), into: %{} do
+      {k,
+       v
+       |> Map.put(:id, ULID.generate())
+       |> stereotype(Acls)}
+    end
+  end
+
+  defp format_verb(verb) when is_atom(verb) , do:   %{verb_id: Verbs.get_id!(verb), value: true}
+  defp format_verb(verb) when is_binary(verb) , do:   %{verb_id: verb, value: true}
+  defp format_verb({verb,v}) when is_atom(verb) and is_boolean(v) , do:   %{verb_id: Verbs.get_id!(verb), value: v}
+  defp format_verb({verb,v}) when is_binary(verb) and is_boolean(v) , do:   %{verb_id: verb, value: v}
+
+  defp prepare_grants(user_default_boundaries, acls, circles, user) do
+    for {acl, entries} <- Map.fetch!(user_default_boundaries, :grants),
+        {circle, verbs} <- entries,
+        verb <- verbs do
+          format_verb(verb) |> Map.merge(%{
+        id: ULID.generate(),
+        acl_id: default_acl_id(acls, acl),
+        subject_id: default_subject_id(circles, user, circle)
+      })
+        end
+  end
+
+  defp prepare_controlleds(user_default_boundaries, acls, acls_extra, user) do
+    for {:SELF, acls_default} <- Map.fetch!(user_default_boundaries, :controlleds),
+    ### control access to the user themselves (e.g. to view their profile or mention them)
+    acl <- acls_default ++ acls_extra do
+  %{id: user.id, acl_id: default_acl_id(acls, acl)}
+end
+  end
+
+  defp prepare_nameds(nameds) do
+
+    nameds
+    |> Enum.filter(& &1[:name])
+    |> Enum.map(&Map.take(&1, [:id, :name]))
+  end
+
+  defp prepare_stereotypes(stereotypes) do
+    stereotypes
+    |> Enum.filter(& &1[:stereotype_id])
+    |> Enum.map(&Map.take(&1, [:id, :stereotype_id]))
+
+  end
+
   defp prepare_default_boundaries(user, acls_extra, _opts) do
     # debug(opts)
     user_default_boundaries = Boundaries.user_default_boundaries()
     #  |> debug("create_default_boundaries")
-    circles =
-      for {k, v} <- Map.fetch!(user_default_boundaries, :circles), into: %{} do
-        {k,
-         v
-         |> Map.put(:id, ULID.generate())
-         |> stereotype(Circles)}
-      end
+    circles = prepare_circles(user_default_boundaries)
+    acls = prepare_acls(user_default_boundaries)
 
-    acls =
-      for {k, v} <- Map.fetch!(user_default_boundaries, :acls), into: %{} do
-        {k,
-         v
-         |> Map.put(:id, ULID.generate())
-         |> stereotype(Acls)}
-      end
+    grants = prepare_grants(user_default_boundaries, acls,circles, user)
 
-    grants =
-      for {acl, entries} <- Map.fetch!(user_default_boundaries, :grants),
-          {circle, verbs} <- entries,
-          verb <- verbs do
-        case verb do
-          _ when is_atom(verb) ->
-            %{verb_id: Verbs.get_id!(verb), value: true}
+    controlleds =prepare_controlleds(user_default_boundaries, acls, acls_extra,user)
 
-          _ when is_binary(verb) ->
-            %{verb_id: verb, value: true}
-
-          {verb, v} when is_atom(verb) and is_boolean(v) ->
-            %{verb_id: Verbs.get_id!(verb), value: v}
-
-          {verb, v} when is_binary(verb) and is_boolean(v) ->
-            %{verb_id: verb, value: v}
-        end
-        |> Map.merge(%{
-          id: ULID.generate(),
-          acl_id: default_acl_id(acls, acl),
-          subject_id: default_subject_id(circles, user, circle)
-        })
-      end
-
-    ### control access to the user themselves (e.g. to view their profile or mention them)
-    controlleds =
-      for {:SELF, acls_default} <- Map.fetch!(user_default_boundaries, :controlleds),
-          acl <- acls_default ++ acls_extra do
-        %{id: user.id, acl_id: default_acl_id(acls, acl)}
-      end
 
     # |> info("circles for #{e(user, :character, :username, nil)}")
-    circles = Map.values(circles)
-
+    circles_values = Map.values(circles)
     # |> info("acls for #{e(user, :character, :username, nil)}")
-    acls = Map.values(acls)
+    acls_values = Map.values(acls)
 
-    named =
-      (acls ++ circles)
-      |> Enum.filter(& &1[:name])
-      |> Enum.map(&Map.take(&1, [:id, :name]))
-
-    stereotypes =
-      (acls ++ circles)
-      |> Enum.filter(& &1[:stereotype_id])
-      |> Enum.map(&Map.take(&1, [:id, :stereotype_id]))
+    named = prepare_nameds(acls_values ++ circles_values)
+    stereotypes = prepare_stereotypes(acls_values ++ circles_values)
 
     %{
-      acls: acls,
-      circles: circles,
+      acls: acls_values,
+      circles: circles_values,
       grants: grants,
       named: named,
       controlleds: controlleds,
