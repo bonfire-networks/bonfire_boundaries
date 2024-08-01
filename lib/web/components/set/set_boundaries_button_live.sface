@@ -49,10 +49,8 @@
       </div>
     </div>
   {#match boundary_name}
-    <div class="flex items-center gap-2 mx">
-      <div class="flex items-center gap-2 normal-case  btn-active btn-ghost btn-sm btn opacity-90 cursor-default">
-        <span>{boundary_name}</span>
-      </div>
+    <div class="btn-active items-center rounded flex btn-ghost btn-sm !justify-start max-w-[120px] truncate cursor-default">
+      <span>{boundary_name}</span>
     </div>
 {/case}
 
