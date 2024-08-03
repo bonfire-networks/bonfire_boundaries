@@ -62,6 +62,23 @@ defmodule Bonfire.Boundaries.Users do
   end
 
   @doc """
+  Removes from the list stereotypes already present in the database
+  """
+  defp reject_existing_stereotypes(stereotypes, user) do
+    existing_stereotypes =
+      stereotypes
+      |> Enum.map(&e(&1, :stereotype_id, nil))
+      |> debug("all stereos")
+      |> Boundaries.find_caretaker_stereotypes(user, ...)
+      |> Enum.map(&e(&1, :stereotyped, :stereotype_id, nil))
+      |> debug("existing stereos")
+
+    stereotypes
+    |> Enum.reject(&(e(&1, :stereotype_id, nil) in existing_stereotypes))
+    |> debug("new stereos")
+  end
+
+  @doc """
   Creates any missing boundaries for an existing user. Used when the app or config has defined some new types of default boundaries.
 
   ## Parameters
@@ -82,29 +99,16 @@ defmodule Bonfire.Boundaries.Users do
       stereotypes: stereotypes
     } = PreparedBoundaries.from_config(user, [], [])
 
-    # do not attempt re-creating any existing stereotypes...
-
-    existing_stereotypes =
-      stereotypes
-      |> Enum.map(&e(&1, :stereotype_id, nil))
-      |> debug("all stereos")
-      |> Boundaries.find_caretaker_stereotypes(user, ...)
-      |> Enum.map(&e(&1, :stereotyped, :stereotype_id, nil))
-      |> debug("existing stereos")
-
-    stereotypes =
-      stereotypes
-      |> Enum.reject(&(e(&1, :stereotype_id, nil) in existing_stereotypes))
-      |> debug("new stereos")
+    stereotypes = stereotypes |> reject_existing_stereotypes(user)
 
     acls =
       acls
-      |> Enum.reject(&(e(&1, :stereotype_id, nil) in existing_stereotypes))
+      |> Enum.filter(&(e(&1, :stereotype_id, nil) in stereotypes))
       |> debug("missing acls")
 
     circles =
       circles
-      |> Enum.reject(&(e(&1, :stereotype_id, nil) in existing_stereotypes))
+      |> Enum.filter(&(e(&1, :stereotype_id, nil) in stereotypes))
       |> debug("missing circles")
 
     # first acls and circles
