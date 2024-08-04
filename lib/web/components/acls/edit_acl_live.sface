@@ -55,12 +55,12 @@
               <li data-role="remove_from_boundary">
                 <Bonfire.UI.Common.OpenModalLive
                   id={"remove_from_acl_#{ulid(subject)}"}
-                  title_text={l("Remove from boundary")}
+                  title_text={l("Remove from boundary preset")}
                   no_actions
                   open_btn_wrapper_class="flex flex-1 w-full"
                 >
                   <div class="prose prose-sm mt-2">
-                    {l("Are you sure to remove %{subject_name} from %{boundary_name} boundary?",
+                    {l("Are you sure to remove %{subject_name} from the '%{boundary_name}' boundary preset?",
                       subject_name: LiveHandler.subject_name(subject),
                       boundary_name: e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil)
                     )}
