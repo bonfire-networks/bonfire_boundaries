@@ -34,7 +34,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
       %{id: user_id} = user = fake_user!()
       assert length(Circles.list_my(user)) == 0
       assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 0
-      assert repo().one(from s in Stereotyped, select: count(s))==0
+      assert repo().one(from s in Stereotyped, select: count(s)) == 0
     end
 
     test "circles should be created" do
@@ -115,21 +115,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
 
       assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 1
     end
-    end
 
-    test "controlleds should be created" do
-      Process.put([:bonfire, :user_default_boundaries], %{
-        circles: %{},
-        acls: %{},
-        grants: %{},
-        controlleds: %{
-          SELF: [
-            :locals_may_reply,
-            :remotes_may_reply,
-            :i_may_administer
-          ]
-        }
-      })
     test "controlleds should be created" do
       Process.put([:bonfire, :user_default_boundaries], %{
         circles: %{},
@@ -147,33 +133,30 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
       %{id: user_id} = user = fake_user!()
       assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 4
     end
-  end
 
-  test "stereotypes with the same name in different entries should not be duplicated on the db" do
-    Process.put([:bonfire, :user_default_boundaries], %{
-      circles: %{
-        ABC: %{stereotype: :followers}
-      },
-      acls: %{i_may_administer: %{stereotype: :i_may_administer}},
-      grants: %{
-        i_may_administer: %{
-          ABC: [:see, :read]
+    test "stereotypes with the same name in different entries should not be duplicated on the db" do
+      Process.put([:bonfire, :user_default_boundaries], %{
+        circles: %{
+          ABC: %{stereotype: :followers}
+        },
+        acls: %{i_may_administer: %{stereotype: :i_may_administer}},
+        grants: %{
+          i_may_administer: %{
+            ABC: [:see, :read]
+          }
+        },
+        controlleds: %{
+          ABC: [
+            :locals_may_reply,
+            :remotes_may_reply,
+            :i_may_administer
+          ]
         }
-      },
-      controlleds: %{
-        ABC: [
-          :locals_may_reply,
-          :remotes_may_reply,
-          :i_may_administer
-        ]
-      }
-    })
+      })
 
-    fake_user!()
-    #ABC is in different maps but it creates only one entry
-    assert repo().one(from s in Stereotyped, select: count(s))==1
+      fake_user!()
+      # ABC is in different maps but it creates only one entry
+      assert repo().one(from s in Stereotyped, select: count(s)) == 1
+    end
   end
-
-  describe "creation of multiple users" do
-end
 end
