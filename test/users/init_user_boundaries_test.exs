@@ -3,7 +3,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
   @moduletag :backend
   alias Credo.Check.Refactor.ABCSize
   # alias Bonfire.Boundaries.Controlleds
-  # alias Bonfire.Data.AccessControl.Stereotyped
+  alias Bonfire.Data.AccessControl.Stereotyped
   alias Bonfire.Data.AccessControl.Controlled
   # alias Absinthe.Blueprint.TypeReference.Name
   # alias Bonfire.Data.AccessControl.Circle
@@ -40,7 +40,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
     test "circles should be created" do
       Process.put([:bonfire, :user_default_boundaries], %{
         circles: %{
-          test_circle: %{stereotype: :followers}
+          test_circle: %{id: "test", name: "test_name"}
         },
         acls: %{},
         grants: %{},
@@ -48,7 +48,8 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
       })
 
       user = fake_user!()
-      assert length(Circles.list_my(user)) == 1
+      [circle] = Circles.list_my(user)
+      assert circle.named.name == "test_name"
     end
 
     test "grants should be created" do
@@ -70,9 +71,9 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
     test "acls should be created" do
       Process.put([:bonfire, :user_default_boundaries], %{
         circles: %{},
-        acls: %{i_may_administer: %{stereotype: :i_may_administer}},
+        acls: %{abc: %{id: "test", name: "test_name"}},
         grants: %{
-          i_may_administer: %{
+          abc: %{
             SELF: [:see, :read]
           }
         },
@@ -81,7 +82,8 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
 
       user = fake_user!()
 
-      assert length(Acls.list_my(user, paginate?: false)) == 1
+      [acl] = Acls.list_my(user, paginate?: false)
+      assert acl.named.name == "test_name"
     end
 
     test "default discover/read controlleds should be created" do
@@ -130,33 +132,50 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         }
       })
 
-      %{id: user_id} = user = fake_user!()
+      %{id: user_id} = fake_user!()
       assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 4
     end
 
-    test "stereotypes with the same name in different entries should not be duplicated on the db" do
+    test "a stereotyped circle or acl should not be duplicated on the db when created for two different users" do
       Process.put([:bonfire, :user_default_boundaries], %{
         circles: %{
-          ABC: %{stereotype: :followers}
-        },
-        acls: %{i_may_administer: %{stereotype: :i_may_administer}},
-        grants: %{
-          i_may_administer: %{
-            ABC: [:see, :read]
+          followers: %{
+            id: "7DAPE0P1E1PERM1TT0F0110WME",
+            name: "Those who follow me",
+            stereotype: :followers
           }
         },
-        controlleds: %{
-          ABC: [
-            :locals_may_reply,
-            :remotes_may_reply,
-            :i_may_administer
-          ]
-        }
+        acls: %{
+          i_may_administer: %{
+            id: "71MAYADM1N1STERMY0WNSTVFFS",
+            name: "I may administer",
+            stereotype: :i_may_administer
+          }
+        },
+        grants: %{},
+        controlleds: %{}
       })
 
-      fake_user!()
-      # ABC is in different maps but it creates only one entry
-      assert repo().one(from s in Stereotyped, select: count(s)) == 1
+      user_1 = fake_user!()
+      user_2 = fake_user!()
+      [circle_1] = Circles.list_my(user_1)
+      [circle_2] = Circles.list_my(user_2)
+      [acl_1] = Acls.list_my(user_1, paginate?: false)
+      [acl_2] = Acls.list_my(user_2, paginate?: false)
+
+      assert repo().one(from s in Stereotyped, select: count(s)) == 4
+
+      assert circle_1.stereotyped.stereotype_id ==
+               repo().one(from s in Stereotyped, where: s.id == ^circle_1.id).stereotype_id
+
+      assert circle_2.stereotyped.stereotype_id ==
+               repo().one(from s in Stereotyped, where: s.id == ^circle_2.id).stereotype_id
+
+      assert acl_1.stereotyped.stereotype_id ==
+               repo().one(from s in Stereotyped, where: s.id == ^acl_1.id).stereotype_id
+
+      assert acl_2.stereotyped.stereotype_id ==
+               repo().one(from s in Stereotyped, where: s.id == ^acl_2.id).stereotype_id
     end
   end
 end
