@@ -110,4 +110,10 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
     assert Bonfire.Boundaries.Circles.is_encircled_by?(bob, circle)
     refute Bonfire.Boundaries.Circles.is_encircled_by?(carl, circle)
   end
+
+  test "deleting a circle works" do
+    user = fake_user!()
+    circles = Circles.list_my(user)
+    assert {:ok, _} = Circles.delete(List.first(circles), current_user: user)
+  end
 end
