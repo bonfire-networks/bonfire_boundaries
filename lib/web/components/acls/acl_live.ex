@@ -254,6 +254,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
      )}
   end
 
+
   def handle_event(
         "live_select_change",
         %{"id" => live_select_id, "text" => search},
@@ -273,6 +274,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
        ))
     |> results_for_multiselect(live_select_id, socket)
   end
+
+
 
   def handle_event(
         "live_select_change",
@@ -301,7 +304,6 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         socket
       ) do
     current_user = current_user(socket.assigns)
-
     (Bonfire.Boundaries.Circles.list_my_with_global(
        [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
        search: search

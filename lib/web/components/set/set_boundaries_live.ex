@@ -127,9 +127,16 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   #   Bonfire.Boundaries.Acls.list_my(current_user)
   # end
 
-  def list_my_circles(scope) do
+  def list_my_circles_with_global(scope) do
     # TODO: load using LivePlug to avoid re-loading on render?
     Bonfire.Boundaries.Circles.list_my_with_global(scope,
+      exclude_block_stereotypes: true
+    )
+  end
+
+  def list_my_circles(scope) do
+    # TODO: load using LivePlug to avoid re-loading on render?
+    Bonfire.Boundaries.Circles.list_my(scope,
       exclude_block_stereotypes: true
     )
   end

@@ -219,7 +219,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
   def handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
     debug(socket.assigns)
-
     do_results_for_multiselect(search)
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
 

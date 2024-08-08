@@ -1,8 +1,8 @@
 <div class="">
   <div>
     <div class="flex flex-col">
-      <div class="p-4 border-b border-base-content/20">
-        <span class="text-base-content/70">
+      <div class="p-4 pt-0 border-b border-base-content/20">
+        <span class="text-sm text-base-content/70">
           {l("Roles define sets of permissions which you can assign to users and circles")}</span>
       </div>
       <div
