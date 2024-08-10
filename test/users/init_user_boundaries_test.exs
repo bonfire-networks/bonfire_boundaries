@@ -1,6 +1,7 @@
 defmodule Bonfire.Boundaries.InitUserBoundariesTest do
   use Bonfire.Boundaries.DataCase, async: true
   @moduletag :backend
+  alias Erl2exVendored.Pipeline.Names
   alias Credo.Check.Refactor.ABCSize
   # alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Data.AccessControl.Stereotyped
@@ -9,16 +10,19 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
   # alias Bonfire.Data.AccessControl.Circle
   # alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.AccessControl.Grant
-  # alias Bonfire.Data.AccessControl.Encircle
+  alias Bonfire.Data.AccessControl.Named
   # alias Bonfire.Boundaries.Grants
   # alias Bonfire.Me.Fake
   # alias Bonfire.Me.Users
-  # alias Bonfire.Boundaries.Users
+  alias Bonfire.Boundaries.Users
   # alias Bonfire.Common.Config
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Acls
+  alias Bonfire.Common.Repo
 
-  describe "default boundaries from config should be inserted in the database when a new user is created" do
+  describe(
+    "default boundaries from config should be inserted in the database when a new user is created"
+  ) do
     setup do
       on_exit(fn -> Process.delete([:bonfire, :user_default_boundaries]) end)
     end
@@ -176,6 +180,53 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
 
       assert acl_2.stereotyped.stereotype_id ==
                repo().one(from s in Stereotyped, where: s.id == ^acl_2.id).stereotype_id
+    end
+  end
+
+  describe "create_missing_boundaries should" do
+    setup do
+      on_exit(fn -> Process.delete([:bonfire, :user_default_boundaries]) end)
+    end
+
+    test "do nothing if no boundaries are present and no boundaries are to be introduced" do
+      Process.put([:bonfire, :user_default_boundaries], %{
+        circles: %{},
+        acls: %{},
+        grants: %{},
+        controlleds: %{}
+      })
+
+      %{id: user_id} = user = fake_user!()
+      Users.create_missing_boundaries(user)
+      assert length(Circles.list_my(user)) == 0
+      assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 0
+      assert repo().one(from s in Stereotyped, select: count(s)) == 0
+    end
+
+    test "create missing circles" do
+      Process.put([:bonfire, :user_default_boundaries], %{
+        circles: %{
+          followers: %{
+            id: "7DAPE0P1E1PERM1TT0F0110WME",
+            name: "Those who follow me",
+            stereotype: :followers
+          }
+        },
+        acls: %{},
+        grants: %{},
+        controlleds: %{}
+      })
+
+      user = fake_user!()
+      [circle] = Circles.list_my(user)
+      Circles.delete(circle, current_user: user)
+      assert Circles.list_my(user) == []
+      all = repo().all(from(s in Stereotyped))
+      assert repo().one(from s in Stereotyped, select: count(s), where: s.id == ^circle.id) == 0
+      Users.create_missing_boundaries(user)
+      [circle] = Circles.list_my(user)
+
+      assert circle.named.name == "test_name"
     end
   end
 end
