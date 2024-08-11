@@ -97,7 +97,7 @@ defmodule Bonfire.Boundaries.Users do
       named: named,
       controlleds: controlleds,
       stereotypes: stereotypes
-    } = PreparedBoundaries.from_config(user, [], [])
+    } = PreparedBoundaries.from_config(user, [], false)
 
     stereotypes = stereotypes |> reject_existing_stereotypes(user)
 
@@ -112,7 +112,11 @@ defmodule Bonfire.Boundaries.Users do
       |> debug("missing circles")
 
     # first acls and circles
-    do_insert_main(user, %{acls: acls, circles: circles, stereotypes: stereotypes})
+    do_insert_main(user, %PreparedBoundaries{
+      acls: acls,
+      circles: circles,
+      stereotypes: stereotypes
+    })
 
     repo().insert_or_ignore(Stereotyped, stereotypes)
 
