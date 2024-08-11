@@ -144,18 +144,10 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
     test "a stereotyped circle or acl should not be duplicated on the db when created for two different users" do
       Process.put([:bonfire, :user_default_boundaries], %{
         circles: %{
-          followers: %{
-            id: "7DAPE0P1E1PERM1TT0F0110WME",
-            name: "Those who follow me",
-            stereotype: :followers
-          }
+          followers: %{stereotype: :followers}
         },
         acls: %{
-          i_may_administer: %{
-            id: "71MAYADM1N1STERMY0WNSTVFFS",
-            name: "I may administer",
-            stereotype: :i_may_administer
-          }
+          i_may_administer: %{stereotype: :i_may_administer}
         },
         grants: %{},
         controlleds: %{}
@@ -207,7 +199,6 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
     test "create missing circles" do
       Process.put([:bonfire, :user_default_boundaries], %{
         circles: %{
-          # users who have followed you
           followers: %{stereotype: :followers}
         },
         acls: %{},
@@ -223,6 +214,27 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
       Users.create_missing_boundaries(user)
       [circle] = Circles.list_my(user)
       assert circle.stereotyped.named.name == "Those who follow me"
+    end
+
+    test "create missing acls" do
+      Process.put([:bonfire, :user_default_boundaries], %{
+        circles: %{},
+        acls: %{
+          i_may_administer: %{stereotype: :i_may_administer}
+        },
+        grants: %{},
+        controlleds: %{}
+      })
+
+      user = fake_user!()
+      [acl] = Acls.list_my(user, paginate?: false)
+      Acls.delete(acl, current_user: user)
+      assert Acls.list_my(user, paginate?: false) == []
+      assert repo().one(from s in Stereotyped, select: count(s), where: s.id == ^acl.id) == 0
+      Users.create_missing_boundaries(user)
+      [acl] = Acls.list_my(user, paginate?: false)
+
+      assert acl.stereotyped.named.name == "I may administer"
     end
 
     test "create missing controlleds" do
@@ -253,5 +265,32 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         }
       ] = repo().all(from c in Controlled, where: c.id == ^user_id)
     end
+  end
+
+  test "create missing grants" do
+    Process.put([:bonfire, :user_default_boundaries], %{
+      circles: %{},
+      acls: %{},
+      grants: %{
+        i_may_administer: %{
+          SELF: [:see, :read]
+        }
+      },
+      controlleds: %{}
+    })
+
+    %{id: user_id} = user = fake_user!()
+    assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 2
+    repo().delete_many(from c in Grant, where: c.subject_id == ^user_id)
+    assert repo().one(from c in Grant, select: count(c), where: c.subject_id == ^user_id) == 0
+    Users.create_missing_boundaries(user)
+
+    [
+      %Bonfire.Data.AccessControl.Grant{subject_id: sub_id_1},
+      %Bonfire.Data.AccessControl.Grant{subject_id: sub_id_2}
+    ] = repo().all(from c in Grant, where: c.subject_id == ^user_id)
+
+    assert sub_id_1 == sub_id_2
+    assert sub_id_1 == user_id
   end
 end

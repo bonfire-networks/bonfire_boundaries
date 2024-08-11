@@ -97,7 +97,6 @@ defmodule Bonfire.Boundaries.Users do
       named: named,
       controlleds: controlleds,
       stereotypes: stereotypes
-
     } = PreparedBoundaries.from_config(user, [])
 
     missing_stereotypes = stereotypes |> reject_existing_stereotypes(user)
@@ -119,13 +118,14 @@ defmodule Bonfire.Boundaries.Users do
       circles: missing_circles,
       stereotypes: missing_stereotypes
     })
+
     add_caretaker(missing_acls ++ missing_circles, user)
 
     repo().insert_or_ignore(Stereotyped, missing_stereotypes)
 
     # Then grants
     # TODO: can we avoid attempting to re-insert existing grants
-    repo().insert_or_ignore(Grant, grants)
+    repo().insert_all_or_ignore(Grant, grants)
     # Then the mixins
     repo().insert_or_ignore(Named, named)
     repo().insert_or_ignore(Controlled, controlleds)
@@ -134,7 +134,7 @@ defmodule Bonfire.Boundaries.Users do
   end
 
   defp add_caretaker(objects, user),
-       do: Boundaries.take_care_of!(objects, user)
+    do: Boundaries.take_care_of!(objects, user)
 
   defp do_insert_main(user, %PreparedBoundaries{
          acls: acls,
