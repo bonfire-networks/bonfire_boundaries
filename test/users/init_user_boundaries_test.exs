@@ -220,9 +220,29 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
       assert Circles.list_my(user) == []
       assert repo().one(from s in Stereotyped, select: count(s), where: s.id == ^circle.id) == 0
       Users.create_missing_boundaries(user)
-      [circle] = Circles.list_my(user) |> debug()
-
+      [circle] = Circles.list_my(user)
       assert circle.stereotyped.named.name == "Those who follow me"
+    end
+
+    test "create missing acls" do
+      Process.put([:bonfire, :user_default_boundaries], %{
+        circles: %{},
+        acls: %{
+          i_may_administer: %{stereotype: :i_may_administer}
+        },
+        grants: %{},
+        controlleds: %{}
+      })
+
+      user = fake_user!()
+      [acl] = Acls.list_my(user, paginate?: false)
+      Acls.delete(acl, current_user: user)
+      assert Acls.list_my(user, paginate?: false) == []
+      assert repo().one(from s in Stereotyped, select: count(s), where: s.id == ^acl.id) == 0
+      Users.create_missing_boundaries(user)
+      [acl] = Acls.list_my(user, paginate?: false)
+
+      assert acl.stereotyped.named.name == "I may administer"
     end
   end
 end
