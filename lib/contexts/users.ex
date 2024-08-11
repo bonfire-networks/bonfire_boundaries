@@ -32,21 +32,24 @@ defmodule Bonfire.Boundaries.Users do
       > Bonfire.Boundaries.Users.create_default_boundaries(user)
   """
   def create_default_boundaries(user, opts \\ []) do
-    %PreparedBoundaries{
-      acls: acls,
-      circles: circles,
-      grants: grants,
-      named: named,
-      controlleds: controlleds,
-      stereotypes: stereotypes
-    } =
-      prepared_boundaries =
-      PreparedBoundaries.from_config(
-        user,
-        opts
-      )
-      |> debug()
+    PreparedBoundaries.from_config(
+      user,
+      opts
+    )
+    |> insert_prepared_boundaries(user)
+  end
 
+  defp insert_prepared_boundaries(
+         %PreparedBoundaries{
+           acls: acls,
+           circles: circles,
+           grants: grants,
+           named: named,
+           controlleds: controlleds,
+           stereotypes: stereotypes
+         } = prepared_boundaries,
+         user
+       ) do
     # first acls and circles
     insert_acls(user, acls)
     insert_circles(user, circles)
@@ -114,22 +117,17 @@ defmodule Bonfire.Boundaries.Users do
       |> Enum.filter(&(e(&1, :stereotype_id, nil) in missing_stereotypes_ids))
       |> debug("missing circles")
 
-    # first acls and circles
-    insert_acls(user, missing_acls)
-    insert_circles(user, missing_circles)
-
-    add_caretaker(missing_acls ++ missing_circles, user)
-
-    repo().insert_or_ignore(Stereotyped, missing_stereotypes)
-
-    # Then grants
-    # TODO: can we avoid attempting to re-insert existing grants
-    repo().insert_all_or_ignore(Grant, grants)
-    # Then the mixins
-    repo().insert_or_ignore(Named, named)
-    repo().insert_or_ignore(Controlled, controlleds)
-    # NOTE: The ACLs and Circles must be deleted when the user is deleted.
-    # Grants will take care of themselves because they have a strong pointer acl_id.
+    insert_prepared_boundaries(
+      %PreparedBoundaries{
+        acls: missing_acls,
+        circles: missing_circles,
+        grants: grants,
+        named: named,
+        controlleds: controlleds,
+        stereotypes: missing_stereotypes
+      },
+      user
+    )
   end
 
   defp add_caretaker(objects, user),
