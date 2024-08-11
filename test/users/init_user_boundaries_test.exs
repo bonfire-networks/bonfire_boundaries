@@ -220,9 +220,9 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
       assert Circles.list_my(user) == []
       assert repo().one(from s in Stereotyped, select: count(s), where: s.id == ^circle.id) == 0
       Users.create_missing_boundaries(user)
-      [circle] = Circles.list_my(user)
+      [circle] = Circles.list_my(user) |> debug()
 
-      assert circle.named.name == "test_name"
+      assert circle.stereotyped.named.name == "Those who follow me"
     end
   end
 end

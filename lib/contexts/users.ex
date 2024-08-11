@@ -49,7 +49,7 @@ defmodule Bonfire.Boundaries.Users do
 
     # first acls and circles
     do_insert_main(user, prepared_boundaries)
-    add_caretaker(prepared_boundaries, user)
+    add_caretaker(acls ++ circles, user)
     repo().insert_all_or_ignore(Stereotyped, stereotypes)
 
     # Then grants
@@ -119,6 +119,7 @@ defmodule Bonfire.Boundaries.Users do
       circles: missing_circles,
       stereotypes: missing_stereotypes
     })
+    add_caretaker(missing_acls ++ missing_circles, user)
 
     repo().insert_or_ignore(Stereotyped, missing_stereotypes)
 
@@ -132,19 +133,16 @@ defmodule Bonfire.Boundaries.Users do
     # Grants will take care of themselves because they have a strong pointer acl_id.
   end
 
-  defp add_caretaker(
-         %PreparedBoundaries{acls: acls, circles: circles, stereotypes: _stereotypes},
-         user
-       ),
-       do: Boundaries.take_care_of!(acls ++ circles, user)
+  defp add_caretaker(objects, user),
+       do: Boundaries.take_care_of!(objects, user)
 
   defp do_insert_main(user, %PreparedBoundaries{
          acls: acls,
          circles: circles,
          stereotypes: _stereotypes
        }) do
-    repo().insert_all(Acl, acls)
-    repo().insert_all(Circle, circles)
+    repo().insert_all(Acl, Enum.map(acls, &Map.take(&1, [:id])))
+    repo().insert_all(Circle, Enum.map(circles, &Map.take(&1, [:id])))
     # repo().insert_all_or_ignore(Stereotyped, stereotypes)
   end
 end
