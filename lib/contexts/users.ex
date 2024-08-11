@@ -48,7 +48,9 @@ defmodule Bonfire.Boundaries.Users do
       |> debug()
 
     # first acls and circles
-    do_insert_main(user, prepared_boundaries)
+    insert_acls(user, acls)
+    insert_circles(user, circles)
+
     add_caretaker(acls ++ circles, user)
     repo().insert_all_or_ignore(Stereotyped, stereotypes)
 
@@ -113,11 +115,8 @@ defmodule Bonfire.Boundaries.Users do
       |> debug("missing circles")
 
     # first acls and circles
-    do_insert_main(user, %PreparedBoundaries{
-      acls: missing_acls,
-      circles: missing_circles,
-      stereotypes: missing_stereotypes
-    })
+    insert_acls(user, missing_acls)
+    insert_circles(user, missing_circles)
 
     add_caretaker(missing_acls ++ missing_circles, user)
 
@@ -136,13 +135,11 @@ defmodule Bonfire.Boundaries.Users do
   defp add_caretaker(objects, user),
     do: Boundaries.take_care_of!(objects, user)
 
-  defp do_insert_main(user, %PreparedBoundaries{
-         acls: acls,
-         circles: circles,
-         stereotypes: _stereotypes
-       }) do
+  defp insert_acls(user, acls) do
     repo().insert_all(Acl, Enum.map(acls, &Map.take(&1, [:id])))
+  end
+
+  defp insert_circles(user, circles) do
     repo().insert_all(Circle, Enum.map(circles, &Map.take(&1, [:id])))
-    # repo().insert_all_or_ignore(Stereotyped, stereotypes)
   end
 end
