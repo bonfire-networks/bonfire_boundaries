@@ -206,11 +206,8 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
     test "create missing circles" do
       Process.put([:bonfire, :user_default_boundaries], %{
         circles: %{
-          followers: %{
-            id: "7DAPE0P1E1PERM1TT0F0110WME",
-            name: "Those who follow me",
-            stereotype: :followers
-          }
+          # users who have followed you
+          followers: %{stereotype: :followers}
         },
         acls: %{},
         grants: %{},
@@ -221,7 +218,6 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
       [circle] = Circles.list_my(user)
       Circles.delete(circle, current_user: user)
       assert Circles.list_my(user) == []
-      all = repo().all(from(s in Stereotyped))
       assert repo().one(from s in Stereotyped, select: count(s), where: s.id == ^circle.id) == 0
       Users.create_missing_boundaries(user)
       [circle] = Circles.list_my(user)
