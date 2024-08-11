@@ -97,28 +97,30 @@ defmodule Bonfire.Boundaries.Users do
       named: named,
       controlleds: controlleds,
       stereotypes: stereotypes
-    } = PreparedBoundaries.from_config(user, [], false)
 
-    stereotypes = stereotypes |> reject_existing_stereotypes(user)
+    } = PreparedBoundaries.from_config(user, [])
 
-    acls =
+    missing_stereotypes = stereotypes |> reject_existing_stereotypes(user)
+    missing_stereotypes_ids = stereotypes |> Enum.map(& &1.stereotype_id)
+
+    missing_acls =
       acls
-      |> Enum.filter(&(e(&1, :stereotype_id, nil) in stereotypes))
+      |> Enum.filter(&(e(&1, :stereotype_id, nil) in missing_stereotypes_ids))
       |> debug("missing acls")
 
-    circles =
+    missing_circles =
       circles
-      |> Enum.filter(&(e(&1, :stereotype_id, nil) in stereotypes))
+      |> Enum.filter(&(e(&1, :stereotype_id, nil) in missing_stereotypes_ids))
       |> debug("missing circles")
 
     # first acls and circles
     do_insert_main(user, %PreparedBoundaries{
-      acls: acls,
-      circles: circles,
-      stereotypes: stereotypes
+      acls: missing_acls,
+      circles: missing_circles,
+      stereotypes: missing_stereotypes
     })
 
-    repo().insert_or_ignore(Stereotyped, stereotypes)
+    repo().insert_or_ignore(Stereotyped, missing_stereotypes)
 
     # Then grants
     # TODO: can we avoid attempting to re-insert existing grants
@@ -141,8 +143,8 @@ defmodule Bonfire.Boundaries.Users do
          circles: circles,
          stereotypes: _stereotypes
        }) do
-    repo().insert_all_or_ignore(Acl, Enum.map(acls, &Map.take(&1, [:id])))
-    repo().insert_all_or_ignore(Circle, Enum.map(circles, &Map.take(&1, [:id])))
+    repo().insert_all(Acl, acls)
+    repo().insert_all(Circle, circles)
     # repo().insert_all_or_ignore(Stereotyped, stereotypes)
   end
 end
