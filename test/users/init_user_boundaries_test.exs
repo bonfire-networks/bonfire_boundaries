@@ -1,6 +1,7 @@
 defmodule Bonfire.Boundaries.InitUserBoundariesTest do
   use Bonfire.Boundaries.DataCase, async: true
   @moduletag :backend
+  alias Bonfire.Boundaries.Controlleds
   alias Erl2exVendored.Pipeline.Names
   alias Credo.Check.Refactor.ABCSize
   # alias Bonfire.Boundaries.Controlleds
@@ -224,25 +225,33 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
       assert circle.stereotyped.named.name == "Those who follow me"
     end
 
-    test "create missing acls" do
+    test "create missing controlleds" do
       Process.put([:bonfire, :user_default_boundaries], %{
         circles: %{},
-        acls: %{
-          i_may_administer: %{stereotype: :i_may_administer}
-        },
+        acls: %{},
         grants: %{},
-        controlleds: %{}
+        controlleds: %{
+          SELF: [
+            :locals_may_reply
+          ]
+        }
       })
 
-      user = fake_user!()
-      [acl] = Acls.list_my(user, paginate?: false)
-      Acls.delete(acl, current_user: user)
-      assert Acls.list_my(user, paginate?: false) == []
-      assert repo().one(from s in Stereotyped, select: count(s), where: s.id == ^acl.id) == 0
-      Users.create_missing_boundaries(user)
-      [acl] = Acls.list_my(user, paginate?: false)
+      %{id: user_id} = user = fake_user!()
 
-      assert acl.stereotyped.named.name == "I may administer"
+      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 2
+      repo().delete_many(from c in Controlled, where: c.id == ^user_id)
+      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 0
+      Users.create_missing_boundaries(user)
+
+      [
+        %Bonfire.Data.AccessControl.Controlled{
+          acl_id: "710CA1SMY1NTERACTANDREP1YY"
+        },
+        %Bonfire.Data.AccessControl.Controlled{
+          acl_id: "7W1DE1YAVA11AB1ET0SEENREAD"
+        }
+      ] = repo().all(from c in Controlled, where: c.id == ^user_id)
     end
   end
 end
