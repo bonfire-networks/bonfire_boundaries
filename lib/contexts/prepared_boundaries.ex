@@ -108,6 +108,9 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
     end
   end
 
+  @doc """
+  Creates PreparedBoundaries for a given user based on the runtime config.
+  """
   def from_config(user, opts, skip_acls_extra \\ false)
 
   def from_config(user, opts, false = _skip_acls_extra) do
