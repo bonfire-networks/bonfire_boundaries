@@ -265,34 +265,34 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         }
       ] = repo().all(from c in Controlled, where: c.id == ^user_id)
     end
-  end
 
-  test "create missing grants" do
-    Process.put([:bonfire, :user_default_boundaries], %{
-      circles: %{},
-      acls: %{
-        i_may_administer: %{stereotype: :i_may_administer}
-      },
-      grants: %{
-        i_may_administer: %{
-          SELF: [:see, :read]
-        }
-      },
-      controlleds: %{}
-    })
+    test "create missing grants" do
+      Process.put([:bonfire, :user_default_boundaries], %{
+        circles: %{},
+        acls: %{
+          i_may_administer: %{stereotype: :i_may_administer}
+        },
+        grants: %{
+          i_may_administer: %{
+            SELF: [:see, :read]
+          }
+        },
+        controlleds: %{}
+      })
 
-    %{id: user_id} = user = fake_user!()
-    assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 2
-    repo().delete_many(from c in Grant, where: c.subject_id == ^user_id)
-    assert repo().one(from c in Grant, select: count(c), where: c.subject_id == ^user_id) == 0
-    Users.create_missing_boundaries(user)
+      %{id: user_id} = user = fake_user!()
+      assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 2
+      repo().delete_many(from c in Grant, where: c.subject_id == ^user_id)
+      assert repo().one(from c in Grant, select: count(c), where: c.subject_id == ^user_id) == 0
+      Users.create_missing_boundaries(user)
 
-    [
-      %Bonfire.Data.AccessControl.Grant{subject_id: sub_id_1},
-      %Bonfire.Data.AccessControl.Grant{subject_id: sub_id_2}
-    ] = repo().all(from c in Grant, where: c.subject_id == ^user_id)
+      [
+        %Bonfire.Data.AccessControl.Grant{subject_id: sub_id_1},
+        %Bonfire.Data.AccessControl.Grant{subject_id: sub_id_2}
+      ] = repo().all(from c in Grant, where: c.subject_id == ^user_id)
 
-    assert sub_id_1 == sub_id_2
-    assert sub_id_1 == user_id
+      assert sub_id_1 == sub_id_2
+      assert sub_id_1 == user_id
+    end
   end
 end
