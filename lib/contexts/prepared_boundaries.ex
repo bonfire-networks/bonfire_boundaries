@@ -123,14 +123,11 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
   end
 
   def from_config(user, opts, true = _skip_acls_extra) do
-    # TODO: document what this is and find a better variable name
     prepare_boundaries(user, [], opts)
   end
 
   defp prepare_boundaries(user, acls_extra, opts) do
-    # debug(opts)
     user_default_boundaries = Boundaries.user_default_boundaries()
-    #  |> debug("create_default_boundaries")
     circles = prepare_circles(user_default_boundaries)
     acls = prepare_acls(user_default_boundaries)
 
@@ -156,7 +153,6 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
     }
   end
 
-  # support for create_default_boundaries/1
   defp stereotype(attrs, module) do
     case attrs[:stereotype] do
       nil ->
@@ -169,7 +165,6 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
     end
   end
 
-  # support for create_default_boundaries/1
   defp default_acl_id(acls, acl_id) do
     with nil <- Map.get(acls, acl_id, %{})[:id],
          nil <- Acls.get_id(acl_id) do
@@ -178,7 +173,6 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
     end
   end
 
-  # support for create_default_boundaries/1
   defp default_subject_id(_circles, user, :SELF), do: user.id
 
   defp default_subject_id(circles, _user, circle_id) do

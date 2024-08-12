@@ -47,7 +47,7 @@ defmodule Bonfire.Boundaries.Users do
            named: named,
            controlleds: controlleds,
            stereotypes: stereotypes
-         } = prepared_boundaries,
+         },
          user
        ) do
     # first acls and circles
