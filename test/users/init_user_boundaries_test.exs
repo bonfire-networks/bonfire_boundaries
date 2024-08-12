@@ -270,7 +270,9 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
   test "create missing grants" do
     Process.put([:bonfire, :user_default_boundaries], %{
       circles: %{},
-      acls: %{},
+      acls: %{
+        i_may_administer: %{stereotype: :i_may_administer}
+      },
       grants: %{
         i_may_administer: %{
           SELF: [:see, :read]

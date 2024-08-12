@@ -117,11 +117,18 @@ defmodule Bonfire.Boundaries.Users do
       |> Enum.filter(&(e(&1, :stereotype_id, nil) in missing_stereotypes_ids))
       |> debug("missing circles")
 
+    missing_acl_ids = missing_acls |> Enum.map(& &1.id)
+
+    missing_grants =
+      grants
+      |> Enum.filter(&(e(&1, :acl_id, nil) in missing_acl_ids))
+      |> debug("missing grants")
+
     insert_prepared_boundaries(
       %PreparedBoundaries{
         acls: missing_acls,
         circles: missing_circles,
-        grants: grants,
+        grants: missing_grants,
         named: named,
         controlleds: controlleds,
         stereotypes: missing_stereotypes
