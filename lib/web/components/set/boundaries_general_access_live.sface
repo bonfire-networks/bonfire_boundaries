@@ -238,7 +238,7 @@
       </div>
     {/for}
 
-    <!-- <div class="my-3 px-2 text-left items-start border-t border-base-content/20">
+    {!-- <div class="my-3 px-2 text-left items-start border-t border-base-content/20">
       <div class="items-start text-left text-xs font-semibold uppercase text-base-content/70 mb-2 pt-4">{l "Specific access"}</div>
       <StatefulComponent
         :if={Bonfire.Boundaries.Web.SetBoundariesButtonLive.clone_context(@to_boundaries) == false}
@@ -252,7 +252,7 @@
         to_circles={@to_circles}
         exclude_circles={@exclude_circles}
       />
-    </div> -->
+    </div> --}
     {!-- CREATE A NEW ONE --}
     <div :if={!@hide_custom} class="mt-1 pt-1 border-t border-base-content/20">
       <div class={
