@@ -182,7 +182,7 @@ defmodule Bonfire.Boundaries.BlockTest do
       alice = fake_user!(account)
       assert {:ok, _silenced} = Bonfire.Boundaries.Blocks.block(alice, :silence, current_user: me)
       conn = conn(user: alice, account: account)
-      {:ok, view, _html} = live(conn, "/")
+      {:ok, view, _html} = live(conn, "/feed")
       # write a post
       html_body = "epic html message"
       attrs = %{post_content: %{html_body: html_body}}
@@ -208,7 +208,7 @@ defmodule Bonfire.Boundaries.BlockTest do
       alice = fake_user!(account)
       assert {:ok, _silenced} = Bonfire.Boundaries.Blocks.block(alice, :silence, current_user: me)
       conn = conn(user: alice, account: account)
-      {:ok, view, _html} = live(conn, "/")
+      {:ok, view, _html} = live(conn, "/feed")
       # write a post
       html_body = "epic html message"
       attrs = %{post_content: %{html_body: html_body}}
@@ -241,7 +241,7 @@ defmodule Bonfire.Boundaries.BlockTest do
       alice = fake_user!(account)
       assert {:ok, _silenced} = Bonfire.Boundaries.Blocks.block(alice, :silence, current_user: me)
       conn = conn(user: alice, account: account)
-      {:ok, view, _html} = live(conn, "/")
+      {:ok, view, _html} = live(conn, "/feed")
       # write a post as alice and mention me
       html_body = "@#{me.character.username} epic html message"
       attrs = %{post_content: %{html_body: html_body}}
@@ -270,7 +270,7 @@ defmodule Bonfire.Boundaries.BlockTest do
       alice = fake_user!(account)
       assert {:ok, _silenced} = Bonfire.Boundaries.Blocks.block(alice, :silence, current_user: me)
       conn = conn(user: alice, account: account)
-      {:ok, view, _html} = live(conn, "/")
+      {:ok, view, _html} = live(conn, "/feed")
       # write a post as alice and mention me
       html_body = "@#{alice.character.username} epic html message"
       attrs = %{post_content: %{html_body: html_body}}
@@ -311,7 +311,7 @@ defmodule Bonfire.Boundaries.BlockTest do
       alice = fake_user!(account)
       assert {:ok, _ghosted} = Bonfire.Boundaries.Blocks.block(alice, :ghost, current_user: me)
       conn = conn(user: me, account: account)
-      {:ok, view, _html} = live(conn, "/")
+      {:ok, view, _html} = live(conn, "/feed")
       # write a post
       html_body = "epic html message"
       attrs = %{post_content: %{html_body: html_body}}
@@ -337,7 +337,7 @@ defmodule Bonfire.Boundaries.BlockTest do
       alice = fake_user!(account)
       assert {:ok, _ghosted} = Bonfire.Boundaries.Blocks.block(alice, :ghost, current_user: me)
       conn = conn(user: me, account: account)
-      {:ok, view, _html} = live(conn, "/")
+      {:ok, view, _html} = live(conn, "/feed")
       # write a post
       html_body = "epic html message"
       attrs = %{post_content: %{html_body: html_body}}
@@ -351,7 +351,7 @@ defmodule Bonfire.Boundaries.BlockTest do
 
       # login as alice
       conn = conn()
-      {:ok, view, _html} = live(conn, "/")
+      {:ok, view, _html} = live(conn, "/feed")
       # check that the post is not there
       assert render(view) =~ html_body
     end
@@ -363,7 +363,7 @@ defmodule Bonfire.Boundaries.BlockTest do
       alice = fake_user!(account)
       assert {:ok, _ghosted} = Bonfire.Boundaries.Blocks.block(alice, :ghost, current_user: me)
       conn = conn(user: me, account: account)
-      {:ok, view, _html} = live(conn, "/")
+      {:ok, view, _html} = live(conn, "/feed")
       # write a post and mention alice
       html_body = "@#{alice.character.username} epic html message"
       attrs = %{post_content: %{html_body: html_body}}
@@ -392,7 +392,7 @@ defmodule Bonfire.Boundaries.BlockTest do
       alice = fake_user!(account)
       assert {:ok, _ghosted} = Bonfire.Boundaries.Blocks.block(alice, :ghost, current_user: me)
       conn = conn(user: me, account: account)
-      {:ok, view, _html} = live(conn, "/")
+      {:ok, view, _html} = live(conn, "/feed")
       # write a post and DM alice
       html_body = "epic html message"
       attrs = %{post_content: %{html_body: html_body}}
@@ -442,7 +442,7 @@ defmodule Bonfire.Boundaries.BlockTest do
     #   assert {:ok, _ghosted} = Bonfire.Boundaries.Blocks.block(alice.id, :ghost, :instance_wide)
     #   # login as bob
     #   conn = conn(user: bob, account: account)
-    #   {:ok, view, _html} = live(conn, "/")
+    #   {:ok, view, _html} = live(conn, "/feed")
     #   # write a post
     #   html_body = "epic html message"
     #   attrs = %{post_content: %{html_body: html_body}}
@@ -472,7 +472,7 @@ defmodule Bonfire.Boundaries.BlockTest do
     #   assert {:ok, _ghosted} = Bonfire.Boundaries.Blocks.block(alice.id, :ghost, :instance_wide)
     #   # login as bob
     #   conn = conn(user: bob, account: account)
-    #   {:ok, view, _html} = live(conn, "/")
+    #   {:ok, view, _html} = live(conn, "/feed")
     #   # write a post
     #   html_body = "epic html message"
     #   attrs = %{post_content: %{html_body: html_body}}
