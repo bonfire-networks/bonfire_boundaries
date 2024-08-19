@@ -750,9 +750,24 @@ defmodule Bonfire.Boundaries.Circles do
       iex> Bonfire.Boundaries.Circles.empty_circles([circle1, circle2])
       {10, nil}
   """
-  def empty_circles(circles) when is_list(circles) do
+  def empty_circles(circles) do
     from(e in Encircle,
-      where: e.circle_id in ^ulid(circles)
+      where: e.circle_id in ^ulids(circles)
+    )
+    |> repo().delete_all()
+  end
+
+  @doc """
+  Removes user(s) from all circles.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.empty_circles([circle1, circle2])
+      {10, nil}
+  """
+  def leave_all_circles(users) do
+    from(e in Encircle,
+      where: e.subject_id in ^ulids(users)
     )
     |> repo().delete_all()
   end

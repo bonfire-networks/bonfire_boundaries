@@ -785,7 +785,7 @@ defmodule Bonfire.Boundaries.Acls do
     list_q(opts)
     |> where(
       [caretaker: caretaker],
-      caretaker.caretaker_id in ^[ulid(opts[:current_user]), Fixtures.admin_circle()]
+      caretaker.caretaker_id in ^[current_user_id(opts), Fixtures.admin_circle()]
     )
     |> many_with_opts(opts)
   end
