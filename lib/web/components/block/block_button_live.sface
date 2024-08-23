@@ -322,7 +322,7 @@
                 <button
                   :on-click="Bonfire.Boundaries.Blocks:block_instance_wide"
                   phx-value-id={e(@object, :id, @object)}
-                  class="btn btn-error  btn-outline normal-case"
+                  class="btn btn-error  normal-case"
                 >{l("Disable this user")}</button>
               {#match _}
                 <p class="mt-0 text-sm">

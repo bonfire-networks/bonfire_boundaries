@@ -28,7 +28,7 @@
         scope={@scope}
         circle_id={@current_params["id"]}
       />
-    {#match "admin_circle"}
+      <!-- {#match "admin_circle"}
       <StatefulComponent
         :if={current_user(@__context__)}
         module={maybe_component(Bonfire.Boundaries.Web.CircleLive, @__context__)}
@@ -49,7 +49,7 @@
         show_add={maybe_apply(Bonfire.Me.Accounts, :is_admin?, @__context__) == true}
         read_only
         circle_id={Bonfire.Boundaries.Fixtures.mod_circle()}
-      />
+      /> -->
     {#match "acls"}
       <StatefulComponent
         :if={current_user(@__context__)}
