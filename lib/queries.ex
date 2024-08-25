@@ -16,6 +16,7 @@ defmodule Bonfire.Boundaries.Queries do
   # providing) the return type of a subquery.
 
   # import Untangle
+  use Bonfire.Common.E
   import Ecto.Query
   alias Bonfire.Boundaries.Summary
   alias Bonfire.Boundaries.Verbs
@@ -57,7 +58,7 @@ defmodule Bonfire.Boundaries.Queries do
           require Untangle
           query = unquote(query)
           opts = unquote(opts)
-          verbs = List.wrap(Bonfire.Common.Utils.e(opts, :verbs, [:see, :read]))
+          verbs = List.wrap(e(opts, :verbs, [:see, :read]))
 
           case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
             true ->
@@ -93,7 +94,7 @@ defmodule Bonfire.Boundaries.Queries do
 
               # join(
               #   unquote(query),
-              #   Bonfire.Common.Utils.e(opts, :boundary_join, :inner),
+              #   e(opts, :boundary_join, :inner),
               #   [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
               #   v in subquery(vis),
               #   on: unquote(field_ref) == v.object_id
@@ -246,7 +247,7 @@ defmodule Bonfire.Boundaries.Queries do
       vis =
         query_with_summary(
           agent,
-          Common.Utils.e(opts, :verbs, [:see, :read]),
+          e(opts, :verbs, [:see, :read]),
           from(Summary, where: [object_id: parent_as(:main_object).id])
         )
 

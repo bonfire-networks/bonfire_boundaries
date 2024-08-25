@@ -6,6 +6,8 @@ defmodule Bonfire.Boundaries.Debug do
   """
 
   use Arrows
+  use Bonfire.Common.E
+
   # import Untangle
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Verbs
@@ -39,7 +41,7 @@ defmodule Bonfire.Boundaries.Debug do
     for encircle <- user.encircles do
       %{
         circle_id: encircle.circle_id,
-        circle_name: Utils.e(encircle.circle, :named, :name, nil)
+        circle_name: e(encircle.circle, :named, :name, nil)
       }
     end
     |> Scribe.print()
@@ -81,9 +83,9 @@ defmodule Bonfire.Boundaries.Debug do
       %{
         acl_id: acl.id,
         acl_name:
-          Utils.e(acl, :named, :name, nil) ||
-            "[stereotype] " <> Utils.e(acl, :stereotyped, :named, :name, ""),
-        acl_stereotype: Utils.e(acl, :stereotyped, :stereotype_id, nil),
+          e(acl, :named, :name, nil) ||
+            "[stereotype] " <> e(acl, :stereotyped, :named, :name, ""),
+        acl_stereotype: e(acl, :stereotyped, :stereotype_id, nil),
         grant_verb: Verbs.get!(grant.verb_id).verb,
         grant_subject: Circles.get(grant.subject_id)[:name] || grant.subject_id,
         grant_value: grant.value

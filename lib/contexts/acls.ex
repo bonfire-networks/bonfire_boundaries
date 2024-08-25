@@ -438,7 +438,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   defp reply_to_grants(changeset_or_obj, preset, _opts) do
     reply_to_creator =
-      Utils.e(
+      e(
         changeset_or_obj,
         :changes,
         :replied,
@@ -448,7 +448,7 @@ defmodule Bonfire.Boundaries.Acls do
         :creator,
         nil
       ) ||
-        Utils.e(
+        e(
           changeset_or_obj,
           :replied,
           :reply_to,
@@ -479,8 +479,8 @@ defmodule Bonfire.Boundaries.Acls do
 
   defp mentions_grants(changeset_or_obj, preset, _opts) do
     mentions =
-      Utils.e(changeset_or_obj, :changes, :post_content, :changes, :mentions, nil) ||
-        Utils.e(changeset_or_obj, :post_content, :mentions, nil)
+      e(changeset_or_obj, :changes, :post_content, :changes, :mentions, nil) ||
+        e(changeset_or_obj, :post_content, :mentions, nil)
 
     if mentions && mentions != [] do
       # debug(mentions, "mentions/tags may be added to a new ACL")
