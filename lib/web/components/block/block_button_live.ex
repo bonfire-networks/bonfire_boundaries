@@ -8,7 +8,7 @@ defmodule Bonfire.Boundaries.Web.BlockButtonLive do
   prop is_local_user, :any, default: nil
 
   prop scope, :any, default: nil
-  prop type, :string, default: nil
+  prop type, :atom, default: :block
   prop my_block, :any, default: nil
 
   prop only_admin, :boolean, default: false
@@ -23,4 +23,17 @@ defmodule Bonfire.Boundaries.Web.BlockButtonLive do
   prop label, :string, default: nil
   prop open_btn_label, :string, default: nil
   prop title, :string, default: nil
+
+  def render(assigns) do
+    assigns
+    |> assign_new(:type_display, fn -> case assigns[:type] do
+       :block -> l("Block")
+       :silence -> l("Silence")
+       :ghost -> l("Ghost")
+       :hide -> l("Hide")
+       type -> type
+      end
+    end)
+    |> render_sface()
+  end
 end

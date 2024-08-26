@@ -6,9 +6,9 @@
     "block_#{@parent_id}_#{id(@object)}_#{@type}",
     __MODULE__
   )}
-  title_text={@title || l("%{type} %{user_or_instance_name}", type: @type, user_or_instance_name: @label)}
+  title_text={@title || l("%{type} %{user_or_instance_name}", type: @type_display, user_or_instance_name: @label)}
 >
-  {#if @type == "silence"}
+  {#if @type in [:silence, :hide]}
     {#if !@only_admin}
       {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :silence, current_user: current_user(@__context__))}
         <div class="text-sm mt-3">{l("By unsilencing %{user_or_instance_name}, you will see things they publish again.",
@@ -24,7 +24,14 @@
         </button>
       {#else}
         <div class="my-3">
-          <div class="text-sm">{l("By silencing %{user_or_instance_name}, you will stop seeing things they publish",
+        {#if @type == :hide}
+        <div class="text-sm">
+          {l("You can hide %{this_object} if you don't want to see it ever again.",
+              this_object: @label
+            )}</div>
+            {#else}
+          <div class="text-sm">
+          {l("By silencing %{user_or_instance_name}, you will stop seeing things they publish",
               user_or_instance_name: @label
             )}</div>
           <div x-data="{active: false}" role="region" class="text-base-content">
@@ -61,6 +68,7 @@
               </div>
             </div>
           </div>
+          {/if}
         </div>
         <button
           data-role="silence"
@@ -68,7 +76,7 @@
           phx-value-id={e(@object, :id, @object)}
           type="button"
           class="btn w-full btn-warning normal-case"
-        >{l("Silence")}
+        >{@type_display}
         </button>
       {/if}
     {/if}
@@ -92,7 +100,12 @@
             <div class="text-base font-semibold">{l("Super powers")}</div>
             <p class="mt-0 text-sm">
               {l(
-                "You can enforce the silence for all users of your instance. All local users will stop seeing %{user_or_instance_name} or their content",
+                "%{silence} %{user_or_instance_name} for all users of your instance.",
+                user_or_instance_name: @label,
+                silence: @type_display
+              )}
+              {if @type==:silence, do: l(
+                "All local users will stop seeing %{user_or_instance_name} or their content.",
                 user_or_instance_name: @label
               )}
             </p>
@@ -100,12 +113,12 @@
               :on-click="Bonfire.Boundaries.Blocks:silence_instance_wide"
               phx-value-id={e(@object, :id, @object)}
               class="btn btn-error  btn-outline normal-case"
-            >{l("Silence instance-wide")}</button>
+            >{l("%{silence} instance-wide", silence: @type_display)}</button>
           </div>
         {/if}
       </div>
     {/if}
-  {#elseif @type == "ghost"}
+  {#elseif @type == :ghost}
     {#if !@only_admin}
       {#if Bonfire.Boundaries.Blocks.is_blocked?(@object, :ghost, current_user: current_user(@__context__))}
         <div class="text-sm mt-3">{l("By unghosting %{user_or_instance_name}, they will see things you publish again.",
@@ -347,23 +360,29 @@
   <:open_btn>
     <div class={e(@class, "btn btn-sm flex items-center gap-2 btn-outline ")}>
       <#Icon
-        :if={@with_icon && @type == "ghost"}
+        :if={@with_icon && @type == :ghost}
         iconify="mingcute:ghost-fill"
         class="w-4 h-4 stroke-1 text-base-content/70"
       />
       <#Icon
-        :if={@with_icon && @type == "silence"}
+        :if={@with_icon && @type == :silence}
         iconify="heroicons-solid:volume-off"
         class="w-4 h-4 stroke-1 text-base-content/70"
       />
       <#Icon
-        :if={@with_icon && @type == "block"}
+        :if={@with_icon && @type == :block}
         iconify="heroicons-solid:ban"
         class="w-4 h-4 stroke-1 text-base-content/70"
       />
+      <#Icon
+        :if={@with_icon && @type == :hide}
+        iconify="heroicons-solid:eye-off"
+        class="w-4 h-4 stroke-1 text-base-content/70"
+      />
+      
       <span :if={!@hide_text} class="text-left truncate ellipsis">
         {@open_btn_label ||
-          l("%{type} %{user_or_instance_name}", type: @type, user_or_instance_name: @label)}
+          l("%{type} %{user_or_instance_name}", type: @type_display, user_or_instance_name: @label)}
       </span>
     </div>
   </:open_btn>

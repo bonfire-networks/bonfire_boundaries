@@ -18,12 +18,12 @@
       {#if !@as_icon}
         <div class="flex items-center w-full gap-2 text-sm text-base-content">
           <#Icon iconify="fluent:people-list-16-filled" class="w-4 h-4 shrink-0" />
-          <span>{l("Add to circles")}</span>
+          <span>{l("Add %{name} to a circle", name: @name)}</span>
         </div>
       {#else}
         <div class="btn btn-sm w-full flex-1 btn-outline">
           <#Icon iconify="fluent:people-list-16-filled" class="w-4 h-4 shrink-0" />
-          <span class="font-semibold">{l("Add to circles")}</span>
+          <span class="font-semibold">{l("Add %{name} to a circle", name: @name)}</span>
         </div>
       {/if}
     </:open_btn>

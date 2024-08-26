@@ -77,7 +77,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
       # You can handle errors here
       error ->
         IO.inspect(error, label: "Error")
-        {:noreply, assign_flash(socket, :error, l("Could not unblock"))}
+        {:noreply, assign_flash(socket, :error, l("Could not block"))}
     end
   end
 
@@ -100,7 +100,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
       # You can handle errors here
       error ->
         IO.inspect(error, label: "Error")
-        {:noreply, assign_flash(socket, :error, l("Could not block"))}
+        {:noreply, assign_flash(socket, :error, l("Could not block instance-wide"))}
     end
   end
 
@@ -123,7 +123,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
       # You can handle errors here
       error ->
         IO.inspect(error, label: "Error")
-        {:noreply, assign_flash(socket, :error, l("Could not unblock"))}
+        {:noreply, assign_flash(socket, :error, l("Could not unblock instance-wide"))}
     end
   end
 
@@ -169,7 +169,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
       # You can handle errors here
       error ->
         IO.inspect(error, label: "Error")
-        {:noreply, assign_flash(socket, :error, l("Could not unghost"))}
+        {:noreply, assign_flash(socket, :error, l("Could not ghost"))}
     end
   end
 
@@ -191,7 +191,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
       # You can handle errors here
       error ->
         IO.inspect(error, label: "Error")
-        {:noreply, assign_flash(socket, :error, l("Could not ghost"))}
+        {:noreply, assign_flash(socket, :error, l("Could not ghost instance-wide"))}
     end
   end
 
@@ -213,7 +213,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
       # You can handle errors here
       error ->
         IO.inspect(error, label: "Error")
-        {:noreply, assign_flash(socket, :error, l("Could not unghost"))}
+        {:noreply, assign_flash(socket, :error, l("Could not unghost instance-wide"))}
     end
   end
 
@@ -236,8 +236,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
       # This block will be executed if either of the unblock operations fails
       # You can handle errors here
       error ->
-        IO.inspect(error, label: "Error")
-        {:noreply, assign_flash(socket, :error, l("Could not unblock"))}
+        {:noreply, assign_flash(socket, :error, l("Could not unsilence"))}
     end
   end
 
@@ -260,8 +259,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
       # This block will be executed if either of the unblock operations fails
       # You can handle errors here
       error ->
-        IO.inspect(error, label: "Error")
-        {:noreply, assign_flash(socket, :error, l("Could not unblock"))}
+        {:noreply, assign_flash(socket, :error, l("Could not silence"))}
     end
   end
 
@@ -282,8 +280,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
       # This block will be executed if either of the unblock operations fails
       # You can handle errors here
       error ->
-        IO.inspect(error, label: "Error")
-        {:noreply, assign_flash(socket, :error, l("Could not unblock"))}
+        {:noreply, assign_flash(socket, :error, l("Could not silence instance-wide"))}
     end
   end
 
@@ -304,8 +301,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
       # This block will be executed if either of the unblock operations fails
       # You can handle errors here
       error ->
-        IO.inspect(error, label: "Error")
-        {:noreply, assign_flash(socket, :error, l("Could not unblock"))}
+        {:noreply, assign_flash(socket, :error, l("Could not unsilence instance-wide"))}
     end
   end
 
