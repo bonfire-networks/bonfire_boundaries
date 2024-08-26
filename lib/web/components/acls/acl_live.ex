@@ -394,6 +394,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     {:noreply,
      with {del, _} when is_integer(del) and del > 0 <-
             Grants.remove_subject_from_acl(subject, acl_id) do
+       Bonfire.UI.Common.OpenModalLive.close()
+
        assign_flash(socket, :info, l("Removed from boundary"))
        |> assign_updated(true)
 

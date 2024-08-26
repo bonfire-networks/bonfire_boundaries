@@ -113,6 +113,15 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
         socket
         |> assign_flash(:info, l("Permission edited!"))
         |> maybe_assign_settings(edited)
+        |> assign(
+          :role_verbs,
+          Bonfire.Boundaries.Roles.role_verbs(:all,
+            one_scope_only: socket.assigns[:scope_type] not in [:smart_input],
+            scope: scope,
+            current_user: current_user(edited)
+          )
+          |> debug("updated role_verbsssss")
+        )
       }
     else
       other ->

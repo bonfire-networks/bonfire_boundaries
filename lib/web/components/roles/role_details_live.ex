@@ -11,9 +11,9 @@ defmodule Bonfire.Boundaries.Web.RoleDetailsLive do
 
   prop event_target, :any, default: nil
 
-  def update(assigns, socket) do
-    {:ok,
-     socket
-     |> assign(assigns)}
-  end
+  # def update(assigns, socket) do
+  #   {:ok,
+  #    socket
+  #    |> assign(assigns)}
+  # end
 end

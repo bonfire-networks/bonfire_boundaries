@@ -19,7 +19,7 @@
   </div>
 </div>
 <div x-cloak x-show="open" x-collapse>
-  {!-- TODO: don't render until opened (using LV instead of Alpine) --}
+  {!-- TODO: do not render until opened (using LV instead of Alpine) --}
   <div class="">
     <ul class="">
       {#for verb <- e(@role, :can_verbs, nil) || []}
