@@ -10,7 +10,7 @@
     </div>
 
     <:open_btn>
-      <div class="normal-case  btn !border !border-primary/30 btn-primary btn-sm btn-outline">
+      <div class="btn btn-neutral btn-sm">
         {l("New circle")}
       </div>
     </:open_btn>
