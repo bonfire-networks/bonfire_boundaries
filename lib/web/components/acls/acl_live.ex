@@ -212,15 +212,13 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     acl = e(socket.assigns, :acl, nil)
     scope = e(socket.assigns, :scope, nil)
 
-    grants =
+    granted =
       Enum.map(subjects, fn {subject_id, role_name} ->
         Grants.grant_role(subject_id, acl, role_name, current_user: current_user, scope: scope)
       end)
-      |> List.flatten()
+      |> debug("done")
 
-    # |> debug("done")
-
-    with [:ok] <- Keyword.keys(grants) |> Enum.uniq() do
+    if Enums.all_ok?(granted) do
       {
         :noreply,
         socket
@@ -231,10 +229,9 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         # )
       }
     else
-      other ->
-        error(other)
+      error(granted, "Could not grant role")
 
-        {:noreply, assign_error(socket, l("Could not assign the role"))}
+      {:noreply, assign_error(socket, l("Could not assign the role"))}
     end
   end
 
@@ -317,7 +314,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   defp results_for_multiselect(results, live_select_id, socket) do
     results
     |> Bonfire.Boundaries.Web.SetBoundariesLive.results_for_multiselect()
-    |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
+    |> debug()
+
+    # |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
+    # FIXME! creates an infinite loop
 
     {:noreply, socket}
   end

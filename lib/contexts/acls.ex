@@ -708,7 +708,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   defp changeset(:create, attrs, _opts, :system), do: changeset_cast(attrs)
 
-  defp changeset(:create, attrs, opts, :instance),
+  defp changeset(:create, attrs, opts, instance) when instance in [:instance, :instance_wide],
     do:
       changeset(:create, attrs, opts, %{
         id: Bonfire.Boundaries.Fixtures.admin_circle()

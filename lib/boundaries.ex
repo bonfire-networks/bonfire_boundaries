@@ -537,6 +537,10 @@ defmodule Bonfire.Boundaries do
   """
   def can?(subject, verbs, object, opts \\ [])
 
+  # just for typos ;)
+  def can?(subject, can_verbs?, :instance_wide, opts),
+    do: can?(subject, can_verbs?, :instance, opts)
+
   def can?(subject, can_verbs?, %{verbs: can_verbs!, value: true} = object_boundary, opts)
       when is_list(can_verbs!) do
     debug(object_boundary, " preloaded object_boundary")

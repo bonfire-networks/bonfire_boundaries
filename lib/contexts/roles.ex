@@ -70,7 +70,7 @@ defmodule Bonfire.Boundaries.Roles do
       to_options(opts)
       |> Keyword.put_new(:one_scope_only, true)
 
-    if opts[:scope] == :instance do
+    if opts[:scope] in [:instance, :instance_wide] do
       Config.get(key, %{})
     else
       Settings.get(key, %{}, opts)

@@ -234,6 +234,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         ]
 
     cannot_read = Enum.reject(all_verb_names, fn v -> v == :request end)
+    cannot_discover = Enum.reject(all_verb_names, fn v -> v in verbs_read_request end)
     cannot_interact = Enum.reject(all_verb_names, fn v -> v in verbs_see_read_request end)
     cannot_participate = Enum.reject(all_verb_names, fn v -> v in verbs_interact_incl_boost end)
 
@@ -253,6 +254,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         contribute: %{usage: :ops, can_verbs: verbs_contribute, read_only: true},
         moderate: %{usage: :ops, can_verbs: verbs_moderate, read_only: false},
         administer: %{can_verbs: all_verb_names, read_only: true},
+        cannot_discover: %{cannot_verbs: cannot_discover, read_only: true},
         cannot_read: %{cannot_verbs: cannot_read, read_only: true},
         cannot_interact: %{cannot_verbs: cannot_interact, read_only: true},
         cannot_participate: %{cannot_verbs: cannot_participate, read_only: true},
@@ -402,6 +404,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           id: "1ANY10CA1VSERCANC0NTR1BVTE",
           name: "Local users may contribute"
         },
+        followed_may_reply: %{
+          id: "1HANDP1CKEDZEPE0P1E1F0110W",
+          name: "People who I follow may read, interact, and reply",
+          stereotype: true
+        },
 
         ### Stereotypes - placeholders for special per-user (or per-object) ACLs the system will manage.
 
@@ -425,7 +432,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # mentions_may_interact: %{id: "7MENT10NSCAN1NTERACTW1TH1T", name: "Mentions may read and interact", stereotype: true},
         # mentions_may_reply:    %{id: "7MENT10NSCANEVENREP1YT01TS", name: "Mentions may read, interact and reply", stereotype: true},
 
-        ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
+        ## "Negative" ACLs 
+
+        no_follow: %{
+          id: "1MVSTREQVESTBEF0REF0110W1N",
+          name: "People must request to follow"
+        },
+
+        # Apply overrides for ghosting and silencing purposes.
         ghosted_cannot_anything: %{
           id: "0H0STEDCANTSEE0RD0ANYTH1NG",
           name: "People I ghosted cannot see me",
@@ -438,17 +452,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         },
         cannot_discover_if_silenced: %{
           id: "2HEYS11ENCEDMES0CAN0TSEEME",
-          name: "People who silenced me can not discover me",
+          name: "People who silenced me cannot discover me",
           stereotype: true
-        },
-        followed_may_reply: %{
-          id: "1HANDP1CKEDZEPE0P1E1F0110W",
-          name: "People who I follow may read, interact, and reply",
-          stereotype: true
-        },
-        no_follow: %{
-          id: "1MVSTREQVESTBEF0REF0110W1N",
-          name: "People must request to follow"
         }
       },
       ### Grants are the entries of an ACL and define the permissions a user or circle has for content using this ACL.
@@ -529,11 +534,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           # i_may_read:           %{stereotype: :i_may_read},
           # i_may_reply:          %{stereotype: :i_may_interact},
           i_may_administer: %{stereotype: :i_may_administer},
+          my_followed_may_reply: %{stereotype: :followed_may_reply},
           ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
           my_ghosted_cannot_anything: %{stereotype: :ghosted_cannot_anything},
           my_silenced_cannot_reach_me: %{stereotype: :silenced_cannot_reach_me},
-          my_cannot_discover_if_silenced: %{stereotype: :cannot_discover_if_silenced},
-          my_followed_may_reply: %{stereotype: :followed_may_reply}
+          my_cannot_discover_if_silenced: %{stereotype: :cannot_discover_if_silenced}
         },
         ### Data structure:
         ### * The outer keys are ACL names declared above.

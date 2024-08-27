@@ -198,7 +198,13 @@ defmodule Bonfire.Boundaries.Grants do
       iex> Bonfire.Boundaries.Grants.grant_role("subject_123", "acl_456", :admin, [])
       {:ok, %Grant{}}
   """
-  def grant_role(subject_id, acl_id, role, opts \\ []) do
+  def grant_role(subject, acl_id, role, opts \\ [])
+
+  def grant_role(subjects, acl_id, role, opts) when is_list(subjects) do
+    Enum.flat_map(subjects, &grant_role(&1, acl_id, role, opts))
+  end
+
+  def grant_role(subject_id, acl_id, role, opts) do
     debug(opts, "opts")
 
     with {:ok, can_verbs, cannot_verbs} <- Roles.verbs_for_role(role, opts) do

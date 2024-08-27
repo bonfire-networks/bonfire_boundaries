@@ -10,6 +10,8 @@ defmodule Bonfire.Boundaries.Blocks do
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Circles
+  alias Bonfire.Boundaries.Acls
+  alias Bonfire.Boundaries.Grants
   # alias Bonfire.Data.Identity.User
   # alias Bonfire.Data.AccessControl.Grant
   # alias Bonfire.Data.Identity.Caretaker
@@ -43,6 +45,10 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   def types_blocked(type) when type in [:silence, :silence_them] do
+    [:silence_them]
+  end
+
+  def types_blocked(:hide) do
     [:silence_them]
   end
 
@@ -117,6 +123,10 @@ defmodule Bonfire.Boundaries.Blocks do
   """
   def block(user_or_instance_to_block, block_type \\ nil, scope)
 
+  # just for typos ;)
+  def block(user_or_instance, block_type, :instance),
+    do: block(user_or_instance, block_type, :instance_wide)
+
   def block(
         %{__struct__: schema, display_hostname: display_hostname} = _instance_to_block,
         block_type,
@@ -138,8 +148,8 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   def block(user_or_instance_to_block, block_type, scope) do
-    with {:ok, blocked} <- mutate(:block, user_or_instance_to_block, block_type, scope) do
-      debug(blocked, "blooocked")
+    with {:ok, result} <- mutate(:block, user_or_instance_to_block, block_type, scope) do
+      debug(result, "blooocked")
 
       if user_or_instance_to_block != :instance_wide and scope != :instance_wide do
         me = Utils.current_user_required!(scope)
@@ -155,7 +165,7 @@ defmodule Bonfire.Boundaries.Blocks do
           ])
         end
 
-        if :silence_them in types_blocked do
+        if block_type != :hide and :silence_them in types_blocked do
           debug("unfollow the person I am silencing")
 
           Utils.maybe_apply(Bonfire.Social.Graph.Follows, :unfollow, [
@@ -165,7 +175,7 @@ defmodule Bonfire.Boundaries.Blocks do
         end
       end
 
-      {:ok, blocked}
+      {:ok, result}
     end
   end
 
@@ -180,8 +190,8 @@ defmodule Bonfire.Boundaries.Blocks do
       iex> Bonfire.Boundaries.Blocks.unblock(user, :silence, :instance_wide)
       {:ok, "Unblocked"}
   """
-  def unblock(user_or_instance_to_block, block_type \\ nil, scope) do
-    mutate(:unblock, user_or_instance_to_block, block_type, scope)
+  def unblock(user_or_instance_to_unblock, block_type \\ nil, scope) do
+    mutate(:unblock, user_or_instance_to_unblock, block_type, scope)
   end
 
   @doc """
@@ -202,6 +212,42 @@ defmodule Bonfire.Boundaries.Blocks do
   def unblock_all(block_type, scope) do
     user_block_circles(current_user(scope), block_type)
     |> Circles.empty_circles()
+  end
+
+  # just for typos ;)
+  defp mutate(block_or_unblock, user_or_instance_to_block_or_unblock, block_type, :instance),
+    do: mutate(block_or_unblock, user_or_instance_to_block_or_unblock, block_type, :instance_wide)
+
+  defp mutate(:block, object_to_hide, :hide, scope) do
+    # WIP
+
+    current_user = current_user(scope)
+    acl = Acls.get_or_create_object_custom_acl(object_to_hide, current_user || scope)
+
+    who_to_hide_it_from =
+      if scope == :instance_wide do
+        # hiding instance-wide means we hide for these circles
+        instance_wide_circles([:guest, :local, :activity_pub])
+      else
+        current_user
+      end
+
+    granted =
+      Grants.grant_role(who_to_hide_it_from, acl, :cannot_discover,
+        current_user: current_user,
+        scope: scope
+      )
+      |> debug("done")
+
+    if Enums.all_ok?(granted) do
+      {:ok, l("Hidden")}
+    else
+      error(granted, l("Could not hide it"))
+    end
+  end
+
+  defp mutate(_, object_to_hide, :hide, scope) do
+    error("Unhiding is not yet implemented")
   end
 
   defp mutate(
@@ -231,10 +277,9 @@ defmodule Bonfire.Boundaries.Blocks do
   defp mutate(block_or_unblock, user_or_instance_to_block, block_type, scope)
        when block_type in [:silence, :silence_them] do
     current_user = Utils.current_user_required!(scope)
-    silence_them = types_blocked(block_type)
 
     debug(
-      "add silence block to both users' circles, one to my #{inspect(silence_them)} and the other to their :silence_me"
+      "add silence block to both users' circles, one to current_user's :silence_them and the other to user_or_instance_to_block's :silence_me"
     )
 
     # my list of people I've silenced
@@ -242,7 +287,7 @@ defmodule Bonfire.Boundaries.Blocks do
            mutate_blocklists(
              block_or_unblock,
              user_or_instance_to_block,
-             silence_them,
+             types_blocked(block_type),
              current_user
            ),
          # their list of people who silenced them (this list isn't meant to be visible to them, but is used so queries can filter stuff using `Bonfire.Boundaries.Queries`)
@@ -278,6 +323,10 @@ defmodule Bonfire.Boundaries.Blocks do
       true
   """
   def is_blocked?(user_or_instance, block_type \\ :any, opts \\ [])
+
+  # just for typos ;)
+  def is_blocked?(user_or_instance, block_type, :instance),
+    do: is_blocked?(user_or_instance, block_type, :instance_wide)
 
   def is_blocked?(user_or_instance, block_type, :instance_wide)
       when not is_nil(user_or_instance) do

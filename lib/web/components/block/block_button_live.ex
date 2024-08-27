@@ -26,14 +26,19 @@ defmodule Bonfire.Boundaries.Web.BlockButtonLive do
 
   def render(assigns) do
     assigns
-    |> assign_new(:type_display, fn -> case assigns[:type] do
-       :block -> l("Block")
-       :silence -> l("Silence")
-       :ghost -> l("Ghost")
-       :hide -> l("Hide")
-       type -> type
+    |> assign_new(:type_display, fn ->
+      case assigns[:type] do
+        :block -> l("Block")
+        :silence -> l("Silence")
+        :ghost -> l("Ghost")
+        :hide -> l("Hide")
+        type -> type
       end
     end)
+    |> assign(
+      :can_instance_wide?,
+      Bonfire.Boundaries.can?(assigns[:__context__], :block, :instance_wide)
+    )
     |> render_sface()
   end
 end

@@ -21,7 +21,7 @@
       </section>
     {#match nil}
       <div>
-        <div class="p-4 border-b border-base-content/20">
+        <div :if={!@setting_boundaries} class="p-4 border-b border-base-content/20">
           <span class="text-base-content/70">
             {e(@acl, :extra_info, :summary, "No description provided for this boundary preset.")}
           </span>
