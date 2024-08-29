@@ -8,18 +8,18 @@ You can create custom groups of contacts (circles) and grant them specific permi
 > These limits can be physical, like curtains or doors; digital, like sharing settings on social media; in writing, like codes of conduct; emotional, like feeling comfortable to take time for self-care; or mental, like choosing what you pay attention to. In Bonfire, boundaries can help limit the type of interactions that others may have with you or things you post.
 > Boundaries are important because they help you protect yourself, maintain your autonomy, and communicate your needs and expectations clearly.
 
-## Glossary 
+## Glossary
 
-| Term        | Definition                                                                  |
-|-------------|-----------------------------------------------------------------------------|
-| **Subject** or **User**    | An individual who interacts with the system.                                |
-| **[Circle](Bonfire.Boundaries.Circles.html)**  | A categorization method for users, allowing users to group other users (e.g., colleagues, friends).    |
-| **[Verb](Bonfire.Boundaries.Verbs.html)**    | An action that a user can perform (e.g., read, reply).                      |
-| **Permission** | A value indicating whether an action is allowed (`true`), denied (`false`), or `nil`. |
-| **[Grant](Bonfire.Boundaries.Grants.html)**   | Links a user or circle with a verb and permission.                          |
-| **[ACL](Bonfire.Boundaries.Acls.html)**| Access Control List, a collection of grants. Also called "boundary" or "boundary preset" in the app.                          |
-| **[Controlled](Bonfire.Boundaries.Controlleds.html)** | Links an object to one or more ACLs, to determine access based on the grants. |
-| **[Role](Bonfire.Boundaries.Roles.html)**    | A group of verbs linked to a permission.                                  |
+| Term                                                  | Definition                                                                                           |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Subject** or **User**                               | An individual who interacts with the system.                                                         |
+| **[Circle](Bonfire.Boundaries.Circles.html)**         | A categorization method for users, allowing users to group other users (e.g., colleagues, friends).  |
+| **[Verb](Bonfire.Boundaries.Verbs.html)**             | An action that a user can perform (e.g., read, reply).                                               |
+| **Permission**                                        | A value indicating whether an action is allowed (`true`), denied (`false`), or `nil`.                |
+| **[Grant](Bonfire.Boundaries.Grants.html)**           | Links a user or circle with a verb and permission.                                                   |
+| **[ACL](Bonfire.Boundaries.Acls.html)**               | Access Control List, a collection of grants. Also called "boundary" or "boundary preset" in the app. |
+| **[Controlled](Bonfire.Boundaries.Controlleds.html)** | Links an object to one or more ACLs, to determine access based on the grants.                        |
+| **[Role](Bonfire.Boundaries.Roles.html)**             | A group of verbs linked to a permission.                                                             |
 
 ## Users and Circles
 
@@ -33,9 +33,9 @@ Verbs represent actions users can perform, such as reading a post or replying to
 
 A permission is a decision about whether the action may be performed or not. There are 3 possible values:
 
-* `true`: yes, the action is allowed
-* `false`: no, the action is explicitly denied (i.e. never permit)
-* `null`/`nil`: unknown, the action isn't explicitly allowed (defaults to not allowed) 
+- `true`: yes, the action is allowed
+- `false`: no, the action is explicitly denied (i.e. never permit)
+- `null`/`nil`: unknown, the action isn't explicitly allowed (defaults to not allowed)
 
 ### Grants
 
@@ -43,21 +43,21 @@ A `Grant` links a `subject` (user or circle) with a `Verb` and a permission. It 
 
 ## ACLs
 
-An `Acl` is a list of `Grant`s used to define access permissions for objects. 
+An `Acl` is a list of `Grant`s used to define access permissions for objects.
 
 Because a user could be in more than one circle and each circle may have a different permission, when a user attempts an action on an object, the system combines all relevant grants to determine the final permission. This combination prioritizes permissions as follows: `false > true > nil`, resulting in:
 
-input    | input   | result
-:------ | :------ | :-----
-`nil`   | `nil`   | `nil`
-`nil`   | `true`  | `true`
-`nil`   | `false` | `false`
-`true`  | `nil`   | `true`
-`true`  | `true`  | `true`
-`true`  | `false` | `false`
-`false` | `nil`   | `false`
-`false` | `true`  | `false`
-`false` | `false` | `false`
+| input   | input   | result  |
+| :------ | :------ | :------ |
+| `nil`   | `nil`   | `nil`   |
+| `nil`   | `true`  | `true`  |
+| `nil`   | `false` | `false` |
+| `true`  | `nil`   | `true`  |
+| `true`  | `true`  | `true`  |
+| `true`  | `false` | `false` |
+| `false` | `nil`   | `false` |
+| `false` | `true`  | `false` |
+| `false` | `false` | `false` |
 
 In simpler terms, a final permission is granted only if the combined result is `true`. Think of it as requiring an explicit "yes" for permission, while "no" always takes precedence. Notably, `nil` acts as a sort of "weak no," it can be overridden by a `true` but not granting access on its own. This approach provides flexibility for implementing features like user blocking (`false` is crucial here).
 
@@ -70,7 +70,6 @@ The `Controlled` [multimixin](./DATABASE.md#multimixins) link an object to one o
 ### Roles
 
 Roles are groups of verbs associated with permissions. While not stored in the database, they are defined at the configuration level to enhance readability and user experience.
-
 
 ## Practical example: Surprise birthday party
 
@@ -86,7 +85,7 @@ iex> friends = [fake_user!(), fake_user!()]
 iex> family = [fake_user!(), fake_user!()]
 ```
 
-### 2. Define your Circles 
+### 2. Define your Circles
 
 Organize users into relevant circles (friends and family).
 
@@ -109,9 +108,9 @@ iex> alias Bonfire.Boundaries.Acls
 iex> {:ok, boundary} = Acls.simple_create(organizer, "Surprise party")
 ```
 
-### 4. Grant permissions 
+### 4. Grant permissions
 
-Allow friends to discover, read, and respond to party plans, while family members can also edit details and send invitations. 
+Allow friends to discover, read, and respond to party plans, while family members can also edit details and send invitations.
 
 ```elixir
 iex> alias Bonfire.Boundaries.Grants
@@ -125,12 +124,12 @@ Prevent the birthday person from accessing any party information.
 iex> Grants.grant(birthday_girl.id, boundary.id, [:see, :read], false, current_user: organizer)
 ```
 
-### 5. Post about the party  
+### 5. Post about the party
 
 ```elixir
 iex> alias Bonfire.Posts
 iex> {:ok, party_plan} = Posts.publish(
-        current_user: organizer, 
+        current_user: organizer,
         boundary: boundary.id,
         post_attrs: %{post_content: %{name: "Surprise party!"}})
 ```
@@ -149,7 +148,6 @@ nil
 ```
 
 By following these steps, the organizer can effectively manage access to ensure the birthday girl cannot see the party plans, while friends and family can.
-
 
 ## Copyright and License
 

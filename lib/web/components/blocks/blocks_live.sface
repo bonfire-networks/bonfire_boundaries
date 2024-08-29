@@ -99,10 +99,10 @@
             <div class="block text-left px-3">
               <ul class="block pl-4 mt-1 prose-sm list-disc">
                 <li>
-                  {l("Nothing you post privately will be shown to them from now on.")}
+                  {l("Nothing you post privately will be shown to them from now on (at least on this instance).")}
                 </li>
                 <li>
-                  {l("They will still be able to see things you post publicly.")}
+                  {l("They may still be able to see things you post publicly.")}
                 </li>
                 <li>
                   {l("You won't be able to @ mention or message them.")}

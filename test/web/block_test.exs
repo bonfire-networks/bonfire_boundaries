@@ -330,7 +330,7 @@ defmodule Bonfire.Boundaries.BlockTest do
       refute render(view) =~ html_body
     end
 
-    test "They will still be able to see things I post publicly. " do
+    test "They may still be able to see things I post publicly. " do
       # create a bunch of users
       account = fake_account!()
       me = fake_user!(account)
