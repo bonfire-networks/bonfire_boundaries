@@ -561,9 +561,9 @@ defmodule Bonfire.Boundaries do
 
   def can?(subject, verbs, object, opts)
       when is_map(object) or is_binary(object) or is_list(object) do
-    debug(object, "check object")
-
-    skip? = Queries.skip_boundary_check?(opts)
+    skip? =
+      Queries.skip_boundary_check?(opts)
+      |> debug("check object?")
 
     skip? =
       skip? == true ||
