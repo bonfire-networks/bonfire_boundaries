@@ -6,6 +6,7 @@ defmodule Bonfire.Boundaries.Web.BlockMenuButtonsLive do
   prop silence_extra_object, :any, default: nil
   prop parent_id, :string, default: nil
   prop peered, :any, default: nil
+  prop permalink, :string, default: nil
   prop open_btn_label, :string, default: nil
   prop extra_object_label, :string, default: nil
   prop scope, :any, default: nil

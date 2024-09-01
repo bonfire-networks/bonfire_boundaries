@@ -1,4 +1,14 @@
-{#if current_user(@__context__) != nil}
+{#if !current_user_id(@__context__)}
+  <li>
+    <a
+      href={"/remote_interaction?type=block&name=#{l("this user or instance")}&url=#{@permalink || URIs.canonical_url(@object)}"}
+      class="flex items-center w-full gap-2 text-sm text-base-content"
+    >
+      <#Icon iconify="heroicons-solid:ban" class="w-4 h-4 shrink-0" />
+      <span class="truncate ellipsis">{l("Block")}</span>
+    </a>
+  </li>
+{#else}
   {#case {current_user_id(@__context__) == id(@object), e(peered(@object, @peered), :peer_id, nil),
      is_local?(@object)}}
     {#match {true, _, _}}
