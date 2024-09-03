@@ -64,7 +64,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   def list_on_objects_by_subject(objects, current_user) do
     repo().many(list_on_objects_by_subject_q(objects, current_user))
     |> Enum.reduce(%{}, fn c, acc ->
-      id = ulid(c)
+      id = uid(c)
       # TODO: better
       Map.put(acc, id, Map.get(acc, id, []) ++ [e(c, :acl, nil) || %Acl{id: e(c, :acl_id, nil)}])
     end)
@@ -296,7 +296,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   # TODO: instead of preloading named from DB we can use names from Config
 
   defp list_objects_q(objects, opts \\ []) do
-    where(list_q(opts), [c], c.id in ^ulids(objects))
+    where(list_q(opts), [c], c.id in ^uids(objects))
   end
 
   defp list_on_objects_by_subject_q(objects, current_user) do
@@ -304,7 +304,7 @@ defmodule Bonfire.Boundaries.Controlleds do
     |> proload(acl: [:named, stereotyped: {"stereotyped_", [:named]}, grants: [:verb]])
     |> where(
       [c, grants: grants],
-      grants.subject_id == ^ulid(current_user) and c.acl_id not in ^Acls.preset_acl_ids()
+      grants.subject_id == ^uid(current_user) and c.acl_id not in ^Acls.preset_acl_ids()
     )
   end
 
@@ -319,7 +319,7 @@ defmodule Bonfire.Boundaries.Controlleds do
     )
     |> where(
       [c, grants: grants],
-      grants.verb_id in ^ulids(verbs) and grants.value == ^value
+      grants.verb_id in ^uids(verbs) and grants.value == ^value
     )
   end
 
@@ -342,8 +342,8 @@ defmodule Bonfire.Boundaries.Controlleds do
   def remove_acls(object, acls) do
     from(e in Controlled,
       where:
-        e.id == ^ulid!(object) and
-          e.acl_id in ^ulids_or(acls, &acl_id/1)
+        e.id == ^uid!(object) and
+          e.acl_id in ^uids_or(acls, &acl_id/1)
     )
     |> repo().delete_all()
   end
@@ -366,7 +366,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   def add_acls(object, acl) when not is_list(acl) do
-    create(%{id: ulid!(object), acl_id: ulid!(acl)})
+    create(%{id: uid!(object), acl_id: uid!(acl)})
   end
 
   def add_acls(object, acls) when is_list(acls) do

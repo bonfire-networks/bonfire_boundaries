@@ -420,7 +420,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   #   %{
   #     component_id: assigns.id,
   #     object: object,
-  #     object_id: e(assigns, :object_id, nil) || ulid(object)
+  #     object_id: e(assigns, :object_id, nil) || uid(object)
   #   }
   # end
 

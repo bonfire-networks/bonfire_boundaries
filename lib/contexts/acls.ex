@@ -153,7 +153,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def acl_id(obj) do
-    ulid(obj) || get_id!(obj)
+    uid(obj) || get_id!(obj)
   end
 
   @doc """
@@ -224,7 +224,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp do_set(object, creator, opts) do
-    id = ulid(object)
+    id = uid(object)
 
     case prepare_cast(object, creator, opts) do
       {:ok, control_acls} ->
@@ -394,7 +394,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp maybe_add_direct_acl_ids(acls) do
-    ulids(acls)
+    uids(acls)
     |> filter_empty([])
   end
 
@@ -422,13 +422,13 @@ defmodule Bonfire.Boundaries.Acls do
     |> Enum.map(fn
       {key, val} ->
         # with custom role
-        case ulid(key) do
-          nil -> {ulid(val), key}
+        case uid(key) do
+          nil -> {uid(val), key}
           subject_id -> {subject_id, val}
         end
 
       val ->
-        ulid(val)
+        uid(val)
     end)
     |> debug()
   end
@@ -487,16 +487,16 @@ defmodule Bonfire.Boundaries.Acls do
 
       case preset do
         "public" ->
-          ulid(mentions)
+          uids(mentions)
 
         "mentions" ->
-          ulid(mentions)
+          uids(mentions)
 
         "local" ->
           # include only if local
           mentions
           |> Enum.filter(&is_local?/1)
-          |> ulid()
+          |> uids()
 
         _ ->
           # do not grant to mentions by default
@@ -606,7 +606,7 @@ defmodule Bonfire.Boundaries.Acls do
   def get_object_custom_acl(object) do
     from(a in Acl,
       join: c in Controlled,
-      on: a.id == c.acl_id and c.id == ^ulid(object),
+      on: a.id == c.acl_id and c.id == ^uid(object),
       join: s in Stereotyped,
       on: a.id == s.id and s.stereotype_id == ^Fixtures.custom_acl(),
       preload: [stereotyped: s]
@@ -762,13 +762,13 @@ defmodule Bonfire.Boundaries.Acls do
 
   defp maybe_for_caretaker(query, id, caretaker) do
     if is_built_in?(id) do
-      where(query, [acl], acl.id == ^ulid!(id))
+      where(query, [acl], acl.id == ^uid!(id))
     else
       # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
       where(
         query,
         [acl, caretaker: caretaker],
-        acl.id == ^ulid!(id) and caretaker.caretaker_id == ^ulid!(caretaker)
+        acl.id == ^uid!(id) and caretaker.caretaker_id == ^uid!(caretaker)
       )
     end
   end
@@ -807,7 +807,7 @@ defmodule Bonfire.Boundaries.Acls do
     query
     |> where(
       [acl],
-      acl.id in ^Types.ulids(ids)
+      acl.id in ^Types.uids(ids)
     )
   end
 
@@ -886,7 +886,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   def is_stereotype?(acl) do
     # debug(acl)
-    ulid(acl) in stereotype_ids()
+    uid(acl) in stereotype_ids()
   end
 
   @doc """
@@ -902,7 +902,7 @@ defmodule Bonfire.Boundaries.Acls do
   """
   def is_built_in?(acl) do
     # debug(acl)
-    ulid(acl) in built_in_ids()
+    uid(acl) in built_in_ids()
   end
 
   @doc """
@@ -1087,7 +1087,7 @@ defmodule Bonfire.Boundaries.Acls do
     list_q(skip_boundary_check: true)
     |> where(
       [acl, caretaker: caretaker],
-      caretaker.caretaker_id == ^ulid!(user) or
+      caretaker.caretaker_id == ^uid!(user) or
         (acl.id in ^e(opts, :extra_ids_to_include, []) and
            acl.id not in ^exclude)
     )

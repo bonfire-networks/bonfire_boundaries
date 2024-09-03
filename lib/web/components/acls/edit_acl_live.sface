@@ -54,7 +54,7 @@
           </li> --}
               <li data-role="remove_from_boundary">
                 <Bonfire.UI.Common.OpenModalLive
-                  id={"remove_from_acl_#{ulid(subject)}"}
+                  id={"remove_from_acl_#{uid(subject)}"}
                   title_text={l("Remove from boundary preset")}
                   no_actions
                   open_btn_wrapper_class="flex flex-1 w-full"

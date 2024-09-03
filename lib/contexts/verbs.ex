@@ -126,7 +126,7 @@ defmodule Bonfire.Boundaries.Verbs do
   def get_id(id_or_slug, all_verbs) when is_binary(id_or_slug) do
     case maybe_to_atom(id_or_slug) do
       slug when not is_nil(slug) and is_atom(slug) -> get_id(slug, all_verbs)
-      _ -> ulid(id_or_slug)
+      _ -> uid(id_or_slug)
     end
   end
 
@@ -200,7 +200,7 @@ defmodule Bonfire.Boundaries.Verbs do
     end)
   end
 
-  def list(:instance, :id), do: list(:instance, nil) |> Enum.map(&(elem(&1, 1) |> ulid()))
+  def list(:instance, :id), do: list(:instance, nil) |> Enum.map(&(elem(&1, 1) |> uid()))
 
   def list(:instance, _),
     do: verbs() |> Enum.filter(&(elem(&1, 1) |> e(:scope, nil) == :instance))

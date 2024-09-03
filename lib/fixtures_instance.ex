@@ -128,7 +128,7 @@ defmodule Bonfire.Boundaries.Fixtures do
     # Make the instance admins circle caretaker of global circles and ACLs
     repo().insert_all_or_ignore(
       Caretaker,
-      ulids(acls ++ circles)
+      uids(acls ++ circles)
       |> Enum.map(&%{id: &1, caretaker_id: admin_circle()})
     )
     |> info("Init caretakers")

@@ -454,7 +454,7 @@ defmodule Bonfire.Boundaries.Blocks do
 
     current_user_ids
     |> debug("user_ids")
-    |> Enum.flat_map(&per_user_circles(ulid(&1), block_types))
+    |> Enum.flat_map(&per_user_circles(uid(&1), block_types))
     |> debug("user_block_circles")
     |> Bonfire.Boundaries.Circles.is_encircled_by?(user_or_peer, ...)
   end

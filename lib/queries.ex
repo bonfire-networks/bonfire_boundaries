@@ -283,7 +283,7 @@ defmodule Bonfire.Boundaries.Queries do
   end
 
   defp user_and_circle_ids(subjects) do
-    case Bonfire.Common.Types.ulids(subjects) do
+    case Bonfire.Common.Types.uids(subjects) do
       [] -> [Bonfire.Boundaries.Circles.circles()[:guest][:id]]
       ids when is_list(ids) -> ids
     end

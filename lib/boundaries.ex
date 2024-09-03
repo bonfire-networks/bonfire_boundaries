@@ -198,7 +198,7 @@ defmodule Bonfire.Boundaries do
   """
   def list_grants_on(things) do
     from(s in Summary,
-      where: s.object_id in ^Types.ulids(things)
+      where: s.object_id in ^Types.uids(things)
     )
     |> all_grouped_by_verb()
   end
@@ -212,7 +212,7 @@ defmodule Bonfire.Boundaries do
   """
   def list_grants_on(things, verbs) do
     from(s in Summary,
-      where: s.object_id in ^Types.ulids(things)
+      where: s.object_id in ^Types.uids(things)
     )
     |> filter_grants_by_verbs(verbs)
   end
@@ -244,8 +244,8 @@ defmodule Bonfire.Boundaries do
 
   defp query_users_grants_on(users, things) do
     from(s in Summary,
-      where: s.object_id in ^Types.ulids(things),
-      where: s.subject_id in ^Types.ulids(users)
+      where: s.object_id in ^Types.uids(things),
+      where: s.subject_id in ^Types.uids(users)
     )
   end
 
@@ -254,7 +254,7 @@ defmodule Bonfire.Boundaries do
       List.wrap(verbs)
       |> Enum.map(fn
         slug when is_atom(slug) -> Verbs.get_id!(slug)
-        id when is_binary(id) or is_map(id) -> ulid(id)
+        id when is_binary(id) or is_map(id) -> uid(id)
       end)
 
     verb_names =
@@ -406,7 +406,7 @@ defmodule Bonfire.Boundaries do
     do: preset_boundary_tuple_from_acl(acl, object_type)
 
   def preset_boundary_tuple_from_acl(other, object_type) do
-    if Types.is_ulid?(other) do
+    if Types.is_uid?(other) do
       preset_boundary_tuple_from_acl(%Acl{id: other}, object_type)
     else
       warn(other, "No boundary pattern matched")
@@ -493,7 +493,7 @@ defmodule Bonfire.Boundaries do
   def take_care_of!(things, user) when is_list(things) do
     repo().upsert_all(
       Caretaker,
-      Enum.map(things, &%{id: Types.ulid(&1), caretaker_id: Types.ulid(user)})
+      Enum.map(things, &%{id: Types.uid(&1), caretaker_id: Types.uid(user)})
     )
 
     # |> debug
@@ -503,7 +503,7 @@ defmodule Bonfire.Boundaries do
         %{caretaker: _} ->
           Map.put(thing, :caretaker, %Caretaker{
             id: thing.id,
-            caretaker_id: Types.ulid(user),
+            caretaker_id: Types.uid(user),
             caretaker: user
           })
 
@@ -657,7 +657,7 @@ defmodule Bonfire.Boundaries do
       true
   """
   def pointer_permitted?(item, opts) do
-    case ulids(item) do
+    case uids(item) do
       ids when is_list(ids) and ids != [] ->
         load_query(ids, e(opts, :ids_only, nil), opts ++ [limit: 1])
         |> repo().exists?()
@@ -681,7 +681,7 @@ defmodule Bonfire.Boundaries do
       %Needle.Pointer{id: 1}
   """
   def load_pointer(item, opts) do
-    case ulids(item) do
+    case uids(item) do
       ids when is_list(ids) and ids != [] ->
         load_query(ids, e(opts, :ids_only, nil), opts ++ [limit: 1])
         |> repo().one()
@@ -706,7 +706,7 @@ defmodule Bonfire.Boundaries do
   """
   def load_pointers(items, opts) do
     # debug(items, "items")
-    case ulid(items) do
+    case uids(items) do
       [] ->
         []
 
@@ -777,9 +777,9 @@ defmodule Bonfire.Boundaries do
   defp find_caretaker_stereotypes_q(caretaker, stereotypes, from) do
     from(a in from,
       join: c in Caretaker,
-      on: a.id == c.id and c.caretaker_id == ^ulid!(caretaker),
+      on: a.id == c.id and c.caretaker_id == ^uid!(caretaker),
       join: s in Stereotyped,
-      on: a.id == s.id and s.stereotype_id in ^ulids(stereotypes),
+      on: a.id == s.id and s.stereotype_id in ^uids(stereotypes),
       preload: [caretaker: c, stereotyped: s]
     )
 

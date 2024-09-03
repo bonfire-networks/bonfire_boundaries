@@ -50,7 +50,7 @@ defmodule Bonfire.Boundaries.Web.EditCircleLive do
          followed: followed,
          read_only:
            e(circle, :stereotyped, :stereotype_id, nil) in follow_stereotypes or
-             ulid(circle) in follow_stereotypes,
+             uid(circle) in follow_stereotypes,
          settings_section_title: "View " <> e(circle, :named, :name, "Circle name") <> " circle",
          settings_section_description: l("Create and manage your circle.")
        )}

@@ -90,7 +90,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
       # suggestions =
       #   Enum.map(followers ++ followed ++ [current_user], fn follow ->
       #     u = f(follow)
-      #     {ulid(u), u}
+      #     {uid(u), u}
       #   end)
       #   |> Map.new()
       #   |> debug
@@ -237,7 +237,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
   def add_member(subject, %{assigns: %{scope: scope, circle_type: circle_type}} = socket)
       when circle_type in [:silence, :ghost] do
-    with id when is_binary(id) <- ulid(subject),
+    with id when is_binary(id) <- uid(subject),
          {:ok, _} <- Blocks.block(id, circle_type, scope || current_user(socket.assigns)) do
       {:noreply,
        socket
@@ -259,7 +259,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   end
 
   def add_member(subject, socket) do
-    with id when is_binary(id) <- ulid(subject),
+    with id when is_binary(id) <- uid(subject),
          {:ok, _} <- Circles.add_to_circles(id, e(socket.assigns, :circle, nil)) do
       {:noreply,
        socket

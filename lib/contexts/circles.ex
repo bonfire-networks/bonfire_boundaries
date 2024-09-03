@@ -82,7 +82,7 @@ defmodule Bonfire.Boundaries.Circles do
   """
   def is_built_in?(circle) do
     # debug(acl)
-    ulid(circle) in built_in_ids()
+    uid(circle) in built_in_ids()
   end
 
   @doc """
@@ -97,7 +97,7 @@ defmodule Bonfire.Boundaries.Circles do
       false
   """
   def is_stereotype?(acl) do
-    ulid(acl) in stereotype_ids()
+    uid(acl) in stereotype_ids()
   end
 
   @doc """
@@ -198,7 +198,7 @@ defmodule Bonfire.Boundaries.Circles do
       repo().many(
         from(c in Circle,
           left_join: named in assoc(c, :named),
-          where: c.id in ^ulid(ids),
+          where: c.id in ^Types.uids(ids),
           preload: [:named]
         )
       )
@@ -222,7 +222,7 @@ defmodule Bonfire.Boundaries.Circles do
       do: [get_id(circle_name)]
 
   def circle_ids(%{id: subject_id}), do: [subject_id]
-  def circle_ids(subject_id) when is_binary(subject_id), do: [ulid(subject_id)]
+  def circle_ids(subject_id) when is_binary(subject_id), do: [uid(subject_id)]
   def circle_ids(_), do: []
 
   @doc """
@@ -269,7 +269,7 @@ defmodule Bonfire.Boundaries.Circles do
                attrs
                |> input_to_atoms()
                |> deep_merge(%{
-                 caretaker: %{caretaker_id: ulid!(user)}
+                 caretaker: %{caretaker_id: uid!(user)}
                  # encircles: [%{subject_id: user.id}] # add myself to circle?
                })
              )
@@ -340,7 +340,7 @@ defmodule Bonfire.Boundaries.Circles do
     encircled_by_q(subject)
     |> where(
       [encircle: encircle],
-      encircle.circle_id in ^ulids(circles)
+      encircle.circle_id in ^uids(circles)
     )
   end
 
@@ -348,7 +348,7 @@ defmodule Bonfire.Boundaries.Circles do
     from(encircle in Encircle, as: :encircle)
     |> where(
       [encircle: encircle],
-      encircle.subject_id in ^ulids(subject)
+      encircle.subject_id in ^uids(subject)
     )
   end
 
@@ -418,7 +418,7 @@ defmodule Bonfire.Boundaries.Circles do
     query_my(subject, skip_boundary_check: true)
     |> where(
       [circle: circle, stereotyped: stereotyped],
-      stereotyped.stereotype_id in ^ulids(stereotypes)
+      stereotyped.stereotype_id in ^uids(stereotypes)
     )
     |> repo().all()
   end
@@ -590,7 +590,7 @@ defmodule Bonfire.Boundaries.Circles do
     query_basic(opts)
     |> where(
       [circle, caretaker: caretaker],
-      caretaker.caretaker_id == ^ulid!(user) or
+      caretaker.caretaker_id == ^uid!(user) or
         circle.id in ^e(opts, :extra_ids_to_include, [])
     )
   end
@@ -611,7 +611,7 @@ defmodule Bonfire.Boundaries.Circles do
     query(opts)
     |> where(
       [circle, caretaker: caretaker],
-      caretaker.caretaker_id in ^ulids(caretaker) or
+      caretaker.caretaker_id in ^uids(caretaker) or
         circle.id in ^e(opts, :extra_ids_to_include, [])
     )
   end
@@ -630,7 +630,7 @@ defmodule Bonfire.Boundaries.Circles do
     # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
     |> where(
       [circle: circle],
-      circle.id == ^ulid!(id)
+      circle.id == ^uid!(id)
     )
   end
 
@@ -671,8 +671,8 @@ defmodule Bonfire.Boundaries.Circles do
     |> input_to_atoms()
     |> Changesets.put_id_on_mixins([:named, :extra_info], circle)
     # |> input_to_atoms()
-    # |> Map.update(:named, nil, &Map.put(&1, :id, ulid(circle)))
-    # |> Map.update(:extra_info, nil, &Map.put(&1, :id, ulid(circle)))
+    # |> Map.update(:named, nil, &Map.put(&1, :id, uid(circle)))
+    # |> Map.update(:extra_info, nil, &Map.put(&1, :id, uid(circle)))
     |> changeset(:update, circle, ...)
     |> repo().update()
   end
@@ -713,7 +713,7 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   def add_to_circles(subject, circle) when not is_nil(circle) do
-    repo().insert(Encircle.changeset(%{circle_id: ulid!(circle), subject_id: ulid!(subject)}))
+    repo().insert(Encircle.changeset(%{circle_id: uid!(circle), subject_id: uid!(subject)}))
   end
 
   @doc """
@@ -733,7 +733,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   def remove_from_circles(subject, circles) when is_list(circles) do
     from(e in Encircle,
-      where: e.subject_id == ^ulid(subject) and e.circle_id in ^ulid(circles)
+      where: e.subject_id == ^uid(subject) and e.circle_id in ^Types.uids(circles)
     )
     |> repo().delete_all()
   end
@@ -752,7 +752,7 @@ defmodule Bonfire.Boundaries.Circles do
   """
   def empty_circles(circles) do
     from(e in Encircle,
-      where: e.circle_id in ^ulids(circles)
+      where: e.circle_id in ^uids(circles)
     )
     |> repo().delete_all()
   end
@@ -767,7 +767,7 @@ defmodule Bonfire.Boundaries.Circles do
   """
   def leave_all_circles(users) do
     from(e in Encircle,
-      where: e.subject_id in ^ulids(users)
+      where: e.subject_id in ^uids(users)
     )
     |> repo().delete_all()
   end

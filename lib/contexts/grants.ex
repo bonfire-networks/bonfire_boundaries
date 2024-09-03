@@ -170,7 +170,7 @@ defmodule Bonfire.Boundaries.Grants do
     upsert_or_delete(
       %{
         subject_id: subject_id,
-        acl_id: ulid!(acl),
+        acl_id: uid!(acl),
         verb_id: verb_id,
         value: value
       },
@@ -244,7 +244,7 @@ defmodule Bonfire.Boundaries.Grants do
 
   def remove_subject_from_acl(subject, acls) when is_list(acls) do
     from(e in Grant,
-      where: e.subject_id == ^ulid(subject) and e.acl_id in ^ulid(acls)
+      where: e.subject_id == ^uid(subject) and e.acl_id in ^Types.uids(acls)
     )
     |> repo().delete_all()
   end
@@ -289,7 +289,7 @@ defmodule Bonfire.Boundaries.Grants do
 
   defp list_for_acl_q(acl, opts) do
     list_q(opts)
-    |> where([grant: grant], grant.acl_id in ^ulids(acl))
+    |> where([grant: grant], grant.acl_id in ^uids(acl))
   end
 
   @doc """

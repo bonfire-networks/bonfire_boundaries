@@ -338,7 +338,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   defp do_add_to_acl(subject, socket) do
-    id = ulid(subject)
+    id = uid(subject)
     # |> debug("id")
 
     subject_map = %{id => %{subject: subject, grants: nil}}
@@ -348,7 +348,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
     socket
     |> assign(
-      # subjects: ([subject] ++ e(socket.assigns, :subjects, [])) |> Enum.uniq_by(&ulid/1),
+      # subjects: ([subject] ++ e(socket.assigns, :subjects, [])) |> Enum.uniq_by(&uid/1),
       # so tagify doesn't remove it as invalid
       # suggestions: Map.put(e(socket.assigns, :suggestions, %{}), id, subject_name),
       feed_by_subject: e(socket.assigns, :feed_by_subject, %{}) |> Map.merge(subject_map)
@@ -388,8 +388,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   def remove_from_acl(subject, socket) do
     # IO.inspect(subject, label: "ULLID")
-    acl_id = ulid!(e(socket.assigns, :acl, nil))
-    # subject_id = ulid!(subject)
+    acl_id = uid!(e(socket.assigns, :acl, nil))
+    # subject_id = uid!(subject)
 
     {:noreply,
      with {del, _} when is_integer(del) and del > 0 <-
@@ -443,7 +443,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   def predefined_subjects(subjects) do
     Enum.map(subjects, fn s ->
-      %{"value" => ulid(s), "text" => LiveHandler.subject_name(s) || ulid(s)}
+      %{"value" => uid(s), "text" => LiveHandler.subject_name(s) || uid(s)}
     end)
     # |> Enum.join(", ")
     |> Jason.encode!()

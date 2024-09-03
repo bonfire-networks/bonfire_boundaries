@@ -309,7 +309,7 @@ defmodule Bonfire.Boundaries.Roles do
   end
 
   def preset_boundary_role_from_acl(other) do
-    if Types.is_ulid?(other) do
+    if Types.is_uid?(other) do
       preset_boundary_role_from_acl(%Acl{id: other})
     else
       warn(other, "No role pattern matched")

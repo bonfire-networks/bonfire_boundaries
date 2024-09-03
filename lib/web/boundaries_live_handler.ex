@@ -237,7 +237,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("circle_edit", %{"circle" => circle_params}, socket) do
     # params = input_to_atoms(params)
-    id = ulid!(e(socket.assigns, :circle, nil))
+    id = uid!(e(socket.assigns, :circle, nil))
 
     with {:ok, _circle} <-
            Circles.edit(id, current_user_required!(socket), %{
@@ -249,7 +249,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("remove_from_circle", %{"subject_id" => subject}, socket) do
     _current_user = current_user_required!(socket)
-    id = ulid!(e(socket.assigns, :circle, nil))
+    id = uid!(e(socket.assigns, :circle, nil))
 
     with {:ok, _circle} <-
            Circles.remove_from_circles(subject, id) do
@@ -261,7 +261,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def handle_event("circle_delete", _, socket) do
-    id = ulid!(e(socket.assigns, :circle, nil))
+    id = uid!(e(socket.assigns, :circle, nil))
 
     with {:ok, _circle} <-
            Circles.delete(id, current_user_required!(socket)) |> debug() do
@@ -288,7 +288,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   # TODO
   # def handle_event("circle_soft_delete", _, socket) do
-  #   id = ulid!(e(socket.assigns, :circle, nil))
+  #   id = uid!(e(socket.assigns, :circle, nil))
 
   #   with {:ok, _circle} <-
   #          Circles.soft_delete(id, current_user_required!(socket)) |> debug() do
@@ -321,7 +321,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def handle_event("acl_soft_delete", _, socket) do
-    id = ulid!(e(socket.assigns, :acl, nil))
+    id = uid!(e(socket.assigns, :acl, nil))
 
     with {:ok, _} <-
            Acls.soft_delete(id, current_user_required!(socket)) |> debug() do
@@ -333,7 +333,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def handle_event("acl_delete", _, socket) do
-    id = ulid!(e(socket.assigns, :acl, nil))
+    id = uid!(e(socket.assigns, :acl, nil))
 
     with {:ok, _} <-
            Acls.delete(id, current_user_required!(socket)) |> debug() do
@@ -671,13 +671,13 @@ defmodule Bonfire.Boundaries.LiveHandler do
               current_user: current_user,
               verbs: e(opts, :verbs, [:read])
             )
-            |> Enum.map(&ulid/1),
+            |> Enums.ids(),
           else: []
 
       debug(my_visible_ids, "my_visible_ids")
 
       Enum.map(assigns_sockets, fn {assigns, socket} ->
-        object_id = ulid(the_object(assigns))
+        object_id = uid(the_object(assigns))
 
         {if object_id in list_of_ids and object_id not in my_visible_ids do
            # not allowed
@@ -738,7 +738,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     %{
       component_id: assigns.id,
       object: object || e(assigns, :object_id, nil),
-      object_id: e(assigns, :object_id, nil) || ulid(object),
+      object_id: e(assigns, :object_id, nil) || uid(object),
       previous_value: e(assigns, :object_boundary, nil)
     }
   end
@@ -800,7 +800,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     e(subject, :named, :name, nil) ||
       e(subject, :stereotyped, :named, :name, nil) ||
       e(subject, :profile, :name, nil) || e(subject, :character, :username, nil) ||
-      e(subject, :name, nil) || ulid(subject)
+      e(subject, :name, nil) || uid(subject)
   end
 
   def scope_origin(assigns \\ nil, socket) do
