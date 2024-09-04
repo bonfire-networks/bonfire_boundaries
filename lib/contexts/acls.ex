@@ -288,7 +288,7 @@ defmodule Bonfire.Boundaries.Acls do
         debug(custom_recipients, "custom_recipients")
 
         # TODO: enable using cast on existing objects by using `get_or_create_object_custom_acl(object)` to check if a custom Acl already exists?
-        acl_id = ULID.generate()
+        acl_id = Needle.UID.generate(Acl)
 
         # default_role = e(opts, :role_to_grant, nil) || Config.get!([:role_to_grant, :default])
 
@@ -594,7 +594,7 @@ defmodule Bonfire.Boundaries.Acls do
 
     [
       %{
-        id: ULID.generate(),
+        id: Needle.UID.generate(Grant),
         acl_id: acl_id,
         subject_id: user_etc,
         verb_id: Verbs.get_id!(verb),
@@ -624,7 +624,7 @@ defmodule Bonfire.Boundaries.Acls do
       _ ->
         with {:ok, acl} <-
                create(
-                 prepare_custom_acl_maps(ULID.generate()),
+                 prepare_custom_acl_maps(Needle.UID.generate(Acl)),
                  current_user: caretaker
                ),
              {:ok, _} <- Controlleds.add_acls(object, acl) do

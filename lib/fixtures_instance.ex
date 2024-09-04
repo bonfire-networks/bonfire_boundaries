@@ -71,7 +71,7 @@ defmodule Bonfire.Boundaries.Fixtures do
         debug(verb)
 
         %{
-          id: ULID.generate(),
+          id: Needle.UID.generate(),
           acl_id: Acls.get_id!(acl),
           subject_id: Circles.get_id!(circle),
           verb_id: Verbs.get_id!(Enums.maybe_elem(verb, 0) || verb),

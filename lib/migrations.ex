@@ -74,7 +74,7 @@ defmodule Bonfire.Boundaries.Migrations do
   #   {:ok, id} =
   #     Verbs.declare_verbs()[:verbs]
   #     |> Map.fetch!(id)
-  #     |> Needle.ULID.cast!()
+  #     |> Needle.UID.cast!()
   #     |> Needle.ULID.dump()
   #   Needle.UUID.cast!(id)
   # end

@@ -32,7 +32,7 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
     for {k, v} <- Map.fetch!(user_default_boundaries, :circles), into: %{} do
       {k,
        v
-       |> Map.put(:id, ULID.generate())
+       |> Map.put(:id, Needle.UID.generate(Circle))
        |> stereotype(Circles)}
     end
   end
@@ -41,7 +41,7 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
     for {k, v} <- Map.fetch!(user_default_boundaries, :acls), into: %{} do
       {k,
        v
-       |> Map.put(:id, ULID.generate())
+       |> Map.put(:id, Needle.UID.generate(Acl))
        |> stereotype(Acls)}
     end
   end
@@ -61,7 +61,7 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
         verb <- verbs do
       format_verb(verb)
       |> Map.merge(%{
-        id: ULID.generate(),
+        id: Needle.UID.generate(Grant),
         acl_id: default_acl_id(acls, acl),
         subject_id: default_subject_id(circles, user, circle)
       })
