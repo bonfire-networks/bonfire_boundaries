@@ -8,12 +8,12 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
 
   def update(assigns, socket) do
     current_user =
-      current_user(assigns) || current_user(socket.assigns)
+      current_user(assigns) || current_user(assigns(socket))
 
     # params = e(assigns, :__context__, :current_params, %{})
 
     scope =
-      (e(assigns, :scope, nil) || e(socket.assigns, :scope, nil))
+      (e(assigns, :scope, nil) || e(assigns(socket), :scope, nil))
       |> debug("role_scope")
 
     scope_type = Types.object_type(scope) || scope
@@ -25,7 +25,7 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
           send_self(
             scope: scope,
             scope_type: scope_type,
-            page_title: e(socket.assigns, :name, nil) || l("Roles"),
+            page_title: e(assigns(socket), :name, nil) || l("Roles"),
             back: true,
             page_header_aside: [
               if(!assigns[:read_only],
@@ -84,7 +84,7 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
     debug(attrs)
 
     current_user = current_user_required!(socket)
-    scope = e(socket.assigns, :scope, nil)
+    scope = e(assigns(socket), :scope, nil)
     # verb_value = List.first(Map.values(roles))
 
     with [ok: edited] <-
@@ -116,7 +116,7 @@ defmodule Bonfire.Boundaries.Web.RolesLive do
         |> assign(
           :role_verbs,
           Bonfire.Boundaries.Roles.role_verbs(:all,
-            one_scope_only: socket.assigns[:scope_type] not in [:smart_input],
+            one_scope_only: assigns(socket)[:scope_type] not in [:smart_input],
             scope: scope,
             current_user: current_user(edited)
           )

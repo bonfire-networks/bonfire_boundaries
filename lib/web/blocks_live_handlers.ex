@@ -4,7 +4,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   # import Bonfire.UI.Common
 
   def handle_event("unblock", %{"id" => id} = _params, socket) do
-    current_user = current_user_required!(socket.assigns)
+    current_user = current_user_required!(assigns(socket))
 
     with {:ok, _} <-
            Bonfire.Boundaries.Blocks.unblock(id, :ghost, current_user: current_user),
@@ -30,7 +30,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   end
 
   def handle_event("block", %{"id" => id} = _params, socket) do
-    current_user = current_user_required!(socket.assigns)
+    current_user = current_user_required!(assigns(socket))
 
     with {:ok, _} <-
            Bonfire.Boundaries.Blocks.block(id, :ghost, current_user: current_user),
@@ -56,7 +56,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   end
 
   def handle_event("block_scoped", %{"id" => id, "scope" => scoped_id} = _params, socket) do
-    with true <- Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, scoped_id),
+    with true <- Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, scoped_id),
          {:ok, _} <-
            Bonfire.Boundaries.Blocks.block(id, :ghost, scoped_id),
          {:ok, _} <-
@@ -81,7 +81,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   end
 
   def handle_event("block_instance_wide", %{"id" => id} = _params, socket) do
-    with true <- Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance_wide),
+    with true <- Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, :instance_wide),
          {:ok, _} <- Bonfire.Boundaries.Blocks.block(id, :ghost, :instance_wide),
          {:ok, _} <- Bonfire.Boundaries.Blocks.block(id, :silence, :instance_wide) do
       Bonfire.UI.Common.OpenModalLive.close()
@@ -105,7 +105,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   end
 
   def handle_event("unblock_instance_wide", %{"id" => id} = _params, socket) do
-    with true <- Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance_wide),
+    with true <- Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, :instance_wide),
          {:ok, _} <- Bonfire.Boundaries.Blocks.unblock(id, :ghost, :instance_wide),
          {:ok, _} <- Bonfire.Boundaries.Blocks.unblock(id, :silence, :instance_wide) do
       Bonfire.UI.Common.OpenModalLive.close()
@@ -131,7 +131,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   def handle_event("unghost", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
            Bonfire.Boundaries.Blocks.unblock(id, :ghost,
-             current_user: current_user_required!(socket.assigns)
+             current_user: current_user_required!(assigns(socket))
            ) do
       Bonfire.UI.Common.OpenModalLive.close()
 
@@ -155,7 +155,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   def handle_event("ghost", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
            Bonfire.Boundaries.Blocks.block(id, :ghost,
-             current_user: current_user_required!(socket.assigns)
+             current_user: current_user_required!(assigns(socket))
            ) do
       Bonfire.UI.Common.OpenModalLive.close()
 
@@ -177,7 +177,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   end
 
   def handle_event("ghost_instance_wide", %{"id" => id} = _params, socket) do
-    with true <- Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance_wide),
+    with true <- Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, :instance_wide),
          {:ok, _} <- Bonfire.Boundaries.Blocks.block(id, :ghost, :instance_wide) do
       Bonfire.UI.Common.OpenModalLive.close()
 
@@ -200,7 +200,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   end
 
   def handle_event("unghost_instance_wide", %{"id" => id} = _params, socket) do
-    with true <- Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance_wide),
+    with true <- Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, :instance_wide),
          {:ok, _} <- Bonfire.Boundaries.Blocks.unblock(id, :ghost, :instance_wide) do
       Bonfire.UI.Common.OpenModalLive.close()
 
@@ -225,7 +225,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   def handle_event("silence", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
            Bonfire.Boundaries.Blocks.block(id, :silence,
-             current_user: current_user_required!(socket.assigns)
+             current_user: current_user_required!(assigns(socket))
            ) do
       Bonfire.UI.Common.OpenModalLive.close()
 
@@ -248,7 +248,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   def handle_event("unsilence", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
            Bonfire.Boundaries.Blocks.unblock(id, :silence,
-             current_user: current_user_required!(socket.assigns)
+             current_user: current_user_required!(assigns(socket))
            ) do
       Bonfire.UI.Common.OpenModalLive.close()
 
@@ -269,7 +269,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   end
 
   def handle_event("silence_instance_wide", %{"id" => id} = _params, socket) do
-    with true <- Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance_wide),
+    with true <- Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, :instance_wide),
          {:ok, _} <- Bonfire.Boundaries.Blocks.block(id, :silence, :instance_wide) do
       Bonfire.UI.Common.OpenModalLive.close()
 
@@ -291,7 +291,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   end
 
   def handle_event("unsilence_instance_wide", %{"id" => id} = _params, socket) do
-    with true <- Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance_wide),
+    with true <- Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, :instance_wide),
          {:ok, _} <- Bonfire.Boundaries.Blocks.unblock(id, :silence, :instance_wide) do
       Bonfire.UI.Common.OpenModalLive.close()
 
@@ -315,7 +315,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   def handle_event("hide", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
            Bonfire.Boundaries.Blocks.block(id, :hide,
-             current_user: current_user_required!(socket.assigns)
+             current_user: current_user_required!(assigns(socket))
            ) do
       Bonfire.UI.Common.OpenModalLive.close()
 
@@ -338,7 +338,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   def handle_event("unhide", %{"id" => id} = _params, socket) do
     with {:ok, _} <-
            Bonfire.Boundaries.Blocks.unblock(id, :hide,
-             current_user: current_user_required!(socket.assigns)
+             current_user: current_user_required!(assigns(socket))
            ) do
       Bonfire.UI.Common.OpenModalLive.close()
 
@@ -359,7 +359,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   end
 
   def handle_event("hide_instance_wide", %{"id" => id} = _params, socket) do
-    with true <- Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance_wide),
+    with true <- Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, :instance_wide),
          {:ok, _} <- Bonfire.Boundaries.Blocks.block(id, :hide, :instance_wide) do
       Bonfire.UI.Common.OpenModalLive.close()
 
@@ -381,7 +381,7 @@ defmodule Bonfire.Boundaries.Blocks.LiveHandler do
   end
 
   def handle_event("unhide_instance_wide", %{"id" => id} = _params, socket) do
-    with true <- Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance_wide),
+    with true <- Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, :instance_wide),
          {:ok, _} <- Bonfire.Boundaries.Blocks.unblock(id, :hide, :instance_wide) do
       Bonfire.UI.Common.OpenModalLive.close()
 

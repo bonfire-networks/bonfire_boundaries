@@ -122,7 +122,7 @@ defmodule Bonfire.Boundaries.Web.SetCirclesPermissionsLive do
   end
 
   # def list_my_boundaries(socket) do
-  #   current_user = current_user(socket.assigns)
+  #   current_user = current_user(assigns(socket))
   #   Bonfire.Boundaries.Acls.list_my(current_user)
   # end
 
@@ -135,7 +135,7 @@ defmodule Bonfire.Boundaries.Web.SetCirclesPermissionsLive do
   end
 
   def live_select_change(live_select_id, search, circle_field, socket) do
-    current_user = current_user(socket.assigns)
+    current_user = current_user(assigns(socket))
     # Bonfire.Boundaries.Acls.list_my(current_user, search: search) ++
     (Bonfire.Boundaries.Circles.list_my_with_global(
        [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
@@ -158,13 +158,13 @@ defmodule Bonfire.Boundaries.Web.SetCirclesPermissionsLive do
 
   def handle_event("multi_select", %{"add_circles" => circle_id}, socket) do
     debug(circle_id, "QUIII")
-    circles_list = list_my_circles(current_user(socket.assigns))
+    circles_list = list_my_circles(current_user(assigns(socket)))
 
     # Find the circle by ID
     circle = Enum.find(circles_list, fn c -> c.id == circle_id end)
 
     circles =
-      e(socket.assigns, :to_circles, []) ++
+      e(assigns(socket), :to_circles, []) ++
         [{circle, nil}]
 
     {:noreply,
@@ -188,19 +188,19 @@ defmodule Bonfire.Boundaries.Web.SetCirclesPermissionsLive do
         :to_boundaries ->
           # [{"public", l("Public")}]
           []
-          |> (e(socket.assigns, field, ...) ++
+          |> (e(assigns(socket), field, ...) ++
                 [{id(data), data}])
 
         :to_circles ->
-          e(socket.assigns, field, []) ++
+          e(assigns(socket), field, []) ++
             [{data, nil}]
 
         :exclude_circles ->
-          e(socket.assigns, field, []) ++
+          e(assigns(socket), field, []) ++
             [{data, nil}]
 
         _ ->
-          e(socket.assigns, field, []) ++
+          e(assigns(socket), field, []) ++
             [{data, id(data)}]
       end
       |> debug("list")
@@ -215,7 +215,7 @@ defmodule Bonfire.Boundaries.Web.SetCirclesPermissionsLive do
      )
      |> assign_global(
        _already_live_selected_:
-         Enum.uniq(e(socket.assigns, :__context, :_already_live_selected_, []) ++ [field])
+         Enum.uniq(e(assigns(socket), :__context, :_already_live_selected_, []) ++ [field])
      )}
   end
 

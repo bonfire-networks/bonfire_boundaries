@@ -30,7 +30,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   end
 
   def update(assigns, socket) do
-    current_user = current_user(assigns) || current_user(socket.assigns)
+    current_user = current_user(assigns) || current_user(assigns(socket))
 
     # assigns
     # |> debug("assigns")
@@ -55,7 +55,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
     with %{id: id} = circle <-
            (e(assigns, :circle, nil) ||
-              Circles.get_for_caretaker(id, current_user, scope: e(socket.assigns, :scope, nil)))
+              Circles.get_for_caretaker(id, current_user, scope: e(assigns(socket), :scope, nil)))
            |> repo().maybe_preload(encircles: [subject: [:profile, :character]])
            |> repo().maybe_preload(encircles: [subject: [:named]])
            |> ok_unwrap() do
@@ -99,7 +99,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
       follow_stereotypes = Circles.stereotypes(:follow)
 
-      read_only = e(assigns, :read_only, nil) || e(socket.assigns, :read_only, nil)
+      read_only = e(assigns, :read_only, nil) || e(assigns(socket), :read_only, nil)
 
       read_only =
         if is_nil(read_only) do
@@ -114,7 +114,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
           send_self(
             read_only: read_only,
             page_title:
-              e(circle, :named, :name, nil) || e(socket.assigns, :name, nil) ||
+              e(circle, :named, :name, nil) || e(assigns(socket), :name, nil) ||
                 e(circle, :stereotyped, :named, :name, nil) || l("Circle"),
             back: true,
             circle: circle
@@ -162,7 +162,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
   def handle_event("select", %{"id" => id}, socket) do
     # debug(attrs)
-    add_member(input_to_atoms(e(socket.assigns, :suggestions, %{})[id]) || id, socket)
+    add_member(input_to_atoms(e(assigns(socket), :suggestions, %{})[id]) || id, socket)
   end
 
   def handle_event(
@@ -172,7 +172,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
       )
       when is_binary(id) and circle_type in [:silence, :ghost] do
     with {:ok, _} <-
-           Blocks.unblock(id, circle_type, scope || current_user(socket.assigns)) do
+           Blocks.unblock(id, circle_type, scope || current_user(assigns(socket))) do
       {:noreply,
        socket
        |> update(:members, &Map.drop(&1, [id]))
@@ -187,7 +187,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
   def handle_event("remove", %{"subject" => id} = _attrs, socket) when is_binary(id) do
     with {1, _} <-
-           Circles.remove_from_circles(id, e(socket.assigns, :circle, nil)) do
+           Circles.remove_from_circles(id, e(assigns(socket), :circle, nil)) do
       {:noreply,
        socket
        |> update(:members, &Map.drop(&1, [id]))
@@ -218,7 +218,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   end
 
   def handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
-    debug(socket.assigns)
+    debug(assigns(socket))
 
     do_results_for_multiselect(search)
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
@@ -238,7 +238,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   def add_member(subject, %{assigns: %{scope: scope, circle_type: circle_type}} = socket)
       when circle_type in [:silence, :ghost] do
     with id when is_binary(id) <- uid(subject),
-         {:ok, _} <- Blocks.block(id, circle_type, scope || current_user(socket.assigns)) do
+         {:ok, _} <- Blocks.block(id, circle_type, scope || current_user(assigns(socket))) do
       {:noreply,
        socket
        |> assign_flash(:info, l("Blocked!"))
@@ -246,7 +246,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
          members:
            Map.merge(
              %{id => subject},
-             e(socket.assigns, :members, %{})
+             e(assigns(socket), :members, %{})
            )
            |> debug()
        )}
@@ -260,7 +260,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
 
   def add_member(subject, socket) do
     with id when is_binary(id) <- uid(subject),
-         {:ok, _} <- Circles.add_to_circles(id, e(socket.assigns, :circle, nil)) do
+         {:ok, _} <- Circles.add_to_circles(id, e(assigns(socket), :circle, nil)) do
       {:noreply,
        socket
        |> assign_flash(:info, l("Added to circle!"))
@@ -268,7 +268,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
          members:
            Map.merge(
              %{id => subject},
-             e(socket.assigns, :members, %{})
+             e(assigns(socket), :members, %{})
            )
            |> debug()
        )}

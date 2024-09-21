@@ -9,7 +9,7 @@ defmodule Bonfire.Boundaries.Web.BlocksLive do
   prop scope, :any, default: nil
 
   def update(assigns, socket) do
-    context = assigns[:__context__] || socket.assigns[:__context__]
+    context = assigns[:__context__] || assigns(socket)[:__context__]
     current_user = current_user(context)
     tab = e(assigns, :selected_tab, nil)
 

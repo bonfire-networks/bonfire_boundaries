@@ -2,7 +2,7 @@ defmodule Bonfire.Boundaries.Web.RoleLive do
   use Bonfire.UI.Common.Web, :stateful_component
 
   def update(assigns, socket) do
-    current_user = current_user(assigns) || current_user(socket.assigns)
+    current_user = current_user(assigns) || current_user(assigns(socket)))
 
     params =
       e(assigns, :__context__, :current_params, %{})

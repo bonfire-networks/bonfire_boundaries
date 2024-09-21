@@ -27,11 +27,11 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def update(assigns, socket) do
-    current_user = current_user(assigns) || current_user(socket.assigns)
+    current_user = current_user(assigns) || current_user(assigns(socket))
     params = e(assigns, :__context__, :current_params, %{})
 
-    acl_id = e(assigns, :acl_id, nil) || e(socket.assigns, :acl_id, nil) || e(params, "id", nil)
-    scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
+    acl_id = e(assigns, :acl_id, nil) || e(assigns(socket), :acl_id, nil) || e(params, "id", nil)
+    scope = e(assigns, :scope, nil) || e(assigns(socket), :scope, nil)
 
     scope_type = Types.object_type(scope) || scope
 
@@ -77,10 +77,10 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   end
 
   def assign_updated(socket, force? \\ false) do
-    current_user = current_user(socket.assigns)
+    current_user = current_user(assigns(socket))
 
-    acl_id = e(socket.assigns, :acl_id, nil)
-    acl = e(socket.assigns, :acl, nil)
+    acl_id = e(assigns(socket), :acl_id, nil)
+    acl = e(assigns(socket), :acl, nil)
     acl = if id(acl) == acl_id, do: {:ok, acl}
 
     with {:ok, acl} <-
@@ -96,8 +96,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
            ) do
       debug(acl, "acllll")
 
-      if socket_connected?(socket) && !e(socket.assigns, :setting_boundaries, nil) and
-           e(socket.assigns, :scope_type, nil) not in [:group, Bonfire.Classify.Category] do
+      if socket_connected?(socket) && !e(assigns(socket), :setting_boundaries, nil) and
+           e(assigns(socket), :scope_type, nil) not in [:group, Bonfire.Classify.Category] do
         send_self(
           back: true,
           page_title: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil),
@@ -106,7 +106,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         )
       end
 
-      # verbs = e(socket.assigns, :verbs, [])
+      # verbs = e(assigns(socket), :verbs, [])
 
       feed_by_subject = Grants.subject_verb_grants(e(acl, :grants, []))
       # list_by_verb = verb_subject_grant(e(acl, :grants, []))
@@ -122,7 +122,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
           (Acls.is_built_in?(acl) and id(acl) == Bonfire.Boundaries.Fixtures.instance_acl()) or
             (!Acls.is_object_custom?(acl) and
                (Acls.is_stereotyped?(acl) and
-                  !Bonfire.Boundaries.can?(socket.assigns[:__context__], :grant, :instance)))
+                  !Bonfire.Boundaries.can?(assigns(socket)[:__context__], :grant, :instance)))
       )
     end
   end
@@ -131,7 +131,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     debug(attrs)
 
     with {:ok, acl} <-
-           Acls.edit(e(socket.assigns, :acl, nil), current_user_required!(socket), attrs) do
+           Acls.edit(e(assigns(socket), :acl, nil), current_user_required!(socket), attrs) do
       {:noreply,
        socket
        |> assign_flash(:info, l("Edited!"))
@@ -171,7 +171,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   def handle_event("edit_verb_value", %{"subject" => subjects} = _attrs, socket) do
     # debug(attrs)
     current_user = current_user_required!(socket)
-    acl = e(socket.assigns, :acl, nil)
+    acl = e(assigns(socket), :acl, nil)
     # verb_value = List.first(Map.values(subjects))
     grant =
       Enum.flat_map(subjects, fn {subject_id, verb_value} ->
@@ -195,7 +195,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         |> assign_updated(true)
 
         # |> assign(
-        # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
+        # list: Map.merge(e(assigns(socket), :list, %{}), %{id=> %{subject: %{name: e(assigns(socket), :suggestions, id, nil)}}}) #|> debug
         # )
       }
     else
@@ -209,8 +209,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
   def handle_event("edit_grant_role", %{"to_circles" => subjects} = _attrs, socket) do
     # debug(attrs)
     current_user = current_user_required!(socket)
-    acl = e(socket.assigns, :acl, nil)
-    scope = e(socket.assigns, :scope, nil)
+    acl = e(assigns(socket), :acl, nil)
+    scope = e(assigns(socket), :scope, nil)
 
     granted =
       Enum.map(subjects, fn {subject_id, role_name} ->
@@ -225,7 +225,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         |> assign_flash(:info, l("Role assigned!"))
         |> assign_updated(true)
         # |> assign(
-        # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
+        # list: Map.merge(e(assigns(socket), :list, %{}), %{id=> %{subject: %{name: e(assigns(socket), :suggestions, id, nil)}}}) #|> debug
         # )
       }
     else
@@ -277,7 +277,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         %{assigns: %{scope: %schema{}}} = socket
       )
       when schema == Bonfire.Classify.Category do
-    # current_user = current_user(socket.assigns)
+    # current_user = current_user(assigns(socket))
     # for groups and the like
     # TODO: should they have their own circles?
     (Bonfire.Boundaries.Circles.list_my_with_global(
@@ -297,7 +297,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         %{"id" => live_select_id, "text" => search},
         socket
       ) do
-    current_user = current_user(socket.assigns)
+    current_user = current_user(assigns(socket))
 
     (Bonfire.Boundaries.Circles.list_my_with_global(
        [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
@@ -327,7 +327,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
      do_add_to_acl(
        %{
          id: id,
-         name: e(socket.assigns, :suggestions, id, nil)
+         name: e(assigns(socket), :suggestions, id, nil)
        },
        socket
      )}
@@ -348,12 +348,12 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
     socket
     |> assign(
-      # subjects: ([subject] ++ e(socket.assigns, :subjects, [])) |> Enum.uniq_by(&uid/1),
+      # subjects: ([subject] ++ e(assigns(socket), :subjects, [])) |> Enum.uniq_by(&uid/1),
       # so tagify doesn't remove it as invalid
-      # suggestions: Map.put(e(socket.assigns, :suggestions, %{}), id, subject_name),
-      feed_by_subject: e(socket.assigns, :feed_by_subject, %{}) |> Map.merge(subject_map)
+      # suggestions: Map.put(e(assigns(socket), :suggestions, %{}), id, subject_name),
+      feed_by_subject: e(assigns(socket), :feed_by_subject, %{}) |> Map.merge(subject_map)
       # list_by_verb:
-      #   e(socket.assigns, :list_by_verb, %{})
+      #   e(assigns(socket), :list_by_verb, %{})
       #   |> Enum.map(fn
       #     {verb_id, %{verb: verb, subject_verb_grants: subject_verb_grants}} ->
       #       {
@@ -376,7 +376,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       #   # |> debug
       #   |> Map.new()
 
-      # list: Map.merge(e(socket.assigns, :list, %{}), %{id=> %{subject: %{name: e(socket.assigns, :suggestions, id, nil)}}}) #|> debug
+      # list: Map.merge(e(assigns(socket), :list, %{}), %{id=> %{subject: %{name: e(assigns(socket), :suggestions, id, nil)}}}) #|> debug
     )
     |> assign_flash(
       :info,
@@ -388,7 +388,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
   def remove_from_acl(subject, socket) do
     # IO.inspect(subject, label: "ULLID")
-    acl_id = uid!(e(socket.assigns, :acl, nil))
+    acl_id = uid!(e(assigns(socket), :acl, nil))
     # subject_id = uid!(subject)
 
     {:noreply,

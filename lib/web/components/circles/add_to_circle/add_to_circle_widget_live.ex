@@ -9,7 +9,7 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
 
   def update(%{circles: circles_passed_down} = assigns, socket) when circles_passed_down != [] do
     debug("use circles passed down by parent component")
-    # current_user = current_user(assigns) || current_user(socket.assigns)
+    # current_user = current_user(assigns) || current_user(assigns(socket))
 
     circles_passed_down =
       Circles.preload_encircled_by(e(assigns, :user_id, nil), circles_passed_down)
@@ -23,7 +23,7 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
   def update(assigns, %{assigns: %{circles: circles_already_loaded}} = socket)
       when circles_already_loaded != [] do
     debug("use circles already loaded (but reload membership)")
-    # current_user = current_user(assigns) || current_user(socket.assigns)
+    # current_user = current_user(assigns) || current_user(assigns(socket))
 
     circles_already_loaded =
       Circles.preload_encircled_by(e(assigns, :user_id, nil), circles_already_loaded, force: true)
@@ -35,7 +35,7 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
   end
 
   def update(assigns, socket) do
-    context = assigns[:__context__] || socket.assigns[:__context__]
+    context = assigns[:__context__] || assigns(socket)[:__context__]
     current_user = current_user(context)
 
     %{page_info: page_info, edges: edges} = LiveHandler.my_circles_paginated(current_user)
@@ -61,7 +61,7 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
 
   def handle_event("add", %{"id" => id, "circle" => circle}, socket) do
     # TODO: check permission
-    # current_user = current_user(socket.assigns)
+    # current_user = current_user(assigns(socket))
     with {:ok, _} <- Circles.add_to_circles(id, circle) do
       {:noreply,
        socket
@@ -77,7 +77,7 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
 
   def handle_event("remove", %{"id" => id, "circle" => circle}, socket) do
     # TODO: check permission
-    # current_user = current_user(socket.assigns)
+    # current_user = current_user(assigns(socket))
     with {1, _} <- Circles.remove_from_circles(id, circle) do
       {:noreply,
        socket
@@ -96,7 +96,7 @@ defmodule Bonfire.Boundaries.Web.AddToCircleWidgetLive do
 
     with {:ok, %{id: _id} = circle} <-
            Circles.create(
-             e(socket.assigns, :scope, nil) || current_user,
+             e(assigns(socket), :scope, nil) || current_user,
              attrs
            ) do
       # Bonfire.UI.Common.OpenModalLive.close()

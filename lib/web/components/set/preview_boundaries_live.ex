@@ -40,7 +40,7 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
   end
 
   def update(assigns, socket) do
-    # current_user =(current_user(assigns) || current_user(socket.assigns))
+    # current_user =(current_user(assigns) || current_user(assigns(socket)))
 
     # params = e(assigns, :__context__, :current_params, %{})
 
@@ -95,12 +95,12 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
   end
 
   def preview(socket, id, username) do
-    current_user = current_user(socket.assigns)
+    current_user = current_user(assigns(socket))
 
     boundaries =
       Enum.map(
         List.wrap(
-          e(socket.assigns, :boundary_preset, nil) || e(socket.assigns, :to_boundaries, [])
+          e(assigns(socket), :boundary_preset, nil) || e(assigns(socket), :to_boundaries, [])
         ),
         fn
           {slug, _} -> slug
@@ -112,11 +112,11 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
     opts = [
       preview_for_id: id,
       boundary: e(boundaries, "mentions"),
-      to_circles: e(socket.assigns, :to_circles, []),
-      context_id: e(socket.assigns, :context_id, nil)
+      to_circles: e(assigns(socket), :to_circles, []),
+      context_id: e(assigns(socket), :context_id, nil)
       # TODO: also calculate mentions from current draft text to take those into account in boundary calculation
       # mentions: [],
-      # reply_to_id: e(socket.assigns, :reply_to_id, nil),
+      # reply_to_id: e(assigns(socket), :reply_to_id, nil),
     ]
 
     with {:ok, verbs} <-

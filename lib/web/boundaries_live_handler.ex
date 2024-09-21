@@ -21,7 +21,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     current_user = current_user_required!(socket)
     opts = [current_user: current_user]
 
-    can_instance_wide = Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
+    can_instance_wide = Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, :instance)
 
     with {:ok, a} <-
            if(attrs["silence"],
@@ -53,7 +53,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       when is_binary(id) do
     # current_user = current_user_required!(socket)
 
-    can_instance_wide = Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
+    can_instance_wide = Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, :instance)
 
     with {:ok, status} <-
            (if can_instance_wide do
@@ -97,7 +97,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("unblock", %{"id" => id} = attrs, socket)
       when is_binary(id) do
-    unblock(id, maybe_to_atom(attrs["block_type"]), socket.assigns[:scope], socket)
+    unblock(id, maybe_to_atom(attrs["block_type"]), assigns(socket)[:scope], socket)
   end
 
   def handle_event("circle_create", %{"name" => name} = attrs, socket) do
@@ -145,7 +145,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
        socket,
        :to_boundaries,
        Bonfire.Boundaries.Web.SetBoundariesLive.set_clean_boundaries(
-         e(socket.assigns, :to_boundaries, []),
+         e(assigns(socket), :to_boundaries, []),
          acl_id,
          e(params, "name", acl_id)
        )
@@ -159,13 +159,13 @@ defmodule Bonfire.Boundaries.LiveHandler do
      assign(
        socket,
        :to_boundaries,
-       e(socket.assigns, :to_boundaries, [])
+       e(assigns(socket), :to_boundaries, [])
        |> Keyword.drop([id])
      )}
   end
 
   # def handle_event("input", %{"circles" => selected_circles} = _attrs, socket) when is_list(selected_circles) and length(selected_circles)>0 do
-  #   previous_circles = e(socket, :assigns, :to_circles, []) #|> Enum.uniq()
+  #   previous_circles = e(assigns(socket), :to_circles, []) #|> Enum.uniq()
   #   new_circles = set_circles(selected_circles, previous_circles)
 
   #   {:noreply,
@@ -190,7 +190,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     {:noreply, Bonfire.Boundaries.LiveHandler.set_circles_tuples(:to_circles, [selected], socket)}
     #
     #  assign(socket,
-    #    to_circles: set_circles([selected], e(socket, :assigns, :to_circles, []), true)
+    #    to_circles: set_circles([selected], e(assigns(socket), :to_circles, []), true)
     #  )
   end
 
@@ -230,14 +230,14 @@ defmodule Bonfire.Boundaries.LiveHandler do
        field,
        remove_from_circle_tuples(
          [deselected],
-         e(socket, :assigns, field, [])
+         e(assigns(socket), field, [])
        )
      )}
   end
 
   def handle_event("circle_edit", %{"circle" => circle_params}, socket) do
     # params = input_to_atoms(params)
-    id = uid!(e(socket.assigns, :circle, nil))
+    id = uid!(e(assigns(socket), :circle, nil))
 
     with {:ok, _circle} <-
            Circles.edit(id, current_user_required!(socket), %{
@@ -249,7 +249,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
   def handle_event("remove_from_circle", %{"subject_id" => subject}, socket) do
     _current_user = current_user_required!(socket)
-    id = uid!(e(socket.assigns, :circle, nil))
+    id = uid!(e(assigns(socket), :circle, nil))
 
     with {:ok, _circle} <-
            Circles.remove_from_circles(subject, id) do
@@ -261,7 +261,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def handle_event("circle_delete", _, socket) do
-    id = uid!(e(socket.assigns, :circle, nil))
+    id = uid!(e(assigns(socket), :circle, nil))
 
     with {:ok, _circle} <-
            Circles.delete(id, current_user_required!(socket)) |> debug() do
@@ -281,14 +281,14 @@ defmodule Bonfire.Boundaries.LiveHandler do
      socket
      |> assign(
        loaded: true,
-       circles: e(socket.assigns, :circles, []) ++ edges,
+       circles: e(assigns(socket), :circles, []) ++ edges,
        page_info: page_info
      )}
   end
 
   # TODO
   # def handle_event("circle_soft_delete", _, socket) do
-  #   id = uid!(e(socket.assigns, :circle, nil))
+  #   id = uid!(e(assigns(socket), :circle, nil))
 
   #   with {:ok, _circle} <-
   #          Circles.soft_delete(id, current_user_required!(socket)) |> debug() do
@@ -321,7 +321,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def handle_event("acl_soft_delete", _, socket) do
-    id = uid!(e(socket.assigns, :acl, nil))
+    id = uid!(e(assigns(socket), :acl, nil))
 
     with {:ok, _} <-
            Acls.soft_delete(id, current_user_required!(socket)) |> debug() do
@@ -333,7 +333,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def handle_event("acl_delete", _, socket) do
-    id = uid!(e(socket.assigns, :acl, nil))
+    id = uid!(e(assigns(socket), :acl, nil))
 
     with {:ok, _} <-
            Acls.delete(id, current_user_required!(socket)) |> debug() do
@@ -348,7 +348,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     current_user = current_user_required!(socket)
 
     scope =
-      case e(socket.assigns, :scope, nil) do
+      case e(assigns(socket), :scope, nil) do
         nil -> current_user
         scope -> scope
       end
@@ -438,7 +438,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       when is_binary(id) do
     # current_user = current_user_required!(socket)
 
-    can_instance_wide = Bonfire.Boundaries.can?(socket.assigns[:__context__], :block, :instance)
+    can_instance_wide = Bonfire.Boundaries.can?(assigns(socket)[:__context__], :block, :instance)
 
     with {:ok, status} <-
            (if can_instance_wide do
@@ -473,7 +473,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       {:noreply,
        socket
        |> assign(
-         acls: [acl] ++ e(socket.assigns, :acls, []),
+         acls: [acl] ++ e(assigns(socket), :acls, []),
          edit_acl_id: id,
          section: nil
        )
@@ -502,7 +502,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       socket
       |> assign_flash(:info, "Circle created!")
       |> assign(
-        circles: [circle] ++ e(socket.assigns, :circles, []),
+        circles: [circle] ++ e(assigns(socket), :circles, []),
         section: nil
       )
       |> maybe_redirect_to(
@@ -517,7 +517,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
   defp maybe_add_to_acl(socket, subject) do
     _current_user = current_user_required!(socket)
 
-    if e(socket.assigns, :acl, nil) do
+    if e(assigns(socket), :acl, nil) do
       Bonfire.Boundaries.Web.AclLive.add_to_acl(subject, socket)
     else
       {:noreply, socket}
@@ -580,7 +580,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
     debug(circles, "set roles for #{field}")
 
     previous_value =
-      e(socket.assigns, field, [])
+      e(assigns(socket), field, [])
       |> debug("previous_value")
 
     known_circles =
@@ -615,7 +615,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
       )
       |> assign_global(
         _already_live_selected_:
-          Enum.uniq(e(socket.assigns, :__context, :_already_live_selected_, []) ++ [field])
+          Enum.uniq(e(assigns(socket), :__context, :_already_live_selected_, []) ++ [field])
       )
     else
       socket
@@ -804,9 +804,9 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def scope_origin(assigns \\ nil, socket) do
-    context = e(assigns, :__context__, nil) || socket.assigns[:__context__]
+    context = e(assigns, :__context__, nil) || assigns(socket)[:__context__]
     current_user = current_user(context)
-    scope = e(assigns, :scope, nil) || e(socket.assigns, :scope, nil)
+    scope = e(assigns, :scope, nil) || e(assigns(socket), :scope, nil)
 
     if scope == :instance and
          Bonfire.Boundaries.can?(context, :assign, :instance),
@@ -829,11 +829,11 @@ defmodule Bonfire.Boundaries.LiveHandler do
   end
 
   def prepare_assigns(socket) do
-    current_user = current_user(socket.assigns)
-    my_acls = e(socket.assigns[:__context__], :my_acls, nil) || my_acls(id(current_user))
+    current_user = current_user(assigns(socket))
+    my_acls = e(assigns(socket)[:__context__], :my_acls, nil) || my_acls(id(current_user))
 
     to_boundaries =
-      e(socket.assigns, :to_boundaries, nil)
+      e(assigns(socket), :to_boundaries, nil)
       |> debug("existing")
       |> Bonfire.Boundaries.boundaries_or_default(current_user: current_user, my_acls: my_acls)
       |> debug()

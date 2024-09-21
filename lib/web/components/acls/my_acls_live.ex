@@ -37,7 +37,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
 
     scope = LiveHandler.scope_origin(socket)
 
-    %{page_info: page_info, edges: acls} = my_acls_paginated(scope, socket.assigns)
+    %{page_info: page_info, edges: acls} = my_acls_paginated(scope, assigns(socket))
 
     {:ok,
      socket
@@ -56,13 +56,13 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
     scope = LiveHandler.scope_origin(socket)
 
     %{page_info: page_info, edges: edges} =
-      my_acls_paginated(scope, socket.assigns, input_to_atoms(attrs))
+      my_acls_paginated(scope, assigns(socket), input_to_atoms(attrs))
 
     {:noreply,
      socket
      |> assign(
        loaded: true,
-       acls: e(socket.assigns, :acls, []) ++ edges,
+       acls: e(assigns(socket), :acls, []) ++ edges,
        page_info: page_info
      )}
   end
