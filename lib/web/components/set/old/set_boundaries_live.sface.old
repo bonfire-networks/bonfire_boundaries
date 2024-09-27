@@ -1,4 +1,4 @@
-<Context get={to_circles: to_circles}>
+{!-- <Context get={to_circles: to_circles}> --}
   <div class="mb-2" x-show="open">
     <Bonfire.UI.Common.MultiselectLive
       id="set_boundaries"
@@ -10,4 +10,4 @@
       remove_event="Bonfire.Boundaries:deselect"
     />
   </div>
-</Context>
+{!-- </Context> --}
