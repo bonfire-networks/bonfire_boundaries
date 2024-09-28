@@ -2,6 +2,6 @@ faker = "~> 0.14" # fake data generation
 jason = "~> 1.0"
 # ex_spirit = "~> 0.4"
 scribe = "~> 0.10" # debug printing tables
-# surface = "~> 0.12.0"
+# surface = "~> 0.12.0" # required if there's any JS hooks or CSS components that need to be found by Surface compiler
 needle = "~> 0.7"
 ecto_vista = "~> 0.2" # postgres views
