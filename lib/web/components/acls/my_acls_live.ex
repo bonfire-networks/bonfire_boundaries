@@ -97,7 +97,7 @@ defmodule Bonfire.Boundaries.Web.MyAclsLive do
         # if scope == :instance and
         #      Bonfire.Boundaries.can?(assigns, :grant, :instance) do
         #   {
-        #     Bonfire.Boundaries.Fixtures.admin_circle(),
+        #     Bonfire.Boundaries.Scaffold.Instance.admin_circle(),
         #     [extra_ids_to_include: built_in_ids]
         #   }
         # else

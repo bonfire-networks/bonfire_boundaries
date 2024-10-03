@@ -281,7 +281,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   def create(:instance, %{} = attrs) do
     create(
-      Bonfire.Boundaries.Fixtures.admin_circle(),
+      Bonfire.Boundaries.Scaffold.Instance.admin_circle(),
       attrs
     )
   end
@@ -371,8 +371,10 @@ defmodule Bonfire.Boundaries.Circles do
       {:ok, %Circle{id: "circle_id", name: "My Circle"}}
   """
   def get_for_caretaker(id, caretaker, opts \\ []) do
+    opts = opts ++ @default_q_opts
+
     with {:ok, circle} <-
-           repo().single(query_my_by_id(id, caretaker, opts ++ @default_q_opts)) do
+           repo().single(query_my_by_id(id, caretaker, opts)) do
       {:ok, circle}
     else
       {:error, :not_found} ->
@@ -382,8 +384,8 @@ defmodule Bonfire.Boundaries.Circles do
              repo().single(
                query_my_by_id(
                  id,
-                 Bonfire.Boundaries.Fixtures.admin_circle(),
-                 opts ++ @default_q_opts
+                 Bonfire.Boundaries.Scaffold.Instance.admin_circle(),
+                 opts
                )
              ),
            else: {:error, :not_found}
@@ -467,7 +469,7 @@ defmodule Bonfire.Boundaries.Circles do
       opts ++
         [
           extra_ids_to_include:
-            opts[:global_circles] || Bonfire.Boundaries.Fixtures.global_circles()
+            opts[:global_circles] || Bonfire.Boundaries.Scaffold.Instance.global_circles()
         ]
     )
   end
@@ -616,7 +618,8 @@ defmodule Bonfire.Boundaries.Circles do
     )
   end
 
-  def query_my(:instance, opts), do: Bonfire.Boundaries.Fixtures.admin_circle() |> query_my(opts)
+  def query_my(:instance, opts),
+    do: Bonfire.Boundaries.Scaffold.Instance.admin_circle() |> query_my(opts)
 
   @doc """
   Generates a query for a specific circle owned by a user.
@@ -628,6 +631,24 @@ defmodule Bonfire.Boundaries.Circles do
   def query_my_by_id(id, caretaker, opts \\ []) do
     query_my(caretaker, opts)
     # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
+    |> query_by_id(
+      id,
+      opts
+    )
+  end
+
+  def exists?(id, opts \\ []) do
+    query(opts)
+    # |> reusable_join(:inner, [circle: circle], caretaker in assoc(circle, :caretaker), as: :caretaker)
+    |> query_by_id(
+      id,
+      opts
+    )
+    |> repo().exists?()
+  end
+
+  defp query_by_id(query, id, _opts \\ []) do
+    query
     |> where(
       [circle: circle],
       circle.id == ^uid!(id)
@@ -644,7 +665,7 @@ defmodule Bonfire.Boundaries.Circles do
   """
   def get_or_create(name, caretaker \\ nil) when is_binary(name) do
     # instance-wide circle if not user provided
-    caretaker = caretaker || Bonfire.Boundaries.Fixtures.admin_circle()
+    caretaker = caretaker || Bonfire.Boundaries.Scaffold.Instance.admin_circle()
 
     case get_by_name(name, caretaker) do
       {:ok, circle} ->

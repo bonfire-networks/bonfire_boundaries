@@ -37,7 +37,7 @@
         scope={@scope}
         show_add={false}
         read_only
-        circle_id={Bonfire.Boundaries.Fixtures.admin_circle()}
+        circle_id={Bonfire.Boundaries.Scaffold.Instance.admin_circle()}
       />
     {#match "mod_circle"}
       <StatefulComponent
@@ -48,7 +48,7 @@
         scope={@scope}
         show_add={maybe_apply(Bonfire.Me.Accounts, :is_admin?, @__context__) == true}
         read_only
-        circle_id={Bonfire.Boundaries.Fixtures.mod_circle()}
+        circle_id={Bonfire.Boundaries.Scaffold.Instance.mod_circle()}
       /> -->
     {#match "acls"}
       <StatefulComponent
@@ -101,7 +101,7 @@
         id="acl"
         scope={:instance}
         usage={:ops}
-        acl_id={Bonfire.Boundaries.Fixtures.instance_acl()}
+        acl_id={Bonfire.Boundaries.Scaffold.Instance.instance_acl()}
       />
     {#match "roles"}
       <StatefulComponent

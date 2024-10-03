@@ -145,7 +145,7 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
     current_user = current_user(assigns(socket))
     # Bonfire.Boundaries.Acls.list_my(current_user, search: search) ++
     (Bonfire.Boundaries.Circles.list_my_with_global(
-       [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
+       [current_user, Bonfire.Boundaries.Scaffold.Instance.activity_pub_circle()],
        search: search
      ) ++
        Bonfire.Common.Utils.maybe_apply(

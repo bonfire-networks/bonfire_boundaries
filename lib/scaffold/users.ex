@@ -1,4 +1,10 @@
-defmodule Bonfire.Boundaries.FixturesUsersMigrations do
+defmodule Bonfire.Boundaries.Scaffold.Users do
+  @moduledoc """
+  Provides batching functionality to insert/update default boundary fixtures for all users.
+
+  The functions that define and insert user fixtures are defined in `Bonfire.Boundaries.Users` and `Bonfire.Boundaries.Users.PreparedBoundaries`.
+  """
+
   alias EctoSparkles.DataMigration
   use DataMigration
 

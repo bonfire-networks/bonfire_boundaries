@@ -641,7 +641,7 @@ defmodule Bonfire.Boundaries do
 
   defp do_can_instance(subject, verbs, key) do
     val =
-      can?(subject, verbs, Bonfire.Boundaries.Fixtures.instance_acl())
+      can?(subject, verbs, Bonfire.Boundaries.Scaffold.Instance.instance_acl())
       |> debug("put in cache")
 
     Process.put(key, val)

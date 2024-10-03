@@ -52,7 +52,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     #     verbs
     #   end
 
-    global_circles = Bonfire.Boundaries.Fixtures.global_circles()
+    global_circles = Bonfire.Boundaries.Scaffold.Instance.global_circles()
 
     {:ok,
      socket
@@ -119,7 +119,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         # list_by_verb: Map.merge(verbs, list_by_verb),
         # subjects: subjects(e(acl, :grants, [])),
         read_only:
-          (Acls.is_built_in?(acl) and id(acl) == Bonfire.Boundaries.Fixtures.instance_acl()) or
+          (Acls.is_built_in?(acl) and
+             id(acl) == Bonfire.Boundaries.Scaffold.Instance.instance_acl()) or
             (!Acls.is_object_custom?(acl) and
                (Acls.is_stereotyped?(acl) and
                   !Bonfire.Boundaries.can?(assigns(socket)[:__context__], :grant, :instance)))
@@ -258,8 +259,8 @@ defmodule Bonfire.Boundaries.Web.AclLive do
       ) do
     (Bonfire.Boundaries.Circles.list_my_with_global(
        [
-         Bonfire.Boundaries.Fixtures.admin_circle(),
-         Bonfire.Boundaries.Fixtures.activity_pub_circle()
+         Bonfire.Boundaries.Scaffold.Instance.admin_circle(),
+         Bonfire.Boundaries.Scaffold.Instance.activity_pub_circle()
        ],
        search: search
      ) ++
@@ -281,7 +282,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     # for groups and the like
     # TODO: should they have their own circles?
     (Bonfire.Boundaries.Circles.list_my_with_global(
-       [Bonfire.Boundaries.Fixtures.activity_pub_circle()],
+       [Bonfire.Boundaries.Scaffold.Instance.activity_pub_circle()],
        search: search
      ) ++
        Utils.maybe_apply(
@@ -300,7 +301,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     current_user = current_user(assigns(socket))
 
     (Bonfire.Boundaries.Circles.list_my_with_global(
-       [current_user, Bonfire.Boundaries.Fixtures.activity_pub_circle()],
+       [current_user, Bonfire.Boundaries.Scaffold.Instance.activity_pub_circle()],
        search: search
      ) ++
        Utils.maybe_apply(

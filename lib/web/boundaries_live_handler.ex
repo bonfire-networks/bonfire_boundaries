@@ -810,7 +810,7 @@ defmodule Bonfire.Boundaries.LiveHandler do
 
     if scope == :instance and
          Bonfire.Boundaries.can?(context, :assign, :instance),
-       do: Bonfire.Boundaries.Fixtures.admin_circle(),
+       do: Bonfire.Boundaries.Scaffold.Instance.admin_circle(),
        else: current_user
   end
 

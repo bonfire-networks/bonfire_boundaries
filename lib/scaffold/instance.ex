@@ -1,4 +1,4 @@
-defmodule Bonfire.Boundaries.Fixtures do
+defmodule Bonfire.Boundaries.Scaffold.Instance do
   @moduledoc """
   Provides functions to create default boundary fixtures for the instance.
   """

@@ -29,7 +29,7 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Boundaries.Controlleds
   alias Bonfire.Boundaries.Verbs
   alias Bonfire.Boundaries.Circles
-  alias Bonfire.Boundaries.Fixtures
+  alias Bonfire.Boundaries.Scaffold
   alias Bonfire.Boundaries.Grants
   alias Bonfire.Boundaries.Roles
   alias Ecto.Changeset
@@ -129,7 +129,7 @@ defmodule Bonfire.Boundaries.Acls do
   Retrieves an ACL by its slug, raising an error if not found.
   """
   def get!(slug) when is_atom(slug) do
-    # || ( Bonfire.Boundaries.Fixtures.insert && get(slug) )
+    # || ( Bonfire.Boundaries.Scaffold.insert && get(slug) )
     get(slug) ||
       raise RuntimeError, message: "Missing default acl: #{inspect(slug)}"
   end
@@ -149,7 +149,7 @@ defmodule Bonfire.Boundaries.Acls do
   def get_id!(slug), do: get!(slug)[:id]
 
   def acl_id(:instance) do
-    Bonfire.Boundaries.Fixtures.instance_acl()
+    Bonfire.Boundaries.Scaffold.Instance.instance_acl()
   end
 
   def acl_id(obj) do
@@ -608,7 +608,7 @@ defmodule Bonfire.Boundaries.Acls do
       join: c in Controlled,
       on: a.id == c.acl_id and c.id == ^uid(object),
       join: s in Stereotyped,
-      on: a.id == s.id and s.stereotype_id == ^Fixtures.custom_acl(),
+      on: a.id == s.id and s.stereotype_id == ^Scaffold.Instance.custom_acl(),
       preload: [stereotyped: s]
     )
     |> repo().single()
@@ -652,14 +652,14 @@ defmodule Bonfire.Boundaries.Acls do
   defp prepare_custom_acl(acl_id) do
     %Acl{
       id: acl_id,
-      stereotyped: %Stereotyped{id: acl_id, stereotype_id: Fixtures.custom_acl()}
+      stereotyped: %Stereotyped{id: acl_id, stereotype_id: Scaffold.Instance.custom_acl()}
     }
   end
 
   defp prepare_custom_acl_maps(acl_id) do
     %{
       id: acl_id,
-      stereotyped: %{id: acl_id, stereotype_id: Fixtures.custom_acl()}
+      stereotyped: %{id: acl_id, stereotype_id: Scaffold.Instance.custom_acl()}
     }
   end
 
@@ -711,7 +711,7 @@ defmodule Bonfire.Boundaries.Acls do
   defp changeset(:create, attrs, opts, instance) when instance in [:instance, :instance_wide],
     do:
       changeset(:create, attrs, opts, %{
-        id: Bonfire.Boundaries.Fixtures.admin_circle()
+        id: Bonfire.Boundaries.Scaffold.Instance.admin_circle()
       })
 
   defp changeset(:create, attrs, _opts, %{id: id}) do
@@ -746,7 +746,7 @@ defmodule Bonfire.Boundaries.Acls do
             repo().single(
               get_for_caretaker_q(
                 id,
-                Bonfire.Boundaries.Fixtures.admin_circle(),
+                Bonfire.Boundaries.Scaffold.Instance.admin_circle(),
                 opts
               )
             ),
@@ -785,7 +785,7 @@ defmodule Bonfire.Boundaries.Acls do
     list_q(opts)
     |> where(
       [caretaker: caretaker],
-      caretaker.caretaker_id in ^[current_user_id(opts), Fixtures.admin_circle()]
+      caretaker.caretaker_id in ^[current_user_id(opts), Scaffold.Instance.admin_circle()]
     )
     |> many_with_opts(opts)
   end
@@ -923,7 +923,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def is_object_custom?(acl) do
-    id(acl) == Fixtures.custom_acl()
+    id(acl) == Scaffold.Instance.custom_acl()
   end
 
   @doc """
@@ -1003,7 +1003,7 @@ defmodule Bonfire.Boundaries.Acls do
   def list_my(user, opts \\ [])
 
   def list_my(:instance, opts),
-    do: list_my(Bonfire.Boundaries.Fixtures.admin_circle(), opts)
+    do: list_my(Bonfire.Boundaries.Scaffold.Instance.admin_circle(), opts)
 
   def list_my(user, opts),
     do:
