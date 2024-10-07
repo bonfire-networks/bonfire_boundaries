@@ -646,7 +646,7 @@ defmodule Bonfire.Boundaries.Acls do
     |> debug()
 
     repo.insert_all(Grant, custom_grants)
-    |> debug()
+    |> debug("inserted")
   end
 
   defp prepare_custom_acl(acl_id) do

@@ -410,7 +410,7 @@ defmodule Bonfire.Boundaries.Blocks do
       {:ok, "Unblocked"}
     else
       e ->
-        error(e)
+        warn(e, "Could not unblock")
         {:error, "Could not unblock"}
     end
   end
