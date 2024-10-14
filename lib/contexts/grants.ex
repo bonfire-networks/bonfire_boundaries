@@ -95,8 +95,23 @@ defmodule Bonfire.Boundaries.Grants do
       {:ok, _deleted}
   """
   def upsert_or_delete(
+        %{acl_id: acl_id, subject_id: subject_id, verb_id: verb_id, value: value} = _attrs,
+        :remove_grant
+      ) do
+    repo().get_by(Grant,
+      acl_id: acl_id,
+      subject_id: subject_id,
+      verb_id: verb_id,
+      value: value
+    )
+    # |> debug
+    |> repo().delete()
+  end
+
+  #  we don't store nil values as they are implied
+  def upsert_or_delete(
         %{acl_id: acl_id, subject_id: subject_id, verb_id: verb_id, value: nil} = _attrs,
-        _opts
+        _action
       ) do
     repo().get_by(Grant,
       acl_id: acl_id,
@@ -107,7 +122,7 @@ defmodule Bonfire.Boundaries.Grants do
     |> repo().delete()
   end
 
-  def upsert_or_delete(%{} = attrs, _opts) do
+  def upsert_or_delete(%{} = attrs, _action) do
     repo().upsert(
       changeset(attrs),
       attrs,
@@ -155,17 +170,7 @@ defmodule Bonfire.Boundaries.Grants do
 
   def grant(subject_id, acl, verb_id, value, opts)
       when is_binary(subject_id) and is_binary(verb_id) do
-    value =
-      case value do
-        1 -> true
-        "1" -> true
-        true -> true
-        0 -> false
-        "0" -> false
-        false -> false
-        _ -> nil
-      end
-      |> debug("grant value")
+    value = grant_value(value)
 
     upsert_or_delete(
       %{
@@ -174,7 +179,7 @@ defmodule Bonfire.Boundaries.Grants do
         verb_id: verb_id,
         value: value
       },
-      opts
+      opts[:action]
     )
   end
 
@@ -190,8 +195,21 @@ defmodule Bonfire.Boundaries.Grants do
     nil
   end
 
+  defp grant_value(value) do
+    case value do
+      1 -> true
+      "1" -> true
+      true -> true
+      0 -> false
+      "0" -> false
+      false -> false
+      _ -> nil
+    end
+    |> debug("grant value")
+  end
+
   @doc """
-  Edits or adds grants to an ACL based on a role.
+  Adds grants to an ACL based on a role.
 
   ## Examples
 
@@ -211,12 +229,6 @@ defmodule Bonfire.Boundaries.Grants do
       debug(can_verbs, "grant true for verbs")
       debug(cannot_verbs, "grant false for verbs")
 
-      # first remove existing grants to this subject
-      # FIXME: what if the user granted a separate role or custom verbs to the same subject? we should only remove grants that match the old role we're changing (if any)
-      remove_subject_from_acl(subject_id, acl_id)
-      |> debug("cleeen before granting #{role}")
-
-      # then re-add based on role
       # TODO: optimise with an insert_all or single changeset?
       grant(subject_id, acl_id, can_verbs, true, opts) ++
         grant(subject_id, acl_id, cannot_verbs, false, opts)
@@ -228,6 +240,67 @@ defmodule Bonfire.Boundaries.Grants do
         error(e, "No such role found")
         raise "No such role found"
     end
+  end
+
+  @doc """
+  Adds grants to an ACL based on a role.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.remove_role("subject_123", "acl_456", :admin, [])
+      {:ok, %Grant{}}
+  """
+  def remove_role(subject, acl_id, role, opts \\ [])
+
+  def remove_role(subjects, acl_id, role, opts) when is_list(subjects) do
+    Enum.flat_map(subjects, &remove_role(&1, acl_id, role, opts))
+  end
+
+  def remove_role(subject_id, acl_id, role, opts) do
+    debug(opts, "opts")
+
+    with {:ok, can_verbs, cannot_verbs} <- Roles.verbs_for_role(role, opts) do
+      debug(can_verbs, "grant true for verbs")
+      debug(cannot_verbs, "grant false for verbs")
+      opts = opts ++ [action: :remove_grant]
+
+      # TODO: optimise with an insert_all or single changeset?
+      grant(subject_id, acl_id, can_verbs, true, opts) ++
+        grant(subject_id, acl_id, cannot_verbs, false, opts)
+    else
+      {:error, e} ->
+        raise e
+
+      e ->
+        error(e, "No such role found")
+        raise "No such role found"
+    end
+  end
+
+  @doc """
+  Edit grants of an ACL based on a role.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Grants.change_role("subject_123", "acl_456", :admin, [])
+      {:ok, %Grant{}}
+  """
+  def change_role(subject, acl_id, role, opts \\ [])
+
+  def change_role(subjects, acl_id, role, opts) when is_list(subjects) do
+    Enum.flat_map(subjects, &change_role(&1, acl_id, role, opts))
+  end
+
+  def change_role(subject_id, acl_id, role, opts) do
+    debug(opts, "opts")
+
+    # first remove existing grants to this subject
+    # FIXME: what if the user granted a separate role or custom verbs to the same subject? we should only remove grants that match the previous role that we're changing from (if any)
+    remove_subject_from_acl(subject_id, acl_id)
+    |> debug("clean before granting #{role}")
+
+    # then re-add based on role
+    grant_role(subject_id, acl_id, role, opts)
   end
 
   @doc """

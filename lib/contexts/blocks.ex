@@ -219,8 +219,6 @@ defmodule Bonfire.Boundaries.Blocks do
     do: mutate(block_or_unblock, user_or_instance_to_block_or_unblock, block_type, :instance_wide)
 
   defp mutate(:block, object_to_hide, :hide, scope) do
-    # WIP
-
     current_user = current_user(scope)
     acl = Acls.get_or_create_object_custom_acl(object_to_hide, current_user || scope)
 
@@ -237,7 +235,8 @@ defmodule Bonfire.Boundaries.Blocks do
         current_user: current_user,
         scope: scope
       )
-      |> debug("done")
+
+    # |> debug("done")
 
     if Enums.all_ok?(granted) do
       {:ok, l("Hidden")}
@@ -246,8 +245,66 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
-  defp mutate(_, object_to_hide, :hide, scope) do
+  defp mutate(:unblock, object_to_hide, :hide, scope) do
     error("Unhiding is not yet implemented")
+  end
+
+  defp mutate(:block, object_to_lock, :lock, scope) do
+    current_user = current_user(scope)
+    acl = Acls.get_or_create_object_custom_acl(object_to_lock, current_user || scope)
+
+    # if scope == ? do
+    #   # TODO: lock for specific circles
+    # else
+    # locking for all means these circles
+    # FIXME: should we optimise by simply applying a preset ACL?
+    who_to_lock =
+      instance_wide_circles([:guest, :local, :activity_pub])
+
+    # end
+
+    granted =
+      Grants.grant_role(who_to_lock, acl, :cannot_participate,
+        current_user: current_user,
+        scope: scope
+      )
+
+    # |> debug("done")
+
+    if Enums.all_ok?(granted) do
+      {:ok, l("Locked")}
+    else
+      error(granted, l("Could not lock it"))
+    end
+  end
+
+  defp mutate(:unblock, object_to_unlock, :lock, scope) do
+    current_user = current_user(scope)
+    acl = Acls.get_or_create_object_custom_acl(object_to_unlock, current_user || scope)
+
+    # if scope == ? do
+    #   # TODO: lock for specific circles
+    # else
+    # locking for all means these circles
+    # FIXME: should we optimise by simply applying a preset ACL?
+    who_to_unlock =
+      instance_wide_circles([:guest, :local, :activity_pub])
+
+    # end
+
+    granted =
+      Grants.remove_role(who_to_unlock, acl, :cannot_participate,
+        current_user: current_user,
+        scope: scope
+      )
+
+    # |> debug("done")
+
+    if Enums.all_ok?(granted) do
+      {:ok, l("Unlocked")}
+    else
+      error(granted, l("Could not unlock it"))
+    end
   end
 
   defp mutate(

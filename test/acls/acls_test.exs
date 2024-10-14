@@ -192,7 +192,7 @@ defmodule Bonfire.Boundaries.AclTest do
            end)
 
     # change bob's role
-    Grants.grant_role(bob.id, acl.id, "cannot_read", current_user: me)
+    Grants.change_role(bob.id, acl.id, "cannot_read", current_user: me)
     |> debug("2ndgrant")
 
     {:ok, acl} =
@@ -215,7 +215,7 @@ defmodule Bonfire.Boundaries.AclTest do
            end)
 
     # change bob's role
-    Grants.grant_role(bob.id, acl.id, "cannot_participate", current_user: me)
+    Grants.change_role(bob.id, acl.id, "cannot_participate", current_user: me)
     |> debug("3rdgrant")
 
     {:ok, acl} =

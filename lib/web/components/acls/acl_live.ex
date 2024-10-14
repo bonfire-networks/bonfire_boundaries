@@ -215,7 +215,7 @@ defmodule Bonfire.Boundaries.Web.AclLive do
 
     granted =
       Enum.map(subjects, fn {subject_id, role_name} ->
-        Grants.grant_role(subject_id, acl, role_name, current_user: current_user, scope: scope)
+        Grants.change_role(subject_id, acl, role_name, current_user: current_user, scope: scope)
       end)
       |> debug("done")
 
