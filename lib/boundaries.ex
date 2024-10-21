@@ -517,14 +517,14 @@ defmodule Bonfire.Boundaries do
 
   @doc """
   Returns the default boundaries to be set for new users from config.
-
-  ## Examples
-
-      iex> Bonfire.Boundaries.user_default_boundaries()
-      [{"public", "Public"}]
   """
-  def user_default_boundaries() do
+  def user_default_boundaries(true = _local?) do
     Config.get!(:user_default_boundaries)
+  end
+
+  def user_default_boundaries(_) do
+    Config.get!(:remote_user_boundaries)
+    |> debug("init for remote actor")
   end
 
   @doc """

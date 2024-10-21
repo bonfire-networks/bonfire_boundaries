@@ -510,9 +510,10 @@ defmodule Bonfire.Boundaries.Acls do
   defp find_acls(acls, user)
        when is_list(acls) and length(acls) > 0 and
               (is_binary(user) or is_map(user)) do
+    # FIXME: we're assuming that user is local and not a remote actor
     acls =
       acls
-      |> Enum.map(&identify/1)
+      |> Enum.map(&identify(true, &1))
       # |> info("identified")
       |> filter_empty([])
       |> Enum.group_by(&elem(&1, 0))
@@ -544,8 +545,8 @@ defmodule Bonfire.Boundaries.Acls do
     []
   end
 
-  defp identify(name) do
-    case user_default_acl(name) do
+  defp identify(local?, name) do
+    case user_default_acl(local?, name) do
       # seems to be a global ACL
       nil ->
         {:global, get!(name)}
@@ -1122,11 +1123,11 @@ defmodule Bonfire.Boundaries.Acls do
 
   defp maybe_preload_n_subjects(acls, _), do: acls
 
-  def user_default_acl(name), do: user_default_acls()[name]
+  def user_default_acl(local?, name), do: user_default_acls(local?)[name]
 
   # FIXME: this vs acls/0 ?
-  def user_default_acls() do
-    Map.fetch!(Boundaries.user_default_boundaries(), :acls)
+  def user_default_acls(local?) do
+    Map.fetch!(Boundaries.user_default_boundaries(local?), :acls)
     # |> debug
   end
 

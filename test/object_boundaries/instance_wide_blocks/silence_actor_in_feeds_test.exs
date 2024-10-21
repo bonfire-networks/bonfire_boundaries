@@ -42,7 +42,6 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
       assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, current_user: me)
     end
 
-    @tag :todo
     test "does not show in any feeds a post from a instance-wide silenced user" do
       bob = fake_user!(@other_name)
 
@@ -67,7 +66,6 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
       assert %{edges: []} = Bonfire.Social.FeedActivities.feed(:local, current_user: third_user)
     end
 
-    @tag :todo
     test "does not show in any feeds a post from an user that was instance-wide silenced later on" do
       bob = fake_user!(@other_name)
       # Bonfire.Boundaries.Blocks.instance_wide_circles([:silence_me])

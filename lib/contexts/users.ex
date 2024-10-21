@@ -102,7 +102,7 @@ defmodule Bonfire.Boundaries.Users do
       named: named,
       controlleds: controlleds,
       stereotypes: stereotypes
-    } = PreparedBoundaries.from_config(user, [])
+    } = PreparedBoundaries.from_config(user, skip_extra_acls: true)
 
     missing_stereotypes = stereotypes |> reject_existing_stereotypes(user)
     missing_stereotypes_ids = stereotypes |> Enum.map(& &1.stereotype_id)

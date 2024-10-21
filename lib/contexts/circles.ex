@@ -258,10 +258,10 @@ defmodule Bonfire.Boundaries.Circles do
 
   ## Examples
 
-      iex> Bonfire.Boundaries.Circles.create(user, %{named: %{name: "My Circle"}})
+      iex> Bonfire.Boundaries.Circles.create(caretaker, %{named: %{name: "My Circle"}})
       {:ok, %Circle{id: "new_circle_id", name: "My Circle"}}
   """
-  def create(user, %{} = attrs) when is_map(user) or is_binary(user) do
+  def create(caretaker, %{} = attrs) when is_map(caretaker) or is_binary(caretaker) do
     with {:ok, circle} <-
            repo().insert(
              changeset(
@@ -269,7 +269,7 @@ defmodule Bonfire.Boundaries.Circles do
                attrs
                |> input_to_atoms()
                |> deep_merge(%{
-                 caretaker: %{caretaker_id: uid!(user)}
+                 caretaker: %{caretaker_id: uid!(caretaker)}
                  # encircles: [%{subject_id: user.id}] # add myself to circle?
                })
              )
@@ -286,8 +286,8 @@ defmodule Bonfire.Boundaries.Circles do
     )
   end
 
-  def create(user, name) when is_binary(name) do
-    create(user, %{named: %{name: name}})
+  def create(caretaker, name) when is_binary(name) do
+    create(caretaker, %{named: %{name: name}})
   end
 
   def changeset(circle \\ %Circle{}, attrs)
@@ -301,6 +301,7 @@ defmodule Bonfire.Boundaries.Circles do
     Circle.changeset(circle, attrs)
     |> Changesets.cast(attrs, [])
     |> Changesets.cast_assoc(:named, with: &Named.changeset/2)
+    |> Changesets.cast_assoc(:stereotyped, with: &Stereotyped.changeset/2)
     |> Changesets.cast_assoc(:extra_info, with: &ExtraInfo.changeset/2)
     |> Changesets.cast_assoc(:encircles, with: &Encircle.changeset/2)
   end
@@ -330,6 +331,21 @@ defmodule Bonfire.Boundaries.Circles do
 
   def is_encircled_by?(subject, circle) when is_atom(circle) and not is_nil(circle),
     do: is_encircled_by?(subject, get_id!(circle))
+
+  def is_encircled_by?(subject, %{__struct__: schema, display_hostname: display_hostname})
+      when schema == Bonfire.Data.ActivityPub.Peer do
+    with {:ok, circle} <-
+           get_by_name(
+             display_hostname,
+             Bonfire.Boundaries.Scaffold.Instance.activity_pub_circle()
+           )
+           |> debug("circle for peer") do
+      is_encircled_by?(subject, circle)
+    else
+      _ ->
+        nil
+    end
+  end
 
   def is_encircled_by?(subject, circles)
       when is_list(circles) or is_binary(circles) or is_map(circles),
@@ -401,7 +417,9 @@ defmodule Bonfire.Boundaries.Circles do
       {:ok, %Circle{id: "circle_id", name: "My Circle"}}
   """
   def get_by_name(name, caretaker) do
-    repo().single(query_basic_my(caretaker, name: name))
+    repo().single(
+      query_basic_my(caretaker || Bonfire.Boundaries.Scaffold.Instance.admin_circle(), name: name)
+    )
   end
 
   @doc """
@@ -412,22 +430,52 @@ defmodule Bonfire.Boundaries.Circles do
       iex> Bonfire.Boundaries.Circles.get_stereotype_circles(user, [:follow, :block])
       [%Circle{id: "follow_circle_id", name: "Follow"}, %Circle{id: "block_circle_id", name: "Block"}]
   """
+
+  # def get_stereotype_circles(%{__struct__: schema, display_hostname: display_hostname}, stereotypes) when schema == Bonfire.Data.ActivityPub.Peer do
+  #   raise "Instance stereotypes not implemented"
+  # end
+
   def get_stereotype_circles(subject, stereotypes)
       when is_list(stereotypes) and stereotypes != [] do
-    stereotypes = Enum.map(stereotypes, &Bonfire.Boundaries.Circles.get_id!/1)
+    stereotypes =
+      Enum.map(stereotypes, &Bonfire.Boundaries.Circles.get_id!/1)
+      |> uids()
 
-    # skip boundaries since we should only use this query internally
-    query_my(subject, skip_boundary_check: true)
-    |> where(
-      [circle: circle, stereotyped: stereotyped],
-      stereotyped.stereotype_id in ^uids(stereotypes)
-    )
-    |> repo().all()
+    if stereotypes == [] do
+      []
+    else
+      # skip boundaries since we should only use this query internally
+      query_my(subject, skip_boundary_check: true)
+      |> where(
+        [circle: circle, stereotyped: stereotyped],
+        stereotyped.stereotype_id in ^stereotypes
+      )
+      |> repo().all()
+    end
   end
 
   def get_stereotype_circles(subject, stereotype)
       when not is_nil(stereotype) and stereotype != [],
       do: get_stereotype_circles(subject, [stereotype])
+
+  def get_or_create_stereotype_circle(caretaker, stereotype) do
+    case get_stereotype_circles(caretaker, [stereotype]) do
+      [] ->
+        create_stereotype_circle(caretaker, stereotype)
+
+      [existing] ->
+        {:ok, existing}
+
+      other ->
+        error(other, "Unexpected number of stereotypes")
+    end
+  end
+
+  def create_stereotype_circle(caretaker, stereotype) do
+    create(caretaker, %{
+      stereotyped: %{stereotype_id: Bonfire.Boundaries.Circles.get_id!(stereotype)}
+    })
+  end
 
   @doc """
   Lists visible circles for a user.
@@ -717,11 +765,11 @@ defmodule Bonfire.Boundaries.Circles do
   """
   def add_to_circles(_subject, circles)
       when is_nil(circles) or (is_list(circles) and length(circles) == 0),
-      do: error("No circle ID provided, so could not add")
+      do: error(circles, "No circle provided to add to")
 
   def add_to_circles(subjects, _circles)
       when is_nil(subjects) or (is_list(subjects) and length(subjects) == 0),
-      do: error("No subject ID provided, so could not add")
+      do: error(subjects, "No subject provided to add to a circle")
 
   def add_to_circles(subjects, circle) when is_list(subjects) do
     # TODO: optimise

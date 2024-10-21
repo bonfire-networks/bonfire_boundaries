@@ -4,22 +4,22 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
   It takes care of reading the configuration about the default boundaries and prepare the information for the  Bonfire.Boundaries.Users module.
   """
   alias __MODULE__
-  alias Bonfire.Boundaries
+  alias Bonfire.Common.Types
+  alias Needle.ULID
 
+  alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Users.PreparedBoundaries
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Circles
-  alias Bonfire.Data.AccessControl.Stereotyped
   alias Bonfire.Boundaries.Verbs
 
+  alias Bonfire.Data.Identity.Named
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.AccessControl.Controlled
   alias Bonfire.Data.AccessControl.Circle
   alias Bonfire.Data.AccessControl.Grant
-
-  alias Bonfire.Data.Identity.Named
-  alias Needle.ULID
+  alias Bonfire.Data.AccessControl.Stereotyped
 
   defstruct acls: [],
             circles: [],
@@ -27,6 +27,51 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
             named: [],
             controlleds: [],
             stereotypes: []
+
+  @doc """
+  Creates PreparedBoundaries for a given user based on the runtime config.
+  """
+  def from_config(user, opts \\ []) do
+    # TODO: document what this is and find a better variable name
+    acls_extra =
+      if not is_list(opts) or opts[:skip_extra_acls] do
+        []
+      else
+        default_profile_visibility(opts[:undiscoverable]) ++
+          maybe_request_before_follow(opts[:request_before_follow])
+      end
+
+    prepare_boundaries(user, acls_extra, opts)
+  end
+
+  defp prepare_boundaries(user, acls_extra, opts) do
+    user_default_boundaries =
+      Boundaries.user_default_boundaries(!(opts == :remote or opts[:local] == false))
+
+    circles = prepare_circles(user_default_boundaries)
+    acls = prepare_acls(user_default_boundaries)
+
+    grants = prepare_grants(user_default_boundaries, acls, circles, user, opts)
+
+    controlleds = prepare_controlleds(user_default_boundaries, acls, acls_extra, user)
+
+    # |> info("circles for #{e(user, :character, :username, nil)}")
+    circles_values = Map.values(circles)
+    # |> info("acls for #{e(user, :character, :username, nil)}")
+    acls_values = Map.values(acls)
+
+    named = prepare_nameds(acls_values ++ circles_values)
+    stereotypes = prepare_stereotypes(acls_values ++ circles_values)
+
+    %PreparedBoundaries{
+      acls: acls_values,
+      circles: circles_values,
+      grants: grants,
+      named: named,
+      controlleds: controlleds,
+      stereotypes: stereotypes
+    }
+  end
 
   defp prepare_circles(user_default_boundaries) do
     for {k, v} <- Map.fetch!(user_default_boundaries, :circles), into: %{} do
@@ -55,7 +100,7 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
   defp format_verb({verb, v}) when is_binary(verb) and is_boolean(v),
     do: %{verb_id: verb, value: v}
 
-  defp prepare_grants(user_default_boundaries, acls, circles, user) do
+  defp prepare_grants(user_default_boundaries, acls, circles, user, opts) do
     for {acl, entries} <- Map.fetch!(user_default_boundaries, :grants),
         {circle, verbs} <- entries,
         verb <- verbs do
@@ -63,7 +108,7 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
       |> Map.merge(%{
         id: Needle.UID.generate(Grant),
         acl_id: default_acl_id(acls, acl),
-        subject_id: default_subject_id(circles, user, circle)
+        subject_id: default_subject_id(circles, user, circle, opts)
       })
     end
   end
@@ -108,51 +153,6 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
     end
   end
 
-  @doc """
-  Creates PreparedBoundaries for a given user based on the runtime config.
-  """
-  def from_config(user, opts, skip_acls_extra \\ false)
-
-  def from_config(user, opts, false = _skip_acls_extra) do
-    # TODO: document what this is and find a better variable name
-    acls_extra =
-      default_profile_visibility(opts[:undiscoverable]) ++
-        maybe_request_before_follow(opts[:request_before_follow])
-
-    prepare_boundaries(user, acls_extra, opts)
-  end
-
-  def from_config(user, opts, true = _skip_acls_extra) do
-    prepare_boundaries(user, [], opts)
-  end
-
-  defp prepare_boundaries(user, acls_extra, opts) do
-    user_default_boundaries = Boundaries.user_default_boundaries()
-    circles = prepare_circles(user_default_boundaries)
-    acls = prepare_acls(user_default_boundaries)
-
-    grants = prepare_grants(user_default_boundaries, acls, circles, user)
-
-    controlleds = prepare_controlleds(user_default_boundaries, acls, acls_extra, user)
-
-    # |> info("circles for #{e(user, :character, :username, nil)}")
-    circles_values = Map.values(circles)
-    # |> info("acls for #{e(user, :character, :username, nil)}")
-    acls_values = Map.values(acls)
-
-    named = prepare_nameds(acls_values ++ circles_values)
-    stereotypes = prepare_stereotypes(acls_values ++ circles_values)
-
-    %PreparedBoundaries{
-      acls: acls_values,
-      circles: circles_values,
-      grants: grants,
-      named: named,
-      controlleds: controlleds,
-      stereotypes: stereotypes
-    }
-  end
-
   defp stereotype(attrs, module) do
     case attrs[:stereotype] do
       nil ->
@@ -173,13 +173,14 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
     end
   end
 
-  defp default_subject_id(_circles, user, :SELF), do: user.id
+  defp default_subject_id(_circles, user, :SELF, _opts), do: user.id
 
-  defp default_subject_id(circles, _user, circle_id) do
-    with nil <- Map.get(circles, circle_id, %{})[:id],
-         nil <- Circles.get_id(circle_id) do
+  defp default_subject_id(circles, _user, circle_slug, opts) do
+    with nil <- Map.get(circles, circle_slug, %{})[:id],
+         nil <- Circles.get_id(circle_slug),
+         false <- (is_list(opts) and Types.uid(opts[:custom_circles][circle_slug])) || false do
       raise RuntimeError,
-        message: "invalid circle given in new user boundaries config: #{inspect(circle_id)}"
+        message: "invalid circle given in new user boundaries config: #{inspect(circle_slug)}"
     end
   end
 end

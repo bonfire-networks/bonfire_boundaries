@@ -500,16 +500,22 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     # end of global boundaries
 
-    negative_grants = [
+    bare_negative_grants = [
       # instance-wide negative permissions
       :ghosted_cannot_anything,
       :silenced_cannot_reach_me,
       :cannot_discover_if_silenced,
       # per-user negative permissions
-      :my_ghosted_cannot_anything,
-      :my_silenced_cannot_reach_me,
       :my_cannot_discover_if_silenced
     ]
+
+    negative_grants =
+      bare_negative_grants ++
+        [
+          # per-user negative permissions
+          :my_ghosted_cannot_anything,
+          :my_silenced_cannot_reach_me
+        ]
 
     ### Creating a user also entails inserting a default boundaries configuration for them.
     ###
@@ -526,7 +532,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           ghost_them: %{stereotype: :ghost_them},
           # users/instances you have silenced
           silence_them: %{stereotype: :silence_them},
-          # users who have silenced me
+          # users who have silenced you
           silence_me: %{stereotype: :silence_me}
         },
         acls: %{
@@ -558,8 +564,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           my_silenced_cannot_reach_me: %{
             silence_them: verbs_negative.([:mention, :message])
           },
-          # People who silence me can't see me or my objects in feeds and such (but can still read them if they have a
-          # direct link or come across my objects in a thread structure or such).
+          # People who silence me can't see me or my objects in feeds and such (but can still read them if they have a direct link or come across my objects in a thread structure or such). This is an automatated invisible circle (i.e. I can't see who silenced me).
           my_cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])},
           my_followed_may_reply: %{followed: verbs_participate_and_message}
         },
@@ -573,6 +578,51 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               :i_may_administer
               # note that extra ACLs are added by `Bonfire.Boundaries.Users.default_visibility/0`
             ] ++ negative_grants
+        }
+      },
+      remote_user_boundaries: %{
+        circles: %{
+          # users who have followed you
+          followers: %{stereotype: :followers},
+          # users who you have followed
+          followed: %{stereotype: :followed},
+          # users who have silenced you
+          silence_me: %{stereotype: :silence_me}
+        },
+        acls: %{
+          ## ACLs that confer my personal permissions on things i have created
+          i_may_administer: %{stereotype: :i_may_administer},
+          ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
+          my_cannot_discover_if_silenced: %{stereotype: :cannot_discover_if_silenced}
+        },
+        ### Data structure:
+        ### * The outer keys are ACL names declared above.
+        ### * The inner keys are circles declared above.
+        ### * The inner values declare the verbs the user is permitted to see. Either a map of verb to boolean or a list
+        ###   (where values are assumed to be true).
+        ### * The special key `SELF` means the creating user.
+        grants: %{
+          ## ACLs that confer my personal permissions on things i have created
+          # i_may_read:           %{SELF:  [:read, :see]},# not currently used
+          # i_may_reply:          %{SELF:  [:read, :see, :create, :mention, :tag, :boost, :flag, :like, :follow, :reply]}, # not currently used
+          i_may_administer: %{SELF: all_verb_names},
+          ## "Negative" ACLs that apply overrides for ghosting and silencing purposes.
+          # People who silence me can't see me or my objects in feeds and such (but can still read them if they have a direct link or come across my objects in a thread structure or such). This is an automatated invisible circle (i.e. I can't see who silenced me).
+          my_cannot_discover_if_silenced: %{
+            silence_me: verbs_negative.([:see]),
+            silence_my_instance: verbs_negative.([:see])
+          }
+          # my_cannot_discover_if_silenced_instance: %{silence_my_instance: verbs_negative.([:see])}
+        },
+        ### This lets us control access to the user themselves (e.g. to view their profile or mention them)
+        controlleds: %{
+          SELF:
+            [
+              # positive permissions
+              :locals_may_reply,
+              :i_may_administer
+              # note that extra ACLs are added by `Bonfire.Boundaries.Users.default_visibility/0`
+            ] ++ bare_negative_grants
         }
       }
 

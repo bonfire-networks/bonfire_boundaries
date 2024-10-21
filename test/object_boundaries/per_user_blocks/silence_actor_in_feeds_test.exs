@@ -78,7 +78,7 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
 
       # Bonfire.Boundaries.Circles.get_stereotype_circles(other_user, [:silence_me])
       # |> Bonfire.Common.Repo.maybe_preload(caretaker: [:profile], encircles: [subject: [:profile]])
-      # |> info("other_user: silence_me encircles")
+      # |> info("other_user: silence_me encircles") 
 
       # Bonfire.Boundaries.Circles.get_stereotype_circles(other_user, [:silence_them])
       # |> Bonfire.Common.Repo.maybe_preload(caretaker: [:profile], encircles: [subject: [:profile]])

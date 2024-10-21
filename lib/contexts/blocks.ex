@@ -81,12 +81,13 @@ defmodule Bonfire.Boundaries.Blocks do
       iex> Bonfire.Boundaries.Blocks.remote_instance_block("example.com", :silence, :instance_wide)
       {:ok, "Blocked"}
   """
-  def remote_instance_block(display_hostname, block_type, scope) do
-    with {:ok, circle} <- Bonfire.Boundaries.Circles.get_or_create(display_hostname) do
-      debug(circle, "blocking (#{block_type}) an entire instance: #{display_hostname}")
-      block(circle, block_type, scope)
-    end
-  end
+
+  # def remote_instance_block(display_hostname, block_type, scope) do
+  #   with {:ok, circle} <- Bonfire.Boundaries.Circles.get_or_create(display_hostname, Bonfire.Boundaries.Scaffold.Instance.activity_pub_circle()) do
+  #     debug(circle, "blocking (#{block_type}) an entire instance: #{display_hostname}")
+  #     block(circle, block_type, scope)
+  #   end
+  # end
 
   @doc """
   Blocks, silences, or ghosts a user or instance.
@@ -127,23 +128,30 @@ defmodule Bonfire.Boundaries.Blocks do
   def block(user_or_instance, block_type, :instance),
     do: block(user_or_instance, block_type, :instance_wide)
 
-  def block(
-        %{__struct__: schema, display_hostname: display_hostname} = _instance_to_block,
-        block_type,
-        scope
-      )
-      when schema == Bonfire.Data.ActivityPub.Peer do
-    remote_instance_block(display_hostname, block_type, scope)
-  end
+  # def block(
+  #       %{__struct__: schema, display_hostname: display_hostname} = _instance_to_block,
+  #       block_type,
+  #       scope
+  #     )
+  #     when schema == Bonfire.Data.ActivityPub.Peer do
+  #   remote_instance_block(display_hostname, block_type, scope)
+  # end
 
-  def block(id, block_type, scope) when is_binary(id) do
-    with {:ok, user_or_circle} <- Bonfire.Common.Needles.get(id, skip_boundary_check: true) do
+  def block(id_or_username, block_type, scope) when is_binary(id_or_username) do
+    with {:ok, user_or_circle} <-
+           Bonfire.Common.Needles.get(id_or_username, skip_boundary_check: true) do
       debug(user_or_circle, "found by ID or username")
       block(user_or_circle, block_type, scope)
     else
       _ ->
-        debug("assume it's an instance display_hostname")
-        remote_instance_block(id, block_type, scope)
+        if Types.is_uid(id_or_username) do
+          debug("assume it's an instance display_hostname")
+
+          maybe_apply(Bonfire.Federate.ActivityPub.Instances, :get, [id_or_username])
+          ~> block(block_type, scope)
+        else
+          error(id_or_username, "Could not find what to block")
+        end
     end
   end
 
@@ -368,6 +376,64 @@ defmodule Bonfire.Boundaries.Blocks do
     )
   end
 
+  defp mutate_blocklists(
+         block_or_unblock,
+         user_or_instance_add,
+         block_type,
+         circle_caretaker
+       ) do
+    per_user_circles(circle_caretaker, block_type)
+    |> debug("user circles to block for #{inspect(block_type)}")
+    |> repo().maybe_preload(caretaker: [caretaker: [:profile]])
+    |> do_mutate_blocklists(block_or_unblock, user_or_instance_add, ...)
+  end
+
+  defp do_mutate_blocklists(
+         block_or_unblock,
+         %{__struct__: schema, display_hostname: display_hostname} = instance_to_block,
+         circles
+       )
+       when schema == Bonfire.Data.ActivityPub.Peer do
+    debug("for blocking of instances, we use the instance's Circle instead of the Peer")
+
+    with {:ok, circle_to_block} <-
+           Bonfire.Boundaries.Circles.get_or_create(
+             display_hostname,
+             Bonfire.Boundaries.Scaffold.Instance.activity_pub_circle()
+           ) do
+      debug(circle_to_block, "#{block_or_unblock} an entire instance: #{display_hostname}")
+
+      do_mutate_blocklists(
+        block_or_unblock,
+        circle_to_block,
+        circles
+      )
+    end
+  end
+
+  defp do_mutate_blocklists(:block, user_or_instance_to_block, circles) do
+    # TODO: properly validate the inserts
+    with done when is_list(done) <-
+           Circles.add_to_circles(user_or_instance_to_block, circles) do
+      {:ok, "Blocked"}
+    else
+      e ->
+        error(e)
+        {:error, "Could not block"}
+    end
+  end
+
+  defp do_mutate_blocklists(:unblock, user_or_instance_to_unblock, circles) do
+    with {deleted, _} when deleted > 0 <-
+           Circles.remove_from_circles(user_or_instance_to_unblock, circles) do
+      {:ok, "Unblocked"}
+    else
+      e ->
+        warn(e, "Could not unblock")
+        {:error, "Could not unblock"}
+    end
+  end
+
   @doc """
   Checks if a user or instance is blocked.
 
@@ -436,42 +502,6 @@ defmodule Bonfire.Boundaries.Blocks do
 
   ###
 
-  defp mutate_blocklists(
-         block_or_unblock,
-         user_or_instance_add,
-         block_type,
-         circle_caretaker
-       ) do
-    circle_caretaker
-    |> per_user_circles(..., block_type)
-    # |> debug("user circles to block")
-    |> repo().maybe_preload(caretaker: [caretaker: [:profile]])
-    |> do_mutate_blocklists(block_or_unblock, user_or_instance_add, ...)
-  end
-
-  defp do_mutate_blocklists(:block, user_or_instance_to_block, circles) do
-    # TODO: properly validate the inserts
-    with done when is_list(done) <-
-           Circles.add_to_circles(user_or_instance_to_block, circles) do
-      {:ok, "Blocked"}
-    else
-      e ->
-        error(e)
-        {:error, "Could not block"}
-    end
-  end
-
-  defp do_mutate_blocklists(:unblock, user_or_instance_to_unblock, circles) do
-    with {deleted, _} when deleted > 0 <-
-           Circles.remove_from_circles(user_or_instance_to_unblock, circles) do
-      {:ok, "Unblocked"}
-    else
-      e ->
-        warn(e, "Could not unblock")
-        {:error, "Could not unblock"}
-    end
-  end
-
   def instance_wide_circles(block_types) when is_list(block_types) do
     Enum.map(block_types, &Bonfire.Boundaries.Circles.get_id/1)
   end
@@ -481,8 +511,20 @@ defmodule Bonfire.Boundaries.Blocks do
     |> instance_wide_circles()
   end
 
+  # defp per_user_circles(%{__struct__: schema, display_hostname: display_hostname} = instance_to_block,
+  #       block_types
+  #     ) when schema == Bonfire.Data.ActivityPub.Peer do
+  #       debug(instance_to_block, "instance_to_block with #{inspect block_types}")
+  #   raise "Instance silencing not implemented"
+  # end
+  defp per_user_circles(%Bonfire.Data.AccessControl.Circle{} = circle, _block_types) do
+    warn(circle, "Received a circle instead of a user")
+    [circle]
+  end
+
   defp per_user_circles(current_user, block_types)
        when not is_nil(current_user) and is_list(block_types) do
+    debug(current_user, "per-user ssscircles")
     Circles.get_stereotype_circles(current_user, block_types)
   end
 
