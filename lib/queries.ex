@@ -17,6 +17,7 @@ defmodule Bonfire.Boundaries.Queries do
 
   # import Untangle
   use Bonfire.Common.E
+  import Untangle
   import Ecto.Query
   alias Bonfire.Boundaries.Summary
   alias Bonfire.Boundaries.Verbs
@@ -65,9 +66,9 @@ defmodule Bonfire.Boundaries.Queries do
               query
 
             :admins ->
-              current_user = Bonfire.Common.Utils.current_user(opts)
+              agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
 
-              case Bonfire.Me.Accounts.is_admin?(current_user) do
+              case Bonfire.Me.Accounts.is_admin?(agent) do
                 true ->
                   Untangle.debug("Skipping boundary checks for instance administrator")
 
@@ -76,7 +77,7 @@ defmodule Bonfire.Boundaries.Queries do
                 _ ->
                   vis =
                     Bonfire.Boundaries.Queries.query_with_summary(
-                      current_user,
+                      agent,
                       verbs,
                       from(Summary, where: [object_id: parent_as(unquote(alia)).unquote(field)])
                     )
@@ -88,9 +89,9 @@ defmodule Bonfire.Boundaries.Queries do
               end
 
             _false ->
-              current_user = Bonfire.Common.Utils.current_user(opts)
+              agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
 
-              # vis = Bonfire.Boundaries.Queries.query_with_summary(uscurrent_userer, verbs)
+              # vis = Bonfire.Boundaries.Queries.query_with_summary(agent, verbs)
 
               # join(
               #   unquote(query),
@@ -102,7 +103,7 @@ defmodule Bonfire.Boundaries.Queries do
 
               vis =
                 Bonfire.Boundaries.Queries.query_with_summary(
-                  current_user,
+                  agent,
                   verbs,
                   from(Summary, where: [object_id: parent_as(unquote(alia)).unquote(field)])
                 )
@@ -155,12 +156,12 @@ defmodule Bonfire.Boundaries.Queries do
       iex> Bonfire.Boundaries.Queries.query_with_summary(user_id, [:read, :write])
   """
   def query_with_summary(user, verbs \\ [:see, :read], query \\ Summary) do
-    ids = user_and_circle_ids(user)
+    subject_ids = user_and_circle_ids(user)
     verbs = Verbs.ids(verbs)
 
     from(summary in query,
       where:
-        summary.subject_id in ^ids and
+        summary.subject_id in ^subject_ids and
           summary.verb_id in ^verbs,
       group_by: summary.object_id,
       having: fragment("agg_perms(?)", summary.value),
@@ -190,11 +191,11 @@ defmodule Bonfire.Boundaries.Queries do
       iex> Bonfire.Boundaries.Queries.permitted(user_id, [:read, :write])
   """
   def permitted(user, verbs) do
-    ids = user_and_circle_ids(user)
+    subject_ids = user_and_circle_ids(user)
     verbs = Verbs.ids(verbs)
 
     from(summary in Summary,
-      where: summary.subject_id in ^ids,
+      where: summary.subject_id in ^subject_ids,
       where: summary.verb_id in ^verbs,
       group_by: [summary.object_id],
       having: fragment("agg_perms(?)", summary.value),
@@ -282,10 +283,26 @@ defmodule Bonfire.Boundaries.Queries do
       (is_list(opts) and Keyword.get(opts, :skip_boundary_check))
   end
 
+  defp user_and_circle_ids(%{} = subject) do
+    extra_circle =
+      if Bonfire.Boundaries.Integration.is_local?(subject), do: :local, else: :activity_pub
+
+    [Bonfire.Boundaries.Circles.circles()[extra_circle][:id], Bonfire.Common.Types.uid(subject)]
+  end
+
   defp user_and_circle_ids(subjects) do
     case Bonfire.Common.Types.uids(subjects) do
-      [] -> [Bonfire.Boundaries.Circles.circles()[:guest][:id]]
-      ids when is_list(ids) -> ids
+      [] ->
+        [Bonfire.Boundaries.Circles.circles()[:guest][:id]]
+
+      # [id] -> Bonfire.Boundaries.Integration.is_local?() # TODO?
+      ids when is_list(ids) ->
+        warn(
+          ids,
+          "You may get unexpected results when checking permissions for several subjects, as :local or :activity_pub circles won't be added"
+        )
+
+        ids
     end
   end
 end

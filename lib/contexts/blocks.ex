@@ -322,9 +322,29 @@ defmodule Bonfire.Boundaries.Blocks do
          :instance_wide
        )
        when block_type in [:silence, :silence_them] do
-    instance_wide_circles([:silence_me, :silence_them])
-    |> info("instance_wide_circles_silenced")
-    |> do_mutate_blocklists(block_or_unblock, user_or_instance_to_block, ...)
+    debug(
+      "add silence block to both instance's :silence_them and the other to user_or_instance_to_block's :silence_me"
+    )
+
+    # instance list of people/instances silenced
+    with {:ok, _ret} <-
+           types_blocked(block_type)
+           |> instance_wide_circles()
+           |> info("instance_wide_circles_silenced1")
+           |> do_mutate_blocklists(block_or_unblock, user_or_instance_to_block, ...),
+         # that user or instance's list of people who silenced them (this list isn't meant to be visible to them, but is used so queries can filter stuff using `Bonfire.Boundaries.Queries`)
+         #  [:silence_me]
+         {:ok, ret} <-
+           [:guest, :local]
+           |> instance_wide_circles()
+           |> info("instance_wide_circles_silenced2")
+           |> do_mutate_blocklists(
+             block_or_unblock,
+             ...,
+             per_user_circles(user_or_instance_to_block, [:silence_me])
+           ) do
+      {:ok, ret}
+    end
   end
 
   defp mutate(
@@ -347,7 +367,7 @@ defmodule Bonfire.Boundaries.Blocks do
       "add silence block to both users' circles, one to current_user's :silence_them and the other to user_or_instance_to_block's :silence_me"
     )
 
-    # my list of people I've silenced
+    # my list of people/instances I've silenced
     with {:ok, _ret} <-
            mutate_blocklists(
              block_or_unblock,

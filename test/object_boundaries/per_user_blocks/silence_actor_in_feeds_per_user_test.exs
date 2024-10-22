@@ -130,6 +130,8 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
                  boundary: "public"
                )
 
+      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, me)
+
       Bonfire.Boundaries.Blocks.block(other_user, :silence, current_user: me)
 
       refute Bonfire.Social.FeedActivities.feed_contains?(:local, post, me)
@@ -138,6 +140,11 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
       third = fake_user!()
 
       assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, current_user: third)
+
+      Bonfire.Boundaries.Blocks.unblock(other_user, :silence, current_user: me)
+
+      # we show it once again
+      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, me)
     end
   end
 end

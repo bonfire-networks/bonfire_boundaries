@@ -201,6 +201,7 @@ defmodule Bonfire.Boundaries.Circles do
           where: c.id in ^Types.uids(ids),
           preload: [:named]
         )
+        # |> query_with_counts() 
       )
 
   @doc """
@@ -532,6 +533,12 @@ defmodule Bonfire.Boundaries.Circles do
   """
   def list_my_with_counts(user, opts \\ []) do
     query_my(user, opts ++ @default_q_opts)
+    |> query_with_counts()
+    |> many(opts[:paginate?], opts)
+  end
+
+  defp query_with_counts(query) do
+    query
     |> join(
       :left,
       [circle],
@@ -545,8 +552,8 @@ defmodule Bonfire.Boundaries.Circles do
       as: :encircles
     )
     |> select_merge([encircles: encircles], %{encircles_count: encircles.count})
-    # |> order_by([encircles: encircles], desc_nulls_last: encircles.count) # custom order messes with pagination
-    |> many(opts[:paginate?], opts)
+
+    # |> order_by([encircles: encircles], desc_nulls_last: encircles.count) # FIXME: custom order messes with pagination
   end
 
   @doc """
@@ -797,18 +804,18 @@ defmodule Bonfire.Boundaries.Circles do
       {2, nil}
   """
   def remove_from_circles(_subject, circles)
-      when is_nil(circles) or (is_list(circles) and length(circles) == 0),
-      do: error("No circle ID provided, so could not remove")
+      when is_nil(circles) or circles == [],
+      do: error("No circle provided, so could not remove")
 
-  def remove_from_circles(subject, circles) when is_list(circles) do
+  def remove_from_circles(subject, _circles)
+      when is_nil(subject) or subject == [],
+      do: error("No subject provided, so could not remove")
+
+  def remove_from_circles(subject, circles) do
     from(e in Encircle,
-      where: e.subject_id == ^uid(subject) and e.circle_id in ^Types.uids(circles)
+      where: e.subject_id in ^Types.uids(subject) and e.circle_id in ^Types.uids(circles)
     )
     |> repo().delete_all()
-  end
-
-  def remove_from_circles(subject, circle) do
-    remove_from_circles(subject, [circle])
   end
 
   @doc """
