@@ -161,7 +161,7 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   end
 
   def handle_event("select", %{"id" => id}, socket) do
-    # debug(attrs)
+    debug(id)
     add_member(input_to_atoms(e(assigns(socket), :suggestions, %{})[id]) || id, socket)
   end
 
@@ -218,8 +218,6 @@ defmodule Bonfire.Boundaries.Web.CircleLive do
   end
 
   def handle_event("live_select_change", %{"id" => live_select_id, "text" => search}, socket) do
-    debug(assigns(socket))
-
     do_results_for_multiselect(search)
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
 

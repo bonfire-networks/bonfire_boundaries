@@ -1,18 +1,28 @@
-<div id="circle_preview" x-data="{search: false}" class="">
+<div id="circle_preview" class="">
   <div class="">
     <#slot />
-    <ul
-      class="menu mt-2 menu-horizontal gap-3 bg-base-100 mx-2"
+    <div
+      class="menu menu-horizontal gap-3 bg-base-100 w-full border-base-content/20 border-b"
       :if={@show_add || (!@stereotype_id and !@read_only)}
     >
-      <li :if={@show_add || !@read_only}>
-        <button @click="search = !search" class="btn btn-active  btn-outline btn-sm">
-          <#Icon solid="search" class="w-4 h-4" />
-          <span>{l("Add users")}</span>
-        </button>
-      </li>
+      <form
+        id="edit_circle_participant"
+        phx-target={@myself}
+        phx-change="select"
+        class="max-w-[300px] w-full flex-1"
+      >
+        <!-- WIP: Not working when using live_select on a stateful component -->
+        <!-- <Bonfire.UI.Common.MultiselectLive
+            implementation={:live_select}
+            event_target="#edit_circle_participant"
+            form_input_name={__MODULE__}
+            label={l("Search for users to add")}
+          /> -->
+        <Bonfire.Boundaries.Web.SearchUsersInCirclesLive />
+      </form>
+
       {#if !@stereotype_id and !@read_only}
-        <li data-role="edit_circle_name" class="edit_name">
+        <div data-role="edit_circle_name" class="edit_name">
           <Bonfire.UI.Common.OpenModalLive
             id="edit_name"
             title_text={l("Edit circle name")}
@@ -35,12 +45,13 @@
 
             <button type="submit" class="w-full mt-3 normal-case btn btn-primary">{l("Save")}</button>
             <:open_btn>
-              <button type="button" class="btn btn-outline btn-sm">
+              <button type="button" class="btn btn-neutral h-10 min-h-10">
                 {l("Edit circle")}</button>
             </:open_btn>
           </Bonfire.UI.Common.OpenModalLive>
-        </li>
-        <li data-role="delete_circle" class="delete_circle">
+        </div>
+
+        <div data-role="delete_circle" class="delete_circle">
           <Bonfire.UI.Common.OpenModalLive
             id="delete_circle"
             title_text={l("Delete this circle")}
@@ -52,7 +63,7 @@
                 )}</p>
             </div>
             <:open_btn>
-              <button type="button" class="btn btn-outline normal-case btn-circle btn-sm"><#Icon iconify="ph:trash-fill" class="w-4 h-4" />
+              <button type="button" class="btn btn-error btn-circle h-10 min-h-10 max-w-10"><#Icon iconify="ph:trash-fill" class="w-4 h-4" />
                 <span class="sr-only">{l("Delete circle")}</span></button>
             </:open_btn>
             <:action_btns>
@@ -66,18 +77,8 @@
                 {l("Delete this circle")}</button>
             </:action_btns>
           </Bonfire.UI.Common.OpenModalLive>
-        </li>
+        </div>
       {/if}
-    </ul>
-
-    <div x-show="search" x-cloak class="p-2 px-4">
-      <form id="edit_circle_participant" :on-change="select">
-        <Bonfire.UI.Common.MultiselectLive
-          implementation={:live_select}
-          form_input_name={Bonfire.Boundaries.Web.CircleLive}
-          label={l("Search for users to add")}
-        />
-      </form>
     </div>
   </div>
   {#if Enum.count(@members) > 0}
