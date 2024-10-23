@@ -1,8 +1,4 @@
-<select
-  name={"#{@field}[#{@circle_id}][]"}
-  class="font-normal select-sm ounded-full select select-bordered"
-  disabled={@read_only}
->
+<select name={"#{@field}[#{@circle_id}][]"} class="select select-bordered" disabled={@read_only}>
   <option value="">{l("Select role")}</option>
   <option
     :for={{id, name} <-

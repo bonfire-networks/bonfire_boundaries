@@ -21,12 +21,12 @@
       </section>
     {#match nil}
       <div>
-        <div :if={!@setting_boundaries} class="p-4 border-b border-base-content/20">
+        <div :if={!@setting_boundaries} class="p-4 pt-0 border-b border-base-content/20">
           <span class="text-base-content/70">
             {e(@acl, :extra_info, :summary, "No description provided for this boundary preset.")}
           </span>
         </div>
-        <div class="" x-data="{search: false}">
+        <div class="">
           {#if @section == "new_circle"}
             <Bonfire.Boundaries.Web.NewCircleLive
               parent_back={@myself}
@@ -41,116 +41,37 @@
               setting_boundaries={@setting_boundaries}
             />
           {#else}
-            <ul :if={!@read_only} class="menu menu-horizontal gap-3 bg-base-100 px-0 mb-0 m-4 mt-2">
-              <li>
-                <button @click="search = !search" class="btn btn-active btn-outline normal-case  btn-sm">
-                  <#Icon solid="search" class="w-4 h-4" />
-                  <span>{l("Add circle/users")}</span>
+            <div class="p-3 bg-base-100 w-full border-base-content/20 border-b" :if={!@read_only}>
+              <div class="text-sm mb-2 text-base-content/80 font-medium">{l("Add one or more circles to this boundary")}</div>
+              <form
+                id="edit_acl_members"
+                class="flex items-center gap-2 w-full flex-1"
+                phx-change="multi_select"
+              >
+                <!-- <Bonfire.UI.Common.MultiselectLive
+                  implementation={:live_select}
+                  form_input_name={:add_circles_to_acl}
+                  preloaded_options={@my_circles}
+                  label={l("Search for circles or users to add")}
+                /> -->
+                <button
+                  disabled={Enum.any?(@feed_by_subject, fn {id, _} -> id == elem(circle, 1)[:id] end)}
+                  class="btn btn-outline rounded-full"
+                  :for={circle <- @my_circles}
+                  type="button"
+                  phx-target={@myself}
+                  phx-click="add_to_acl"
+                  phx-value-id={elem(circle, 1)[:id]}
+                >
+                  {elem(circle, 1)[:name]}
                 </button>
-              </li>
+              </form>
               {#if !@setting_boundaries and !@read_only and !Acls.is_object_custom?(@acl)}
-                <li data-role="edit_boundary" class="edit_name">
-                  <Bonfire.UI.Common.OpenModalLive
-                    id="edit_boundary"
-                    title_text={l("Edit boundary preset")}
-                    no_actions
-                    open_btn_wrapper_class="flex flex-1 w-full"
-                  >
-                    <section role="tabpanel">
-                      <form id="edit_acl" phx-submit="edit" phx-target={@myself} class="mt-4">
-                        <div class="w-full form-control">
-                          <label class="label">
-                            <span class="text-sm text-base-content/70">{l("Edit the boundary preset name")}</span>
-                          </label>
-                          <div class="flex items-center">
-                            <input
-                              name="named[name]"
-                              value={e(@acl, :named, :name, nil) || e(@acl, :stereotyped, :named, :name, nil)}
-                              type="text"
-                              placeholder="Type here"
-                              class="w-full input input-bordered"
-                            />
-                          </div>
-                        </div>
-
-                        <div class="w-full mt-4 form-control">
-                          <label class="label">
-                            <span class="text-sm text-base-content/70">{l("Edit the boundary preset description")}</span>
-                          </label>
-                          <div class="flex flex-col space-y-3">
-                            <textarea
-                              name="extra_info[summary]"
-                              placeholder="A short description to help you remember what this boundary is about"
-                              rows="3"
-                              class="w-full h-24 text-sm textarea textarea-bordered"
-                            >{e(@acl, :extra_info, :summary, nil)}</textarea>
-                          </div>
-                        </div>
-                        <button
-                          type="submit"
-                          class="w-full mt-3 normal-case btn-outline  !border-primary/30 btn btn-primary"
-                        >{l("Save")}</button>
-                      </form>
-                      <div
-                        :if={!e(@acl, :stereotyped, nil)}
-                        class="p-4 mt-6 border rounded-lg bg-error/5 border-error/30"
-                      >
-                        <div class="flex items-center justify-between space-x-8">
-                          <div class="flex flex-col">
-                            <div class="flex-1 text-base font-bold text-error">{l("Delete this boundary")}</div>
-                            <div class="mt-2 text-sm text-error">{l(
-                                "Deleting a boundary means anything shared with users of the local instance using this boundary will no longer be shared. Please be certain."
-                              )}</div>
-                          </div>
-                          <div data-role="delete_boundary_modal">
-                            <Bonfire.UI.Common.OpenModalLive
-                              id={"delete_#{@acl_id || id(@acl)}"}
-                              title_text={l("Delete this boundary preset")}
-                            >
-                              <div class="mt-3 prose prose-sm">{l(
-                                  "The boundary preset will be permanently deleted. This action will affect everything that was shared on the local instance using this preset."
-                                )}</div>
-                              <:open_btn>
-                                <div class="normal-case btn btn-error btn-sm">{l("Delete")}</div>
-                              </:open_btn>
-                              <:action_btns>
-                                <button
-                                  data-id="delete_boundary"
-                                  type="button"
-                                  :on-click="Bonfire.Boundaries:acl_delete"
-                                  phx-value-go="/boundaries/acls"
-                                  class="normal-case btn btn-error btn-sm"
-                                >
-                                  <span class="text-left truncate ellipsis">{l("Delete this boundary preset")}</span>
-                                </button>
-                              </:action_btns>
-                            </Bonfire.UI.Common.OpenModalLive>
-                          </div>
-                        </div>
-                      </div>
-                    </section>
-
-                    <:open_btn>
-                      <button type="button" class="btn btn-outline btn-sm">
-                        {l("Edit boundary preset")}</button>
-                    </:open_btn>
-                  </Bonfire.UI.Common.OpenModalLive>
-                </li>
               {/if}
-            </ul>
+            </div>
 
             <div date-role="edit-acl">
               <div class="">
-                <div x-show="search" x-cloak :if={!@read_only}>
-                  <form id="edit_acl_members" class="p-2 px-4" :on-change="select">
-                    <Bonfire.UI.Common.MultiselectLive
-                      implementation={:live_select}
-                      form_input_name={__MODULE__}
-                      preloaded_options={@my_circles}
-                      label={l("Search for circles or users to add")}
-                    />
-                  </form>
-                </div>
                 {#if is_list(@feed_by_subject) or (is_map(@feed_by_subject) and not Enum.empty?(@feed_by_subject))}
                   {!-- <div class="text-xl font-medium collapse-title">
             Role per circle or person
@@ -195,11 +116,21 @@
                               extra_roles={[{:custom, l("Custom")}]}
                               no_actions
                             />
-                            <div class="dropdown dropdown-end">
-                              <label tabindex="0" class="rounded btn btn-square btn-ghost btn-sm">
+                            <div
+                              data-position="bottom-end"
+                              phx-hook="Tooltip"
+                              id="acl_actions_#{uid(subject)}"
+                              class="relative"
+                            >
+                              <label tabindex="0" class="tooltip-button btn btn-sm btn-circle btn-ghost opacity-70">
                                 <#Icon solid="DotsVertical" class="w-4 h-4" />
                               </label>
-                              <ul tabindex="0" class="w-48 p-1 rounded shadow dropdown-content menu menu-compact bg-base-200">
+                              <ul
+                                role="menu"
+                                aria-orientation="vertical"
+                                tabindex="0"
+                                class="tooltip z-[99999999] p-0.5 menu shadow-lg bg-base-100 shadow-xl border border-base-content/20 rounded-lg w-52 absolute top-0 left-0 hidden"
+                              >
                                 {!-- <li :if={!@setting_boundaries}>
                         <Bonfire.Boundaries.Web.AclModalLive
                           subject_id={subject_id}

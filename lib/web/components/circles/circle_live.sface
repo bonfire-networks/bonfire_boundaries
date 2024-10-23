@@ -8,17 +8,24 @@
       <form
         id="edit_circle_participant"
         phx-target={@myself}
-        phx-change="select"
+        phx-change="multi_select"
         class="max-w-[300px] w-full flex-1"
       >
         <!-- WIP: Not working when using live_select on a stateful component -->
         <!-- <Bonfire.UI.Common.MultiselectLive
-            implementation={:live_select}
-            event_target="#edit_circle_participant"
-            form_input_name={__MODULE__}
-            label={l("Search for users to add")}
+          implementation={:live_select}
+          event_target="#edit_circle_participant"
+          form_input_name={__MODULE__}
+          label={l("Search for users to add")}
           /> -->
-        <Bonfire.Boundaries.Web.SearchUsersInCirclesLive />
+        <Bonfire.UI.Common.MultiselectLive
+          implementation={:live_select}
+          form_input_name={:add_users_to_circle}
+          label={l("Search for users to add")}
+          event_target="#edit_circle_participant"
+        />
+
+        <!-- <Bonfire.Boundaries.Web.SearchUsersInCirclesLive /> -->
       </form>
 
       {#if !@stereotype_id and !@read_only}

@@ -83,6 +83,13 @@ defmodule Bonfire.Boundaries.Web.AclLive do
     acl = e(assigns(socket), :acl, nil)
     acl = if id(acl) == acl_id, do: {:ok, acl}
 
+    read_only =
+      (Acls.is_built_in?(acl) and
+         id(acl) == Bonfire.Boundaries.Scaffold.Instance.instance_acl()) or
+        (!Acls.is_object_custom?(acl) and
+           (Acls.is_stereotyped?(acl) and
+              !Bonfire.Boundaries.can?(assigns(socket)[:__context__], :grant, :instance)))
+
     with {:ok, acl} <-
            (acl || Acls.get_for_caretaker(acl_id, current_user))
            |> repo().maybe_preload(
@@ -102,7 +109,14 @@ defmodule Bonfire.Boundaries.Web.AclLive do
           back: true,
           page_title: e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil),
           acl: acl,
-          page_header_aside: []
+          page_header_aside: [
+            {Bonfire.Boundaries.Web.EditAclButtonLive,
+             [
+               acl: acl,
+               read_only: read_only,
+               acl_id: acl_id
+             ]}
+          ]
         )
       end
 
@@ -118,18 +132,14 @@ defmodule Bonfire.Boundaries.Web.AclLive do
         feed_by_subject: feed_by_subject,
         # list_by_verb: Map.merge(verbs, list_by_verb),
         # subjects: subjects(e(acl, :grants, [])),
-        read_only:
-          (Acls.is_built_in?(acl) and
-             id(acl) == Bonfire.Boundaries.Scaffold.Instance.instance_acl()) or
-            (!Acls.is_object_custom?(acl) and
-               (Acls.is_stereotyped?(acl) and
-                  !Bonfire.Boundaries.can?(assigns(socket)[:__context__], :grant, :instance)))
+        read_only: read_only
       )
     end
   end
 
   def handle_event("edit", attrs, socket) do
     debug(attrs)
+    send_update(Bonfire.UI.Common.ReusableModalLive, id: "edit_boundary", action: :close)
 
     with {:ok, acl} <-
            Acls.edit(e(assigns(socket), :acl, nil), current_user_required!(socket), attrs) do
