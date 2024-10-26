@@ -79,7 +79,12 @@ defmodule Bonfire.Boundaries.Queries do
                     Bonfire.Boundaries.Queries.query_with_summary(
                       agent,
                       verbs,
-                      from(Summary, where: [object_id: parent_as(unquote(alia)).unquote(field)])
+                      from(
+                        Bonfire.Boundaries.Queries.base_summary_query(
+                          opts[:boundarise_with_view]
+                        ),
+                        where: [object_id: parent_as(unquote(alia)).unquote(field)]
+                      )
                     )
 
                   where(
@@ -91,7 +96,7 @@ defmodule Bonfire.Boundaries.Queries do
             _false ->
               agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
 
-              # vis = Bonfire.Boundaries.Queries.query_with_summary(agent, verbs)
+              # vis = Bonfire.Boundaries.Queries.query_with_summary(agent, verbs, Bonfire.Boundaries.Queries.base_summary_query(opts[:boundarise_with_view]))
 
               # join(
               #   unquote(query),
@@ -105,7 +110,9 @@ defmodule Bonfire.Boundaries.Queries do
                 Bonfire.Boundaries.Queries.query_with_summary(
                   agent,
                   verbs,
-                  from(Summary, where: [object_id: parent_as(unquote(alia)).unquote(field)])
+                  from(Bonfire.Boundaries.Queries.base_summary_query(opts[:boundarise_with_view]),
+                    where: [object_id: parent_as(unquote(alia)).unquote(field)]
+                  )
                 )
 
               where(
@@ -139,6 +146,10 @@ defmodule Bonfire.Boundaries.Queries do
     end
   end
 
+  def base_summary_query(boundarise_with_view \\ false)
+  def base_summary_query(true), do: Summary
+  def base_summary_query(_false), do: Summary.base_summary_query()
+
   @doc """
   Creates a subquery to filter results based on user permissions.
 
@@ -155,7 +166,13 @@ defmodule Bonfire.Boundaries.Queries do
       iex> user_id = "user123"
       iex> Bonfire.Boundaries.Queries.query_with_summary(user_id, [:read, :write])
   """
-  def query_with_summary(user, verbs \\ [:see, :read], query \\ Summary) do
+
+  def query_with_summary(user, verbs), do: query_with_summary(user, verbs, base_summary_query())
+
+  def query_with_summary(user, verbs, boundarise_with_view) when is_boolean(boundarise_with_view),
+    do: query_with_summary(user, verbs, base_summary_query(boundarise_with_view))
+
+  def query_with_summary(user, verbs, query) do
     subject_ids = user_and_circle_ids(user)
     verbs = Verbs.ids(verbs)
 
@@ -170,7 +187,25 @@ defmodule Bonfire.Boundaries.Queries do
         object_id: summary.object_id
       }
     )
+    |> IO.inspect()
   end
+
+  # def query_with_summary(user, verbs \\ [:see, :read], query) do
+  #   subject_ids = user_and_circle_ids(user)
+  #   verbs = Verbs.ids(verbs)
+
+  #   from(summary in query,
+  #     where:
+  #       summary.subject_id in ^subject_ids and
+  #         summary.verb_id in ^verbs,
+  #     group_by: summary.object_id,
+  #     having: fragment("agg_perms(?)", summary.value),
+  #     select: %{
+  #       subjects: count(summary.subject_id),
+  #       object_id: summary.object_id
+  #     }
+  #   )
+  # end
 
   @doc """
   Queries for all permitted objects for a user.
@@ -239,7 +274,7 @@ defmodule Bonfire.Boundaries.Queries do
       iex> query = from(p in Post)
       iex> Bonfire.Boundaries.Queries.object_boundarised(query, current_user: user)
   """
-  def object_boundarised(q, opts \\ nil) do
+  def object_boundarised(q, opts \\ []) do
     if Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
       q
     else
@@ -249,7 +284,9 @@ defmodule Bonfire.Boundaries.Queries do
         query_with_summary(
           agent,
           e(opts, :verbs, [:see, :read]),
-          from(Summary, where: [object_id: parent_as(:main_object).id])
+          from(Bonfire.Boundaries.Queries.base_summary_query(opts[:boundarise_with_view]),
+            where: [object_id: parent_as(:main_object).id]
+          )
         )
 
       where(

@@ -16,6 +16,7 @@ defmodule Bonfire.Boundaries.Summary do
   # @create_view_type @view_type
 
   use Ecto.Schema
+  import Ecto.Query
 
   use EctoVista,
     table_name: @table_base_name,
@@ -119,6 +120,34 @@ defmodule Bonfire.Boundaries.Summary do
   where g.subject_id = pointer.id or encircle.id is not null
   group by (pointer.id, controlled.id, verb.id)
   """
+
+  @doc "An equivalent of the Summary view, but represented as an Ecto subquery instead"
+  def base_summary_query do
+    subquery(
+      from(pointer in Pointer,
+        cross_join: controlled in Controlled,
+        cross_join: verb in Verb,
+        left_join: g in Grant,
+        on:
+          controlled.acl_id == g.acl_id and
+            g.verb_id == verb.id,
+        left_join: circle in Circle,
+        on: g.subject_id == circle.id,
+        left_join: encircle in Encircle,
+        on:
+          encircle.circle_id == circle.id and
+            encircle.subject_id == pointer.id,
+        where: g.subject_id == pointer.id or not is_nil(encircle.id),
+        group_by: [pointer.id, controlled.id, verb.id],
+        select: %{
+          subject_id: pointer.id,
+          object_id: controlled.id,
+          verb_id: verb.id,
+          value: fragment("agg_perms(?)", g.value)
+        }
+      )
+    )
+  end
 
   @doc """
   Generates the SQL to drop the view.
