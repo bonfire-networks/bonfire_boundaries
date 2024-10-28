@@ -23,6 +23,7 @@ defmodule Bonfire.Boundaries.Web.SearchUsersInCirclesLive do
     # current_user = current_user(assigns(socket))
     do_results_for_multiselect(search)
     |> maybe_send_update(LiveSelect.Component, live_select_id, options: ...)
+
     {:noreply, socket}
   end
 
@@ -83,5 +84,4 @@ defmodule Bonfire.Boundaries.Web.SearchUsersInCirclesLive do
         {:noreply, assign_flash(socket, :error, l("Could not add to circle"))}
     end
   end
-
 end
