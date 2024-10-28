@@ -16,7 +16,7 @@
       <div class="w-full">
         <Bonfire.UI.Common.MultiselectLive.UserSelectorLive
           selected_options={[]}
-          class="focus:outline-0 border-0 border-b h-10 rounded-none border-base-content/20 text-sm select_recipients_input"
+          class="focus:outline-0 border-0 border-b h-10 rounded-none border-base-content/10 text-sm select_recipients_input"
           label={l("Search for a user to preview")}
           form_input_name={__MODULE__}
           event_target={@myself}
@@ -28,7 +28,7 @@
       <div class="px-3" :if={@preview_boundary_for_id}>
         <span class="mt-3 block mb-3 text-base-content/90 tracking-wide uppercase text-xs font-normal">{l("Previewing boundaries for")} <b>{@preview_boundary_for_username}</b></span>
         <input type="hidden" name="preview_boundary_for_id" value={@preview_boundary_for_id}>
-        <div class="border border-base-content/20 rounded-box">
+        <div class="border border-base-content/10 rounded-box">
           <Bonfire.Boundaries.Web.YourRoleLive is_caretaker={nil} role_name={@role_name} scope={:preview} />
 
           <ul :if={@preview_boundary_verbs} role="list" class="p-3 pt-0 flex gap-3 flex-wrap">

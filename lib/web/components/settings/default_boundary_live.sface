@@ -12,7 +12,7 @@
     </button>
   </div>
   <div x-show="open" x-cloak x-collapse>
-    <div data-scope="safety_boundary_default" class="mt-3 border border-base-content/20 rounded-box">
+    <div data-scope="safety_boundary_default" class="mt-3 border border-base-content/10 rounded-box">
       <StatelessComponent
         module={maybe_component(Bonfire.Boundaries.Web.BoundariesGeneralAccessLive, @__context__)}
         hide_custom

@@ -1,6 +1,6 @@
 <div x-data="{edit: false}">
   <div x-show="!edit">
-    <div class="border border-base-content/20 mb-3 rounded-box w-full">
+    <div class="border border-base-content/10 mb-3 rounded-box w-full">
       <div class="flex items-center w-full p-4 gap-3">
         <Bonfire.Boundaries.Web.BoundariesPresetNameLive
           boundary_preset={@boundary_preset}
@@ -89,7 +89,7 @@
       </details>
 
       {#if is_list(@preset_acls) and @preset_acls != []}
-        <ul class="flex flex-col divide-y divide-base-content/20 px-4 mt-2">
+        <ul class="flex flex-col divide-y divide-base-content/10 px-4 mt-2">
           <li :for={acl <- @preset_acls} class="flex items-center justify-between py-4">
             <div class="flex items-center gap-3">
               <span class="flex items-center w-8 h-8 rounded-full place-content-center bg-info">

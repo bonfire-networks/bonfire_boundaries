@@ -1,6 +1,6 @@
 {#case clone_context(@to_boundaries)}
   {#match false}
-    <div class="flex items-center px-1 gap-2 border-l border-r border-base-content/20">
+    <div class="flex items-center px-1 gap-2 border-l border-r border-base-content/10">
       <div class="flex relative z-50 items-center flex-1 gap-2">
         <!-- on mobile -->
         <div class="lg:hidden">
@@ -37,7 +37,7 @@
           </label>
           <ul
             tabindex="0"
-            class="tooltip z-[9999] menu shadow-sm bg-base-200 border border-base-content/20 rounded-lg p-0 w-full lg:w-[29rem] absolute top-0 left-0 hidden"
+            class="tooltip z-[9999] menu shadow-sm bg-base-200 border border-base-content/10 rounded-lg p-0 w-full lg:w-[29rem] absolute top-0 left-0 hidden"
           >
             <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive
               to_boundaries={@to_boundaries}

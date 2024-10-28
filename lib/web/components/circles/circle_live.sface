@@ -2,7 +2,7 @@
   <div class="">
     <#slot />
     <div
-      class="menu menu-horizontal gap-3 bg-base-100 w-full border-base-content/20 border-b"
+      class="menu menu-horizontal gap-3 bg-base-100 w-full border-base-content/10 border-b"
       :if={@show_add || (!@stereotype_id and !@read_only)}
     >
       <form
@@ -89,7 +89,7 @@
     </div>
   </div>
   {#if Enum.count(@members) > 0}
-    <div class="divide-y divide-base-content/20 gap-4 px-0 gap-4">
+    <div class="divide-y divide-base-content/10 gap-4 px-0 gap-4">
       <!-- row 1 -->
       {#for {id, member} <- @members}
         <div class="flex items-center w-full justify-between p-4">

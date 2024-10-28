@@ -1,12 +1,12 @@
 <div class="">
-  <div class="p-4 pt-0 border-b border-base-content/20">
+  <div class="p-4 pt-0 border-b border-base-content/10">
     <span class="text-sm text-base-content/70">
       {l(
         "Circles are a way to organize your connections and relations with people. Circles can be used to group people together based on your relationship, shared interests, affiliations, or other factors."
       )}</span>
   </div>
   <div class="">
-    <ul role="list" class="flex flex-col divide-y divide-base-content/20">
+    <ul role="list" class="flex flex-col divide-y divide-base-content/10">
       {#for circle <- e(@circles, [])}
         <li class="">
           <LinkLive

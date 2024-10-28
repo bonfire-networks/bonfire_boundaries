@@ -1,5 +1,5 @@
 <form id="edit_grants" :on-change="edit_grant_role">
-  <ul class="flex flex-col divide-y divide-base-content/20">
+  <ul class="flex flex-col divide-y divide-base-content/10">
     <li
       :for={{{subject_id, %{subject: subject, grants: grants} = _subject_verb_grants}, _i} <-
         Enum.with_index(@feed_by_subject || [])}

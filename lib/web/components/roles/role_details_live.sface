@@ -1,5 +1,5 @@
 <div
-  :class="{'border-b border-base-content/20': open}"
+  :class="{'border-b border-base-content/10': open}"
   x-on:click="open = !open"
   class="block cursor-pointer"
 >

@@ -21,7 +21,7 @@
       </section>
     {#match nil}
       <div>
-        <div :if={!@setting_boundaries} class="p-4 pt-0 border-b border-base-content/20">
+        <div :if={!@setting_boundaries} class="p-4 pt-0 border-b border-base-content/10">
           <span class="text-base-content/70">
             {e(@acl, :extra_info, :summary, "No description provided for this boundary preset.")}
           </span>
@@ -41,7 +41,7 @@
               setting_boundaries={@setting_boundaries}
             />
           {#else}
-            <div class="p-3 bg-base-100 w-full border-base-content/20 border-b" :if={!@read_only}>
+            <div class="p-3 bg-base-100 w-full border-base-content/10 border-b" :if={!@read_only}>
               <div class="text-sm mb-2 text-base-content/80 font-medium">{l("Add one or more circles to this boundary")}</div>
               <form
                 id="edit_acl_members"
@@ -77,7 +77,7 @@
             Role per circle or person
           </div> --}
                   <form id="edit_grants" :on-change="edit_grant_role">
-                    <ul class="flex flex-col divide-y divide-base-content/20">
+                    <ul class="flex flex-col divide-y divide-base-content/10">
                       <li
                         :for={{{subject_id, %{subject: subject, grants: grants} = _subject_verb_grants}, _i} <-
                           Enum.with_index(@feed_by_subject || [])}
@@ -129,7 +129,7 @@
                                 role="menu"
                                 aria-orientation="vertical"
                                 tabindex="0"
-                                class="tooltip z-[99999999] p-0.5 menu shadow-lg bg-base-100 shadow-xl border border-base-content/20 rounded-lg w-52 absolute top-0 left-0 hidden"
+                                class="tooltip z-[99999999] p-0.5 menu shadow-lg bg-base-100 shadow-xl border border-base-content/10 rounded-lg w-52 absolute top-0 left-0 hidden"
                               >
                                 {!-- <li :if={!@setting_boundaries}>
                         <Bonfire.Boundaries.Web.AclModalLive

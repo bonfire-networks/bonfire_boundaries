@@ -53,7 +53,7 @@
           no_actions
           open_btn_wrapper_class="flex flex-1 w-full"
         >
-          <div class="border border-base-content/20 mt-4 rounded-box">
+          <div class="border border-base-content/10 mt-4 rounded-box">
             <Bonfire.Boundaries.Web.YourRoleLive
               is_caretaker={nil}
               role_permissions={acls_from_role(role)}
