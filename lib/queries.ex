@@ -187,7 +187,8 @@ defmodule Bonfire.Boundaries.Queries do
         object_id: summary.object_id
       }
     )
-    |> IO.inspect()
+
+    # |> debug()
   end
 
   # def query_with_summary(user, verbs \\ [:see, :read], query) do
