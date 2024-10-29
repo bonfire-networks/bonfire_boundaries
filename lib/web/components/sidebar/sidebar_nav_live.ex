@@ -6,6 +6,6 @@ defmodule Bonfire.Boundaries.Web.SidebarNavLive do
   prop showing_within, :atom, default: :sidebar
   prop class, :css_class, default: "!p-0 !m-0"
 
-  declare_nav_component("Links to boundaries & circles management pages")
-  declare_settings_nav_component("Links to boundaries & circles management pages", scope: :user)
+  # declare_nav_component("Links to boundaries & circles management pages")
+  # declare_settings_nav_component("Links to boundaries & circles management pages", scope: :user)
 end

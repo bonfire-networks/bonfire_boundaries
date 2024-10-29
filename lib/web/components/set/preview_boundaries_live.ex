@@ -2,12 +2,12 @@ defmodule Bonfire.Boundaries.Web.PreviewBoundariesLive do
   use Bonfire.UI.Common.Web, :stateful_component
   # alias Bonfire.Boundaries.Roles
 
-  declare_module_optional(l("Preview boundaries in composer"),
-    description:
-      l(
-        "Adds a button to calculate and display how boundaries will be applied for a specific user."
-      )
-  )
+  # declare_module_optional(l("Preview boundaries in composer"),
+  #   description:
+  #     l(
+  #       "Adds a button to calculate and display how boundaries will be applied for a specific user."
+  #     )
+  # )
 
   prop preview_boundary_for_id, :any, default: nil
   prop preview_boundary_for_username, :any, default: nil

@@ -3,5 +3,5 @@ defmodule Bonfire.Boundaries.Web.DefaultBoundaryLive do
 
   prop scope, :any, default: nil
 
-  declare_settings_component(l("Default boundary"), icon: "fluent:people-team-16-filled")
+  # declare_settings_component(l("Default boundary"), icon: "fluent:people-team-16-filled")
 end

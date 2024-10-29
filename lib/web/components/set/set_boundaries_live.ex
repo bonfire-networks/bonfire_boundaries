@@ -2,12 +2,12 @@ defmodule Bonfire.Boundaries.Web.SetBoundariesLive do
   use Bonfire.UI.Common.Web, :stateless_component
   use Bonfire.Common.Utils
 
-  declare_module_optional(l("Custom boundaries in composer"),
-    description:
-      l(
-        "Enable selecting custom roles for specific circles or users in the composer when drafting a post. "
-      )
-  )
+  # declare_module_optional(l("Custom boundaries in composer"),
+  #   description:
+  #     l(
+  #       "Enable selecting custom roles for specific circles or users in the composer when drafting a post. "
+  #     )
+  # )
 
   prop create_object_type, :any, default: nil
   prop to_boundaries, :any, default: nil

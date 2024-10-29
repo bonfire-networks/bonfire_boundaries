@@ -21,7 +21,7 @@
                 <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive
                   to_boundaries={@to_boundaries}
                   boundary_preset={@boundary_preset}
-                  hide_custom={!module_enabled?(Bonfire.Boundaries.Web.SetBoundariesLive, @__context__)}
+                  hide_custom={!module_enabled?(Bonfire.UI.Boundaries.Web.SetBoundariesLive, @__context__)}
                 />
               </div>
             </div>
@@ -42,7 +42,7 @@
             <Bonfire.Boundaries.Web.BoundariesGeneralAccessLive
               to_boundaries={@to_boundaries}
               boundary_preset={@boundary_preset}
-              hide_custom={!module_enabled?(Bonfire.Boundaries.Web.SetBoundariesLive, @__context__)}
+              hide_custom={!module_enabled?(Bonfire.UI.Boundaries.Web.SetBoundariesLive, @__context__)}
             />
           </ul>
         </div>
