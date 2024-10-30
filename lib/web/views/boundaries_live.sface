@@ -115,7 +115,7 @@
         :if={current_user(@__context__)}
         module={maybe_component(Bonfire.Boundaries.Web.RolesLive, @__context__)}
         id="roles"
-        scope={:instance}
+        scope={@scope}
         read_only
       />
     {#match "role"}
