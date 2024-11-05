@@ -1,6 +1,0 @@
-<Bonfire.UI.Common.MultiselectLive
-  implementation={:live_select}
-  form_input_name={__MODULE__}
-  label={l("Search for users to add")}
-  event_target="#edit_circle_participant"
-/>

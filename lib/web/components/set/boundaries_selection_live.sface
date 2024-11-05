@@ -1,8 +1,0 @@
-{#for {id, data} <- List.wrap(@to_boundaries) |> debug("to_boundaries")}
-  <input
-    name="to_boundaries[]"
-    value={id}
-    label={e(data, :name, if(is_binary(data), do: data))}
-    type="hidden"
-  />
-{/for}
