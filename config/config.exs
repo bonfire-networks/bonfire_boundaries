@@ -3,11 +3,11 @@ import Config
 # You will almost certainly want to change at least some of these
 
 config :bonfire_common,
-  otp_app: :bonfire_boundaries
-
-config :bonfire_boundaries,
   otp_app: :bonfire_boundaries,
   localisation_path: "priv/localisation"
+
+config :bonfire_boundaries,
+  otp_app: :bonfire_boundaries
 
 # Choose password hashing backend
 # Note that this corresponds with our dependencies in mix.exs
