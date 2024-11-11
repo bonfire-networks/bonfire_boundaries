@@ -187,7 +187,7 @@ defmodule Bonfire.Boundaries.Acls do
         boundary: "clone_context",
         context_id: context_object_id
       ])
-      
+
   """
   def preview(creator, opts)
       when is_list(opts) do
@@ -289,7 +289,6 @@ defmodule Bonfire.Boundaries.Acls do
 
         # TODO: enable using cast on existing objects by using `get_or_create_object_custom_acl(object)` to check if a custom Acl already exists?
         acl_id = Needle.UID.generate(Acl)
-
         # default_role = e(opts, :role_to_grant, nil) || Config.get!([:role_to_grant, :default])
 
         custom_grants =
