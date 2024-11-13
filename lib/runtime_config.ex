@@ -432,7 +432,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # mentions_may_interact: %{id: "7MENT10NSCAN1NTERACTW1TH1T", name: "Mentions may read and interact", stereotype: true},
         # mentions_may_reply:    %{id: "7MENT10NSCANEVENREP1YT01TS", name: "Mentions may read, interact and reply", stereotype: true},
 
-        ## "Negative" ACLs 
+        ## "Negative" ACLs
 
         no_follow: %{
           id: "1MVSTREQVESTBEF0REF0110W1N",

@@ -16,7 +16,7 @@ defmodule Bonfire.Boundaries.Roles do
   - **Cannot Interact**: cannot perform any actions related to interaction, including liking, following, boosting, and pinning, and also can't participate.
   - **Cannot Participate**: cannot perform any actions related to participation, including replying, mentioning, and sending messages.
 
-  Negative permissions always take precedence over positive or undefined permissions. For example, For example, if you share something giving permission to anyone to read and reply to it, and you assign the *Cannot Participate* role to your *Likely to troll* circle, the people in that circle will be able to read the content but will not be able to reply to it.
+  Negative permissions always take precedence over positive or undefined permissions. For example, if you share something giving permission to anyone to read and reply to it, and you assign the *Cannot Participate* role to your *Likely to troll* circle, the people in that circle will be able to read the content but will not be able to reply to it.
 
   > Note that these negative roles do not grant any additional permissions. Assigning the Cannot Participate role to someone who wouldn't otherwise be able to read the content does not mean they will now have the ability to do so. Negative roles simply limit or override any permissions defined elsewhere, ensuring that the specified actions are explicitly restricted.
   """
@@ -38,7 +38,7 @@ defmodule Bonfire.Boundaries.Roles do
       # returns all instance-level role verbs
 
       iex> role_verbs(nil, current_user: me)
-      # returns my role verbs 
+      # returns my role verbs
   """
   def role_verbs(usage \\ :all, opts \\ [])
   def role_verbs(:ops, opts), do: role_verbs(:all, opts)
@@ -352,7 +352,7 @@ defmodule Bonfire.Boundaries.Roles do
   end
 
   @doc """
-  Edits a verb permission for a role 
+  Edits a verb permission for a role
 
   ## Examples
 
