@@ -318,11 +318,7 @@ defmodule Bonfire.Boundaries.Roles do
   end
 
   @doc """
-  Creates a role with given attributes and options.
-
-  ## Examples
-
-      iex> create(attrs, opts)
+  Creates a role with given attributes and options. 
   """
   def create(attrs, opts) do
     # Bonfire.Common.Text.slug
@@ -336,19 +332,38 @@ defmodule Bonfire.Boundaries.Roles do
   @doc """
   Creates a role with a given name, usage, and options.
 
-  ## Examples
+      iex> create("Mod", :ops, scope: :instance)
+      # creates a Mod role for the instance, that will not be shown in the dropdown when creating content
 
-      iex> create("Admin", :admin, opts)
-      # creates an admin role with the provided options
+      iex> create("Contributor", nil, current_user: current_user)
+      # creates a Contributor role for the user
   """
   def create(name, usage, opts) do
     # debug(opts, "opts")
     # TODO: whether to show an instance role to all users
-    role_verbs(:all, opts)
-    |> Enum.into(%{})
-    |> Map.merge(%{name => %{usage: usage}})
-    |> debug("merged with existing roles")
-    |> Settings.put([@config_key], ..., opts)
+    Settings.put([@config_key, name], %{usage: usage}, opts)
+  end
+
+  @doc """
+  Edit a role with a given name and usage
+
+      iex> edit_details("Mod", "Moderator", :ops, scope: :instance)
+      # renames the moderator role for the instance, and ensure it will not be shown in the dropdown when creating content
+
+      iex> edit_details("Contributor", "Editor", nil, current_user: current_user)
+      # renames the contributor role for the user
+  """
+  def edit_details(old_name, new_name, usage, opts) do
+    get(old_name, opts)
+    |> Enum.into(%{usage: usage})
+    |> debug()
+    |> Settings.put([@config_key, new_name], ..., opts)
+
+    delete(old_name, opts)
+  end
+
+  def delete(old_name, opts) do
+    Settings.delete([@config_key, old_name], opts)
   end
 
   @doc """
