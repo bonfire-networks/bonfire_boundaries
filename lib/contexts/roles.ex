@@ -354,12 +354,22 @@ defmodule Bonfire.Boundaries.Roles do
       # renames the contributor role for the user
   """
   def edit_details(old_name, new_name, usage, opts) do
-    get(old_name, opts)
-    |> Enum.into(%{usage: usage})
-    |> debug()
-    |> Settings.put([@config_key, new_name], ..., opts)
+    opts = to_options(opts)
 
-    delete(old_name, opts)
+    with {:ok, new_data} <-
+           get(old_name, opts)
+           |> Enum.into(%{usage: usage})
+           |> debug("to_rename")
+           |> Settings.put([@config_key, new_name], ..., opts) do
+      delete(
+        old_name,
+        opts
+        |> Enums.maybe_put(:current_user, e(new_data, :__context__, :current_user, nil))
+        |> Enums.maybe_put(:current_account, e(new_data, :__context__, :current_account, nil))
+        |> Keyword.put(:context, new_data)
+      )
+      |> debug("deleted")
+    end
   end
 
   def delete(old_name, opts) do
