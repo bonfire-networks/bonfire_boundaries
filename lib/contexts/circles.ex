@@ -409,6 +409,10 @@ defmodule Bonfire.Boundaries.Circles do
     end
   end
 
+  def get_for_instance(id, opts \\ []) do
+    get_for_caretaker(id, Bonfire.Boundaries.Scaffold.Instance.admin_circle(), opts)
+  end
+
   @doc """
   Retrieves a circle by name for a caretaker.
 
