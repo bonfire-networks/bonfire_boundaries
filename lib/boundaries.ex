@@ -659,7 +659,7 @@ defmodule Bonfire.Boundaries do
   def pointer_permitted?(item, opts) do
     case uids(item) do
       ids when is_list(ids) and ids != [] ->
-        load_query(ids, e(opts, :ids_only, nil), opts ++ [limit: 1])
+        load_query(ids, true, opts ++ [limit: 1])
         |> repo().exists?()
 
       _ ->
