@@ -25,9 +25,6 @@ defmodule Bonfire.Boundaries.MixProject do
       aliases: aliases(),
       deps:
         Mess.deps([
-          {:phoenix_live_reload, "~> 1.2", only: :dev},
-
-          {:floki, ">= 0.0.0", only: [:dev, :test]}
         ])
     ]
   end
