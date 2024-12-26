@@ -41,7 +41,7 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
 
       feed_id = Bonfire.Social.Feeds.named_feed_id(:local)
       # |> debug()
-      assert Bonfire.Social.FeedActivities.feed_contains?(feed_id, post, current_user: me)
+      assert Bonfire.Social.FeedLoader.feed_contains?(feed_id, post, current_user: me)
     end
 
     test "does not show in my_feed a post from a per-user silenced user that I am not following" do
@@ -57,7 +57,7 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
                  boundary: "public"
                )
 
-      refute Bonfire.Social.FeedActivities.feed_contains?(:my, post, me)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:my, post, me)
     end
 
     test "does not show in my_feed a post from a per-user silenced user that I am following" do
@@ -91,7 +91,7 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
                  boundary: "public"
                )
 
-      refute Bonfire.Social.FeedActivities.feed_contains?(:my, post, me)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:my, post, me)
     end
 
     test "does not show in any feeds a post from a per-user silenced user" do
@@ -112,11 +112,11 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
 
       debug_object_acls(post)
 
-      refute Bonfire.Social.FeedActivities.feed_contains?(:local, post, me)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
 
       third_user = fake_user!()
       # check that we do show it to others
-      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, current_user: third_user)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: third_user)
     end
 
     test "does not show in any feeds a post from an user that was per-user silenced later on" do
@@ -130,21 +130,21 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
                  boundary: "public"
                )
 
-      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, me)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
 
       Bonfire.Boundaries.Blocks.block(other_user, :silence, current_user: me)
 
-      refute Bonfire.Social.FeedActivities.feed_contains?(:local, post, me)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
 
       # check that we do show it to others
       third = fake_user!()
 
-      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, current_user: third)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: third)
 
       Bonfire.Boundaries.Blocks.unblock(other_user, :silence, current_user: me)
 
       # we show it once again
-      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, me)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
     end
   end
 end

@@ -39,11 +39,11 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideHidePostFeedsPerUserTest do
                  boundary: "public"
                )
 
-      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, me)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
 
       Bonfire.Boundaries.Blocks.block(post, :hide, :instance_wide)
 
-      refute Bonfire.Social.FeedActivities.feed_contains?(:local, post, me)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
     end
 
     @tag :todo

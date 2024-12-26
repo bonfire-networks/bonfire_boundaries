@@ -69,7 +69,7 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
 
     feed_id = Bonfire.Social.Feeds.feed_id(:outbox, user)
 
-    assert FeedActivities.feed_contains?(:outbox, post, current_user: user)
+    assert Bonfire.Social.FeedLoader.feed_contains?(:outbox, post, current_user: user)
   end
 
   test "cannot see posts I'm not allowed to see in instance feed" do
@@ -87,6 +87,6 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
     assert post.post_content.name =~ "name"
 
     me = fake_user!()
-    refute FeedActivities.feed_contains?(:local, post, current_user: me)
+    refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: me)
   end
 end

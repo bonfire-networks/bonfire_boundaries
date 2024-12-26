@@ -39,8 +39,8 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
                  boundary: "public"
                )
 
-      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, current_user: alice)
-      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post)
     end
 
     test "does not show in any feeds a post from a instance-wide silenced user" do
@@ -97,10 +97,10 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
                )
 
       # debug_object_acls(post)
-      refute Bonfire.Social.FeedActivities.feed_contains?(:local, post)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:local, post)
       # check that we do not show it to authenticated users either
-      refute Bonfire.Social.FeedActivities.feed_contains?(:local, post, current_user: alice)
-      # refute Bonfire.Social.FeedActivities.feed_contains?(:local, post, current_user: bob)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
+      # refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: bob)
     end
 
     test "does not show in any feeds a post from an user that was instance-wide silenced later on" do
@@ -118,17 +118,17 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
                )
 
       # debug_object_acls(post)
-      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post)
-      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, current_user: alice)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
 
       Bonfire.Boundaries.Blocks.block(bob, :silence, :instance_wide)
-      refute Bonfire.Social.FeedActivities.feed_contains?(:local, post)
-      refute Bonfire.Social.FeedActivities.feed_contains?(:local, post, current_user: alice)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:local, post)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
 
       # we show it once again
       Bonfire.Boundaries.Blocks.unblock(bob, :silence, :instance_wide)
-      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post)
-      assert Bonfire.Social.FeedActivities.feed_contains?(:local, post, current_user: alice)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
     end
   end
 end
