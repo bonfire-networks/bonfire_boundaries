@@ -550,7 +550,9 @@ defmodule Bonfire.Boundaries do
     skip? =
       skip? == true ||
         (skip? == :admins and
-           Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, :is_admin?, [subject])) ||
+           Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, :is_admin?, [subject],
+             fallback_return: nil
+           )) ||
         Enum.all?(List.wrap(can_verbs?), &Enum.member?(can_verbs!, Verbs.get(&1)[:verb]))
   end
 
@@ -568,7 +570,9 @@ defmodule Bonfire.Boundaries do
     skip? =
       skip? == true ||
         (skip? == :admins and
-           Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, :is_admin?, [subject])) ||
+           Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, :is_admin?, [subject],
+             fallback_return: nil
+           )) ||
         (
           current_user = current_user(subject)
           current_user_id = id(current_user)
@@ -617,7 +621,9 @@ defmodule Bonfire.Boundaries do
   def can?(subject, verbs, :instance, _opts) do
     current_account = current_account(subject)
 
-    Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, :is_admin?, [current_account]) ||
+    Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, :is_admin?, [current_account],
+      fallback_return: nil
+    ) ||
       (
         current_user = current_user(subject)
         # cache needed for eg. for extension page
