@@ -413,6 +413,19 @@ defmodule Bonfire.Boundaries.Circles do
     get_for_caretaker(id, Bonfire.Boundaries.Scaffold.Instance.admin_circle(), opts)
   end
 
+  @doc "Gets a circle by ID, after checking boundaries to see if this is a list shared with me"
+  def get(id, opts \\ []) do
+    opts = opts ++ @default_q_opts
+
+    with {:ok, circle} <-
+           query(opts)
+           |> query_by_id(id, opts)
+           |> boundarise(circle.id, opts)
+           |> repo().single() do
+      {:ok, circle}
+    end
+  end
+
   @doc """
   Retrieves a circle by name for a caretaker.
 
