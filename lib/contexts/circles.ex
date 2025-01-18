@@ -442,26 +442,35 @@ defmodule Bonfire.Boundaries.Circles do
 
   def get_stereotype_circles(subject, stereotypes)
       when is_list(stereotypes) and stereotypes != [] do
-    stereotypes =
+    stereotype_ids =
       Enum.map(stereotypes, &Bonfire.Boundaries.Circles.get_id!/1)
       |> uids()
 
-    if stereotypes == [] do
-      []
+    if is_list(subject) do
+      Enum.flat_map(subject, &do_get_stereotype_circles(&1, stereotype_ids))
     else
-      # skip boundaries since we should only use this query internally
-      query_my(subject, skip_boundary_check: true)
-      |> where(
-        [circle: circle, stereotyped: stereotyped],
-        stereotyped.stereotype_id in ^stereotypes
-      )
-      |> repo().all()
+      do_get_stereotype_circles(subject, stereotype_ids)
     end
   end
 
   def get_stereotype_circles(subject, stereotype)
       when not is_nil(stereotype) and stereotype != [],
       do: get_stereotype_circles(subject, [stereotype])
+
+  defp do_get_stereotype_circles(subject, stereotype_ids)
+       when is_list(stereotype_ids) and stereotype_ids != [] do
+    # skip boundaries since we should only use this query internally
+    query_my(subject, skip_boundary_check: true)
+    |> where(
+      [circle: circle, stereotyped: stereotyped],
+      stereotyped.stereotype_id in ^stereotype_ids
+    )
+    |> repo().all()
+  end
+
+  defp do_get_stereotype_circles(_subject, _stereotype_ids) do
+    []
+  end
 
   def get_or_create_stereotype_circle(caretaker, stereotype) do
     case get_stereotype_circles(caretaker, [stereotype]) do
