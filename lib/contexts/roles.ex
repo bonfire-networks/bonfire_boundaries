@@ -341,7 +341,7 @@ defmodule Bonfire.Boundaries.Roles do
   def create(name, usage, opts) do
     # debug(opts, "opts")
     # TODO: whether to show an instance role to all users
-    Settings.put([@config_key, name], %{usage: usage}, opts)
+    Settings.put_raw([@config_key, name], %{usage: usage}, opts)
   end
 
   @doc """
@@ -360,7 +360,7 @@ defmodule Bonfire.Boundaries.Roles do
            get(old_name, opts)
            |> Enum.into(%{usage: usage})
            |> debug("to_rename")
-           |> Settings.put([@config_key, new_name], ..., opts) do
+           |> Settings.put_raw([@config_key, new_name], ..., opts) do
       delete(
         old_name,
         opts
