@@ -28,6 +28,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "bxs:BookReader",
         summary: "Readable/visible (if you can see or have a direct link)"
       },
+      bookmark: %{
+        id: "1B00KMARKMYGREATESTF1ND1NG",
+        verb: "Bookmark",
+        icon: "carbon:bookmark",
+        summary: "Bookmark an object (only visible to you)"
+      },
       like: %{
         id: "11KES1ND1CATEAM11DAPPR0VA1",
         verb: "Like",

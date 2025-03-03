@@ -114,6 +114,19 @@ defmodule Bonfire.Boundaries.Circles do
   def get(slug) when is_atom(slug), do: circles()[slug]
   def get(id) when is_binary(id), do: get_tuple(id) |> Enums.maybe_elem(1)
 
+  @doc "Gets a circle by ID, after checking boundaries to see if this is a list shared with me"
+  def get(id, opts \\ []) do
+    opts = opts ++ @default_q_opts
+
+    with {:ok, circle} <-
+           query(opts)
+           |> query_by_id(id, opts)
+           |> boundarise(circle.id, opts)
+           |> repo().single() do
+      {:ok, circle}
+    end
+  end
+
   def get!(slug) when is_atom(slug) do
     get(slug) ||
       raise RuntimeError, message: "Missing built-in circle: #{inspect(slug)}"
@@ -411,19 +424,6 @@ defmodule Bonfire.Boundaries.Circles do
 
   def get_for_instance(id, opts \\ []) do
     get_for_caretaker(id, Bonfire.Boundaries.Scaffold.Instance.admin_circle(), opts)
-  end
-
-  @doc "Gets a circle by ID, after checking boundaries to see if this is a list shared with me"
-  def get(id, opts \\ []) do
-    opts = opts ++ @default_q_opts
-
-    with {:ok, circle} <-
-           query(opts)
-           |> query_by_id(id, opts)
-           |> boundarise(circle.id, opts)
-           |> repo().single() do
-      {:ok, circle}
-    end
   end
 
   @doc """
