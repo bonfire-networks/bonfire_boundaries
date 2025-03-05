@@ -640,6 +640,11 @@ defmodule Bonfire.Boundaries do
     nil
   end
 
+  def can!(subject, verbs, object, opts \\ []) do
+    can?(subject, verbs, object, opts) ||
+      raise(Bonfire.Fail.Auth, :not_permitted)
+  end
+
   defp do_can_instance(%{shared_user: %{id: _}} = _subject, _verbs, _key) do
     debug("do not share instance-wide permission on SharedUser")
     false
