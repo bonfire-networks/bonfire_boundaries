@@ -261,8 +261,8 @@ defmodule Bonfire.Boundaries.Roles do
   def verbs_for_role(role, opts) do
     opts =
       to_options(opts)
-      |> Keyword.put_new(:one_scope_only, false)
 
+    # |> Keyword.put_new(:one_scope_only, false)
     do_verbs_for_role(to_string(role), Types.maybe_to_atom(role), role_verbs(:all, opts), opts)
   end
 
@@ -318,7 +318,7 @@ defmodule Bonfire.Boundaries.Roles do
   end
 
   @doc """
-  Creates a role with given attributes and options. 
+  Creates a role with given attributes and options.
   """
   def create(attrs, opts) do
     # Bonfire.Common.Text.slug
@@ -339,9 +339,9 @@ defmodule Bonfire.Boundaries.Roles do
       # creates a Contributor role for the user
   """
   def create(name, usage, opts) do
-    # debug(opts, "opts")
+    debug(@config_key, "opts")
     # TODO: whether to show an instance role to all users
-    Settings.put_raw([@config_key, name], %{usage: usage}, opts)
+    Settings.put([@config_key, name], %{usage: usage}, opts)
   end
 
   @doc """
