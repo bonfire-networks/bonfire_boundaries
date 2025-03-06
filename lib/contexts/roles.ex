@@ -341,7 +341,7 @@ defmodule Bonfire.Boundaries.Roles do
   def create(name, usage, opts) do
     debug(@config_key, "opts")
     # TODO: whether to show an instance role to all users
-    Settings.put([@config_key, name], %{usage: usage}, opts)
+    Settings.put_raw([@config_key, name], %{usage: usage}, opts)
   end
 
   @doc """
