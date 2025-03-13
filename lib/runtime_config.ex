@@ -2,6 +2,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
   @behaviour Bonfire.Common.ConfigModule
   def config_module, do: true
 
+  use Bonfire.Common.Localise
+
   @doc """
   NOTE: you can override this default config in your app's runtime.exs, by placing similarly-named config keys below the `Bonfire.Common.Config.LoadExtensionsConfig.load_configs` line
   """
@@ -12,176 +14,184 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs = [
       request: %{
         id: "1NEEDPERM1SS10NT0D0TH1SN0W",
-        verb: "Request",
+        verb: l("Request"),
         icon: "humbleicons:user-asking",
-        summary: "Request permission for another verb (eg. request to follow)"
+        summary: l("Request permission for another verb (eg. request to follow)")
       },
       see: %{
         id: "0BSERV1NG11ST1NGSEX1STENCE",
-        verb: "See",
+        verb: l("See"),
         icon: "Heroicons-Solid:Eye",
-        summary: "Discoverable in lists (like feeds)"
+        summary: l("Discoverable in lists (like feeds)")
       },
       read: %{
         id: "0EAD1NGSVTTER1YFVNDAMENTA1",
-        verb: "Read",
+        verb: l("Read"),
         icon: "bxs:BookReader",
-        summary: "Readable/visible (if you can see or have a direct link)"
+        summary: l("Readable/visible (if you can see or have a direct link)")
       },
       bookmark: %{
         id: "1B00KMARKMYGREATESTF1ND1NG",
-        verb: "Bookmark",
+        verb: l("Bookmark"),
         icon: "carbon:bookmark",
-        summary: "Bookmark an object (only visible to you)"
+        summary: l("Bookmark an object (only visible to you)")
       },
       like: %{
         id: "11KES1ND1CATEAM11DAPPR0VA1",
-        verb: "Like",
+        verb: l("Like"),
         icon: "bxs:Star",
-        summary: "Like an object (and notify the author)"
+        summary: l("Like an object (and notify the author)")
       },
       boost: %{
         id: "300ST0R0RANN0VCEANACT1V1TY",
-        verb: "Boost",
+        verb: l("Boost"),
         icon: "system-uicons:retweet",
-        summary: "Boost an object (and notify the author)"
+        summary: l("Boost an object (and notify the author)")
       },
       flag: %{
         id: "71AGSPAM0RVNACCEPTAB1E1TEM",
-        verb: "Flag",
+        verb: l("Flag"),
         icon: "bxs:FlagAlt",
         summary:
-          "Flag an object for a moderator to review (please note that anyone who can see or read something can flag it anyway)"
+          l(
+            "Flag an object for a moderator to review (please note that anyone who can see or read something can flag it anyway)"
+          )
       },
       reply: %{
         id: "71TCREAT1NGA11NKEDRESP0NSE",
-        verb: "Reply",
+        verb: l("Reply"),
         icon: "bx:Reply",
-        summary: "Reply to an activity or post"
+        summary: l("Reply to an activity or post")
+      },
+      annotate: %{
+        id: "110VET0ANN0TATEEVERYTH1NGS",
+        verb: l("Annotate"),
+        icon: "heroicons-outline:pencil",
+        summary: l("Annotate a video or other content")
       },
       mention: %{
         id: "0EFERENC1NGTH1NGSE1SEWHERE",
-        verb: "Mention",
+        verb: l("Mention"),
         icon: "bx:At",
-        summary: "Mention a user or object (and notify them)"
+        summary: l("Mention a user or object (and notify them)")
       },
       message: %{
         id: "40NTACTW1THAPR1VATEMESSAGE",
-        verb: "Message",
+        verb: l("Message"),
         icon: "bxs:Send",
-        summary: "Send a message"
+        summary: l("Send a message")
       },
       tag: %{
         id: "4ATEG0R1S1NGNGR0VP1NGSTVFF",
-        verb: "Tag",
+        verb: l("Tag"),
         icon: "bxs:PurchaseTag",
-        summary: "Tag a user or object, or publish in a topic"
+        summary: l("Tag a user or object, or publish in a topic")
       },
       label: %{
         id: "7PDATETHESTATVS0FS0METH1NG",
-        verb: "Label",
+        verb: l("Label"),
         icon: "fluent:status-16-filled",
-        summary: "Set/update a status or label"
+        summary: l("Set/update a status or label")
       },
       follow: %{
         id: "20SVBSCR1BET0THE0VTPVT0F1T",
-        verb: "Follow",
+        verb: l("Follow"),
         icon: "bx:Walk",
-        summary: "Follow a user or thread or whatever"
+        summary: l("Follow a user or thread or whatever")
       },
       schedule: %{
         id: "7SCHEDV1EF1XEDDES1REDDATES",
-        verb: "Schedule",
+        verb: l("Schedule"),
         icon: "akar-icons:schedule",
-        summary: "Set an expected or desired date"
+        summary: l("Set an expected or desired date")
       },
       pin: %{
         id: "1P1NN1NNG1S11KEH1GH11GHT1T",
-        verb: "Pin",
+        verb: l("Pin"),
         icon: "eos-icons:pin",
-        summary: "Pin something to highlight it"
+        summary: l("Pin something to highlight it")
       },
       create: %{
         id: "4REATE0RP0STBRANDNEW0BJECT",
-        verb: "Create",
+        verb: l("Create"),
         icon: "bxs:Pen",
-        summary: "Create a post or other object"
+        summary: l("Create a post or other object")
       },
       edit: %{
         id: "4HANG1NGVA1VES0FPR0PERT1ES",
-        verb: "Edit",
+        verb: l("Edit"),
         icon: "bx:Highlight",
-        summary: "Modify the contents of an existing object"
+        summary: l("Modify the contents of an existing object")
       },
       delete: %{
         id: "4AKESTVFFG0AWAYPERMANENT1Y",
-        verb: "Delete",
+        verb: l("Delete"),
         icon: "bxs:TrashAlt",
-        summary: "Delete an object"
+        summary: l("Delete an object")
       },
       vote: %{
         id: "7V0TEMEANSC0NSENT0RREFVSA1",
-        verb: "Vote",
+        verb: l("Vote"),
         icon: "material-symbols:how-to-vote",
-        summary: "Vote on something"
+        summary: l("Vote on something")
       },
 
       # WIP adding verbs, see: https://github.com/bonfire-networks/bonfire-app/issues/406
 
       toggle: %{
         id: "1CANENAB1E0RD1SAB1EFEATVRE",
-        verb: "Toggle",
+        verb: l("Toggle"),
         icon: "bx:ToggleRight",
-        summary: "Enable/disable extensions or features",
+        summary: l("Enable/disable extensions or features"),
         scope: :instance
       },
       describe: %{
         id: "1CANADD0M0D1FY1NF0METADATA",
-        verb: "Describe",
+        verb: l("Describe"),
         icon: "bx:CommentEdit",
-        summary: "Edit info and metadata, eg. thread titles",
+        summary: l("Edit info and metadata, eg. thread titles"),
         scope: :instance
       },
       grant: %{
         id: "1T0ADDED1TREM0VEB0VNDAR1ES",
-        verb: "Grant",
+        verb: l("Grant"),
         icon: "bx:Key",
-        summary: "Add, edit or remove boundaries",
+        summary: l("Add, edit or remove boundaries"),
         scope: :instance
       },
       assign: %{
         id: "1T0ADDC1RC1ES0RASS1GNR01ES",
-        verb: "Assign",
+        verb: l("Assign"),
         icon: "bxs:UserBadge",
-        summary: "Assign roles or tasks",
+        summary: l("Assign roles or tasks"),
         scope: :instance
       },
       invite: %{
         id: "11NV1TESPE0P1E0RGRANTENTRY",
-        verb: "Invite",
+        verb: l("Invite"),
         icon: "bx:Gift",
-        summary: "Join without invitation and invite others",
+        summary: l("Join without invitation and invite others"),
         scope: :instance
       },
       mediate: %{
         id: "1T0SEEF1AGSANDMAKETHEPEACE",
-        verb: "Mediate",
+        verb: l("Mediate"),
         icon: "bxs:FlagCheckered",
-        summary: "See flags",
+        summary: l("See flags"),
         scope: :instance
       },
       block: %{
         id: "1T0MANAGEB10CKGH0STS11ENCE",
-        verb: "Block",
+        verb: l("Block"),
         icon: "bx:Block",
-        summary: "Manage blocks",
+        summary: l("Manage blocks"),
         scope: :instance
       },
       configure: %{
         id: "1T0C0NF1GVREGENERA1SETT1NG",
-        verb: "Configure",
+        verb: l("Configure"),
         icon: "Heroicons-Solid:Adjustments",
-        summary: "Change general settings",
+        summary: l("Change general settings"),
         scope: :instance
       }
     ]
@@ -278,7 +288,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       acls_for_dropdown: basic_acls,
       # what boundaries we can display to everyone when applied on objects
       public_acls_on_objects: public_acls,
-      #  used for setting boundaries
+      #  used for setting boundaries
       preset_acls: %{
         "public" => [
           :guests_may_see_read,
@@ -295,7 +305,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         ],
         "private" => []
       },
-      #  used for matching saved boundaries to presets:
+      #  used for matching saved boundaries to presets:
       preset_acls_match: %{
         "public" => [
           :guests_may_see,
@@ -328,35 +338,39 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       ### effect of applying to all users in those circles.
       circles: %{
         ### Public circles used to categorise broadly how much of a friend/do the user is.
-        guest: %{id: "0AND0MSTRANGERS0FF1NTERNET", name: "Guests"},
-        local: %{id: "3SERSFR0MY0VR10CA11NSTANCE", name: "Local Users"},
+        guest: %{id: "0AND0MSTRANGERS0FF1NTERNET", name: l("Guests")},
+        local: %{id: "3SERSFR0MY0VR10CA11NSTANCE", name: l("Local Users")},
         activity_pub: %{
           id: "7EDERATEDW1THANACT1V1TYPVB",
-          name: "Remote ActivityPub Actors"
+          name: l("Remote ActivityPub Actors")
         },
-        admin: %{id: "0ADM1NSVSERW1THSVPERP0WERS", name: "Instance Admins"},
-        mod: %{id: "10VE1YM0DSHE1PHEA1THYC0MMS", name: "Instance Moderators"},
+        admin: %{id: "0ADM1NSVSERW1THSVPERP0WERS", name: l("Instance Admins")},
+        mod: %{id: "10VE1YM0DSHE1PHEA1THYC0MMS", name: l("Instance Moderators")},
 
         ### Stereotypes - placeholders for special per-user circles the system will manage.
         followers: %{
           id: "7DAPE0P1E1PERM1TT0F0110WME",
-          name: "Those who follow me",
+          name: l("Those who follow me"),
           stereotype: true
         },
         followed: %{
           id: "4THEPE0P1ES1CH00SET0F0110W",
-          name: "Those I follow",
+          name: l("Those I follow"),
           stereotype: true
         },
-        ghost_them: %{id: "7N010NGERC0NSENTT0Y0VN0WTY", name: "Those I ghosted", stereotype: true},
+        ghost_them: %{
+          id: "7N010NGERC0NSENTT0Y0VN0WTY",
+          name: l("Those I ghosted"),
+          stereotype: true
+        },
         silence_them: %{
           id: "7N010NGERWANTT011STENT0Y0V",
-          name: "Those I silenced",
+          name: l("Those I silenced"),
           stereotype: true
         },
         silence_me: %{
           id: "0KF1NEY0VD0N0TWANTT0HEARME",
-          name: "Those who silenced me",
+          name: l("Those who silenced me"),
           stereotype: true
         }
       },
@@ -366,53 +380,53 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       acls: %{
         instance_care: %{
           id: "01SETT1NGSF0R10CA11NSTANCE",
-          name: "Local instance roles & boundaries"
+          name: l("Local instance roles & boundaries")
         },
 
         ### Public ACLs that allow basic control over visibility and interactions.
         guests_may_see_read: %{
           id: "7W1DE1YAVA11AB1ET0SEENREAD",
-          name: "Publicly discoverable and readable"
+          name: l("Publicly discoverable and readable")
         },
         guests_may_see: %{
           id: "50VCANF1NDMEBVTCAN0T0PENME",
-          name: "Publicly discoverable, but contents may be hidden"
+          name: l("Publicly discoverable, but contents may be hidden")
         },
         guests_may_read: %{
           id: "50VCANREAD1FY0VHAVETHE11NK",
-          name: "Publicly readable, but not necessarily discoverable"
+          name: l("Publicly readable, but not necessarily discoverable")
         },
         remotes_may_interact: %{
           id: "5REM0TEPE0P1E1NTERACTREACT",
-          name: "Remote actors may read and interact"
+          name: l("Remote actors may read and interact")
         },
         remotes_may_reply: %{
           id: "5REM0TEPE0P1E1NTERACTREP1Y",
-          name: "Remote actors may read, interact and reply"
+          name: l("Remote actors may read, interact and reply")
         },
         remotes_may_contribute: %{
           id: "7REM0TEACT0RSCANC0NTR1BVTE",
-          name: "Remote actors may contribute"
+          name: l("Remote actors may contribute")
         },
         locals_may_read: %{
           id: "10CA1SMAYSEEANDREAD0N1YN0W",
-          name: "Visible to local users"
+          name: l("Visible to local users")
         },
         locals_may_interact: %{
           id: "710CA1SMY1NTERACTN0TREP1YY",
-          name: "Local users may read and interact"
+          name: l("Local users may read and interact")
         },
         locals_may_reply: %{
           id: "710CA1SMY1NTERACTANDREP1YY",
-          name: "Local users may read, interact and reply"
+          name: l("Local users may read, interact and reply")
         },
         locals_may_contribute: %{
           id: "1ANY10CA1VSERCANC0NTR1BVTE",
-          name: "Local users may contribute"
+          name: l("Local users may contribute")
         },
         followed_may_reply: %{
           id: "1HANDP1CKEDZEPE0P1E1F0110W",
-          name: "People who I follow may read, interact, and reply",
+          name: l("People who I follow may read, interact, and reply"),
           stereotype: true
         },
 
@@ -420,45 +434,45 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
         custom_acl: %{
           id: "7HECVST0MAC1F0RAN0BJECTETC",
-          name: "Custom boundary",
+          name: l("Custom boundary"),
           stereotype: true
         },
 
         ## ACLs that confer my personal permissions on things i have created
-        # i_may_read:            %{id: "71MAYSEEANDREADMY0WNSTVFFS", name: "I may read"},              # not currently used
-        # i_may_interact:        %{id: "71MAY1NTERACTW1MY0WNSTVFFS", name: "I may read and interact"}, # not currently used
+        # i_may_read:            %{id: "71MAYSEEANDREADMY0WNSTVFFS", name: l("I may read")},              # not currently used
+        # i_may_interact:        %{id: "71MAY1NTERACTW1MY0WNSTVFFS", name: l("I may read and interact")}, # not currently used
         i_may_administer: %{
           id: "71MAYADM1N1STERMY0WNSTVFFS",
-          name: "I may administer",
+          name: l("I may administer"),
           stereotype: true
         },
 
         ## ACLs that confer permissions for people i mention (or reply to, which causes a mention)
-        # mentions_may_read:     %{id: "7MENT10NSCANREADTH1STH1NGS", name: "Mentions may read", stereotype: true},
-        # mentions_may_interact: %{id: "7MENT10NSCAN1NTERACTW1TH1T", name: "Mentions may read and interact", stereotype: true},
-        # mentions_may_reply:    %{id: "7MENT10NSCANEVENREP1YT01TS", name: "Mentions may read, interact and reply", stereotype: true},
+        # mentions_may_read:     %{id: "7MENT10NSCANREADTH1STH1NGS", name: l("Mentions may read"), stereotype: true},
+        # mentions_may_interact: %{id: "7MENT10NSCAN1NTERACTW1TH1T", name: l("Mentions may read and interact"), stereotype: true},
+        # mentions_may_reply:    %{id: "7MENT10NSCANEVENREP1YT01TS", name: l("Mentions may read, interact and reply"), stereotype: true},
 
         ## "Negative" ACLs
 
         no_follow: %{
           id: "1MVSTREQVESTBEF0REF0110W1N",
-          name: "People must request to follow"
+          name: l("People must request to follow")
         },
 
         # Apply overrides for ghosting and silencing purposes.
         ghosted_cannot_anything: %{
           id: "0H0STEDCANTSEE0RD0ANYTH1NG",
-          name: "People I ghosted cannot see me",
+          name: l("People I ghosted cannot see me"),
           stereotype: true
         },
         silenced_cannot_reach_me: %{
           id: "1S11ENCEDTHEMS0CAN0TP1NGME",
-          name: "People I silenced aren't discoverable by me",
+          name: l("People I silenced aren't discoverable by me"),
           stereotype: true
         },
         cannot_discover_if_silenced: %{
           id: "2HEYS11ENCEDMES0CAN0TSEEME",
-          name: "People who silenced me cannot discover me",
+          name: l("People who silenced me cannot discover me"),
           stereotype: true
         }
       },
@@ -646,9 +660,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     config :bonfire, :ui,
       profile: [
         my_network: [
-          "/boundaries/circles": "Circles",
-          "/boundaries/ghosted": "Ghosted",
-          "/boundaries/silenced": "Silenced"
+          "/boundaries/circles": l("Circles"),
+          "/boundaries/ghosted": l("Ghosted"),
+          "/boundaries/silenced": l("Silenced")
         ]
       ]
   end
