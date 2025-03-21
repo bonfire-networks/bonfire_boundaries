@@ -177,6 +177,17 @@ defmodule Bonfire.Boundaries do
     |> Enum.map(& &1.acl)
   end
 
+  def object_public?(object) do
+    public_acl_ids = Bonfire.Boundaries.Acls.remote_public_acl_ids()
+
+    # FIXME: use `get_preset_on_object` instead of loading them all, or at least only load the IDs
+    acls =
+      list_object_acls(object)
+      |> debug("post_acls")
+
+    Enum.any?(acls, fn %{id: acl_id} -> acl_id in public_acl_ids end)
+  end
+
   @doc """
   Lists boundaries (ACLs and grants) for a given object 
 
