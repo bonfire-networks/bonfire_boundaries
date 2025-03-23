@@ -261,6 +261,7 @@ defmodule Bonfire.Boundaries.Roles do
   def verbs_for_role(role, opts) do
     opts =
       to_options(opts)
+      |> Keyword.put_new(:one_scope_only, false)
 
     # |> Keyword.put_new(:one_scope_only, false)
     do_verbs_for_role(to_string(role), Types.maybe_to_atom(role), role_verbs(:all, opts), opts)
