@@ -114,19 +114,6 @@ defmodule Bonfire.Boundaries.Circles do
   def get(slug) when is_atom(slug), do: circles()[slug]
   def get(id) when is_binary(id), do: get_tuple(id) |> Enums.maybe_elem(1)
 
-  @doc "Gets a circle by ID, after checking boundaries to see if this is a list shared with me"
-  def get(id, opts \\ []) do
-    opts = opts ++ @default_q_opts
-
-    with {:ok, circle} <-
-           query(opts)
-           |> query_by_id(id, opts)
-           |> boundarise(circle.id, opts)
-           |> repo().single() do
-      {:ok, circle}
-    end
-  end
-
   def get!(slug) when is_atom(slug) do
     get(slug) ||
       raise RuntimeError, message: "Missing built-in circle: #{inspect(slug)}"
@@ -166,6 +153,74 @@ defmodule Bonfire.Boundaries.Circles do
     Enum.find(circles(), fn {_slug, c} ->
       c[:id] == id
     end)
+  end
+
+  @doc "Gets a circle by ID, after checking boundaries to see if this is a list shared with me"
+  def get(id, opts) do
+    opts = opts ++ @default_q_opts
+    caretaker = current_user(opts)
+
+    with {:ok, circle} <-
+           query(opts)
+           |> query_by_id(id, opts)
+           #  |> boundarise(circle.id, opts)
+           |> where(
+             [circle, caretaker: caretaker],
+             exists(boundarise(circle.id, opts)) or
+               caretaker.caretaker_id in ^uids(caretaker) or
+               circle.id in ^e(opts, :extra_ids_to_include, [])
+           )
+           |> repo().single() do
+      {:ok, circle}
+    end
+  end
+
+  @doc """
+  Retrieves a circle for a caretaker by ID.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.get_for_caretaker("circle_id", user)
+      {:ok, %Circle{id: "circle_id", name: "My Circle"}}
+  """
+  def get_for_caretaker(id, caretaker, opts \\ []) do
+    opts = opts ++ @default_q_opts
+
+    with {:ok, circle} <-
+           repo().single(query_my_by_id(id, caretaker, opts)) do
+      {:ok, circle}
+    else
+      {:error, :not_found} ->
+        if Bonfire.Boundaries.can?(current_account(opts) || caretaker, :assign, :instance) ||
+             opts[:scope] == :instance_wide,
+           do:
+             repo().single(
+               query_my_by_id(
+                 id,
+                 Bonfire.Boundaries.Scaffold.Instance.admin_circle(),
+                 opts
+               )
+             ),
+           else: {:error, :not_found}
+    end
+  end
+
+  def get_for_instance(id, opts \\ []) do
+    get_for_caretaker(id, Bonfire.Boundaries.Scaffold.Instance.admin_circle(), opts)
+  end
+
+  @doc """
+  Retrieves a circle by name for a caretaker.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.get_by_name("My Circle", user)
+      {:ok, %Circle{id: "circle_id", name: "My Circle"}}
+  """
+  def get_by_name(name, caretaker) do
+    repo().single(
+      query_basic_my(caretaker || Bonfire.Boundaries.Scaffold.Instance.admin_circle(), name: name)
+    )
   end
 
   @doc """
@@ -391,54 +446,6 @@ defmodule Bonfire.Boundaries.Circles do
 
   ## invariants:
   ## * Created circles will have the user as a caretaker
-
-  @doc """
-  Retrieves a circle for a caretaker by ID.
-
-  ## Examples
-
-      iex> Bonfire.Boundaries.Circles.get_for_caretaker("circle_id", user)
-      {:ok, %Circle{id: "circle_id", name: "My Circle"}}
-  """
-  def get_for_caretaker(id, caretaker, opts \\ []) do
-    opts = opts ++ @default_q_opts
-
-    with {:ok, circle} <-
-           repo().single(query_my_by_id(id, caretaker, opts)) do
-      {:ok, circle}
-    else
-      {:error, :not_found} ->
-        if Bonfire.Boundaries.can?(current_account(opts) || caretaker, :assign, :instance) ||
-             opts[:scope] == :instance_wide,
-           do:
-             repo().single(
-               query_my_by_id(
-                 id,
-                 Bonfire.Boundaries.Scaffold.Instance.admin_circle(),
-                 opts
-               )
-             ),
-           else: {:error, :not_found}
-    end
-  end
-
-  def get_for_instance(id, opts \\ []) do
-    get_for_caretaker(id, Bonfire.Boundaries.Scaffold.Instance.admin_circle(), opts)
-  end
-
-  @doc """
-  Retrieves a circle by name for a caretaker.
-
-  ## Examples
-
-      iex> Bonfire.Boundaries.Circles.get_by_name("My Circle", user)
-      {:ok, %Circle{id: "circle_id", name: "My Circle"}}
-  """
-  def get_by_name(name, caretaker) do
-    repo().single(
-      query_basic_my(caretaker || Bonfire.Boundaries.Scaffold.Instance.admin_circle(), name: name)
-    )
-  end
 
   @doc """
   Retrieves stereotype circles for a subject.

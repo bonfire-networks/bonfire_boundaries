@@ -48,7 +48,7 @@ defmodule Bonfire.Boundaries.Queries do
       iex> query_editable_posts = from(p in Post)
                                 |> boundarise(p.id, verbs: [:edit], current_user: user)
   """
-  defmacro boundarise(query, field_ref, opts) do
+  defmacro boundarise(query \\ nil, field_ref, opts) do
     boundarise_impl(query, field_ref, opts)
   end
 
@@ -63,7 +63,7 @@ defmodule Bonfire.Boundaries.Queries do
 
           case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
             true ->
-              query
+              query || Bonfire.Boundaries.Queries.always_true_subquery()
 
             :admins ->
               agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
@@ -72,7 +72,7 @@ defmodule Bonfire.Boundaries.Queries do
                 true ->
                   Untangle.debug("Skipping boundary checks for instance administrator")
 
-                  query
+                  query || Bonfire.Boundaries.Queries.always_true_subquery()
 
                 _ ->
                   vis =
@@ -87,10 +87,13 @@ defmodule Bonfire.Boundaries.Queries do
                       )
                     )
 
-                  where(
-                    unquote(query),
-                    exists(vis)
-                  )
+                  if query,
+                    do:
+                      where(
+                        query,
+                        exists(vis)
+                      ),
+                    else: vis
               end
 
             _false ->
@@ -115,10 +118,13 @@ defmodule Bonfire.Boundaries.Queries do
                   )
                 )
 
-              where(
-                unquote(query),
-                exists(vis)
-              )
+              if query,
+                do:
+                  where(
+                    query,
+                    exists(vis)
+                  ),
+                else: vis
           end
         end
 
@@ -144,6 +150,11 @@ defmodule Bonfire.Boundaries.Queries do
            * `alias.field` (for ID field `field` on table alias `alias`, e.g: `activity.object_id`)
           """
     end
+  end
+
+  def always_true_subquery do
+    # NOTE: ugly temp workaround
+    from(s in Bonfire.Data.AccessControl.Verb, select: fragment("true"), limit: 1)
   end
 
   def base_summary_query(boundarise_with_view \\ false)
