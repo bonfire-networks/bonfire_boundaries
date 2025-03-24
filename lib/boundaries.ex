@@ -358,12 +358,12 @@ defmodule Bonfire.Boundaries do
       iex> Bonfire.Boundaries.preset_boundary_tuple_from_acl(%Bonfire.Data.AccessControl.Acl{id: 1}, :group)
       {"open", "Open"}
   """
-  def preset_boundary_tuple_from_acl(acl, object_type \\ nil)
+  def preset_boundary_tuple_from_acl(acl, object_type \\ nil, opts \\ [])
 
-  def preset_boundary_tuple_from_acl(acl, %{__struct__: schema} = _object),
-    do: preset_boundary_tuple_from_acl(acl, schema)
+  def preset_boundary_tuple_from_acl(acl, %{__struct__: schema} = _object, opts),
+    do: preset_boundary_tuple_from_acl(acl, schema, opts)
 
-  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, object_type)
+  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, object_type, opts)
       when object_type in [Bonfire.Classify.Category, :group] do
     # debug(acl)
 
@@ -380,11 +380,11 @@ defmodule Bonfire.Boundaries do
     cond do
       acl_id in visible_acl_ids -> {"visible", l("Visible")}
       acl_id in open_acl_ids -> {"open", l("Open")}
-      true -> {"private", l("Private")}
+      true -> opts[:custom_tuple] || {"private", l("Private")}
     end
   end
 
-  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, _object_type) do
+  def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, _object_type, opts) do
     # debug(acl)
 
     preset_acls = Config.get!(:preset_acls_match)
@@ -396,33 +396,50 @@ defmodule Bonfire.Boundaries do
     cond do
       acl_id in public_acl_ids -> {"public", l("Public")}
       acl_id in local_acl_ids -> {"local", l("Local Instance")}
-      true -> {"mentions", l("Mentions")}
+      true -> opts[:custom_tuple] || {"mentions", l("Mentions")}
     end
   end
 
   def preset_boundary_tuple_from_acl(
         %{__typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = _summary,
-        object_type
+        object_type,
+        opts
       ) do
-    preset_boundary_tuple_from_acl(%Acl{id: acl_id}, object_type)
+    preset_boundary_tuple_from_acl(%Acl{id: acl_id}, object_type, opts)
   end
 
-  def preset_boundary_tuple_from_acl(%{acl: %{id: _} = acl}, object_type),
-    do: preset_boundary_tuple_from_acl(acl, object_type)
+  def preset_boundary_tuple_from_acl(%{acl: %{id: _} = acl}, object_type, opts),
+    do: preset_boundary_tuple_from_acl(acl, object_type, opts)
 
-  def preset_boundary_tuple_from_acl(%{acl_id: acl}, object_type),
-    do: preset_boundary_tuple_from_acl(acl, object_type)
+  def preset_boundary_tuple_from_acl(%{acl_id: acl}, object_type, opts),
+    do: preset_boundary_tuple_from_acl(acl, object_type, opts)
 
-  def preset_boundary_tuple_from_acl([acl], object_type),
-    do: preset_boundary_tuple_from_acl(acl, object_type)
+  def preset_boundary_tuple_from_acl([acl], object_type, opts),
+    do: preset_boundary_tuple_from_acl(acl, object_type, opts)
 
-  def preset_boundary_tuple_from_acl(other, object_type) do
-    if Types.is_uid?(other) do
-      preset_boundary_tuple_from_acl(%Acl{id: other}, object_type)
-    else
-      warn(other, "No boundary pattern matched")
+  def preset_boundary_tuple_from_acl(acls, object_type, opts) when is_list(acls) do
+    # TODO: optimise
+    presets =
+      Enum.map(acls, fn acl ->
+        preset_boundary_tuple_from_acl(acl, object_type, opts)
+      end)
 
-      {"mentions", l("Mentions")}
+    cond do
+      {"public", l("Public")} in presets -> {"public", l("Public")}
+      {"local", l("Local Instance")} in presets -> {"local", l("Local Instance")}
+      true -> opts[:custom_tuple] || {"mentions", l("Mentions")}
+    end
+  end
+
+  def preset_boundary_tuple_from_acl(other, object_type, opts) do
+    case Types.uid(other) do
+      nil ->
+        warn(other, "No boundary pattern matched")
+
+        opts[:custom_tuple] || {"mentions", l("Mentions")}
+
+      id ->
+        preset_boundary_tuple_from_acl(%Acl{id: id}, object_type, opts)
     end
   end
 
@@ -475,8 +492,9 @@ defmodule Bonfire.Boundaries do
     maybe_remove_previous_preset(creator, object, preset)
   end
 
-  defp maybe_remove_previous_preset(creator, object, {preset, _description}) do
-    debug(preset, "TODO")
+  defp maybe_remove_previous_preset(creator, object, {preset, _description})
+       when is_binary(preset) and preset != "mentions" do
+    debug(preset, "WIP")
 
     Acls.base_acls_from_preset(creator, preset)
     |> debug("base_acls_from_preset to remove")
@@ -489,7 +507,8 @@ defmodule Bonfire.Boundaries do
     :ok
   end
 
-  defp maybe_remove_previous_preset(_, _, _) do
+  defp maybe_remove_previous_preset(_, _, preset) do
+    warn(preset, "could not remove previous preset")
     :ok
   end
 

@@ -166,7 +166,7 @@ defmodule Bonfire.Boundaries.Acls do
   """
   def set(object, creator, opts)
       when is_list(opts) and is_struct(object) do
-    with {:ok, _pointer} <- do_set(object, creator, opts) do
+    with {_num, nil} <- do_set(object, creator, opts) do
       {:ok, :granted}
     end
   end

@@ -737,6 +737,48 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc """
+  Lists members of a circle with cursor-based pagination using Paginator.
+
+  ## Options
+    * `:cursor` - The cursor for pagination (optional)
+    * `:limit` - The maximum number of members to return (default: 12)
+    * `:preload` - Associations to preload (optional)
+
+  ## Examples
+      iex> Bonfire.Boundaries.Circles.list_members("circle_id", limit: 10)
+      %Paginator.Page{entries: [%Encircle{}, ...], metadata: %{...}}
+  """
+  def list_members(circle, opts \\ []) do
+    query =
+      from e in Encircle,
+        where: e.circle_id == ^Types.uid!(circle)
+
+    # Order by insertion time for consistent cursor pagination
+    query =
+      query
+      |> proload(subject: [:character, :profile, :named])
+
+    # Use Paginator for cursor-based pagination
+    many(
+      query,
+      true,
+      opts
+    )
+  end
+
+  @doc """
+  Counts the total number of members in a circle.
+  """
+  def count_members(circle) do
+    query =
+      from e in Encircle,
+        where: e.circle_id == ^Types.uid!(circle),
+        select: count(e.id)
+
+    repo().one(query) || 0
+  end
+
+  @doc """
   Retrieves or creates a circle by name for a caretaker.
 
   ## Examples

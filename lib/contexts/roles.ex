@@ -219,7 +219,7 @@ defmodule Bonfire.Boundaries.Roles do
     if Enum.count(verbs) == Verbs.verbs_count() do
       role_for_all
     else
-      case all_role_verbs
+      case (all_role_verbs || role_verbs(:all))
            |> debug("all_role_verbs")
            |> Enum.filter(fn
              {role, %{^verbs_field => a_role_verbs}} ->
@@ -229,19 +229,23 @@ defmodule Bonfire.Boundaries.Roles do
                  |> Enum.sort()
                  |> debug("#{role} role_verbs")
 
-             _other ->
-               # debug(other, "other")
+             other ->
+               debug(other, "other")
                false
            end) do
         [{role, _verbs}] ->
           role
+
+        [] ->
+          warn(verbs, "no role match for verbs")
+          nil
 
         other ->
           warn(other, "unknown")
           nil
       end
     end
-    |> debug()
+    |> debug("role_from_verbs")
   end
 
   @doc """

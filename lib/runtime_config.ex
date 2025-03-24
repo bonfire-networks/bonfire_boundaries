@@ -202,12 +202,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       Enum.reduce(verbs, %{}, &Map.put(&2, &1, false))
     end
 
-    verbs_see_request = [:see, :request]
-    verbs_read_request = [:read, :request]
-    verbs_see_read_request = [:read, :see, :request]
-    verbs_interaction = [:like, :follow, :flag]
+    verbs_see_request = [:see, :request, :bookmark, :flag]
+    verbs_read_request = [:read, :request, :bookmark, :flag]
+    verbs_see_read_request = [:read, :see, :request, :bookmark, :flag]
+    verbs_interaction = [:like, :follow]
     verbs_sharing = [:boost, :pin]
-    verbs_ping = [:reply, :mention, :message]
+    verbs_ping = [:reply, :mention, :message, :annotate]
     verbs_contrib = [:create, :tag, :describe]
     verbs_edit = [:edit, :tag, :describe]
     verbs_mod = [:invite, :label, :mediate, :block, :delete]
