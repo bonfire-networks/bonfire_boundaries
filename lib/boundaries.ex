@@ -200,6 +200,58 @@ defmodule Bonfire.Boundaries do
     |> Enum.map(& &1.acl)
   end
 
+  def boundaries_on_objects(list_of_ids, current_user) do
+    boundaries_on_objects(
+      list_of_ids,
+      Controlleds.list_presets_on_objects(list_of_ids),
+      current_user
+    )
+  end
+
+  def boundaries_on_objects(list_of_ids, presets, current_user) do
+    if not is_nil(current_user) do
+      # display user's computed permission if we have current_user
+      case users_grants_on(current_user, list_of_ids) do
+        custom when is_list(custom) and custom != [] ->
+          custom
+          |> Map.new(&{&1.object_id, Map.take(&1, [:verbs, :value])})
+          |> debug("my_grants_on")
+          |> deep_merge(presets || [], replace_lists: false)
+          |> debug("merged boundaries")
+
+        _empty ->
+          presets
+      end
+    else
+      presets
+    end
+  end
+
+  def boundary_on_object(id, current_user) do
+    boundary_on_object(id, Controlleds.get_preset_on_object(id), current_user)
+  end
+
+  def boundary_on_object(id, preset \\ nil, current_user) do
+    if not is_nil(current_user) do
+      # display user's computed permission if we have current_user
+      case users_grants_on(current_user, id) do
+        custom when is_list(custom) and custom != [] ->
+          custom
+          |> debug("users_grants_on")
+          |> List.first()
+          |> Map.take([:verbs, :value])
+          |> debug("my_grants_on")
+          |> Map.merge(preset || %{})
+          |> debug("merged boundaries")
+
+        _empty ->
+          preset
+      end
+    else
+      preset
+    end
+  end
+
   @doc """
   Lists grants for a given set of objects.
 
@@ -612,14 +664,16 @@ defmodule Bonfire.Boundaries do
               objects =
                 Enum.reject(object, fn o -> is_nil(o) or o in @skip_object_placeholders end)
 
-              {List.first(object), objects}
+              {List.first(objects), objects}
             else
               {object, nil}
             end
 
           creator_id =
-            e(object, :created, :creator_id, nil) || e(object, :created, :creator, :id, nil) ||
-              e(object, :creator_id, nil) || e(object, :creator, :id, nil)
+            if is_map(object),
+              do:
+                e(object, :created, :creator_id, nil) || e(object, :created, :creator, :id, nil) ||
+                  e(object, :creator_id, nil) || e(object, :creator, :id, nil)
 
           case (not is_nil(current_user_id) and creator_id == current_user_id) or
                  pointer_permitted?(objects || object,
@@ -644,7 +698,7 @@ defmodule Bonfire.Boundaries do
 
   def can?(_subject, _verbs, object, _opts)
       when is_nil(object) or object in @skip_object_placeholders do
-    debug("no object or boundary data")
+    debug(object, "no object or boundary data")
     nil
   end
 
