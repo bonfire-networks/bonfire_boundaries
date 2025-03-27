@@ -350,6 +350,13 @@ defmodule Bonfire.Boundaries.Controlleds do
     |> repo().delete_all()
   end
 
+  def remove_all_acls(object) do
+    from(e in Controlled,
+      where: e.id == ^uid!(object)
+    )
+    |> repo().delete_all()
+  end
+
   defp acl_id(%{acl_id: id}), do: id
   defp acl_id(id), do: Bonfire.Boundaries.Acls.get_id(id)
 

@@ -61,6 +61,9 @@ defmodule Bonfire.Boundaries do
           "visible" in boundaries ->
         boundaries
 
+      "private" in boundaries ->
+        "private"
+
       true ->
         # debug(boundaries, "No preset boundary set")
         nil
@@ -122,6 +125,9 @@ defmodule Bonfire.Boundaries do
 
       :mentions ->
         [{"mentions", l("Mentions")}]
+
+      :private ->
+        [{"private", l("Private")}]
 
       other when is_binary(other) or is_atom(other) ->
         # debug(context, "zzzz")
@@ -475,6 +481,7 @@ defmodule Bonfire.Boundaries do
       Enum.map(acls, fn acl ->
         preset_boundary_tuple_from_acl(acl, object_type, opts)
       end)
+      |> Enum.uniq()
 
     cond do
       {"public", l("Public")} in presets -> {"public", l("Public")}
@@ -510,14 +517,20 @@ defmodule Bonfire.Boundaries do
   """
   def set_boundaries(creator, object, opts)
       when is_list(opts) and is_struct(object) do
-    case opts[:remove_previous_preset] do
-      nil ->
-        with {:ok, _pointer} <- Acls.set(object, creator, opts) do
-          {:ok, :granted}
-        end
+    if opts[:to_boundaries] == "private" do
+      with {num, nil} <- Bonfire.Boundaries.Controlleds.remove_all_acls(object) do
+        {:ok, num}
+      end
+    else
+      case opts[:remove_previous_preset] do
+        nil ->
+          with {:ok, _pointer} <- Acls.set(object, creator, opts) do
+            {:ok, :granted}
+          end
 
-      previous_preset ->
-        replace_boundaries(creator, object, previous_preset, opts)
+        previous_preset ->
+          replace_boundaries(creator, object, previous_preset, opts)
+      end
     end
   end
 
