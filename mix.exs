@@ -25,7 +25,10 @@ defmodule Bonfire.Boundaries.MixProject do
       aliases: aliases(),
       deps:
         Mess.deps([
-          {:igniter, "~> 0.5", optional: true}
+          {:igniter, "~> 0.5", optional: true},
+          # {:bonfire_me, 
+          #  git: "https://github.com/bonfire-networks/bonfire_me",
+          #  optional: true, runtime: false}
         ])
     ]
   end

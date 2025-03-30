@@ -25,7 +25,7 @@ defmodule Bonfire.Boundaries.DataCase do
       use Bonfire.Common.Utils
       use Bonfire.Common.Repo
       # import Bonfire.Boundaries.DataCase
-      import Bonfire.UI.Common.Testing.Helpers
+      # import Bonfire.Me.Fake
     end
   end
 
