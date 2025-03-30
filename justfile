@@ -67,6 +67,8 @@ compile:
       args=""
     fi
 
+    echo "Compile with $args"
+
     mix compile $args
 
 clean: stop-test-db clean-symlinks
