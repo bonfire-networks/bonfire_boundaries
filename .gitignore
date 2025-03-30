@@ -12,6 +12,9 @@
 /.npm/
 /.config/
 
+# The lockfile (not needed for extensions)
+# mix.lock
+
 # Where 3rd-party dependencies like ExDoc output generated docs.
 /doc/
 
