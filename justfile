@@ -61,7 +61,7 @@ compile:
     #!/usr/bin/env bash
     set -eu
 
-    if [ "$WARNINGS_AS_ERRORS" eq "1" ]; then
+    if [ "$WARNINGS_AS_ERRORS" -eq "1" ]; then
       args="--warnings-as-errors"
     else
       args=""
@@ -123,7 +123,7 @@ test *args: setup-db (run-tests args)
 @setup-db:
     #!/usr/bin/env bash
     set -eu
-    if [ "$DB_TESTS" eq "1" ]; then
+    if [ "$DB_TESTS" -eq "1" ]; then
       just --justfile {{justfile()}} start-test-db ext-migrations-copy create-test-db
     fi
 
