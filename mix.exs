@@ -25,6 +25,7 @@ defmodule Bonfire.Boundaries.MixProject do
       aliases: aliases(),
       deps:
         Mess.deps([
+          {:igniter, "~> 0.5", optional: true}
         ])
     ]
   end
