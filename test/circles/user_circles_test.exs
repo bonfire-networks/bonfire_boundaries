@@ -8,7 +8,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
   alias Bonfire.Boundaries.Circles
 
   test "listing instance-wide circles (which I am permitted to see) works" do
-    user = fake_user!()
+    user = Bonfire.Me.Fake.fake_user!()
 
     assert circles = Circles.list_visible(user)
     # preset_circles = Bonfire.Boundaries.Circles.circles() |> Map.keys()
@@ -17,7 +17,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
   end
 
   test "creation works" do
-    user = fake_user!()
+    user = Bonfire.Me.Fake.fake_user!()
     name = "test circle"
     assert {:ok, circle} = Circles.create(user, name)
     assert name == circle.named.name
@@ -25,7 +25,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
   end
 
   test "listing my circles (which I'm caretaker of) works" do
-    user = fake_user!()
+    user = Bonfire.Me.Fake.fake_user!()
     name = "test circle"
     assert {:ok, circle} = Circles.create(user, name)
 
@@ -49,11 +49,11 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
   end
 
   test "cannot list someone else's circles (which they're caretaker of) " do
-    user = fake_user!()
+    user = Bonfire.Me.Fake.fake_user!()
     name = "test circle"
     assert {:ok, circle} = Circles.create(user, name)
 
-    me = fake_user!()
+    me = Bonfire.Me.Fake.fake_user!()
 
     assert circles =
              Circles.list_my(me)
@@ -64,7 +64,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
   end
 
   # test "listing circles I am permitted to see works" do
-  #   user = fake_user!()
+  #   user = Bonfire.Me.Fake.fake_user!()
   #   name = "test circle"
   #   assert {:ok, circle} = Circles.create(user, name)
 
@@ -80,8 +80,8 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
   # end
 
   test "cannot list circles which I am not permitted to see" do
-    me = fake_user!()
-    user = fake_user!()
+    me = Bonfire.Me.Fake.fake_user!()
+    user = Bonfire.Me.Fake.fake_user!()
     name = "test circle by other user"
     assert {:ok, circle} = Circles.create(user, name)
 
@@ -96,10 +96,10 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
   test "can create a circle and add people to it" do
     # create a bunch of users
     account = fake_account!()
-    me = fake_user!(account)
-    alice = fake_user!(account)
-    bob = fake_user!(account)
-    carl = fake_user!(account)
+    me = Bonfire.Me.Fake.fake_user!(account)
+    alice = Bonfire.Me.Fake.fake_user!(account)
+    bob = Bonfire.Me.Fake.fake_user!(account)
+    carl = Bonfire.Me.Fake.fake_user!(account)
 
     # create a circle with alice and bob
     {:ok, circle} = Circles.create(me, %{named: %{name: "family"}})
@@ -112,7 +112,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
   end
 
   test "deleting a circle works" do
-    user = fake_user!()
+    user = Bonfire.Me.Fake.fake_user!()
     circles = Circles.list_my(user)
     assert {:ok, _} = Circles.delete(List.first(circles), current_user: user)
   end

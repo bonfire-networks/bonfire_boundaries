@@ -27,8 +27,8 @@ defmodule Bonfire.Boundaries.Boundaries.GhostActorFeedsPerUserTest do
   end
 
   test "shows in feeds a post with no per-user ghosting" do
-    me = fake_user!(@my_name)
-    other_user = fake_user!()
+    me = Bonfire.Me.Fake.fake_user!(@my_name)
+    other_user = Bonfire.Me.Fake.fake_user!()
 
     assert {:ok, post} =
              Posts.publish(
@@ -43,8 +43,8 @@ defmodule Bonfire.Boundaries.Boundaries.GhostActorFeedsPerUserTest do
   end
 
   test "does not show in my_feed a post from someone who per-user ghosted me, who I am not following" do
-    me = fake_user!(@my_name)
-    other_user = fake_user!()
+    me = Bonfire.Me.Fake.fake_user!(@my_name)
+    other_user = Bonfire.Me.Fake.fake_user!()
 
     Bonfire.Boundaries.Blocks.block(me, :ghost, current_user: other_user)
 
@@ -59,8 +59,8 @@ defmodule Bonfire.Boundaries.Boundaries.GhostActorFeedsPerUserTest do
   end
 
   test "does not show in my_feed a post from someone who per-user ghosted me, who I am following" do
-    me = fake_user!(@my_name)
-    other_user = fake_user!()
+    me = Bonfire.Me.Fake.fake_user!(@my_name)
+    other_user = Bonfire.Me.Fake.fake_user!()
 
     Bonfire.Social.Graph.Follows.follow(me, other_user)
 
@@ -77,8 +77,8 @@ defmodule Bonfire.Boundaries.Boundaries.GhostActorFeedsPerUserTest do
   end
 
   test "does not show in any feeds a post from someone who per-user ghosted me" do
-    me = fake_user!(@my_name)
-    other_user = fake_user!()
+    me = Bonfire.Me.Fake.fake_user!(@my_name)
+    other_user = Bonfire.Me.Fake.fake_user!()
 
     Bonfire.Boundaries.Blocks.block(me, :ghost, current_user: other_user)
 
@@ -96,14 +96,14 @@ defmodule Bonfire.Boundaries.Boundaries.GhostActorFeedsPerUserTest do
 
     refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
 
-    third_user = fake_user!()
+    third_user = Bonfire.Me.Fake.fake_user!()
     # check that we do show it to others
     assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: third_user)
   end
 
   test "does not show in any feeds a post from someone who per-user ghosted me later on" do
-    me = fake_user!(@my_name)
-    other_user = fake_user!()
+    me = Bonfire.Me.Fake.fake_user!(@my_name)
+    other_user = Bonfire.Me.Fake.fake_user!()
 
     assert {:ok, post} =
              Posts.publish(

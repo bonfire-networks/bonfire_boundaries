@@ -29,8 +29,8 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
 
   describe "" do
     test "shows in feeds a post with no per-user silencing" do
-      me = fake_user!(@my_name)
-      other_user = fake_user!(@other_name)
+      me = Bonfire.Me.Fake.fake_user!(@my_name)
+      other_user = Bonfire.Me.Fake.fake_user!(@other_name)
 
       assert {:ok, post} =
                Posts.publish(
@@ -45,8 +45,8 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
     end
 
     test "does not show in my_feed a post from a per-user silenced user that I am not following" do
-      me = fake_user!(@my_name)
-      other_user = fake_user!(@other_name)
+      me = Bonfire.Me.Fake.fake_user!(@my_name)
+      other_user = Bonfire.Me.Fake.fake_user!(@other_name)
 
       Bonfire.Boundaries.Blocks.block(other_user, :silence, current_user: me)
 
@@ -61,8 +61,8 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
     end
 
     test "does not show in my_feed a post from a per-user silenced user that I am following" do
-      me = fake_user!(@my_name)
-      other_user = fake_user!(@other_name)
+      me = Bonfire.Me.Fake.fake_user!(@my_name)
+      other_user = Bonfire.Me.Fake.fake_user!(@other_name)
 
       Bonfire.Social.Graph.Follows.follow(me, other_user)
 
@@ -95,8 +95,8 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
     end
 
     test "does not show in any feeds a post from a per-user silenced user" do
-      me = fake_user!(@my_name)
-      other_user = fake_user!(@other_name)
+      me = Bonfire.Me.Fake.fake_user!(@my_name)
+      other_user = Bonfire.Me.Fake.fake_user!(@other_name)
 
       Bonfire.Boundaries.Blocks.block(other_user, :silence, current_user: me)
 
@@ -114,14 +114,14 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
 
       refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
 
-      third_user = fake_user!()
+      third_user = Bonfire.Me.Fake.fake_user!()
       # check that we do show it to others
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: third_user)
     end
 
     test "does not show in any feeds a post from an user that was per-user silenced later on" do
-      me = fake_user!(@my_name)
-      other_user = fake_user!(@other_name)
+      me = Bonfire.Me.Fake.fake_user!(@my_name)
+      other_user = Bonfire.Me.Fake.fake_user!(@other_name)
 
       assert {:ok, post} =
                Posts.publish(
@@ -137,7 +137,7 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
       refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
 
       # check that we do show it to others
-      third = fake_user!()
+      third = Bonfire.Me.Fake.fake_user!()
 
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: third)
 

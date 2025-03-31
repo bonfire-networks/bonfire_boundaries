@@ -10,7 +10,7 @@ defmodule Bonfire.Boundaries.AclTest do
   alias Bonfire.Boundaries.Grants
 
   # test "listing instance-wide acls (which I am permitted to see) works" do
-  #   user = fake_user!()
+  #   user = Bonfire.Me.Fake.fake_user!()
 
   #   assert acls = Acls.list_visible(user)
   #   #preset_acls = Bonfire.Boundaries.Circles.circles() |> Map.keys()
@@ -18,7 +18,7 @@ defmodule Bonfire.Boundaries.AclTest do
   # end
 
   test "creation works" do
-    user = fake_user!()
+    user = Bonfire.Me.Fake.fake_user!()
     name = "test acl"
 
     assert {:ok, acl} =
@@ -30,7 +30,7 @@ defmodule Bonfire.Boundaries.AclTest do
   end
 
   test "listing my ACLs (which I'm caretaker of) works" do
-    user = fake_user!()
+    user = Bonfire.Me.Fake.fake_user!()
     name = "test circle"
     assert {:ok, acl} = Acls.simple_create(user, name)
 
@@ -52,11 +52,11 @@ defmodule Bonfire.Boundaries.AclTest do
   end
 
   test "cannot list someone else's ACLs (which they're caretaker of) " do
-    user = fake_user!()
+    user = Bonfire.Me.Fake.fake_user!()
     name = "test circle"
     assert {:ok, circle} = Acls.simple_create(user, name)
 
-    me = fake_user!()
+    me = Bonfire.Me.Fake.fake_user!()
 
     assert acls =
              Acls.list_my(me)
@@ -67,8 +67,8 @@ defmodule Bonfire.Boundaries.AclTest do
   end
 
   # test "cannot list ACLs which I am not permitted to see" do
-  #   me = fake_user!()
-  #   user = fake_user!()
+  #   me = Bonfire.Me.Fake.fake_user!()
+  #   user = Bonfire.Me.Fake.fake_user!()
   #   name = "test circle by other user"
   #   assert {:ok, acl} = Acls.simple_create(user, name)
 
@@ -83,10 +83,10 @@ defmodule Bonfire.Boundaries.AclTest do
     name = "family trip"
     # create a bunch of users
     account = fake_account!()
-    me = fake_user!(account)
-    alice = fake_user!(account)
-    bob = fake_user!(account)
-    carl = fake_user!(account)
+    me = Bonfire.Me.Fake.fake_user!(account)
+    alice = Bonfire.Me.Fake.fake_user!(account)
+    bob = Bonfire.Me.Fake.fake_user!(account)
+    carl = Bonfire.Me.Fake.fake_user!(account)
 
     {:ok, acl} = Acls.simple_create(me, name)
 
@@ -122,10 +122,10 @@ defmodule Bonfire.Boundaries.AclTest do
     name = "family trip"
     # create a bunch of users
     account = fake_account!()
-    me = fake_user!(account)
-    alice = fake_user!(account)
-    bob = fake_user!(account)
-    carl = fake_user!(account)
+    me = Bonfire.Me.Fake.fake_user!(account)
+    alice = Bonfire.Me.Fake.fake_user!(account)
+    bob = Bonfire.Me.Fake.fake_user!(account)
+    carl = Bonfire.Me.Fake.fake_user!(account)
 
     {:ok, acl} = Acls.simple_create(me, name)
 
@@ -163,8 +163,8 @@ defmodule Bonfire.Boundaries.AclTest do
     name = "family trip"
     # create a bunch of users
     account = fake_account!()
-    me = fake_user!(account)
-    bob = fake_user!(account)
+    me = Bonfire.Me.Fake.fake_user!(account)
+    bob = Bonfire.Me.Fake.fake_user!(account)
 
     {:ok, acl} = Acls.simple_create(me, name)
 

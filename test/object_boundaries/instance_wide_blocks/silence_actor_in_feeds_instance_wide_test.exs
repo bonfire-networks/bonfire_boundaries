@@ -29,8 +29,8 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
 
   describe "" do
     test "shows in feeds a post with no instance-wide silencing" do
-      alice = fake_user!(@my_name)
-      bob = fake_user!(@other_name)
+      alice = Bonfire.Me.Fake.fake_user!(@my_name)
+      bob = Bonfire.Me.Fake.fake_user!(@other_name)
 
       assert {:ok, post} =
                Posts.publish(
@@ -44,8 +44,8 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
     end
 
     test "does not show in any feeds a post from a instance-wide silenced user" do
-      alice = fake_user!(@other_name)
-      bob = fake_user!(@other_name)
+      alice = Bonfire.Me.Fake.fake_user!(@other_name)
+      bob = Bonfire.Me.Fake.fake_user!(@other_name)
 
       # view unlisted
       assert Bonfire.Boundaries.can?(alice, :read, bob)
@@ -104,8 +104,8 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
     end
 
     test "does not show in any feeds a post from an user that was instance-wide silenced later on" do
-      alice = fake_user!(@other_name)
-      bob = fake_user!(@other_name)
+      alice = Bonfire.Me.Fake.fake_user!(@other_name)
+      bob = Bonfire.Me.Fake.fake_user!(@other_name)
       # Bonfire.Boundaries.Blocks.instance_wide_circles([:silence_me])
       # |> Bonfire.Boundaries.Circles.list_by_ids()
       # |> repo().maybe_preload(caretaker: [:profile], encircles: [subject: [:profile]])

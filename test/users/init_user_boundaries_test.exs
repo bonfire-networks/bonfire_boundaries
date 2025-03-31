@@ -36,7 +36,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{}
       })
 
-      %{id: user_id} = user = fake_user!()
+      %{id: user_id} = user = Bonfire.Me.Fake.fake_user!()
       assert length(Circles.list_my(user)) == 0
       assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 0
       assert repo().one(from s in Stereotyped, select: count(s)) == 0
@@ -52,7 +52,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{}
       })
 
-      user = fake_user!()
+      user = Bonfire.Me.Fake.fake_user!()
       [circle] = Circles.list_my(user)
       assert circle.named.name == "test_name"
     end
@@ -69,7 +69,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{}
       })
 
-      %{id: user_id} = fake_user!()
+      %{id: user_id} = Bonfire.Me.Fake.fake_user!()
       assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 2
     end
 
@@ -85,7 +85,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{}
       })
 
-      user = fake_user!()
+      user = Bonfire.Me.Fake.fake_user!()
 
       [acl] = Acls.list_my(user, paginate?: false)
       assert acl.named.name == "test_name"
@@ -99,7 +99,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{SELF: []}
       })
 
-      %{id: user_id} = fake_user!()
+      %{id: user_id} = Bonfire.Me.Fake.fake_user!()
 
       assert %Bonfire.Data.AccessControl.Controlled{acl_id: "7W1DE1YAVA11AB1ET0SEENREAD"} =
                repo().one(from c in Controlled, where: c.id == ^user_id)
@@ -115,7 +115,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{SELF: []}
       })
 
-      %{id: user_id} = fake_user!(%{}, %{}, undiscoverable: true)
+      %{id: user_id} = Bonfire.Me.Fake.fake_user!(%{}, %{}, undiscoverable: true)
 
       assert %Bonfire.Data.AccessControl.Controlled{acl_id: "50VCANREAD1FY0VHAVETHE11NK"} =
                repo().one(from c in Controlled, where: c.id == ^user_id)
@@ -137,7 +137,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         }
       })
 
-      %{id: user_id} = fake_user!()
+      %{id: user_id} = Bonfire.Me.Fake.fake_user!()
       assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 4
     end
 
@@ -153,8 +153,8 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{}
       })
 
-      user_1 = fake_user!()
-      user_2 = fake_user!()
+      user_1 = Bonfire.Me.Fake.fake_user!()
+      user_2 = Bonfire.Me.Fake.fake_user!()
       [circle_1] = Circles.list_my(user_1)
       [circle_2] = Circles.list_my(user_2)
       [acl_1] = Acls.list_my(user_1, paginate?: false)
@@ -189,7 +189,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{}
       })
 
-      %{id: user_id} = user = fake_user!()
+      %{id: user_id} = user = Bonfire.Me.Fake.fake_user!()
       Users.create_missing_boundaries(user)
       assert length(Circles.list_my(user)) == 0
       assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 0
@@ -206,7 +206,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{}
       })
 
-      user = fake_user!()
+      user = Bonfire.Me.Fake.fake_user!()
       [circle] = Circles.list_my(user)
       Circles.delete(circle, current_user: user)
       assert Circles.list_my(user) == []
@@ -226,7 +226,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{}
       })
 
-      user = fake_user!()
+      user = Bonfire.Me.Fake.fake_user!()
       [acl] = Acls.list_my(user, paginate?: false)
       Acls.delete(acl, current_user: user)
       assert Acls.list_my(user, paginate?: false) == []
@@ -249,7 +249,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         }
       })
 
-      %{id: user_id} = user = fake_user!()
+      %{id: user_id} = user = Bonfire.Me.Fake.fake_user!()
 
       assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 2
       repo().delete_many(from c in Controlled, where: c.id == ^user_id)
@@ -281,7 +281,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{}
       })
 
-      %{id: user_id} = user = fake_user!()
+      %{id: user_id} = user = Bonfire.Me.Fake.fake_user!()
       assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 2
       repo().delete_many(from c in Grant, where: c.subject_id == ^user_id)
       assert repo().one(from c in Grant, select: count(c), where: c.subject_id == ^user_id) == 0

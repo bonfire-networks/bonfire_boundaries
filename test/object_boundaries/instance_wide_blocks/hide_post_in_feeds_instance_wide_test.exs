@@ -29,8 +29,8 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideHidePostFeedsPerUserTest do
 
   describe "" do
     test "does not show in local feeds an instance-wide hidden post" do
-      me = fake_user!(@my_name)
-      bob = fake_user!(@other_name)
+      me = Bonfire.Me.Fake.fake_user!(@my_name)
+      bob = Bonfire.Me.Fake.fake_user!(@other_name)
 
       assert {:ok, post} =
                Posts.publish(
