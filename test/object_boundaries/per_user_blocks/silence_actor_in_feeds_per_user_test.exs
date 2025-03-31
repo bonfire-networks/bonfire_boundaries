@@ -39,9 +39,8 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
                  boundary: "public"
                )
 
-      feed_id = Bonfire.Social.Feeds.named_feed_id(:local)
       # |> debug()
-      assert Bonfire.Social.FeedLoader.feed_contains?(feed_id, post, current_user: me)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: me)
     end
 
     test "does not show in my_feed a post from a per-user silenced user that I am not following" do

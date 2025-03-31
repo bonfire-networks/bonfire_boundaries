@@ -37,9 +37,8 @@ defmodule Bonfire.Boundaries.Boundaries.GhostActorFeedsPerUserTest do
                boundary: "public"
              )
 
-    feed_id = Bonfire.Social.Feeds.named_feed_id(:local)
     # |> debug()
-    assert Bonfire.Social.FeedLoader.feed_contains?(feed_id, post, current_user: me)
+    assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: me)
   end
 
   test "does not show in my_feed a post from someone who per-user ghosted me, who I am not following" do
