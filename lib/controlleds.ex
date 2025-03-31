@@ -81,7 +81,7 @@ defmodule Bonfire.Boundaries.Controlleds do
   """
   def list_acls_on_object(object, opts \\ [])
 
-  def list_acls_on_object(%{} = object, opts) do
+  def list_acls_on_object(%{controlled: _} = object, opts) do
     exclude =
       e(
         opts,
@@ -92,6 +92,7 @@ defmodule Bonfire.Boundaries.Controlleds do
     object
     |> repo().maybe_preload(
       :controlled,
+      # load latest
       force: true
     )
     |> debug()
