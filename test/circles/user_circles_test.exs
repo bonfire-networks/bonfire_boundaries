@@ -95,7 +95,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
 
   test "can create a circle and add people to it" do
     # create a bunch of users
-    account = fake_account!()
+    account = Bonfire.Me.Fake.fake_account!()
     me = Bonfire.Me.Fake.fake_user!(account)
     alice = Bonfire.Me.Fake.fake_user!(account)
     bob = Bonfire.Me.Fake.fake_user!(account)

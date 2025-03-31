@@ -82,7 +82,7 @@ defmodule Bonfire.Boundaries.AclTest do
   test "can create a ACL, add circles and people to it, and grant them some verbs" do
     name = "family trip"
     # create a bunch of users
-    account = fake_account!()
+    account = Bonfire.Me.Fake.fake_account!()
     me = Bonfire.Me.Fake.fake_user!(account)
     alice = Bonfire.Me.Fake.fake_user!(account)
     bob = Bonfire.Me.Fake.fake_user!(account)
@@ -121,7 +121,7 @@ defmodule Bonfire.Boundaries.AclTest do
   test "can create a ACL, add circles and people to it, and grant them some roles" do
     name = "family trip"
     # create a bunch of users
-    account = fake_account!()
+    account = Bonfire.Me.Fake.fake_account!()
     me = Bonfire.Me.Fake.fake_user!(account)
     alice = Bonfire.Me.Fake.fake_user!(account)
     bob = Bonfire.Me.Fake.fake_user!(account)
@@ -162,7 +162,7 @@ defmodule Bonfire.Boundaries.AclTest do
   test "can correctly edit the role of someone on a ACL" do
     name = "family trip"
     # create a bunch of users
-    account = fake_account!()
+    account = Bonfire.Me.Fake.fake_account!()
     me = Bonfire.Me.Fake.fake_user!(account)
     bob = Bonfire.Me.Fake.fake_user!(account)
 
