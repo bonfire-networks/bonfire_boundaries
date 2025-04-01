@@ -33,7 +33,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       bookmark: %{
         id: "1B00KMARKMYGREATESTF1ND1NG",
         verb: l("Bookmark"),
-        icon: "carbon:bookmark",
+        icon: "lucide:bookmark",
         summary: l("Bookmark an object (only visible to you)")
       },
       like: %{
@@ -45,7 +45,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       boost: %{
         id: "300ST0R0RANN0VCEANACT1V1TY",
         verb: l("Boost"),
-        icon: "system-uicons:retweet",
+        icon: "lucide:refresh-cw",
         summary: l("Boost an object (and notify the author)")
       },
       flag: %{
