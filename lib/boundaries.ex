@@ -672,7 +672,7 @@ defmodule Bonfire.Boundaries do
           current_user = current_user(subject)
           current_user_id = id(current_user)
 
-          {object, objects} =
+          {first_object, objects} =
             if is_list(object) do
               objects =
                 Enum.reject(object, fn o -> is_nil(o) or o in @skip_object_placeholders end)
@@ -683,13 +683,15 @@ defmodule Bonfire.Boundaries do
             end
 
           creator_id =
-            if is_map(object),
+            if is_map(first_object),
+              # TODO: include caretaker
               do:
-                e(object, :created, :creator_id, nil) || e(object, :created, :creator, :id, nil) ||
-                  e(object, :creator_id, nil) || e(object, :creator, :id, nil)
+                e(first_object, :created, :creator_id, nil) ||
+                  e(first_object, :created, :creator, :id, nil) ||
+                  e(first_object, :creator_id, nil) || e(first_object, :creator, :id, nil)
 
           case (not is_nil(current_user_id) and creator_id == current_user_id) or
-                 pointer_permitted?(objects || object,
+                 pointer_permitted?(objects || first_object,
                    current_user: current_user,
                    current_account: current_account(subject),
                    verbs: verbs,
