@@ -728,7 +728,8 @@ defmodule Bonfire.Boundaries do
         # cache needed for eg. for extension page
         key = "can:#{id(current_user)}:#{inspect(verbs)}:instance"
 
-        with :not_set <- Process.get(key, :not_set) |> debug("from cache?") do
+        # TODO: use Cachex? but then would need to handle cache invalidation
+        with :not_set <- ProcessTree.get(key, default: :not_set) |> debug("from cache?") do
           do_can_instance(current_user, verbs, key)
         end
       )
