@@ -73,7 +73,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
   #   assert is_list(circles) and length(circles) > 0
 
   #   my_circle = List.first(circles)
-  #   my_circle = Repo.maybe_preload(my_circle, [:named, :caretaker])
+  #   my_circle = repo().maybe_preload(my_circle, [:named, :caretaker])
 
   #   assert name == my_circle.named.name
   #   assert user.id == my_circle.caretaker.caretaker_id
@@ -87,7 +87,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
 
     assert circles =
              Circles.list_visible(me)
-             |> Repo.preload([:named, :caretaker])
+             |> repo().preload([:named, :caretaker])
 
     # debug(circles)
     assert length(circles) == 0

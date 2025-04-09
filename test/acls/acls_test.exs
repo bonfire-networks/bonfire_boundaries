@@ -73,7 +73,7 @@ defmodule Bonfire.Boundaries.AclTest do
   #   assert {:ok, acl} = Acls.simple_create(user, name)
 
   #   assert acls = Acls.list_visible(me)
-  #   |> Repo.preload([:named, :caretaker])
+  #   |> repo().preload([:named, :caretaker])
 
   #   #debug(acls)
   #   assert length(acls) == 0

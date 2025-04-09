@@ -26,6 +26,8 @@ defmodule Bonfire.Boundaries.DataCase do
       use Bonfire.Common.Repo
       # import Bonfire.Boundaries.DataCase
       # import Bonfire.Me.Fake
+
+      @moduletag :backend
     end
   end
 

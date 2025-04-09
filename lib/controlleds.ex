@@ -95,7 +95,7 @@ defmodule Bonfire.Boundaries.Controlleds do
       # load latest
       force: true
     )
-    |> debug()
+    # |> debug()
     |> repo().maybe_preload(
       controlled: [
         acl: [
