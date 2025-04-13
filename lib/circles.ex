@@ -437,11 +437,72 @@ defmodule Bonfire.Boundaries.Circles do
     )
   end
 
-  def preload_encircled_by(subject, circles, opts \\ []) do
-    circles
-    |> repo().preload([encircles: encircled_by_q(subject)], opts)
+  # def preload_encircled_by(subject, circles, opts \\ []) do
+  #   circles
+  #   |> repo().preload([encircles: encircled_by_q(subject)], opts)
+  # end
 
-    # |> debug()
+  # Add this function to your Circles module
+
+  @doc """
+  Determines if a user is in specific circles.
+  Returns the original circles list with a boolean field added to each circle.
+  """
+  def list_subject_in_circles(subject_id, circles, opts \\ []) when is_list(circles) do
+    subject_ids = Types.uids(subject_id)
+
+    if Enum.empty?(subject_ids) or Enum.empty?(circles) do
+      circles
+    else
+      field = opts[:boolean_field] || :encircle_subjects
+      reload_circle_id = opts[:reload_circle_id]
+      # Can be :increment, :decrement, or nil
+      inc_reload_count = opts[:inc_reload_count]
+
+      # Single split_with that determines which circles need checking
+      {circles_to_check, other_circles} =
+        Enum.split_with(circles, fn %{id: id} = circle ->
+          # Check if this is the circle to reload OR if it doesn't have the field set yet
+          id == reload_circle_id || not is_boolean(Map.get(circle, field))
+        end)
+
+      if Enum.empty?(circles_to_check) do
+        # No circles need membership status checked
+        circles
+      else
+        # Get all membership pairs in a single query
+        memberships =
+          from(e in Encircle,
+            where: e.subject_id in ^subject_ids and e.circle_id in ^Types.uids(circles_to_check),
+            select: e.circle_id
+          )
+          |> repo().all()
+          |> MapSet.new()
+
+        # Annotate circles with membership status
+        updated_circles =
+          Enum.map(circles_to_check, fn %{id: id} = circle ->
+            # Add the membership boolean flag
+            circle = Map.put(circle, field, MapSet.member?(memberships, id))
+
+            # Update count only if requested and this is the specific circle being reloaded
+            if id == reload_circle_id && inc_reload_count &&
+                 Map.has_key?(circle, :encircles_count) do
+              # Update the count, ensuring it never goes below zero
+              Map.put(
+                circle,
+                :encircles_count,
+                max(0, (circle.encircles_count || 0) + inc_reload_count)
+              )
+            else
+              circle
+            end
+          end)
+
+        # Combine updated circles with other circles that weren't checked
+        updated_circles ++ other_circles
+      end
+    end
   end
 
   ## invariants:
