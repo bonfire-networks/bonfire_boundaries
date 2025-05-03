@@ -17,6 +17,7 @@ defmodule Bonfire.Boundaries.Queries do
 
   # import Untangle
   use Bonfire.Common.E
+  use Bonfire.Common.Config
   import Untangle
   import Ecto.Query
   alias Bonfire.Boundaries.Summary

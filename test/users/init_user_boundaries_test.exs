@@ -16,7 +16,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
   # alias Bonfire.Me.Fake
   # alias Bonfire.Me.Users
   alias Bonfire.Boundaries.Users
-  # alias Bonfire.Common.Config
+  # use Bonfire.Common.Config
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Common.Repo
@@ -193,6 +193,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
       Users.create_missing_boundaries(user)
       assert length(Circles.list_my(user)) == 0
       assert repo().one(from g in Grant, select: count(g), where: g.subject_id == ^user_id) == 0
+      repo().all(from(s in Stereotyped)) |> debug()
       assert repo().one(from s in Stereotyped, select: count(s)) == 0
     end
 

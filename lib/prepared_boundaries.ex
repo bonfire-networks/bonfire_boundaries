@@ -3,6 +3,9 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
   This module structures the information about the default boundaries for a newly created user before they are inserted in the database.
   It takes care of reading the configuration about the default boundaries and prepare the information for the  Bonfire.Boundaries.Users module.
   """
+  use Bonfire.Common.Config
+  import Untangle
+
   alias __MODULE__
   alias Bonfire.Common.Types
   alias Needle.ULID
@@ -42,11 +45,14 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
       end
 
     prepare_boundaries(user, acls_extra, opts)
+    |> debug("prepared")
   end
 
   defp prepare_boundaries(user, acls_extra, opts) do
     user_default_boundaries =
       Boundaries.user_default_boundaries(!(opts == :remote or opts[:local] == false))
+
+    # |> debug("user_default_boundaries")
 
     circles = prepare_circles(user_default_boundaries)
     acls = prepare_acls(user_default_boundaries)

@@ -615,6 +615,7 @@ defmodule Bonfire.Boundaries do
   """
   def user_default_boundaries(true = _local?) do
     Config.get!(:user_default_boundaries)
+    |> debug("init for local actor")
   end
 
   def user_default_boundaries(_) do
