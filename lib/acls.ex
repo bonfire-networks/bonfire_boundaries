@@ -226,6 +226,8 @@ defmodule Bonfire.Boundaries.Acls do
   defp do_set(object, creator, opts) do
     id = uid(object)
 
+    Needle.ULID.as_uuid(id) |> debug("oooid for #{id}")
+
     case prepare_cast(object, creator, opts) do
       {:ok, control_acls} ->
         control_acls
@@ -262,7 +264,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   def prepare_cast(changeset_or_obj, creator, opts) do
     opts
-    |> info("opts")
+    |> debug("cast opts")
 
     context_id = maybe_from_opts(opts, :context_id)
 
@@ -279,6 +281,8 @@ defmodule Bonfire.Boundaries.Acls do
       end
 
     debug(control_acls, "preset + inputted ACLs to set")
+    |> Enum.map(&Needle.ULID.as_uuid(&1.acl_id))
+    |> debug()
 
     case custom_recipients(changeset_or_obj, preset, opts) do
       [] ->
@@ -509,11 +513,12 @@ defmodule Bonfire.Boundaries.Acls do
   defp find_acls(acls, user)
        when is_list(acls) and length(acls) > 0 and
               (is_binary(user) or is_map(user)) do
-    # FIXME: we're assuming that user is local and not a remote actor
+    is_local? = is_local?(user, exclude_service_character: true)
+
     acls =
       acls
-      |> Enum.map(&identify(true, &1))
-      # |> info("identified")
+      |> Enum.map(&identify(is_local?, &1))
+      |> debug("identified")
       |> filter_empty([])
       |> Enum.group_by(&elem(&1, 0))
 
