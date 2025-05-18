@@ -513,7 +513,8 @@ defmodule Bonfire.Boundaries.Acls do
   defp find_acls(acls, user)
        when is_list(acls) and length(acls) > 0 and
               (is_binary(user) or is_map(user)) do
-    is_local? = true #is_local?(user, exclude_service_character: true)
+    # is_local?(user, exclude_service_character: true)
+    is_local? = true
     # FIXME: remote causes `Missing default acl: :my_ghosted_cannot_anything`
 
     acls =
