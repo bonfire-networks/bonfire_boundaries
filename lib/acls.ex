@@ -226,7 +226,7 @@ defmodule Bonfire.Boundaries.Acls do
   defp do_set(object, creator, opts) do
     id = uid(object)
 
-    Needle.ULID.as_uuid(id) |> debug("oooid for #{id}")
+    # Needle.ULID.as_uuid(id) |> debug("oooid for #{id}")
 
     case prepare_cast(object, creator, opts) do
       {:ok, control_acls} ->
@@ -280,9 +280,9 @@ defmodule Bonfire.Boundaries.Acls do
           preset_acls_tuple(creator, to_boundaries, opts)
       end
 
-    debug(control_acls, "preset + inputted ACLs to set")
-    |> Enum.map(&Needle.ULID.as_uuid(&1.acl_id))
-    |> debug()
+    # debug(control_acls, "preset + inputted ACLs to set")
+    # |> Enum.map(&Needle.ULID.as_uuid(&1.acl_id))
+    # |> debug()
 
     case custom_recipients(changeset_or_obj, preset, opts) do
       [] ->
