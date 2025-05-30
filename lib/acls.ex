@@ -407,15 +407,17 @@ defmodule Bonfire.Boundaries.Acls do
        List.wrap(maybe_custom_circles_or_users(maybe_from_opts(opts, :to_circles, []))))
     |> debug()
     |> Enum.map(fn
+      nil -> nil
+      {nil, nil} -> nil
       {subject, role} -> {subject, if(preset != "mentions", do: Types.maybe_to_atom!(role))}
       subject -> {subject, nil}
     end)
     |> debug()
+    |> Enum.reject(&is_nil/1)
     |> Enum.sort_by(fn {_subject, role} -> role end, :desc)
     # |> debug()
     |> Enum.uniq_by(fn {subject, _role} -> subject end)
     # |> debug()
-    |> filter_empty([])
     |> debug()
   end
 
