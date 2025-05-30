@@ -406,17 +406,17 @@ defmodule Bonfire.Boundaries.Acls do
     mentions = List.wrap(mentions_grants(changeset_or_obj, preset, opts))
     to_circles = maybe_from_opts(opts, :to_circles, [])
     custom_circles = List.wrap(maybe_custom_circles_or_users(to_circles))
-    
+
     (reply_to ++ mentions ++ custom_circles)
     |> debug()
     |> Enum.map(fn
-      {subject, role} -> 
+      {subject, role} ->
         # For messages without a preset, use a default role to prevent filtering
         processed_role = if preset != "mentions", do: Types.maybe_to_atom!(role)
         # If no role and we're dealing with messages (boundary: "message"), use default
         final_role = processed_role || (if opts[:boundary] == "message", do: :participate)
         {subject, final_role}
-      subject -> 
+      subject ->
         # Same for subjects without explicit role
         default_role = if opts[:boundary] == "message", do: :participate
         {subject, default_role}
@@ -525,8 +525,9 @@ defmodule Bonfire.Boundaries.Acls do
        when is_list(acls) and length(acls) > 0 and
               (is_binary(user) or is_map(user)) do
     # is_local?(user, exclude_service_character: true)
-    is_local? = true
-    # FIXME: remote causes `Missing default acl: :my_ghosted_cannot_anything`
+    is_local? = is_local?(user, exclude_service_character: true)
+    # is_local? = true
+    # # FIXME: remote causes `Missing default acl: :my_ghosted_cannot_anything`
 
     acls =
       acls
