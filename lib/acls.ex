@@ -402,24 +402,13 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp custom_recipients(changeset_or_obj, preset, opts) do
-    reply_to = List.wrap(reply_to_grants(changeset_or_obj, preset, opts))
-    mentions = List.wrap(mentions_grants(changeset_or_obj, preset, opts))
-    to_circles = maybe_from_opts(opts, :to_circles, [])
-    custom_circles = List.wrap(maybe_custom_circles_or_users(to_circles))
-    
-    (reply_to ++ mentions ++ custom_circles)
+    (List.wrap(reply_to_grants(changeset_or_obj, preset, opts)) ++
+       List.wrap(mentions_grants(changeset_or_obj, preset, opts)) ++
+       List.wrap(maybe_custom_circles_or_users(maybe_from_opts(opts, :to_circles, []))))
     |> debug()
     |> Enum.map(fn
-      {subject, role} -> 
-        # For messages without a preset, use a default role to prevent filtering
-        processed_role = if preset != "mentions", do: Types.maybe_to_atom!(role)
-        # If no role and we're dealing with messages (boundary: "message"), use default
-        final_role = processed_role || (if opts[:boundary] == "message", do: :participate)
-        {subject, final_role}
-      subject -> 
-        # Same for subjects without explicit role
-        default_role = if opts[:boundary] == "message", do: :participate
-        {subject, default_role}
+      {subject, role} -> {subject, if(preset != "mentions", do: Types.maybe_to_atom!(role))}
+      subject -> {subject, nil}
     end)
     |> debug()
     |> Enum.sort_by(fn {_subject, role} -> role end, :desc)
