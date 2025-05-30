@@ -517,6 +517,7 @@ defmodule Bonfire.Boundaries.Acls do
               (is_binary(user) or is_map(user)) do
     # is_local? = is_local?(user, exclude_service_character: true)
     is_local? = true
+
     # # FIXME: making this correct remote causes `Missing default acl: :my_ghosted_cannot_anything`
 
     acls =
