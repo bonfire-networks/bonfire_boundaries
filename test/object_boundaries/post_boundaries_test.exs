@@ -14,17 +14,16 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
     attrs = %{
       post_content: %{
         summary: "summary",
-        name: "name",
         html_body: "<p>epic html message</p>"
       }
     }
 
     assert {:ok, post} = Posts.publish(current_user: user, post_attrs: attrs)
     assert String.contains?(post.post_content.html_body, "epic html message")
-    assert post.post_content.name =~ "name"
+    assert post.post_content.summary =~ "summary"
 
     assert {:ok, post} = Posts.read(post.id, current_user: user)
-    assert post.post_content.name =~ "name"
+    assert post.post_content.summary =~ "summary"
   end
 
   test "cannot read posts which I am not permitted to see" do
@@ -33,13 +32,12 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
     attrs = %{
       post_content: %{
         summary: "summary",
-        name: "name",
         html_body: "<p>epic html message</p>"
       }
     }
 
     assert {:ok, post} = Posts.publish(current_user: user, post_attrs: attrs)
-    assert post.post_content.name =~ "name"
+    assert post.post_content.summary =~ "summary"
 
     # debug_object_acls(post)
 
@@ -53,7 +51,6 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
     attrs = %{
       post_content: %{
         summary: "summary",
-        name: "name",
         html_body: "<p>epic html message</p>"
       }
     }
@@ -65,7 +62,7 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
                boundary: "local"
              )
 
-    assert post.post_content.name =~ "name"
+    assert post.post_content.summary =~ "summary"
 
     assert Bonfire.Social.FeedLoader.feed_contains?(:user_activities, post,
              current_user: user,
@@ -79,13 +76,12 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
     attrs = %{
       post_content: %{
         summary: "summary",
-        name: "name",
         html_body: "<p>epic html message</p>"
       }
     }
 
     assert {:ok, post} = Posts.publish(current_user: user, post_attrs: attrs)
-    assert post.post_content.name =~ "name"
+    assert post.post_content.summary =~ "summary"
 
     me = Bonfire.Me.Fake.fake_user!()
     refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: me)
