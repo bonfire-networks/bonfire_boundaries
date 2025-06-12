@@ -319,7 +319,7 @@ defmodule Bonfire.Boundaries.Grants do
     from(e in Grant,
       where: e.subject_id == ^uid(subject) and e.acl_id in ^Types.uids(acls)
     )
-    |> repo().delete_all()
+    |> repo().delete_many()
   end
 
   def remove_subject_from_acl(subject, acl) do

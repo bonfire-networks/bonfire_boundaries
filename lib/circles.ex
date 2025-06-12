@@ -951,7 +951,7 @@ defmodule Bonfire.Boundaries.Circles do
     from(e in Encircle,
       where: e.subject_id in ^Types.uids(subject) and e.circle_id in ^Types.uids(circles)
     )
-    |> repo().delete_all()
+    |> repo().delete_many()
   end
 
   @doc """
@@ -966,7 +966,7 @@ defmodule Bonfire.Boundaries.Circles do
     from(e in Encircle,
       where: e.circle_id in ^uids(circles)
     )
-    |> repo().delete_all()
+    |> repo().delete_many()
   end
 
   @doc """
@@ -981,7 +981,7 @@ defmodule Bonfire.Boundaries.Circles do
     from(e in Encircle,
       where: e.subject_id in ^uids(users)
     )
-    |> repo().delete_all()
+    |> repo().delete_many()
   end
 
   @doc """
