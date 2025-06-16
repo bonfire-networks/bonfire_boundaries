@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.Verbs do
   @doc """
   Returns the list of verbs from the configuration.
   """
-  def verbs, do: Bonfire.Common.Config.get!(:verbs)
+  def verbs, do: Bonfire.Common.Config.get!(:verbs, otp_app: :bonfire)
 
   @doc """
   Returns the count of verbs in the configuration.
