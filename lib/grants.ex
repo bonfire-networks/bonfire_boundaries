@@ -381,7 +381,6 @@ defmodule Bonfire.Boundaries.Grants do
     Returns a list of grants-per-subject from a list of grants.
   """
   def subject_grants(grants) when is_list(grants) and length(grants) > 0 do
-    # TODO: rewrite this whole thing tbh
     Enum.reduce(grants, %{}, fn grant, subjects_acc ->
       new_grant = [Map.drop(grant, [:subject])]
       new_subject = %{subject: grant.subject, grants: new_grant}
@@ -421,7 +420,6 @@ defmodule Bonfire.Boundaries.Grants do
       %{}
   """
   def subject_verb_grants(grants) when is_list(grants) and length(grants) > 0 do
-    # TODO: rewrite this whole thing tbh
     Enum.reduce(grants, %{}, fn grant, subjects_acc ->
       new_grant = %{grant.verb_id => Map.drop(grant, [:subject])}
       new_subject = %{subject: grant.subject, grants: new_grant}
@@ -461,7 +459,6 @@ defmodule Bonfire.Boundaries.Grants do
       %{}
   """
   def verb_subject_grant(grants) when is_list(grants) and length(grants) > 0 do
-    # TODO: rewrite this whole thing tbh
     Enum.reduce(grants, %{}, fn grant, verbs_acc ->
       new_grant = %{grant.subject_id => Map.drop(grant, [:verb])}
       new_verb = %{verb: grant.verb, subject_verb_grants: new_grant}
