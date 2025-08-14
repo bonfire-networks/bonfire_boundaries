@@ -1,17 +1,20 @@
 import Config
 
 default_locale = "en"
+# Only compile additional locales in prod or when explicitly requested
+compile_all_locales? =
+  config_env() == :prod or System.get_env("COMPILE_ALL_LOCALES") in ["true", "1"]
+
+locales = if compile_all_locales?, do: [default_locale, "fr", "es"], else: [default_locale]
 
 config :bonfire_common,
-  localisation_path: "priv/localisation"
+  otp_app: :bonfire
 
-## Localisation & internationalisation
-
+# internationalisation
 config :bonfire_common, Bonfire.Common.Localise.Cldr,
-  otp_app: :bonfire_fail,
   default_locale: default_locale,
   # locales that will be made available on top of those for which gettext localisation files are available
-  locales: ["fr", "en", "es"],
+  locales: locales,
   providers: [
     Cldr.Language,
     Cldr.DateTime,
@@ -23,10 +26,8 @@ config :bonfire_common, Bonfire.Common.Localise.Cldr,
     Cldr.LocaleDisplay
   ],
   gettext: Bonfire.Common.Localise.Gettext,
-  # extra Gettex modules from dependencies not using the one from Bonfire.Common, so we can change their locale too
-  extra_gettext: [Timex.Gettext],
-  data_dir: "priv/cldr",
-  add_fallback_locales: true,
+  data_dir: "./priv/cldr",
+  add_fallback_locales: compile_all_locales?,
   # precompile_number_formats: ["¤¤#,##0.##"],
   # precompile_transliterations: [{:latn, :arab}, {:thai, :latn}]
   force_locale_download: Mix.env() == :prod,
@@ -39,3 +40,5 @@ config :ex_cldr,
   default_locale: default_locale,
   default_backend: Bonfire.Common.Localise.Cldr,
   json_library: Jason
+
+config :rustler_precompiled, force_build_all: System.get_env("RUSTLER_BUILD_ALL") in ["true", "1"]
