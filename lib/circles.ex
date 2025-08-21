@@ -829,7 +829,7 @@ defmodule Bonfire.Boundaries.Circles do
     # Use Paginator for cursor-based pagination
     many(
       query,
-      true,
+      Keyword.get(opts, :paginate, true),
       opts
     )
   end
