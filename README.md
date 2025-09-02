@@ -65,7 +65,7 @@ For efficiency, `nil` is the assumed default and not stored in the database.
 
 ## Controlled - Applying boundaries to an object
 
-The `Controlled` [multimixin](./DATABASE.md#multimixins) link an object to one or more ACLs. This allows for applying multiple boundaries to the same object. In case of overlapping permissions, the system combines them following the logic described above.
+The `Controlled` multimixin link an object to one or more ACLs. This allows for applying multiple boundaries to the same object. In case of overlapping permissions, the system combines them following the logic described above.
 
 ### Roles
 
