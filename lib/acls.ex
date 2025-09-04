@@ -300,7 +300,7 @@ defmodule Bonfire.Boundaries.Acls do
              Config.get!([:verbs_to_grant, :default]))
           |> debug("default verbs_to_grant")
           |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ..., true, opts))
-          |> debug("on-the-fly ACLs to create")
+          |> flood("on-the-fly ACLs to create")
 
         {
           fn repo_or_changeset ->
@@ -652,7 +652,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   defp insert_custom_acl_and_grants(repo, acl_id, custom_grants) do
     prepare_custom_acl(acl_id)
-    |> repo.insert!()
+    |> repo.insert!(on_conflict: :nothing)
     |> debug()
 
     repo.insert_all(Grant, custom_grants)

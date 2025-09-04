@@ -207,9 +207,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_see_read_request = [:read, :see, :request, :bookmark, :flag]
     verbs_interaction = [:like, :follow]
     verbs_sharing = [:boost, :pin]
-    verbs_ping = [:reply, :mention, :message, :annotate]
-    verbs_contrib = [:create, :tag, :describe]
-    verbs_edit = [:edit, :tag, :describe]
+    verbs_ping = [:reply, :mention, :message]
+    verbs_contrib = [:create, :tag, :describe, :annotate]
+    verbs_edit = [:edit, :tag, :describe, :annotate]
     verbs_mod = [:invite, :label, :mediate, :block, :delete]
 
     # verbs_interact_minus_follow =
