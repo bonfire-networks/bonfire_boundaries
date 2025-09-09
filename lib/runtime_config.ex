@@ -511,7 +511,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # negative grants:
         ghosted_cannot_anything: %{ghost_them: verbs_negative.(all_verb_names)},
         silenced_cannot_reach_me: %{
-          silence_them: verbs_negative.([:mention, :message, :reply])
+          silence_them: verbs_negative.([:request, :mention, :message])
         },
         cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])},
         no_follow: %{local: verbs_negative.([:follow]), activity_pub: verbs_negative.([:follow])}
@@ -582,7 +582,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           my_ghosted_cannot_anything: %{ghost_them: verbs_negative.(all_verb_names)},
           # People/instances I silence can't ping me
           my_silenced_cannot_reach_me: %{
-            silence_them: verbs_negative.([:mention, :message])
+            silence_them: verbs_negative.([:request, :mention, :message])
           },
           # People who silence me can't see me or my objects in feeds and such (but can still read them if they have a direct link or come across my objects in a thread structure or such). This is an automatated invisible circle (i.e. I can't see who silenced me).
           my_cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])},

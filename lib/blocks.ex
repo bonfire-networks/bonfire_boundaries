@@ -137,31 +137,43 @@ defmodule Bonfire.Boundaries.Blocks do
   #   remote_instance_block(display_hostname, block_type, scope)
   # end
 
-  def block(id_or_username, block_type, scope) when is_binary(id_or_username) do
+  def block(user_or_instance_id_or_username, block_type, scope)
+      when is_binary(user_or_instance_id_or_username) do
     with {:ok, user_or_circle} <-
-           Bonfire.Common.Needles.get(id_or_username, skip_boundary_check: true) do
+           Bonfire.Common.Needles.get(user_or_instance_id_or_username, skip_boundary_check: true) do
       debug(user_or_circle, "found by ID or username")
       block(user_or_circle, block_type, scope)
     else
       _ ->
-        if Types.is_uid(id_or_username) do
+        if Types.is_uid(user_or_instance_id_or_username) do
           debug("assume it's an instance display_hostname")
 
-          maybe_apply(Bonfire.Federate.ActivityPub.Instances, :get, [id_or_username])
+          maybe_apply(Bonfire.Federate.ActivityPub.Instances, :get, [
+            user_or_instance_id_or_username
+          ])
           ~> block(block_type, scope)
         else
-          error(id_or_username, "Could not find what to block")
+          error(user_or_instance_id_or_username, "Could not find what to block")
         end
     end
   end
 
   def block(user_or_instance_to_block, block_type, scope) do
-    with {:ok, result} <- mutate(:block, user_or_instance_to_block, block_type, scope) do
-      debug(result, "blooocked")
+    types_blocked =
+      types_blocked(block_type)
+      |> flood("types_blocked for #{block_type}")
+
+    with {:ok, result} <-
+           mutate(
+             :block,
+             user_or_instance_to_block,
+             block_type || List.first(types_blocked),
+             scope
+           ) do
+      # debug(result, "blooocked")
 
       if user_or_instance_to_block != :instance_wide and scope != :instance_wide do
         me = Utils.current_user_required!(scope)
-        types_blocked = types_blocked(block_type)
 
         # TODO: what about if I block and later unblock someone? they should probably not have to re-follow...
         if :ghost_them in types_blocked do
@@ -173,7 +185,7 @@ defmodule Bonfire.Boundaries.Blocks do
           ])
         end
 
-        if block_type != :hide and :silence_them in types_blocked do
+        if :silence_them in types_blocked do
           debug("unfollow the person I am silencing")
 
           Utils.maybe_apply(Bonfire.Social.Graph.Follows, :unfollow, [
