@@ -270,9 +270,12 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def prepare_cast(changeset_or_obj, creator, opts) do
-    object_id = uid(changeset_or_obj) || "no_id"
-    debug("=== prepare_cast CALLED for object #{object_id} ===")
-    debug(Process.info(self(), :current_stacktrace), "stacktrace")
+    object_id =
+      uid(changeset_or_obj) ||
+        "no_id"
+        |> debug("=== prepare_cast CALLED for object ===")
+
+    # debug(Process.info(self(), :current_stacktrace), "stacktrace")
 
     # opts
     # |> debug("cast opts")
