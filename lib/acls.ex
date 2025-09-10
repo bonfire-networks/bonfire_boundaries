@@ -226,7 +226,7 @@ defmodule Bonfire.Boundaries.Acls do
   defp do_set(object, creator, opts) do
     id = uid(object)
 
-    # Needle.ULID.as_uuid(id) |> flood("oooid for #{id}")
+    # Needle.ULID.as_uuid(id) |> debug("oooid for #{id}")
 
     case prepare_cast(object, creator, opts) do
       {:ok, control_acls} ->
@@ -238,9 +238,9 @@ defmodule Bonfire.Boundaries.Acls do
         control_acls
     end
     |> Enum.map(&Map.put(&1, :id, id))
-    |> flood("insert controlled")
+    |> debug("insert controlled")
     |> repo().insert_all(Controlled, ..., on_conflict: :nothing)
-    |> flood("inserted?")
+    |> debug("inserted?")
   end
 
   @doc """
@@ -252,30 +252,30 @@ defmodule Bonfire.Boundaries.Acls do
   """
   def cast(changeset, creator, opts) do
     object_id = uid(changeset) || "no_id"
-    flood("=== cast CALLED for object #{object_id} ===")
+    debug("=== cast CALLED for object #{object_id} ===")
 
     case prepare_cast(changeset, creator, opts) do
       {:ok, control_acls} ->
-        flood("=== cast: putting assoc for #{object_id} ===")
+        debug("=== cast: putting assoc for #{object_id} ===")
         Changesets.put_assoc(changeset, :controlled, control_acls)
 
       {fun, control_acls} when is_function(fun) ->
-        flood("=== cast: using prepare_changes for #{object_id} ===")
+        debug("=== cast: using prepare_changes for #{object_id} ===")
 
         changeset
         |> Changeset.prepare_changes(fun)
         |> Changesets.put_assoc!(:controlled, control_acls)
     end
-    |> flood("after cast")
+    |> debug("after cast")
   end
 
   def prepare_cast(changeset_or_obj, creator, opts) do
     object_id = uid(changeset_or_obj) || "no_id"
-    flood("=== prepare_cast CALLED for object #{object_id} ===")
-    flood(Process.info(self(), :current_stacktrace), "stacktrace")
+    debug("=== prepare_cast CALLED for object #{object_id} ===")
+    debug(Process.info(self(), :current_stacktrace), "stacktrace")
 
     # opts
-    # |> flood("cast opts")
+    # |> debug("cast opts")
 
     context_id = maybe_from_opts(opts, :context_id)
 
@@ -291,40 +291,40 @@ defmodule Bonfire.Boundaries.Acls do
           preset_acls_tuple(creator, to_boundaries, opts)
       end
 
-    # flood(control_acls, "preset + inputted ACLs to set")
+    # debug(control_acls, "preset + inputted ACLs to set")
     # |> Enum.map(&Needle.ULID.as_uuid(&1.acl_id))
-    # |> flood()
+    # |> debug()
 
     case custom_recipients(changeset_or_obj, preset, opts) do
       [] ->
-        flood("=== prepare_cast RETURNING {:ok, control_acls} for #{object_id} ===")
+        debug("=== prepare_cast RETURNING {:ok, control_acls} for #{object_id} ===")
         {:ok, control_acls}
 
       custom_recipients ->
-        flood(custom_recipients, "custom_recipients for #{object_id}")
+        debug(custom_recipients, "custom_recipients for #{object_id}")
 
         # TODO: enable using cast on existing objects by using `get_or_create_object_custom_acl(object)` to check if a custom Acl already exists?
         acl_id = Needle.UID.generate(Acl)
-        flood("=== GENERATED ACL ID: #{acl_id} for object #{object_id} ===")
+        debug("=== GENERATED ACL ID: #{acl_id} for object #{object_id} ===")
 
         # default_role = e(opts, :role_to_grant, nil) || Config.get!([:role_to_grant, :default])
 
         custom_grants =
           (e(opts, :verbs_to_grant, nil) ||
              Config.get!([:verbs_to_grant, :default]))
-          |> flood("default verbs_to_grant")
+          |> debug("default verbs_to_grant")
           |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ..., true, opts))
-          |> flood("on-the-fly ACLs to create")
+          |> debug("on-the-fly ACLs to create")
 
-        flood("=== prepare_cast RETURNING {fun, control_acls} for #{object_id} ===")
+        debug("=== prepare_cast RETURNING {fun, control_acls} for #{object_id} ===")
 
         {
           fn changeset ->
-            IO.warn("=== EXECUTING INSERT FUNCTION for ACL #{acl_id} ===")
+            debug("=== EXECUTING INSERT FUNCTION for ACL #{acl_id} ===")
             insert_custom_acl_and_grants(changeset, acl_id, custom_grants)
 
             changeset
-            |> flood("returning changeset from prepare_changes")
+            |> debug("returning changeset from prepare_changes")
           end,
           [%{acl_id: acl_id} | control_acls]
         }
@@ -395,11 +395,11 @@ defmodule Bonfire.Boundaries.Acls do
   defp to_boundaries_preset_tuple(to_boundaries) do
     to_boundaries =
       Boundaries.boundaries_normalise(to_boundaries)
-      |> flood("validated to_boundaries")
+      |> debug("validated to_boundaries")
 
     preset =
       Boundaries.preset_name(to_boundaries)
-      |> flood("preset_name")
+      |> debug("preset_name")
 
     {to_boundaries, preset}
   end
@@ -425,25 +425,25 @@ defmodule Bonfire.Boundaries.Acls do
     (List.wrap(reply_to_grants(changeset_or_obj, preset, opts)) ++
        List.wrap(mentions_grants(changeset_or_obj, preset, opts)) ++
        List.wrap(maybe_custom_circles_or_users(maybe_from_opts(opts, :to_circles, []))))
-    |> flood()
+    |> debug()
     |> Enum.map(fn
       nil -> nil
       {nil, nil} -> nil
       {subject, role} -> {subject, if(preset != "mentions", do: Types.maybe_to_atom!(role))}
       subject -> {subject, nil}
     end)
-    |> flood()
+    |> debug()
     |> Enum.reject(&is_nil/1)
     |> Enum.sort_by(fn {_subject, role} -> role end, :desc)
-    # |> flood()
+    # |> debug()
     |> Enum.uniq_by(fn {subject, _role} -> subject end)
-    # |> flood()
-    |> flood()
+    # |> debug()
+    |> debug()
   end
 
   defp maybe_custom_circles_or_users(to_circles) when is_list(to_circles) or is_map(to_circles) do
     to_circles
-    |> flood()
+    |> debug()
     |> Enum.map(fn
       {key, val} ->
         # with custom role
@@ -455,7 +455,7 @@ defmodule Bonfire.Boundaries.Acls do
       val ->
         uid(val)
     end)
-    |> flood()
+    |> debug()
   end
 
   defp maybe_custom_circles_or_users(to_circles),
@@ -483,7 +483,7 @@ defmodule Bonfire.Boundaries.Acls do
         )
 
     if reply_to_creator do
-      # flood(reply_to_creator, "creators of reply_to should be added to a new ACL")
+      # debug(reply_to_creator, "creators of reply_to should be added to a new ACL")
 
       case preset do
         "public" ->
@@ -508,7 +508,7 @@ defmodule Bonfire.Boundaries.Acls do
         e(changeset_or_obj, :post_content, :mentions, nil)
 
     if mentions && mentions != [] do
-      # flood(mentions, "mentions/tags may be added to a new ACL")
+      # debug(mentions, "mentions/tags may be added to a new ACL")
 
       case preset do
         "public" ->
@@ -543,7 +543,7 @@ defmodule Bonfire.Boundaries.Acls do
     acls =
       acls
       |> Enum.map(&identify(is_local?, &1))
-      |> flood("identified")
+      |> debug("identified")
       |> filter_empty([])
       |> Enum.group_by(&elem(&1, 0))
 
@@ -620,7 +620,7 @@ defmodule Bonfire.Boundaries.Acls do
     do: Enum.flat_map(users_etc, &grant_to(&1, acl_id, verb, value, opts))
 
   defp grant_to(user_etc, acl_id, verb, value, _opts) do
-    flood(user_etc)
+    debug(user_etc)
 
     [
       %{
@@ -643,7 +643,7 @@ defmodule Bonfire.Boundaries.Acls do
     )
     |> repo().single()
 
-    # |> flood("custom acl")
+    # |> debug("custom acl")
   end
 
   def get_or_create_object_custom_acl(object, caretaker \\ nil) do
@@ -675,18 +675,18 @@ defmodule Bonfire.Boundaries.Acls do
       false ->
         # ACL doesn't exist, create it
         prepare_custom_acl(acl_id)
-        |> flood("custom acl")
+        |> debug("custom acl")
         |> repo.insert!()
-        |> flood("inserted custom acl")
+        |> debug("inserted custom acl")
 
       true ->
         # ACL already exists, skip creation
-        flood("ACL #{acl_id} already exists, skipping creation")
+        debug("ACL #{acl_id} already exists, skipping creation")
     end
 
     # Always insert grants (they might be different even for existing ACLs)
     repo.insert_all_or_ignore(Grant, custom_grants)
-    |> flood("inserted custom grants")
+    |> debug("inserted custom grants")
   end
 
   defp prepare_custom_acl(acl_id) do
@@ -707,7 +707,7 @@ defmodule Bonfire.Boundaries.Acls do
     {nil,
      Controlleds.list_on_object(controlled_object_id)
      |> Enum.map(&Map.take(&1, [:acl_id]))
-     |> flood()}
+     |> debug()}
   end
 
   ## invariants:
@@ -925,7 +925,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def is_stereotype?(acl) do
-    # flood(acl)
+    # debug(acl)
     uid(acl) in stereotype_ids()
   end
 
@@ -941,7 +941,7 @@ defmodule Bonfire.Boundaries.Acls do
       false
   """
   def is_built_in?(acl) do
-    # flood(acl)
+    # debug(acl)
     uid(acl) in built_in_ids()
   end
 
@@ -959,7 +959,7 @@ defmodule Bonfire.Boundaries.Acls do
   def is_object_custom?(%{stereotyped: %{stereotype_id: stereotype_id}} = _acl)
       when is_binary(stereotype_id) do
     is_object_custom?(stereotype_id)
-    |> flood(stereotype_id)
+    |> debug(stereotype_id)
   end
 
   def is_object_custom?(acl) do
