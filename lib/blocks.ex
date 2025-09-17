@@ -161,7 +161,8 @@ defmodule Bonfire.Boundaries.Blocks do
   def block(user_or_instance_to_block, block_type, scope) do
     types_blocked =
       types_blocked(block_type)
-      |> debug("types_blocked for #{block_type}")
+
+    # |> debug("types_blocked for #{inspect block_type}")
 
     with {:ok, result} <-
            mutate(
