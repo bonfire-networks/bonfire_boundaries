@@ -78,11 +78,26 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc """
+  Lists all built-in circles. Returns Circle structs.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_built_ins()
+      [%Circle{id: "guest_circle_id", name: "Guest"}, %Circle{id: "local_circle_id", name: "Local"}]
+  """
+  def list_built_ins() do
+    Enum.map(circles(), fn {_slug, %{id: id}} ->
+      id
+    end)
+    |> list_by_ids()
+  end
+
+  @doc """
   Checks if a circle is a built-in circle.
   """
-  def is_built_in?(circle) do
+  def is_built_in?(circle, built_in_ids \\ built_in_ids()) do
     # debug(acl)
-    uid(circle) in built_in_ids()
+    uid(circle) in built_in_ids
   end
 
   @doc """
@@ -96,8 +111,8 @@ defmodule Bonfire.Boundaries.Circles do
       iex> Bonfire.Boundaries.Circles.is_stereotype?("custom_circle_id")
       false
   """
-  def is_stereotype?(acl) do
-    uid(acl) in stereotype_ids()
+  def is_stereotype?(circle, stereotype_ids \\ stereotype_ids()) do
+    uid(circle) in stereotype_ids
   end
 
   @doc """
@@ -109,7 +124,7 @@ defmodule Bonfire.Boundaries.Circles do
       %{id: "guest_circle_id", name: "Guest"}
 
       iex> Bonfire.Boundaries.Circles.get("circle_id")
-      %Circle{id: "circle_id", name: "Custom Circle"}
+      %{id: "circle_id", name: "Custom Circle"}
   """
   def get(slug) when is_atom(slug), do: circles()[slug]
   def get(id) when is_binary(id), do: get_tuple(id) |> Enums.maybe_elem(1)
@@ -145,13 +160,41 @@ defmodule Bonfire.Boundaries.Circles do
       iex> Bonfire.Boundaries.Circles.get_tuple("circle_id")
       {:my_circle, %{id: "circle_id", name: "My Circle"}}
   """
-  def get_tuple(slug) when is_atom(slug) do
+  def get_tuple(id, all_circles \\ circles())
+
+  def get_tuple(slug, _all_circles) when is_atom(slug) do
     {Config.get!([:circles, slug, :name]), Config.get!([:circles, slug, :id])}
   end
 
-  def get_tuple(id) when is_binary(id) do
-    Enum.find(circles(), fn {_slug, c} ->
+  def get_tuple(id, all_circles) when is_binary(id) do
+    Enum.find(all_circles, fn {_slug, c} ->
       c[:id] == id
+    end)
+  end
+
+  @doc """
+  Retrieves a circle slug by its ID or name.
+
+    ## Examples
+
+      iex> get_slug("guest_circle_id")
+      :guest
+  """
+  def get_slug(id_or_name, all_circles \\ circles()) do
+    case get_tuple(id_or_name, all_circles) do
+      {slug, _verb} -> slug
+      _ -> nil
+    end
+  end
+
+  def get_slugs(circles, all_circles \\ circles()) do
+    circles
+    |> Enum.map(fn
+      %{stereotyped: %{stereotype_id: stereotype_id}} ->
+        Circles.get_slug(stereotype_id, all_circles)
+
+      %{id: id} ->
+        Circles.get_slug(id, all_circles)
     end)
   end
 
@@ -234,21 +277,6 @@ defmodule Bonfire.Boundaries.Circles do
   def list_my_defaults(_user \\ nil) do
     # TODO make configurable
     Enum.map([:guest, :local, :activity_pub], &Circles.get_tuple/1)
-  end
-
-  @doc """
-  Lists all built-in circles.
-
-  ## Examples
-
-      iex> Bonfire.Boundaries.Circles.list_built_ins()
-      [%Circle{id: "guest_circle_id", name: "Guest"}, %Circle{id: "local_circle_id", name: "Local"}]
-  """
-  def list_built_ins() do
-    Enum.map(circles(), fn {_slug, %{id: id}} ->
-      id
-    end)
-    |> list_by_ids()
   end
 
   # def list, do: repo().many(from(u in Circle, left_join: named in assoc(u, :named), preload: [:named]))
@@ -509,6 +537,48 @@ defmodule Bonfire.Boundaries.Circles do
   ## * Created circles will have the user as a caretaker
 
   @doc """
+  Returns a list of built-in and stereotyped circle structs for the user.
+
+  ## Options
+
+    * `:include_circles` - restrict which built-in circles to include (list of atoms, defaults to all)
+
+  ## Examples
+
+      iex> list_user_built_ins(user)
+      [%Circle{id: "0AND0MSTRANGERS0FF1NTERNET", name: l("Guests")}, ...]
+
+      iex> list_user_built_ins(user, include_circles: [:followers, :public])
+      [%Circle{id: "0AND0MSTRANGERS0FF1NTERNET", name: l("Guests")}, %Circle{id: "XYZ", name: l("Followers")}, ...]
+
+  """
+  def list_user_built_ins(user, opts \\ []) do
+    # 1. Built-in circles, optionally filtered by opts[:include_circles]
+    built_in_circles =
+      case opts[:include_circles] do
+        nil ->
+          # TODO: optionally also include user's public circles?
+          list_built_ins()
+
+        slugs when is_list(slugs) ->
+          slugs
+          |> Enum.map(&get/1)
+          |> Enum.filter(& &1)
+      end
+
+    stereotype_ids = stereotype_ids()
+
+    {stereotyped, built_in_circles} =
+      Enum.split_with(built_in_circles, &is_stereotype?(&1, stereotype_ids))
+
+    # 2. Stereotype circles for the user 
+    stereotype_structs = get_stereotype_circles(user, stereotyped)
+
+    # 3. Combine and return
+    built_in_circles ++ stereotype_structs
+  end
+
+  @doc """
   Retrieves stereotype circles for a subject.
 
   ## Examples
@@ -524,8 +594,11 @@ defmodule Bonfire.Boundaries.Circles do
   def get_stereotype_circles(subject, stereotypes)
       when is_list(stereotypes) and stereotypes != [] do
     stereotype_ids =
-      Enum.map(stereotypes, &Bonfire.Boundaries.Circles.get_id!/1)
-      |> uids()
+      Enum.map(stereotypes, fn
+        %{id: id} when is_binary(id) -> id
+        stereo -> Bonfire.Boundaries.Circles.get_id!(stereo)
+      end)
+      |> ids()
 
     if is_list(subject) do
       Enum.flat_map(subject, &do_get_stereotype_circles(&1, stereotype_ids))

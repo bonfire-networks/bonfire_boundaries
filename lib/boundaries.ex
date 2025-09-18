@@ -5,7 +5,7 @@ defmodule Bonfire.Boundaries do
   import Bonfire.Boundaries.Integration
 
   # alias Bonfire.Data.Identity.User
-  # alias Bonfire.Boundaries.Circles
+  alias Bonfire.Boundaries.Circles
   # alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.Identity.Caretaker
@@ -184,13 +184,15 @@ defmodule Bonfire.Boundaries do
   end
 
   def object_public?(object) do
-    public_acl_ids = Bonfire.Boundaries.Acls.remote_public_acl_ids()
-
     # FIXME: use `get_preset_on_object` instead of loading them all, or at least only load the IDs
     acls =
       list_object_acls(object)
       |> debug("post_acls")
+      |> object_acls_public?()
+  end
 
+  def object_acls_public?(acls) do
+    public_acl_ids = Bonfire.Boundaries.Acls.remote_public_acl_ids()
     Enum.any?(acls, fn %{id: acl_id} -> acl_id in public_acl_ids end)
   end
 
@@ -654,7 +656,7 @@ defmodule Bonfire.Boundaries do
 
   def can?(circle_name, verbs, object, opts) when is_atom(circle_name) do
     # lookup if a built-in circle (eg. local users) has permission (note that some circle members may NOT have permission if they're also in another circle with negative permissions)
-    can?([current_user: Bonfire.Boundaries.Circles.get_id(circle_name)], verbs, object, opts)
+    can?([current_user: Circles.get_id(circle_name)], verbs, object, opts)
   end
 
   def can?(subject, verbs, object, opts)
@@ -896,5 +898,56 @@ defmodule Bonfire.Boundaries do
     )
 
     # |> debug("stereotype acls")
+  end
+
+  @doc """
+  Returns a list of built-in and stereotyped circle structs for the subject that have permission for the given verb(s) on the object.
+
+  ## Options
+
+    * `:include_circles` - restrict which built-in circles to check (list of atoms, defaults to all)
+    * `:return` - set to `:names` to return a list of circle slugs/atoms (e.g. `:followers`, `:public`), or `:structs` to return Circle structs, or `:ids` to just return circles IDs (default)
+
+  ## Examples
+
+      iex> list_user_circles_who_can(subject, [:read], object)
+      [%Circle{id: ...}, ...]
+
+      iex> list_user_circles_who_can(subject, [:read], object, include_circles: [:followers, :public], return: :names)
+      [:followers]
+  """
+  def list_user_circles_who_can(user, verbs, object, opts \\ []) do
+    circles =
+      Circles.list_user_built_ins(user, opts)
+      |> debug("circles to check")
+      |> filter_circles_who_can(verbs, object, opts)
+  end
+
+  def filter_circles_who_can(circles, verbs, object, opts \\ []) do
+    circle_ids = ids(circles)
+
+    verb_ids =
+      List.wrap(verbs)
+      |> Enum.map(&Verbs.get_id!/1)
+      |> debug("verbs to check")
+
+    permitted_ids =
+      Bonfire.Boundaries.Queries.permitted_subjects(circle_ids, verb_ids, uid!(object))
+      |> debug("query")
+      |> repo().all()
+      |> debug("permitted_ids")
+
+    case opts[:return] do
+      :names ->
+        Enum.filter(circles, fn circle -> circle.id in permitted_ids end)
+        |> Circles.get_slugs()
+
+      :structs ->
+        Enum.filter(circles, fn circle -> circle.id in permitted_ids end)
+
+      _ids ->
+        permitted_ids
+    end
+    |> debug("permitted_circles")
   end
 end

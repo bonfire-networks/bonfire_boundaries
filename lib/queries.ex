@@ -226,9 +226,9 @@ defmodule Bonfire.Boundaries.Queries do
   ## Examples
 
       iex> user_id = "user123"
-      iex> Bonfire.Boundaries.Queries.permitted(user_id)
+      iex> Bonfire.Boundaries.Queries.permitted_objects(user_id)
   """
-  def permitted(user), do: permitted(user, Verbs.slugs())
+  def permitted_objects(user), do: permitted_objects(user, Verbs.slugs())
 
   @doc """
   Queries for permitted objects for a user with specific verbs.
@@ -236,9 +236,9 @@ defmodule Bonfire.Boundaries.Queries do
   ## Examples
 
       iex> user_id = "user123"
-      iex> Bonfire.Boundaries.Queries.permitted(user_id, [:read, :write])
+      iex> Bonfire.Boundaries.Queries.permitted_objects(user_id, [:read, :write])
   """
-  def permitted(user, verbs) do
+  def permitted_objects(user, verbs) do
     subject_ids = user_and_circle_ids(user)
     verbs = Verbs.ids(verbs)
 
@@ -252,6 +252,27 @@ defmodule Bonfire.Boundaries.Queries do
         object_id: summary.object_id,
         verbs: fragment("array_agg(?)", summary.verb_id)
       }
+    )
+  end
+
+  @doc """
+  Returns the list of subject_ids (e.g. user or circle ids) that have permission for all the given verb_ids on the given object_id.
+
+  ## Examples
+
+      iex> permitted_subjects(["circle1", "circle2"], ["verb1"], "object1")
+      ["circle1"]
+
+  """
+  def permitted_subjects(subject_ids, verb_ids, object_id) do
+    from(summary in Bonfire.Boundaries.Summary,
+      where:
+        summary.subject_id in ^subject_ids and
+          summary.verb_id in ^verb_ids and
+          summary.object_id == ^object_id,
+      group_by: summary.subject_id,
+      having: fragment("agg_perms(?)", summary.value),
+      select: summary.subject_id
     )
   end
 

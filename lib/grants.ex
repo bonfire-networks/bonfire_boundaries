@@ -512,4 +512,12 @@ defmodule Bonfire.Boundaries.Grants do
         {subject, Roles.role_from_grants(grants, current_user: creator)}
     end)
   end
+
+  def uniq_grants_to_create(grants) do
+    grants
+    |> Enum.group_by(fn g -> {g.subject_id, g.acl_id, g.verb_id} end)
+    |> Enum.map(fn {_key, group} ->
+      Enum.find(group, &(&1.value == false)) || List.last(group)
+    end)
+  end
 end
