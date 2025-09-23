@@ -1,4 +1,4 @@
-defmodule Bonfire.Boundaries.Repo.Migrations.MoreVerbsFixtures2 do
+defmodule Bonfire.Boundaries.Repo.Migrations.MoreVerbsFixtures3 do
   @moduledoc false
   use Ecto.Migration
 

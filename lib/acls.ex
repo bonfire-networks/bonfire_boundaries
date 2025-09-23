@@ -319,6 +319,7 @@ defmodule Bonfire.Boundaries.Acls do
           |> debug("default verbs_to_grant")
           |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ..., true, opts))
 
+
         # Process direct verb grants (bypasses role system)
         direct_grants =
           case e(opts, :verb_grants, []) do
@@ -362,7 +363,11 @@ defmodule Bonfire.Boundaries.Acls do
 
             filtered_defaults ++ direct_grants
           end
-          |> debug("on-the-fly ACLs to create")
+
+          |> debug("all custom grants")
+          |> Grants.uniq_grants_to_create()
+          |> debug("on-the-fly unique ACLs to create")
+
 
         debug("=== prepare_cast RETURNING {fun, control_acls} for #{object_id} ===")
 
@@ -482,9 +487,12 @@ defmodule Bonfire.Boundaries.Acls do
     end)
     |> debug()
     |> Enum.reject(&is_nil/1)
-    |> Enum.sort_by(fn {_subject, role} -> role end, :desc)
     # |> debug()
-    |> Enum.uniq_by(fn {subject, _role} -> subject end)
+    # NOTE: cannot do this or we don't allow same user with multiple roles:
+    # |> Enum.sort_by(fn {_subject, role} -> role end, :desc)
+    # |> Enum.uniq_by(fn {subject, _role} -> subject end)
+    # we just keep a unique combo then:
+    |> Enum.uniq()
     # |> debug()
     |> debug()
   end
@@ -493,6 +501,9 @@ defmodule Bonfire.Boundaries.Acls do
     to_circles
     |> debug()
     |> Enum.map(fn
+      {circle, val} when is_atom(circle) ->
+        {Circles.get_id!(circle), val}
+
       {key, val} ->
         # with custom role
         case uid(key) do
@@ -718,7 +729,7 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp insert_custom_acl_and_grants(repo, acl_id, custom_grants) when is_binary(acl_id) do
-    # Check if ACL already exists before attempting to insert    
+    # Check if ACL already exists before attempting to insert
     case repo.exists?(from a in Acl, where: a.id == ^acl_id) do
       false ->
         # ACL doesn't exist, create it

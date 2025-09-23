@@ -63,6 +63,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "ph:chat-circle-duotone",
         summary: l("Reply to an activity or post")
       },
+      quote: %{
+        id: "2QV0TE1SH1GHF0RM0FF1ATTERY",
+        verb: l("Quote"),
+        icon: "fa:quote-right",
+        summary: l("Quote a post or activity")
+      },
       annotate: %{
         id: "110VET0ANN0TATEEVERYTH1NGS",
         verb: l("Annotate"),
@@ -197,6 +203,50 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     ]
 
     all_verb_names = Enum.map(verbs, &elem(&1, 0))
+
+    default_verbs_for = [
+      objects: [
+        :request,
+        :see,
+        :read,
+        :like,
+        :boost,
+        :reply,
+        :quote,
+        :annotate,
+        :tag,
+        :label,
+        # :grant,
+        :edit,
+        :delete
+      ]
+    ]
+
+    preferred_verb_order =
+      default_verbs_for[:objects] ++
+        [
+          :create,
+          :mention,
+          :message,
+          :follow,
+          :pin,
+          :schedule,
+          :vote,
+          :toggle,
+          :describe,
+          :grant,
+          :assign,
+          :invite,
+          :mediate,
+          :block,
+          :configure
+        ]
+
+    # make sure all_verb_names lists the ordered ones first, in the preferred order
+    all_verb_names =
+      preferred_verb_order ++
+        (all_verb_names -- preferred_verb_order)
+
     # |> IO.inspect()
     verbs_negative = fn verbs ->
       Enum.reduce(verbs, %{}, &Map.put(&2, &1, false))
@@ -205,9 +255,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_see_request = [:see, :request, :bookmark, :flag]
     verbs_read_request = [:read, :request, :bookmark, :flag]
     verbs_see_read_request = [:read, :see, :request, :bookmark, :flag]
-    verbs_interaction = [:like, :follow]
-    verbs_sharing = [:boost, :pin]
+    verbs_interaction = [:follow]
+    verbs_liking = [:like]
+    verbs_sharing = [:boost]
     verbs_ping = [:reply, :mention, :message]
+    verbs_critique = [:quote]
+    verbs_curate = [:tag, :describe, :annotate, :pin]
     verbs_contrib = [:create, :tag, :describe, :annotate]
     verbs_edit = [:edit, :tag, :describe, :annotate]
     verbs_mod = [:invite, :label, :mediate, :block, :delete]
@@ -215,23 +268,30 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     # verbs_interact_minus_follow =
     #   verbs_see_read_request ++ [:like]
 
-    verbs_interact_minus_boost = verbs_see_read_request ++ verbs_interaction
-    verbs_interact_incl_boost = verbs_interact_minus_boost ++ verbs_sharing
+    verbs_interact_minus_boost = verbs_see_read_request ++ verbs_interaction ++ verbs_liking
+    verbs_interact_minus_like = verbs_see_read_request ++ verbs_interaction ++ verbs_sharing
+    role_verbs_interact = verbs_interact_minus_boost ++ verbs_liking ++ verbs_sharing
 
     # verbs_participate_message_minus_follow =
     #   verbs_interact_minus_follow ++ verbs_ping
 
     verbs_participate_message_minus_boost = verbs_interact_minus_boost ++ verbs_ping
 
-    verbs_participate_and_message = verbs_interact_incl_boost ++ verbs_ping
+    role_verbs_participate = role_verbs_interact ++ verbs_ping
 
-    verbs_editor = verbs_participate_and_message ++ verbs_edit
+    role_verbs_critique = role_verbs_participate ++ verbs_critique
 
-    verbs_contribute = verbs_participate_and_message ++ verbs_contrib
+    role_verbs_curate = role_verbs_critique ++ verbs_curate
 
-    # verbs_join_and_contribute = verbs_contribute ++ [:invite]
+    role_verbs_editor = role_verbs_curate ++ verbs_contrib
 
-    verbs_moderate = verbs_contribute ++ verbs_mod
+    role_verbs_contribute = role_verbs_curate ++ verbs_contrib
+
+    role_verbs_editor_and_contribute = role_verbs_editor ++ verbs_contrib
+
+    # verbs_join_and_contribute = role_verbs_contribute ++ [:invite]
+
+    role_verbs_moderate = role_verbs_contribute ++ verbs_mod
 
     basic_acls = [
       :guests_may_see_read,
@@ -249,39 +309,73 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :locals_may_read
         ]
 
-    cannot_read = Enum.reject(all_verb_names, fn v -> v == :request end)
-    cannot_discover = Enum.reject(all_verb_names, fn v -> v in verbs_read_request end)
-    cannot_interact = Enum.reject(all_verb_names, fn v -> v in verbs_see_read_request end)
-    cannot_participate = Enum.reject(all_verb_names, fn v -> v in verbs_interact_incl_boost end)
-
-    cannot_contribute =
-      Enum.reject(all_verb_names, fn v -> v in verbs_participate_and_message end)
-
-    cannot_administer = Enum.reject(all_verb_names, fn v -> v in verbs_contribute end)
-
     config :bonfire,
       verbs: verbs,
+      preferred_verb_order: all_verb_names,
+      default_verbs_for: default_verbs_for,
       role_verbs: %{
         none: %{read_only: true},
         read: %{can_verbs: verbs_see_read_request, read_only: true},
-        interact: %{can_verbs: verbs_interact_incl_boost, read_only: true},
-        participate: %{can_verbs: verbs_participate_and_message, read_only: true},
-        edit: %{can_verbs: verbs_editor, read_only: true},
-        contribute: %{usage: :ops, can_verbs: verbs_contribute, read_only: true},
-        moderate: %{usage: :ops, can_verbs: verbs_moderate, read_only: false},
+        react: %{can_verbs: verbs_interact_minus_boost, read_only: true},
+        share: %{can_verbs: verbs_interact_minus_like, read_only: true},
+        interact: %{can_verbs: role_verbs_interact, read_only: true},
+        participate: %{can_verbs: role_verbs_participate, read_only: true},
+        critique: %{can_verbs: role_verbs_critique, read_only: true},
+        curate: %{can_verbs: role_verbs_curate, read_only: true},
+        edit: %{can_verbs: role_verbs_editor, read_only: true},
+        contribute: %{usage: :ops, can_verbs: role_verbs_contribute, read_only: true},
+        moderate: %{usage: :ops, can_verbs: role_verbs_moderate, read_only: false},
         administer: %{can_verbs: all_verb_names, read_only: true},
-        cannot_discover: %{cannot_verbs: cannot_discover, read_only: true},
-        cannot_read: %{cannot_verbs: cannot_read, read_only: true},
-        cannot_interact: %{cannot_verbs: cannot_interact, read_only: true},
-        cannot_participate: %{cannot_verbs: cannot_participate, read_only: true},
-        cannot_contribute: %{usage: :ops, cannot_verbs: cannot_contribute, read_only: true},
-        cannot_administer: %{cannot_verbs: cannot_administer, read_only: true}
+        cannot_anything: %{cannot_verbs: all_verb_names, read_only: true},
+        cannot_request: %{cannot_verbs: [:request], read_only: true},
+        cannot_discover: %{
+          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_read_request end),
+          read_only: true
+        },
+        cannot_read: %{
+          cannot_verbs: Enum.reject(all_verb_names, fn v -> v == :request end),
+          read_only: true
+        },
+        cannot_react: %{
+          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_interact_minus_like end),
+          read_only: true
+        },
+        cannot_share: %{
+          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_interact_minus_boost end),
+          read_only: true
+        },
+        cannot_interact: %{
+          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_see_read_request end),
+          read_only: true
+        },
+        cannot_participate: %{
+          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_interact end),
+          read_only: true
+        },
+        cannot_critique: %{
+          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_participate end),
+          read_only: true
+        },
+        cannot_curate: %{
+          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_critique end),
+          read_only: true
+        },
+        cannot_contribute: %{
+          usage: :ops,
+          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_curate end),
+          read_only: true
+        },
+        cannot_administer: %{
+          cannot_verbs:
+            Enum.reject(all_verb_names, fn v -> v in role_verbs_editor_and_contribute end),
+          read_only: true
+        }
       },
       role_to_grant: [
         default: :participate
       ],
       verbs_to_grant: [
-        default: verbs_participate_and_message,
+        default: role_verbs_participate,
         message: verbs_participate_message_minus_boost
       ],
       # preset ACLs to show when editing boundaries
@@ -586,7 +680,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           },
           # People who silence me can't see me or my objects in feeds and such (but can still read them if they have a direct link or come across my objects in a thread structure or such). This is an automatated invisible circle (i.e. I can't see who silenced me).
           my_cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])},
-          my_followed_may_reply: %{followed: verbs_participate_and_message}
+          my_followed_may_reply: %{followed: role_verbs_participate}
         },
         ### This lets us control access to the user themselves (e.g. to view their profile or mention them)
         controlleds: %{

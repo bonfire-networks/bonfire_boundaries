@@ -115,7 +115,10 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
     |> info("Init verbs")
 
     # then grants
-    repo().upsert_all(Grant, grants, [:acl_id, :subject_id, :verb_id])
+    # First deduplicate grants by [:acl_id, :subject_id, :verb_id]
+    deduped_grants = Grants.uniq_grants_to_create(grants)
+
+    repo().upsert_all(Grant, deduped_grants, [:acl_id, :subject_id, :verb_id])
     |> info("Init or update grants")
 
     # Then the mixins
