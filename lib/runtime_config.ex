@@ -204,35 +204,43 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     all_verb_names = Enum.map(verbs, &elem(&1, 0))
 
-    preferred_verb_order = [
-      :see,
-      :read,
-      :request,
-      :like,
-      :boost,
-      :mention,
-      :reply,
-      :quote,
-      :message,
-      :tag,
-      :label,
-      :annotate,
-      :follow,
-      :schedule,
-      :pin,
-      :create,
-      :edit,
-      :delete,
-      :vote,
-      :toggle,
-      :describe,
-      :grant,
-      :assign,
-      :invite,
-      :mediate,
-      :block,
-      :configure
+    default_verbs_for = [
+      objects: [
+        :request,
+        :see,
+        :read,
+        :like,
+        :boost,
+        :reply,
+        :quote,
+        :annotate,
+        :tag,
+        :label,
+        # :grant,
+        :edit,
+        :delete
+      ]
     ]
+
+    preferred_verb_order =
+      default_verbs_for[:objects] ++
+        [
+          :create,
+          :mention,
+          :message,
+          :follow,
+          :pin,
+          :schedule,
+          :vote,
+          :toggle,
+          :describe,
+          :grant,
+          :assign,
+          :invite,
+          :mediate,
+          :block,
+          :configure
+        ]
 
     # make sure all_verb_names lists the ordered ones first, in the preferred order
     all_verb_names =
@@ -304,6 +312,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     config :bonfire,
       verbs: verbs,
       preferred_verb_order: all_verb_names,
+      default_verbs_for: default_verbs_for,
       role_verbs: %{
         none: %{read_only: true},
         read: %{can_verbs: verbs_see_read_request, read_only: true},
