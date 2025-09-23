@@ -312,11 +312,56 @@ defmodule Bonfire.Boundaries.Acls do
 
         # default_role = e(opts, :role_to_grant, nil) || Config.get!([:role_to_grant, :default])
 
-        custom_grants =
+        # Process default verbs for all recipients
+        default_grants =
           (e(opts, :verbs_to_grant, nil) ||
              Config.get!([:verbs_to_grant, :default]))
           |> debug("default verbs_to_grant")
           |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ..., true, opts))
+
+        # Process direct verb grants (bypasses role system)
+        direct_grants =
+          case e(opts, :verb_grants, []) do
+            [] ->
+              []
+
+            verb_grants when is_list(verb_grants) ->
+              verb_grants
+              |> debug("processing direct verb_grants")
+              |> Enum.map(fn {subject_id, verb, value} ->
+                %{
+                  id: Needle.UID.generate(Grant),
+                  acl_id: acl_id,
+                  subject_id: subject_id,
+                  verb_id: Verbs.get_id!(verb),
+                  value: value
+                }
+              end)
+              |> debug("direct verb grants")
+          end
+
+        # Deduplicate grants - verb_grants override default grants for same subject+verb
+        custom_grants =
+          if direct_grants == [] do
+            default_grants
+          else
+            # Create a map key for deduplication
+            direct_keys =
+              direct_grants
+              |> Enum.map(fn grant ->
+                {grant.subject_id, grant.verb_id}
+              end)
+              |> MapSet.new()
+
+            # Keep only default grants that don't conflict with direct grants
+            filtered_defaults =
+              default_grants
+              |> Enum.reject(fn grant ->
+                MapSet.member?(direct_keys, {grant.subject_id, grant.verb_id})
+              end)
+
+            filtered_defaults ++ direct_grants
+          end
           |> debug("on-the-fly ACLs to create")
 
         debug("=== prepare_cast RETURNING {fun, control_acls} for #{object_id} ===")

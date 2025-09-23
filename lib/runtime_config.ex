@@ -21,37 +21,37 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       see: %{
         id: "0BSERV1NG11ST1NGSEX1STENCE",
         verb: l("See"),
-        icon: "Heroicons-Solid:Eye",
+        icon: "ph:eyes-duotone",
         summary: l("Discoverable in lists (like feeds)")
       },
       read: %{
         id: "0EAD1NGSVTTER1YFVNDAMENTA1",
         verb: l("Read"),
-        icon: "bxs:BookReader",
+        icon: "ph:read-cv-logo-duotone",
         summary: l("Readable/visible (if you can see or have a direct link)")
       },
       bookmark: %{
         id: "1B00KMARKMYGREATESTF1ND1NG",
         verb: l("Bookmark"),
-        icon: "lucide:bookmark",
+        icon: "ph:bookmark-duotone",
         summary: l("Bookmark an object (only visible to you)")
       },
       like: %{
         id: "11KES1ND1CATEAM11DAPPR0VA1",
         verb: l("Like"),
-        icon: "bxs:Star",
+        icon: "ph:fire-duotone",
         summary: l("Like an object (and notify the author)")
       },
       boost: %{
         id: "300ST0R0RANN0VCEANACT1V1TY",
         verb: l("Boost"),
-        icon: "lucide:refresh-cw",
+        icon: "ph:rocket-launch-duotone",
         summary: l("Boost an object (and notify the author)")
       },
       flag: %{
         id: "71AGSPAM0RVNACCEPTAB1E1TEM",
         verb: l("Flag"),
-        icon: "bxs:FlagAlt",
+        icon: "ph:flag-duotone",
         summary:
           l(
             "Flag an object for a moderator to review (please note that anyone who can see or read something can flag it anyway)"
@@ -60,73 +60,73 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       reply: %{
         id: "71TCREAT1NGA11NKEDRESP0NSE",
         verb: l("Reply"),
-        icon: "bx:Reply",
+        icon: "ph:chat-circle-duotone",
         summary: l("Reply to an activity or post")
       },
       annotate: %{
         id: "110VET0ANN0TATEEVERYTH1NGS",
         verb: l("Annotate"),
-        icon: "heroicons-outline:pencil",
+        icon: "ph:quotes-duotone",
         summary: l("Annotate a video or other content")
       },
       mention: %{
         id: "0EFERENC1NGTH1NGSE1SEWHERE",
         verb: l("Mention"),
-        icon: "bx:At",
+        icon: "ph:at-duotone",
         summary: l("Mention a user or object (and notify them)")
       },
       message: %{
         id: "40NTACTW1THAPR1VATEMESSAGE",
         verb: l("Message"),
-        icon: "bxs:Send",
+        icon: "ph:envelope-duotone",
         summary: l("Send a message")
       },
       tag: %{
         id: "4ATEG0R1S1NGNGR0VP1NGSTVFF",
         verb: l("Tag"),
-        icon: "bxs:PurchaseTag",
+        icon: "ph:tag-duotone",
         summary: l("Tag a user or object, or publish in a topic")
       },
       label: %{
         id: "7PDATETHESTATVS0FS0METH1NG",
         verb: l("Label"),
-        icon: "fluent:status-16-filled",
+        icon: "ph:tag-simple-duotone",
         summary: l("Set/update a status or label")
       },
       follow: %{
         id: "20SVBSCR1BET0THE0VTPVT0F1T",
         verb: l("Follow"),
-        icon: "bx:Walk",
+        icon: "ph:eye-duotone",
         summary: l("Follow a user or thread or whatever")
       },
       schedule: %{
         id: "7SCHEDV1EF1XEDDES1REDDATES",
         verb: l("Schedule"),
-        icon: "akar-icons:schedule",
+        icon: "ph:calendar-plus-duotone",
         summary: l("Set an expected or desired date")
       },
       pin: %{
         id: "1P1NN1NNG1S11KEH1GH11GHT1T",
         verb: l("Pin"),
-        icon: "eos-icons:pin",
+        icon: "ph:map-pin-simple-duotone",
         summary: l("Pin something to highlight it")
       },
       create: %{
         id: "4REATE0RP0STBRANDNEW0BJECT",
         verb: l("Create"),
-        icon: "bxs:Pen",
+        icon: "ph:plus-circle-duotone",
         summary: l("Create a post or other object")
       },
       edit: %{
         id: "4HANG1NGVA1VES0FPR0PERT1ES",
         verb: l("Edit"),
-        icon: "bx:Highlight",
+        icon: "ph:pencil-simple-line-duotone",
         summary: l("Modify the contents of an existing object")
       },
       delete: %{
         id: "4AKESTVFFG0AWAYPERMANENT1Y",
         verb: l("Delete"),
-        icon: "bxs:TrashAlt",
+        icon: "ph:trash-duotone",
         summary: l("Delete an object")
       },
       vote: %{
@@ -141,56 +141,56 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       toggle: %{
         id: "1CANENAB1E0RD1SAB1EFEATVRE",
         verb: l("Toggle"),
-        icon: "bx:ToggleRight",
+        icon: "ph:toggle-right-duotone",
         summary: l("Enable/disable extensions or features"),
         scope: :instance
       },
       describe: %{
         id: "1CANADD0M0D1FY1NF0METADATA",
         verb: l("Describe"),
-        icon: "bx:CommentEdit",
+        icon: "ph:pen-duotone",
         summary: l("Edit info and metadata, eg. thread titles"),
         scope: :instance
       },
       grant: %{
         id: "1T0ADDED1TREM0VEB0VNDAR1ES",
         verb: l("Grant"),
-        icon: "bx:Key",
+        icon: "ph:key-duotone",
         summary: l("Add, edit or remove boundaries"),
         scope: :instance
       },
       assign: %{
         id: "1T0ADDC1RC1ES0RASS1GNR01ES",
         verb: l("Assign"),
-        icon: "bxs:UserBadge",
+        icon: "ph:identification-card-duotone",
         summary: l("Assign roles or tasks"),
         scope: :instance
       },
       invite: %{
         id: "11NV1TESPE0P1E0RGRANTENTRY",
         verb: l("Invite"),
-        icon: "bx:Gift",
+        icon: "ph:gift-duotone",
         summary: l("Join without invitation and invite others"),
         scope: :instance
       },
       mediate: %{
         id: "1T0SEEF1AGSANDMAKETHEPEACE",
         verb: l("Mediate"),
-        icon: "bxs:FlagCheckered",
+        icon: "ph:circles-three-duotone",
         summary: l("See flags"),
         scope: :instance
       },
       block: %{
         id: "1T0MANAGEB10CKGH0STS11ENCE",
         verb: l("Block"),
-        icon: "bx:Block",
+        icon: "ph:prohibit-duotone",
         summary: l("Manage blocks"),
         scope: :instance
       },
       configure: %{
         id: "1T0C0NF1GVREGENERA1SETT1NG",
         verb: l("Configure"),
-        icon: "Heroicons-Solid:Adjustments",
+        icon: "ph-sliders-duotone",
         summary: l("Change general settings"),
         scope: :instance
       }
