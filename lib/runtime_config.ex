@@ -66,7 +66,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       quote: %{
         id: "2QV0TE1SH1GHF0RM0FF1ATTERY",
         verb: l("Quote"),
-        icon: "fa:quote-right",
+        icon: "ph:quotes-duotone",
         summary: l("Quote a post or activity")
       },
       annotate: %{
@@ -213,7 +213,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         :boost,
         :reply,
         :quote,
-        :annotate,
+        # :annotate,
         :tag,
         :label,
         # :grant,
