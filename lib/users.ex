@@ -9,6 +9,7 @@ defmodule Bonfire.Boundaries.Users do
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Circles
+  alias Bonfire.Boundaries.Grants
   alias Bonfire.Data.AccessControl.Stereotyped
   alias Bonfire.Boundaries.Verbs
 
@@ -58,7 +59,9 @@ defmodule Bonfire.Boundaries.Users do
     repo().insert_all_or_ignore(Stereotyped, stereotypes)
 
     # Then grants
-    repo().insert_all_or_ignore(Grant, grants)
+    deduped_grants = Grants.uniq_grants_to_create(grants)
+    repo().insert_all_or_ignore(Grant, deduped_grants)
+
     # Then the mixins
     repo().insert_all_or_ignore(Named, named)
     repo().insert_all_or_ignore(Controlled, controlleds)

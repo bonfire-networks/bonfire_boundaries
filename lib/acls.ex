@@ -328,20 +328,14 @@ defmodule Bonfire.Boundaries.Acls do
             verb_grants when is_list(verb_grants) ->
               verb_grants
               |> debug("processing direct verb_grants")
-              |> Enum.map(fn {subject_id, verb, value} ->
-                %{
-                  id: Needle.UID.generate(Grant),
-                  acl_id: acl_id,
-                  subject_id: subject_id,
-                  verb_id: Verbs.get_id!(verb),
-                  value: value
-                }
+              |> Enum.flat_map(fn {subject_id, verb, value} ->
+                grant_to(subject_id, acl_id, verb, value, opts)
               end)
               |> debug("direct verb grants")
           end
 
-        # Deduplicate grants - verb_grants override default grants for same subject+verb
-        custom_grants =
+        # Deduplicate grants - direct_grants override default_grants for same subject+verb
+        unique_custom_acl_grants =
           if direct_grants == [] do
             default_grants
           else
@@ -371,7 +365,7 @@ defmodule Bonfire.Boundaries.Acls do
         {
           fn changeset ->
             debug("=== EXECUTING INSERT FUNCTION for ACL #{acl_id} ===")
-            insert_custom_acl_and_grants(changeset, acl_id, custom_grants)
+            insert_custom_acl_and_grants(changeset, acl_id, unique_custom_acl_grants)
 
             changeset
             |> debug("returning changeset from prepare_changes")
