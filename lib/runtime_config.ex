@@ -700,6 +700,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           followers: %{stereotype: :followers},
           # users who you have followed
           followed: %{stereotype: :followed},
+          # users/instances you have ghosted
+          ghost_them: %{stereotype: :ghost_them},
+          # users/instances you have silenced
+          silence_them: %{stereotype: :silence_them},
           # users who have silenced you
           silence_me: %{stereotype: :silence_me}
         },

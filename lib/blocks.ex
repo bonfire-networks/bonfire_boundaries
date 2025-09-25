@@ -415,10 +415,16 @@ defmodule Bonfire.Boundaries.Blocks do
          block_type,
          circle_caretaker
        ) do
-    per_user_circles(circle_caretaker, block_type)
-    |> debug("user circles to block for #{inspect(block_type)}")
-    |> repo().maybe_preload(caretaker: [caretaker: [:profile]])
-    |> do_mutate_blocklists(block_or_unblock, user_or_instance_add, ...)
+    case per_user_circles(circle_caretaker, block_type) do
+      [] ->
+        error(circle_caretaker, "This user has no circles for block type #{inspect(block_type)}")
+
+      circles ->
+        circles
+        |> debug("user circles to block for #{inspect(block_type)}")
+        |> repo().maybe_preload(caretaker: [caretaker: [:profile]])
+        |> do_mutate_blocklists(block_or_unblock, user_or_instance_add, ...)
+    end
   end
 
   defp do_mutate_blocklists(
@@ -635,8 +641,8 @@ defmodule Bonfire.Boundaries.Blocks do
              :get_or_fetch_character_by_ap_id,
              [blocked]
            )
-           |> debug(),
-         {:ok, block} <- block(blocked, :all, current_user: blocker) |> debug() do
+           |> debug("character to_block"),
+         {:ok, block} <- block(blocked, current_user: blocker) |> debug("blocked?") do
       {:ok, block}
     else
       e ->
