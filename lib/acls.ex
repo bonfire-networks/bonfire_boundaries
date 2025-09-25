@@ -319,7 +319,6 @@ defmodule Bonfire.Boundaries.Acls do
           |> debug("default verbs_to_grant")
           |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ..., true, opts))
 
-
         # Process direct verb grants (bypasses role system)
         direct_grants =
           case e(opts, :verb_grants, []) do
@@ -363,11 +362,9 @@ defmodule Bonfire.Boundaries.Acls do
 
             filtered_defaults ++ direct_grants
           end
-
           |> debug("all custom grants")
           |> Grants.uniq_grants_to_create()
           |> debug("on-the-fly unique ACLs to create")
-
 
         debug("=== prepare_cast RETURNING {fun, control_acls} for #{object_id} ===")
 

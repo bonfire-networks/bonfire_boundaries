@@ -45,7 +45,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       boost: %{
         id: "300ST0R0RANN0VCEANACT1V1TY",
         verb: l("Boost"),
-        icon: "ph:rocket-launch-duotone",
+        icon: "ph:arrows-counter-clockwise-duotone",
         summary: l("Boost an object (and notify the author)")
       },
       flag: %{
