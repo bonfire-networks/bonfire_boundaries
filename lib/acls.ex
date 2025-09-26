@@ -298,8 +298,20 @@ defmodule Bonfire.Boundaries.Acls do
     # |> Enum.map(&Needle.ULID.as_uuid(&1.acl_id))
     # |> debug()
 
+    verb_grants =
+      case e(opts, :verb_grants, []) do
+        verb_grants
+        when is_list(verb_grants) or
+               (is_map(verb_grants) and verb_grants != [] and verb_grants != %{}) ->
+          verb_grants
+
+        _ ->
+          []
+      end
+      |> debug("verb_grants input")
+
     case custom_recipients(changeset_or_obj, preset, opts) do
-      [] ->
+      [] when verb_grants == [] ->
         debug("=== prepare_cast RETURNING {:ok, control_acls} for #{object_id} ===")
         {:ok, control_acls}
 
@@ -313,31 +325,25 @@ defmodule Bonfire.Boundaries.Acls do
         # default_role = e(opts, :role_to_grant, nil) || Config.get!([:role_to_grant, :default])
 
         # Process default verbs for all recipients
-        default_grants =
+        custom_recipient_grants =
           (e(opts, :verbs_to_grant, nil) ||
              Config.get!([:verbs_to_grant, :default]))
           |> debug("default verbs_to_grant")
           |> Enum.flat_map(custom_recipients, &grant_to(&1, acl_id, ..., true, opts))
 
         # Process direct verb grants (bypasses role system)
-        direct_grants =
-          case e(opts, :verb_grants, []) do
-            [] ->
-              []
 
-            verb_grants when is_list(verb_grants) ->
-              verb_grants
-              |> debug("processing direct verb_grants")
-              |> Enum.flat_map(fn {subject_id, verb, value} ->
-                grant_to(subject_id, acl_id, verb, value, opts)
-              end)
-              |> debug("direct verb grants")
-          end
+        direct_grants =
+          verb_grants
+          |> Enum.flat_map(fn {subject_id, verb, value} ->
+            grant_to(subject_id, acl_id, verb, value, opts)
+          end)
+          |> debug("direct_grants output")
 
         # Deduplicate grants - direct_grants override default_grants for same subject+verb
         unique_custom_acl_grants =
           if direct_grants == [] do
-            default_grants
+            custom_recipient_grants
           else
             # Create a map key for deduplication
             direct_keys =
@@ -349,7 +355,7 @@ defmodule Bonfire.Boundaries.Acls do
 
             # Keep only default grants that don't conflict with direct grants
             filtered_defaults =
-              default_grants
+              custom_recipient_grants
               |> Enum.reject(fn grant ->
                 MapSet.member?(direct_keys, {grant.subject_id, grant.verb_id})
               end)
@@ -469,14 +475,14 @@ defmodule Bonfire.Boundaries.Acls do
     (List.wrap(reply_to_grants(changeset_or_obj, preset, opts)) ++
        List.wrap(mentions_grants(changeset_or_obj, preset, opts)) ++
        List.wrap(maybe_custom_circles_or_users(maybe_from_opts(opts, :to_circles, []))))
-    |> debug()
+    |> debug("custom_recipients input")
     |> Enum.map(fn
       nil -> nil
       {nil, nil} -> nil
       {subject, role} -> {subject, if(preset != "mentions", do: Types.maybe_to_atom!(role))}
       subject -> {subject, nil}
     end)
-    |> debug()
+    # |> debug()
     |> Enum.reject(&is_nil/1)
     # |> debug()
     # NOTE: cannot do this or we don't allow same user with multiple roles:
@@ -485,12 +491,12 @@ defmodule Bonfire.Boundaries.Acls do
     # we just keep a unique combo then:
     |> Enum.uniq()
     # |> debug()
-    |> debug()
+    |> debug("custom_recipients output")
   end
 
   defp maybe_custom_circles_or_users(to_circles) when is_list(to_circles) or is_map(to_circles) do
     to_circles
-    |> debug()
+    |> debug("to_circles input")
     |> Enum.map(fn
       {circle, val} when is_atom(circle) ->
         {Circles.get_id!(circle), val}
@@ -505,7 +511,7 @@ defmodule Bonfire.Boundaries.Acls do
       val ->
         uid(val)
     end)
-    |> debug()
+    |> debug("maybe_custom_circles_or_users output")
   end
 
   defp maybe_custom_circles_or_users(to_circles),

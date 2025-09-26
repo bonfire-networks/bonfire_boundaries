@@ -830,6 +830,16 @@ defmodule Bonfire.Boundaries.Circles do
 
   defp maybe_by_name(query, _), do: query
 
+  defp maybe_by_name_basic(query, text) when is_binary(text) and text != "" do
+    query
+    |> where(
+      [named: named],
+      named.name == ^text
+    )
+  end
+
+  defp maybe_by_name_basic(query, _), do: query
+
   defp maybe_search(query, text) when is_binary(text) and text != "" do
     query
     |> where(
@@ -864,7 +874,7 @@ defmodule Bonfire.Boundaries.Circles do
       :named,
       :caretaker
     ])
-    |> maybe_by_name(opts[:name])
+    |> maybe_by_name_basic(opts[:name])
     |> maybe_search(opts[:search])
   end
 
