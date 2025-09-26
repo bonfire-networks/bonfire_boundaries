@@ -432,39 +432,58 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       ### effect of applying to all users in those circles.
       circles: %{
         ### Public circles used to categorise broadly how much of a friend/do the user is.
-        guest: %{id: "0AND0MSTRANGERS0FF1NTERNET", name: l("Guests")},
-        local: %{id: "3SERSFR0MY0VR10CA11NSTANCE", name: l("Local Users")},
+        guest: %{
+          id: "0AND0MSTRANGERS0FF1NTERNET",
+          name: l("Anyone on the internet"),
+          icon: "ph:globe-hemisphere-east-duotone"
+        },
+        local: %{
+          id: "3SERSFR0MY0VR10CA11NSTANCE",
+          name: l("Any user of this instance"),
+          icon: "ph:map-pin-line-duotone"
+        },
         activity_pub: %{
           id: "7EDERATEDW1THANACT1V1TYPVB",
-          name: l("Remote ActivityPub Actors")
+          name: l("Anyone federating over ActivityPub"),
+          icon: "ph:fediverse-logo-duotone"
         },
-        admin: %{id: "0ADM1NSVSERW1THSVPERP0WERS", name: l("Instance Admins")},
-        mod: %{id: "10VE1YM0DSHE1PHEA1THYC0MMS", name: l("Instance Moderators")},
+        admin: %{
+          id: "0ADM1NSVSERW1THSVPERP0WERS",
+          name: l("Instance Admins"),
+          icon: "ph:hard-hat-duotone"
+        },
+        mod: %{
+          id: "10VE1YM0DSHE1PHEA1THYC0MMS",
+          name: l("Instance Moderators"),
+          icon: "ph:shield-plus-duotone"
+        },
 
         ### Stereotypes - placeholders for special per-user circles the system will manage.
         followers: %{
           id: "7DAPE0P1E1PERM1TT0F0110WME",
-          name: l("Those who follow me"),
-          stereotype: true
+          name: l("People who follow me"),
+          stereotype: true,
+          icon: "ph:broadcast-duotone"
         },
         followed: %{
           id: "4THEPE0P1ES1CH00SET0F0110W",
-          name: l("Those I follow"),
-          stereotype: true
+          name: l("People I am following"),
+          stereotype: true,
+          icon: "ph:address-book-duotone"
         },
         ghost_them: %{
           id: "7N010NGERC0NSENTT0Y0VN0WTY",
-          name: l("Those I ghosted"),
+          name: l("People I am ghosting"),
           stereotype: true
         },
         silence_them: %{
           id: "7N010NGERWANTT011STENT0Y0V",
-          name: l("Those I silenced"),
+          name: l("People I am silencing"),
           stereotype: true
         },
         silence_me: %{
           id: "0KF1NEY0VD0N0TWANTT0HEARME",
-          name: l("Those who silenced me"),
+          name: l("People silencing me"),
           stereotype: true
         }
       },

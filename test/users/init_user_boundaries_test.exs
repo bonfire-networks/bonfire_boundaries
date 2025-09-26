@@ -214,7 +214,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
       assert repo().one(from s in Stereotyped, select: count(s), where: s.id == ^circle.id) == 0
       Users.create_missing_boundaries(user)
       [circle] = Circles.list_my(user)
-      assert circle.stereotyped.named.name == "Those who follow me"
+      assert circle.stereotyped.named.name == "People who follow me"
     end
 
     test "create missing acls" do

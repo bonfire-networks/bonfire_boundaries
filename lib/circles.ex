@@ -126,8 +126,11 @@ defmodule Bonfire.Boundaries.Circles do
       iex> Bonfire.Boundaries.Circles.get("circle_id")
       %{id: "circle_id", name: "Custom Circle"}
   """
-  def get(slug) when is_atom(slug), do: circles()[slug]
-  def get(id) when is_binary(id), do: get_tuple(id) |> Enums.maybe_elem(1)
+  def get(id_or_slug, all_circles \\ circles())
+  def get(slug, all_circles) when is_atom(slug), do: (all_circles || circles())[slug]
+
+  def get(id, all_circles) when is_binary(id),
+    do: get_tuple(id, all_circles) |> Enums.maybe_elem(1)
 
   def get!(slug) when is_atom(slug) do
     get(slug) ||
@@ -167,7 +170,7 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   def get_tuple(id, all_circles) when is_binary(id) do
-    Enum.find(all_circles, fn {_slug, c} ->
+    Enum.find(all_circles || circles(), fn {_slug, c} ->
       c[:id] == id
     end)
   end
@@ -668,8 +671,61 @@ defmodule Bonfire.Boundaries.Circles do
       iex> Bonfire.Boundaries.Circles.list_my(user)
       [%Circle{id: "circle_id1", name: "My Circle 1"}, %Circle{id: "circle_id2", name: "My Circle 2"}]
   """
-  def list_my(user, opts \\ []),
-    do: repo().many(query_my(user, opts ++ @default_q_opts))
+  def list_my(user, opts \\ []) do
+    repo().many(query_my(user, opts ++ @default_q_opts))
+
+    all_circles = circles()
+
+    repo().many(query_my(user, opts ++ @default_q_opts))
+    |> Enum.map(fn
+      %{stereotyped: %{stereotype_id: stereotype_id} = stereotyped} = circle
+      when not is_nil(stereotype_id) ->
+        config =
+          get(stereotype_id, all_circles)
+          |> flood("config for stereotype #{stereotype_id}")
+
+        # Merge name and icon from config 
+        if is_map(config) or Keyword.keyword?(config) do
+          circle
+          |> Map.put(
+            :stereotyped,
+            stereotyped
+            |> update_meta_from_config(config[:icon], config[:name])
+          )
+        else
+          circle
+        end
+
+      %{id: id} = circle ->
+        config =
+          get(id, all_circles)
+          |> flood("config for #{id}")
+
+        # Merge name and icon from config 
+        if is_map(config) or Keyword.keyword?(config) do
+          circle
+          |> update_meta_from_config(config[:icon], config[:name])
+        else
+          circle
+        end
+
+      circle ->
+        circle
+    end)
+    |> flood("updated_circles_list")
+  end
+
+  defp update_meta_from_config(object, icon, name) do
+    named = %{name: name}
+    extra_info = %{icon: icon}
+
+    object
+    |> Map.update(:named, named, fn val -> if(name, do: named, else: val) end)
+    |> Map.update(:extra_info, extra_info, fn
+      %{} = val -> if(icon, do: Map.merge(val, extra_info), else: val)
+      val -> if(icon, do: extra_info, else: val)
+    end)
+  end
 
   @doc """
   Lists circles owned by a user and global/built-in circles.
@@ -740,7 +796,7 @@ defmodule Bonfire.Boundaries.Circles do
               do: stereotype_ids(),
               else:
                 if(opts[:exclude_block_stereotypes],
-                  do: @block_stereotypes,
+                  do: stereotypes(:block),
                   else: []
                 )
             )
@@ -750,6 +806,7 @@ defmodule Bonfire.Boundaries.Circles do
       :named,
       :extra_info,
       :caretaker,
+      # :stereotyped
       stereotyped: {"stereotype_", [:named]}
     ])
     |> where(
@@ -765,8 +822,9 @@ defmodule Bonfire.Boundaries.Circles do
   defp maybe_by_name(query, text) when is_binary(text) and text != "" do
     query
     |> where(
-      [named: named],
-      named.name == ^text
+      [named: named, stereotype_named: stereotype_named],
+      named.name == ^text or
+        stereotype_named.name == ^text
     )
   end
 
