@@ -87,7 +87,7 @@ defmodule Bonfire.Boundaries.Debug do
             "[stereotype] " <> e(acl, :stereotyped, :named, :name, ""),
         acl_stereotype: e(acl, :stereotyped, :stereotype_id, nil),
         grant_verb: Verbs.get!(grant.verb_id).verb,
-        grant_subject: Circles.get(grant.subject_id)[:name] || grant.subject_id,
+        grant_subject: Circles.get_built_in(grant.subject_id)[:name] || grant.subject_id,
         grant_value: grant.value
       }
     end

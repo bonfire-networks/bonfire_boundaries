@@ -120,21 +120,41 @@ defmodule Bonfire.Boundaries.Circles do
 
   ## Examples
 
-      iex> Bonfire.Boundaries.Circles.get(:guest)
+      iex> Bonfire.Boundaries.Circles.get_built_in(:guest)
       %{id: "guest_circle_id", name: "Guest"}
 
-      iex> Bonfire.Boundaries.Circles.get("circle_id")
+      iex> Bonfire.Boundaries.Circles.get_built_in("circle_id")
       %{id: "circle_id", name: "Custom Circle"}
   """
-  def get(id_or_slug, all_circles \\ circles())
-  def get(slug, all_circles) when is_atom(slug), do: (all_circles || circles())[slug]
+  def get_built_in(id_or_slug, all_circles \\ circles())
+  def get_built_in(slug, all_circles) when is_atom(slug), do: (all_circles || circles())[slug]
 
-  def get(id, all_circles) when is_binary(id),
+  def get_built_in(id, all_circles) when is_binary(id),
     do: get_tuple(id, all_circles) |> Enums.maybe_elem(1)
 
-  def get!(slug) when is_atom(slug) do
-    get(slug) ||
+  def get_built_in!(slug) when is_atom(slug) do
+    get_built_in(slug) ||
       raise RuntimeError, message: "Missing built-in circle: #{inspect(slug)}"
+  end
+
+  @doc "Gets a circle by ID, after checking boundaries to see if this is a list shared with me"
+  def get(id, opts) do
+    opts = opts ++ @default_q_opts
+    caretaker = current_user(opts)
+
+    with {:ok, circle} <-
+           query(opts)
+           |> query_by_id(id, opts)
+           #  |> boundarise(circle.id, opts)
+           |> where(
+             [circle, caretaker: caretaker],
+             exists(boundarise(circle.id, opts)) or
+               caretaker.caretaker_id in ^uids(caretaker) or
+               circle.id in ^e(opts, :extra_ids_to_include, [])
+           )
+           |> repo().single() do
+      {:ok, circle}
+    end
   end
 
   @doc """
@@ -150,7 +170,7 @@ defmodule Bonfire.Boundaries.Circles do
   """
   def get_id(slug), do: Map.get(circles(), slug, %{})[:id]
 
-  def get_id!(slug) when is_atom(slug), do: get!(slug).id
+  def get_id!(slug) when is_atom(slug), do: get_built_in!(slug).id
 
   @doc """
   Retrieves a tuple containing the name and ID of a circle by its slug or ID.
@@ -199,26 +219,6 @@ defmodule Bonfire.Boundaries.Circles do
       %{id: id} ->
         Circles.get_slug(id, all_circles)
     end)
-  end
-
-  @doc "Gets a circle by ID, after checking boundaries to see if this is a list shared with me"
-  def get(id, opts) do
-    opts = opts ++ @default_q_opts
-    caretaker = current_user(opts)
-
-    with {:ok, circle} <-
-           query(opts)
-           |> query_by_id(id, opts)
-           #  |> boundarise(circle.id, opts)
-           |> where(
-             [circle, caretaker: caretaker],
-             exists(boundarise(circle.id, opts)) or
-               caretaker.caretaker_id in ^uids(caretaker) or
-               circle.id in ^e(opts, :extra_ids_to_include, [])
-           )
-           |> repo().single() do
-      {:ok, circle}
-    end
   end
 
   @doc """
@@ -556,6 +556,8 @@ defmodule Bonfire.Boundaries.Circles do
 
   """
   def list_user_built_ins(user, opts \\ []) do
+    all_circles = circles()
+
     # 1. Built-in circles, optionally filtered by opts[:include_circles]
     built_in_circles =
       case opts[:include_circles] do
@@ -565,7 +567,7 @@ defmodule Bonfire.Boundaries.Circles do
 
         slugs when is_list(slugs) ->
           slugs
-          |> Enum.map(&get/1)
+          |> Enum.map(&get_built_in(&1, all_circles))
           |> Enum.filter(& &1)
       end
 
@@ -681,7 +683,7 @@ defmodule Bonfire.Boundaries.Circles do
       %{stereotyped: %{stereotype_id: stereotype_id} = stereotyped} = circle
       when not is_nil(stereotype_id) ->
         config =
-          get(stereotype_id, all_circles)
+          get_built_in(stereotype_id, all_circles)
           |> flood("config for stereotype #{stereotype_id}")
 
         # Merge name and icon from config 
@@ -698,7 +700,7 @@ defmodule Bonfire.Boundaries.Circles do
 
       %{id: id} = circle ->
         config =
-          get(id, all_circles)
+          get_built_in(id, all_circles)
           |> flood("config for #{id}")
 
         # Merge name and icon from config 

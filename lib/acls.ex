@@ -425,7 +425,7 @@ defmodule Bonfire.Boundaries.Acls do
        &Enum.map(
          &1,
          fn {slug, role} ->
-           {Circles.get(slug), role}
+           {Circles.get_built_in(slug), role}
          end
        )
      )) ++
