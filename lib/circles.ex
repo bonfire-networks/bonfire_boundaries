@@ -684,7 +684,7 @@ defmodule Bonfire.Boundaries.Circles do
       when not is_nil(stereotype_id) ->
         config =
           get_built_in(stereotype_id, all_circles)
-          |> flood("config for stereotype #{stereotype_id}")
+          |> debug("config for stereotype #{stereotype_id}")
 
         # Merge name and icon from config 
         if is_map(config) or Keyword.keyword?(config) do
@@ -701,7 +701,7 @@ defmodule Bonfire.Boundaries.Circles do
       %{id: id} = circle ->
         config =
           get_built_in(id, all_circles)
-          |> flood("config for #{id}")
+          |> debug("config for #{id}")
 
         # Merge name and icon from config 
         if is_map(config) or Keyword.keyword?(config) do
@@ -714,7 +714,7 @@ defmodule Bonfire.Boundaries.Circles do
       circle ->
         circle
     end)
-    |> flood("updated_circles_list")
+    |> debug("updated_circles_list")
   end
 
   defp update_meta_from_config(object, icon, name) do
