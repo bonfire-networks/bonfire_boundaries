@@ -310,9 +310,12 @@ defmodule Bonfire.Boundaries.Acls do
       end
       |> debug("verb_grants input")
 
+    #     repo().all(from c in Caretaker, where: c.caretaker_id == ^uid(creator), select: c.id)
+    # |> debug("DEBUG Raw caretaker IDs in find_acls")
+
     case custom_recipients(changeset_or_obj, preset, opts) do
       [] when verb_grants == [] ->
-        debug("=== prepare_cast RETURNING {:ok, control_acls} for #{object_id} ===")
+        debug(control_acls, "=== prepare_cast RETURNING {:ok, control_acls} for #{object_id} ===")
         {:ok, control_acls}
 
       custom_recipients ->
@@ -392,11 +395,12 @@ defmodule Bonfire.Boundaries.Acls do
         end)
       )
 
+    debug(base_acls, "base_acls")
+    debug(direct_acl_ids, "direct_acl_ids")
+
     {preset,
-     Enum.map(
-       find_acls(base_acls, creator) ++ direct_acl_ids,
-       &%{acl_id: id(&1)}
-     )}
+     (find_acls(base_acls, creator) ++ direct_acl_ids)
+     |> Enum.map(&%{acl_id: id(&1)})}
   end
 
   def acls_from_preset(creator, to_boundaries, opts \\ []) do
@@ -463,7 +467,7 @@ defmodule Bonfire.Boundaries.Acls do
   defp base_acls(_user, preset, opts) do
     (List.wrap(opts[:universal_boundaries]) ++
        Boundaries.acls_from_preset_boundary_names(preset))
-    |> info("preset ACLs to set (based on preset #{preset}) ")
+    |> debug("preset ACLs to set (based on preset #{preset}) ")
   end
 
   defp maybe_add_direct_acl_ids(acls) do
@@ -599,14 +603,15 @@ defmodule Bonfire.Boundaries.Acls do
     acls =
       acls
       |> Enum.map(&identify(is_local?, &1))
-      |> debug("identified")
       |> filter_empty([])
       |> Enum.group_by(&elem(&1, 0))
+      |> debug("identified")
 
     globals =
       acls
       |> Map.get(:global, [])
       |> Enum.map(&elem(&1, 1))
+      |> debug("globals")
 
     # |> info("globals")
     stereo =
@@ -618,8 +623,7 @@ defmodule Bonfire.Boundaries.Acls do
           stereo
           |> Enum.map(&elem(&1, 1).id)
           |> Boundaries.find_caretaker_stereotypes(user, ..., Acl)
-
-          # |> info("stereos")
+          |> debug("stereos")
       end
 
     globals ++ stereo

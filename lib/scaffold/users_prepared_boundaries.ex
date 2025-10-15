@@ -1,7 +1,7 @@
-defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
+defmodule Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries do
   @moduledoc """
   This module structures the information about the default boundaries for a newly created user before they are inserted in the database.
-  It takes care of reading the configuration about the default boundaries and prepare the information for the  Bonfire.Boundaries.Users module.
+  It takes care of reading the configuration about the default boundaries and prepare the information for the  Bonfire.Boundaries.Scaffold.Users module.
   """
   use Bonfire.Common.Config
   import Untangle
@@ -11,7 +11,7 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
   alias Needle.ULID
 
   alias Bonfire.Boundaries
-  alias Bonfire.Boundaries.Users.PreparedBoundaries
+  alias Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Circles
@@ -45,7 +45,7 @@ defmodule Bonfire.Boundaries.Users.PreparedBoundaries do
       end
 
     prepare_boundaries(user, acls_extra, opts)
-    |> debug("prepared")
+    |> debug("prepared boundaries for user")
   end
 
   defp prepare_boundaries(user, acls_extra, opts) do

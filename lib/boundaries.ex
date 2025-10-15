@@ -592,8 +592,7 @@ defmodule Bonfire.Boundaries do
       Caretaker,
       Enum.map(things, &%{id: Types.uid(&1), caretaker_id: Types.uid(user)})
     )
-
-    # |> debug
+    |> debug("upserted caretakers")
 
     Enum.map(things, fn thing ->
       case thing do
@@ -866,23 +865,19 @@ defmodule Bonfire.Boundaries do
       iex> Bonfire.Boundaries.find_caretaker_stereotypes(%User{id: 1}, [%{id: 2}])
       [%Needle.Pointer{id: 1}]
   """
-  def find_caretaker_stereotypes(caretaker, stereotypes, from \\ Pointer)
-
-  def find_caretaker_stereotypes(caretaker, stereotypes, from) do
+  def find_caretaker_stereotypes(caretaker, stereotypes, from \\ Pointer) do
     find_caretaker_stereotypes_q(caretaker, stereotypes, from)
     |> repo().all()
-
-    # |> debug("stereotype acls")
+    |> debug("user stereotypes")
   end
 
   @doc """
   Finds a caretaker stereotype based on the specified caretaker and stereotype IDs.
   """
-  def find_caretaker_stereotype(caretaker, stereotype, from) do
+  def find_caretaker_stereotype(caretaker, stereotype, from \\ Pointer) do
     find_caretaker_stereotypes_q(caretaker, stereotype, from)
     |> repo().one()
-
-    # |> debug("stereotype acls")
+    |> debug("user stereotype")
   end
 
   @doc """
@@ -896,8 +891,7 @@ defmodule Bonfire.Boundaries do
       on: a.id == s.id and s.stereotype_id in ^uids(stereotypes),
       preload: [caretaker: c, stereotyped: s]
     )
-
-    # |> debug("stereotype acls")
+    |> debug("stereotype query")
   end
 
   @doc """

@@ -15,7 +15,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
   # alias Bonfire.Boundaries.Grants
   # alias Bonfire.Me.Fake
   # alias Bonfire.Me.Users
-  alias Bonfire.Boundaries.Users
+  alias Bonfire.Boundaries.Scaffold.Users
   # use Bonfire.Common.Config
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Acls

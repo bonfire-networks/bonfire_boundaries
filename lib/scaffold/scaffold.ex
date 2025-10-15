@@ -7,6 +7,6 @@ defmodule Bonfire.Boundaries.Scaffold do
 
   defdelegate insert, to: Scaffold.Instance
 
-  defdelegate create_default_boundaries(user, opts \\ []), to: Bonfire.Boundaries.Users
-  defdelegate create_missing_boundaries(user), to: Bonfire.Boundaries.Users
+  defdelegate create_default_boundaries(user, opts \\ []), to: Bonfire.Boundaries.Scaffold.Users
+  defdelegate create_missing_boundaries(user), to: Bonfire.Boundaries.Scaffold.Users
 end

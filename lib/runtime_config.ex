@@ -709,7 +709,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               :locals_may_reply,
               :remotes_may_reply,
               :i_may_administer
-              # note that extra ACLs are added by `Bonfire.Boundaries.Users.default_visibility/0`
+              # note that extra ACLs are added by `Bonfire.Boundaries.Scaffold.Users.default_visibility/0`
             ] ++ negative_grants
         }
       },
@@ -758,7 +758,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               # positive permissions
               :locals_may_reply,
               :i_may_administer
-              # note that extra ACLs are added by `Bonfire.Boundaries.Users.default_visibility/0`
+              # note that extra ACLs are added by `Bonfire.Boundaries.Scaffold.Users.default_visibility/0`
             ] ++ bare_negative_grants
         }
       }

@@ -1,46 +1,155 @@
 defmodule Bonfire.Boundaries.Scaffold.Users do
   @moduledoc """
-  Provides batching functionality to insert/update default boundary fixtures for all users.
-
-  The functions that define and insert user fixtures are defined in `Bonfire.Boundaries.Users` and `Bonfire.Boundaries.Users.PreparedBoundaries`.
+  Reads fixtures in configuration and creates a default boundaries setup for a user
   """
 
-  alias EctoSparkles.DataMigration
-  use DataMigration
+  use Bonfire.Common.Utils
+  import Bonfire.Boundaries.Integration
+  alias Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries
+  alias Bonfire.Boundaries
+  alias Bonfire.Boundaries.Acls
+  alias Bonfire.Boundaries.Circles
+  alias Bonfire.Boundaries.Grants
+  alias Bonfire.Data.AccessControl.Stereotyped
+  alias Bonfire.Boundaries.Verbs
 
-  @impl DataMigration
-  def base_query do
-    # NOTE: This works in cases where:
-    # 1. The data can be queried with a condition that not longer applies after the migration ran, so you can repeatedly query the data and update the data until the query result is empty. For example, if a column is currently null and will be updated to not be null, then you can query for the null records and pick up where you left off.
-    # 2. The migration is written in such a way that it can be ran several times on the same data without causing data loss or duplication (or crashing).
+  alias Bonfire.Data.AccessControl.Acl
+  alias Bonfire.Data.AccessControl.Controlled
+  alias Bonfire.Data.AccessControl.Circle
+  alias Bonfire.Data.AccessControl.Grant
 
-    # Notice how we do not use Ecto schemas here.
-    from(u in Bonfire.Data.Identity.User,
-      select: %{id: u.id}
+  alias Bonfire.Data.Identity.Named
+  alias Needle.ULID
+
+  @doc """
+  Creates the default boundaries setup for a newly-created user.
+
+  ## Parameters
+    - `user`: The user for whom to create the default boundaries.
+    - `opts`: Optional parameters for customizing the boundaries (such as whether the user is `undiscoverable` or requires `request_before_follow`)
+
+  ## Examples
+
+      > Bonfire.Boundaries.Scaffold.Users.create_default_boundaries(user)
+  """
+  def create_default_boundaries(user, opts \\ []) do
+    PreparedBoundaries.from_config(
+      user,
+      opts
+    )
+    |> insert_prepared_boundaries(user)
+  end
+
+  defp insert_prepared_boundaries(
+         %PreparedBoundaries{
+           acls: acls,
+           circles: circles,
+           grants: grants,
+           named: named,
+           controlleds: controlleds,
+           stereotypes: stereotypes
+         } = config,
+         user
+       ) do
+    debug(config, "inserting prepared boundaries for user #{id(user)}")
+
+    # first acls and circles
+    insert_acls(user, acls)
+    insert_circles(user, circles)
+
+    add_caretaker(acls ++ circles, user)
+    repo().insert_all_or_ignore(Stereotyped, stereotypes)
+
+    # Then grants
+    deduped_grants = Grants.uniq_grants_to_create(grants)
+    repo().insert_all_or_ignore(Grant, deduped_grants)
+
+    # Then the mixins
+    repo().insert_all_or_ignore(Named, named)
+    repo().insert_all_or_ignore(Controlled, controlleds)
+    # NOTE: The ACLs and Circles must be deleted when the user is deleted.
+    # Grants will take care of themselves because they have a strong pointer acl_id.
+  end
+
+  @doc """
+  Removes from the list stereotypes already present in the database
+  """
+  defp reject_existing_stereotypes(stereotypes, user) do
+    existing_stereotypes =
+      stereotypes
+      |> Enum.map(&e(&1, :stereotype_id, nil))
+      |> debug("all stereos")
+      |> Boundaries.find_caretaker_stereotypes(user, ...)
+      |> Enum.map(&e(&1, :stereotyped, :stereotype_id, nil))
+      |> debug("existing stereos")
+
+    stereotypes
+    |> Enum.reject(&(e(&1, :stereotype_id, nil) in existing_stereotypes))
+    |> debug("new stereos")
+  end
+
+  @doc """
+  Creates any missing boundaries for an existing user. Used when the app or config has defined some new types of default boundaries.
+
+  ## Parameters
+    - `user`: The user for whom to create the missing boundaries.
+    - `opts`: Optional parameters for customizing the boundaries (not currently used)
+
+  ## Examples
+
+      > Bonfire.Boundaries.Scaffold.Users.create_missing_boundaries(user)
+  """
+  def create_missing_boundaries(user) do
+    %PreparedBoundaries{
+      acls: acls,
+      circles: circles,
+      grants: grants,
+      named: named,
+      controlleds: controlleds,
+      stereotypes: stereotypes
+    } = PreparedBoundaries.from_config(user, skip_extra_acls: true)
+
+    missing_stereotypes = stereotypes |> reject_existing_stereotypes(user)
+    missing_stereotypes_ids = stereotypes |> Enum.map(& &1.stereotype_id)
+
+    missing_acls =
+      acls
+      |> Enum.filter(&(e(&1, :stereotype_id, nil) in missing_stereotypes_ids))
+      |> debug("missing acls")
+
+    missing_circles =
+      circles
+      |> Enum.filter(&(e(&1, :stereotype_id, nil) in missing_stereotypes_ids))
+      |> debug("missing circles")
+
+    missing_acl_ids = missing_acls |> Enum.map(& &1.id)
+
+    missing_grants =
+      grants
+      |> Enum.filter(&(e(&1, :acl_id, nil) in missing_acl_ids))
+      |> debug("missing grants")
+
+    insert_prepared_boundaries(
+      %PreparedBoundaries{
+        acls: missing_acls,
+        circles: missing_circles,
+        grants: missing_grants,
+        named: named,
+        controlleds: controlleds,
+        stereotypes: missing_stereotypes
+      },
+      user
     )
   end
 
-  @impl DataMigration
-  def config do
-    %DataMigration.Config{
-      # do not block app startup in auto-migrations
-      async: true,
-      # users at a time
-      batch_size: 1000,
-      # wait a sec
-      throttle_ms: 1_000,
-      repo: Bonfire.Common.Repo,
-      first_id: "00000000000000000000000000"
-    }
+  defp add_caretaker(objects, user),
+    do: Boundaries.take_care_of!(objects, user)
+
+  defp insert_acls(user, acls) do
+    repo().insert_all(Acl, Enum.map(acls, &Map.take(&1, [:id])))
   end
 
-  @impl DataMigration
-  def migrate(results) do
-    Enum.each(results, fn user ->
-      # hooks into a context module, which is more likely to be kept up to date as the app evolves, to avoid having to update old migrations
-      Bonfire.Boundaries.Users.create_missing_boundaries(user)
-      # can hae some extra throttling here
-      Process.sleep(100)
-    end)
+  defp insert_circles(user, circles) do
+    repo().insert_all(Circle, Enum.map(circles, &Map.take(&1, [:id])))
   end
 end
