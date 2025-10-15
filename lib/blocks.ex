@@ -649,4 +649,52 @@ defmodule Bonfire.Boundaries.Blocks do
         error(e)
     end
   end
+
+  defp blocked_ids_for(subjects, block_type) do
+    block_circle_ids = instance_wide_circles(types_blocked(block_type))
+    Circles.subject_ids_in_circles(Enums.ids(subjects), block_circle_ids)
+  end
+
+  @doc """
+  Filters a list of subjects, returning only those not blocked instance-wide for the given block type.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Blocks.reject_blocked([user1, user2], :ghost, :instance_wide)
+      [user2]
+
+      iex> Bonfire.Boundaries.Blocks.reject_blocked([%{id: "a"}, %{id: "b"}], :any, :instance_wide)
+      [%{id: "a"}, %{id: "b"}] # if none are blocked
+
+  Returns the same type as input (structs or IDs).
+  """
+  def reject_blocked(subjects, block_type \\ :any, :instance_wide) do
+    blocked_ids = blocked_ids_for(subjects, block_type) |> MapSet.new()
+
+    Enum.filter(subjects, fn
+      %{id: id} -> not MapSet.member?(blocked_ids, id)
+      id when is_binary(id) -> not MapSet.member?(blocked_ids, id)
+    end)
+  end
+
+  @doc """
+  Throws `:blocked` if any subject in the list is blocked instance-wide for the given block type.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Blocks.throw_blocked!([user1, user2], :ghost, :instance_wide)
+      ** (throw) :blocked
+
+      iex> Bonfire.Boundaries.Blocks.throw_blocked!([user1], :ghost, :instance_wide)
+      :ok
+
+  Returns :ok if none are blocked.
+  """
+  def check_blocked!(subjects, block_type \\ :any, :instance_wide, throw_what) do
+    if blocked_ids_for(subjects, block_type) != [] do
+      throw(throw_what || :blocked)
+    else
+      subjects
+    end
+  end
 end

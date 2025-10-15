@@ -1156,4 +1156,30 @@ defmodule Bonfire.Boundaries.Circles do
       delete(circle, opts)
     end
   end
+
+  @doc """
+  Returns the IDs of subjects that are members of any of the given circles.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.subject_ids_in_circles([user1, user2], [circle1, circle2])
+      ["user1_id"]
+
+  This is useful for efficiently filtering blocked users in batch.
+  """
+  def subject_ids_in_circles(subjects, circles) do
+    subject_ids = Types.uids(subjects)
+    circle_ids = Types.uids(circles)
+
+    if Enum.empty?(subject_ids) or Enum.empty?(circle_ids) do
+      []
+    else
+      from(e in Encircle,
+        where: e.subject_id in ^subject_ids and e.circle_id in ^circle_ids,
+        select: e.subject_id
+      )
+      |> repo().all()
+      |> Enum.uniq()
+    end
+  end
 end
