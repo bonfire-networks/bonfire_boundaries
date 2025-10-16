@@ -674,8 +674,6 @@ defmodule Bonfire.Boundaries.Circles do
       [%Circle{id: "circle_id1", name: "My Circle 1"}, %Circle{id: "circle_id2", name: "My Circle 2"}]
   """
   def list_my(user, opts \\ []) do
-    repo().many(query_my(user, opts ++ @default_q_opts))
-
     all_circles = circles()
 
     repo().many(query_my(user, opts ++ @default_q_opts))
