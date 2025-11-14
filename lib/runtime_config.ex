@@ -439,12 +439,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         },
         local: %{
           id: "3SERSFR0MY0VR10CA11NSTANCE",
-          name: l("Any user of this instance"),
+          name: l("Local users"),
           icon: "ph:map-pin-line-duotone"
         },
         activity_pub: %{
           id: "7EDERATEDW1THANACT1V1TYPVB",
-          name: l("Anyone federating over ActivityPub"),
+          name: l("Anyone in the fediverse"),
           icon: "ph:fediverse-logo-duotone"
         },
         admin: %{
