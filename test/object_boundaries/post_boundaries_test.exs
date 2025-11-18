@@ -143,4 +143,133 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
     me = Bonfire.Me.Fake.fake_user!()
     refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: me)
   end
+
+  describe "thread locking:" do
+    test "locking a post prevents replies from other users, and unlocking allows them again" do
+      author = Bonfire.Me.Fake.fake_user!()
+      commenter = Bonfire.Me.Fake.fake_user!()
+
+      # Configure threads to start new threads instead of raising when reply is not allowed
+      Process.put(
+        [:bonfire_social, Bonfire.Social.Threads, :start_new_thread_if_reply_not_allowed],
+        true
+      )
+
+      # Create a post
+      attrs = %{
+        post_content: %{
+          summary: "original post",
+          html_body: "<p>original post content</p>"
+        }
+      }
+
+      assert {:ok, post} =
+               Posts.publish(current_user: author, post_attrs: attrs, boundary: "public")
+
+      # Lock the post
+      assert {:ok, _} =
+               Bonfire.Boundaries.Blocks.block(post, :lock, current_user: author)
+               |> debug("Locked post")
+
+      refute Boundaries.can?(commenter, :reply, post)
+
+      # Try to reply as another user - should create a new thread instead
+      reply_attrs = %{
+        post_content: %{
+          summary: "reply",
+          html_body: "<p>trying to reply</p>"
+        },
+        reply_to_id: post.id
+      }
+
+      # Commenter should still be able to read the post
+      assert Boundaries.can?(commenter, :see, post)
+
+      # Should succeed but create a new thread, not a reply
+      assert {:ok, new_post} = Posts.publish(current_user: commenter, post_attrs: reply_attrs)
+
+      # Verify it's a new thread, not a reply to the locked post
+      refute new_post.replied.reply_to_id == post.id
+      assert new_post.replied.thread_id == new_post.id, "Should start its own thread"
+      assert is_nil(new_post.replied.reply_to_id), "Should not be a reply"
+
+      # Unlock the post
+      assert {:ok, _} =
+               Bonfire.Boundaries.Blocks.unblock(post, :lock, current_user: author)
+               |> debug("Unlocked post")
+
+      # Try to reply - should now succeed as an actual reply
+      reply_attrs = %{
+        post_content: %{
+          summary: "reply",
+          html_body: "<p>successful reply</p>"
+        },
+        reply_to_id: post.id
+      }
+
+      assert {:ok, reply} = Posts.publish(current_user: commenter, post_attrs: reply_attrs)
+      assert reply.replied.reply_to_id == post.id, "Should be an actual reply now"
+    end
+
+    test "locking doesn't affect existing replies, but prevents new replies to any sub-reply of the locked thread" do
+      author = Bonfire.Me.Fake.fake_user!()
+      commenter = Bonfire.Me.Fake.fake_user!()
+
+      # Configure threads to start new threads instead of raising when reply is not allowed
+      Process.put(
+        [:bonfire_social, Bonfire.Social.Threads, :start_new_thread_if_reply_not_allowed],
+        true
+      )
+
+      # Create a post
+      attrs = %{
+        post_content: %{
+          summary: "post",
+          html_body: "<p>post content</p>"
+        }
+      }
+
+      assert {:ok, post} =
+               Posts.publish(current_user: author, post_attrs: attrs, boundary: "public")
+
+      # Add a reply before locking
+      reply_attrs = %{
+        post_content: %{
+          summary: "early reply",
+          html_body: "<p>replied before lock</p>"
+        },
+        reply_to_id: post.id
+      }
+
+      assert {:ok, reply} =
+               Posts.publish(current_user: commenter, post_attrs: reply_attrs)
+               |> debug("Created reply before locking")
+
+      # Lock the post
+      assert {:ok, _} = Bonfire.Boundaries.Blocks.block(post, :lock, current_user: author)
+
+      # Existing reply should still be readable
+      assert Boundaries.can?(commenter, :see, post)
+      refute Boundaries.can?(commenter, :reply, post)
+
+      # Try to reply to the existing reply - should create a new thread instead
+      reply_to_reply_attrs = %{
+        post_content: %{
+          summary: "reply to reply",
+          html_body: "<p>trying to reply to reply</p>"
+        },
+        reply_to_id: reply.id
+      }
+
+      # Should succeed but create a new thread, not a reply in the locked thread
+      assert {:ok, new_post} =
+               Posts.publish(current_user: commenter, post_attrs: reply_to_reply_attrs)
+
+      # Verify it's a new thread, not part of the locked thread
+      refute new_post.replied.reply_to_id == reply.id
+      refute new_post.replied.thread_id == post.id
+      assert new_post.replied.thread_id == new_post.id, "Should start its own thread"
+      assert is_nil(new_post.replied.reply_to_id), "Should not be a reply"
+    end
+  end
 end

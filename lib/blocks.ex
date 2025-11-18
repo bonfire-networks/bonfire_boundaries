@@ -290,7 +290,7 @@ defmodule Bonfire.Boundaries.Blocks do
         scope: scope
       )
 
-    # |> debug("done")
+    # |> debug("locks granted")
 
     if Enums.all_ok?(granted) do
       {:ok, l("Locked")}
