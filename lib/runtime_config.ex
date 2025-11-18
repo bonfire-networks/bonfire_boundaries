@@ -196,7 +196,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       configure: %{
         id: "1T0C0NF1GVREGENERA1SETT1NG",
         verb: l("Configure"),
-        icon: "ph-sliders-duotone",
+        icon: "ph:sliders-duotone",
         summary: l("Change general settings"),
         scope: :instance
       }
