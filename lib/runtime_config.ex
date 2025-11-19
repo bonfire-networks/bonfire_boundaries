@@ -270,12 +270,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     verbs_interact_minus_boost = verbs_see_read_request ++ verbs_interaction ++ verbs_liking
     verbs_interact_minus_like = verbs_see_read_request ++ verbs_interaction ++ verbs_sharing
-    role_verbs_interact = verbs_interact_minus_boost ++ verbs_liking ++ verbs_sharing
+
+    role_verbs_interact =
+      verbs_see_read_request ++ verbs_interaction ++ verbs_liking ++ verbs_sharing
 
     # verbs_participate_message_minus_follow =
     #   verbs_interact_minus_follow ++ verbs_ping
 
-    verbs_participate_message_minus_boost = verbs_interact_minus_boost ++ verbs_ping
+    verbs_participate_minus_boost = verbs_interact_minus_boost ++ verbs_ping
 
     role_verbs_participate = role_verbs_interact ++ verbs_ping
 
@@ -376,7 +378,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       ],
       verbs_to_grant: [
         default: role_verbs_participate,
-        message: verbs_participate_message_minus_boost
+        message: verbs_participate_minus_boost
       ],
       # preset ACLs to show when editing boundaries
       acls_for_dropdown: basic_acls,
