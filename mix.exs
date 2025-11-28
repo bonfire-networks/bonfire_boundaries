@@ -26,9 +26,10 @@ defmodule Bonfire.Boundaries.MixProject do
       deps:
         Mess.deps([
           {:igniter, "~> 0.5", optional: true},
-          # {:bonfire_me, 
-          #  git: "https://github.com/bonfire-networks/bonfire_me",
-          #  optional: true, runtime: false}
+          {:absinthe, "~> 1.7", optional: true},
+          {:bonfire_api_graphql,
+           git: "https://github.com/bonfire-networks/bonfire_api_graphql",
+           optional: true, runtime: false}
         ])
     ]
   end
