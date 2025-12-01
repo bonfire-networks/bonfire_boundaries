@@ -366,28 +366,20 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
         silenced_ids = extract_user_ids_from_circles(silence_circles)
 
         # Intersection: users who are both ghosted AND silenced
-        blocked_ids = MapSet.intersection(MapSet.new(ghosted_ids), MapSet.new(silenced_ids))
+        blocked_ids =
+          MapSet.intersection(MapSet.new(ghosted_ids), MapSet.new(silenced_ids))
+          |> MapSet.to_list()
 
-        users =
-          ghost_circles
-          |> extract_users_from_circles()
-          |> Enum.filter(fn u -> MapSet.member?(blocked_ids, Bonfire.Common.Types.uid(u)) end)
-          |> Bonfire.Common.Repo.maybe_preload([:profile, :character])
-
+        users = Bonfire.Me.Users.by_ids(blocked_ids)
         {:ok, users}
       end
     end
 
     defp list_muted_users(_parent, _args, info) do
       with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info) do
-        # Get users who are silenced (muted)
         circles = Blocks.list(:silence, current_user: user)
-
-        users =
-          circles
-          |> extract_users_from_circles()
-          |> Bonfire.Common.Repo.maybe_preload([:profile, :character])
-
+        user_ids = extract_user_ids_from_circles(circles)
+        users = Bonfire.Me.Users.by_ids(user_ids)
         {:ok, users}
       end
     end
