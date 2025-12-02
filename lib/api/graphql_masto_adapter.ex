@@ -29,12 +29,33 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       opts_with_loader = Keyword.put(opts, :context, context_with_loader)
       AbsintheClient.default_pipeline(schema, opts_with_loader)
     end
+
     alias Bonfire.Boundaries.Blocks
-    alias Bonfire.API.MastoCompat.{Mappers, Schemas, PaginationHelpers, Fragments}
+    alias Bonfire.API.MastoCompat.{Mappers, Schemas, PaginationHelpers}
     alias Bonfire.Social.Graph.Follows
 
-    # Use centralized fragment from Bonfire.API.MastoCompat.Fragments
-    @user_profile Fragments.user_profile()
+    # User profile fragment inlined for compile-order independence
+    @user_profile """
+      id
+      created_at: date_created
+      profile {
+        avatar: icon
+        avatar_static: icon
+        header: image
+        header_static: image
+        display_name: name
+        note: summary
+        website
+      }
+      character {
+        username
+        acct: username
+        url: canonical_uri
+        peered {
+          canonical_uri
+        }
+      }
+    """
 
     # Helper to list restricted accounts (mutes/blocks) via GraphQL
     defp list_restricted_accounts(conn, query_name, data_key) do
@@ -45,7 +66,12 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
 
           accounts =
             users
-            |> Enum.map(&Mappers.Account.from_user(&1, current_user: current_user, skip_expensive_stats: true))
+            |> Enum.map(
+              &Mappers.Account.from_user(&1,
+                current_user: current_user,
+                skip_expensive_stats: true
+              )
+            )
             |> Enum.reject(&is_nil/1)
 
           Phoenix.Controller.json(conn, accounts)
@@ -141,7 +167,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
 
         case result do
           %{data: data} when is_map(data) ->
-            # Query actual state after the action completes
             relationship = build_relationship(current_user, target_id)
             Phoenix.Controller.json(conn, relationship)
 
@@ -178,10 +203,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
         "requested" => requested
       })
     end
-
-    # ==========================================
-    # Lists API (Mastodon Lists → Bonfire Circles)
-    # ==========================================
 
     @circle "
     id
@@ -369,8 +390,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       case graphql(conn, :list_accounts, pagination_params) do
         %{data: %{circle_members: %{entries: entries, page_info: page_info}}}
         when is_list(entries) ->
-          # Skip expensive stats for list endpoints (N+1 query prevention)
-          # List accounts endpoint doesn't need follower/status counts per user
           accounts =
             entries
             |> Enum.map(fn member ->
@@ -379,7 +398,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
             end)
             |> Enum.reject(&is_nil/1)
 
-          # Add Link headers for pagination if we have page_info
           conn =
             if page_info do
               page_info_map = %{
@@ -471,11 +489,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       SocialAdapter.feed(feed_params, conn)
     end
 
-    # ==========================================
-    # List Helper Functions
-    # ==========================================
-
-    # Validate title for list create/update operations
     defp with_valid_title(params, conn, fun) do
       title = params["title"]
 

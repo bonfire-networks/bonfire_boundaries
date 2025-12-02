@@ -16,10 +16,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     alias Bonfire.Boundaries.Circles
     alias Bonfire.Boundaries.Blocks
 
-    # ==================
-    # TYPE DEFINITIONS
-    # ==================
-
     @desc "A circle (group of users) for organizing boundaries"
     object :circle do
       field(:id, non_null(:id))
@@ -70,10 +66,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
       field(:exclude_built_ins, :boolean)
     end
 
-    # ==================
-    # QUERIES
-    # ==================
-
     object :boundaries_queries do
       @desc "List circles owned by current user"
       field :my_circles, list_of(:circle) do
@@ -110,10 +102,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
         resolve(&list_muted_users/3)
       end
     end
-
-    # ==================
-    # MUTATIONS
-    # ==================
 
     object :boundaries_mutations do
       @desc "Create a new circle"
@@ -182,10 +170,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
         resolve(&unmute_user/2)
       end
     end
-
-    # ==================
-    # RESOLVER FUNCTIONS
-    # ==================
 
     defp resolve_circle_name(%{named: %{name: name}}, _, _) when is_binary(name), do: {:ok, name}
     defp resolve_circle_name(%{name: name}, _, _) when is_binary(name), do: {:ok, name}
@@ -295,7 +279,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
 
         case Circles.create(user, attrs) do
           {:ok, circle} ->
-            # Preload named for response
             circle = Bonfire.Common.Repo.maybe_preload(circle, [:named, :extra_info])
             {:ok, circle}
 
@@ -335,7 +318,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
            {:ok, circle} <- Circles.get_for_caretaker(circle_id, user) do
         case Circles.add_to_circles(subject_ids, circle) do
           {:ok, _} -> {:ok, true}
-          # add_to_circles may not return a tuple
           _ -> {:ok, true}
         end
       end
@@ -346,15 +328,10 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
            {:ok, circle} <- Circles.get_for_caretaker(circle_id, user) do
         case Circles.remove_from_circles(subject_ids, circle) do
           {:ok, _} -> {:ok, true}
-          # remove_from_circles may not return a tuple
           _ -> {:ok, true}
         end
       end
     end
-
-    # ==================
-    # BLOCK/MUTE RESOLVERS
-    # ==================
 
     defp list_blocked_users(_parent, _args, info) do
       with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info) do
@@ -430,7 +407,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
       with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info),
            # :silence block_type = mute only
            {:ok, _} <- Blocks.block(id, :silence, current_user: user) do
-        # Return the muted user
         Bonfire.Me.Users.by_id(id)
       end
     end
@@ -439,7 +415,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
       with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info),
            # :silence block_type = unmute only
            {:ok, _} <- Blocks.unblock(id, :silence, current_user: user) do
-        # Return the unmuted user
         Bonfire.Me.Users.by_id(id)
       end
     end
