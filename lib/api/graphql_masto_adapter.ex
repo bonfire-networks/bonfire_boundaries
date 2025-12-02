@@ -74,13 +74,13 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
             )
             |> Enum.reject(&is_nil/1)
 
-          Phoenix.Controller.json(conn, accounts)
+          RestAdapter.json(conn, accounts)
 
         %{errors: errors} ->
           RestAdapter.error_fn({:error, errors}, conn)
 
         _ ->
-          Phoenix.Controller.json(conn, [])
+          RestAdapter.json(conn, [])
       end
     end
 
@@ -168,7 +168,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
         case result do
           %{data: data} when is_map(data) ->
             relationship = build_relationship(current_user, target_id)
-            Phoenix.Controller.json(conn, relationship)
+            RestAdapter.json(conn, relationship)
 
           %{errors: errors} ->
             RestAdapter.error_fn({:error, errors}, conn)
@@ -247,7 +247,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
             |> Enum.map(&Mappers.List.from_circle/1)
             |> Enum.reject(&is_nil/1)
 
-          Phoenix.Controller.json(conn, lists)
+          RestAdapter.json(conn, lists)
 
         %{errors: errors} ->
           RestAdapter.error_fn({:error, errors}, conn)
@@ -272,7 +272,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
         case graphql(conn, :create_list, %{"circle" => %{"name" => title}}) do
           %{data: %{create_circle: circle}} when not is_nil(circle) ->
             list = Mappers.List.from_circle(circle)
-            Phoenix.Controller.json(conn, list)
+            RestAdapter.json(conn, list)
 
           %{errors: errors} ->
             RestAdapter.error_fn({:error, errors}, conn)
@@ -297,7 +297,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       case graphql(conn, :show_list, %{"id" => id}) do
         %{data: %{circle: circle}} when not is_nil(circle) ->
           list = Mappers.List.from_circle(circle)
-          Phoenix.Controller.json(conn, list)
+          RestAdapter.json(conn, list)
 
         %{data: %{circle: nil}} ->
           RestAdapter.error_fn({:error, :not_found}, conn)
@@ -325,7 +325,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
         case graphql(conn, :update_list, %{"id" => id, "circle" => %{"name" => title}}) do
           %{data: %{update_circle: circle}} when not is_nil(circle) ->
             list = Mappers.List.from_circle(circle)
-            Phoenix.Controller.json(conn, list)
+            RestAdapter.json(conn, list)
 
           %{errors: errors} ->
             RestAdapter.error_fn({:error, errors}, conn)
@@ -347,7 +347,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
     def delete_list(id, _params, conn) do
       case graphql(conn, :delete_list, %{"id" => id}) do
         %{data: %{delete_circle: true}} ->
-          Phoenix.Controller.json(conn, %{})
+          RestAdapter.json(conn, %{})
 
         %{errors: errors} ->
           RestAdapter.error_fn({:error, errors}, conn)
@@ -411,7 +411,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
               conn
             end
 
-          Phoenix.Controller.json(conn, accounts)
+          RestAdapter.json(conn, accounts)
 
         %{errors: errors} ->
           RestAdapter.error_fn({:error, errors}, conn)
@@ -506,7 +506,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       case graphql(conn, query_name, %{"circle_id" => id, "subject_ids" => account_ids}) do
         %{data: data} when is_map(data) ->
           if Map.get(data, data_key) == true do
-            Phoenix.Controller.json(conn, %{})
+            RestAdapter.json(conn, %{})
           else
             RestAdapter.error_fn({:error, :unexpected_response}, conn)
           end

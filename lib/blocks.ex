@@ -145,7 +145,7 @@ defmodule Bonfire.Boundaries.Blocks do
       block(user_or_circle, block_type, scope)
     else
       _ ->
-        if Types.is_uid(user_or_instance_id_or_username) do
+        if Types.is_uid?(user_or_instance_id_or_username) do
           debug("assume it's an instance display_hostname")
 
           maybe_apply(Bonfire.Federate.ActivityPub.Instances, :get, [
@@ -515,7 +515,7 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   @doc """
-  Lists blocked users or instances for a given block type and scope 
+  Lists blocked users or instances for a given block type and scope
 
   ## Examples
 
