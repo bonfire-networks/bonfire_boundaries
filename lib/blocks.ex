@@ -650,6 +650,51 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
+  def ap_receive_activity(
+        unblocker,
+        %{data: %{"type" => "Undo", "object" => %{"type" => "Block", "object" => unblocked_id}}} =
+          _activity,
+        _object
+      ) do
+    info("apply incoming Undo Block")
+
+    with {:ok, unblocked} <-
+           Bonfire.Common.Utils.maybe_apply(
+             Bonfire.Federate.ActivityPub.AdapterUtils,
+             :get_or_fetch_character_by_ap_id,
+             [unblocked_id]
+           )
+           |> debug("character to unblock"),
+         {:ok, result} <- unblock(unblocked, nil, current_user: unblocker) |> debug("unblocked?") do
+      {:ok, result}
+    else
+      e ->
+        error(e)
+    end
+  end
+
+  def ap_receive_activity(
+        unblocker,
+        %{data: %{"type" => "Undo"}} = _activity,
+        %{data: %{"type" => "Block", "object" => unblocked_id}} = _block_object
+      ) do
+    info("apply incoming Undo Block (with separate block object)")
+
+    with {:ok, unblocked} <-
+           Bonfire.Common.Utils.maybe_apply(
+             Bonfire.Federate.ActivityPub.AdapterUtils,
+             :get_or_fetch_character_by_ap_id,
+             [unblocked_id]
+           )
+           |> debug("character to unblock"),
+         {:ok, result} <- unblock(unblocked, nil, current_user: unblocker) |> debug("unblocked?") do
+      {:ok, result}
+    else
+      e ->
+        error(e)
+    end
+  end
+
   defp blocked_ids_for(subjects, block_type) do
     block_circle_ids = instance_wide_circles(types_blocked(block_type))
     Circles.subject_ids_in_circles(Enums.ids(subjects), block_circle_ids)
