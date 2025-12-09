@@ -800,6 +800,7 @@ defmodule Bonfire.Boundaries.Circles do
                   else: []
                 )
             )
+            |> flood("excluding circles")
 
     from(circle in Circle, as: :circle)
     |> proload([

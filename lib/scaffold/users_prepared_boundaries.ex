@@ -145,9 +145,9 @@ defmodule Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries do
            [Bonfire.Me.Users, :undiscoverable],
            false
          ) do
-      [:guests_may_see_read]
+      [:everyone_may_see_read]
     else
-      [:guests_may_read]
+      [:everyone_may_read]
     end
   end
 

@@ -295,21 +295,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     role_verbs_moderate = role_verbs_contribute ++ verbs_mod
 
+    # preset ACLs to show when editing boundaries
     basic_acls = [
-      :guests_may_see_read,
+      :everyone_may_see_read,
       :remotes_may_interact,
       :remotes_may_reply,
       :locals_may_interact,
       :locals_may_reply
     ]
-
-    public_acls =
-      basic_acls ++
-        [
-          :guests_may_see,
-          :guests_may_read,
-          :locals_may_read
-        ]
 
     config :bonfire,
       verbs: verbs,
@@ -383,19 +376,29 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       # preset ACLs to show when editing boundaries
       acls_for_dropdown: basic_acls,
       # what boundaries we can display to everyone when applied on objects
-      public_acls_on_objects: public_acls,
+      public_acls_on_objects:
+        basic_acls ++
+          [
+            :everyone_may_see,
+            :everyone_may_read,
+            # :everyone_may_see_read,
+            :guests_may_see,
+            :guests_may_read,
+            :guests_may_see_read,
+            :locals_may_read
+          ],
       #  used for setting boundaries
       preset_acls: %{
         "public" => [
-          :guests_may_see_read,
+          :everyone_may_see_read,
           :locals_may_reply,
           :remotes_may_reply
         ],
         "local" => [:locals_may_reply],
-        "open" => [:guests_may_see_read, :locals_may_contribute, :remotes_may_contribute],
+        "open" => [:everyone_may_see_read, :locals_may_contribute, :remotes_may_contribute],
         "visible" => [
           :no_follow,
-          :guests_may_see_read,
+          :everyone_may_see_read,
           :locals_may_interact,
           :remotes_may_interact
         ],
@@ -404,6 +407,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       #  used for matching saved boundaries to presets:
       preset_acls_match: %{
         "public" => [
+          :everyone_may_see,
+          :everyone_may_read,
+          :everyone_may_see_read,
           :guests_may_see,
           :guests_may_read,
           :guests_may_see_read,
@@ -459,6 +465,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: l("Instance Moderators"),
           icon: "ph:shield-plus-duotone"
         },
+        suggested_profiles: %{
+          id: "5VGGESTEDPR0F11EST0F0110WS",
+          name: l("Suggested Profiles"),
+          icon: "ph:users-three-duotone"
+        },
 
         ### Stereotypes - placeholders for special per-user circles the system will manage.
         followers: %{
@@ -497,8 +508,24 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           id: "01SETT1NGSF0R10CA11NSTANCE",
           name: l("Local instance roles & boundaries")
         },
+        mods_may_manage: %{
+          id: "1M0DERAT0RSADM1NSMAYMANAGE",
+          name: l("Moderators may manage")
+        },
 
         ### Public ACLs that allow basic control over visibility and interactions.
+        everyone_may_see_read: %{
+          id: "1EVERY0NEMAYSEEEEANDREADDD",
+          name: l("Everyone may see and read")
+        },
+        everyone_may_read: %{
+          id: "2EVERY0NEMAYREADDDDDDDDDDD",
+          name: l("Everyone may read")
+        },
+        everyone_may_see: %{
+          id: "3EVERY0NEMAYSEEEEEEEEEEEEE",
+          name: l("Everyone may read")
+        },
         guests_may_see_read: %{
           id: "7W1DE1YAVA11AB1ET0SEENREAD",
           name: l("Publicly discoverable and readable")
@@ -608,9 +635,28 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           activity_pub: :interact,
           guest: :read
         },
-        guests_may_see_read: %{guest: :read},
+        mods_may_manage: %{
+          mod: role_verbs_moderate,
+          admin: all_verb_names
+        },
+        everyone_may_see: %{
+          guest: [:see],
+          local: [:see],
+          activity_pub: [:see]
+        },
+        everyone_may_read: %{
+          guest: [:read],
+          local: [:read],
+          activity_pub: [:read]
+        },
+        everyone_may_see_read: %{
+          guest: [:see, :read],
+          local: [:see, :read],
+          activity_pub: [:see, :read]
+        },
         guests_may_see: %{guest: verbs_see_request},
         guests_may_read: %{guest: verbs_read_request},
+        guests_may_see_read: %{guest: :read},
         # interact but NOT reply/message/mention
         remotes_may_interact: %{activity_pub: :interact},
         # interact and reply/message/mention

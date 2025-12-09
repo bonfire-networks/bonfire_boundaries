@@ -42,7 +42,7 @@ defmodule Bonfire.Boundaries.Grants do
 
   ## Examples
 
-      iex> Bonfire.Boundaries.Grants.get(:guests_may_see_read)
+      iex> Bonfire.Boundaries.Grants.get(:everyone_may_see_read)
   """
   def get(slug) when is_atom(slug), do: Config.get([:grants, slug])
   def get(slugs) when is_list(slugs), do: Enum.map(slugs, &get/1)

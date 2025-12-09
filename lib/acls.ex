@@ -101,7 +101,7 @@ defmodule Bonfire.Boundaries.Acls do
 
   def preset_acl_ids do
     Config.get(:public_acls_on_objects, [
-      :guests_may_see_read,
+      :everyone_may_see_read,
       :locals_may_interact,
       :locals_may_reply
     ])
