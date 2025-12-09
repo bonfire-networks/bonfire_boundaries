@@ -97,10 +97,10 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
     # First deduplicate grants by [:acl_id, :subject_id, :verb_id]
     deduped_grants =
       Grants.uniq_grants_to_create(grants)
-      |> flood("deduped grants")
+      |> debug("deduped grants")
 
     repo().upsert_all(Grant, deduped_grants, [:acl_id, :subject_id, :verb_id])
-    |> flood("Init or update grants")
+    |> debug("Init or update grants")
   end
 
   defp grants_fixtures do
@@ -118,7 +118,7 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
         value: Enums.maybe_elem(verb, 1, true)
       }
     end
-    |> flood("grants")
+    |> debug("grants")
   end
 
   @doc """
