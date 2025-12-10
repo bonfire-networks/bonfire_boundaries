@@ -5,7 +5,7 @@ default_locale = "en"
 compile_all_locales? =
   config_env() == :prod or System.get_env("COMPILE_ALL_LOCALES") in ["true", "1"]
 
-locales = if compile_all_locales?, do: [default_locale, "fr", "es"], else: [default_locale]
+locales = if compile_all_locales?, do: [default_locale, "fr", "es", "it"], else: [default_locale]
 
 config :bonfire_common,
   otp_app: :bonfire
@@ -23,7 +23,8 @@ config :bonfire_common, Bonfire.Common.Localise.Cldr,
     Cldr.List,
     Cldr.Calendar,
     Cldr.Territory,
-    Cldr.LocaleDisplay
+    Cldr.LocaleDisplay,
+    Cldr.Trans
   ],
   gettext: Bonfire.Common.Localise.Gettext,
   data_dir: "./priv/cldr",
