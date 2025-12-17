@@ -561,10 +561,10 @@ defmodule Bonfire.Boundaries.Blocks do
     [circle]
   end
 
+  # Returns full Circle structs (needed for mutate_blocklists which preloads associations)
   defp per_user_circles(current_user, block_types)
        when not is_nil(current_user) and is_list(block_types) do
-    debug(current_user, "per-user circles")
-    # Use lightweight ID-only query for block checking
+    debug(current_user, "per-user circles (full structs)")
     Circles.get_stereotype_circles(current_user, block_types)
   end
 
@@ -577,6 +577,16 @@ defmodule Bonfire.Boundaries.Blocks do
     warn(block_types, "expected a list of block types")
     []
   end
+
+  # Returns only circle IDs
+  defp per_user_circle_ids(current_user, block_types)
+       when not is_nil(current_user) and is_list(block_types) do
+    debug(current_user, "per-user circle IDs")
+    Circles.get_stereotype_circle_ids(current_user, block_types)
+  end
+
+  defp per_user_circle_ids(nil, _block_types), do: []
+  defp per_user_circle_ids(_, _block_types), do: []
 
   def user_block_circles(current_user, block_type) do
     types_blocked(block_type)
@@ -593,8 +603,8 @@ defmodule Bonfire.Boundaries.Blocks do
 
     current_user_ids
     |> debug("user_ids")
-    |> Enum.flat_map(&per_user_circles(uid(&1), block_types))
-    |> debug("user_block_circles")
+    |> Enum.flat_map(&per_user_circle_ids(uid(&1), block_types))
+    |> debug("user_block_circle_ids")
     |> Bonfire.Boundaries.Circles.is_encircled_by?(user_or_peer, ...)
   end
 
