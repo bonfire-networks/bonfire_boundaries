@@ -631,6 +631,49 @@ defmodule Bonfire.Boundaries.Circles do
     []
   end
 
+  @doc """
+  Fast lookup of user's stereotype circle IDs (for block checking).
+
+  Unlike `get_stereotype_circles/2`, this function returns only circle IDs
+  without loading full circle structs or associations. Use this when you
+  only need IDs for membership checks.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.get_stereotype_circle_ids(user, [:ghost_them, :silence_them])
+      ["circle_id_1", "circle_id_2"]
+  """
+  def get_stereotype_circle_ids(subject, stereotypes)
+      when is_list(stereotypes) and stereotypes != [] do
+    stereotype_ids =
+      Enum.map(stereotypes, fn
+        %{id: id} when is_binary(id) -> id
+        stereo -> Bonfire.Boundaries.Circles.get_id!(stereo)
+      end)
+      |> ids()
+
+    caretaker_id = Types.uid(subject)
+
+    if is_binary(caretaker_id) and is_list(stereotype_ids) and stereotype_ids != [] do
+      from(c in Circle,
+        join: ct in assoc(c, :caretaker),
+        join: st in assoc(c, :stereotyped),
+        where: ct.caretaker_id == ^caretaker_id,
+        where: st.stereotype_id in ^stereotype_ids,
+        select: c.id
+      )
+      |> repo().all()
+    else
+      []
+    end
+  end
+
+  def get_stereotype_circle_ids(subject, stereotype)
+      when not is_nil(stereotype) and stereotype != [],
+      do: get_stereotype_circle_ids(subject, [stereotype])
+
+  def get_stereotype_circle_ids(_subject, _stereotypes), do: []
+
   def get_or_create_stereotype_circle(caretaker, stereotype) do
     case get_stereotype_circles(caretaker, [stereotype]) do
       [] ->
