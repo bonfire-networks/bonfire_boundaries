@@ -598,12 +598,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   def get_stereotype_circles(subject, stereotypes)
       when is_list(stereotypes) and stereotypes != [] do
-    stereotype_ids =
-      Enum.map(stereotypes, fn
-        %{id: id} when is_binary(id) -> id
-        stereo -> Bonfire.Boundaries.Circles.get_id!(stereo)
-      end)
-      |> ids()
+    stereotype_ids = stereotype_ids(stereotypes)
 
     if is_list(subject) do
       Enum.flat_map(subject, &do_get_stereotype_circles(&1, stereotype_ids))
@@ -631,34 +626,34 @@ defmodule Bonfire.Boundaries.Circles do
     []
   end
 
+  def stereotype_ids(stereotypes), do:
+      Enum.map(stereotypes, fn
+        %{id: id} when is_binary(id) -> id
+        stereo -> Bonfire.Boundaries.Circles.get_id!(stereo)
+      end)
+      |> Enums.ids()
+
   @doc """
   Fast lookup of user's stereotype circle IDs (for block checking).
 
-  Unlike `get_stereotype_circles/2`, this function returns only circle IDs
-  without loading full circle structs or associations. Use this when you
-  only need IDs for membership checks.
+  Unlike `get_stereotype_circles/2`, this function returns only circle IDs without loading full circle structs or associations. Use this when you only need IDs for membership checks.
 
   ## Examples
 
       iex> Bonfire.Boundaries.Circles.get_stereotype_circle_ids(user, [:ghost_them, :silence_them])
       ["circle_id_1", "circle_id_2"]
   """
-  def get_stereotype_circle_ids(subject, stereotypes)
+  def get_stereotype_circle_ids(subjects, stereotypes)
       when is_list(stereotypes) and stereotypes != [] do
-    stereotype_ids =
-      Enum.map(stereotypes, fn
-        %{id: id} when is_binary(id) -> id
-        stereo -> Bonfire.Boundaries.Circles.get_id!(stereo)
-      end)
-      |> ids()
+    stereotype_ids = stereotype_ids(stereotypes)
 
-    caretaker_id = Types.uid(subject)
+    caretaker_ids = Enums.ids(subjects)
 
-    if is_binary(caretaker_id) and is_list(stereotype_ids) and stereotype_ids != [] do
+    if is_list(caretaker_ids) and caretaker_ids != [] and is_list(stereotype_ids) and stereotype_ids != [] do
       from(c in Circle,
         join: ct in assoc(c, :caretaker),
         join: st in assoc(c, :stereotyped),
-        where: ct.caretaker_id == ^caretaker_id,
+        where: ct.caretaker_id in ^caretaker_ids,
         where: st.stereotype_id in ^stereotype_ids,
         select: c.id
       )

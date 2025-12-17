@@ -565,7 +565,7 @@ defmodule Bonfire.Boundaries.Blocks do
        when not is_nil(current_user) and is_list(block_types) do
     debug(current_user, "per-user circles")
     # Use lightweight ID-only query for block checking
-    Circles.get_stereotype_circle_ids(current_user, block_types)
+    Circles.get_stereotype_circles(current_user, block_types)
   end
 
   defp per_user_circles(nil, _block_types) do
