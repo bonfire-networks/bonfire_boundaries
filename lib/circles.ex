@@ -626,7 +626,8 @@ defmodule Bonfire.Boundaries.Circles do
     []
   end
 
-  def stereotype_ids(stereotypes), do:
+  def stereotype_ids(stereotypes),
+    do:
       Enum.map(stereotypes, fn
         %{id: id} when is_binary(id) -> id
         stereo -> Bonfire.Boundaries.Circles.get_id!(stereo)
@@ -649,7 +650,8 @@ defmodule Bonfire.Boundaries.Circles do
 
     caretaker_ids = Enums.ids(subjects)
 
-    if is_list(caretaker_ids) and caretaker_ids != [] and is_list(stereotype_ids) and stereotype_ids != [] do
+    if is_list(caretaker_ids) and caretaker_ids != [] and is_list(stereotype_ids) and
+         stereotype_ids != [] do
       from(c in Circle,
         join: ct in assoc(c, :caretaker),
         join: st in assoc(c, :stereotyped),
