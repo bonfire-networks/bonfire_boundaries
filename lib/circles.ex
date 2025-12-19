@@ -768,6 +768,80 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc """
+  Fast query for sidebar - uses indexed lookup on caretaker_id first.
+  Only preloads :named and :stereotyped (what sidebar actually uses).
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_my_for_sidebar(user, exclude_stereotypes: true)
+      [%Circle{id: "circle_id1", named: %{name: "My Circle"}}]
+  """
+  def list_my_for_sidebar(user, opts \\ []) do
+    user_id = uid!(user)
+
+    exclude_circles =
+      e(opts, :exclude_circles, []) ++
+        if opts[:exclude_built_ins],
+          do: built_in_ids(),
+          else:
+            if(opts[:exclude_stereotypes],
+              do: stereotype_ids(),
+              else: []
+            )
+
+    # Step 1: Get circle IDs for this user (fast - uses caretaker_id index)
+    circle_ids =
+      from(c in Caretaker,
+        where: c.caretaker_id == ^user_id,
+        select: c.id
+      )
+      |> repo().all()
+      |> Enum.reject(&(&1 in exclude_circles))
+
+    # Step 2: Fetch those specific circles with minimal preloads
+    from(circle in Circle, as: :circle)
+    |> where([circle], circle.id in ^circle_ids)
+    |> proload([
+      :named,
+      stereotyped: {"stereotype_", [:named]}
+    ])
+    |> where(
+      [stereotyped: stereotyped],
+      is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^exclude_circles
+    )
+    |> repo().all()
+    |> merge_stereotype_config()
+  end
+
+  defp merge_stereotype_config(circles) do
+    all_circles = circles()
+
+    Enum.map(circles, fn
+      %{stereotyped: %{stereotype_id: stereotype_id} = stereotyped} = circle
+      when not is_nil(stereotype_id) ->
+        config = get_built_in(stereotype_id, all_circles)
+
+        if is_map(config) or Keyword.keyword?(config) do
+          Map.put(circle, :stereotyped, update_meta_from_config(stereotyped, config[:icon], config[:name]))
+        else
+          circle
+        end
+
+      %{id: id} = circle ->
+        config = get_built_in(id, all_circles)
+
+        if is_map(config) or Keyword.keyword?(config) do
+          update_meta_from_config(circle, config[:icon], config[:name])
+        else
+          circle
+        end
+
+      circle ->
+        circle
+    end)
+  end
+
+  @doc """
   Lists circles owned by a user and global/built-in circles.
 
   ## Examples
