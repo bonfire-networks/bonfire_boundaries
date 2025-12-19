@@ -822,7 +822,11 @@ defmodule Bonfire.Boundaries.Circles do
         config = get_built_in(stereotype_id, all_circles)
 
         if is_map(config) or Keyword.keyword?(config) do
-          Map.put(circle, :stereotyped, update_meta_from_config(stereotyped, config[:icon], config[:name]))
+          Map.put(
+            circle,
+            :stereotyped,
+            update_meta_from_config(stereotyped, config[:icon], config[:name])
+          )
         else
           circle
         end
