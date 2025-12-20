@@ -445,12 +445,9 @@ defmodule Bonfire.Boundaries do
   end
 
   def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, _object_type, opts) do
-    # debug(acl)
-
     preset_acls = Config.get!(:preset_acls_match)
 
     public_acl_ids = Acls.preset_acl_ids("public", preset_acls)
-
     local_acl_ids = Acls.preset_acl_ids("local", preset_acls)
 
     cond do

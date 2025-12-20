@@ -212,17 +212,23 @@ defmodule Bonfire.Boundaries.Controlleds do
 
   defp do_list_presets_on_objects(objects)
        when is_list(objects) and length(objects) > 0 do
+    # Get public ACL IDs for prioritization
+    public_acl_ids = Acls.preset_acl_ids("public")
+
     repo().many(list_presets_on_objects_q(objects))
-    # |> debug()
-    |> Map.new(fn c ->
-      # Map.new discards duplicates for the same key, which is convenient for now as we only display one ACL (note that the order_by in the `list_on_objects` query matters)
+    |> Enum.group_by(&e(&1, :id, nil))
+    |> Map.new(fn {object_id, controlleds} ->
+      # When an object has multiple preset ACLs, prioritize public over local/other
+      best_acl =
+        Enum.find(controlleds, fn c ->
+          e(c, :acl_id, nil) in public_acl_ids
+        end) || List.first(controlleds)
+
       {
-        e(c, :id, nil),
-        e(c, :acl, nil) || %Acl{id: e(c, :acl_id, nil)}
+        object_id,
+        e(best_acl, :acl, nil) || %Acl{id: e(best_acl, :acl_id, nil)}
       }
     end)
-
-    # |> debug()
   end
 
   defp do_list_presets_on_objects(_), do: %{}
