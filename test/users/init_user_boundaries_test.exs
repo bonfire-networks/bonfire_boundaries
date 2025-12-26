@@ -101,7 +101,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
 
       %{id: user_id} = Bonfire.Me.Fake.fake_user!()
 
-      assert %Bonfire.Data.AccessControl.Controlled{acl_id: "7W1DE1YAVA11AB1ET0SEENREAD"} =
+      assert %Bonfire.Data.AccessControl.Controlled{acl_id: "1EVERY0NEMAYSEEEEANDREADDD"} =
                repo().one(from c in Controlled, where: c.id == ^user_id)
 
       assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 1
@@ -117,7 +117,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
 
       %{id: user_id} = Bonfire.Me.Fake.fake_user!(%{}, %{}, undiscoverable: true)
 
-      assert %Bonfire.Data.AccessControl.Controlled{acl_id: "50VCANREAD1FY0VHAVETHE11NK"} =
+      assert %Bonfire.Data.AccessControl.Controlled{acl_id: "2EVERY0NEMAYREADDDDDDDDDDD"} =
                repo().one(from c in Controlled, where: c.id == ^user_id)
 
       assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 1
