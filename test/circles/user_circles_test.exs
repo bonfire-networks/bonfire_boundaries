@@ -12,7 +12,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
 
     assert circles = Circles.list_visible(user)
     # preset_circles = Bonfire.Boundaries.Circles.circles() |> Map.keys()
-    # flood(circles, "visible circles")
+    # debug(circles, "visible circles")
     assert length(circles) == 5
   end
 
@@ -89,7 +89,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
              Circles.list_visible(me)
              |> repo().preload([:named, :caretaker])
 
-    # flood(circles, "circles visible to me")
+    # debug(circles, "circles visible to me")
     assert length(circles) == 5
   end
 
