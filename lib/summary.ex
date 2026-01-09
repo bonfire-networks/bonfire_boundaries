@@ -121,7 +121,7 @@ defmodule Bonfire.Boundaries.Summary do
   group by (pointer.id, controlled.id, verb.id)
   """
 
-  @doc "An equivalent of the Summary view, but represented as an Ecto subquery instead"
+  @doc "An equivalent of the Summary view, but represented as an Ecto subquery instead of a SQL view (useful for debugging queries with more visibility into what's happening, or for testing changes to it before changing the view)."
   def base_summary_query do
     subquery(
       from(pointer in Pointer,
