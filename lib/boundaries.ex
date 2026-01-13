@@ -849,7 +849,8 @@ defmodule Bonfire.Boundaries do
   end
 
   defp load_query(ids, _, opts) do
-    (opts[:from] || Needle.Pointers.query_base(if opts[:include_deleted], do: :include_deleted))
+    (opts[:from] ||
+       Bonfire.Common.Needles.query_base(if opts[:include_deleted], do: :include_deleted))
     |> where([p], p.id in ^List.wrap(ids))
     |> boundarise(main_object.id, opts)
   end
