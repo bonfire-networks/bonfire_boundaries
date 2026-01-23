@@ -31,31 +31,11 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
     end
 
     alias Bonfire.Boundaries.Blocks
-    alias Bonfire.API.MastoCompat.{Mappers, Schemas, PaginationHelpers}
+    alias Bonfire.API.MastoCompat.{Fragments, Mappers, Schemas, PaginationHelpers}
     alias Bonfire.Social.Graph.Follows
 
     # User profile fragment inlined for compile-order independence
-    @user_profile """
-      id
-      created_at: date_created
-      profile {
-        avatar: icon
-        avatar_static: icon
-        header: image
-        header_static: image
-        display_name: name
-        note: summary
-        website
-      }
-      character {
-        username
-        acct: username
-        url: canonical_uri
-        peered {
-          canonical_uri
-        }
-      }
-    """
+    @user_profile Fragments.user_profile()
 
     # Helper to list restricted accounts (mutes/blocks) via GraphQL
     defp list_restricted_accounts(conn, query_name, data_key) do
