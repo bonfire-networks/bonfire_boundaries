@@ -1299,4 +1299,35 @@ defmodule Bonfire.Boundaries.Circles do
       |> Enum.uniq()
     end
   end
+
+  @doc """
+  Returns circles owned by `owner` that contain `subject` as a member.
+
+  Excludes stereotypes and built-in circles (only returns user-created circles).
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.circles_containing_subject(owner, subject_id)
+      [%Circle{id: "circle_id", named: %{name: "Friends"}}, ...]
+  """
+  def circles_containing_subject(owner, subject) do
+    owner_id = Types.uid!(owner)
+    subject_id = Types.uid!(subject)
+
+    stereotype_ids = stereotype_ids()
+    built_in_ids = built_in_ids()
+    exclude_ids = stereotype_ids ++ built_in_ids
+
+    from(c in Circle,
+      join: ct in Caretaker,
+      on: ct.id == c.id,
+      join: e in Encircle,
+      on: e.circle_id == c.id,
+      where: ct.caretaker_id == ^owner_id,
+      where: e.subject_id == ^subject_id,
+      where: c.id not in ^exclude_ids
+    )
+    |> proload([:named])
+    |> repo().many()
+  end
 end

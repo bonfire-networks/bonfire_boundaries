@@ -67,5 +67,11 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       debug(params, "DELETE /api/v1/lists/#{id}/accounts")
       Adapter.remove_from_list(id, params, conn)
     end
+
+    @doc "Get lists containing a specific account"
+    def account_lists(conn, params) do
+      debug(params, "GET /api/v1/accounts/:id/lists")
+      Adapter.account_lists(params, conn)
+    end
   end
 end

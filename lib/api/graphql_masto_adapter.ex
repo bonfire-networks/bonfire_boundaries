@@ -577,5 +577,25 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       do: PaginationHelpers.encode_cursor(id, %{{:activity, :id} => id})
 
     defp encode_id_as_cursor(_), do: {:error, :invalid_id}
+
+    @doc """
+    Get lists (circles) owned by the current user that contain the specified account.
+
+    Mastodon API: GET /api/v1/accounts/:id/lists
+    Returns an array of List objects (or empty array if account is not in any lists).
+    """
+    def account_lists(%{"id" => target_id}, conn) do
+      RestAdapter.with_current_user(conn, fn current_user ->
+        circles =
+          Bonfire.Boundaries.Circles.circles_containing_subject(current_user, target_id)
+
+        lists =
+          circles
+          |> Enum.map(&Mappers.List.from_circle/1)
+          |> Enum.reject(&is_nil/1)
+
+        RestAdapter.json(conn, lists)
+      end)
+    end
   end
 end
