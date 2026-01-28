@@ -13,7 +13,7 @@ defmodule Bonfire.Boundaries.BlockKeywords do
 
         text when is_binary(text) ->
           text_pattern_match?(text, patterns)
-          |> flood("text_pattern_match? #{text} in #{field}")
+          |> debug("text_pattern_match? #{text} in #{field}")
 
         _ ->
           false
@@ -47,7 +47,7 @@ defmodule Bonfire.Boundaries.BlockKeywords do
       _ -> nil
     end)
     |> Enum.reject(&is_nil/1)
-    |> flood("set_with_hooks filter_keywords")
+    |> debug("set_with_hooks filter_keywords")
   end
 
   def settings_load_hook_process(value) do
