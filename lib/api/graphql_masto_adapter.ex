@@ -329,15 +329,19 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       delete_circle(id: $id)
     }"
     def delete_list(id, _params, conn) do
-      case graphql(conn, :delete_list, %{"id" => id}) do
-        %{data: %{delete_circle: true}} ->
-          RestAdapter.json(conn, %{})
+      try do
+        case graphql(conn, :delete_list, %{"id" => id}) do
+          %{data: %{delete_circle: result}} when result not in [nil, false] ->
+            RestAdapter.json(conn, %{})
 
-        %{errors: errors} ->
-          RestAdapter.error_fn({:error, errors}, conn)
+          %{errors: errors} ->
+            RestAdapter.error_fn({:error, errors}, conn)
 
-        _ ->
-          RestAdapter.error_fn({:error, :unexpected_response}, conn)
+          _ ->
+            RestAdapter.error_fn({:error, :not_found}, conn)
+        end
+      rescue
+        _ -> RestAdapter.error_fn({:error, :not_found}, conn)
       end
     end
 
@@ -376,11 +380,14 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
         when is_list(entries) ->
           accounts =
             entries
-            |> Enum.map(fn member ->
-              subject = Map.get(member, :subject)
-              Mappers.Account.from_user(subject, skip_expensive_stats: true)
+            |> Enum.flat_map(fn member ->
+              subject = Map.get(member, :subject) || Map.get(member, "subject")
+
+              case subject && Mappers.Account.from_user(subject, skip_expensive_stats: true) do
+                nil -> []
+                account -> [account]
+              end
             end)
-            |> Enum.reject(&is_nil/1)
 
           conn =
             if page_info do
