@@ -12,22 +12,16 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
 
     alias Bonfire.API.GraphQL.RestAdapter
 
-    # Override to add Dataloader context (AbsintheClient doesn't call schema's context/1)
+    # AbsintheClient doesn't call schema's context/1, so we add Dataloader here
     def absinthe_pipeline(schema, opts) do
-      # Get existing context or empty map
       context = Keyword.get(opts, :context, %{})
 
-      # Add Dataloader if not already present
       context_with_loader =
-        if Map.has_key?(context, :loader) do
-          context
-        else
-          # Call the schema's context function to get Dataloader
-          schema.context(context)
-        end
+        if Map.has_key?(context, :loader),
+          do: context,
+          else: schema.context(context)
 
-      opts_with_loader = Keyword.put(opts, :context, context_with_loader)
-      AbsintheClient.default_pipeline(schema, opts_with_loader)
+      AbsintheClient.default_pipeline(schema, Keyword.put(opts, :context, context_with_loader))
     end
 
     alias Bonfire.Boundaries.Blocks
@@ -37,30 +31,36 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
     # User profile fragment inlined for compile-order independence
     @user_profile Fragments.user_profile()
 
-    # Helper to list restricted accounts (mutes/blocks) via GraphQL
     defp list_restricted_accounts(conn, query_name, data_key) do
-      case graphql(conn, query_name, %{}) do
-        %{data: data} when is_map(data) ->
-          current_user = conn.assigns[:current_user]
-          users = Map.get(data, data_key, [])
+      current_user = conn.assigns[:current_user]
 
-          accounts =
-            users
-            |> Enum.map(
-              &Mappers.Account.from_user(&1,
-                current_user: current_user,
-                skip_expensive_stats: true
+      if is_nil(current_user) do
+        RestAdapter.error_fn({:error, :unauthorized}, conn)
+      else
+        case graphql(conn, query_name, %{}) do
+          %{data: data} when is_map(data) ->
+            users = Map.get(data, data_key, []) || []
+
+            accounts =
+              users
+              |> Enum.map(
+                &Mappers.Account.from_user(&1,
+                  current_user: current_user,
+                  skip_expensive_stats: true
+                )
               )
-            )
-            |> Enum.reject(&is_nil/1)
+              |> Enum.reject(&is_nil/1)
 
-          RestAdapter.json(conn, accounts)
+            RestAdapter.json(conn, accounts)
 
-        %{errors: errors} ->
-          RestAdapter.error_fn({:error, errors}, conn)
+          %{errors: errors} ->
+            error(errors, "GraphQL error in #{query_name}")
+            RestAdapter.error_fn({:error, errors}, conn)
 
-        _ ->
-          RestAdapter.json(conn, [])
+          other ->
+            error(other, "Unexpected GraphQL response in #{query_name}")
+            RestAdapter.json(conn, [])
+        end
       end
     end
 
@@ -215,25 +215,29 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       }
     }"
     def lists(_params, conn) do
-      filter = %{
-        "exclude_stereotypes" => true,
-        "exclude_built_ins" => true
-      }
+      if is_nil(conn.assigns[:current_user]) do
+        RestAdapter.error_fn({:error, :unauthorized}, conn)
+      else
+        filter = %{
+          "exclude_stereotypes" => true,
+          "exclude_built_ins" => true
+        }
 
-      case graphql(conn, :lists, %{"filter" => filter}) do
-        %{data: %{my_circles: circles}} when is_list(circles) ->
-          lists =
-            circles
-            |> Enum.map(&Mappers.List.from_circle/1)
-            |> Enum.reject(&is_nil/1)
+        case graphql(conn, :lists, %{"filter" => filter}) do
+          %{data: %{my_circles: circles}} when is_list(circles) ->
+            lists =
+              circles
+              |> Enum.map(&Mappers.List.from_circle/1)
+              |> Enum.reject(&is_nil/1)
 
-          RestAdapter.json(conn, lists)
+            RestAdapter.json(conn, lists)
 
-        %{errors: errors} ->
-          RestAdapter.error_fn({:error, errors}, conn)
+          %{errors: errors} ->
+            RestAdapter.error_fn({:error, errors}, conn)
 
-        _ ->
-          RestAdapter.error_fn({:error, :unexpected_response}, conn)
+          _ ->
+            RestAdapter.error_fn({:error, :unexpected_response}, conn)
+        end
       end
     end
 
