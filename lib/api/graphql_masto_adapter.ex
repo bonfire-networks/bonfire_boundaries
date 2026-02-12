@@ -565,7 +565,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
 
     # Encode a plain ID as a GraphQL cursor
     defp encode_id_as_cursor(id) when is_binary(id),
-      do: PaginationHelpers.encode_cursor(id, %{{:activity, :id} => id})
+      do: PaginationHelpers.encode_cursor(id, %{id: id})
 
     defp encode_id_as_cursor(_), do: {:error, :invalid_id}
 
