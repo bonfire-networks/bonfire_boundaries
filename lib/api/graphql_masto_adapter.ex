@@ -150,6 +150,11 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
             relationship = build_relationship(current_user, target_id)
             RestAdapter.json(conn, relationship)
 
+          %{errors: _errors} when action in [:unmute, :unblock] ->
+            # Mastodon API expects unmute/unblock to be idempotent
+            relationship = build_relationship(current_user, target_id)
+            RestAdapter.json(conn, relationship)
+
           %{errors: errors} ->
             RestAdapter.error_fn({:error, errors}, conn)
 
@@ -366,49 +371,53 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       }
     }"
     def list_accounts(id, params, conn) do
-      limit = PaginationHelpers.validate_limit(params["limit"] || 40)
+      if not Bonfire.Common.Types.is_uid?(id) do
+        RestAdapter.error_fn({:error, :not_found}, conn)
+      else
+        limit = PaginationHelpers.validate_limit(params["limit"] || 40)
 
-      # Build pagination params from Mastodon params
-      pagination_params =
-        %{"circle_id" => id, "limit" => limit}
-        |> maybe_add_graphql_cursor(params, "max_id", "after")
-        |> maybe_add_graphql_cursor(params, "since_id", "before")
-        |> maybe_add_graphql_cursor(params, "min_id", "before")
+        # Build pagination params from Mastodon params
+        pagination_params =
+          %{"circle_id" => id, "limit" => limit}
+          |> maybe_add_graphql_cursor(params, "max_id", "after")
+          |> maybe_add_graphql_cursor(params, "since_id", "before")
+          |> maybe_add_graphql_cursor(params, "min_id", "before")
 
-      case graphql(conn, :list_accounts, pagination_params) do
-        %{data: %{circle_members: %{entries: entries, page_info: page_info}}}
-        when is_list(entries) ->
-          accounts =
-            entries
-            |> Enum.flat_map(fn member ->
-              subject = Map.get(member, :subject) || Map.get(member, "subject")
+        case graphql(conn, :list_accounts, pagination_params) do
+          %{data: %{circle_members: %{entries: entries, page_info: page_info}}}
+          when is_list(entries) ->
+            accounts =
+              entries
+              |> Enum.flat_map(fn member ->
+                subject = Map.get(member, :subject) || Map.get(member, "subject")
 
-              case subject && Mappers.Account.from_user(subject, skip_expensive_stats: true) do
-                nil -> []
-                account -> [account]
+                case subject && Mappers.Account.from_user(subject, skip_expensive_stats: true) do
+                  nil -> []
+                  account -> [account]
+                end
+              end)
+
+            conn =
+              if page_info do
+                page_info_map = %{
+                  start_cursor: Map.get(page_info, :start_cursor),
+                  end_cursor: Map.get(page_info, :end_cursor),
+                  cursor_fields: [id: :desc]
+                }
+
+                PaginationHelpers.add_simple_link_headers(conn, params, page_info_map, entries)
+              else
+                conn
               end
-            end)
 
-          conn =
-            if page_info do
-              page_info_map = %{
-                start_cursor: Map.get(page_info, :start_cursor),
-                end_cursor: Map.get(page_info, :end_cursor),
-                cursor_fields: [id: :desc]
-              }
+            RestAdapter.json(conn, accounts)
 
-              PaginationHelpers.add_simple_link_headers(conn, params, page_info_map, entries)
-            else
-              conn
-            end
+          %{errors: errors} ->
+            RestAdapter.error_fn({:error, errors}, conn)
 
-          RestAdapter.json(conn, accounts)
-
-        %{errors: errors} ->
-          RestAdapter.error_fn({:error, errors}, conn)
-
-        _ ->
-          RestAdapter.error_fn({:error, :not_found}, conn)
+          _ ->
+            RestAdapter.error_fn({:error, :not_found}, conn)
+        end
       end
     end
 
