@@ -50,6 +50,9 @@ defmodule Bonfire.Boundaries do
       "local" in boundaries ->
         "local"
 
+      "unlisted" in boundaries ->
+        "unlisted"
+
       "public" in boundaries ->
         "public"
 
@@ -448,10 +451,12 @@ defmodule Bonfire.Boundaries do
     preset_acls = Config.get!(:preset_acls_match)
 
     public_acl_ids = Acls.preset_acl_ids("public", preset_acls)
+    unlisted_acl_ids = Acls.preset_acl_ids("unlisted", preset_acls)
     local_acl_ids = Acls.preset_acl_ids("local", preset_acls)
 
     cond do
       acl_id in public_acl_ids -> {"public", l("Public")}
+      acl_id in unlisted_acl_ids -> {"unlisted", l("Unlisted")}
       acl_id in local_acl_ids -> {"local", l("Local Instance")}
       true -> opts[:custom_tuple] || {"mentions", l("Mentions")}
     end

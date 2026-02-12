@@ -394,6 +394,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :locals_may_reply,
           :remotes_may_reply
         ],
+        "unlisted" => [
+          :everyone_may_see_read
+        ],
         "local" => [:locals_may_reply],
         "open" => [:everyone_may_see_read, :locals_may_contribute, :remotes_may_contribute],
         "visible" => [
@@ -415,6 +418,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :guests_may_see_read,
           :remotes_may_interact,
           :remotes_may_reply
+        ],
+        "unlisted" => [
+          :everyone_may_see,
+          :everyone_may_read,
+          :everyone_may_see_read
         ],
         "local" => [:locals_may_read, :locals_may_interact, :locals_may_reply],
         "open" => [:guests_may_see_read, :locals_may_contribute, :remotes_may_contribute],

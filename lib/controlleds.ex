@@ -338,6 +338,102 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   @doc """
+  Lists all preset ACL IDs applied to each object, for visibility detection.
+
+  Unlike `list_presets_on_objects/1` which returns one "best" ACL per object,
+  this returns the full set of ACL IDs, enabling set-based visibility matching
+  (e.g., distinguishing "public" from "unlisted" by checking for remote interaction ACLs).
+
+  Returns `%{object_id => MapSet.t(acl_id)}`.
+  """
+  def list_preset_acl_ids_on_objects(objects) when is_list(objects) and length(objects) > 0 do
+    all_visibility_acl_ids = all_visibility_acl_ids()
+
+    from(c in Controlled,
+      where: c.id in ^uids(objects) and c.acl_id in ^all_visibility_acl_ids,
+      select: {c.id, c.acl_id}
+    )
+    |> repo().all()
+    |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+    |> Map.new(fn {object_id, acl_ids} -> {object_id, MapSet.new(acl_ids)} end)
+  end
+
+  def list_preset_acl_ids_on_objects(_), do: %{}
+
+  @doc """
+  Returns the set of ACL IDs for a single object, for visibility detection.
+  """
+  def list_preset_acl_ids_on_object(object) do
+    all_visibility_acl_ids = all_visibility_acl_ids()
+
+    from(c in Controlled,
+      where: c.id == ^uid(object) and c.acl_id in ^all_visibility_acl_ids,
+      select: c.acl_id
+    )
+    |> repo().all()
+    |> MapSet.new()
+  end
+
+  defp all_visibility_acl_ids do
+    preset_acls = Bonfire.Common.Config.get!(:preset_acls_match)
+
+    ["public", "unlisted", "local"]
+    |> Enum.flat_map(&Acls.preset_acl_ids(&1, preset_acls))
+    |> Enum.concat(Acls.remote_public_acl_ids())
+    |> Enum.uniq()
+  end
+
+  @doc """
+  Checks which objects have grants to the followers stereotype circle.
+
+  Used to distinguish Mastodon "private" (followers + mentions) from "direct" (mentions only)
+  when an object has no preset ACLs.
+
+  Returns a `MapSet` of object IDs that have at least one grant targeting the followers circle.
+  """
+  def list_objects_with_followers_grants(object_ids)
+      when is_list(object_ids) and length(object_ids) > 0 do
+    alias Bonfire.Data.AccessControl.Grant
+    followers_circle_id = Bonfire.Boundaries.Circles.get_id(:followers)
+
+    if followers_circle_id do
+      from(c in Controlled,
+        join: g in Grant,
+        on: g.acl_id == c.acl_id,
+        where: c.id in ^uids(object_ids) and g.subject_id == ^followers_circle_id,
+        select: c.id
+      )
+      |> repo().all()
+      |> MapSet.new()
+    else
+      MapSet.new()
+    end
+  end
+
+  def list_objects_with_followers_grants(_), do: MapSet.new()
+
+  @doc """
+  Checks if a single object has a grant to the followers stereotype circle.
+  """
+  def object_has_followers_grant?(object_id) do
+    alias Bonfire.Data.AccessControl.Grant
+    followers_circle_id = Bonfire.Boundaries.Circles.get_id(:followers)
+
+    if followers_circle_id do
+      from(c in Controlled,
+        join: g in Grant,
+        on: g.acl_id == c.acl_id,
+        where: c.id == ^uid(object_id) and g.subject_id == ^followers_circle_id,
+        select: true
+      )
+      |> limit(1)
+      |> repo().exists?()
+    else
+      false
+    end
+  end
+
+  @doc """
   Removes the given ACLs from an object.
 
   ## Examples
