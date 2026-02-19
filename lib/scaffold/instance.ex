@@ -152,6 +152,8 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
   Prepares fixtures and inserts them into the database.
   """
   def insert() do
+    IO.puts("Inserting default boundary fixtures into #{repo()} for the instance...")
+
     %{acls: acls, circles: circles, verbs: verbs, named: named, grants: grants} = fixtures()
 
     upsert_acls_helper(acls)
