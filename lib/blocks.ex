@@ -525,6 +525,19 @@ defmodule Bonfire.Boundaries.Blocks do
       iex> Bonfire.Boundaries.Blocks.list(:silence, current_user: user)
       [%{id: "789", type: :silence}]
   """
+  @doc "Counts subjects in instance-wide block circles."
+  def count_blocked(:instance_wide, block_type \\ :any) do
+    import Ecto.Query
+
+    circle_ids = instance_wide_circles(types_blocked(block_type))
+
+    from(enc in Bonfire.Data.AccessControl.Encircle,
+      where: enc.circle_id in ^circle_ids,
+      select: count(enc.id)
+    )
+    |> repo().one() || 0
+  end
+
   def list(block_type, :instance_wide) do
     instance_wide_circles(types_blocked(block_type))
     |> Bonfire.Boundaries.Circles.list_by_ids()
