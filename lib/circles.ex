@@ -1095,6 +1095,30 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc """
+  Lists members that appear in ALL of the given circles (intersection).
+  Supports cursor-based pagination.
+
+  This is used for the "blocked" tab which requires users to be in both
+  the ghost_them AND silence_them circles.
+
+  ## Examples
+
+      iex> list_members_in_all_circles(["circle_id_1", "circle_id_2"])
+      %{edges: [%Encircle{}, ...], page_info: %{...}}
+  """
+  def list_members_in_all_circles(circle_ids, opts \\ []) when is_list(circle_ids) do
+    uid_list = Enum.map(circle_ids, &Types.uid!/1)
+    first_circle_id = List.first(uid_list)
+
+    from(e in Encircle,
+      where: e.circle_id == ^first_circle_id,
+      where: e.subject_id in subquery(intersection_subject_ids_query(uid_list))
+    )
+    |> proload(subject: [:character, :profile, :named])
+    |> many(Keyword.get(opts, :paginate, true), opts)
+  end
+
+  @doc """
   Counts the total number of members in a circle.
   """
   def count_members(circle) do
@@ -1104,6 +1128,29 @@ defmodule Bonfire.Boundaries.Circles do
         select: count(e.id)
 
     repo().one(query) || 0
+  end
+
+  @doc """
+  Counts the total number of subjects present in ALL of the given circles (intersection count).
+  Used to get the total blocked count for the blocked tab where a subject must be in both ghost_them and silence_them circles.
+  """
+  def count_members_in_all_circles(circle_ids) when is_list(circle_ids) do
+    circle_ids
+    |> Enum.map(&Types.uid!/1)
+    |> intersection_subject_ids_query()
+    |> subquery()
+    |> repo().aggregate(:count)
+  end
+
+  # Builds a query for subject_ids present in ALL of the given circles (intersection).
+  defp intersection_subject_ids_query(uid_list) do
+    num_circles = length(uid_list)
+
+    from e in Encircle,
+      where: e.circle_id in ^uid_list,
+      group_by: e.subject_id,
+      having: count(e.circle_id) == ^num_circles,
+      select: e.subject_id
   end
 
   @doc """
