@@ -158,7 +158,7 @@ defmodule Bonfire.Boundaries.Queries do
     from(s in Bonfire.Data.AccessControl.Verb, select: fragment("true"), limit: 1)
   end
 
-  def base_summary_query(boundarise_with_view \\ false)
+  def base_summary_query(boundarise_with_view \\ true)
   def base_summary_query(true), do: Summary
   def base_summary_query(_false), do: Summary.base_summary_query()
 
