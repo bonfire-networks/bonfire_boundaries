@@ -5,15 +5,7 @@ defmodule Bonfire.Boundaries.Queries do
   This module provides macros and functions to assist with boundary checks and permission queries.
   """
 
-  # Most of this stuff will probably move at some point when we figure
-  # out how to better organise it.
-
-  # Unfortunately, ecto is against the sort of thing we take for granted
-  # in the bonfire ecosystem, so some of these patterns are a bit
-  # convoluted to make ecto generate acceptable sql. In particular the
-  # lateral join and the macro is a bit loltastic when we could just
-  # return an arbitrary tuple if ecto would support inferring (or us
-  # providing) the return type of a subquery.
+  # Unfortunately, ecto is against the sort of thing we take for granted in the bonfire ecosystem, so some of these patterns are a bit convoluted to make ecto generate acceptable sql. In particular the lateral join and the macro is a bit loltastic when we could just return an arbitrary tuple if ecto would support inferring (or us providing) the return type of a subquery.
 
   # import Untangle
   use Bonfire.Common.E
@@ -276,7 +268,7 @@ defmodule Bonfire.Boundaries.Queries do
     )
   end
 
-  @doc """
+  @doc """  
   A macro that calls the `add_perms(bool?, bool?)` DB function
 
   ## Examples
