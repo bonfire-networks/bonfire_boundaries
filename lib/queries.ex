@@ -268,7 +268,7 @@ defmodule Bonfire.Boundaries.Queries do
     )
   end
 
-  @doc """  
+  @doc """
   A macro that calls the `add_perms(bool?, bool?)` DB function
 
   ## Examples
