@@ -3,7 +3,7 @@ defmodule Bonfire.Boundaries.Summary do
   View that facilities the querying of objects' boundaries. See `Bonfire.Boundaries.Queries` for how it is used.
   """
 
-  # Version of the view (not used at the moment). Could be incremented when making changes to the view and writing a new migration, including dropping the previous version.
+  # Version of the view (not used at the moment). Could be incremented when making changes to the view and writing a new migration, including dropping the previous version. 
   @version 1
 
   # Base name of the table/view
