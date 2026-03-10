@@ -246,14 +246,16 @@ defmodule Bonfire.Boundaries.Controlleds do
     list_on_objects_by_verb_q(objects, Verbs.ids(verb), value)
     |> repo().many()
     # |> debug()
-    |> Map.new(fn c ->
-      # note: Map.new discards duplicates for the same key
-      {
-        "#{e(c, :acl, :grants, :verb_id, nil)}-#{e(c, :acl, :grants, :subject_id, nil)}",
-        e(c, :acl, :grants, :subject, nil)
-      }
+    |> Enum.flat_map(fn c ->
+      # grants is a has_many list, so iterate over it directly
+      (e(c, :acl, :grants, nil) || [])
+      |> Enum.map(fn grant ->
+        {"#{e(grant, :verb_id, nil)}-#{e(grant, :subject_id, nil)}", e(grant, :subject, nil)}
+      end)
     end)
+    |> Map.new()
     |> Map.values()
+    |> Enum.reject(&is_nil/1)
   end
 
   @doc """
