@@ -111,7 +111,7 @@ defmodule Bonfire.Boundaries.Acls do
   @doc """
     Returns a list of special built-in ACLs (e.g., guest, local, activity_pub).
   """
-  def acls, do: Config.get(:acls)
+  def acls, do: Config.get([:bonfire_boundaries, :acls], [])
 
   @doc """
   Retrieves an ACL by its slug.
@@ -942,7 +942,7 @@ defmodule Bonfire.Boundaries.Acls do
   """
   def built_in_ids do
     acls()
-    |> Map.values()
+    |> Keyword.values()
     |> Enums.ids()
   end
 
@@ -956,7 +956,7 @@ defmodule Bonfire.Boundaries.Acls do
   """
   def stereotype_ids do
     acls()
-    |> Map.values()
+    |> Keyword.values()
     |> Enum.filter(&e(&1, :stereotype, nil))
     |> Enums.ids()
   end

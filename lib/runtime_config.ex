@@ -443,10 +443,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     ### Now follows quite a lot of fixtures that must be inserted into the database.
 
-    config :bonfire,
+    config :bonfire_boundaries,
       ### Users are placed into one or more circles, either by users or by the system. Circles referenced in ACLs have the
       ### effect of applying to all users in those circles.
-      circles: %{
+      circles: [
         ### Public circles used to categorise broadly how much of a friend/do the user is.
         guest: %{
           id: "0AND0MSTRANGERS0FF1NTERNET",
@@ -507,11 +507,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: l("People silencing me"),
           stereotype: true
         }
-      },
+      ],
       ### ACLs (Access Control Lists) are reusable lists of permissions assigned to users and circles. Objects in bonfire
       ### have one or more ACLs attached and we combine the results of all of them to determine whether a user is permitted
       ### to perform a particular operation.
-      acls: %{
+      acls: [
         instance_care: %{
           id: "01SETT1NGSF0R10CA11NSTANCE",
           name: l("Local instance roles & boundaries")
@@ -625,7 +625,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: l("People who silenced me cannot discover me"),
           stereotype: true
         }
-      },
+      ],
       ### Grants are the entries of an ACL and define the permissions a user or circle has for content using this ACL.
       ###
       ### Data structure:
@@ -633,7 +633,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       ### * The inner keys are circles declared above.
       ### * The inner values declare the verbs the user is permitted to see. Either a map of verb to boolean or a list
       ###   (where values are assumed to be true).
-      grants: %{
+      grants: [
         ### Public ACLs need their permissions filled out
         # admins can care for every aspect of the instance
         instance_care: %{
@@ -685,7 +685,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])},
         no_follow: %{local: verbs_negative.([:follow]), activity_pub: verbs_negative.([:follow])}
         # |> IO.inspect(label: "no_follow")
-      }
+      ]
 
     # end of global boundaries
 

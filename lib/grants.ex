@@ -35,7 +35,7 @@ defmodule Bonfire.Boundaries.Grants do
       iex> Bonfire.Boundaries.Grants.grants()
       %{}
   """
-  def grants, do: Config.get([:grants])
+  def grants, do: Config.get([:bonfire_boundaries, :grants], [])
 
   @doc """
   Gets the grant configuration by a given slug.
@@ -44,7 +44,7 @@ defmodule Bonfire.Boundaries.Grants do
 
       iex> Bonfire.Boundaries.Grants.get(:everyone_may_see_read)
   """
-  def get(slug) when is_atom(slug), do: Config.get([:grants, slug])
+  def get(slug) when is_atom(slug), do: Config.get([:bonfire_boundaries, :grants, slug])
   def get(slugs) when is_list(slugs), do: Enum.map(slugs, &get/1)
 
   ## invariants:

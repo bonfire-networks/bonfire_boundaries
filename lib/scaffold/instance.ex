@@ -126,11 +126,11 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
   """
   def fixtures() do
     # e.g. public, read_only
-    acls = Map.values(Acls.acls())
+    acls = Keyword.values(Acls.acls())
     # |> debug("ACLs")
 
     # eg, guest, local, activity_pub
-    circles = Map.values(Circles.circles())
+    circles = Keyword.values(Circles.circles())
 
     # eg, read, see, create...
     verbs = Keyword.values(Verbs.verbs())
@@ -200,7 +200,7 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
   - Set up caretakers (admin circle as caretaker)
   """
   def upsert_circles() do
-    circles = Map.values(Circles.circles())
+    circles = Keyword.values(Circles.circles())
 
     upsert_circles_helper(circles)
 
@@ -225,7 +225,7 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
   - Insert the ACL records (ignoring if they already exist)
   """
   def upsert_acls() do
-    Map.values(Acls.acls())
+    Keyword.values(Acls.acls())
     |> upsert_acls_helper()
 
     grants_fixtures()

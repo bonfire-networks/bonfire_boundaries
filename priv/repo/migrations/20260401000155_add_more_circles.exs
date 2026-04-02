@@ -1,4 +1,4 @@
-defmodule Bonfire.Boundaries.Repo.Migrations.MoreCircles4Fixtures do
+defmodule Bonfire.Boundaries.Repo.Migrations.MoreCircles5Fixtures do
   @moduledoc false
   use Ecto.Migration
 

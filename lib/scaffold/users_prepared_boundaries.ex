@@ -4,6 +4,7 @@ defmodule Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries do
   It takes care of reading the configuration about the default boundaries and prepare the information for the  Bonfire.Boundaries.Scaffold.Users module.
   """
   use Bonfire.Common.Config
+  use Bonfire.Common.E
   import Untangle
 
   alias __MODULE__
@@ -172,7 +173,7 @@ defmodule Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries do
   end
 
   defp default_acl_id(acls, acl_id) do
-    with nil <- Map.get(acls, acl_id, %{})[:id],
+    with nil <- ed(acls, acl_id, :id, nil),
          nil <- Acls.get_id(acl_id) do
       raise RuntimeError,
         message: "invalid acl given in new user boundaries config: #{inspect(acl_id)}"
@@ -182,7 +183,7 @@ defmodule Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries do
   defp default_subject_id(_circles, user, :SELF, _opts), do: user.id
 
   defp default_subject_id(circles, _user, circle_slug, opts) do
-    with nil <- Map.get(circles, circle_slug, %{})[:id],
+    with nil <- ed(circles, circle_slug, :id, nil),
          nil <- Circles.get_id(circle_slug),
          false <- (is_list(opts) and Types.uid(opts[:custom_circles][circle_slug])) || false do
       raise RuntimeError,

@@ -44,14 +44,14 @@ defmodule Bonfire.Boundaries.Circles do
   @doc """
   Returns a list of special built-in circles (e.g., guest, local, activity_pub).
   """
-  def circles, do: Config.get([:circles], %{})
+  def circles, do: Config.get([:bonfire_boundaries, :circles], [])
 
   @doc """
   Returns a list of stereotype circle IDs.
   """
   def stereotype_ids do
     circles()
-    |> Map.values()
+    |> Keyword.values()
     |> Enum.filter(&e(&1, :stereotype, nil))
     |> Enum.map(& &1.id)
   end
@@ -73,7 +73,7 @@ defmodule Bonfire.Boundaries.Circles do
   """
   def built_in_ids do
     circles()
-    |> Map.values()
+    |> Keyword.values()
     |> Enums.ids()
   end
 
@@ -168,7 +168,7 @@ defmodule Bonfire.Boundaries.Circles do
       iex> Bonfire.Boundaries.Circles.get_id(:nonexistent)
       nil
   """
-  def get_id(slug), do: Map.get(circles(), slug, %{})[:id]
+  def get_id(slug), do: ed(circles(), slug, :id, nil)
 
   def get_id!(slug) when is_atom(slug), do: get_built_in!(slug).id
 
@@ -186,7 +186,8 @@ defmodule Bonfire.Boundaries.Circles do
   def get_tuple(id, all_circles \\ circles())
 
   def get_tuple(slug, _all_circles) when is_atom(slug) do
-    {Config.get!([:circles, slug, :name]), Config.get!([:circles, slug, :id])}
+    {Config.get!([:bonfire_boundaries, :circles, slug, :name]),
+     Config.get!([:bonfire_boundaries, :circles, slug, :id])}
   end
 
   def get_tuple(id, all_circles) when is_binary(id) do
@@ -473,7 +474,42 @@ defmodule Bonfire.Boundaries.Circles do
   #   |> repo().preload([encircles: encircled_by_q(subject)], opts)
   # end
 
-  # Add this function to your Circles module
+  @doc """
+  Batch-checks which of the given objects (e.g. groups) the subject is a member of,
+  via a named stereotype circle owned by each object.
+
+  Returns a map of `%{object_id => true}` for each object whose stereotype circle
+  contains the subject. Single query.
+
+  ## Examples
+
+      iex> encircled_by_objects_stereoptypes?(user, group_ids, :group_members)
+      %{"group1_id" => true, "group3_id" => true}
+  """
+  def encircled_by_objects_stereoptypes?(subject, object_ids, stereotype)
+      when is_list(object_ids) do
+    subject_id = Types.uid(subject)
+    stereotype_id = get_id!(stereotype)
+
+    if is_nil(subject_id) or Enum.empty?(object_ids) do
+      %{}
+    else
+      repo().all(
+        from(e in Bonfire.Data.AccessControl.Encircle,
+          join: s in Bonfire.Data.AccessControl.Stereotyped,
+          on: s.id == e.circle_id,
+          join: c in Bonfire.Data.Identity.Caretaker,
+          on: c.id == e.circle_id,
+          where:
+            e.subject_id == ^subject_id and
+              c.caretaker_id in ^Types.uids(object_ids) and
+              s.stereotype_id == ^stereotype_id,
+          select: c.caretaker_id
+        )
+      )
+      |> Map.new(&{&1, true})
+    end
+  end
 
   @doc """
   Determines if a user is in specific circles.
@@ -494,7 +530,7 @@ defmodule Bonfire.Boundaries.Circles do
       {circles_to_check, other_circles} =
         Enum.split_with(circles, fn %{id: id} = circle ->
           # Check if this is the circle to reload OR if it doesn't have the field set yet
-          id == reload_circle_id || not is_boolean(Map.get(circle, field))
+          id == reload_circle_id || not is_boolean(ed(circle, field, nil))
         end)
 
       if Enum.empty?(circles_to_check) do
