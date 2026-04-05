@@ -1109,7 +1109,7 @@ defmodule Bonfire.Boundaries.Circles do
     * `:preload` - Associations to preload (optional)
 
   ## Examples
-      iex> Bonfire.Boundaries.Circles.list_members("circle_id", limit: 10)
+      iex> list_members("circle_id", limit: 10)
       %Paginator.Page{entries: [%Encircle{}, ...], metadata: %{...}}
   """
   def list_members(circle, opts \\ []) do
@@ -1128,6 +1128,8 @@ defmodule Bonfire.Boundaries.Circles do
       Keyword.get(opts, :paginate, true),
       opts
     )
+
+    # TODO: return just the subjects?
   end
 
   @doc """
