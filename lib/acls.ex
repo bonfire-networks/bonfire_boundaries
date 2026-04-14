@@ -448,11 +448,11 @@ defmodule Bonfire.Boundaries.Acls do
 
   defp to_boundaries_preset_tuple(to_boundaries) do
     to_boundaries =
-      Boundaries.boundaries_normalise(to_boundaries)
+      Boundaries.Presets.boundaries_normalise(to_boundaries)
       |> debug("validated to_boundaries")
 
     preset =
-      Boundaries.preset_name(to_boundaries)
+      Boundaries.Presets.preset_name(to_boundaries)
       |> debug("preset_name")
 
     {to_boundaries, preset}
@@ -466,7 +466,7 @@ defmodule Bonfire.Boundaries.Acls do
   # when the user picks a preset, this maps to a set of base acls
   defp base_acls(_user, preset, opts) do
     (List.wrap(opts[:universal_boundaries]) ++
-       Boundaries.acls_from_preset_boundary_names(preset))
+       Boundaries.Presets.acls_from_preset_boundary_names(preset))
     |> debug("preset ACLs to set (based on preset #{preset}) ")
   end
 

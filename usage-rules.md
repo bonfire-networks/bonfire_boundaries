@@ -88,7 +88,7 @@ Bonfire.Boundaries.Circles.is_encircled_by?(user, circle)
 
 ```elixir
 # Get default boundaries
-boundaries = Bonfire.Boundaries.default_boundaries(current_user: user)
+boundaries = Bonfire.Boundaries.Presets.default_boundaries(current_user: user)
 # => [{"public", "Public"}] or [{"local", "Local"}]
 
 # Set boundaries on an object

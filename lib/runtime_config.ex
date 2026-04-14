@@ -105,6 +105,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "ph:eye-duotone",
         summary: l("Follow a user or thread or whatever")
       },
+      join: %{
+        id: "50J01NAGR0VP0RC0MMVN1TYYYY",
+        verb: l("Join"),
+        icon: "ph:door-open-duotone",
+        summary: l("Join a group or community as a member")
+      },
       schedule: %{
         id: "7SCHEDV1EF1XEDDES1REDDATES",
         verb: l("Schedule"),
@@ -229,6 +235,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :mention,
           :message,
           :follow,
+          :join,
           :pin,
           :schedule,
           :vote,
@@ -252,9 +259,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       Enum.reduce(verbs, %{}, &Map.put(&2, &1, false))
     end
 
-    verbs_see_request = [:see, :request, :bookmark, :flag]
-    verbs_read_request = [:read, :request, :bookmark, :flag]
-    verbs_see_read_request = [:read, :see, :request, :bookmark, :flag]
+    verbs_basics = [:bookmark, :flag]
+    verbs_see_request = [:see, :request]
+    verbs_read_request = [:read, :request]
+    verbs_see_read_request = [:read, :see, :request] ++ verbs_basics
     verbs_interaction = [:follow]
     verbs_liking = [:like]
     verbs_sharing = [:boost]
@@ -271,6 +279,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_interact_minus_boost = verbs_see_read_request ++ verbs_interaction ++ verbs_liking
     verbs_interact_minus_like = verbs_see_read_request ++ verbs_interaction ++ verbs_sharing
 
+    # like + bookmark + flag — quiet reactions that don't amplify reach (safe for unlisted/quiet content)
+    verbs_react_quiet = verbs_liking ++ [:bookmark, :flag]
+
+    # like + boost + bookmark + flag — full reactions including amplification (for discoverable/preview content)
+    verbs_react = verbs_react_quiet ++ verbs_sharing
+
     role_verbs_interact =
       verbs_see_read_request ++ verbs_interaction ++ verbs_liking ++ verbs_sharing
 
@@ -279,7 +293,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     verbs_participate_minus_boost = verbs_interact_minus_boost ++ verbs_ping
 
-    role_verbs_participate = role_verbs_interact ++ verbs_ping
+    role_verbs_participate = role_verbs_interact ++ verbs_ping ++ [:join]
 
     role_verbs_critique = role_verbs_participate ++ verbs_critique
 
@@ -385,7 +399,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             :guests_may_see,
             :guests_may_read,
             :guests_may_see_read,
-            :locals_may_read
+            :locals_may_read_interact
           ],
       #  used for setting boundaries
       preset_acls: %{
@@ -398,17 +412,56 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :everyone_may_see_read
         ],
         "local" => [:locals_may_reply],
+        "private" => [],
+
+        # --- Membership presets ---
         "open" => [:everyone_may_see_read, :locals_may_contribute, :remotes_may_contribute],
-        "visible" => [
-          :no_follow,
-          :everyone_may_see_read,
-          :locals_may_interact,
-          :remotes_may_interact
-        ],
-        "private" => []
+        "local_members" => [:locals_may_join],
+        "on_request" => [:everyone_may_request],
+        # "invite_only": no grants, members circle controls — no new entry needed?
+
+        # --- Membership presets ---
+        # "open": reuses existing "open" preset (ACL grants work; AP remote join UI shown as coming soon)
+        "archipelago_members" => [],
+
+        # --- Participation presets  ---
+        # "anyone": reuses existing "open" participation grants (ACL grants work; AP remote participation UI shown as coming soon)
+        "archipelago_contributors" => [],
+        "local_contributors" => [:locals_may_contribute],
+        # "group_members": no grants, members circle controls
+
+        # --- Group visibility presets  ---
+        # "visible" retired — groups use dimensional presets (membership/visibility/participation)
+        # full (see+read+interact): global/archipelago disabled until groups federation is complete
+        "global" => [:everyone_may_see_read_interact],
+        "archipelago" => [],
+        # "local" => reuses existing general "local" preset
+        "members_only" => [],
+        # unlisted (readable with direct link, NOT indexed/listed — no :see, no boost)
+        # global/archipelago unlisted disabled until groups federation is complete
+        "unlisted" => [:everyone_may_read_interact],
+        "archipelago_unlisted" => [],
+        "local_unlisted" => [:locals_may_read_interact],
+        # discoverable (see+react but NOT :read; :read granted to members circle in Classify.Boundaries)
+        # global/archipelago discoverable disabled until groups federation is complete
+        "discoverable" => [:everyone_may_see_interact],
+        "archipelago_discoverable" => [],
+        "local_discoverable" => [:locals_may_see_interact],
+
+        # --- Default content visibility presets ---
+        # full: "public"/"local" reuse existing general presets; "archipelago" no-op shared with group visibility above
+        "private_members" => [],
+        "quiet_public" => [:everyone_may_read_interact],
+        "quiet_archipelago" => [],
+        "quiet_local" => [:locals_may_read_interact],
+        # preview: public/archipelago disabled until groups federation is complete
+        "preview_public" => [:everyone_may_see_interact],
+        "preview_archipelago" => [],
+        "preview_local" => [:locals_may_see_interact]
       },
       #  used for matching saved boundaries to presets:
       preset_acls_match: %{
+        # TODO: add new presets, or better yet generate this from that list
         "public" => [
           :everyone_may_see,
           :everyone_may_read,
@@ -424,12 +477,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :everyone_may_read,
           :everyone_may_see_read
         ],
-        "local" => [:locals_may_read, :locals_may_interact, :locals_may_reply],
+        "local" => [:locals_may_read_interact, :locals_may_interact, :locals_may_reply],
         "open" => [:guests_may_see_read, :locals_may_contribute, :remotes_may_contribute],
-        "visible" => [
-          :no_follow,
-          :locals_may_interact,
-          :remotes_may_interact
+        "global" => [
+          :everyone_may_see_read_interact
         ]
       }
 
@@ -558,7 +609,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           id: "7REM0TEACT0RSCANC0NTR1BVTE",
           name: l("Remote actors may contribute")
         },
-        locals_may_read: %{
+        locals_may_read_interact: %{
           id: "10CA1SMAYSEEANDREAD0N1YN0W",
           name: l("Visible to local users")
         },
@@ -573,6 +624,46 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         locals_may_contribute: %{
           id: "1ANY10CA1VSERCANC0NTR1BVTE",
           name: l("Local users may contribute")
+        },
+        locals_may_see: %{
+          id: "10CA1SMAYSEEEEEEEEEEEEEN0W",
+          name: l("Local users may see")
+        },
+        locals_may_follow: %{
+          id: "10CA1SMAYF0110WWWWWWWWWWWW",
+          name: l("Local users may follow")
+        },
+        locals_may_join: %{
+          id: "10CA1SMAYJ01NNNNNNNNNNNNNN",
+          name: l("Local users may join")
+        },
+        everyone_may_request: %{
+          id: "3EVERY0NEMAYREQVEST1111111",
+          name: l("Everyone may request (eg. to join)")
+        },
+        everyone_may_see_interact: %{
+          id: "3EVERY0NEMAYSEEE1NTERACTYY",
+          name: l("Everyone may see and interact (but not read)")
+        },
+        locals_may_see_interact: %{
+          id: "10CA1SMAYSEEE1NTERACTYYYYY",
+          name: l("Local users may see and interact (but not read)")
+        },
+        everyone_may_read_interact: %{
+          id: "3EVERY0NEMAYREAD1NTERACTYY",
+          name: l("Everyone may read and react (but not boost or discover)")
+        },
+        locals_may_read_interact: %{
+          id: "10CA1SMAYREAD1NTERACTYYYYY",
+          name: l("Local users may read and react (but not boost or discover)")
+        },
+        everyone_may_see_read_interact: %{
+          id: "3EVERY0NEMAYSEREAD1NTERACT",
+          name: l("Everyone may see, read and interact")
+        },
+        locals_may_see_read_interact: %{
+          id: "10CA1SMAYSEREAD1NTERACTYYY",
+          name: l("Local users may see, read and interact")
         },
         followed_may_reply: %{
           id: "1HANDP1CKEDZEPE0P1E1F0110W",
@@ -662,14 +753,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           local: [:see, :read],
           activity_pub: [:see, :read]
         },
-        guests_may_see: %{guest: verbs_see_request},
-        guests_may_read: %{guest: verbs_read_request},
+        guests_may_see: %{guest: verbs_see_request ++ verbs_basics},
+        guests_may_read: %{guest: verbs_read_request ++ verbs_basics},
         guests_may_see_read: %{guest: :read},
         # interact but NOT reply/message/mention
         remotes_may_interact: %{activity_pub: :interact},
         # interact and reply/message/mention
         remotes_may_reply: %{activity_pub: :participate},
-        locals_may_read: %{local: :read},
+        locals_may_read_interact: %{local: [:read] ++ verbs_react_quiet},
         # interact but NOT reply/message/mention
         locals_may_interact: %{local: :interact},
         # interact and reply/message/mention
@@ -677,6 +768,31 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # join + interact + contribute
         locals_may_contribute: %{local: :contribute},
         remotes_may_contribute: %{activity_pub: :contribute},
+        locals_may_see: %{local: [:see]},
+        locals_may_follow: %{local: [:follow]},
+        locals_may_join: %{local: [:join, :follow]},
+        everyone_may_request: %{local: [:request], activity_pub: [:request]},
+        everyone_may_see_interact: %{
+          guest: [:see],
+          local: [:see] ++ verbs_react,
+          activity_pub: [:see] ++ verbs_react
+        },
+        locals_may_see_interact: %{
+          local: [:see] ++ verbs_react
+        },
+        everyone_may_see_read_interact: %{
+          guest: [:see, :read],
+          local: [:see, :read] ++ verbs_react,
+          activity_pub: [:see, :read] ++ verbs_react
+        },
+        locals_may_see_read_interact: %{
+          local: [:see, :read] ++ verbs_react
+        },
+        everyone_may_read_interact: %{
+          guest: [:read],
+          local: [:read] ++ verbs_react_quiet,
+          activity_pub: [:read] ++ verbs_react_quiet
+        },
         # negative grants:
         ghosted_cannot_anything: %{ghost_them: verbs_negative.(all_verb_names)},
         silenced_cannot_reach_me: %{
@@ -838,5 +954,255 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           "/boundaries/silenced": l("Silenced")
         ]
       ]
+
+    # Metadata (label, icon, description) for named boundary presets, and dimensional
+    # group boundary options. Used by Bonfire.Boundaries.Presets.
+    # Instance admins can override or extend in runtime.exs.
+    config :bonfire_boundaries,
+      preset_order: ["public", "local", "mentions"],
+      preset_dimensions: %{
+        membership: %{
+          label: l("Who can join?"),
+          slug_order: [
+            "open",
+            "local_members",
+            "archipelago_members",
+            "on_request",
+            "invite_only"
+          ],
+          options: %{
+            "open" => %{
+              label: l("Anyone"),
+              icon: "fluent:globe-person-20-regular",
+              description: l("Anyone (including remote users) can join freely"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires groups federation")
+            },
+            "local_members" => %{
+              label: l("Local members"),
+              icon: "ph:campfire-duotone",
+              description: l("Anyone on this instance can join freely")
+            },
+            "archipelago_members" => %{
+              label: l("Archipelago members"),
+              icon: "ph:planet-duotone",
+              description: l("Anyone on a trusted linked instance can join freely"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires archipelago feature")
+            },
+            "on_request" => %{
+              label: l("On request"),
+              icon: "ph:hand-waving-duotone",
+              description: l("Anyone can request to join; a moderator approves")
+            },
+            "invite_only" => %{
+              label: l("Invite only"),
+              icon: "heroicons-solid:lock-closed",
+              description: l("Only moderators can add members")
+            }
+          }
+        },
+        visibility: %{
+          label: l("Who can see the group?"),
+          slug_order: [
+            "global",
+            "archipelago",
+            "local",
+            "discoverable",
+            "local_discoverable",
+            "unlisted",
+            "local_unlisted",
+            "members_only"
+          ],
+          options: %{
+            "global" => %{
+              label: l("Public"),
+              icon: "ph:globe-duotone",
+              description: l("Anyone (including guests) can see and read the group"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires groups federation")
+            },
+            "archipelago" => %{
+              label: l("Archipelago"),
+              icon: "ph:planet-duotone",
+              description: l("Anyone on a trusted linked instance can see and read"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires archipelago feature")
+            },
+            "local" => %{
+              label: l("Local"),
+              icon: "ph:campfire-duotone",
+              description: l("Anyone on this instance can see and read the group")
+            },
+            "discoverable" => %{
+              label: l("Discoverable"),
+              icon: "fluent:globe-search-24-regular",
+              description:
+                l("Anyone can see the group exists, but only members can read content"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires groups federation")
+            },
+            "local_discoverable" => %{
+              label: l("Locally discoverable"),
+              icon: "ph:eye-duotone",
+              description:
+                l("Local users can see the group exists, but only members can read content")
+            },
+            "unlisted" => %{
+              label: l("Unlisted"),
+              icon: "ph:link-simple-duotone",
+              description: l("Readable with a direct link, not shown in listings"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires groups federation")
+            },
+            "local_unlisted" => %{
+              label: l("Locally unlisted"),
+              icon: "ph:link-simple-duotone",
+              description: l("Local users can read with a direct link; not listed")
+            },
+            "members_only" => %{
+              label: l("Members only"),
+              icon: "heroicons-solid:lock-closed",
+              description: l("Only members can see or read the group")
+            }
+          }
+        },
+        participation: %{
+          label: l("Who can post and interact?"),
+          slug_order: [
+            "anyone",
+            "archipelago_contributors",
+            "local_contributors",
+            "group_members"
+          ],
+          options: %{
+            "anyone" => %{
+              label: l("Anyone"),
+              icon: "ph:globe-duotone",
+              description: l("Anyone (including remote users) can post and interact"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires groups federation")
+            },
+            "archipelago_contributors" => %{
+              label: l("Archipelago contributors"),
+              icon: "ph:planet-duotone",
+              description: l("Users on trusted linked instances can post and interact"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires archipelago feature")
+            },
+            "local_contributors" => %{
+              label: l("Local contributors"),
+              icon: "ph:campfire-duotone",
+              description: l("Any local user can post and interact")
+            },
+            "group_members" => %{
+              label: l("Members only"),
+              icon: "ph:users-three-duotone",
+              description: l("Only group members can post and interact")
+            }
+          }
+        },
+        default_content_visibility: %{
+          label: l("How visible are posts by default?"),
+          description:
+            l(
+              "Pre-fills the boundary selector when posting in the group. Authors can still change it. Affects future posts only."
+            ),
+          slug_order: [
+            "public",
+            "archipelago",
+            "local",
+            "preview_public",
+            "preview_local",
+            "quiet_public",
+            "quiet_local",
+            "private_members"
+          ],
+          options: %{
+            "public" => %{
+              label: l("Public"),
+              icon: "ph:globe-duotone",
+              description: l("Posts visible to anyone including guests and remote users"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires groups federation")
+            },
+            "archipelago" => %{
+              label: l("Archipelago"),
+              icon: "ph:planet-duotone",
+              description: l("Posts visible to trusted linked instances"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires archipelago feature")
+            },
+            "local" => %{
+              label: l("Local"),
+              icon: "ph:campfire-duotone",
+              description: l("Posts visible to anyone on this instance")
+            },
+            "preview_public" => %{
+              label: l("Preview (public)"),
+              icon: "ph:eye-duotone",
+              description: l("Post appears in public feeds but full content is members-only"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires groups federation")
+            },
+            "preview_local" => %{
+              label: l("Preview (local)"),
+              icon: "ph:eye-duotone",
+              description: l("Post appears in local feeds but full content is members-only")
+            },
+            "quiet_public" => %{
+              label: l("Quiet (public)"),
+              icon: "ph:link-simple-duotone",
+              description: l("Readable via direct link, not in feeds, no boosting"),
+              disabled: true,
+              disabled_reason: l("Coming soon: requires groups federation")
+            },
+            "quiet_local" => %{
+              label: l("Quiet (local)"),
+              icon: "ph:link-simple-duotone",
+              description:
+                l("Readable via direct link for local users, not in feeds, no boosting")
+            },
+            "private_members" => %{
+              label: l("Members only"),
+              icon: "heroicons-solid:lock-closed",
+              description: l("Posts only visible to group members")
+            }
+          }
+        }
+      },
+      presets: %{
+        "public" => %{
+          label: l("Public"),
+          icon: "ph:globe-duotone",
+          description: l("Publicly visible to everyone."),
+          tooltip:
+            l(
+              "Public: visible to everyone. People on the fediverse can see, interact, and reply."
+            )
+        },
+        "local" => %{
+          label: l("Local"),
+          icon: "ph:campfire-duotone",
+          description:
+            l("Everyone on this instance will be able to see, like, boost, and reply."),
+          tooltip: l("Local: everyone on this instance can see, interact, and reply.")
+        },
+        "mentions" => %{
+          label: l("Mentions"),
+          icon: "ph:at-duotone",
+          description: l("Anyone mentioned will be able to see, interact, and reply.")
+        },
+        "follows" => %{
+          label: l("Follows"),
+          icon: "ph:eye-duotone",
+          description: l("People who I follow may read, like, boost and reply.")
+        },
+        "private" => %{
+          label: l("Private"),
+          icon: "heroicons-solid:eye-off",
+          description: l("Only visible to the creator and/or caretaker.")
+        }
+      }
   end
 end
