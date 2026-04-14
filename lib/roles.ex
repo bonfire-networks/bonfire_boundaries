@@ -61,8 +61,16 @@ defmodule Bonfire.Boundaries.Roles do
       # returns admin role details
   """
   def get(role_name, opts \\ []) do
-    do_get([@config_key, role_name], opts)
-    |> Enum.into(%{})
+    # Defensive: a corrupted config/settings entry (non-map, non-list) must not
+    # crash every UI that enumerates roles. Return `%{}` so the caller sees an
+    # undefined role rather than the whole page blowing up on `Enum.into/2`.
+    case do_get([@config_key, role_name], opts) do
+      value when is_map(value) -> value
+      value when is_list(value) -> Enum.into(value, %{})
+      other ->
+        warn(other, "Ignoring non-enumerable role_verbs entry for #{inspect(role_name)}")
+        %{}
+    end
   end
 
   defp do_get(key, opts) do
