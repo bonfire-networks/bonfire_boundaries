@@ -65,8 +65,12 @@ defmodule Bonfire.Boundaries.Roles do
     # crash every UI that enumerates roles. Return `%{}` so the caller sees an
     # undefined role rather than the whole page blowing up on `Enum.into/2`.
     case do_get([@config_key, role_name], opts) do
-      value when is_map(value) -> value
-      value when is_list(value) -> Enum.into(value, %{})
+      value when is_map(value) ->
+        value
+
+      value when is_list(value) ->
+        Enum.into(value, %{})
+
       other ->
         warn(other, "Ignoring non-enumerable role_verbs entry for #{inspect(role_name)}")
         %{}
