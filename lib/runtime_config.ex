@@ -479,9 +479,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         ],
         "local" => [:locals_may_read_interact, :locals_may_interact, :locals_may_reply],
         "open" => [:guests_may_see_read, :locals_may_contribute, :remotes_may_contribute],
-        "global" => [
-          :everyone_may_see_read_interact
-        ]
+        "global" => [:everyone_may_see_read_interact],
+        "local_members" => [:locals_may_join],
+        "on_request" => [:everyone_may_request]
       }
 
     # create_verbs: [
@@ -652,10 +652,6 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         everyone_may_read_interact: %{
           id: "3EVERY0NEMAYREAD1NTERACTYY",
           name: l("Everyone may read and react (but not boost or discover)")
-        },
-        locals_may_read_interact: %{
-          id: "10CA1SMAYREAD1NTERACTYYYYY",
-          name: l("Local users may read and react (but not boost or discover)")
         },
         everyone_may_see_read_interact: %{
           id: "3EVERY0NEMAYSEREAD1NTERACT",

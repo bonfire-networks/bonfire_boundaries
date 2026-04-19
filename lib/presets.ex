@@ -59,6 +59,8 @@ defmodule Bonfire.Boundaries.Presets do
 
   def preset_name(boundaries, include_remote?) when is_list(boundaries) do
     debug(boundaries, "inputted")
+    preset_acls = Config.get!(:preset_acls)
+
     # Note: only one applies, in priority from most to least restrictive
     cond do
       "admins" in boundaries ->
@@ -86,6 +88,9 @@ defmodule Bonfire.Boundaries.Presets do
 
       "private" in boundaries ->
         "private"
+
+      Enum.any?(boundaries, &Map.has_key?(preset_acls, to_string(&1))) ->
+        boundaries
 
       true ->
         # debug(boundaries, "No preset boundary set")
@@ -265,24 +270,22 @@ defmodule Bonfire.Boundaries.Presets do
 
   def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, object_type, opts)
       when object_type in [Bonfire.Classify.Category, :group] do
-    # debug(acl)
+    preset_dimensions = Config.get(:preset_dimensions, %{}, :bonfire_boundaries)
+    membership_opts = get_in(preset_dimensions, [:membership, :options]) || %{}
 
-    preset_acls = Config.get!(:preset_acls_match)
+    membership_slugs =
+      get_in(preset_dimensions, [:membership, :slug_order]) || Map.keys(membership_opts)
 
-    # TODO: refactor to use preset_dimensions ?
+    matched = match_membership_slug(acl_id, membership_slugs)
 
-    open_acl_ids =
-      (preset_acls["open"] || [])
-      |> Enum.map(&Acls.get_id!/1)
-
-    visible_acl_ids =
-      (preset_acls["global"] || [])
-      |> Enum.map(&Acls.get_id!/1)
-
-    cond do
-      acl_id in visible_acl_ids -> {"global", l("Global")}
-      acl_id in open_acl_ids -> {"open", l("Open")}
-      true -> opts[:custom_tuple] || {"custom", l("Custom")}
+    if matched do
+      label = get_in(membership_opts, [matched, :label]) || matched
+      {matched, label}
+    else
+      # invite_only has no ACL grants — most restrictive fallback
+      last_slug = List.last(membership_slugs) || "invite_only"
+      label = get_in(membership_opts, [last_slug, :label]) || last_slug
+      opts[:custom_tuple] || {last_slug, label}
     end
   end
 
@@ -346,6 +349,38 @@ defmodule Bonfire.Boundaries.Presets do
   end
 
   @doc """
+  Derives the boundary preset tuple from an object's ACL, using the given object type for
+  context-specific matching. Falls back to `default` (or `nil`) when undetected.
+  """
+  def boundary_preset(object_boundary, object_type \\ nil, default \\ nil) do
+    case preset_boundary_tuple_from_acl(object_boundary, object_type) do
+      {"private", _} -> {"private", l("Private")}
+      {id, name} -> {id, name}
+      other when not is_nil(default) -> warn(other, "no preset detected, falling back") && default
+      _ -> nil
+    end
+  end
+
+  @doc """
+  Detects the membership dimension slug for a group by scanning all its ACLs.
+  Uses `Controlleds.list_acls_on_object/1` so it finds global preset ACLs
+  (not just per-object stereotype ACLs). Falls back to the most restrictive slug.
+  """
+  def membership_slug(group) do
+    preset_dimensions = Config.get(:preset_dimensions, %{}, :bonfire_boundaries)
+    membership_slugs = get_in(preset_dimensions, [:membership, :slug_order]) || []
+
+    matched =
+      Controlleds.list_acls_on_object(group)
+      |> Enum.find_value(fn controlled ->
+        acl_id = e(controlled, :acl_id, nil) || e(controlled, :acl, :id, nil)
+        match_membership_slug(acl_id, membership_slugs)
+      end)
+
+    matched || List.last(membership_slugs) || "invite_only"
+  end
+
+  @doc """
   Looks up metadata for a preset value.
 
   Handles the shapes `{slug, _}`, `slug` (binary), `%{slug: slug}`, and
@@ -354,6 +389,18 @@ defmodule Bonfire.Boundaries.Presets do
 
   Returns `nil` when no config entry is found.
   """
+  # Returns the first membership slug whose ACL IDs include acl_id, or nil.
+  defp match_membership_slug(nil, _slugs), do: nil
+
+  defp match_membership_slug(acl_id, slugs) do
+    preset_acls = Config.get!(:preset_acls_match)
+
+    Enum.find(slugs, fn slug ->
+      expected = Enum.map(preset_acls[slug] || [], &Acls.get_id!/1)
+      acl_id in expected
+    end)
+  end
+
   # Circle/ACL with its own icon — don't override with config
   def for_preset({_id, %{icon: _}}), do: nil
   def for_preset({id, _name}), do: Map.get(all(), id)
