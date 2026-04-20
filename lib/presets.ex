@@ -188,6 +188,42 @@ defmodule Bonfire.Boundaries.Presets do
     list
   end
 
+  @doc """
+  Like `boundaries_normalise/1` but filters out recognized preset slug strings so only
+  direct ACL references (ULIDs / `%Acl{}` structs) remain. Preset slugs are handled
+  separately via `acls_from_preset_boundary_names/1` and should not be passed to
+  `maybe_add_direct_acl_ids`.
+  """
+  def boundaries_normalise_direct(list) when is_list(list) do
+    preset_acls = Config.get!(:preset_acls)
+
+    Enum.reject(list, fn b ->
+      is_binary(b) and Map.has_key?(preset_acls, b)
+    end)
+  end
+
+  def boundaries_normalise_direct(other) do
+    boundaries_normalise(other) |> boundaries_normalise_direct()
+  end
+
+  @doc """
+  Normalises `to_boundaries` input and splits it into `{direct_acl_ids, preset}` where:
+  - `direct_acl_ids` — real ACL references (ULIDs / `%Acl{}` structs) that should be
+    added directly to the controlled object
+  - `preset` — the resolved preset name (or list of preset slugs) for `base_acls` lookup
+
+  Used by `Acls.preset_stereotypes_and_acls/3`.
+  """
+  def boundaries_to_preset_tuple(to_boundaries) do
+    normalized = boundaries_normalise(to_boundaries) |> debug("validated to_boundaries")
+    preset = preset_name(normalized) |> debug("preset_name")
+
+    direct =
+      boundaries_normalise_direct(normalized) |> debug("direct_boundaries (non-preset IDs)")
+
+    {direct, preset}
+  end
+
   def boundaries_normalise(%Bonfire.Data.AccessControl.Acl{id: id}) do
     [id]
   end

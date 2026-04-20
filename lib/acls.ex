@@ -283,12 +283,26 @@ defmodule Bonfire.Boundaries.Acls do
     context_id = maybe_from_opts(opts, :context_id)
 
     {preset, control_acls} =
-      case maybe_from_opts(opts, :boundary, opts) do
+      case maybe_from_opts(opts, :boundary, nil) || maybe_from_opts(opts, :to_boundaries, nil) do
         {:clone, controlled_object_id} ->
-          copy_acls_from_existing_object(controlled_object_id)
+          apply_same_acls_as_existing_object(controlled_object_id)
 
         ["clone_context"] when is_binary(context_id) ->
-          copy_acls_from_existing_object(context_id)
+          apply_same_acls_as_existing_object(context_id)
+
+        nil when is_binary(context_id) ->
+          apply_same_acls_as_existing_object(context_id)
+
+        nil ->
+          preset_acls_tuple(
+            creator,
+            Bonfire.Common.Config.get_ext(
+              e(opts, :for_module, nil),
+              :default_boundary_preset,
+              "public"
+            ),
+            opts
+          )
 
         to_boundaries ->
           preset_acls_tuple(creator, to_boundaries, opts)
@@ -438,24 +452,12 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   defp preset_stereotypes_and_acls(creator, to_boundaries, opts \\ []) do
-    {to_boundaries, preset} = to_boundaries_preset_tuple(to_boundaries)
+    {direct_boundaries, preset} = Boundaries.Presets.boundaries_to_preset_tuple(to_boundaries)
 
     # add ACLs based on any boundary presets (eg. public/local/mentions)
     # + add any ACLs directly specified in input
 
-    {preset, base_acls(creator, preset, opts), maybe_add_direct_acl_ids(to_boundaries)}
-  end
-
-  defp to_boundaries_preset_tuple(to_boundaries) do
-    to_boundaries =
-      Boundaries.Presets.boundaries_normalise(to_boundaries)
-      |> debug("validated to_boundaries")
-
-    preset =
-      Boundaries.Presets.preset_name(to_boundaries)
-      |> debug("preset_name")
-
-    {to_boundaries, preset}
+    {preset, base_acls(creator, preset, opts), maybe_add_direct_acl_ids(direct_boundaries)}
   end
 
   def base_acls_from_preset(creator, preset, opts \\ []) do
@@ -763,7 +765,7 @@ defmodule Bonfire.Boundaries.Acls do
     }
   end
 
-  defp copy_acls_from_existing_object(controlled_object_id) do
+  defp apply_same_acls_as_existing_object(controlled_object_id) do
     {nil,
      Controlleds.list_on_object(controlled_object_id)
      |> Enum.map(&Map.take(&1, [:acl_id]))

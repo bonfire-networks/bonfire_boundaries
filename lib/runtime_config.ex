@@ -425,7 +425,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "archipelago_members" => [],
 
         # --- Participation presets  ---
-        # "anyone": reuses existing "open" participation grants (ACL grants work; AP remote participation UI shown as coming soon)
+        "anyone" => [:locals_may_contribute, :remotes_may_contribute],
         "archipelago_contributors" => [],
         "local_contributors" => [:locals_may_contribute],
         # "group_members": no grants, members circle controls
