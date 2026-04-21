@@ -1171,7 +1171,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "public" => %{
           label: l("Public"),
           icon: "ph:globe-duotone",
-          description: l("Publicly visible to everyone."),
+          description: l("Visible to everyone."),
           tooltip:
             l(
               "Public: visible to everyone. People on the fediverse can see, interact, and reply."
@@ -1180,24 +1180,26 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "local" => %{
           label: l("Local"),
           icon: "ph:campfire-duotone",
-          description:
-            l("Everyone on this instance will be able to see, like, boost, and reply."),
+          description: l("Everyone on this instance."),
           tooltip: l("Local: everyone on this instance can see, interact, and reply.")
         },
         "mentions" => %{
           label: l("Mentions"),
           icon: "ph:at-duotone",
-          description: l("Anyone mentioned will be able to see, interact, and reply.")
+          description: l("Only people you @mention."),
+          tooltip: l("Mentions: anyone mentioned will be able to see, interact, and reply.")
         },
         "follows" => %{
           label: l("Follows"),
           icon: "ph:eye-duotone",
-          description: l("People who I follow may read, like, boost and reply.")
+          description: l("Only people you follow."),
+          tooltip: l("Follows: people who I follow may read, like, boost and reply.")
         },
         "private" => %{
           label: l("Private"),
           icon: "heroicons-solid:eye-off",
-          description: l("Only visible to the creator and/or caretaker.")
+          description: l("Only you."),
+          tooltip: l("Private: only visible to the creator and/or caretaker.")
         }
       }
   end
