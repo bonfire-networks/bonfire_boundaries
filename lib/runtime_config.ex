@@ -327,7 +327,29 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         read: %{can_verbs: verbs_see_read_request, read_only: true},
         react: %{can_verbs: verbs_interact_minus_boost, read_only: true},
         share: %{can_verbs: verbs_interact_minus_like, read_only: true},
-        interact: %{can_verbs: role_verbs_interact, read_only: true},
+        interact: %{
+          can_verbs: role_verbs_interact,
+          read_only: true,
+          label: l("Fully visible"),
+          description: l("Can see, read, and interact with content"),
+          icon: "ph:eye-duotone"
+        },
+        # see + react (no read) — for discoverable visibility
+        discover: %{
+          can_verbs: [:see] ++ verbs_react,
+          read_only: true,
+          label: l("Discoverable"),
+          description: l("Can see the group exists and react, but not read content"),
+          icon: "fluent:globe-search-24-regular"
+        },
+        # read + quiet react (no see, no boost) — for unlisted visibility
+        unlisted_read: %{
+          can_verbs: [:read] ++ verbs_react_quiet,
+          read_only: true,
+          label: l("Unlisted"),
+          description: l("Can read with a direct link but not found in listings or feeds"),
+          icon: "ph:link-simple-duotone"
+        },
         participate: %{can_verbs: role_verbs_participate, read_only: true},
         critique: %{can_verbs: role_verbs_critique, read_only: true},
         curate: %{can_verbs: role_verbs_curate, read_only: true},
@@ -416,18 +438,17 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
         # --- Membership presets ---
         "open" => [:everyone_may_see_read, :locals_may_contribute, :remotes_may_contribute],
-        "local_members" => [:locals_may_join],
+        "local:members" => [:locals_may_join],
         "on_request" => [:everyone_may_request],
         # "invite_only": no grants, members circle controls — no new entry needed?
 
-        # --- Membership presets ---
         # "open": reuses existing "open" preset (ACL grants work; AP remote join UI shown as coming soon)
-        "archipelago_members" => [],
+        "archipelago:members" => [],
 
         # --- Participation presets  ---
         "anyone" => [:locals_may_contribute, :remotes_may_contribute],
-        "archipelago_contributors" => [],
-        "local_contributors" => [:locals_may_contribute],
+        "archipelago:contributors" => [],
+        "local:contributors" => [:locals_may_contribute],
         # "group_members": no grants, members circle controls
 
         # --- Group visibility presets  ---
@@ -436,28 +457,36 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "global" => [:everyone_may_see_read_interact],
         "archipelago" => [],
         # "local" => reuses existing general "local" preset
-        "members_only" => [],
+        # nonfederated — guests+locals can read on-instance; NOT federated (explicit deny to :activity_pub applied in Classify.Boundaries)
+        "nonfederated" => [:guests_may_see_read, :locals_may_see_read_interact],
+        "nonfederated:discoverable" => [:guests_may_see, :locals_may_see_interact],
+        "nonfederated:unlisted" => [:guests_may_read, :locals_may_read_interact],
+        "members:private" => [],
         # unlisted (readable with direct link, NOT indexed/listed — no :see, no boost)
         # global/archipelago unlisted disabled until groups federation is complete
         "unlisted" => [:everyone_may_read_interact],
-        "archipelago_unlisted" => [],
-        "local_unlisted" => [:locals_may_read_interact],
+        "archipelago:unlisted" => [],
+        "local:unlisted" => [:locals_may_read_interact],
         # discoverable (see+react but NOT :read; :read granted to members circle in Classify.Boundaries)
         # global/archipelago discoverable disabled until groups federation is complete
         "discoverable" => [:everyone_may_see_interact],
-        "archipelago_discoverable" => [],
-        "local_discoverable" => [:locals_may_see_interact],
+        "archipelago:discoverable" => [],
+        "local:discoverable" => [:locals_may_see_interact],
 
         # --- Default content visibility presets ---
         # full: "public"/"local" reuse existing general presets; "archipelago" no-op shared with group visibility above
-        "private_members" => [],
-        "quiet_public" => [:everyone_may_read_interact],
-        "quiet_archipelago" => [],
-        "quiet_local" => [:locals_may_read_interact],
+        # members:private shared with visibility preset above
+        # nonfederated DCV — public on-instance, not federated
+        "nonfederated" => [:guests_may_see_read, :locals_may_see_read_interact],
+        "nonfederated:quiet" => [:guests_may_read, :locals_may_read_interact],
+        "nonfederated:preview" => [:guests_may_see, :locals_may_see_interact],
+        "public:quiet" => [:everyone_may_read_interact],
+        "archipelago:quiet" => [],
+        "local:quiet" => [:locals_may_read_interact],
         # preview: public/archipelago disabled until groups federation is complete
-        "preview_public" => [:everyone_may_see_interact],
-        "preview_archipelago" => [],
-        "preview_local" => [:locals_may_see_interact]
+        "public:preview" => [:everyone_may_see_interact],
+        "archipelago:preview" => [],
+        "local:preview" => [:locals_may_see_interact]
       },
       #  used for matching saved boundaries to presets:
       preset_acls_match: %{
@@ -480,8 +509,41 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "local" => [:locals_may_read_interact, :locals_may_interact, :locals_may_reply],
         "open" => [:guests_may_see_read, :locals_may_contribute, :remotes_may_contribute],
         "global" => [:everyone_may_see_read_interact],
-        "local_members" => [:locals_may_join],
+        "local:members" => [:locals_may_join],
         "on_request" => [:everyone_may_request]
+      }
+
+    # Scope metadata for the two-level boundary selector UI (visibility + DCV dims).
+    # Each scope maps to label/icon/disabled status; the actual ACL grants are in preset_acls above.
+    config :bonfire_boundaries,
+      scopes: %{
+        global: %{
+          label: l("Public (federated)"),
+          description: l("Visible to everyone including the wider fediverse"),
+          icon: "ph:globe-duotone",
+          disabled: l("Coming soon: requires groups federation")
+        },
+        nonfederated: %{
+          label: l("Public"),
+          description: l("Visible on this instance but not sent to the wider fediverse"),
+          icon: "ph:house-line-duotone"
+        },
+        archipelago: %{
+          label: l("Archipelago"),
+          description: l("Visible to users on trusted linked instances"),
+          icon: "ph:planet-duotone",
+          disabled: l("Coming soon: requires archipelago feature")
+        },
+        local: %{
+          label: l("Local"),
+          description: l("Visible only to users on this instance"),
+          icon: "ph:campfire-duotone"
+        },
+        members: %{
+          label: l("Members only"),
+          description: l("Visible only to group members"),
+          icon: "ph:users-three-duotone"
+        }
       }
 
     # create_verbs: [
@@ -961,8 +1023,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           label: l("Who can join?"),
           slug_order: [
             "open",
-            "local_members",
-            "archipelago_members",
+            "local:members",
+            "archipelago:members",
             "on_request",
             "invite_only"
           ],
@@ -971,20 +1033,18 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               label: l("Anyone"),
               icon: "fluent:globe-person-20-regular",
               description: l("Anyone (including remote users) can join freely"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires groups federation")
+              disabled: l("Coming soon: requires groups federation")
             },
-            "local_members" => %{
+            "local:members" => %{
               label: l("Local members"),
               icon: "ph:campfire-duotone",
               description: l("Anyone on this instance can join freely")
             },
-            "archipelago_members" => %{
+            "archipelago:members" => %{
               label: l("Archipelago members"),
               icon: "ph:planet-duotone",
               description: l("Anyone on a trusted linked instance can join freely"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires archipelago feature")
+              disabled: l("Coming soon: requires archipelago feature")
             },
             "on_request" => %{
               label: l("On request"),
@@ -1002,64 +1062,78 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           label: l("Who can see the group?"),
           slug_order: [
             "global",
+            "nonfederated",
+            "discoverable",
+            "unlisted",
             "archipelago",
             "local",
-            "discoverable",
-            "local_discoverable",
-            "unlisted",
-            "local_unlisted",
-            "members_only"
+            "local:discoverable",
+            "local:unlisted",
+            "members:private"
           ],
           options: %{
             "global" => %{
-              label: l("Public"),
+              label: l("Public (federated)"),
               icon: "ph:globe-duotone",
-              description: l("Anyone (including guests) can see and read the group"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires groups federation")
+              description: l("Anyone (including guests) can see and read the group; federated"),
+              role: :interact,
+              disabled: l("Coming soon: requires groups federation")
+            },
+            "nonfederated" => %{
+              label: l("Public"),
+              icon: "ph:house-duotone",
+              description:
+                l(
+                  "Anyone (including guests) can see and read the group on this instance; not federated"
+                ),
+              role: :interact
             },
             "archipelago" => %{
               label: l("Archipelago"),
               icon: "ph:planet-duotone",
               description: l("Anyone on a trusted linked instance can see and read"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires archipelago feature")
+              role: :interact,
+              disabled: l("Coming soon: requires archipelago feature")
             },
             "local" => %{
               label: l("Local"),
               icon: "ph:campfire-duotone",
-              description: l("Anyone on this instance can see and read the group")
+              description: l("Anyone on this instance can see and read the group"),
+              role: :interact
             },
             "discoverable" => %{
               label: l("Discoverable"),
               icon: "fluent:globe-search-24-regular",
               description:
                 l("Anyone can see the group exists, but only members can read content"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires groups federation")
+              role: :discover,
+              disabled: l("Coming soon: requires groups federation")
             },
-            "local_discoverable" => %{
+            "local:discoverable" => %{
               label: l("Locally discoverable"),
               icon: "ph:eye-duotone",
               description:
-                l("Local users can see the group exists, but only members can read content")
+                l("Local users can see the group exists, but only members can read content"),
+              role: :discover
             },
             "unlisted" => %{
               label: l("Unlisted"),
               icon: "ph:link-simple-duotone",
               description: l("Readable with a direct link, not shown in listings"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires groups federation")
+              role: :unlisted_read,
+              disabled: l("Coming soon: requires groups federation")
             },
-            "local_unlisted" => %{
+            "local:unlisted" => %{
               label: l("Locally unlisted"),
               icon: "ph:link-simple-duotone",
-              description: l("Local users can read with a direct link; not listed")
+              description: l("Local users can read with a direct link; not listed"),
+              role: :unlisted_read
             },
-            "members_only" => %{
+            "members:private" => %{
               label: l("Members only"),
               icon: "heroicons-solid:lock-closed",
-              description: l("Only members can see or read the group")
+              description: l("Only members can see or read the group"),
+              role: :interact
             }
           }
         },
@@ -1067,26 +1141,25 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           label: l("Who can post and interact?"),
           slug_order: [
             "anyone",
-            "archipelago_contributors",
-            "local_contributors",
-            "group_members"
+            "archipelago:contributors",
+            "local:contributors",
+            "group_members",
+            "moderators"
           ],
           options: %{
             "anyone" => %{
               label: l("Anyone"),
               icon: "ph:globe-duotone",
               description: l("Anyone (including remote users) can post and interact"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires groups federation")
+              disabled: l("Coming soon: requires groups federation")
             },
-            "archipelago_contributors" => %{
+            "archipelago:contributors" => %{
               label: l("Archipelago contributors"),
               icon: "ph:planet-duotone",
               description: l("Users on trusted linked instances can post and interact"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires archipelago feature")
+              disabled: l("Coming soon: requires archipelago feature")
             },
-            "local_contributors" => %{
+            "local:contributors" => %{
               label: l("Local contributors"),
               icon: "ph:campfire-duotone",
               description: l("Any local user can post and interact")
@@ -1095,6 +1168,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               label: l("Members only"),
               icon: "ph:users-three-duotone",
               description: l("Only group members can post and interact")
+            },
+            "moderators" => %{
+              label: l("Group moderators only"),
+              icon: "ph:shield-duotone",
+              description: l("Only group moderators can post; members can read and react")
             }
           }
         },
@@ -1106,63 +1184,92 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             ),
           slug_order: [
             "public",
+            "nonfederated",
             "archipelago",
             "local",
-            "preview_public",
-            "preview_local",
-            "quiet_public",
-            "quiet_local",
-            "private_members"
+            "public:preview",
+            "nonfederated:preview",
+            "local:preview",
+            "public:quiet",
+            "nonfederated:quiet",
+            "local:quiet",
+            "members:private"
           ],
           options: %{
             "public" => %{
-              label: l("Public"),
+              label: l("Public (federated)"),
               icon: "ph:globe-duotone",
-              description: l("Posts visible to anyone including guests and remote users"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires groups federation")
+              description:
+                l("Posts visible to anyone including guests and remote users; federated"),
+              role: :interact,
+              disabled: l("Coming soon: requires groups federation")
+            },
+            "nonfederated" => %{
+              label: l("Public"),
+              icon: "ph:house-duotone",
+              description:
+                l("Posts visible to anyone on this instance including guests; not federated"),
+              role: :interact
+            },
+            "nonfederated:preview" => %{
+              label: l("Preview (public)"),
+              icon: "ph:eye-duotone",
+              description:
+                l("Post appears in feeds but full content is members-only; not federated"),
+              role: :discover
+            },
+            "nonfederated:quiet" => %{
+              label: l("Quiet (public)"),
+              icon: "ph:link-simple-duotone",
+              description:
+                l("Readable via direct link on this instance, not in feeds, no boosting"),
+              role: :unlisted_read
             },
             "archipelago" => %{
               label: l("Archipelago"),
               icon: "ph:planet-duotone",
               description: l("Posts visible to trusted linked instances"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires archipelago feature")
+              role: :interact,
+              disabled: l("Coming soon: requires archipelago feature")
             },
             "local" => %{
               label: l("Local"),
               icon: "ph:campfire-duotone",
-              description: l("Posts visible to anyone on this instance")
+              description: l("Posts visible to logged-in users on this instance"),
+              role: :interact
             },
-            "preview_public" => %{
+            "public:preview" => %{
               label: l("Preview (public)"),
               icon: "ph:eye-duotone",
               description: l("Post appears in public feeds but full content is members-only"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires groups federation")
+              role: :discover,
+              disabled: l("Coming soon: requires groups federation")
             },
-            "preview_local" => %{
+            "local:preview" => %{
               label: l("Preview (local)"),
               icon: "ph:eye-duotone",
-              description: l("Post appears in local feeds but full content is members-only")
+              description: l("Post appears in local feeds but full content is members-only"),
+              role: :discover
             },
-            "quiet_public" => %{
+            "public:quiet" => %{
               label: l("Quiet (public)"),
               icon: "ph:link-simple-duotone",
               description: l("Readable via direct link, not in feeds, no boosting"),
-              disabled: true,
-              disabled_reason: l("Coming soon: requires groups federation")
+              role: :unlisted_read,
+              disabled: l("Coming soon: requires groups federation")
             },
-            "quiet_local" => %{
+            "local:quiet" => %{
               label: l("Quiet (local)"),
               icon: "ph:link-simple-duotone",
               description:
-                l("Readable via direct link for local users, not in feeds, no boosting")
+                l("Readable via direct link for local users, not in feeds, no boosting"),
+              role: :unlisted_read
             },
-            "private_members" => %{
+            "members:private" => %{
               label: l("Members only"),
               icon: "heroicons-solid:lock-closed",
-              description: l("Posts only visible to group members")
+              description: l("Posts only visible to group members"),
+              role: :interact
             }
           }
         }
