@@ -443,4 +443,107 @@ defmodule Bonfire.Boundaries.Presets do
   def for_preset(slug) when is_binary(slug), do: Map.get(all(), slug)
   def for_preset(%{slug: slug}), do: Map.get(all(), to_string(slug))
   def for_preset(_), do: nil
+
+  @doc """
+  Walks a group's ACLs once and derives its membership / visibility / participation slugs
+  by matching each ACL id against the slug orderings in `preset_dimensions` config.
+
+  Returns `%{membership: slug | nil, visibility: slug | nil, participation: slug | nil}`.
+  Membership falls back to the most-restrictive slug (`invite_only` by default) when no ACL
+  matches, mirroring `membership_slug/1`; visibility and participation return `nil` so callers
+  can hide the row.
+  """
+  def group_dimension_slugs(group) do
+    preset_dimensions = Config.get(:preset_dimensions, %{}, :bonfire_boundaries)
+
+    membership_slugs = get_in(preset_dimensions, [:membership, :slug_order]) || []
+    visibility_slugs = get_in(preset_dimensions, [:visibility, :slug_order]) || []
+    participation_slugs = get_in(preset_dimensions, [:participation, :slug_order]) || []
+
+    # Precompute expected ACL id sets per slug once, so the per-ACL reduce is pure MapSet lookup
+    # instead of re-reading :preset_acls_match config + rebuilding the id list for each ACL.
+    all_slugs = membership_slugs ++ visibility_slugs ++ participation_slugs
+    preset_acls = Config.get!(:preset_acls_match)
+
+    expected_by_slug =
+      Map.new(all_slugs, fn slug ->
+        {slug, MapSet.new(preset_acls[slug] || [], &Acls.get_id!/1)}
+      end)
+
+    match = fn acl_id, slugs ->
+      Enum.find(slugs, fn slug -> MapSet.member?(expected_by_slug[slug], acl_id) end)
+    end
+
+    {membership, visibility, participation} =
+      Controlleds.list_acls_on_object(group)
+      |> Enum.reduce({nil, nil, nil}, fn controlled, {m, v, p} ->
+        acl_id = e(controlled, :acl_id, nil) || e(controlled, :acl, :id, nil)
+
+        {
+          m || match.(acl_id, membership_slugs),
+          v || match.(acl_id, visibility_slugs),
+          p || match.(acl_id, participation_slugs)
+        }
+      end)
+
+    %{
+      membership: membership || List.last(membership_slugs) || "invite_only",
+      visibility: visibility,
+      participation: participation
+    }
+  end
+
+  @doc """
+  Infers the group preset slug (e.g. `"private_club"`) from a dimension-slug map by matching
+  against `:bonfire_classify, :group_presets` config. Returns `nil` when no preset matches, so
+  callers can distinguish "known preset" from "custom / unresolvable".
+  """
+  def preset_slug_from_dims(%{} = dims) do
+    m = dims[:membership]
+    v = dims[:visibility]
+    p = dims[:participation]
+
+    Config.get(:group_presets, %{}, :bonfire_classify)
+    |> Enum.find_value(fn {slug, meta} ->
+      if e(meta, :membership, nil) == m and e(meta, :visibility, nil) == v and
+           e(meta, :participation, nil) == p,
+         do: slug
+    end)
+  end
+
+  @doc """
+  Audience-preset metadata (label + icon + description) for a group preset slug, from
+  `:bonfire_classify, :group_presets` config. Returns `nil` when slug is `nil` or has no entry.
+  """
+  def group_preset_meta(nil), do: nil
+
+  def group_preset_meta(slug) do
+    case Config.get([:group_presets, slug], nil, :bonfire_classify) do
+      %{} = meta when map_size(meta) > 0 -> meta
+      _ -> nil
+    end
+  end
+
+  @doc """
+  Dimension option metadata (label + icon + description) for a given dimension and slug, from
+  `:bonfire_boundaries, :preset_dimensions` config.
+  """
+  def dimension_meta(_dim, nil), do: nil
+
+  def dimension_meta(dim, slug) do
+    Config.get([:preset_dimensions, dim, :options, slug], nil, :bonfire_boundaries)
+  end
+
+  @doc """
+  Resolves a single glanceable chip for a group in list contexts (directory rows, feed cards).
+
+  Prefers the matching audience preset (e.g. `"Private club"`); falls back to the membership
+  dimension label (e.g. `"On request"`, `"Invite only"`) for custom combinations.
+  """
+  def group_row_chip(group) do
+    dims = group_dimension_slugs(group)
+
+    group_preset_meta(preset_slug_from_dims(dims)) ||
+      dimension_meta(:membership, dims[:membership])
+  end
 end
