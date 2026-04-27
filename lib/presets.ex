@@ -525,6 +525,20 @@ defmodule Bonfire.Boundaries.Presets do
   end
 
   @doc """
+  Iconify name for a group's preset, falling back to `default` for custom (no-preset) groups.
+  Reads from the `[:preset_slug]` group-scoped setting recorded at create time.
+  """
+  def group_icon(group, default \\ "ph:users-three-duotone") do
+    with slug when is_binary(slug) and slug != "" <-
+           Settings.__get__([:preset_slug], nil, scope: group),
+         %{icon: icon} when is_binary(icon) <- group_preset_meta(slug) do
+      icon
+    else
+      _ -> default
+    end
+  end
+
+  @doc """
   Dimension option metadata (label + icon + description) for a given dimension and slug, from
   `:bonfire_boundaries, :preset_dimensions` config.
   """

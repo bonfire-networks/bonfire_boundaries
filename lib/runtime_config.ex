@@ -490,25 +490,26 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       },
       #  used for matching saved boundaries to presets:
       preset_acls_match: %{
-        # TODO: add new presets, or better yet generate this from that list
+        # TODO: better yet, generate this from the `preset_acls` list above.
         "public" => [
           :everyone_may_see,
           :everyone_may_read,
           :everyone_may_see_read,
-          :guests_may_see,
-          :guests_may_read,
-          :guests_may_see_read,
           :remotes_may_interact,
           :remotes_may_reply
         ],
-        "unlisted" => [
-          :everyone_may_see,
-          :everyone_may_read,
-          :everyone_may_see_read
-        ],
+        "unlisted" => [:everyone_may_read_interact],
         "local" => [:locals_may_read_interact, :locals_may_interact, :locals_may_reply],
-        "open" => [:guests_may_see_read, :locals_may_contribute, :remotes_may_contribute],
+        "local:unlisted" => [:locals_may_read_interact],
+        "local:discoverable" => [:locals_may_see_interact],
+        "discoverable" => [:everyone_may_see_interact],
         "global" => [:everyone_may_see_read_interact],
+        "nonfederated" => [:guests_may_see_read, :locals_may_see_read_interact],
+        "nonfederated:discoverable" => [:guests_may_see, :locals_may_see_interact],
+        "nonfederated:unlisted" => [:guests_may_read, :locals_may_read_interact],
+        # Membership markers — must be unique to membership (no overlap with visibility),
+        # so detection isn't fooled by a visibility ACL matching the wrong dimension.
+        "open" => [:locals_may_contribute, :remotes_may_contribute],
         "local:members" => [:locals_may_join],
         "on_request" => [:everyone_may_request]
       }
@@ -1053,7 +1054,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             },
             "invite_only" => %{
               label: l("Invite only"),
-              icon: "heroicons-solid:lock-closed",
+              icon: "ph:lock-duotone",
               description: l("Only moderators can add members")
             }
           }
@@ -1063,6 +1064,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           slug_order: [
             "global",
             "nonfederated",
+            "nonfederated:discoverable",
+            "nonfederated:unlisted",
             "discoverable",
             "unlisted",
             "archipelago",
@@ -1087,6 +1090,24 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
                   "Anyone (including guests) can see and read the group on this instance; not federated"
                 ),
               role: :interact
+            },
+            "nonfederated:discoverable" => %{
+              label: l("Public, discoverable only"),
+              icon: "fluent:globe-search-24-regular",
+              description:
+                l(
+                  "Anyone on this instance can see the group exists, but only members can read content; not federated"
+                ),
+              role: :discover
+            },
+            "nonfederated:unlisted" => %{
+              label: l("Public, unlisted"),
+              icon: "ph:link-simple-duotone",
+              description:
+                l(
+                  "Anyone on this instance can read with a direct link; not listed; not federated"
+                ),
+              role: :unlisted_read
             },
             "archipelago" => %{
               label: l("Archipelago"),
@@ -1131,7 +1152,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             },
             "members:private" => %{
               label: l("Members only"),
-              icon: "heroicons-solid:lock-closed",
+              icon: "ph:lock-duotone",
               description: l("Only members can see or read the group"),
               role: :interact
             }
@@ -1267,7 +1288,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             },
             "members:private" => %{
               label: l("Members only"),
-              icon: "heroicons-solid:lock-closed",
+              icon: "ph:lock-duotone",
               description: l("Posts only visible to group members"),
               role: :interact
             }

@@ -2,11 +2,16 @@ defmodule Bonfire.Boundaries.Repo.Migrations.RemoveDuplicateLocalsMayReadInterac
   @moduledoc false
   use Ecto.Migration
 
+  # id column is uuid-typed; the ULID literal must be dumped to its 16-byte binary form first
+  @duplicate_acl_id "10CA1SMAYREAD1NTERACTYYYYY"
+
   def up do
-    # Remove the duplicate locals_may_read_interact ACL (id: "10CA1SMAYREAD1NTERACTYYYYY")
-    # that was added alongside the original "10CA1SMAYSEEANDREAD0N1YN0W".
-    # The original is kept; this duplicate had no grants and caused slug detection collisions.
-    execute("DELETE FROM bonfire_data_access_control_acl WHERE id = '10CA1SMAYREAD1NTERACTYYYYY'")
+    {:ok, binary_id} = Needle.UID.dump(@duplicate_acl_id)
+
+    repo().query!(
+      "DELETE FROM bonfire_data_access_control_acl WHERE id = $1",
+      [binary_id]
+    )
   end
 
   def down, do: nil
