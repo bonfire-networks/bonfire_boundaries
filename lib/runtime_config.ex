@@ -423,74 +423,79 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             :guests_may_see_read,
             :locals_may_read_interact
           ],
-      #  used for setting boundaries
+      #  used for setting boundaries — slug → ACL atoms applied at create time.
+      #  Slug namespaces:
+      #    - General object boundaries (posts/single-dim): "public", "unlisted", "local", "private"
+      #    - Group membership: "open", "local:members", "archipelago:members", "on_request", "invite_only"
+      #    - Group participation: "anyone", "archipelago:contributors", "local:contributors", "group_members", "moderators"
+      #    - Group visibility: "global", "nonfederated", "nonfederated:{discoverable,unlisted}",
+      #      "archipelago", "local", "local:{discoverable,unlisted}", "discoverable", "unlisted",
+      #      "members:private"
+      #    - Default content visibility: visibility slugs above plus "{public,local,nonfederated}:{quiet,preview}"
+      #  Slugs not listed below have no ACL signature (members/moderators circle controlled, or open by default).
       preset_acls: %{
+        # --- General object boundaries (single-dim) ---
         "public" => [
           :everyone_may_see_read,
           :locals_may_reply,
           :remotes_may_reply
         ],
-        "unlisted" => [
-          :everyone_may_see_read
-        ],
         "local" => [:locals_may_reply],
         "private" => [],
 
         # --- Membership presets ---
-        "open" => [:everyone_may_see_read, :locals_may_contribute, :remotes_may_contribute],
+        # `open` historically bundled the participation ACLs (`*_may_contribute`)
+        # too, but those belong to participation slugs (`anyone` / `local:contributors`)
+        # — keeping them here would mis-detect any anyone-participation group as
+        # `open` membership. The form cascades `open` → `participation: anyone` so
+        # the contributes still get applied via the participation slug.
+        "open" => [:everyone_may_see_read],
         "local:members" => [:locals_may_join],
-        "on_request" => [:everyone_may_request],
-        # "invite_only": no grants, members circle controls — no new entry needed?
-
-        # "open": reuses existing "open" preset (ACL grants work; AP remote join UI shown as coming soon)
         "archipelago:members" => [],
+        "on_request" => [:everyone_may_request],
+        # "invite_only": no grants, members circle controls
 
         # --- Participation presets  ---
         "anyone" => [:locals_may_contribute, :remotes_may_contribute],
         "archipelago:contributors" => [],
         "local:contributors" => [:locals_may_contribute],
-        # "group_members": no grants, members circle controls
+        # "group_members"/"moderators": circle-controlled, no grants here
 
-        # --- Group visibility presets  ---
-        # "visible" retired — groups use dimensional presets (membership/visibility/participation)
-        # full (see+read+interact): global/archipelago disabled until groups federation is complete
+        # --- Group visibility presets ---
+        # full (see+read+interact): global/archipelago disabled until groups federation ships
         "global" => [:everyone_may_see_read_interact],
         "archipelago" => [],
-        # "local" => reuses existing general "local" preset
-        # nonfederated — guests+locals can read on-instance; NOT federated (explicit deny to :activity_pub applied in Classify.Boundaries)
+        # nonfederated — guests+locals read on-instance; AP-deny applied in Classify.Boundaries
         "nonfederated" => [:guests_may_see_read, :locals_may_see_read_interact],
         "nonfederated:discoverable" => [:guests_may_see, :locals_may_see_interact],
         "nonfederated:unlisted" => [:guests_may_read, :locals_may_read_interact],
         "members:private" => [],
-        # unlisted (readable with direct link, NOT indexed/listed — no :see, no boost)
-        # global/archipelago unlisted disabled until groups federation is complete
+        # unlisted (readable via direct link, not listed)
         "unlisted" => [:everyone_may_read_interact],
         "archipelago:unlisted" => [],
         "local:unlisted" => [:locals_may_read_interact],
-        # discoverable (see+react but NOT :read; :read granted to members circle in Classify.Boundaries)
-        # global/archipelago discoverable disabled until groups federation is complete
+        # discoverable (see+react, but :read for members only — granted in Classify.Boundaries)
         "discoverable" => [:everyone_may_see_interact],
         "archipelago:discoverable" => [],
         "local:discoverable" => [:locals_may_see_interact],
 
-        # --- Default content visibility presets ---
-        # full: "public"/"local" reuse existing general presets; "archipelago" no-op shared with group visibility above
-        # members:private shared with visibility preset above
-        # nonfederated DCV — public on-instance, not federated
-        "nonfederated" => [:guests_may_see_read, :locals_may_see_read_interact],
+        # --- Default content visibility (DCV) presets ---
+        # Uses some visibility slugs as-is ("public", "local", "nonfederated", "members:private")
+        # plus :quiet (read-only, no boost) and :preview (see-only) variants.
         "nonfederated:quiet" => [:guests_may_read, :locals_may_read_interact],
         "nonfederated:preview" => [:guests_may_see, :locals_may_see_interact],
         "public:quiet" => [:everyone_may_read_interact],
         "archipelago:quiet" => [],
         "local:quiet" => [:locals_may_read_interact],
-        # preview: public/archipelago disabled until groups federation is complete
         "public:preview" => [:everyone_may_see_interact],
         "archipelago:preview" => [],
         "local:preview" => [:locals_may_see_interact]
       },
-      #  used for matching saved boundaries to presets:
+      # Used for back-translating saved boundaries to a preset slug, for single-dim
+      # objects (posts). Group dimension detection uses :group_dim_acls below.
+      # Matcher entries can be wider than the applier above (legacy/synonym ACLs).
       preset_acls_match: %{
-        # TODO: better yet, generate this from the `preset_acls` list above.
+        # TODO: derive from :preset_acls above.
         "public" => [
           :everyone_may_see,
           :everyone_may_read,
@@ -506,13 +511,13 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "global" => [:everyone_may_see_read_interact],
         "nonfederated" => [:guests_may_see_read, :locals_may_see_read_interact],
         "nonfederated:discoverable" => [:guests_may_see, :locals_may_see_interact],
-        "nonfederated:unlisted" => [:guests_may_read, :locals_may_read_interact],
-        # Membership markers — must be unique to membership (no overlap with visibility),
-        # so detection isn't fooled by a visibility ACL matching the wrong dimension.
-        "open" => [:locals_may_contribute, :remotes_may_contribute],
-        "local:members" => [:locals_may_join],
-        "on_request" => [:everyone_may_request]
+        "nonfederated:unlisted" => [:guests_may_read, :locals_may_read_interact]
       }
+
+    # NOTE: per-dimension ACL signatures for group back-translation are derived at
+    # runtime from `:preset_acls` + `:preset_dimensions[dim][:slug_order]` by
+    # `Bonfire.Boundaries.Presets.dim_acls/0`. Don't reintroduce a hand-maintained
+    # `:group_dim_acls` config — it drifts.
 
     # Scope metadata for the two-level boundary selector UI (visibility + DCV dims).
     # Each scope maps to label/icon/disabled status; the actual ACL grants are in preset_acls above.
@@ -819,7 +824,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         remotes_may_interact: %{activity_pub: :interact},
         # interact and reply/message/mention
         remotes_may_reply: %{activity_pub: :participate},
-        locals_may_read_interact: %{local: [:read] ++ verbs_react_quiet},
+        locals_may_read_interact: %{local: [:read] ++ verbs_interaction ++ verbs_react_quiet},
         # interact but NOT reply/message/mention
         locals_may_interact: %{local: :interact},
         # interact and reply/message/mention
@@ -831,26 +836,31 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         locals_may_follow: %{local: [:follow]},
         locals_may_join: %{local: [:join, :follow]},
         everyone_may_request: %{local: [:request], activity_pub: [:request]},
+        # The `*_interact` ACLs include `:follow` (the `verbs_interaction` set) on
+        # top of the reaction verbs (`verbs_react`). Without `:follow` the ACL name
+        # is a lie — the only way to "interact with" a discoverable group is by
+        # subscribing to it, and a follow attempt without permission falls through
+        # to a join request, which conflates the Follow and Join UX.
         everyone_may_see_interact: %{
           guest: [:see],
-          local: [:see] ++ verbs_react,
-          activity_pub: [:see] ++ verbs_react
+          local: [:see] ++ verbs_interaction ++ verbs_react,
+          activity_pub: [:see] ++ verbs_interaction ++ verbs_react
         },
         locals_may_see_interact: %{
-          local: [:see] ++ verbs_react
+          local: [:see] ++ verbs_interaction ++ verbs_react
         },
         everyone_may_see_read_interact: %{
           guest: [:see, :read],
-          local: [:see, :read] ++ verbs_react,
-          activity_pub: [:see, :read] ++ verbs_react
+          local: [:see, :read] ++ verbs_interaction ++ verbs_react,
+          activity_pub: [:see, :read] ++ verbs_interaction ++ verbs_react
         },
         locals_may_see_read_interact: %{
-          local: [:see, :read] ++ verbs_react
+          local: [:see, :read] ++ verbs_interaction ++ verbs_react
         },
         everyone_may_read_interact: %{
           guest: [:read],
-          local: [:read] ++ verbs_react_quiet,
-          activity_pub: [:read] ++ verbs_react_quiet
+          local: [:read] ++ verbs_interaction ++ verbs_react_quiet,
+          activity_pub: [:read] ++ verbs_interaction ++ verbs_react_quiet
         },
         # negative grants:
         ghosted_cannot_anything: %{ghost_them: verbs_negative.(all_verb_names)},

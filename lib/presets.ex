@@ -429,12 +429,44 @@ defmodule Bonfire.Boundaries.Presets do
   defp match_membership_slug(nil, _slugs), do: nil
 
   defp match_membership_slug(acl_id, slugs) do
-    preset_acls = Config.get!(:preset_acls_match)
+    membership_acls = Map.get(dim_acls(), :membership, %{})
 
     Enum.find(slugs, fn slug ->
-      expected = Enum.map(preset_acls[slug] || [], &Acls.get_id!/1)
+      expected = Enum.map(membership_acls[slug] || [], &Acls.get_id!/1)
       acl_id in expected
     end)
+  end
+
+  @doc """
+  Per-dim ACL signatures for back-translating a group's stored boundaries into its
+  (membership, visibility, participation) slugs. Derived from `:preset_acls` and
+  the per-dim `:slug_order` list in `:preset_dimensions` — there's no separate
+  `:group_dim_acls` config to keep in sync.
+
+  Slugs with empty ACL signatures (e.g. `archipelago`, `archipelago:contributors`)
+  are filtered out — they're forward-declared but federation-gated, and including
+  them would make every dim ambiguous (an empty subset matches anything). Slugs
+  whose ACL signatures are circle-controlled (e.g. `members:private`,
+  `group_members`, `moderators`, `invite_only`) are also absent from `:preset_acls`
+  and so naturally don't appear here; they're detected by absence/fallback in the
+  caller.
+  """
+  def dim_acls do
+    preset_dimensions = Config.get(:preset_dimensions, %{}, :bonfire_boundaries)
+    preset_acls = Config.get!(:preset_acls)
+
+    for dim <- [:membership, :visibility, :participation], into: %{} do
+      slugs = get_in(preset_dimensions, [dim, :slug_order]) || []
+
+      dim_map =
+        for slug <- slugs,
+            acls = Map.get(preset_acls, slug, []),
+            acls != [],
+            into: %{},
+            do: {slug, acls}
+
+      {dim, dim_map}
+    end
   end
 
   # Circle/ACL with its own icon — don't override with config
@@ -454,37 +486,47 @@ defmodule Bonfire.Boundaries.Presets do
   can hide the row.
   """
   def group_dimension_slugs(group) do
-    preset_dimensions = Config.get(:preset_dimensions, %{}, :bonfire_boundaries)
+    # `dim_acls/0` is derived once from `:preset_acls` + `:preset_dimensions`.
+    # See its docstring for the dim-keyed contract that lets back-translation
+    # disambiguate slugs whose ACL sets are subsets of one another.
+    dim_acls = dim_acls()
 
-    membership_slugs = get_in(preset_dimensions, [:membership, :slug_order]) || []
-    visibility_slugs = get_in(preset_dimensions, [:visibility, :slug_order]) || []
-    participation_slugs = get_in(preset_dimensions, [:participation, :slug_order]) || []
-
-    # Precompute expected ACL id sets per slug once, so the per-ACL reduce is pure MapSet lookup
-    # instead of re-reading :preset_acls_match config + rebuilding the id list for each ACL.
-    all_slugs = membership_slugs ++ visibility_slugs ++ participation_slugs
-    preset_acls = Config.get!(:preset_acls_match)
-
-    expected_by_slug =
-      Map.new(all_slugs, fn slug ->
-        {slug, MapSet.new(preset_acls[slug] || [], &Acls.get_id!/1)}
+    expected = fn dim ->
+      Map.new(Map.get(dim_acls, dim, %{}), fn {slug, acls} ->
+        {slug, MapSet.new(acls, &Acls.get_id!/1)}
       end)
-
-    match = fn acl_id, slugs ->
-      Enum.find(slugs, fn slug -> MapSet.member?(expected_by_slug[slug], acl_id) end)
     end
 
-    {membership, visibility, participation} =
+    group_acl_ids =
       Controlleds.list_acls_on_object(group)
-      |> Enum.reduce({nil, nil, nil}, fn controlled, {m, v, p} ->
-        acl_id = e(controlled, :acl_id, nil) || e(controlled, :acl, :id, nil)
+      |> Enum.map(&(e(&1, :acl_id, nil) || e(&1, :acl, :id, nil)))
+      |> Enum.reject(&is_nil/1)
+      |> MapSet.new()
 
-        {
-          m || match.(acl_id, membership_slugs),
-          v || match.(acl_id, visibility_slugs),
-          p || match.(acl_id, participation_slugs)
-        }
-      end)
+    # Whole-set match: pick the slug whose required ACL set is fully present in
+    # the group, preferring the most specific match (largest required set). This
+    # disambiguates slugs whose ACLs are subsets of one another — e.g.
+    # `local:contributors` requires `[locals_may_contribute]` while `anyone`
+    # requires `[locals_may_contribute, remotes_may_contribute]`. The
+    # per-ACL-iteration approach can't tell these apart and silently picks the
+    # first one encountered.
+    match_dim = fn expected_map ->
+      expected_map
+      |> Enum.filter(fn {_slug, ids} -> MapSet.subset?(ids, group_acl_ids) end)
+      |> Enum.max_by(fn {_slug, ids} -> MapSet.size(ids) end, fn -> nil end)
+      |> case do
+        {slug, _} -> slug
+        nil -> nil
+      end
+    end
+
+    membership = match_dim.(expected.(:membership))
+    visibility = match_dim.(expected.(:visibility))
+    participation = match_dim.(expected.(:participation))
+
+    membership_slugs =
+      get_in(Config.get(:preset_dimensions, %{}, :bonfire_boundaries), [:membership, :slug_order]) ||
+        []
 
     %{
       membership: membership || List.last(membership_slugs) || "invite_only",
