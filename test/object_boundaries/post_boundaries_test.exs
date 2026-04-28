@@ -93,7 +93,7 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
       }
     }
 
-    assert {:ok, post} = Posts.publish(current_user: user, post_attrs: attrs)
+    assert {:ok, post} = Posts.publish(current_user: user, post_attrs: attrs, boundary: "mentions")
     assert post.post_content.summary =~ "summary"
 
     # debug_object_acls(post)
