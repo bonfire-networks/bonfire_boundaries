@@ -545,10 +545,14 @@ defmodule Bonfire.Boundaries.Presets do
     v = dims[:visibility]
     p = dims[:participation]
 
+    # Circle-controlled participation slugs (`group_members`, `moderators`) have no
+    # global ACL signature, so `group_dimension_slugs/1` returns `nil` for them. When
+    # that happens, accept a (membership, visibility) match — the configured presets
+    # are unique on that pair, so it's an unambiguous resolve.
     Config.get(:group_presets, %{}, :bonfire_classify)
     |> Enum.find_value(fn {slug, meta} ->
       if e(meta, :membership, nil) == m and e(meta, :visibility, nil) == v and
-           e(meta, :participation, nil) == p,
+           (is_nil(p) or e(meta, :participation, nil) == p),
          do: slug
     end)
   end
