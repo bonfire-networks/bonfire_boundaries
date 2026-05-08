@@ -25,7 +25,7 @@ defmodule Bonfire.Boundaries.MixProject do
       aliases: aliases(),
       deps:
         Mess.deps([
-          {:igniter, "~> 0.5", optional: true},
+          {:igniter, "~> 0.7", optional: true},
           {:absinthe, "~> 1.10", optional: true},
           {:bonfire_api_graphql,
            git: "https://github.com/bonfire-networks/bonfire_api_graphql",
