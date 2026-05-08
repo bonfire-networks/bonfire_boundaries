@@ -1,4 +1,4 @@
-faker = "~> 0.14" # fake data generation
+faker_fork = "~> 0.19" # fake data generation
 jason = "~> 1.0"
 # ex_spirit = "~> 0.4"
 scribe = "~> 0.10" # debug printing tables

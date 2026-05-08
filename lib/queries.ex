@@ -48,78 +48,22 @@ defmodule Bonfire.Boundaries.Queries do
   defp boundarise_impl(query, field_ref, opts) do
     case field_ref do
       {{:., _, [{alia, _, _}, field]}, [{:no_parens, true} | _], []} ->
-        quote do
-          require Untangle
-          query = unquote(query)
-          opts = unquote(opts)
-          verbs = List.wrap(e(opts, :verbs, [:see, :read]))
+        boundarise_dot(query, alia, field, opts)
 
-          case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
-            true ->
-              query || Bonfire.Boundaries.Queries.always_true_subquery()
+      # Elixir 1.20+ may inject extra metadata (e.g. stop_generated: true) before no_parens
+      {{:., _, [{alia, _, _}, field]}, meta, []} when is_list(meta) ->
+        if {:no_parens, true} in meta,
+          do: boundarise_dot(query, alia, field, opts),
+          else:
+            raise(RuntimeError,
+              message: """
+              Invalid field reference: #{inspect(field_ref)}`
 
-            :admins ->
-              agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
+              Expected this form:
 
-              case Bonfire.Me.Accounts.is_admin?(agent) do
-                true ->
-                  Untangle.debug("Skipping boundary checks for instance administrator")
-
-                  query || Bonfire.Boundaries.Queries.always_true_subquery()
-
-                _ ->
-                  vis =
-                    Bonfire.Boundaries.Queries.query_with_summary(
-                      agent,
-                      verbs,
-                      from(
-                        Bonfire.Boundaries.Queries.base_summary_query(
-                          opts[:boundarise_with_view]
-                        ),
-                        where: [object_id: parent_as(unquote(alia)).unquote(field)]
-                      )
-                    )
-
-                  if query,
-                    do:
-                      where(
-                        query,
-                        exists(vis)
-                      ),
-                    else: vis
-              end
-
-            _false ->
-              agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
-
-              # vis = Bonfire.Boundaries.Queries.query_with_summary(agent, verbs, Bonfire.Boundaries.Queries.base_summary_query(opts[:boundarise_with_view]))
-
-              # join(
-              #   unquote(query),
-              #   e(opts, :boundary_join, :inner),
-              #   [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
-              #   v in subquery(vis),
-              #   on: unquote(field_ref) == v.object_id
-              # )
-
-              vis =
-                Bonfire.Boundaries.Queries.query_with_summary(
-                  agent,
-                  verbs,
-                  from(Bonfire.Boundaries.Queries.base_summary_query(opts[:boundarise_with_view]),
-                    where: [object_id: parent_as(unquote(alia)).unquote(field)]
-                  )
-                )
-
-              if query,
-                do:
-                  where(
-                    query,
-                    exists(vis)
-                  ),
-                else: vis
-          end
-        end
+               * `alias.field` (for ID field `field` on table alias `alias`, e.g: `activity.object_id`)
+              """
+            )
 
       {field, meta, args} = field_ref
       when is_atom(field) and is_list(meta) and
@@ -142,6 +86,81 @@ defmodule Bonfire.Boundaries.Queries do
 
            * `alias.field` (for ID field `field` on table alias `alias`, e.g: `activity.object_id`)
           """
+    end
+  end
+
+  defp boundarise_dot(query, alia, field, opts) do
+    quote do
+      require Untangle
+      query = unquote(query)
+      opts = unquote(opts)
+      verbs = List.wrap(e(opts, :verbs, [:see, :read]))
+
+      case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
+        true ->
+          query || Bonfire.Boundaries.Queries.always_true_subquery()
+
+        :admins ->
+          agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
+
+          case Bonfire.Me.Accounts.is_admin?(agent) do
+            true ->
+              Untangle.debug("Skipping boundary checks for instance administrator")
+
+              query || Bonfire.Boundaries.Queries.always_true_subquery()
+
+            _ ->
+              vis =
+                Bonfire.Boundaries.Queries.query_with_summary(
+                  agent,
+                  verbs,
+                  from(
+                    Bonfire.Boundaries.Queries.base_summary_query(
+                      opts[:boundarise_with_view]
+                    ),
+                    where: [object_id: parent_as(unquote(alia)).unquote(field)]
+                  )
+                )
+
+              if query,
+                do:
+                  where(
+                    query,
+                    exists(vis)
+                  ),
+                else: vis
+          end
+
+        _false ->
+          agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
+
+          # vis = Bonfire.Boundaries.Queries.query_with_summary(agent, verbs, Bonfire.Boundaries.Queries.base_summary_query(opts[:boundarise_with_view]))
+
+          # join(
+          #   unquote(query),
+          #   e(opts, :boundary_join, :inner),
+          #   [{unquote(alia), unquote(Macro.var(alia, __MODULE__))}],
+          #   v in subquery(vis),
+          #   on: unquote(field_ref) == v.object_id
+          # )
+
+          vis =
+            Bonfire.Boundaries.Queries.query_with_summary(
+              agent,
+              verbs,
+              from(Bonfire.Boundaries.Queries.base_summary_query(opts[:boundarise_with_view]),
+                where: [object_id: parent_as(unquote(alia)).unquote(field)]
+              )
+            )
+
+          if query,
+            do:
+              where(
+                query,
+                exists(vis)
+              ),
+            else: vis
+      end
     end
   end
 
