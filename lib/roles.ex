@@ -306,6 +306,10 @@ defmodule Bonfire.Boundaries.Roles do
   @doc """
   Determines the preset boundary role from an ACL summary or list of verbs.
 
+  Returns a 3-tuple `{role_atom, localized_role_name, verbs}` so callers can
+  branch on the locale-stable atom without depending on the translated name or
+  on whether a particular verb name is present in the verbs list.
+
   ## Examples
 
       iex> preset_boundary_role_from_acl(%{verbs: verbs})
@@ -317,10 +321,9 @@ defmodule Bonfire.Boundaries.Roles do
   end
 
   def preset_boundary_role_from_acl(verbs) when is_list(verbs) do
-    # debug(summary)
     case role_from_verb_names(verbs) do
-      :administer -> {l("Administer"), l("Full permissions")}
-      role -> {Recase.to_title(to_string(role)), verbs}
+      :administer -> {:administer, l("Administer"), verbs}
+      role -> {role, Recase.to_title(to_string(role)), verbs}
     end
   end
 

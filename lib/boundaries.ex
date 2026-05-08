@@ -328,6 +328,29 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
+  Optimistic permission check for use in feed action button templates that may
+  render before `object_boundary` has been preloaded by `update_many` as
+  `%{verbs: ..., value: true}`.
+
+  Returns `true` (so the button stays enabled) when:
+    * `object_boundary` is `nil` or `:skip_boundary_preload` — defer to server-side
+      validation when the action is performed
+    * there is no current user — guest users see enabled buttons that prompt login
+      on click (consistent with the existing boost/like/reply UX)
+
+  Otherwise delegates to `can?/3` against the preloaded boundary, which runs
+  in-memory (no DB query) on the `%{verbs: ..., value: true}` fast path.
+
+  Use this instead of `can?/3` in any per-activity template to avoid n+1
+  permission queries when the surrounding preload chain didn't finish.
+  """
+  def can_or_unloaded?(context, verb, object_boundary) do
+    is_nil(current_user_id(context)) or
+      object_boundary in [nil, :skip_boundary_preload] or
+      can?(context, verb, object_boundary)
+  end
+
+  @doc """
   Checks if a subject has permission to conduct the specified action(s)/verb(s) on an object.
 
   ## Examples
