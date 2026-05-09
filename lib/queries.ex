@@ -115,9 +115,7 @@ defmodule Bonfire.Boundaries.Queries do
                   agent,
                   verbs,
                   from(
-                    Bonfire.Boundaries.Queries.base_summary_query(
-                      opts[:boundarise_with_view]
-                    ),
+                    Bonfire.Boundaries.Queries.base_summary_query(opts[:boundarise_with_view]),
                     where: [object_id: parent_as(unquote(alia)).unquote(field)]
                   )
                 )
