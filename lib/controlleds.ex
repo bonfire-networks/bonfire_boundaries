@@ -71,6 +71,16 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   @doc """
+  Returns true if the given subject has a per-object grant with the given verb on the object.
+  Only checks non-preset (per-object) ACLs.
+  """
+  def subject_has_verb_on_object?(object, subject, verb) do
+    list_on_objects_by_subject_q([object], subject)
+    |> where([_c, grants: grants], grants.verb_id in ^Verbs.ids(verb))
+    |> repo().exists?()
+  end
+
+  @doc """
   Lists ACLs applied to an object.
   Only call this as an admin or curator of the object.
 

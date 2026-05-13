@@ -481,8 +481,7 @@ defmodule Bonfire.Boundaries.Presets do
   by matching each ACL id against the slug orderings in `preset_dimensions` config.
 
   Returns `%{membership: slug | nil, visibility: slug | nil, participation: slug | nil}`.
-  Membership falls back to the most-restrictive slug (`invite_only` by default) when no ACL
-  matches, mirroring `membership_slug/1`; visibility and participation return `nil` so callers
+  Membership falls back to the most-restrictive slug (`invite_only` by default) when no ACL matches, mirroring `membership_slug/1`; visibility and participation return `nil` so callers
   can hide the row.
   """
   def group_dimension_slugs(group) do
@@ -512,7 +511,9 @@ defmodule Bonfire.Boundaries.Presets do
     # first one encountered.
     match_dim = fn expected_map ->
       expected_map
-      |> Enum.filter(fn {_slug, ids} -> MapSet.subset?(ids, group_acl_ids) end)
+      |> Enum.filter(fn {_slug, ids} ->
+        MapSet.size(ids) > 0 and MapSet.subset?(ids, group_acl_ids)
+      end)
       |> Enum.max_by(fn {_slug, ids} -> MapSet.size(ids) end, fn -> nil end)
       |> case do
         {slug, _} -> slug
@@ -522,7 +523,7 @@ defmodule Bonfire.Boundaries.Presets do
 
     membership = match_dim.(expected.(:membership))
     visibility = match_dim.(expected.(:visibility))
-    participation = match_dim.(expected.(:participation))
+    participation = match_dim.(expected.(:participation)) || detect_circle_participation(group)
 
     membership_slugs =
       get_in(Config.get(:preset_dimensions, %{}, :bonfire_boundaries), [:membership, :slug_order]) ||
@@ -534,6 +535,25 @@ defmodule Bonfire.Boundaries.Presets do
       participation: participation
     }
   end
+
+  defp detect_circle_participation(group) do
+    cond do
+      circle_contributes?(group, Bonfire.Boundaries.Scaffold.Groups.members_circle(group)) ->
+        "group_members"
+
+      circle_contributes?(group, Bonfire.Boundaries.Scaffold.Groups.moderators_circle(group)) ->
+        "moderators"
+
+      true ->
+        nil
+    end
+  end
+
+  defp circle_contributes?(group, {:ok, circle}) do
+    Controlleds.subject_has_verb_on_object?(group, circle, :create)
+  end
+
+  defp circle_contributes?(_, _), do: false
 
   @doc """
   Infers the group preset slug (e.g. `"private_club"`) from a dimension-slug map by matching

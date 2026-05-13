@@ -25,8 +25,8 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
       assert "public_local_community" ==
                Presets.preset_slug_from_dims(%{
                  membership: "local:members",
-                 visibility: "nonfederated",
-                 participation: "group_members"
+                 visibility: "nonfederated:discoverable",
+                 participation: "local:contributors"
                })
     end
 
@@ -34,7 +34,7 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
       assert "announcement_channel" ==
                Presets.preset_slug_from_dims(%{
                  membership: "invite_only",
-                 visibility: "nonfederated",
+                 visibility: "nonfederated:discoverable",
                  participation: "moderators"
                })
     end
@@ -126,7 +126,8 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
                membership: "local:members",
                visibility: "nonfederated",
                participation: "group_members"
-             } = Presets.group_dimension_slugs(group)
+             } =
+               Presets.group_dimension_slugs(group)
     end
 
     test "derives the dims applied to a private_club-like group" do
@@ -169,16 +170,16 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
       group =
         Simulate.fake_group!(creator, %{
           membership: "local:members",
-          visibility: "nonfederated",
-          participation: "group_members"
+          visibility: "nonfederated:discoverable",
+          participation: "local:contributors"
         })
 
       chip = Presets.group_row_chip(group)
       assert is_map(chip)
       # Same three coordinates the public_local_community preset is built from:
       assert chip[:membership] == "local:members"
-      assert chip[:visibility] == "nonfederated"
-      assert chip[:participation] == "group_members"
+      assert chip[:visibility] == "nonfederated:discoverable"
+      assert chip[:participation] == "local:contributors"
     end
 
     test "falls back to the membership dimension meta for a custom dim combination" do
