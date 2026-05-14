@@ -220,8 +220,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         :reply,
         :quote,
         # :annotate,
-        :tag,
-        :label,
+        # :tag,
+        # :label,
+        :vote,
         # :grant,
         :edit,
         :delete
@@ -266,6 +267,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_interaction = [:follow]
     verbs_liking = [:like]
     verbs_sharing = [:boost]
+    verbs_voting = [:vote]
     verbs_ping = [:reply, :mention, :message]
     verbs_critique = [:quote]
     verbs_curate = [:tag, :describe, :annotate, :pin]
@@ -279,14 +281,15 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_interact_minus_boost = verbs_see_read_request ++ verbs_interaction ++ verbs_liking
     verbs_interact_minus_like = verbs_see_read_request ++ verbs_interaction ++ verbs_sharing
 
-    # like + bookmark + flag — quiet reactions that don't amplify reach (safe for unlisted/quiet content)
-    verbs_react_quiet = verbs_liking ++ [:bookmark, :flag]
+    # like + bookmark + flag + vote — quiet reactions that don't amplify reach (safe for unlisted/quiet content)
+    verbs_react_quiet = verbs_liking ++ verbs_voting ++ [:bookmark, :flag]
 
-    # like + boost + bookmark + flag — full reactions including amplification (for discoverable/preview content)
+    # like + boost + bookmark + flag + vote — full reactions including amplification (for discoverable/preview content)
     verbs_react = verbs_react_quiet ++ verbs_sharing
 
     role_verbs_interact =
-      verbs_see_read_request ++ verbs_interaction ++ verbs_liking ++ verbs_sharing
+      verbs_see_read_request ++
+        verbs_interaction ++ verbs_liking ++ verbs_sharing ++ verbs_voting
 
     # verbs_participate_message_minus_follow =
     #   verbs_interact_minus_follow ++ verbs_ping
