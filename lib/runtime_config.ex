@@ -267,7 +267,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_interaction = [:follow]
     verbs_liking = [:like]
     verbs_sharing = [:boost]
-    verbs_voting = [:vote]
+    verbs_partake = [:join, :vote]
     verbs_ping = [:reply, :mention, :message]
     verbs_critique = [:quote]
     verbs_curate = [:tag, :describe, :annotate, :pin]
@@ -282,21 +282,21 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_interact_minus_like = verbs_see_read_request ++ verbs_interaction ++ verbs_sharing
 
     # like + bookmark + flag + vote — quiet reactions that don't amplify reach (safe for unlisted/quiet content)
-    verbs_react_quiet = verbs_liking ++ verbs_voting ++ [:bookmark, :flag]
+    verbs_react_quiet = verbs_liking ++ [:bookmark, :flag]
 
     # like + boost + bookmark + flag + vote — full reactions including amplification (for discoverable/preview content)
     verbs_react = verbs_react_quiet ++ verbs_sharing
 
     role_verbs_interact =
       verbs_see_read_request ++
-        verbs_interaction ++ verbs_liking ++ verbs_sharing ++ verbs_voting
+        verbs_interaction ++ verbs_liking ++ verbs_sharing
 
     # verbs_participate_message_minus_follow =
     #   verbs_interact_minus_follow ++ verbs_ping
 
-    verbs_participate_minus_boost = verbs_interact_minus_boost ++ verbs_ping
+    verbs_participate_on_message = verbs_interact_minus_boost ++ verbs_ping
 
-    role_verbs_participate = role_verbs_interact ++ verbs_ping ++ [:join]
+    role_verbs_participate = role_verbs_interact ++ verbs_ping ++ verbs_partake
 
     role_verbs_critique = role_verbs_participate ++ verbs_critique
 
@@ -410,7 +410,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       ],
       verbs_to_grant: [
         default: role_verbs_participate,
-        message: verbs_participate_minus_boost
+        message: verbs_participate_on_message
       ],
       # preset ACLs to show when editing boundaries
       acls_for_dropdown: basic_acls,
