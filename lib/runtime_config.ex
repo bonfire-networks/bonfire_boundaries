@@ -455,7 +455,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "open" => [:everyone_may_see_read],
         "local:members" => [:locals_may_join],
         "archipelago:members" => [],
-        "on_request" => [:everyone_may_request],
+        "on_request" => [:everyone_may_request, :no_follow],
         # "invite_only": no grants, members circle controls
 
         # --- Participation presets  ---

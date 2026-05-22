@@ -98,14 +98,15 @@ defmodule Bonfire.Boundaries.Grants do
         %{acl_id: acl_id, subject_id: subject_id, verb_id: verb_id, value: value} = _attrs,
         :remove_grant
       ) do
-    repo().get_by(Grant,
-      acl_id: acl_id,
-      subject_id: subject_id,
-      verb_id: verb_id,
-      value: value
-    )
-    # |> debug
-    |> repo().delete()
+    case repo().get_by(Grant,
+           acl_id: acl_id,
+           subject_id: subject_id,
+           verb_id: verb_id,
+           value: value
+         ) do
+      nil -> nil
+      grant -> repo().delete(grant)
+    end
   end
 
   #  we don't store nil values as they are implied
@@ -113,13 +114,14 @@ defmodule Bonfire.Boundaries.Grants do
         %{acl_id: acl_id, subject_id: subject_id, verb_id: verb_id, value: nil} = _attrs,
         _action
       ) do
-    repo().get_by(Grant,
-      acl_id: acl_id,
-      subject_id: subject_id,
-      verb_id: verb_id
-    )
-    # |> debug
-    |> repo().delete()
+    case repo().get_by(Grant,
+           acl_id: acl_id,
+           subject_id: subject_id,
+           verb_id: verb_id
+         ) do
+      nil -> nil
+      grant -> repo().delete(grant)
+    end
   end
 
   def upsert_or_delete(%{} = attrs, _action) do

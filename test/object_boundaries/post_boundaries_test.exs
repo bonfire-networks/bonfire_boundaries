@@ -139,7 +139,9 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
       }
     }
 
-    assert {:ok, post} = Posts.publish(current_user: user, post_attrs: attrs)
+    assert {:ok, post} =
+             Posts.publish(current_user: user, boundary: "mentions", post_attrs: attrs)
+
     assert post.post_content.summary =~ "summary"
 
     me = Bonfire.Me.Fake.fake_user!()
