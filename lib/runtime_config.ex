@@ -624,6 +624,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: l("People I am silencing"),
           stereotype: true
         },
+        allow_them: %{
+          id: "3TRVSTTHESED0MA1NS0RACT0RS",
+          name: l("Instances and actors I allow to federate with me"),
+          stereotype: true
+        },
         silence_me: %{
           id: "0KF1NEY0VD0N0TWANTT0HEARME",
           name: l("People silencing me"),
@@ -910,7 +915,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           # users/instances you have silenced
           silence_them: %{stereotype: :silence_them},
           # users who have silenced you
-          silence_me: %{stereotype: :silence_me}
+          silence_me: %{stereotype: :silence_me},
+          # instances/actors I allow to federate with me (archipelago mode)
+          allow_them: %{stereotype: :allow_them}
         },
         acls: %{
           ## ACLs that confer my personal permissions on things i have created
@@ -968,7 +975,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           # users/instances you have silenced
           silence_them: %{stereotype: :silence_them},
           # users who have silenced you
-          silence_me: %{stereotype: :silence_me}
+          silence_me: %{stereotype: :silence_me},
+          # instances/actors I allow to federate with me (archipelago mode)
+          allow_them: %{stereotype: :allow_them}
         },
         acls: %{
           ## ACLs that confer my personal permissions on things i have created

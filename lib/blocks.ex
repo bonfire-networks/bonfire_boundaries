@@ -555,7 +555,7 @@ defmodule Bonfire.Boundaries.Blocks do
   ###
 
   def instance_wide_circles(block_types) when is_list(block_types) do
-    Enum.map(block_types, &Bonfire.Boundaries.Circles.get_id/1)
+    Circles.ids_for_stereotypes(block_types)
   end
 
   def instance_wide_circles(block_type) do
@@ -569,37 +569,11 @@ defmodule Bonfire.Boundaries.Blocks do
   #       debug(instance_to_block, "instance_to_block with #{inspect block_types}")
   #   raise "Instance silencing not implemented"
   # end
-  defp per_user_circles(%Bonfire.Data.AccessControl.Circle{} = circle, _block_types) do
-    warn(circle, "Received a circle instead of a user")
-    [circle]
-  end
+  defp per_user_circles(current_user, block_types),
+    do: Circles.stereotype_circles_for(current_user, block_types)
 
-  # Returns full Circle structs (needed for mutate_blocklists which preloads associations)
-  defp per_user_circles(current_user, block_types)
-       when not is_nil(current_user) and is_list(block_types) do
-    debug(current_user, "per-user circles (full structs)")
-    Circles.get_stereotype_circles(current_user, block_types)
-  end
-
-  defp per_user_circles(nil, _block_types) do
-    warn("no user provided")
-    []
-  end
-
-  defp per_user_circles(_, block_types) do
-    warn(block_types, "expected a list of block types")
-    []
-  end
-
-  # Returns only circle IDs
-  defp per_user_circle_ids(current_user, block_types)
-       when not is_nil(current_user) and is_list(block_types) do
-    debug(current_user, "per-user circle IDs")
-    Circles.get_stereotype_circle_ids(current_user, block_types)
-  end
-
-  defp per_user_circle_ids(nil, _block_types), do: []
-  defp per_user_circle_ids(_, _block_types), do: []
+  defp per_user_circle_ids(current_user, block_types),
+    do: Circles.stereotype_circle_ids_for(current_user, block_types)
 
   def user_block_circles(current_user, block_type) do
     types_blocked(block_type)

@@ -26,6 +26,7 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
   def mod_circle, do: "10VE1YM0DSHE1PHEA1THYC0MMS"
   def activity_pub_circle, do: "7EDERATEDW1THANACT1V1TYPVB"
   def suggested_profiles_circle, do: "5VGGESTEDPR0F11EST0F0110WS"
+  def allow_federation_circle, do: "3TRVSTTHESED0MA1NS0RACT0RS"
 
   # TODO: generate from config
 
