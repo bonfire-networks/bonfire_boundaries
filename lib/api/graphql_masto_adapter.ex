@@ -458,35 +458,14 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
     Endpoint: GET /api/v1/timelines/list/:list_id
     """
     def list_timeline(list_id, params, conn) do
-      # Delegate to Social adapter with subject_circles filter
       alias Bonfire.Social.API.GraphQLMasto.Adapter, as: SocialAdapter
 
-      limit = PaginationHelpers.validate_limit(params["limit"] || 20)
-
-      # Extract pagination cursors from Mastodon params
-      cursors = extract_mastodon_pagination_cursors(params)
-
-      # Build limit param based on cursor direction (first for forward, last for backward)
-      limit_param =
-        cond do
-          Map.has_key?(cursors, :after) -> %{first: limit}
-          Map.has_key?(cursors, :before) -> %{last: limit}
-          true -> %{first: limit}
-        end
-
-      # Use subject_circles filter to show posts from users in this list (circle)
-      feed_params =
-        %{
-          "filter" => %{
-            "subject_circles" => [list_id],
-            "time_limit" => 0,
-            "feed_name" => nil
-          }
-        }
-        |> Map.merge(limit_param)
-        |> Map.merge(cursors)
-
-      SocialAdapter.feed(feed_params, conn)
+      params
+      |> PaginationHelpers.build_feed_params(%{
+        "subject_circles" => [list_id],
+        "feed_name" => nil
+      })
+      |> SocialAdapter.feed(conn)
     end
 
     defp with_valid_title(params, conn, fun) do
@@ -538,45 +517,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       do: PaginationHelpers.encode_cursor(id, %{id: id})
 
     defp encode_encircle_cursor(_), do: {:error, :invalid_id}
-
-    # Extract Mastodon pagination cursors and convert to GraphQL cursor format
-    defp extract_mastodon_pagination_cursors(params) do
-      params
-      |> Map.take(["max_id", "since_id", "min_id"])
-      |> Enum.reduce(%{}, fn
-        {"max_id", id}, acc when is_binary(id) and id != "" ->
-          case encode_id_as_cursor(id) do
-            {:ok, cursor} -> Map.put(acc, :after, cursor)
-            _ -> acc
-          end
-
-        {"min_id", id}, acc when is_binary(id) and id != "" ->
-          case encode_id_as_cursor(id) do
-            {:ok, cursor} -> Map.put(acc, :before, cursor)
-            _ -> acc
-          end
-
-        {"since_id", id}, acc when is_binary(id) and id != "" ->
-          # Only use since_id if min_id not already set
-          if Map.has_key?(acc, :before) do
-            acc
-          else
-            case encode_id_as_cursor(id) do
-              {:ok, cursor} -> Map.put(acc, :before, cursor)
-              _ -> acc
-            end
-          end
-
-        _, acc ->
-          acc
-      end)
-    end
-
-    # Encode a plain ID as a GraphQL cursor
-    defp encode_id_as_cursor(id) when is_binary(id),
-      do: PaginationHelpers.encode_cursor(id, %{id: id})
-
-    defp encode_id_as_cursor(_), do: {:error, :invalid_id}
 
     @doc """
     Get lists (circles) owned by the current user that contain the specified account.
