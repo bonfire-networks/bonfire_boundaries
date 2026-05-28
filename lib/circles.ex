@@ -707,6 +707,40 @@ defmodule Bonfire.Boundaries.Circles do
 
   def get_stereotype_circle_ids(_subject, _stereotypes), do: []
 
+  @doc """
+  Returns full Circle structs for the given user's stereotype circles, with nil/Circle guard handling.
+  When given a `%Circle{}` directly (e.g. already-resolved instance circle), returns it as-is.
+  """
+  def stereotype_circles_for(%Circle{} = circle, _stereotypes) do
+    warn(circle, "Received a Circle instead of a user — returning as-is")
+    [circle]
+  end
+
+  def stereotype_circles_for(nil, _stereotypes) do
+    warn("no user provided")
+    []
+  end
+
+  def stereotype_circles_for(user, stereotypes), do: get_stereotype_circles(user, stereotypes)
+
+  @doc """
+  Returns IDs of stereotype circles for a user, with nil-safe handling.
+  """
+  def stereotype_circle_ids_for(nil, _stereotypes), do: []
+
+  def stereotype_circle_ids_for(user, stereotypes),
+    do: get_stereotype_circle_ids(user, stereotypes)
+
+  @doc """
+  Returns IDs of built-in circles matching the given stereotype slugs (e.g. `[:allow_them, :ghost_them]`).
+  Used to look up instance-wide singleton circles by stereotype.
+  """
+  def ids_for_stereotypes(stereotypes) when is_list(stereotypes) do
+    Enum.map(stereotypes, &get_id/1) |> Enum.reject(&is_nil/1)
+  end
+
+  def ids_for_stereotypes(stereotype), do: ids_for_stereotypes([stereotype])
+
   def get_or_create_stereotype_circle(caretaker, stereotype) do
     case get_stereotype_circles(caretaker, [stereotype]) do
       [] ->
