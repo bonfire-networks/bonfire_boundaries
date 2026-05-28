@@ -87,13 +87,24 @@ defmodule Bonfire.Boundaries.Allowlist do
 
   defp is_allowlisted_by?(_, _) do
     debug("no user provided for per-user allowlist check")
-    nil
+    false
   end
 
   defp allow_circles(:instance_wide), do: Circles.ids_for_stereotypes(@stereotypes)
 
   defp allow_circles(opts) when is_list(opts),
-    do: Circles.stereotype_circles_for(current_user(opts), @stereotypes)
+    do: get_or_create_allow_circles(current_user(opts))
 
-  defp allow_circles(user), do: Circles.stereotype_circles_for(user, @stereotypes)
+  defp allow_circles(user), do: get_or_create_allow_circles(user)
+
+  defp get_or_create_allow_circles(nil), do: []
+
+  defp get_or_create_allow_circles(user) do
+    @stereotypes
+    |> Enum.map(&Circles.get_or_create_stereotype_circle(user, &1))
+    |> Enum.flat_map(fn
+      {:ok, circle} -> [circle]
+      _ -> []
+    end)
+  end
 end
