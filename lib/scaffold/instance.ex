@@ -49,7 +49,10 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
   defp list_verbs(verbs) when is_list(verbs) or is_map(verbs), do: verbs
 
   defp list_verbs(role) when is_atom(role) do
-    role = Boundaries.Roles.get(role)
+    # Use scope: :instance_wide to read directly from app config, not DB settings.
+    # In test env, instance_scope_settings reads from DB only (no fallback), so
+    # without this, role aliases like :participate resolve to %{} and no grants are seeded.
+    role = Boundaries.Roles.get(role, scope: :instance_wide)
 
     (role
      |> e(:can_verbs, [])
@@ -229,6 +232,10 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
     Keyword.values(Acls.acls())
     |> upsert_acls_helper()
 
+    upsert_grants()
+  end
+
+  def upsert_grants() do
     grants_fixtures()
     |> upsert_grants_helper()
 

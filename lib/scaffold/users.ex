@@ -146,10 +146,10 @@ defmodule Bonfire.Boundaries.Scaffold.Users do
     do: Boundaries.take_care_of!(objects, user)
 
   defp insert_acls(user, acls) do
-    repo().insert_all(Acl, Enum.map(acls, &Map.take(&1, [:id])))
+    repo().insert_all_or_ignore(Acl, Enum.map(acls, &Map.take(&1, [:id])))
   end
 
   defp insert_circles(user, circles) do
-    repo().insert_all(Circle, Enum.map(circles, &Map.take(&1, [:id])))
+    repo().insert_all_or_ignore(Circle, Enum.map(circles, &Map.take(&1, [:id])))
   end
 end

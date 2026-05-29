@@ -447,11 +447,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "private" => [],
 
         # --- Membership presets ---
-        # `open` historically bundled the participation ACLs (`*_may_contribute`)
-        # too, but those belong to participation slugs (`anyone` / `local:contributors`)
-        # — keeping them here would mis-detect any anyone-participation group as
-        # `open` membership. The form cascades `open` → `participation: anyone` so
-        # the contributes still get applied via the participation slug.
+        # `open` historically bundled the participation ACLs (`*_may_contribute`) too, but those belong to participation slugs (`anyone` / `local:contributors`), keeping them here would mis-detect any anyone-participation group as `open` membership. The form cascades `open` → `participation: anyone` so the contributes still get applied via the participation slug.
         "open" => [:everyone_may_see_read],
         "local:members" => [:locals_may_join],
         "archipelago:members" => [],
