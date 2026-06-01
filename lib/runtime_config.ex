@@ -333,24 +333,24 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         interact: %{
           can_verbs: role_verbs_interact,
           read_only: true,
-          label: l("Fully visible"),
-          description: l("Can see, read, and interact with content"),
+          label: l_noop("Fully visible"),
+          description: l_noop("Can see, read, and interact with content"),
           icon: "ph:eye-duotone"
         },
         # see + react (no read) — for discoverable visibility
         discover: %{
           can_verbs: [:see] ++ verbs_react,
           read_only: true,
-          label: l("Discoverable"),
-          description: l("Can see the group exists and react, but not read content"),
+          label: l_noop("Discoverable"),
+          description: l_noop("Can see the group exists and react, but not read content"),
           icon: "fluent:globe-search-24-regular"
         },
         # read + quiet react (no see, no boost) — for unlisted visibility
         unlisted_read: %{
           can_verbs: [:read] ++ verbs_react_quiet,
           read_only: true,
-          label: l("Unlisted"),
-          description: l("Can read with a direct link but not found in listings or feeds"),
+          label: l_noop("Unlisted"),
+          description: l_noop("Can read with a direct link but not found in listings or feeds"),
           icon: "ph:link-simple-duotone"
         },
         participate: %{can_verbs: role_verbs_participate, read_only: true},
@@ -523,30 +523,30 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     config :bonfire_boundaries,
       scopes: %{
         global: %{
-          label: l("Public (federated)"),
-          description: l("Visible to everyone including the wider fediverse"),
+          label: l_noop("Public (federated)"),
+          description: l_noop("Visible to everyone including the wider fediverse"),
           icon: "ph:globe-duotone",
-          disabled: l("Coming soon: requires groups federation")
+          disabled: l_noop("Coming soon: requires groups federation")
         },
         nonfederated: %{
-          label: l("Public"),
-          description: l("Visible on this instance but not sent to the wider fediverse"),
+          label: l_noop("Public"),
+          description: l_noop("Visible on this instance but not sent to the wider fediverse"),
           icon: "ph:house-line-duotone"
         },
         archipelago: %{
-          label: l("Archipelago"),
-          description: l("Visible to users on trusted linked instances"),
+          label: l_noop("Archipelago"),
+          description: l_noop("Visible to users on trusted linked instances"),
           icon: "ph:planet-duotone",
-          disabled: l("Coming soon: requires archipelago feature")
+          disabled: l_noop("Coming soon: requires archipelago feature")
         },
         local: %{
-          label: l("Local"),
-          description: l("Visible only to users on this instance"),
+          label: l_noop("Local"),
+          description: l_noop("Visible only to users on this instance"),
           icon: "ph:campfire-duotone"
         },
         members: %{
-          label: l("Members only"),
-          description: l("Visible only to group members"),
+          label: l_noop("Members only"),
+          description: l_noop("Visible only to group members"),
           icon: "ph:users-three-duotone"
         }
       }
@@ -1039,7 +1039,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       preset_order: ["public", "local", "mentions"],
       preset_dimensions: %{
         membership: %{
-          label: l("Who can join?"),
+          label: l_noop("Who can join?"),
           slug_order: [
             "open",
             "local:members",
@@ -1049,36 +1049,36 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           ],
           options: %{
             "open" => %{
-              label: l("Anyone"),
+              label: l_noop("Anyone"),
               icon: "fluent:globe-person-20-regular",
-              description: l("Anyone (including remote users) can join freely"),
-              disabled: l("Coming soon: requires groups federation")
+              description: l_noop("Anyone (including remote users) can join freely"),
+              disabled: l_noop("Coming soon: requires groups federation")
             },
             "local:members" => %{
-              label: l("Local members"),
+              label: l_noop("Local members"),
               icon: "ph:campfire-duotone",
-              description: l("Anyone on this instance can join freely")
+              description: l_noop("Anyone on this instance can join freely")
             },
             "archipelago:members" => %{
-              label: l("Archipelago members"),
+              label: l_noop("Archipelago members"),
               icon: "ph:planet-duotone",
-              description: l("Anyone on a trusted linked instance can join freely"),
-              disabled: l("Coming soon: requires archipelago feature")
+              description: l_noop("Anyone on a trusted linked instance can join freely"),
+              disabled: l_noop("Coming soon: requires archipelago feature")
             },
             "on_request" => %{
-              label: l("On request"),
+              label: l_noop("On request"),
               icon: "ph:hand-waving-duotone",
-              description: l("Anyone can request to join; a moderator approves")
+              description: l_noop("Anyone can request to join; a moderator approves")
             },
             "invite_only" => %{
-              label: l("Invite only"),
+              label: l_noop("Invite only"),
               icon: "ph:lock-duotone",
-              description: l("Only moderators can add members")
+              description: l_noop("Only moderators can add members")
             }
           }
         },
         visibility: %{
-          label: l("Who can see the group?"),
+          label: l_noop("Who can see the group?"),
           slug_order: [
             "global",
             "nonfederated",
@@ -1094,90 +1094,91 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           ],
           options: %{
             "global" => %{
-              label: l("Public (federated)"),
+              label: l_noop("Public (federated)"),
               icon: "ph:globe-duotone",
-              description: l("Anyone (including guests) can see and read the group; federated"),
+              description:
+                l_noop("Anyone (including guests) can see and read the group; federated"),
               role: :interact,
-              disabled: l("Coming soon: requires groups federation")
+              disabled: l_noop("Coming soon: requires groups federation")
             },
             "nonfederated" => %{
-              label: l("Public"),
+              label: l_noop("Public"),
               icon: "ph:house-duotone",
               description:
-                l(
+                l_noop(
                   "Anyone (including guests) can see and read the group on this instance; not federated"
                 ),
               role: :interact
             },
             "nonfederated:discoverable" => %{
-              label: l("Public, discoverable only"),
+              label: l_noop("Public, discoverable only"),
               icon: "fluent:globe-search-24-regular",
               description:
-                l(
+                l_noop(
                   "Anyone on this instance can see the group exists, but only members can read content; not federated"
                 ),
               role: :discover
             },
             "nonfederated:unlisted" => %{
-              label: l("Public, unlisted"),
+              label: l_noop("Public, unlisted"),
               icon: "ph:link-simple-duotone",
               description:
-                l(
+                l_noop(
                   "Anyone on this instance can read with a direct link; not listed; not federated"
                 ),
               role: :unlisted_read
             },
             "archipelago" => %{
-              label: l("Archipelago"),
+              label: l_noop("Archipelago"),
               icon: "ph:planet-duotone",
-              description: l("Anyone on a trusted linked instance can see and read"),
+              description: l_noop("Anyone on a trusted linked instance can see and read"),
               role: :interact,
-              disabled: l("Coming soon: requires archipelago feature")
+              disabled: l_noop("Coming soon: requires archipelago feature")
             },
             "local" => %{
-              label: l("Local"),
+              label: l_noop("Local"),
               icon: "ph:campfire-duotone",
-              description: l("Anyone on this instance can see and read the group"),
+              description: l_noop("Anyone on this instance can see and read the group"),
               role: :interact
             },
             "discoverable" => %{
-              label: l("Discoverable"),
+              label: l_noop("Discoverable"),
               icon: "fluent:globe-search-24-regular",
               description:
-                l("Anyone can see the group exists, but only members can read content"),
+                l_noop("Anyone can see the group exists, but only members can read content"),
               role: :discover,
-              disabled: l("Coming soon: requires groups federation")
+              disabled: l_noop("Coming soon: requires groups federation")
             },
             "local:discoverable" => %{
-              label: l("Locally discoverable"),
+              label: l_noop("Locally discoverable"),
               icon: "ph:eye-duotone",
               description:
-                l("Local users can see the group exists, but only members can read content"),
+                l_noop("Local users can see the group exists, but only members can read content"),
               role: :discover
             },
             "unlisted" => %{
-              label: l("Unlisted"),
+              label: l_noop("Unlisted"),
               icon: "ph:link-simple-duotone",
-              description: l("Readable with a direct link, not shown in listings"),
+              description: l_noop("Readable with a direct link, not shown in listings"),
               role: :unlisted_read,
-              disabled: l("Coming soon: requires groups federation")
+              disabled: l_noop("Coming soon: requires groups federation")
             },
             "local:unlisted" => %{
-              label: l("Locally unlisted"),
+              label: l_noop("Locally unlisted"),
               icon: "ph:link-simple-duotone",
-              description: l("Local users can read with a direct link; not listed"),
+              description: l_noop("Local users can read with a direct link; not listed"),
               role: :unlisted_read
             },
             "members:private" => %{
-              label: l("Members only"),
+              label: l_noop("Members only"),
               icon: "ph:lock-duotone",
-              description: l("Only members can see or read the group"),
+              description: l_noop("Only members can see or read the group"),
               role: :interact
             }
           }
         },
         participation: %{
-          label: l("Who can post and interact?"),
+          label: l_noop("Who can post and interact?"),
           slug_order: [
             "anyone",
             "archipelago:contributors",
@@ -1187,38 +1188,38 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           ],
           options: %{
             "anyone" => %{
-              label: l("Anyone"),
+              label: l_noop("Anyone"),
               icon: "ph:globe-duotone",
-              description: l("Anyone (including remote users) can post and interact"),
-              disabled: l("Coming soon: requires groups federation")
+              description: l_noop("Anyone (including remote users) can post and interact"),
+              disabled: l_noop("Coming soon: requires groups federation")
             },
             "archipelago:contributors" => %{
-              label: l("Archipelago contributors"),
+              label: l_noop("Archipelago contributors"),
               icon: "ph:planet-duotone",
-              description: l("Users on trusted linked instances can post and interact"),
-              disabled: l("Coming soon: requires archipelago feature")
+              description: l_noop("Users on trusted linked instances can post and interact"),
+              disabled: l_noop("Coming soon: requires archipelago feature")
             },
             "local:contributors" => %{
-              label: l("Local contributors"),
+              label: l_noop("Local contributors"),
               icon: "ph:campfire-duotone",
-              description: l("Any local user can post and interact")
+              description: l_noop("Any local user can post and interact")
             },
             "group_members" => %{
-              label: l("Members only"),
+              label: l_noop("Members only"),
               icon: "ph:users-three-duotone",
-              description: l("Only group members can post and interact")
+              description: l_noop("Only group members can post and interact")
             },
             "moderators" => %{
-              label: l("Group moderators only"),
+              label: l_noop("Group moderators only"),
               icon: "ph:shield-duotone",
-              description: l("Only group moderators can post; members can read and react")
+              description: l_noop("Only group moderators can post; members can read and react")
             }
           }
         },
         default_content_visibility: %{
-          label: l("How visible are posts by default?"),
+          label: l_noop("How visible are posts by default?"),
           description:
-            l(
+            l_noop(
               "Pre-fills the boundary selector when posting in the group. Authors can still change it. Affects future posts only."
             ),
           slug_order: [
@@ -1236,78 +1237,79 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           ],
           options: %{
             "public" => %{
-              label: l("Public (federated)"),
+              label: l_noop("Public (federated)"),
               icon: "ph:globe-duotone",
               description:
-                l("Posts visible to anyone including guests and remote users; federated"),
+                l_noop("Posts visible to anyone including guests and remote users; federated"),
               role: :interact,
-              disabled: l("Coming soon: requires groups federation")
+              disabled: l_noop("Coming soon: requires groups federation")
             },
             "nonfederated" => %{
-              label: l("Public"),
+              label: l_noop("Public"),
               icon: "ph:house-duotone",
               description:
-                l("Posts visible to anyone on this instance including guests; not federated"),
+                l_noop("Posts visible to anyone on this instance including guests; not federated"),
               role: :interact
             },
             "nonfederated:preview" => %{
-              label: l("Preview (public)"),
+              label: l_noop("Preview (public)"),
               icon: "ph:eye-duotone",
               description:
-                l("Post appears in feeds but full content is members-only; not federated"),
+                l_noop("Post appears in feeds but full content is members-only; not federated"),
               role: :discover
             },
             "nonfederated:quiet" => %{
-              label: l("Quiet (public)"),
+              label: l_noop("Quiet (public)"),
               icon: "ph:link-simple-duotone",
               description:
-                l("Readable via direct link on this instance, not in feeds, no boosting"),
+                l_noop("Readable via direct link on this instance, not in feeds, no boosting"),
               role: :unlisted_read
             },
             "archipelago" => %{
-              label: l("Archipelago"),
+              label: l_noop("Archipelago"),
               icon: "ph:planet-duotone",
-              description: l("Posts visible to trusted linked instances"),
+              description: l_noop("Posts visible to trusted linked instances"),
               role: :interact,
-              disabled: l("Coming soon: requires archipelago feature")
+              disabled: l_noop("Coming soon: requires archipelago feature")
             },
             "local" => %{
-              label: l("Local"),
+              label: l_noop("Local"),
               icon: "ph:campfire-duotone",
-              description: l("Posts visible to logged-in users on this instance"),
+              description: l_noop("Posts visible to logged-in users on this instance"),
               role: :interact
             },
             "public:preview" => %{
-              label: l("Preview (public)"),
+              label: l_noop("Preview (public)"),
               icon: "ph:eye-duotone",
-              description: l("Post appears in public feeds but full content is members-only"),
+              description:
+                l_noop("Post appears in public feeds but full content is members-only"),
               role: :discover,
-              disabled: l("Coming soon: requires groups federation")
+              disabled: l_noop("Coming soon: requires groups federation")
             },
             "local:preview" => %{
-              label: l("Preview (local)"),
+              label: l_noop("Preview (local)"),
               icon: "ph:eye-duotone",
-              description: l("Post appears in local feeds but full content is members-only"),
+              description: l_noop("Post appears in local feeds but full content is members-only"),
               role: :discover
             },
             "public:quiet" => %{
-              label: l("Quiet (public)"),
+              label: l_noop("Quiet (public)"),
               icon: "ph:link-simple-duotone",
-              description: l("Readable via direct link, not in feeds, no boosting"),
+              description: l_noop("Readable via direct link, not in feeds, no boosting"),
               role: :unlisted_read,
-              disabled: l("Coming soon: requires groups federation")
+              disabled: l_noop("Coming soon: requires groups federation")
             },
             "local:quiet" => %{
-              label: l("Quiet (local)"),
+              label: l_noop("Quiet (local)"),
               icon: "ph:link-simple-duotone",
               description:
-                l("Readable via direct link for local users, not in feeds, no boosting"),
+                l_noop("Readable via direct link for local users, not in feeds, no boosting"),
               role: :unlisted_read
             },
             "members:private" => %{
-              label: l("Members only"),
+              label: l_noop("Members only"),
               icon: "ph:lock-duotone",
-              description: l("Posts only visible to group members"),
+              description: l_noop("Posts only visible to group members"),
               role: :interact
             }
           }
