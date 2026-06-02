@@ -114,10 +114,8 @@ defmodule Bonfire.Boundaries.Controlleds do
         ]
       ]
     )
-    |> Map.get(
-      :controlled,
-      []
-    )
+    |> Map.get(:controlled)
+    |> List.wrap()
     |> Enum.reject(&(e(&1, :acl_id, nil) in exclude))
   end
 
@@ -168,10 +166,8 @@ defmodule Bonfire.Boundaries.Controlleds do
         ]
       ]
     )
-    |> Map.get(
-      :controlled,
-      []
-    )
+    |> Map.get(:controlled)
+    |> List.wrap()
     |> Enum.reject(&(e(&1, :acl_id, nil) in exclude))
   end
 
