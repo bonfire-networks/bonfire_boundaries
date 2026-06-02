@@ -270,6 +270,21 @@ defmodule Bonfire.Boundaries.Circles do
     )
   end
 
+  @doc "Batch version of `get_by_name/2`: load circles for a list of names owned by the caretaker (reuses the same `query_basic_my`)."
+  def list_by_names(names, caretaker) when is_list(names) do
+    case names |> Enum.filter(&is_binary/1) |> Enum.uniq() do
+      [] ->
+        []
+
+      names ->
+        repo().many(
+          query_basic_my(caretaker || Bonfire.Boundaries.Scaffold.Instance.admin_circle(),
+            name: names
+          )
+        )
+    end
+  end
+
   @doc """
   Lists default circles for a user.
 
@@ -459,6 +474,24 @@ defmodule Bonfire.Boundaries.Circles do
       [encircle: encircle],
       encircle.circle_id in ^uids(circles)
     )
+  end
+
+  @doc """
+  Batch version of `is_encircled_by?/2`: given many `subjects` and many `circles`, returns a `MapSet`
+  of the subject IDs that are encircled by **any** of the circles, in a single query. Use to
+  pre-resolve membership for a whole set (e.g. allowlist checks) and avoid per-subject n+1.
+  """
+  def encircled_subset(subjects, circles) when is_list(subjects) do
+    with subject_ids when subject_ids != [] <- uids(subjects),
+         circle_ids when circle_ids != [] <- uids(circles) do
+      is_encircled_by_q(subject_ids, circle_ids)
+      |> select([encircle: encircle], encircle.subject_id)
+      |> distinct(true)
+      |> repo().all()
+      |> MapSet.new()
+    else
+      _ -> MapSet.new()
+    end
   end
 
   defp encircled_by_q(subject) do
@@ -1024,6 +1057,14 @@ defmodule Bonfire.Boundaries.Circles do
     |> where(
       [named: named],
       named.name == ^text
+    )
+  end
+
+  defp maybe_by_name_basic(query, names) when is_list(names) and names != [] do
+    query
+    |> where(
+      [named: named],
+      named.name in ^names
     )
   end
 

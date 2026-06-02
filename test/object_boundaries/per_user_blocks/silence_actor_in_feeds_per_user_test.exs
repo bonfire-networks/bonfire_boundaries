@@ -145,5 +145,26 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
       # we show it once again
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
     end
+
+    test "a plain unblock/2 (default nil block_type) also clears the per-user :silence_me reverse-index, so the post shows again" do
+      me = Bonfire.Me.Fake.fake_user!(@my_name)
+      other_user = Bonfire.Me.Fake.fake_user!(@other_name)
+
+      assert {:ok, post} =
+               Posts.publish(
+                 current_user: other_user,
+                 post_attrs: @attrs,
+                 boundary: "public"
+               )
+
+      Bonfire.Boundaries.Blocks.block(other_user, :silence, current_user: me)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
+
+      # `unblock/2` with no block_type means "remove all blocks": it must clear BOTH the silencer's
+      # `:silence_them` AND the silenced user's `:silence_me` (feed queries filter on the latter)
+      Bonfire.Boundaries.Blocks.unblock(other_user, current_user: me)
+
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
+    end
   end
 end

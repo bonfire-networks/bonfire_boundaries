@@ -328,6 +328,20 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
+  # a `nil`/`:any` block type means "all block types": delegate to the per-type paths so the
+  # `:silence` clauses (which also maintain the `:silence_me` reverse-index that boundary queries
+  # filter on) are used. The generic clauses below only touch `:silence_them`/`:ghost_them`, so a
+  # plain `block/2`/`unblock/2` (nil type) would otherwise leave `:silence_me` dangling. Works for
+  # both per-user and instance-wide scopes (each delegated type re-dispatches to its own clause).
+  defp mutate(block_or_unblock, user_or_instance_to_block, block_type, scope)
+       when block_type in [nil, :any] do
+    # succeed if either type changed something (one side may legitimately have nothing to do),
+    # returning a flat `{:ok, _}`/`{:error, _}` like the sibling clauses
+    [:ghost, :silence]
+    |> Enum.map(&mutate(block_or_unblock, user_or_instance_to_block, &1, scope))
+    |> Enums.first_ok_or_error()
+  end
+
   defp mutate(
          block_or_unblock,
          user_or_instance_to_block,

@@ -130,5 +130,27 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post)
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
     end
+
+    test "a plain unblock/2 (default nil block_type) also clears the instance-wide :silence_me reverse-index, so the post shows again" do
+      alice = Bonfire.Me.Fake.fake_user!(@my_name)
+      bob = Bonfire.Me.Fake.fake_user!(@other_name)
+
+      assert {:ok, post} =
+               Posts.publish(
+                 current_user: bob,
+                 post_attrs: @attrs,
+                 boundary: "public"
+               )
+
+      Bonfire.Boundaries.Blocks.block(bob, :silence, :instance_wide)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:local, post)
+      refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
+
+      # `unblock/2` with no block_type must remove all instance-wide blocks, including the
+      # `:silence_me` reverse-index that feed queries filter on
+      Bonfire.Boundaries.Blocks.unblock(bob, :instance_wide)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
+    end
   end
 end
