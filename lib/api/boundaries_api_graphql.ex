@@ -15,6 +15,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     alias Bonfire.API.GraphQL
     alias Bonfire.Boundaries.Circles
     alias Bonfire.Boundaries.Blocks
+    alias Bonfire.Common.Config
 
     @desc "A circle (group of users) for organizing boundaries"
     object :circle do
@@ -53,6 +54,81 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
       field(:end_cursor, :string)
     end
 
+    @desc "A resolved boundary dimension value with display metadata from config"
+    object :boundary_dimension_value do
+      field(:key, non_null(:string))
+      field(:slug, non_null(:string))
+      field(:label, :string)
+      field(:icon, :string)
+      field(:description, :string)
+    end
+
+    @desc "Input for setting group boundary dimensions (write-only; read via category.boundaries)"
+    input_object :boundary_dimensions_input do
+      field(:preset, :string)
+      field(:overrides, list_of(:key_boolean_input))
+      field(:dimensions, list_of(:key_value_input))
+    end
+
+    # BoundaryLabelledOption lives here (not CommonSchema) — Boundary prefix signals it's a boundaries concept.
+    object :boundary_labelled_option do
+      field(:value, non_null(:string))
+      field(:label, non_null(:string))
+      field(:icon, :string)
+      field(:description, :string)
+    end
+
+    object :boundaries do
+      field(:context, non_null(:string))
+      field(:presets, list_of(:boundary_preset))
+      field(:overrides, list_of(:boundary_override_option))
+      field(:dimensions, list_of(:boundary_dimension_group))
+    end
+
+    object :boundary_preset do
+      field(:id, non_null(:string))
+      field(:label, non_null(:string))
+      field(:description, :string)
+      field(:icon, :string)
+      field(:dimensions, list_of(:key_value_entry))
+      field(:overrides_locked, list_of(:string))
+    end
+
+    object :boundary_override_option do
+      field(:key, non_null(:string))
+      field(:label, non_null(:string))
+      field(:help, :string)
+    end
+
+    object :boundary_dimension_group do
+      field(:key, non_null(:string))
+      field(:label, non_null(:string))
+      field(:options, list_of(:boundary_dimension_option))
+    end
+
+    object :boundary_dimension_option do
+      field(:value, non_null(:string))
+      field(:label, non_null(:string))
+      field(:icon, :string)
+      field(:description, :string)
+      # null = available; reason string = disabled (spec: disabled: String)
+      field(:disabled, :string)
+    end
+
+    input_object :boundary_permission_input do
+      field(:permission, :string)
+      field(:can, list_of(:string))
+      field(:cannot, list_of(:string))
+    end
+
+    object :boundary_permission do
+      field(:permission, non_null(:string))
+      field(:can, list_of(:subject))
+      field(:cannot, list_of(:subject))
+      # effective grant for the requesting user: true/false/nil
+      field(:current_user_grant, :boolean)
+    end
+
     @desc "Input for creating/updating a circle"
     input_object :circle_input do
       field(:name, non_null(:string))
@@ -67,6 +143,12 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     end
 
     object :boundaries_queries do
+      @desc "Returns boundary config (presets, toggles, dimensions) for a given context. No auth required."
+      field :boundaries, :boundaries do
+        arg(:context, :string)
+        resolve(&boundaries_config/2)
+      end
+
       @desc "List circles owned by current user"
       field :my_circles, list_of(:circle) do
         arg(:filter, :circle_filters)
@@ -169,6 +251,74 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
 
         resolve(&unmute_user/2)
       end
+    end
+
+    defp boundaries_config(args, _info) do
+      ctx = args[:context] || "group"
+
+      presets_map = Config.get([:bonfire_classify, :group_presets], %{})
+      preset_order = Config.get([:bonfire_classify, :group_preset_order], [])
+      toggles = Config.get([:bonfire_classify, :layer2_toggles], [])
+      preset_dimensions = Config.get(:preset_dimensions, %{}, :bonfire_boundaries)
+
+      dim_keys = [:membership, :visibility, :participation, :default_content_visibility]
+
+      presets =
+        for id <- preset_order, preset = Map.get(presets_map, id), not is_nil(preset) do
+          dimensions =
+            for dim <- dim_keys, slug = preset[dim], not is_nil(slug) do
+              %{key: dim, value: slug}
+            end
+
+          overrides_locked = preset[:layer2_locked] || []
+
+          %{
+            id: id,
+            label: preset[:label] || id,
+            description: preset[:description],
+            icon: preset[:icon],
+            dimensions: dimensions,
+            overrides_locked: overrides_locked
+          }
+        end
+
+      overrides =
+        for %{key: key} = toggle <- toggles do
+          %{
+            key: key,
+            label: toggle[:label] || key,
+            help: toggle[:help]
+          }
+        end
+
+      dimensions =
+        for dim_key <- dim_keys,
+            dim_config = Map.get(preset_dimensions, dim_key),
+            not is_nil(dim_config) do
+          slug_order = dim_config[:slug_order] || []
+          opts_map = dim_config[:options] || %{}
+
+          options =
+            for slug <- slug_order do
+              opt = Map.get(opts_map, slug) || %{}
+
+              %{
+                value: slug,
+                label: opt[:label] || slug,
+                icon: opt[:icon],
+                description: opt[:description],
+                disabled: opt[:disabled]
+              }
+            end
+
+          %{
+            key: dim_key,
+            label: dim_config[:label] || dim_key,
+            options: options
+          }
+        end
+
+      {:ok, %{context: ctx, presets: presets, overrides: overrides, dimensions: dimensions}}
     end
 
     defp resolve_circle_name(%{named: %{name: name}}, _, _) when is_binary(name), do: {:ok, name}

@@ -626,4 +626,22 @@ defmodule Bonfire.Boundaries.Presets do
     group_preset_meta(preset_slug_from_dims(dims)) ||
       dimension_meta(:membership, dims[:membership])
   end
+
+  @doc """
+  Returns the scope portion of a dimension slug (the part before the first `:`).
+  E.g. `"local:discoverable"` → `"local"`, `"nonfederated"` → `"nonfederated"`.
+  Falls back to `"global"` when the prefix is not a known scope.
+  """
+  def slug_scope(slug) when is_binary(slug) do
+    known_scopes =
+      Config.get(:scopes, %{}, :bonfire_boundaries)
+      |> Map.keys()
+      |> Enum.map(&to_string/1)
+
+    case String.split(slug, ":", parts: 2) do
+      [scope | _] -> if scope in known_scopes, do: scope, else: "global"
+    end
+  end
+
+  def slug_scope(_), do: nil
 end
