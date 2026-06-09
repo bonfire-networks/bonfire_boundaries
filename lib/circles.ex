@@ -1192,6 +1192,24 @@ defmodule Bonfire.Boundaries.Circles do
       from e in Encircle,
         where: e.circle_id == ^Types.uid!(circle)
 
+    query =
+      case opts[:exclude_subject_ids] do
+        [_ | _] = ids -> where(query, [e], e.subject_id not in ^ids)
+        _ -> query
+      end
+
+    query =
+      case opts[:exclude_from_circle_ids] do
+        [_ | _] = circle_ids ->
+          mod_subquery =
+            from(ec in Encircle, where: ec.circle_id in ^circle_ids, select: ec.subject_id)
+
+          where(query, [e], e.subject_id not in subquery(mod_subquery))
+
+        _ ->
+          query
+      end
+
     # Order by insertion time for consistent cursor pagination
     query =
       query
