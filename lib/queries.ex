@@ -12,6 +12,7 @@ defmodule Bonfire.Boundaries.Queries do
   use Bonfire.Common.Config
   import Untangle
   import Ecto.Query
+  alias Bonfire.Common.Types
   alias Bonfire.Boundaries.Summary
   alias Bonfire.Boundaries.Verbs
 
@@ -363,19 +364,14 @@ defmodule Bonfire.Boundaries.Queries do
       (is_list(opts) and Keyword.get(opts, :skip_boundary_check))
   end
 
-  defp user_and_circle_ids(%{} = subject) do
-    extra_circle =
-      if Bonfire.Boundaries.Integration.is_local?(subject), do: :local, else: :activity_pub
-
-    [Bonfire.Boundaries.Circles.circles()[extra_circle][:id], Bonfire.Common.Types.uid(subject)]
-  end
+  defp user_and_circle_ids(subject) when is_struct(subject) or is_binary(subject),
+    do: subject_ids_with_locality(subject)
 
   defp user_and_circle_ids(subjects) do
-    case Bonfire.Common.Types.uids(subjects) do
+    case Types.uids(subjects) do
       [] ->
         [Bonfire.Boundaries.Circles.circles()[:guest][:id]]
 
-      # [id] -> Bonfire.Boundaries.Integration.is_local?() # TODO?
       ids when is_list(ids) ->
         warn(
           ids,
@@ -383,6 +379,18 @@ defmodule Bonfire.Boundaries.Queries do
         )
 
         ids
+    end
+  end
+
+  # Picks the locality circle (`:local`/`:activity_pub`) for a single subject. Classifies *without* fetching (`preload_if_needed: false`) so building a boundarised query never triggers a DB round-trip; subjects must arrive with `:peered` already loaded (preloaded at their source, like `Characters.mark_as/2` does for the session user). A subject we cannot classify without a fetch — a bare id, an id-only map, or a struct with `peered: NotLoaded`, fires `Untangle.err` (raising in `:test` to surface the offending caller) and gets no locality circle (least-privilege: just its own id), rather than silently assuming `:local`.
+  defp subject_ids_with_locality(subject) do
+    case Bonfire.Boundaries.Integration.is_local?(subject,
+           preload_if_needed: false,
+           on_unclassifiable: :unknown
+         ) do
+      true -> [Bonfire.Boundaries.Circles.circles()[:local][:id], Types.uid(subject)]
+      false -> [Bonfire.Boundaries.Circles.circles()[:activity_pub][:id], Types.uid(subject)]
+      _unknown -> [Types.uid(subject)]
     end
   end
 end

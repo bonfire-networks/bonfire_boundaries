@@ -125,8 +125,9 @@ defmodule Bonfire.Boundaries.QueriesSubjectCirclesTest do
       refute circle_id(:local) in ids
     end
 
-    test "a remote user WITHOUT :peered loaded still gets :activity_pub, at the cost of preload queries" do
+    test "a remote user with marked :peered gets :activity_pub with ZERO extra queries" do
       {:ok, remote} = Bonfire.Federate.ActivityPub.Simulate.fake_remote_user()
+      # even with top-level :peered NotLoaded, the marked character.peered classifies it for free
       remote = Map.put(remote, :peered, %Ecto.Association.NotLoaded{__field__: :peered})
 
       {ids, query_count} =
@@ -134,8 +135,7 @@ defmodule Bonfire.Boundaries.QueriesSubjectCirclesTest do
 
       assert circle_id(:activity_pub) in ids
       refute circle_id(:local) in ids
-      # documents the hidden IO: classifying the subject required DB round-trips
-      assert query_count >= 1
+      assert query_count == 0
     end
 
     test "REGRESSION: a session user from Users.get_current is classified with ZERO extra queries" do
@@ -143,7 +143,7 @@ defmodule Bonfire.Boundaries.QueriesSubjectCirclesTest do
       # loaded-and-absent — is_local? must short-circuit without queries
       user = Fake.fake_user!()
       current = Users.get_current(uid(user))
-      assert %{peered: nil} = current
+      assert %{character: %{peered: nil}} = current
 
       {ids, query_count} =
         with_query_count(@peered_or_created, fn -> subject_param_ids(current) end)
