@@ -1213,7 +1213,8 @@ defmodule Bonfire.Boundaries.Circles do
     # Order by insertion time for consistent cursor pagination
     query =
       query
-      |> proload(subject: [:character, :profile, :named])
+      # `character.peered` for member locality (is_local? / display_username)
+      |> proload(subject: [:profile, :named, character: [:peered]])
 
     # Use Paginator for cursor-based pagination
     many(
