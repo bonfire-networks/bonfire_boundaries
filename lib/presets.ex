@@ -158,12 +158,20 @@ defmodule Bonfire.Boundaries.Presets do
         [{"private", l("Private")}]
 
       other when is_binary(other) or is_atom(other) ->
-        # debug(context, "zzzz")
-        other = other |> to_string()
-        [{other, e(context, :my_acls, other, nil) || other}]
+        # a custom ACL id (user-created preset or "Follows") - resolve its name
+        other = to_string(other)
+        [{other, acl_name_from_my_acls(context, other) || other}]
 
       other ->
         other
+    end
+  end
+
+  # `my_acls` is a list of `{acl_id, %{name: ...}}` tuples, not a map keyed by id
+  defp acl_name_from_my_acls(context, acl_id) do
+    case List.keyfind(e(context, :my_acls, []), acl_id, 0) do
+      {_id, meta} -> e(meta, :name, nil)
+      _ -> nil
     end
   end
 
