@@ -604,7 +604,7 @@ defmodule Bonfire.Boundaries.Presets do
   """
   def group_icon(group, default \\ "ph:users-three-duotone") do
     with slug when is_binary(slug) and slug != "" <-
-           Settings.__get__([:preset_slug], nil, scope: group),
+           Settings.get([:preset_slug], nil, scope: group),
          %{icon: icon} when is_binary(icon) <- group_preset_meta(slug) do
       icon
     else
