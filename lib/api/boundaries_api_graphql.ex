@@ -142,6 +142,15 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
       field(:exclude_built_ins, :boolean)
     end
 
+    @desc "A selectable post audience: a built-in preset (public/local/mentions/follows) or one of the current user's custom ACLs. The `id` can be passed as `createPost(boundary:)`."
+    object :boundary_option do
+      field(:id, non_null(:string))
+      field(:label, :string)
+      field(:description, :string)
+      field(:icon, :string)
+      field(:custom, :boolean)
+    end
+
     object :boundaries_queries do
       @desc "Returns boundary config (presets, toggles, dimensions) for a given context. No auth required."
       field :boundaries, :boundaries do
@@ -155,6 +164,11 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
         arg(:limit, :integer)
 
         resolve(&list_my_circles/3)
+      end
+
+      @desc "Post-audience options for the composer: built-in presets + the current user's custom ACLs. Each `id` is usable as `createPost(boundary:)`."
+      field :my_boundary_options, list_of(:boundary_option) do
+        resolve(&my_boundary_options/3)
       end
 
       @desc "Get a specific circle by ID"
@@ -346,6 +360,51 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
         circles = Circles.list_my(user, opts)
         {:ok, circles}
       end
+    end
+
+    defp my_boundary_options(_parent, _args, info) do
+      user = GraphQL.current_user(info)
+
+      preset_order =
+        Config.get(:preset_order, ["public", "local", "mentions"], :bonfire_boundaries)
+
+      presets =
+        for slug <- preset_order, meta = Bonfire.Boundaries.Presets.for_preset(slug) do
+          %{
+            id: slug,
+            label: e(meta, :label, slug),
+            description: e(meta, :description, nil),
+            icon: e(meta, :icon, nil),
+            custom: false
+          }
+        end
+
+      customs =
+        if user do
+          # list_my already excludes built-in stereotyped ACLs; keep any named one
+          Bonfire.Boundaries.Acls.list_my(user, preload: [:named, :extra_info])
+          |> Enum.flat_map(fn acl ->
+            name = e(acl, :named, :name, nil) || e(acl, :stereotyped, :named, :name, nil)
+
+            if is_binary(name) and name != "" do
+              [
+                %{
+                  id: id(acl),
+                  label: name,
+                  description: e(acl, :extra_info, :summary, nil),
+                  icon: nil,
+                  custom: true
+                }
+              ]
+            else
+              []
+            end
+          end)
+        else
+          []
+        end
+
+      {:ok, presets ++ customs}
     end
 
     defp get_circle(_parent, %{id: id}, info) do
