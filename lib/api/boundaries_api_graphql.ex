@@ -83,6 +83,11 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
       field(:presets, list_of(:boundary_preset))
       field(:overrides, list_of(:boundary_override_option))
       field(:dimensions, list_of(:boundary_dimension_group))
+
+      @desc "Selectable post-audience options: built-in presets + the current user's custom ACLs. Each `id` is usable as `createPost(boundary:)`. Resolved lazily (only when selected)."
+      field :options, list_of(:boundary_option) do
+        resolve(&boundary_options/3)
+      end
     end
 
     object :boundary_preset do
@@ -164,11 +169,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
         arg(:limit, :integer)
 
         resolve(&list_my_circles/3)
-      end
-
-      @desc "Post-audience options for the composer: built-in presets + the current user's custom ACLs. Each `id` is usable as `createPost(boundary:)`."
-      field :my_boundary_options, list_of(:boundary_option) do
-        resolve(&my_boundary_options/3)
       end
 
       @desc "Get a specific circle by ID"
@@ -362,7 +362,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
       end
     end
 
-    defp my_boundary_options(_parent, _args, info) do
+    defp boundary_options(_parent, _args, info) do
       user = GraphQL.current_user(info)
 
       preset_order =
