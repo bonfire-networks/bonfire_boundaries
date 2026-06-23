@@ -1226,6 +1226,44 @@ defmodule Bonfire.Boundaries.Circles do
     # TODO: return just the subjects?
   end
 
+  # 6h — the curated suggested-profiles list is public, instance-wide data that rarely changes
+  @suggested_profiles_cache_ttl 1_000 * 60 * 60 * 6
+
+  @doc """
+  Lists the curated "suggested profiles" — the members (subjects) of the instance's
+  suggested-profiles circle, which admins/mods manage at `settings/instance/suggested_profiles`.
+
+  The result is cached for 6h, and is the single shared loader used by both the "Who to follow"
+  widget and the Masto `/api/v2/suggestions` API. Subjects come with `:profile`, `:named` and
+  `character: [:peered]` preloaded (for locality).
+
+  Pass the standard `:cache` opt to control caching: `cache: false` bypasses it, `cache: :refresh`
+  busts + recomputes (what the widget's manual "refresh" button calls), `cache: :reset` only clears.
+  """
+  def list_suggested_profiles(opts \\ []) do
+    Cache.maybe_apply_cached(
+      &do_list_suggested_profiles/0,
+      [],
+      Keyword.put_new(opts, :expire, @suggested_profiles_cache_ttl)
+    )
+  end
+
+  defp do_list_suggested_profiles do
+    circle_id = Bonfire.Boundaries.Scaffold.Instance.suggested_profiles_circle()
+
+    case list_members(circle_id, paginate: false) do
+      members when is_list(members) -> extract_subjects(members)
+      %{edges: members} -> extract_subjects(members)
+      _ -> []
+    end
+  end
+
+  defp extract_subjects(members) do
+    members
+    |> Enum.map(&e(&1, :subject, nil))
+    |> Enum.reject(&is_nil/1)
+  end
+
   @doc """
   Lists members that appear in ALL of the given circles (intersection).
   Supports cursor-based pagination.
