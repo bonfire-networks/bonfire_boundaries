@@ -351,6 +351,44 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
+  Like `can?/4`, but for an action that ALSO requires federation to reach the target (follow,
+  reply, like, boost, DM, mention). The subject must have the boundary permission AND — when the
+  target is remote — federation must be possible given the current mode (open / allowlist-only /
+  manual / disabled). The federation subject is `opts[:target_user]` if given, else `object` or its creator (a
+  post boundary often can't carry the author, so callers pass `target_user:` for those). Degrades to plain `can?`
+  when the federate extension is disabled.
+  """
+  def can_interact?(subject, verb, object, opts \\ []) do
+    can?(subject, verb, object, opts) and
+      federated_interaction_allowed?(subject, opts[:target_user] || object, opts)
+  end
+
+  @doc "Optimistic (template) variant of `can_interact?/4`, mirroring `can_or_unloaded?/3`."
+  def can_interact_or_unloaded?(subject, verb, object_boundary, opts \\ []) do
+    case can_or_unloaded?(subject, verb, object_boundary) do
+      true ->
+        case opts[:target_user] || object_boundary do
+          # no resolvable target → stay optimistic (the server-side `can_interact?` is the real gate)
+          target when target in [nil, :skip_boundary_preload] -> true
+          target -> federated_interaction_allowed?(subject, target, opts)
+        end
+
+      other ->
+        other
+    end
+  end
+
+  defp federated_interaction_allowed?(subject, target, opts) do
+    # the boundary `can?` above already enforced blocks → skip the redundant block query
+    maybe_apply(
+      Bonfire.Federate.ActivityPub,
+      :interaction_allowed?,
+      [subject, target, Keyword.put(opts, :skip_block_check, true)],
+      fallback_return: true
+    )
+  end
+
+  @doc """
   Checks if a subject has permission to conduct the specified action(s)/verb(s) on an object.
 
   ## Examples
