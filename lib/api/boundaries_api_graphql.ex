@@ -525,22 +525,40 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     defp add_to_circle(%{circle_id: circle_id, subject_ids: subject_ids}, info) do
       with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info),
            {:ok, circle} <- Circles.get_for_caretaker(circle_id, user) do
-        case Circles.add_to_circles(subject_ids, circle) do
-          {:ok, _} -> {:ok, true}
-          _ -> {:ok, true}
-        end
+        Circles.add_to_circles(subject_ids, circle)
+        |> circle_membership_result("Could not add users to circle")
       end
     end
 
     defp remove_from_circle(%{circle_id: circle_id, subject_ids: subject_ids}, info) do
       with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info),
            {:ok, circle} <- Circles.get_for_caretaker(circle_id, user) do
-        case Circles.remove_from_circles(subject_ids, circle) do
-          {:ok, _} -> {:ok, true}
-          _ -> {:ok, true}
-        end
+        Circles.remove_from_circles(subject_ids, circle)
+        |> circle_membership_result("Could not remove users from circle")
       end
     end
+
+    defp circle_membership_result(result, _message) when is_list(result) do
+      if Enum.all?(result, &circle_membership_success?/1) do
+        {:ok, true}
+      else
+        {:error, "Could not update circle members"}
+      end
+    end
+
+    defp circle_membership_result(result, _message) when is_tuple(result) do
+      if circle_membership_success?(result) do
+        {:ok, true}
+      else
+        result
+      end
+    end
+
+    defp circle_membership_result(_result, message), do: {:error, message}
+
+    defp circle_membership_success?({:ok, _}), do: true
+    defp circle_membership_success?({count, nil}) when is_integer(count) and count >= 0, do: true
+    defp circle_membership_success?(_), do: false
 
     defp list_blocked_users(_parent, _args, info) do
       with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info) do
@@ -575,18 +593,21 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
         ghost_result = Blocks.block(id, :ghost, current_user: user)
         silence_result = Blocks.block(id, :silence, current_user: user)
 
-        case {ghost_result, silence_result} do
-          {{:ok, _}, {:ok, _}} ->
-            Bonfire.Me.Users.by_id(id)
+        if blocked?(id, user) do
+          case {ghost_result, silence_result} do
+            {{:ok, _}, {:ok, _}} ->
+              :ok
 
-          {_, {:ok, _}} ->
-            Bonfire.Me.Users.by_id(id)
+            _ ->
+              warn(
+                {ghost_result, silence_result},
+                "blockUser reached the desired final state with partial operation results"
+              )
+          end
 
-          {{:ok, _}, _} ->
-            Bonfire.Me.Users.by_id(id)
-
-          _ ->
-            {:error, "Could not block user"}
+          Bonfire.Me.Users.by_id(id)
+        else
+          {:error, "Could not block user"}
         end
       end
     end
@@ -596,18 +617,21 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
         ghost_result = Blocks.unblock(id, :ghost, current_user: user)
         silence_result = Blocks.unblock(id, :silence, current_user: user)
 
-        case {ghost_result, silence_result} do
-          {{:ok, _}, {:ok, _}} ->
-            Bonfire.Me.Users.by_id(id)
+        if not blocked?(id, user) do
+          case {ghost_result, silence_result} do
+            {{:ok, _}, {:ok, _}} ->
+              :ok
 
-          {_, {:ok, _}} ->
-            Bonfire.Me.Users.by_id(id)
+            _ ->
+              warn(
+                {ghost_result, silence_result},
+                "unblockUser reached the desired final state with partial operation results"
+              )
+          end
 
-          {{:ok, _}, _} ->
-            Bonfire.Me.Users.by_id(id)
-
-          _ ->
-            {:error, "Could not unblock user"}
+          Bonfire.Me.Users.by_id(id)
+        else
+          {:error, "Could not unblock user"}
         end
       end
     end
@@ -626,6 +650,11 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
            {:ok, _} <- Blocks.unblock(id, :silence, current_user: user) do
         Bonfire.Me.Users.by_id(id)
       end
+    end
+
+    defp blocked?(id, user) do
+      Blocks.is_blocked?(id, :ghost, current_user: user) and
+        Blocks.is_blocked?(id, :silence, current_user: user)
     end
 
     # Helper to extract users from block circles

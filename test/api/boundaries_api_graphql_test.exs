@@ -2,6 +2,9 @@ defmodule Bonfire.Boundaries.API.GraphQLTest do
   use Bonfire.Boundaries.DataCase, async: true
 
   alias Bonfire.API.GraphQL.Schema
+  alias Bonfire.Boundaries.Circles
+
+  import Bonfire.Me.Fake
 
   @moduletag :graphql
 
@@ -16,6 +19,56 @@ defmodule Bonfire.Boundaries.API.GraphQLTest do
   }
   """
 
+  @post_options_query """
+  query {
+    boundaries(context: "post") {
+      options {
+        id
+        label
+        custom
+      }
+    }
+  }
+  """
+
+  @add_to_circle_mutation """
+  mutation($circleId: ID!, $subjectIds: [ID!]!) {
+    add_to_circle(circle_id: $circleId, subject_ids: $subjectIds)
+  }
+  """
+
+  @remove_from_circle_mutation """
+  mutation($circleId: ID!, $subjectIds: [ID!]!) {
+    remove_from_circle(circle_id: $circleId, subject_ids: $subjectIds)
+  }
+  """
+
+  @create_circle_mutation """
+  mutation($circle: CircleInput!) {
+    create_circle(circle: $circle) {
+      id
+      name
+      summary
+    }
+  }
+  """
+
+  @update_circle_mutation """
+  mutation($id: ID!, $circle: CircleInput!) {
+    update_circle(id: $id, circle: $circle) {
+      id
+      name
+      summary
+    }
+  }
+  """
+
+  @delete_circle_mutation """
+  mutation($id: ID!) {
+    delete_circle(id: $id)
+  }
+  """
+
   test "BoundaryLabelledOption type has value, label, icon, description fields" do
     {:ok, result} =
       Absinthe.run(~S|{ __type(name: "BoundaryLabelledOption") { fields { name } } }|, Schema)
@@ -26,6 +79,21 @@ defmodule Bonfire.Boundaries.API.GraphQLTest do
     assert "icon" in names
     assert "description" in names
     refute result[:errors]
+  end
+
+  test "post boundaries options returns built-in audiences without auth" do
+    {:ok, result} = Absinthe.run(@post_options_query, Schema)
+
+    refute result[:errors]
+
+    options = get_in(result, [:data, "boundaries", "options"])
+    assert is_list(options) and options != []
+
+    ids = Enum.map(options, & &1["id"])
+    assert "public" in ids
+    assert "local" in ids
+    assert "mentions" in ids
+    assert Enum.all?(options, &(&1["custom"] == false))
   end
 
   test "returns group presets from runtime config" do
@@ -97,5 +165,107 @@ defmodule Bonfire.Boundaries.API.GraphQLTest do
     assert "dimensions" in names
     assert "overridesLocked" in names
     refute result[:errors]
+  end
+
+  test "add_to_circle returns a GraphQL error for empty subject ids" do
+    user = fake_user!()
+    {:ok, circle} = Circles.create(user, %{named: %{name: "graphql circle"}})
+
+    {:ok, result} =
+      Absinthe.run(@add_to_circle_mutation, Schema,
+        variables: %{"circleId" => circle.id, "subjectIds" => []},
+        context: Schema.context(%{current_user: user})
+      )
+
+    assert result[:errors]
+    assert get_in(result, [:data, "add_to_circle"]) == nil
+  end
+
+  test "remove_from_circle returns a GraphQL error for empty subject ids" do
+    user = fake_user!()
+    {:ok, circle} = Circles.create(user, %{named: %{name: "graphql circle"}})
+
+    {:ok, result} =
+      Absinthe.run(@remove_from_circle_mutation, Schema,
+        variables: %{"circleId" => circle.id, "subjectIds" => []},
+        context: Schema.context(%{current_user: user})
+      )
+
+    assert result[:errors]
+    assert get_in(result, [:data, "remove_from_circle"]) == nil
+  end
+
+  test "circle CRUD mutations return useful success payloads" do
+    user = fake_user!()
+
+    {:ok, create_result} =
+      Absinthe.run(@create_circle_mutation, Schema,
+        variables: %{
+          "circle" => %{
+            "name" => "GraphQL friends",
+            "summary" => "People I know from GraphQL"
+          }
+        },
+        context: Schema.context(%{current_user: user})
+      )
+
+    refute create_result[:errors]
+    created = get_in(create_result, [:data, "create_circle"])
+    assert is_binary(created["id"])
+    assert created["name"] == "GraphQL friends"
+    assert created["summary"] == "People I know from GraphQL"
+
+    {:ok, update_result} =
+      Absinthe.run(@update_circle_mutation, Schema,
+        variables: %{
+          "id" => created["id"],
+          "circle" => %{
+            "name" => "GraphQL close friends",
+            "summary" => "People I trust with test fixtures"
+          }
+        },
+        context: Schema.context(%{current_user: user})
+      )
+
+    refute update_result[:errors]
+    updated = get_in(update_result, [:data, "update_circle"])
+    assert updated["id"] == created["id"]
+    assert updated["name"] == "GraphQL close friends"
+    assert updated["summary"] == "People I trust with test fixtures"
+
+    {:ok, delete_result} =
+      Absinthe.run(@delete_circle_mutation, Schema,
+        variables: %{"id" => created["id"]},
+        context: Schema.context(%{current_user: user})
+      )
+
+    refute delete_result[:errors]
+    assert get_in(delete_result, [:data, "delete_circle"]) == true
+  end
+
+  test "circle update and delete return GraphQL errors for missing ids" do
+    user = fake_user!()
+    missing_id = "01JABCDEF0000000000000000G"
+
+    {:ok, update_result} =
+      Absinthe.run(@update_circle_mutation, Schema,
+        variables: %{
+          "id" => missing_id,
+          "circle" => %{"name" => "Missing circle"}
+        },
+        context: Schema.context(%{current_user: user})
+      )
+
+    assert update_result[:errors]
+    assert get_in(update_result, [:data, "update_circle"]) == nil
+
+    {:ok, delete_result} =
+      Absinthe.run(@delete_circle_mutation, Schema,
+        variables: %{"id" => missing_id},
+        context: Schema.context(%{current_user: user})
+      )
+
+    assert delete_result[:errors]
+    assert get_in(delete_result, [:data, "delete_circle"]) == nil
   end
 end
