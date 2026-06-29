@@ -424,7 +424,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             :guests_may_see,
             :guests_may_read,
             :guests_may_see_read,
-            :locals_may_read_interact
+            :locals_may_read_interact,
+            :locals_may_read_reply
           ],
       #  used for setting boundaries — slug → ACL atoms applied at create time.
       #  Slug namespaces:
@@ -464,15 +465,19 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # full (see+read+interact): global/archipelago disabled until groups federation ships
         "global" => [:everyone_may_see_read_interact],
         "archipelago" => [],
-        # nonfederated — guests+locals read on-instance; AP-deny applied in Classify.Boundaries
-        "nonfederated" => [:guests_may_see_read, :locals_may_see_read_interact],
+        # nonfederated — the non-federated equivalent of "public": guests see+read,
+        # locals get full participation (incl. reply/mention/message), AP-deny applied
+        # in Classify.Boundaries. Mirrors `public`/`local` (which grant `:locals_may_reply`)
+        # minus the federation reach — so a public-on-instance community's posts are
+        # replyable by locals, not capped at read-only interact.
+        "nonfederated" => [:guests_may_see_read, :locals_may_reply],
         "nonfederated:discoverable" => [:guests_may_see, :locals_may_see_interact],
-        "nonfederated:unlisted" => [:guests_may_read, :locals_may_read_interact],
+        "nonfederated:unlisted" => [:guests_may_read, :locals_may_read_reply],
         "members:private" => [],
         # unlisted (readable via direct link, not listed)
         "unlisted" => [:everyone_may_read_interact],
         "archipelago:unlisted" => [],
-        "local:unlisted" => [:locals_may_read_interact],
+        "local:unlisted" => [:locals_may_read_reply],
         # discoverable (see+react, but :read for members only — granted in Classify.Boundaries)
         "discoverable" => [:everyone_may_see_interact],
         "archipelago:discoverable" => [],
@@ -480,12 +485,13 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
         # --- Default content visibility (DCV) presets ---
         # Uses some visibility slugs as-is ("public", "local", "nonfederated", "members:private")
-        # plus :quiet (read-only, no boost) and :preview (see-only) variants.
-        "nonfederated:quiet" => [:guests_may_read, :locals_may_read_interact],
+        # plus :quiet (readable + reply, no boost) and :preview (see-only) variants.
+        "nonfederated:quiet" => [:guests_may_read, :locals_may_read_reply],
         "nonfederated:preview" => [:guests_may_see, :locals_may_see_interact],
-        "public:quiet" => [:everyone_may_read_interact],
+        # everyone reads/interacts (federated); locals additionally get reply (no boost)
+        "public:quiet" => [:everyone_may_read_interact, :locals_may_read_reply],
         "archipelago:quiet" => [],
-        "local:quiet" => [:locals_may_read_interact],
+        "local:quiet" => [:locals_may_read_reply],
         "public:preview" => [:everyone_may_see_interact],
         "archipelago:preview" => [],
         "local:preview" => [:locals_may_see_interact]
@@ -503,14 +509,23 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :remotes_may_reply
         ],
         "unlisted" => [:everyone_may_read_interact],
-        "local" => [:locals_may_read_interact, :locals_may_interact, :locals_may_reply],
-        "local:unlisted" => [:locals_may_read_interact],
+        "local" => [
+          :locals_may_read_interact,
+          :locals_may_read_reply,
+          :locals_may_interact,
+          :locals_may_reply
+        ],
+        "local:unlisted" => [:locals_may_read_interact, :locals_may_read_reply],
         "local:discoverable" => [:locals_may_see_interact],
         "discoverable" => [:everyone_may_see_interact],
         "global" => [:everyone_may_see_read_interact],
-        "nonfederated" => [:guests_may_see_read, :locals_may_see_read_interact],
+        "nonfederated" => [:guests_may_see_read, :locals_may_reply],
         "nonfederated:discoverable" => [:guests_may_see, :locals_may_see_interact],
-        "nonfederated:unlisted" => [:guests_may_read, :locals_may_read_interact]
+        "nonfederated:unlisted" => [
+          :guests_may_read,
+          :locals_may_read_interact,
+          :locals_may_read_reply
+        ]
       }
 
     # NOTE: per-dimension ACL signatures for group back-translation are derived at
@@ -685,6 +700,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           id: "10CA1SMAYSEEANDREAD0N1YN0W",
           name: l("Visible to local users")
         },
+        locals_may_read_reply: %{
+          id: "10CA1SMAYREADREP1YN0B00ST7",
+          name: l("Local users may read, reply and interact (but not boost)")
+        },
         locals_may_interact: %{
           id: "710CA1SMY1NTERACTN0TREP1YY",
           name: l("Local users may read and interact")
@@ -829,6 +848,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # interact and reply/message/mention
         remotes_may_reply: %{activity_pub: :participate},
         locals_may_read_interact: %{local: [:read] ++ verbs_interaction ++ verbs_react_quiet},
+        # read + quiet-react + reply/mention/message, but NOT boost — for readable-but-
+        # low-reach tiers (unlisted/quiet): locals can hold a conversation without the
+        # content being amplified. `locals_may_read_interact` + `verbs_ping`.
+        locals_may_read_reply: %{
+          local: [:read] ++ verbs_interaction ++ verbs_react_quiet ++ verbs_ping
+        },
         # interact but NOT reply/message/mention
         locals_may_interact: %{local: :interact},
         # interact and reply/message/mention
