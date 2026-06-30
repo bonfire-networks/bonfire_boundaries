@@ -267,7 +267,29 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   defp mutate(:unblock, object_to_hide, :hide, scope) do
-    error("Unhiding is not yet implemented")
+    # Reverse of the `:hide` block above: remove the `:cannot_discover` grants
+    # we added to the object's custom ACL for the relevant circle(s).
+    current_user = current_user(scope)
+    acl = Acls.get_or_create_object_custom_acl(object_to_hide, current_user || scope)
+
+    who_to_unhide_for =
+      if scope == :instance_wide do
+        instance_wide_circles([:guest, :local, :activity_pub])
+      else
+        current_user
+      end
+
+    removed =
+      Grants.remove_role(who_to_unhide_for, acl, :cannot_discover,
+        current_user: current_user,
+        scope: scope
+      )
+
+    if Enums.all_ok?(removed) do
+      {:ok, l("Unhidden")}
+    else
+      error(removed, l("Could not unhide it"))
+    end
   end
 
   defp mutate(:block, object_to_lock, :lock, scope) do
