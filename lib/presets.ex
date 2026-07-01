@@ -593,7 +593,9 @@ defmodule Bonfire.Boundaries.Presets do
 
   def group_preset_meta(slug) do
     case Config.get([:group_presets, slug], nil, :bonfire_classify) do
-      %{} = meta when map_size(meta) > 0 -> meta
+      # `label`/`description`/`help` use `l/1` in config, evaluated once at boot under the default
+      # locale — re-localise per-request for display via the shared `localise_tree/3`.
+      %{} = meta when map_size(meta) > 0 -> localise_tree(meta, Bonfire.Classify)
       _ -> nil
     end
   end
@@ -620,6 +622,41 @@ defmodule Bonfire.Boundaries.Presets do
 
   def dimension_meta(dim, slug) do
     Config.get([:preset_dimensions, dim, :options, slug], nil, :bonfire_boundaries)
+    # `label`/`description` use `l/1` in config, evaluated once at boot under the default locale —
+    # re-localise per-request for display via the shared `localise_tree/3`.
+    |> localise_tree(Bonfire.Boundaries)
+  end
+
+  @doc """
+  Full `:bonfire_boundaries, :preset_dimensions` config (dimension → options/slug_order), with
+  the `l/1` display strings re-localised per-request for the current locale.
+  """
+  def preset_dimensions do
+    preset_dimensions_config()
+    |> localise_tree(Bonfire.Boundaries)
+  end
+
+  defp preset_dimensions_config,
+    do: Config.get(:preset_dimensions, %{}, :bonfire_boundaries)
+
+  @doc "Options map (slug → metadata) for a single dimension, with `l/1` display strings re-localised."
+  def dimension_options(dim),
+    do: (get_in(preset_dimensions_config(), [dim, :options]) || %{}) |> localise_tree(Bonfire.Boundaries)
+
+  @doc "Ordered slug list for a single dimension (identifiers only — no display strings to localise)."
+  def dimension_slug_order(dim),
+    do: get_in(preset_dimensions_config(), [dim, :slug_order]) || []
+
+  @doc "`:bonfire_boundaries, :scopes` config, with `l/1` display strings re-localised per-request."
+  def scopes do
+    Config.get(:scopes, %{}, :bonfire_boundaries)
+    |> localise_tree(Bonfire.Boundaries)
+  end
+
+  @doc "`:bonfire, :role_verbs` config, with `l/1` display strings re-localised per-request."
+  def role_verbs do
+    Config.get(:role_verbs, %{}, :bonfire)
+    |> localise_tree(Bonfire.Boundaries)
   end
 
   @doc """

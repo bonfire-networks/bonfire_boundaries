@@ -270,15 +270,18 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     defp boundaries_config(args, _info) do
       ctx = args[:context] || "group"
 
-      presets_map = Config.get([:bonfire_classify, :group_presets], %{})
-      preset_order = Config.get([:bonfire_classify, :group_preset_order], [])
-      toggles = Config.get([:bonfire_classify, :layer2_toggles], [])
-      preset_dimensions = Config.get(:preset_dimensions, %{}, :bonfire_boundaries)
+      # These context fns re-localise the config's `l/1` display strings for the current locale
+      # (config is evaluated once at boot under the default locale).
+      preset_order = Bonfire.Classify.Boundaries.group_preset_order()
+      toggles = Bonfire.Classify.Boundaries.layer2_toggles()
+      preset_dimensions = Bonfire.Boundaries.Presets.preset_dimensions()
 
       dim_keys = [:membership, :visibility, :participation, :default_content_visibility]
 
       presets =
-        for id <- preset_order, preset = Map.get(presets_map, id), not is_nil(preset) do
+        for id <- preset_order,
+            preset = Bonfire.Boundaries.Presets.group_preset_meta(id),
+            not is_nil(preset) do
           dimensions =
             for dim <- dim_keys, slug = preset[dim], not is_nil(slug) do
               %{key: dim, value: slug}
