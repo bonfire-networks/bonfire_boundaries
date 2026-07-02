@@ -641,7 +641,9 @@ defmodule Bonfire.Boundaries.Presets do
 
   @doc "Options map (slug → metadata) for a single dimension, with `l/1` display strings re-localised."
   def dimension_options(dim),
-    do: (get_in(preset_dimensions_config(), [dim, :options]) || %{}) |> localise_tree(Bonfire.Boundaries)
+    do:
+      (get_in(preset_dimensions_config(), [dim, :options]) || %{})
+      |> localise_tree(Bonfire.Boundaries)
 
   @doc "Ordered slug list for a single dimension (identifiers only — no display strings to localise)."
   def dimension_slug_order(dim),
