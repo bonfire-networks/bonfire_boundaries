@@ -10,6 +10,23 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
   def config do
     import Config
 
+    # Which query shape `boundarise` uses for the :see/:read check (see
+    # `Bonfire.Boundaries.Queries.boundarise_query/6`). Only set when the env var is
+    # present so it doesn't override per-env config (e.g. test.exs) with a default.
+    case System.get_env("BOUNDARISE_STRATEGY") do
+      "direct_exists" ->
+        config :bonfire, Bonfire.Boundaries, boundarise_strategy: :direct_exists
+
+      "view" ->
+        config :bonfire, Bonfire.Boundaries, boundarise_strategy: :view
+
+      "summary_subquery" ->
+        config :bonfire, Bonfire.Boundaries, boundarise_strategy: :summary_subquery
+
+      _ ->
+        nil
+    end
+
     ### Verbs are like permissions. Each represents some activity or operation that may or may not be able to perform.
     verbs = [
       request: %{
