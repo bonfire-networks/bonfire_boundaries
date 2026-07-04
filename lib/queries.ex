@@ -345,7 +345,7 @@ defmodule Bonfire.Boundaries.Queries do
   """
   def boundarise_strategy(opts) do
     e(opts, :boundarise_strategy, nil) ||
-      Common.Config.get([Bonfire.Boundaries, :boundarise_strategy], :summary_subquery)
+      Common.Config.get([Bonfire.Boundaries, :boundarise_strategy], :direct_exists)
   end
 
   @doc """
