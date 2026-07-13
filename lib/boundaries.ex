@@ -244,8 +244,8 @@ defmodule Bonfire.Boundaries do
     with object <-
            object
            # |> repo().maybe_preload(:controlled)
-           |> repo().maybe_preload(created: [:creator])
-           |> repo().maybe_preload(:creator),
+           # either creator shape depending on the object type — pruned per schema
+           |> repo().maybe_preload([:creator, created: [:creator]], prune: true),
          :ok <-
            maybe_remove_previous_preset(
              e(object, :created, :creator, nil) || e(object, :created, :creator_id, nil) ||
