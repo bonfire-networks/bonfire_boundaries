@@ -319,7 +319,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     role_verbs_curate = role_verbs_critique ++ verbs_curate
 
-    role_verbs_editor = role_verbs_curate ++ verbs_contrib
+    role_verbs_editor = role_verbs_curate ++ verbs_edit
 
     role_verbs_contribute = role_verbs_curate ++ verbs_contrib
 
@@ -327,7 +327,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     # verbs_join_and_contribute = role_verbs_contribute ++ [:invite]
 
-    role_verbs_moderate = role_verbs_contribute ++ verbs_mod
+    # `:edit` so group admins/moderators can edit the object they moderate (e.g. a group's profile & images)
+    role_verbs_moderate = role_verbs_contribute ++ [:edit] ++ verbs_mod
 
     # preset ACLs to show when editing boundaries
     basic_acls = [
