@@ -42,6 +42,9 @@ defmodule Bonfire.Boundaries.Presets do
       |> Map.new()
 
     Map.merge(dimension_flat, general)
+    # `label`/`description`/`tooltip` use `l/1` in config, evaluated once at boot under the default
+    # locale — re-localise per-request for display via the shared `localise_tree/3`.
+    |> localise_tree(Bonfire.Boundaries)
   end
 
   @doc """
