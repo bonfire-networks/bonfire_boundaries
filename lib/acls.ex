@@ -287,8 +287,15 @@ defmodule Bonfire.Boundaries.Acls do
         {:clone, controlled_object_id} ->
           apply_same_acls_as_existing_object(controlled_object_id)
 
-        ["clone_context"] when is_binary(context_id) ->
+        ["clone_context"] when is_binary(context_id) and context_id != "" ->
           apply_same_acls_as_existing_object(context_id)
+
+        ["clone_context"] ->
+          # the target context was lost (eg. composer cleared it) — fail closed with
+          # only the universal defaults + explicit recipients, rather than silently
+          # resolving to some other preset
+          warn("clone_context boundary without a context_id — applying no preset ACLs")
+          preset_acls_tuple(creator, [], opts)
 
         nil when is_binary(context_id) ->
           apply_same_acls_as_existing_object(context_id)

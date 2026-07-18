@@ -595,7 +595,11 @@ defmodule Bonfire.Boundaries.Presets do
   def group_preset_meta(nil), do: nil
 
   def group_preset_meta(slug) do
-    case Config.get([:group_presets, slug], nil, :bonfire_classify) do
+    # The stored `[:preset_slug]` setting comes back as EITHER a string or an atom: the Settings
+    # funnel atomises string values whose atom is already interned, so under a warm VM (e.g. the
+    # full test battery) `"private_club"` is stored/read as `:private_club`, while a cold VM keeps
+    # it a string. `:group_presets` config is keyed by string, so normalise before the lookup.
+    case Config.get([:group_presets, to_string(slug)], nil, :bonfire_classify) do
       # `label`/`description`/`help` use `l/1` in config, evaluated once at boot under the default
       # locale — re-localise per-request for display via the shared `localise_tree/3`.
       %{} = meta when map_size(meta) > 0 -> localise_tree(meta, Bonfire.Classify)
@@ -608,8 +612,10 @@ defmodule Bonfire.Boundaries.Presets do
   Reads from the `[:preset_slug]` group-scoped setting recorded at create time.
   """
   def group_icon(group, default \\ "ph:users-three-duotone") do
-    with slug when is_binary(slug) and slug != "" <-
-           Settings.get([:preset_slug], nil, scope: group),
+    # `[:preset_slug]` may be stored as a string or an atom (see `group_preset_meta/1`), so accept
+    # any non-nil value and normalise to a string before matching the config.
+    with slug when not is_nil(slug) <- Settings.get([:preset_slug], nil, scope: group),
+         slug when slug != "" <- to_string(slug),
          %{icon: icon} when is_binary(icon) <- group_preset_meta(slug) do
       icon
     else
