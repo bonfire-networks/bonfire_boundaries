@@ -269,6 +269,18 @@ defmodule Bonfire.Boundaries.Acls do
     |> debug("after cast")
   end
 
+  @doc """
+  The boundary preset to apply when the caller didn't choose one: the restrictive `"private"` preset
+  (`[]` base grants — only the explicit `to_circles` recipients get access) when circles/users are
+  being addressed, otherwise the configured `:default_boundary_preset` (usually `"public"`). Shared
+  by `prepare_cast/3` and `Bonfire.Social.Objects.set_boundaries/4` so the fallback lives in one place.
+  """
+  def default_boundary_preset(to_circles, for_module) do
+    if not empty?(to_circles),
+      do: "private",
+      else: Bonfire.Common.Config.get_ext(for_module, :default_boundary_preset, "public")
+  end
+
   def prepare_cast(changeset_or_obj, creator, opts) do
     object_id =
       uid(changeset_or_obj) ||
@@ -303,10 +315,9 @@ defmodule Bonfire.Boundaries.Acls do
         nil ->
           preset_acls_tuple(
             creator,
-            Bonfire.Common.Config.get_ext(
-              e(opts, :for_module, nil),
-              :default_boundary_preset,
-              "public"
+            default_boundary_preset(
+              maybe_from_opts(opts, :to_circles, nil),
+              e(opts, :for_module, nil)
             ),
             opts
           )

@@ -614,6 +614,22 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: l("Anyone in the fediverse"),
           icon: "ph:fediverse-logo-duotone"
         },
+        # Feed origin×boundary buckets for write-time feed addressing (see the local-remote-feeds plan). These are `feed_publish.feed_id` pointers seeded like the feed circles above, NOT member circles — nobody joins them, they carry no ACL grants, and they shouldn't appear in circle-picker UIs. The `_custom` buckets reuse the legacy feed ids via `Feeds.named_feed_id/1` aliases (`local_custom`=`local`/`3SERS…`, `remote_custom`=`activity_pub`/`7EDER…`), so only these 3 are new.
+        local_public: %{
+          id: "7PVB11C0BJECTFR0M10CA1VSER",
+          name: l("Local public activities"),
+          icon: "ph:map-pin-duotone"
+        },
+        local_instance_only: %{
+          id: "710CA10BJ0N1YF0R10CA1VSERS",
+          name: l("Local instance-only activities"),
+          icon: "ph:house-line-duotone"
+        },
+        remote_public: %{
+          id: "7PVB11C0BJFR0MAREM0TEACT0R",
+          name: l("Remote public activities"),
+          icon: "ph:planet-duotone"
+        },
         admin: %{
           id: "0ADM1NSVSERW1THSVPERP0WERS",
           name: l("Instance Admins"),
