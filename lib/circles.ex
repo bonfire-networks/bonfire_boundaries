@@ -47,6 +47,28 @@ defmodule Bonfire.Boundaries.Circles do
   def circles, do: Config.get([:bonfire_boundaries, :circles], [])
 
   @doc """
+  Returns the localised name of a circle, preferring its own name and falling back to the name of the built-in stereotype it is based on ("Anyone on the internet", "Local users", ...).
+
+  Use this rather than localising a stereotype name at the call site. Those names are declared here (in `Bonfire.Boundaries.RuntimeConfig`), so they are extracted into the `bonfire_boundaries` gettext domain — and a gettext lookup only ever searches one domain, so localising from a `bonfire_ui_boundaries` component asks the wrong one and silently yields untranslated English. Only the stereotype name goes through gettext: a user's own circle name is their text, not a translatable string.
+  """
+  def circle_name(circle) do
+    e(circle, :named, :name, nil) || e(circle, :name, nil) ||
+      stereotype_name(circle)
+  end
+
+  @doc """
+  Returns the localised name of the built-in stereotype a circle is based on, or nil.
+
+  See `circle_name/1` for why localising this at the call site does not work.
+  """
+  def stereotype_name(circle) do
+    case e(circle, :stereotyped, :named, :name, nil) do
+      name when is_binary(name) and name != "" -> localise_dynamic(name, __MODULE__)
+      _ -> nil
+    end
+  end
+
+  @doc """
   Returns a list of stereotype circle IDs.
   """
   def stereotype_ids do

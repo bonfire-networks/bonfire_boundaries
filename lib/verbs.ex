@@ -21,6 +21,25 @@ defmodule Bonfire.Boundaries.Verbs do
   def verbs_count, do: Enum.count(verbs())
 
   @doc """
+  Returns the localised display name of a verb.
+
+  Use this rather than localising a verb name at the call site. Verb names are declared here (in `Bonfire.Boundaries.RuntimeConfig`), so they are extracted into the `bonfire_boundaries` gettext domain — and a gettext lookup only ever searches one domain. Calling `localise_dynamic(name, __MODULE__)` from, say, a `bonfire_ui_boundaries` component asks the *wrong* domain and silently returns the untranslated English, in every locale. Routing through this function keeps the domain with the extension that owns the string.
+
+  No `msgctxt` here, deliberately: within this domain there is no competing sense of "Boost" to disambiguate — the bare verbs *are* the permission list, and the buttons that trigger them live in other extensions' domains, which this lookup never sees. Keeping these as the bare entry also means the contextual variants used elsewhere (`"verb: action"`, `"verb: past tense"`) fall back to these translations until they are filled in.
+  """
+  def verb_name(verb) do
+    (e(verb, :name, nil) || e(verb, :verb, "?") |> to_string() |> String.capitalize())
+    |> localise_dynamic(__MODULE__)
+  end
+
+  @doc """
+  Returns the localised summary of a verb — the sentence explaining what the permission allows.
+
+  See `verb_name/1` for why this belongs here rather than at the call site. Summaries carry no context: they are full sentences, so there is nothing to disambiguate.
+  """
+  def verb_summary(verb), do: localise_dynamic(e(verb, :summary, nil), __MODULE__)
+
+  @doc """
   Returns the list of verb slugs.
 
   ## Examples
