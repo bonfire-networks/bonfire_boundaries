@@ -344,10 +344,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       preferred_verb_order: all_verb_names,
       default_verbs_for: default_verbs_for,
       role_verbs: %{
-        none: %{read_only: true},
-        read: %{can_verbs: verbs_see_read_request, read_only: true},
-        react: %{can_verbs: verbs_interact_minus_boost, read_only: true},
-        share: %{can_verbs: verbs_interact_minus_like, read_only: true},
+        none: %{read_only: true, label: l("None")},
+        read: %{can_verbs: verbs_see_read_request, read_only: true, label: l("Read")},
+        react: %{can_verbs: verbs_interact_minus_boost, read_only: true, label: l("React")},
+        share: %{can_verbs: verbs_interact_minus_like, read_only: true, label: l("Share")},
         interact: %{
           can_verbs: role_verbs_interact,
           read_only: true,
@@ -371,56 +371,84 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           description: l("Can read with a direct link but not found in listings or feeds"),
           icon: "ph:link-simple-duotone"
         },
-        participate: %{can_verbs: role_verbs_participate, read_only: true},
-        critique: %{can_verbs: role_verbs_critique, read_only: true},
-        curate: %{can_verbs: role_verbs_curate, read_only: true},
-        edit: %{can_verbs: role_verbs_editor, read_only: true},
-        contribute: %{usage: :ops, can_verbs: role_verbs_contribute, read_only: true},
-        moderate: %{usage: :ops, can_verbs: role_verbs_moderate, read_only: false},
-        administer: %{can_verbs: all_verb_names, read_only: true},
-        cannot_anything: %{cannot_verbs: all_verb_names, read_only: true},
-        cannot_request: %{cannot_verbs: [:request], read_only: true},
+        participate: %{
+          can_verbs: role_verbs_participate,
+          read_only: true,
+          label: l("Participate")
+        },
+        critique: %{can_verbs: role_verbs_critique, read_only: true, label: l("Critique")},
+        curate: %{can_verbs: role_verbs_curate, read_only: true, label: l("Curate")},
+        edit: %{can_verbs: role_verbs_editor, read_only: true, label: l("Edit")},
+        contribute: %{
+          usage: :ops,
+          can_verbs: role_verbs_contribute,
+          read_only: true,
+          label: l("Contribute")
+        },
+        moderate: %{
+          usage: :ops,
+          can_verbs: role_verbs_moderate,
+          read_only: false,
+          label: l("Moderate")
+        },
+        administer: %{can_verbs: all_verb_names, read_only: true, label: l("Administer")},
+        cannot_anything: %{
+          cannot_verbs: all_verb_names,
+          read_only: true,
+          label: l("Cannot do anything")
+        },
+        cannot_request: %{cannot_verbs: [:request], read_only: true, label: l("Cannot request")},
         cannot_discover: %{
           cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_read_request end),
-          read_only: true
+          read_only: true,
+          label: l("Cannot discover")
         },
         cannot_read: %{
           cannot_verbs: Enum.reject(all_verb_names, fn v -> v == :request end),
-          read_only: true
+          read_only: true,
+          label: l("Cannot read")
         },
         cannot_react: %{
           cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_interact_minus_like end),
-          read_only: true
+          read_only: true,
+          label: l("Cannot react")
         },
         cannot_share: %{
           cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_interact_minus_boost end),
-          read_only: true
+          read_only: true,
+          label: l("Cannot share")
         },
         cannot_interact: %{
           cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_see_read_request end),
-          read_only: true
+          read_only: true,
+          label: l("Cannot interact")
         },
         cannot_participate: %{
           cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_interact end),
-          read_only: true
+          read_only: true,
+          label: l("Cannot participate")
         },
         cannot_critique: %{
           cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_participate end),
-          read_only: true
+          read_only: true,
+          label: l("Cannot critique")
         },
         cannot_curate: %{
           cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_critique end),
-          read_only: true
+          read_only: true,
+          label: l("Cannot curate")
         },
         cannot_contribute: %{
           usage: :ops,
           cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_curate end),
-          read_only: true
+          read_only: true,
+          label: l("Cannot contribute")
         },
         cannot_administer: %{
           cannot_verbs:
             Enum.reject(all_verb_names, fn v -> v in role_verbs_editor_and_contribute end),
-          read_only: true
+          read_only: true,
+          label: l("Cannot administer")
         }
       },
       role_to_grant: [

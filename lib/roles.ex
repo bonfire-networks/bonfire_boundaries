@@ -122,7 +122,7 @@ defmodule Bonfire.Boundaries.Roles do
 
     debug(
       for role <- roles || [] do
-        {role, Recase.to_title(to_string(role))}
+        {role, role_name(role, opts)}
       end
     )
 
@@ -132,6 +132,25 @@ defmodule Bonfire.Boundaries.Roles do
     #       {"cannot_#{role}", l("Cannot") <> " " <> Recase.to_title(to_string(role))}
     #     end
     #   )
+  end
+
+  @doc """
+  Returns the localised display name of a role, from the `label` declared alongside it in the `:role_verbs` config.
+
+  Use this rather than title-casing the role key at the call site: `Recase.to_title(to_string(role))` produces English that never reaches gettext, so every role except `:administer` rendered untranslated in every locale.
+
+  The label is re-localised here rather than trusted as-is, because config is evaluated once at boot: the `l/4` call in `RuntimeConfig` fixes the string under whichever locale was active then, so it has to go back through gettext per request. Same reason `localise_tree/4` exists for the preset metadata.
+
+  Roles with no configured label — including any an instance defines itself — fall back to the title-cased key. That is correct for instance-defined roles, whose names are the instance's own text rather than anything we ship.
+  """
+  def role_name(role, opts \\ []) do
+    case get(role, opts) do
+      %{label: label} when is_binary(label) and label != "" ->
+        localise_dynamic(label, __MODULE__)
+
+      _ ->
+        Recase.to_title(to_string(role))
+    end
   end
 
   defp role_from_verb_names(verbs) do
@@ -163,14 +182,14 @@ defmodule Bonfire.Boundaries.Roles do
         verb_ids_from_grants(positive)
         |> debug("this is a role with only positive permissions")
         |> role_from_verb(:id, all_role_verbs) ||
-          if(opts[:fallback_to_list], do: Enum.join(display_verb_grants(positive, l("Can")), ";"))
+          if(opts[:fallback_to_list], do: Enum.join(display_verb_grants(positive, :can), ";"))
 
       positive == [] and negative != [] ->
         verb_ids_from_grants(negative)
         |> debug("this is a role with only negative permissions")
         |> cannot_role_from_verb(:id, all_role_verbs) ||
           if(opts[:fallback_to_list],
-            do: Enum.join(display_verb_grants(negative, l("Cannot")), ";")
+            do: Enum.join(display_verb_grants(negative, :cannot), ";")
           )
 
       true ->
@@ -179,8 +198,8 @@ defmodule Bonfire.Boundaries.Roles do
         if(opts[:fallback_to_list],
           do:
             Enum.join(
-              display_verb_grants(positive, l("Can")) ++
-                display_verb_grants(negative, l("Cannot")),
+              display_verb_grants(positive, :can) ++
+                display_verb_grants(negative, :cannot),
               " ; "
             )
         )
@@ -189,8 +208,19 @@ defmodule Bonfire.Boundaries.Roles do
       :custom
   end
 
-  defp display_verb_grants(grants, prefix) do
-    Enum.map(grants, &"#{prefix} #{e(&1, :verb, :verb, nil)}")
+  # one interpolated msgid per polarity rather than prefixing a localised "Can"/"Cannot" onto a
+  # verb: concatenation freezes English word order for every locale, and left the verb itself
+  # untranslated
+  defp display_verb_grants(grants, :can) do
+    Enum.map(grants, &l("Can %{verb}", verb: grant_verb_name(&1)))
+  end
+
+  defp display_verb_grants(grants, :cannot) do
+    Enum.map(grants, &l("Cannot %{verb}", verb: grant_verb_name(&1)))
+  end
+
+  defp grant_verb_name(grant) do
+    Bonfire.Boundaries.Verbs.verb_name(%{verb: e(grant, :verb, :verb, nil)})
   end
 
   defp verb_ids_from_grants(grants) do
@@ -322,8 +352,8 @@ defmodule Bonfire.Boundaries.Roles do
 
   def preset_boundary_role_from_acl(verbs) when is_list(verbs) do
     case role_from_verb_names(verbs) do
-      :administer -> {:administer, l("Administer"), verbs}
-      role -> {role, Recase.to_title(to_string(role)), verbs}
+      :administer -> {:administer, role_name(:administer), verbs}
+      role -> {role, role_name(role), verbs}
     end
   end
 
