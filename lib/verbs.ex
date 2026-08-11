@@ -27,10 +27,21 @@ defmodule Bonfire.Boundaries.Verbs do
 
   No `msgctxt` here, deliberately: within this domain there is no competing sense of "Boost" to disambiguate — the bare verbs *are* the permission list, and the buttons that trigger them live in other extensions' domains, which this lookup never sees. Keeping these as the bare entry also means the contextual variants used elsewhere (`"verb: action"`, `"verb: past tense"`) fall back to these translations until they are filled in.
   """
-  def verb_name(verb) do
+  def verb_name(%{} = verb) do
     (e(verb, :name, nil) || e(verb, :verb, "?") |> to_string() |> String.capitalize())
     |> localise_dynamic(__MODULE__)
   end
+
+  # callers often hold a slug or ID rather than the definition, eg. `role_verb_live` iterating a role's verbs
+  def verb_name(slug_or_id) when is_atom(slug_or_id) or is_binary(slug_or_id) do
+    case get(slug_or_id) do
+      # nil would otherwise recurse into this same clause forever
+      %{} = verb -> verb_name(verb)
+      _ -> nil
+    end
+  end
+
+  def verb_name(_), do: nil
 
   @doc """
   Returns the localised summary of a verb — the sentence explaining what the permission allows.
