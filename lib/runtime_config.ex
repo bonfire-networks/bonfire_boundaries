@@ -1402,7 +1402,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         },
         "private" => %{
           label: l("Private"),
-          icon: "heroicons-solid:eye-off",
+          icon: "ph:eye-slash-duotone",
           description: l("Only you."),
           tooltip: l("Private: only visible to the creator and/or caretaker.")
         }
