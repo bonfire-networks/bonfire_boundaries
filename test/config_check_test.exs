@@ -6,6 +6,9 @@ defmodule Bonfire.Boundaries.ConfigCheckTest do
 
   use ExUnit.Case, async: true
 
+  # bucket this into the backend CI leg: bare `ExUnit.Case` skips the tag the extension case templates apply, so without it this also runs in the federation job catch-all
+  @moduletag :backend
+
   alias Bonfire.Boundaries.ConfigCheck
 
   test "preset configuration is internally consistent" do
