@@ -642,10 +642,16 @@ defmodule Bonfire.Boundaries.Blocks do
     nil
   end
 
+  defp is_blocked_by?(_user_or_peer, _block_types, nil) do
+    debug("no current_user")
+
+    nil
+  end
+
   defp is_blocked_by?(user_or_peer, _block_types, _) do
     warn(
       user_or_peer,
-      "no pattern found"
+      "no pattern found to check blocks"
     )
 
     nil
