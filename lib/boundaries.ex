@@ -435,7 +435,8 @@ defmodule Bonfire.Boundaries do
              fallback_return: nil
            )) ||
         (
-          current_user = current_user(subject)
+          # `current_user_or_id` so a bare subject id (eg. the circle-as-subject clause above) is honored instead of silently downgrading the check to guest
+          current_user = current_user_or_id(subject)
           current_user_id = id(current_user)
 
           {first_object, objects} =

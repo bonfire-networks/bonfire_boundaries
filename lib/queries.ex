@@ -102,7 +102,8 @@ defmodule Bonfire.Boundaries.Queries do
           query || Bonfire.Boundaries.Queries.always_true_subquery()
 
         :admins ->
-          agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
+          agent =
+            Common.Utils.current_user_or_id(opts) || Common.Utils.current_account(opts)
 
           case Bonfire.Me.Accounts.is_admin?(agent) do
             true ->
@@ -122,7 +123,8 @@ defmodule Bonfire.Boundaries.Queries do
           end
 
         _false ->
-          agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
+          agent =
+            Common.Utils.current_user_or_id(opts) || Common.Utils.current_account(opts)
 
           Bonfire.Boundaries.Queries.boundarise_query(
             query,
@@ -326,7 +328,9 @@ defmodule Bonfire.Boundaries.Queries do
     if Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
       q
     else
-      agent = Common.Utils.current_user(opts) || Common.Utils.current_account(opts)
+      agent =
+        Common.Utils.current_user_or_id(opts) || Common.Utils.current_account(opts)
+
       verbs = e(opts, :verbs, [:see, :read])
 
       boundarise_query(q, agent, verbs, :main_object, :id, opts)
@@ -397,7 +401,14 @@ defmodule Bonfire.Boundaries.Queries do
       (is_list(opts) and Keyword.get(opts, :skip_boundary_check))
   end
 
-  defp user_and_circle_ids(subject) when is_struct(subject) or is_binary(subject),
+  defp user_and_circle_ids(subject) when is_binary(subject) do
+    # a built-in circle used AS the subject (eg. `can?(:activity_pub, ...)`) is its own grant subject: no locality circle applies, and it must not hit the unclassifiable-subject path
+    if Bonfire.Boundaries.Circles.is_built_in?(subject),
+      do: [subject],
+      else: subject_ids_with_locality(subject)
+  end
+
+  defp user_and_circle_ids(subject) when is_struct(subject),
     do: subject_ids_with_locality(subject)
 
   defp user_and_circle_ids(subjects) do

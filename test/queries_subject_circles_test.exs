@@ -196,4 +196,47 @@ defmodule Bonfire.Boundaries.QueriesSubjectCirclesTest do
              "is_local? defaults to true for unclassifiable shapes, granting remote subjects local-circle visibility"
     end
   end
+
+  describe "built-in circle used AS the subject (eg. can?(:activity_pub, ...))" do
+    test "a built-in circle id is its own grant subject: no locality or guest circle added, zero classification queries" do
+      ap_circle = circle_id(:activity_pub)
+
+      {ids, query_count} =
+        with_query_count(@peered_or_created, fn -> subject_param_ids(ap_circle) end)
+
+      # NOTE: params also contain verb ids, so assert membership (like the tests above)
+      assert ap_circle in ids
+      refute circle_id(:local) in ids
+      refute circle_id(:guest) in ids
+
+      # must not hit the unclassifiable-subject path (which would also err-raise in test env)
+      assert query_count == 0
+    end
+
+    test "can?(:activity_pub, ...) checks the activity_pub circle's own grants, not guest's" do
+      user = Fake.fake_user!()
+
+      {:ok, public_post} =
+        Bonfire.Posts.publish(
+          current_user: user,
+          post_attrs: %{post_content: %{html_body: "public post"}},
+          boundary: "public"
+        )
+
+      {:ok, local_post} =
+        Bonfire.Posts.publish(
+          current_user: user,
+          post_attrs: %{post_content: %{html_body: "local-only post"}},
+          boundary: "local"
+        )
+
+      assert Bonfire.Boundaries.can?(:activity_pub, :read, public_post) == true
+      assert Bonfire.Boundaries.can?(:activity_pub, :read, local_post) == false
+
+      # positive circle grants resolve too, proving the subject isn't silently guest:
+      # the :local circle can read a local-boundary post, which guest cannot
+      assert Bonfire.Boundaries.can?(:local, :read, local_post) == true
+      assert Bonfire.Boundaries.can?(:guest, :read, local_post) == false
+    end
+  end
 end
