@@ -145,6 +145,21 @@ defmodule Bonfire.Boundaries.Allowlist do
     |> repo().maybe_preload(encircles: [:peer, subject: [:profile, :character]])
   end
 
+  @doc "The allowlist circle for the given scope (there is only one `#{inspect(@stereotypes)}` circle per scope), or nil if it doesn't exist yet."
+  def circle(scope) do
+    list(scope)
+    |> List.wrap()
+    |> List.first()
+  end
+
+  @doc "The members (people and instances) of the allowlist for the given scope. `opts` are passed to `Circles.list_members/2`."
+  def list_members(scope, opts \\ []) do
+    case circle(scope) do
+      nil -> []
+      circle -> Circles.list_members(circle, opts)
+    end
+  end
+
   ###
 
   defp is_allowlisted_by?(subject, user_ids) when is_list(user_ids) and user_ids != [] do
