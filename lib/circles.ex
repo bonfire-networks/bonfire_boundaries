@@ -27,7 +27,7 @@ defmodule Bonfire.Boundaries.Circles do
   alias Bonfire.Data.AccessControl.Encircle
 
   alias Bonfire.Data.Identity.Caretaker
-  # alias Ecto.Changeset
+  alias Ecto.Changeset, as: EctoChangeset
   alias Needle.Changesets
   # alias Needle.Pointer
 
@@ -40,6 +40,11 @@ defmodule Bonfire.Boundaries.Circles do
     "7DAPE0P1E1PERM1TT0F0110WME",
     "4THEPE0P1ES1CH00SET0F0110W"
   ]
+
+  @circle_settings_types %{
+    name: :string,
+    description: :string
+  }
 
   @doc """
   Returns a list of special built-in circles (e.g., guest, local, activity_pub).
@@ -271,6 +276,39 @@ defmodule Bonfire.Boundaries.Circles do
                )
              ),
            else: {:error, :not_found}
+    end
+  end
+
+  @doc "Gets a circle that the current user owns or is permitted to configure. Refuses built-in and stereotype circles (e.g. follower/followed bookkeeping), which must not be edited or deleted from management UIs."
+  def get_for_manager(id, user, opts \\ []) do
+    opts = Keyword.put_new(opts, :current_user, user)
+
+    case get_for_caretaker(id, user, opts) do
+      {:ok, circle} ->
+        check_editable(circle)
+
+      {:error, :not_found} ->
+        with {:ok, circle} <- get(id, opts),
+             object_boundary <- Bonfire.Boundaries.boundary_on_object(id, user),
+             true <- Bonfire.Boundaries.can?(user, :configure, object_boundary) do
+          check_editable(circle)
+        else
+          permission when permission in [false, nil] -> {:error, :not_permitted}
+          other -> other
+        end
+
+      other ->
+        other
+    end
+  end
+
+  defp check_editable(circle) do
+    circle = repo().maybe_preload(circle, :stereotyped)
+
+    if is_built_in?(circle) or e(circle, :stereotyped, :stereotype_id, nil) do
+      {:error, :not_permitted}
+    else
+      {:ok, circle}
     end
   end
 
@@ -934,6 +972,7 @@ defmodule Bonfire.Boundaries.Circles do
       [stereotyped: stereotyped],
       is_nil(stereotyped.id) or stereotyped.stereotype_id not in ^exclude_circles
     )
+    |> order_by([circle: circle], desc: circle.id)
     |> repo().all()
     |> merge_stereotype_config()
   end
@@ -1001,6 +1040,21 @@ defmodule Bonfire.Boundaries.Circles do
     query_my(user, opts ++ @default_q_opts)
     |> query_with_counts()
     |> many(opts[:paginate?], opts)
+  end
+
+  @doc """
+  Lists a user's editable circles with member counts for management interfaces.
+
+  Results exclude built-in and stereotype circles when requested and are returned newest first.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_my_for_manager(user, exclude_built_ins: true)
+      [%Circle{encircles_count: 2}]
+  """
+  def list_my_for_manager(user, opts \\ []) do
+    list_my_with_counts(user, Keyword.put(opts, :paginate?, false))
+    |> Enum.sort_by(&uid/1, :desc)
   end
 
   defp query_with_counts(query) do
@@ -1246,6 +1300,78 @@ defmodule Bonfire.Boundaries.Circles do
     )
 
     # TODO: return just the subjects?
+  end
+
+  @doc """
+  Lists a small, preloaded member preview for each requested circle in one query.
+
+  The result is keyed by circle ID and each value contains at most `:limit` encircle records.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_member_previews([], limit: 3)
+      %{}
+  """
+  def list_member_previews(circle_ids, opts \\ []) when is_list(circle_ids) do
+    circle_ids = uids(circle_ids)
+    limit = Keyword.get(opts, :limit, 3)
+
+    if circle_ids == [] or limit < 1 do
+      %{}
+    else
+      ranked_members =
+        from encircle in Encircle,
+          where: encircle.circle_id in ^circle_ids,
+          select: %{
+            id: encircle.id,
+            member_rank:
+              over(row_number(),
+                partition_by: encircle.circle_id,
+                order_by: [desc: encircle.id]
+              )
+          }
+
+      limited_members =
+        from member in subquery(ranked_members),
+          where: member.member_rank <= ^limit,
+          select: member
+
+      from(encircle in Encircle)
+      |> join(:inner, [encircle], member in subquery(limited_members),
+        as: :member_preview,
+        on: member.id == encircle.id
+      )
+      |> proload(subject: [:profile, :named, character: [:peered]])
+      |> order_by(
+        [encircle, member_preview: member],
+        asc: encircle.circle_id,
+        asc: member.member_rank
+      )
+      |> repo().all()
+      |> Enum.group_by(& &1.circle_id)
+    end
+  end
+
+  @doc """
+  Builds the validation changeset for editable circle details.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.details_changeset(%{name: "Friends"}).valid?
+      true
+
+      iex> Bonfire.Boundaries.Circles.details_changeset(%{name: ""}).valid?
+      false
+  """
+  def details_changeset(params \\ %{}) do
+    # :description defaults to nil in the data so apply_changes always includes the key (Ecto cast drops "" params as empty values) and clearing the field persists nil
+    {%{description: nil}, @circle_settings_types}
+    |> EctoChangeset.cast(params, [:name, :description])
+    |> EctoChangeset.update_change(:name, &String.trim/1)
+    |> EctoChangeset.update_change(:description, &String.trim/1)
+    |> EctoChangeset.validate_required([:name])
+    |> EctoChangeset.validate_length(:name, max: 64)
+    |> EctoChangeset.validate_length(:description, max: 240)
   end
 
   # 6h — the curated suggested-profiles list is public, instance-wide data that rarely changes

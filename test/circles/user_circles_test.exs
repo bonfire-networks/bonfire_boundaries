@@ -111,6 +111,61 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
     refute Bonfire.Boundaries.Circles.is_encircled_by?(carl, circle)
   end
 
+  test "lists management counts and bounded member previews" do
+    account = Bonfire.Me.Fake.fake_account!()
+    me = Bonfire.Me.Fake.fake_user!(account)
+    members = Enum.map(1..4, fn _ -> Bonfire.Me.Fake.fake_user!(account) end)
+
+    {:ok, circle} = Circles.create(me, %{named: %{name: "organisers"}})
+    Enum.each(members, &Circles.add_to_circles(&1, circle))
+
+    [listed_circle] =
+      Circles.list_my_for_manager(me,
+        exclude_stereotypes: true,
+        exclude_built_ins: true
+      )
+
+    assert listed_circle.id == circle.id
+    assert listed_circle.encircles_count == 4
+
+    previews = Circles.list_member_previews([circle.id], limit: 3)
+
+    assert previews |> Map.fetch!(circle.id) |> length() == 3
+
+    assert Enum.all?(Map.fetch!(previews, circle.id), fn member ->
+             member.subject.profile.id
+           end)
+  end
+
+  test "get_for_manager refuses stereotype circles" do
+    me = Bonfire.Me.Fake.fake_user!()
+
+    {:ok, circle} = Circles.create(me, %{named: %{name: "custom"}})
+    assert {:ok, _} = Circles.get_for_manager(circle.id, me)
+
+    assert [stereotype_circle | _] = Circles.get_stereotype_circles(me, [:followed, :followers])
+
+    assert {:error, _} = Circles.get_for_manager(stereotype_circle.id, me)
+  end
+
+  test "applies a blank description as nil instead of dropping the key" do
+    changeset = Circles.details_changeset(%{name: "Friends", description: ""})
+
+    assert changeset.valid?
+    assert %{name: "Friends", description: nil} = Ecto.Changeset.apply_changes(changeset)
+  end
+
+  test "validates circle details" do
+    assert Circles.details_changeset(%{
+             name: "Mutual aid",
+             description: "Neighbours helping neighbours"
+           }).valid?
+
+    refute Circles.details_changeset(%{name: ""}).valid?
+    refute Circles.details_changeset(%{name: String.duplicate("a", 65)}).valid?
+    refute Circles.details_changeset(%{name: "Friends", description: String.duplicate("a", 241)}).valid?
+  end
+
   test "deleting a circle works" do
     user = Bonfire.Me.Fake.fake_user!()
     circles = Circles.list_my(user)
