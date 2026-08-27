@@ -163,6 +163,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
 
     refute Circles.details_changeset(%{name: ""}).valid?
     refute Circles.details_changeset(%{name: String.duplicate("a", 65)}).valid?
+
     refute Circles.details_changeset(%{name: "Friends", description: String.duplicate("a", 241)}).valid?
   end
 
