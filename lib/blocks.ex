@@ -19,7 +19,10 @@ defmodule Bonfire.Boundaries.Blocks do
   @behaviour Bonfire.Federate.ActivityPub.FederationModules
   def federation_module,
     do: [
-      "Block"
+      "Block",
+      # a moderator closing a thread to further replies, which is a `:lock` block on the object
+      "Lock",
+      {"Undo", "Lock"}
     ]
 
   @doc """
@@ -660,10 +663,102 @@ defmodule Bonfire.Boundaries.Blocks do
   @doc """
   Handles incoming Block activities from ActivityPub federation.
 
+  A moderator closing a thread to further replies. Locking IS a block of type `:lock` on the object, so this needs no new concept: what arrives as `Lock` from the threadiverse is the same thing our own "lock a post" does. The reason travels in `summary`, as it does on a mod-removal `Delete`; we do not have anywhere to show it yet.
+
   ## Examples
 
       iex> Bonfire.Boundaries.Blocks.ap_receive_activity(blocker, activity, blocked)
   """
+  def ap_receive_activity(locker, %{data: %{"type" => "Lock"} = data} = _activity, object) do
+    info("apply incoming Lock")
+
+    with {:ok, object} <- ap_receive_object_to_lock(object),
+         # the group the moderator claims to act for, which this family states in `audience`
+         :ok <- moderation_authority(locker, object, data["audience"]),
+         {:ok, locked} <- block(object, :lock, current_user: locker) do
+      # the reason a moderator gave, which the wire carries in `summary` (as a mod-removal `Delete` does). A `Flag` keeps its comment because a flag is an Edge record with a `named` mixin; a lock creates no record, only grants, so where this goes is still open (see the group federation plan).
+      maybe_store_moderation_reason(object, data["summary"])
+      {:ok, locked}
+    else
+      e -> error(e, "Could not lock the object")
+    end
+  end
+
+  def ap_receive_activity(
+        unlocker,
+        %{data: %{"type" => "Undo", "object" => %{"type" => "Lock"} = inner}} = _activity,
+        object
+      ) do
+    info("apply incoming Undo of a Lock")
+
+    with {:ok, object} <- ap_receive_object_to_lock(object),
+         # reopening a thread needs the same standing as closing it, so check the group the Undo's inner Lock names
+         :ok <- moderation_authority(unlocker, object, inner["audience"]),
+         {:ok, unlocked} <- unblock(object, :lock, current_user: unlocker) do
+      {:ok, unlocked}
+    else
+      e -> error(e, "Could not unlock the object")
+    end
+  end
+
+  defp ap_receive_object_to_lock(%{pointer_id: pointer_id}) when is_binary(pointer_id),
+    do: Bonfire.Common.Needles.get(pointer_id, skip_boundary_check: true)
+
+  defp ap_receive_object_to_lock(%{} = object), do: {:ok, object}
+  defp ap_receive_object_to_lock(other), do: error(other, "No object to lock")
+
+  # Moderation from elsewhere only counts within a group, and only from that group's own authority. FEP-1b12's convention, which every implementor follows, is that a receiver accepts a moderation activity when its actor is listed as a moderator of the group the object belongs to, or is same-origin with that group. Note it can NOT be same-origin with the object: a moderator
+  # legitimately closes a thread whose post was authored on a third instance.
+  #
+  # Without this, anyone who can reach our inbox could close any thread on this instance.
+  # Who may moderate what is a GROUP question, so it lives with groups rather than here: this module knows how to lock an object, not who is entitled to. One call out, and if the groups extension is disabled there is no group moderation to accept, so refusing is the right fallback.
+  defp moderation_authority(actor, object, group_ap_id) do
+    # `audience` is a single id on the wire but a list once ingested, since addressing fields are
+    # normalised on the way in. Read both shapes, or a legitimate lock is refused for its shape
+    group_ap_ids = group_ap_id |> List.wrap() |> Enum.filter(&is_binary/1)
+
+    cond do
+      # an author closing their own thread, which is exactly what we let a local author do
+      author?(actor, object) ->
+        :ok
+
+      # A thread in no group has no moderator collection to check against, and same-origin with the object is NOT a substitute: that would let any account on the object's instance close any thread it hosts, not just its moderators. Remote instance-admin standing is not something we can verify today (nodeinfo does not carry it, and nothing signs "I am an admin here"), so refuse rather than trust the claim. The author case above is the exception, since that one IS verifiable.
+      group_ap_ids == [] ->
+        error(
+          actor,
+          "refusing remote moderation of a thread in no group: only its author has verifiable standing"
+        )
+
+      # otherwise it is group moderation, and who may moderate what is a GROUP question, so it lives with groups rather than here: this module knows how to lock an object, not who is entitled to. Note an admin of the group's own instance passes this as same-origin, while an admin of some other instance has no standing over that group's threads `== true` deliberately: anything else, including an `{:error, …}` tuple (which is truthy, and is what `error/2` returns), must not read as permission granted
+      Utils.maybe_apply(
+        Bonfire.Classify.Categories,
+        :remote_moderation_authority?,
+        [actor, object, group_ap_ids],
+        fallback_return: false
+      ) == true ->
+        :ok
+
+      true ->
+        error(actor, "refusing remote moderation without authority over the object or its group")
+    end
+  end
+
+  defp author?(actor, object) do
+    uid(actor) ==
+      object
+      |> repo().maybe_preload(created: [:creator])
+      |> e(:created, :creator_id, nil)
+  end
+
+  defp maybe_store_moderation_reason(_object, reason) when reason in [nil, ""], do: :ok
+
+  defp maybe_store_moderation_reason(object, reason) do
+    # TODO: where to store the reason? The object may be a post, comment, or thread, etc
+    # Utils.maybe_apply(Bonfire.Common.Settings, :put, [[:moderation_reason], reason, [scope: object]],
+    #   fallback_return: nil
+    # )
+  end
+
   def ap_receive_activity(
         blocker,
         %{data: %{"type" => "Block"} = _data} = _activity,
