@@ -508,4 +508,22 @@ defmodule Bonfire.Boundaries.Controlleds do
       Grants.grant_role(subject_id, acl, role, opts)
     end
   end
+
+  @doc """
+  Removes a role a subject was granted on an object, undoing `grant_role/4`.
+
+  Unlike granting, this never creates the object's custom ACL: with no custom ACL there is no bespoke grant to take back.
+
+  ## Examples
+
+      iex> remove_role(subject_id, object, :editor)
+      [ok: %Grant{}]
+
+  """
+  def remove_role(subject_id, object, role, opts \\ []) do
+    case Acls.get_object_custom_acl(object) do
+      {:ok, acl} -> Grants.remove_role(subject_id, acl, role, opts)
+      _ -> []
+    end
+  end
 end

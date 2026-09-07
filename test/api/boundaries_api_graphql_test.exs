@@ -128,10 +128,11 @@ defmodule Bonfire.Boundaries.API.GraphQLTest do
   test "returns layer2 override toggles" do
     {:ok, result} = Absinthe.run(@query, Schema, variables: %{"ctx" => "group"})
     keys = get_in(result, [:data, "boundaries", "overrides"]) |> Enum.map(& &1["key"])
-    assert "discoverable" in keys
-    assert "approval_required" in keys
-    assert "anyone_posts" in keys
+    assert "joins_need_approval" in keys
+    assert "nonmembers_may_post" in keys
     assert "federate" in keys
+
+    #  assert "discoverable" in keys # withheld until it stops rewriting the `read` bit along with `see` — a client offered it would unlist a group and grant read to everyone in one click"
   end
 
   test "membership dimension has expected options" do
