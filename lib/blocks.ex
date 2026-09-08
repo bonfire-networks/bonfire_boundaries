@@ -219,6 +219,93 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   @doc """
+  Closes an object to further participation: a moderator locking a thread, or a group being archived.
+
+  A named wrapper over `block/3`, so call sites say what they mean rather than passing a `:lock` atom, and so there is ONE seam to hang outgoing federation on when it lands — no block of any kind federates today.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Blocks.lock(post, current_user: moderator)
+  """
+  def lock(object, scope) do
+    with {:ok, _} = ok <- block(object, :lock, scope) do
+      maybe_federate_lock(:lock, object, scope)
+      ok
+    end
+  end
+
+  @doc "Reopens an object closed by `lock/2`."
+  def unlock(object, scope) do
+    with {:ok, _} = ok <- unblock(object, :lock, scope) do
+      maybe_federate_lock(:unlock, object, scope)
+      ok
+    end
+  end
+
+  # A closed THREAD is worth telling other instances about, and our own ingest already accepts it (`ap_receive_activity/3` below). A closed ACTOR is not: `Lock` is per-post everywhere it is implemented, so `Lock{Group}` would be a shape with no receiver — an archived group says `postingRestrictedToMods` on its actor instead, which is why this skips characters.
+  # Routed explicitly at THIS module because outgoing publishing dispatches on `{verb, object_type}` and falls back to the object's own context module, which for a post is `Bonfire.Posts` — the same `federation_module:` override `Bonfire.Social.Quotes` uses for its requests.
+  # Never fatal: failing to announce a lock must not undo the lock.
+  @doc """
+  Publishes a thread closing or reopening as `Lock` / `Undo{Lock}`.
+
+  Reached through the `federation_module: __MODULE__` override rather than by type dispatch, since the object being locked is a post, whose own context module would otherwise be asked to publish a verb it knows nothing about.
+
+  ⚠️ The moderator's REASON has nowhere to come from yet: an incoming lock carries it in `summary` and we store it (`maybe_store_moderation_reason/2`), but a local lock creates grants rather than a record, so there is nothing to read back. Emitted without one until that is decided.
+  """
+  def ap_publish_activity(subject, verb, object) when verb in [:lock, :unlock] do
+    with {:ok, actor} <- ActivityPub.Actor.get_cached(pointer: subject),
+         {:ok, ap_object} <- ActivityPub.Object.get_cached(pointer: object) do
+      # no `pointer:` — a lock creates GRANTS rather than a record, so the activity has no local pointable of its own, and claiming the locked object's would collide with the AP object already holding it
+      params = %{actor: actor, object: ap_object}
+
+      case verb do
+        :lock -> ActivityPub.lock(params)
+        :unlock -> ActivityPub.unlock(params)
+      end
+    else
+      e -> error(e, "Could not find the actor or object to #{verb}")
+    end
+  end
+
+  defp maybe_federate_lock(verb, object_or_id, scope) do
+    # callers pass an id as readily as a struct (the locking LiveView handler passes one), and the locality check below deliberately RAISES rather than guessing when `:peered` is not loaded — so load it here, mirroring what `AdapterUtils.preload_peered/1` asks of an object
+    object =
+      case object_or_id do
+        id when is_binary(id) ->
+          case Bonfire.Common.Needles.get(id, skip_boundary_check: true) do
+            {:ok, object} -> object
+            _ -> nil
+          end
+
+        object ->
+          object
+      end
+      |> repo().maybe_preload([:peered, created: [creator: :peered]], prune: true)
+
+    character_schemas =
+      Bonfire.Common.Config.get(:types_character_schemas, [], :bonfire)
+
+    # and only for objects WE host: applying an incoming `Lock` goes through this same function (`ap_receive_activity/3` below, and `Threads.ap_receive_comments_enabled/4` for the `commentsEnabled` form), so announcing a remote object's lock would echo the origin's own decision back at the fediverse as though it were ours
+    if Types.object_type(object) not in character_schemas and
+         Utils.maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :is_local?, [object],
+           fallback_return: false
+         ) == true do
+      try do
+        Utils.maybe_apply(
+          Bonfire.Federate.ActivityPub.Outgoing,
+          :maybe_federate,
+          [current_user(scope), verb, object, [federation_module: __MODULE__]],
+          fallback_return: nil
+        )
+      rescue
+        e -> error(e, "Could not federate the #{verb}")
+      catch
+        :exit, e -> error(e, "Could not federate the #{verb}")
+      end
+    end
+  end
+
+  @doc """
   Unblocks *all* users or instances for a given block type and scope (only used for debugging purposes)
 
   ## Examples
@@ -675,7 +762,7 @@ defmodule Bonfire.Boundaries.Blocks do
     with {:ok, object} <- ap_receive_object_to_lock(object),
          # the group the moderator claims to act for, which this family states in `audience`
          :ok <- moderation_authority(locker, object, data["audience"]),
-         {:ok, locked} <- block(object, :lock, current_user: locker) do
+         {:ok, locked} <- lock(object, current_user: locker) do
       # the reason a moderator gave, which the wire carries in `summary` (as a mod-removal `Delete` does). A `Flag` keeps its comment because a flag is an Edge record with a `named` mixin; a lock creates no record, only grants, so where this goes is still open (see the group federation plan).
       maybe_store_moderation_reason(object, data["summary"])
       {:ok, locked}
@@ -694,7 +781,7 @@ defmodule Bonfire.Boundaries.Blocks do
     with {:ok, object} <- ap_receive_object_to_lock(object),
          # reopening a thread needs the same standing as closing it, so check the group the Undo's inner Lock names
          :ok <- moderation_authority(unlocker, object, inner["audience"]),
-         {:ok, unlocked} <- unblock(object, :lock, current_user: unlocker) do
+         {:ok, unlocked} <- unlock(object, current_user: unlocker) do
       {:ok, unlocked}
     else
       e -> error(e, "Could not unlock the object")
