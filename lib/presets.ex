@@ -496,45 +496,49 @@ defmodule Bonfire.Boundaries.Presets do
   can hide the row.
   """
   def group_dimension_slugs(group) do
-    # `dim_acls/0` is derived once from `:preset_acls` + `:preset_dimensions`.
-    # See its docstring for the dim-keyed contract that lets back-translation
-    # disambiguate slugs whose ACL sets are subsets of one another.
-    dim_acls = dim_acls()
-
-    expected = fn dim ->
-      Map.new(Map.get(dim_acls, dim, %{}), fn {slug, acls} ->
-        {slug, MapSet.new(acls, &Acls.get_id!/1)}
-      end)
-    end
-
     group_acl_ids =
       Controlleds.list_acls_on_object(group)
       |> Enum.map(&(e(&1, :acl_id, nil) || e(&1, :acl, :id, nil)))
       |> Enum.reject(&is_nil/1)
       |> MapSet.new()
 
-    # Whole-set match: pick the slug whose required ACL set is fully present in
-    # the group, preferring the most specific match (largest required set). This
-    # disambiguates slugs whose ACLs are subsets of one another — e.g.
-    # `local:contributors` requires `[locals_may_contribute]` while `anyone`
-    # requires `[locals_may_contribute, remotes_may_contribute]`. The
-    # per-ACL-iteration approach can't tell these apart and silently picks the
-    # first one encountered.
-    match_dim = fn expected_map ->
-      expected_map
-      |> Enum.filter(fn {_slug, ids} ->
-        MapSet.size(ids) > 0 and MapSet.subset?(ids, group_acl_ids)
-      end)
-      |> Enum.max_by(fn {_slug, ids} -> MapSet.size(ids) end, fn -> nil end)
-      |> case do
-        {slug, _} -> slug
-        nil -> nil
-      end
-    end
+    group_acl_ids
+    |> dimension_slugs_from_acl_ids()
+    |> Map.update!(:participation, &(&1 || detect_circle_participation(group)))
+  end
 
-    membership = match_dim.(expected.(:membership))
-    visibility = match_dim.(expected.(:visibility))
-    participation = match_dim.(expected.(:participation)) || detect_circle_participation(group)
+  @doc """
+  Derives the list-facing membership and visibility dimensions for several groups in one query.
+
+  Participation that depends on a group-owned circle is intentionally left as `nil`; list cards
+  only need membership and visibility, and resolving those circles would reintroduce per-group queries.
+  """
+  def group_listing_dimension_slugs(groups) when is_list(groups) do
+    acl_ids_by_group = Controlleds.list_acl_ids_on_objects(groups)
+    expected = expected_dimension_acl_ids()
+
+    groups
+    |> Enum.map(&uid/1)
+    |> Enum.reject(&is_nil/1)
+    |> Map.new(fn group_id ->
+      {group_id,
+       acl_ids_by_group
+       |> Map.get(group_id, MapSet.new())
+       |> dimension_slugs_from_acl_ids(expected)}
+    end)
+  end
+
+  defp expected_dimension_acl_ids do
+    dim_acls()
+    |> Map.new(fn {dimension, slugs} ->
+      {dimension, Map.new(slugs, fn {slug, acls} -> {slug, MapSet.new(acls, &Acls.get_id!/1)} end)}
+    end)
+  end
+
+  defp dimension_slugs_from_acl_ids(group_acl_ids, expected \\ expected_dimension_acl_ids()) do
+    membership = match_dimension(expected[:membership], group_acl_ids)
+    visibility = match_dimension(expected[:visibility], group_acl_ids)
+    participation = match_dimension(expected[:participation], group_acl_ids)
 
     membership_slugs =
       get_in(Config.get(:preset_dimensions, %{}, :bonfire_boundaries), [:membership, :slug_order]) ||
@@ -545,6 +549,20 @@ defmodule Bonfire.Boundaries.Presets do
       visibility: visibility,
       participation: participation
     }
+  end
+
+  # Whole-set matching disambiguates slugs whose ACL signatures overlap. For example,
+  # `local:contributors` is a subset of `anyone`, so the most specific complete set wins.
+  defp match_dimension(expected_slugs, group_acl_ids) do
+    expected_slugs
+    |> Enum.filter(fn {_slug, ids} ->
+      MapSet.size(ids) > 0 and MapSet.subset?(ids, group_acl_ids)
+    end)
+    |> Enum.max_by(fn {_slug, ids} -> MapSet.size(ids) end, fn -> nil end)
+    |> case do
+      {slug, _} -> slug
+      nil -> nil
+    end
   end
 
   defp detect_circle_participation(group) do

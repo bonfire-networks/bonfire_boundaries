@@ -1197,7 +1197,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               role: :interact
             },
             "nonfederated:discoverable" => %{
-              label: l("Public, discoverable only"),
+              label: l("Discoverable · Members-only content"),
               icon: "fluent:globe-search-24-regular",
               description:
                 l(

@@ -133,6 +133,27 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   @doc """
+  Lists ACL IDs for several controlled objects in one query.
+
+  Returns `%{object_id => MapSet.t(acl_id)}` so callers can derive list-facing
+  policy metadata without loading every ACL association per object.
+  """
+  def list_acl_ids_on_objects(objects, opts \\ []) when is_list(objects) do
+    case uids(objects) do
+      [] ->
+        %{}
+
+      object_ids ->
+        object_ids
+        |> list_objects_q(opts)
+        |> select([controlled], {controlled.id, controlled.acl_id})
+        |> repo().all()
+        |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+        |> Map.new(fn {object_id, acl_ids} -> {object_id, MapSet.new(acl_ids)} end)
+    end
+  end
+
+  @doc """
   Lists ALL boundaries (ACLs and grants) applied to an object.
   Only call this as an admin or curator of the object.
 

@@ -605,6 +605,34 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc """
+  Counts the members of the same named stereotype circle across several owner objects.
+
+  Returns `%{object_id => count}`, including zero for empty circles and omitting owners without a matching circle.
+  """
+  def count_members_of_objects(object_ids, stereotype) when is_list(object_ids) do
+    owner_ids = Types.uids(object_ids)
+
+    if Enum.empty?(owner_ids) do
+      %{}
+    else
+      stereotype_id = get_id!(stereotype)
+
+      repo().all(
+        from(s in Bonfire.Data.AccessControl.Stereotyped,
+          join: c in Bonfire.Data.Identity.Caretaker,
+          on: c.id == s.id,
+          left_join: e in Bonfire.Data.AccessControl.Encircle,
+          on: e.circle_id == s.id,
+          where: c.caretaker_id in ^owner_ids and s.stereotype_id == ^stereotype_id,
+          group_by: c.caretaker_id,
+          select: {c.caretaker_id, count(e.subject_id, :distinct)}
+        )
+      )
+      |> Map.new()
+    end
+  end
+
+  @doc """
   Determines if a user is in specific circles.
   Returns the original circles list with a boolean field added to each circle.
   """
