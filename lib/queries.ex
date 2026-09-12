@@ -325,16 +325,7 @@ defmodule Bonfire.Boundaries.Queries do
       iex> Bonfire.Boundaries.Queries.object_boundarised(query, current_user: user)
   """
   def object_boundarised(q, opts \\ []) do
-    if Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
-      q
-    else
-      agent =
-        Common.Utils.current_user_or_id(opts) || Common.Utils.current_account(opts)
-
-      verbs = e(opts, :verbs, [:see, :read])
-
-      boundarise_query(q, agent, verbs, :main_object, :id, opts)
-    end
+    boundarise(q, main_object.id, opts)
   end
 
   @doc """
