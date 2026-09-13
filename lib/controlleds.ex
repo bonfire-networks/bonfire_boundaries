@@ -429,7 +429,10 @@ defmodule Bonfire.Boundaries.Controlleds do
       from(c in Controlled,
         join: g in Grant,
         on: g.acl_id == c.acl_id,
-        where: c.id in ^uids(object_ids) and g.subject_id == ^followers_circle_id,
+        left_join: s in Bonfire.Data.AccessControl.Stereotyped,
+        on: s.id == g.subject_id,
+        where: c.id in ^uids(object_ids) and g.value == true,
+        where: g.subject_id == ^followers_circle_id or s.stereotype_id == ^followers_circle_id,
         select: c.id
       )
       |> repo().all()
@@ -445,21 +448,9 @@ defmodule Bonfire.Boundaries.Controlleds do
   Checks if a single object has a grant to the followers stereotype circle.
   """
   def object_has_followers_grant?(object_id) do
-    alias Bonfire.Data.AccessControl.Grant
-    followers_circle_id = Bonfire.Boundaries.Circles.get_id(:followers)
-
-    if followers_circle_id do
-      from(c in Controlled,
-        join: g in Grant,
-        on: g.acl_id == c.acl_id,
-        where: c.id == ^uid(object_id) and g.subject_id == ^followers_circle_id,
-        select: true
-      )
-      |> limit(1)
-      |> repo().exists?()
-    else
-      false
-    end
+    [object_id]
+    |> list_objects_with_followers_grants()
+    |> MapSet.member?(uid(object_id))
   end
 
   @doc """
