@@ -39,7 +39,7 @@ defmodule Bonfire.Boundaries.GroupBatchMetadataTest do
 
     for group <- groups do
       expected_acls =
-        Controlleds.list_acls_on_object(group)
+        Controlleds.list_acls_on_object(group.id)
         |> Enum.map(& &1.acl_id)
         |> MapSet.new()
 
@@ -50,6 +50,30 @@ defmodule Bonfire.Boundaries.GroupBatchMetadataTest do
     end
 
     assert acls == Controlleds.list_acl_ids_on_objects(Enum.map(groups, & &1.id))
+  end
+
+  test "listing policies preserve individual detection for every configured group preset" do
+    creator = Fake.fake_user!()
+    presets = Bonfire.Common.Config.get(:group_presets, %{}, :bonfire_classify)
+    assert map_size(presets) > 0
+
+    groups =
+      Enum.map(presets, fn {slug, preset} ->
+        attrs =
+          preset
+          |> Map.take([:membership, :visibility, :participation, :default_content_visibility])
+          |> Map.merge(%{name: Faker.Lorem.word(), preset_slug: slug})
+
+        {slug, Bonfire.Classify.Simulate.fake_group!(creator, attrs)}
+      end)
+
+    listing = Presets.group_listing_dimension_slugs(Enum.map(groups, &elem(&1, 1)))
+
+    for {slug, group} <- groups do
+      assert Map.take(listing[group.id], [:membership, :visibility]) ==
+               Map.take(Presets.group_dimension_slugs(group), [:membership, :visibility]),
+             "batch policies differ from the original struct lookup for #{slug}"
+    end
   end
 
   test "empty batches return empty maps" do
