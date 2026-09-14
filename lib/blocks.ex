@@ -478,7 +478,11 @@ defmodule Bonfire.Boundaries.Blocks do
            |> do_mutate_blocklists(
              block_or_unblock,
              ...,
-             per_user_circles(user_or_instance_to_block, [:silence_me])
+             per_user_circles(
+               user_or_instance_to_block,
+               [:silence_me],
+               block_or_unblock == :block
+             )
            ) do
       {:ok, ret}
     end
