@@ -159,10 +159,7 @@ defmodule Bonfire.Boundaries.Roles do
   # A preset's ACLs are unioned PER CIRCLE before matching, so `locals_may_reply` plus `everyone_may_request` arrives as `participate` plus `:request` and matches no role. The retry drops the verbs that belong to no rung, and comes second so an exact match always wins first: `role_from_verbs/5` identifies the all-verbs role by COUNT, and that role does hold these three.
   def role_from_verb_names(verbs) do
     role_from_verbs(verbs, :verb) ||
-      role_from_verbs(
-        (verbs -- verb_names(@verbs_outside_roles), "Filtered Verbs"),
-        :verb
-      ) ||
+      role_from_verbs(verbs -- verb_names(@verbs_outside_roles), :verb) ||
       :custom
   end
 
