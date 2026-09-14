@@ -101,10 +101,14 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
 
       %{id: user_id} = Bonfire.Me.Fake.fake_user!()
 
-      assert %Bonfire.Data.AccessControl.Controlled{acl_id: "1EVERY0NEMAYSEEEEANDREADDD"} =
-               repo().one(from c in Controlled, where: c.id == ^user_id)
+      see_read_id = Acls.get_id!(:everyone_may_see_read)
 
-      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 1
+      assert repo().exists?(
+               from c in Controlled, where: c.id == ^user_id and c.acl_id == ^see_read_id
+             )
+
+      # profile visibility, plus the pair every ordinary account carries since `:follow` stopped riding in the `interact` role: `everyone_may_follow` grants following, `everyone_may_request` the asking
+      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 3
     end
 
     test "specified discover/read controlleds should be created" do
@@ -117,10 +121,14 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
 
       %{id: user_id} = Bonfire.Me.Fake.fake_user!(%{}, %{}, undiscoverable: true)
 
-      assert %Bonfire.Data.AccessControl.Controlled{acl_id: "2EVERY0NEMAYREADDDDDDDDDDD"} =
-               repo().one(from c in Controlled, where: c.id == ^user_id)
+      read_id = Acls.get_id!(:everyone_may_read)
 
-      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 1
+      assert repo().exists?(
+               from c in Controlled, where: c.id == ^user_id and c.acl_id == ^read_id
+             )
+
+      # as above: an undiscoverable account still carries the follow/ask pair, since being harder to find is not the same as refusing follows
+      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 3
     end
 
     test "controlleds should be created" do
@@ -138,7 +146,9 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
       })
 
       %{id: user_id} = Bonfire.Me.Fake.fake_user!()
-      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 4
+
+      # the three configured above, plus profile visibility and the `everyone_may_follow` / `everyone_may_request` pair that `maybe_request_before_follow/1` adds for an ordinary account
+      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 6
     end
 
     test "a stereotyped circle or acl should not be duplicated on the db when created for two different users" do
@@ -252,20 +262,20 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
 
       %{id: user_id} = user = Bonfire.Me.Fake.fake_user!()
 
-      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 2
+      # the one configured above, plus profile visibility and the follow/ask pair
+      assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 4
       repo().delete_many(from c in Controlled, where: c.id == ^user_id)
       assert repo().one(from c in Controlled, select: count(c), where: c.id == ^user_id) == 0
       Users.create_missing_boundaries(user)
 
-      [
-        %Bonfire.Data.AccessControl.Controlled{
-          acl_id: "710CA1SMY1NTERACTANDREP1YY"
-        }
-        # FIXME: is this correct?
-        # %Bonfire.Data.AccessControl.Controlled{
-        #   acl_id: "7W1DE1YAVA11AB1ET0SEENREAD"
-        # }
-      ] = repo().all(from c in Controlled, where: c.id == ^user_id)
+      # derived from the same atom the config above uses, rather than hardcoded: a versioned ACL keeps its name and takes a new id, so a literal here would quietly start asserting the deprecated one
+      locals_may_reply_id = Bonfire.Boundaries.Acls.get_id!(:locals_may_reply)
+
+      assert [
+               %Bonfire.Data.AccessControl.Controlled{
+                 acl_id: ^locals_may_reply_id
+               }
+             ] = repo().all(from c in Controlled, where: c.id == ^user_id)
     end
 
     test "create missing grants" do

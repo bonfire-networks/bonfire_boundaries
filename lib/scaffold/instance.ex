@@ -108,7 +108,12 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
   end
 
   defp grants_fixtures do
+    # a deprecated ACL is excluded from `config_current_acls/0`, so a fresh install never creates its row, and grants written against it would reference an ACL that does not exist. It keeps its config entry only so existing rows still resolve by id.
+    deprecated =
+      Acls.acls() |> Enum.filter(fn {_slug, acl} -> acl[:deprecated] end) |> Keyword.keys()
+
     for {acl, entries} <- Grants.grants(),
+        acl not in deprecated,
         {circle, role_or_verbs} <- entries,
         verb <- list_verbs(role_or_verbs) |> debug("list_verbs") do
       debug(verb)
@@ -130,7 +135,7 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
   """
   def fixtures() do
     # e.g. public, read_only
-    acls = Keyword.values(Acls.acls())
+    acls = config_current_acls()
     # |> debug("ACLs")
 
     # eg, guest, local, activity_pub
@@ -229,11 +234,14 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
   - Insert the ACL records (ignoring if they already exist)
   """
   def upsert_acls() do
-    Keyword.values(Acls.acls())
+    config_current_acls()
     |> upsert_acls_helper()
 
     upsert_grants()
   end
+
+  # `deprecated` ACLs are never created or granted. They stay in config so their ids keep resolving for instances that already hold rows pointing at them, and so nothing new is ever attached to one. `Acls.get_id/1` reads config rather than the DB, so omitting them here costs no lookups. Dropping them here also drops them from `named` in `fixtures/0`, which derives from this list.
+  defp config_current_acls, do: Acls.acls() |> Keyword.values() |> Enum.reject(& &1[:deprecated])
 
   def upsert_grants() do
     grants_fixtures()

@@ -25,7 +25,7 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
       assert "public_local_community" ==
                Presets.preset_slug_from_dims(%{
                  membership: "local:members",
-                 visibility: "nonfederated:discoverable",
+                 visibility: "nonfederated",
                  participation: "local:contributors"
                })
     end
@@ -34,7 +34,7 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
       assert "announcement_channel" ==
                Presets.preset_slug_from_dims(%{
                  membership: "invite_only",
-                 visibility: "nonfederated:discoverable",
+                 visibility: "nonfederated",
                  participation: "moderators"
                })
     end
@@ -147,6 +147,21 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
              } = Presets.group_dimension_slugs(group)
     end
 
+    # `:everyone_may_request` belongs to the membership dimension but the `"local"` config key is both a post boundary and a visibility slug, so `local` visibility is signed by `{locals_may_reply, everyone_may_request}`, the same size as `nonfederated`'s `{guests_may_see_read, locals_may_reply}`. A group can satisfy both at once, each ACL for its own reason, and the tie is settled by `slug_order` rather than by whichever key sorts first. The pair below has to stay together: the first alone would also pass if `local` were simply unreachable.
+    test "a local-visibility group is still detected as local" do
+      creator = Fake.fake_user!()
+
+      group =
+        Simulate.fake_group!(creator, %{
+          membership: "open",
+          visibility: "local",
+          participation: "group_members"
+        })
+
+      assert %{visibility: "local"} = Presets.group_dimension_slugs(group),
+             "the control: the tie-break must not make `local` unreachable, only lose the tie"
+    end
+
     test "falls back to invite_only when no membership ACL matches" do
       creator = Fake.fake_user!()
 
@@ -170,7 +185,7 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
       group =
         Simulate.fake_group!(creator, %{
           membership: "local:members",
-          visibility: "nonfederated:discoverable",
+          visibility: "nonfederated",
           participation: "local:contributors"
         })
 
@@ -178,7 +193,7 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
       assert is_map(chip)
       # Same three coordinates the public_local_community preset is built from:
       assert chip[:membership] == "local:members"
-      assert chip[:visibility] == "nonfederated:discoverable"
+      assert chip[:visibility] == "nonfederated"
       assert chip[:participation] == "local:contributors"
     end
 

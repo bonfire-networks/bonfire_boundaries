@@ -272,6 +272,60 @@ defmodule Bonfire.Boundaries.Queries do
   end
 
   @doc """
+  Base query for the grants a subject holds on some objects.
+  """
+  def query_users_grants_on(subject, things, verbs \\ nil) do
+    query_grants_on(things, verbs)
+    |> where([s], s.subject_id in ^user_and_circle_ids(subject))
+  end
+
+  @doc """
+  Base query for every grant held on some objects, by any subject.
+
+  See `query_users_grants_on/3` for the variant scoped to one subject.
+  """
+  def query_grants_on(things, verbs \\ nil) do
+    from(s in Summary,
+      where: s.object_id in ^Types.uids(things)
+    )
+    |> maybe_only_verbs(verbs)
+  end
+
+  @doc """
+  Returns which of the given verbs a subject may perform on one object, as verb slugs.
+
+  Grouping by verb rather than by object is the whole point: `permitted_objects/2` groups by object, so `bool_and` there means "permitted for ALL the verbs asked about" and one denied verb drops the object entirely. Here each verb is judged on its own grant rows, so asking about `[:follow, :request]` can answer "not follow, but yes request" — which is what a caller needs to tell "you may not follow" from "you may not even ask".
+
+  Negative precedence stays in SQL (`bool_and` over the verb's rows, so any `false` grant wins) and subjects are expanded with `user_and_circle_ids/1`, so grants held by the `local` / `activity_pub` / `guest` circles count. Both are easy to get wrong when reimplementing this over `Bonfire.Boundaries.users_grants_on/2`.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Queries.permitted_verbs_on(user, object, [:follow, :request])
+      [:request]
+  """
+  def permitted_verbs_on(subject, object, verbs \\ nil) do
+    subject_ids = user_and_circle_ids(subject)
+
+    from(summary in Summary,
+      where: summary.subject_id in ^subject_ids,
+      where: summary.object_id == ^Types.uid(object),
+      group_by: [summary.verb_id],
+      having: fragment("bool_and(?)", summary.value),
+      select: summary.verb_id
+    )
+    |> maybe_only_verbs(verbs)
+    |> Bonfire.Common.Repo.all()
+    |> Enum.map(&Verbs.get_slug/1)
+    |> Enum.reject(&is_nil/1)
+  end
+
+  @doc "Narrows a `Summary` query to the given verbs, or leaves it alone when none are given."
+  def maybe_only_verbs(query, verbs) when is_nil(verbs) or verbs == [], do: query
+
+  def maybe_only_verbs(query, verbs),
+    do: where(query, [summary], summary.verb_id in ^Verbs.ids(verbs))
+
+  @doc """
   Returns the list of subject_ids (e.g. user or circle ids) that have permission for all the given verb_ids on the given object_id.
 
   ## Examples

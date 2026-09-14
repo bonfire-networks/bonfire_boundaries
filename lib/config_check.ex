@@ -2,25 +2,17 @@ defmodule Bonfire.Boundaries.ConfigCheck do
   @moduledoc """
   Boot-time / CI invariants on the boundary preset configuration.
 
-  Boundary presets are spread across several config keys in `runtime_config.ex`
-  files in `:bonfire_boundaries` and `:bonfire_classify`. The relationships
-  between them (a preset's dim slugs must map to a real dim, dim slugs must have
-  ACL signatures, no two dims may share an ACL, etc.) are *implicit* — there's
-  no schema enforcing them. Drift between the maps has caused several silent
-  bugs (e.g. `open` membership and `anyone` participation sharing an ACL
-  signature, leading to mis-detection of the membership dim).
+  Boundary presets are spread across several config keys in the `runtime_config.ex` files of `:bonfire_boundaries` and `:bonfire_classify`. The relationships between them are implicit, with no schema enforcing them: a preset's dim slugs must map to a real dim, dim slugs must have ACL signatures, and an ACL shared across dims must be declared. Drift between the maps has caused several silent bugs, such as `open` membership and `anyone` participation sharing an ACL signature and so mis-detecting the membership dim.
 
-  Call `validate!/0` from a test, a CI step, or a startup hook to catch drift.
-  Returns `:ok` on success, raises with a clear message on failure.
+  Currently run from `config_check_test.exs` only, which is what makes CI the enforcement point. `validate!/0` is safe to call from a startup hook too, but note that it raises, so wiring it into boot means an instance with drifted config refuses to start.
 
-  Run `iex>` `Bonfire.Boundaries.ConfigCheck.report/0` to get a non-raising
-  summary of the current state.
+  Run `Bonfire.Boundaries.ConfigCheck.report/0` in IEx for a non-raising summary of the current state.
   """
 
   alias Bonfire.Common.Config
 
   @doc """
-  Runs all invariant checks. Raises on the first violation.
+  Runs all invariant checks, raising on the first violation.
   """
   def validate! do
     with :ok <- check_preset_dims_resolve(),
@@ -28,6 +20,10 @@ defmodule Bonfire.Boundaries.ConfigCheck do
          :ok <- check_no_cross_dim_acl_collision(),
          :ok <- check_interact_acls_grant_follow() do
       :ok
+    else
+      {:error, violations} ->
+        raise ArgumentError,
+              "Boundary preset config is inconsistent:\n" <> Enum.join(violations, "\n")
     end
   end
 
@@ -44,9 +40,7 @@ defmodule Bonfire.Boundaries.ConfigCheck do
     }
   end
 
-  # 1. Every dim slug declared in `:group_presets[preset][dim]` must be in
-  # `:preset_dimensions[dim][:slug_order]`. Otherwise the form can't render
-  # the slug and detection can't match it.
+  # 1. Every dim slug declared in `:group_presets[preset][dim]` must be in `:preset_dimensions[dim][:slug_order]`, or the form cannot render the slug and detection cannot match it.
   defp check_preset_dims_resolve do
     presets = Config.__get__(:group_presets, %{}, :bonfire_classify)
     preset_dimensions = Config.__get__(:preset_dimensions, %{}, :bonfire_boundaries)
@@ -69,11 +63,7 @@ defmodule Bonfire.Boundaries.ConfigCheck do
     end
   end
 
-  # 2. Every slug in `:preset_dimensions[dim][:slug_order]` is either a key in
-  # `:preset_acls` (even with an empty `[]` value, which forward-declares
-  # federation-gated slugs) or one of the explicitly-circle-controlled slugs.
-  # The allowlist below enumerates the only slugs whose membership/posting is
-  # governed by circle membership rather than by ACL grants.
+  # 2. Every slug in `:preset_dimensions[dim][:slug_order]` is either a key in `:preset_acls` (even with an empty `[]` value, which forward-declares federation-gated slugs) or one of the circle-controlled slugs below, which are the only ones whose membership/posting is governed by circle membership rather than by ACL grants.
   @circle_controlled %{
     membership: ~w(invite_only),
     visibility: ~w(),
@@ -99,11 +89,10 @@ defmodule Bonfire.Boundaries.ConfigCheck do
     end
   end
 
-  # 3. No two slugs in different dims of the derived dim-ACL map share an ACL
-  # atom. If they did, `group_dimension_slugs/1` would be ambiguous — exactly the
-  # bug that made `open` membership "win" when a group had `participation: anyone`.
-  # The map is derived (no longer a config), so this check is effectively a
-  # tautology against `:preset_acls` + `:preset_dimensions[dim][:slug_order]`.
+  # 3. An ACL atom may be shared across dims only if it is declared here, so that sharing stays a decision rather than an accident. Undeclared sharing is what made `open` membership "win" when a group had `participation: anyone`.
+  # `:everyone_may_request` is shared on purpose: asking is granted by the membership dimension, and the `"local"` key is at once a post boundary and a visibility slug, so posts cannot carry it without visibility seeing it too. `Presets.match_dimension/2` settles the resulting equal-size tie by `slug_order`.
+  @acls_shared_across_dims [:everyone_may_request]
+
   defp check_no_cross_dim_acl_collision do
     dim_acls = Bonfire.Boundaries.Presets.dim_acls()
 
@@ -117,6 +106,7 @@ defmodule Bonfire.Boundaries.ConfigCheck do
 
     violations =
       for {acl, ds_list} <- by_acl,
+          acl not in @acls_shared_across_dims,
           dims = ds_list |> Enum.map(&elem(&1, 0)) |> Enum.uniq(),
           length(dims) > 1 do
         "ACL #{inspect(acl)} is claimed by multiple dims: #{inspect(ds_list)}"
@@ -128,18 +118,8 @@ defmodule Bonfire.Boundaries.ConfigCheck do
     end
   end
 
-  # 4. Every `*_interact` ACL must grant `:follow` to its `:local` subject when
-  # the grant is an explicit verb list. Without it, a user clicking Follow on a
-  # discoverable group falls through to the boundary's request path and creates
-  # a join-request-shaped row instead of a Follow — conflating Follow and Join.
-  # (See the announcement-channel regression that added `verbs_interaction` to
-  # the `*_interact` ACLs.)
-  #
-  # Skipped on purpose:
-  # - `:guest` and `:activity_pub` — guests can't follow without an identity, and
-  #   the activity_pub stereotype follows are governed by federation, not this ACL.
-  # - role-based grants (atom values like `:interact`) — those expand to verb sets
-  #   resolved by the role system; not a flat verb list to check.
+  # 4. Every `*_interact` ACL must grant `:follow` to its `:local` subject when the grant is an explicit verb list. Without it, clicking Follow on a discoverable group falls through to the boundary's request path and creates a join-request-shaped row instead of a Follow, conflating Follow and Join. See the announcement-channel regression that added `verbs_interaction` to the `*_interact` ACLs.
+  # Skipped on purpose: `:guest` and `:activity_pub` (guests cannot follow without an identity, and activity_pub stereotype follows are governed by federation rather than by this ACL), and role-based grants such as `:interact` (atoms expand to verb sets via the role system, so there is no flat list to check).
   defp check_interact_acls_grant_follow do
     grants = Config.__get__(:grants, %{}, :bonfire_boundaries) |> Enum.into(%{})
 

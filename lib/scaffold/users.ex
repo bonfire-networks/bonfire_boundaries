@@ -99,7 +99,7 @@ defmodule Bonfire.Boundaries.Scaffold.Users do
 
       > Bonfire.Boundaries.Scaffold.Users.create_missing_boundaries(user)
   """
-  def create_missing_boundaries(user) do
+  def create_missing_boundaries(user, opts \\ []) do
     %PreparedBoundaries{
       acls: acls,
       circles: circles,
@@ -107,7 +107,7 @@ defmodule Bonfire.Boundaries.Scaffold.Users do
       named: named,
       controlleds: controlleds,
       stereotypes: stereotypes
-    } = PreparedBoundaries.from_config(user, skip_extra_acls: true)
+    } = PreparedBoundaries.from_config(user, Keyword.put(opts, :skip_extra_acls, true))
 
     missing_stereotypes = stereotypes |> reject_existing_stereotypes(user)
     missing_stereotypes_ids = stereotypes |> Enum.map(& &1.stereotype_id)

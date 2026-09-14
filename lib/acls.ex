@@ -83,13 +83,26 @@ defmodule Bonfire.Boundaries.Acls do
   @doc """
   Returns a list of ACL IDs for remote public access.
 
+  Derived from the ACL names rather than written out, because a versioned ACL keeps its name and takes a NEW id, and a literal would keep pointing at the deprecated one. The deprecated names are included so objects created before the split still match.
+
   ## Examples
 
-      iex> Bonfire.Boundaries.Acls.remote_public_acl_ids()
-      ["5REM0TEPE0P1E1NTERACTREACT", "5REM0TEPE0P1E1NTERACTREP1Y", "7REM0TEACT0RSCANC0NTR1BVTE"]
+      iex> ids = Bonfire.Boundaries.Acls.remote_public_acl_ids()
+      iex> Bonfire.Boundaries.Acls.get_id!(:remotes_may_interact) in ids
+      true
   """
   def remote_public_acl_ids,
-    do: ["5REM0TEPE0P1E1NTERACTREACT", "5REM0TEPE0P1E1NTERACTREP1Y", "7REM0TEACT0RSCANC0NTR1BVTE"]
+    do:
+      Enum.map(
+        [
+          :remotes_may_interact,
+          :remotes_may_reply,
+          :remotes_may_reply_follow_join_request,
+          :remotes_may_contribute,
+          :remotes_may_contribute_follow_join_request
+        ],
+        &get_id!/1
+      )
 
   @doc """
   Returns a list of ACL IDs for a preset (eg. "local" and "public").
@@ -191,8 +204,9 @@ defmodule Bonfire.Boundaries.Acls do
   """
   def preview(creator, opts)
       when is_list(opts) do
-    with {:error, {:ok, [%{verbs: verbs}]}} <- do_preview(creator, opts) do
-      {:ok, verbs}
+    # matched a ONE-element list until `users_grants_on/2` started expanding the subject into its locality circles, which returns an entry per `{subject, value}` group. Combining them applies the same negative-wins rule the SQL does; matching a single entry silently fell through to the error branch instead.
+    with {:error, {:ok, [_ | _] = grants}} <- do_preview(creator, opts) do
+      {:ok, e(Boundaries.combine_users_grants_on(grants), :verbs, [])}
     else
       {:error, {:ok, []}} ->
         {:ok, []}

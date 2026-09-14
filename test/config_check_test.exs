@@ -1,7 +1,6 @@
 defmodule Bonfire.Boundaries.ConfigCheckTest do
   @moduledoc """
-  Boot-time invariants for the boundary preset configuration. If any of these
-  fail, the assertion message names exactly which config key and slug is at fault.
+  Boot-time invariants for the boundary preset configuration. If any of these fail, the assertion message names exactly which config key and slug is at fault.
   """
 
   use ExUnit.Case, async: true

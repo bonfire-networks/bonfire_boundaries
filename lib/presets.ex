@@ -417,12 +417,13 @@ defmodule Bonfire.Boundaries.Presets do
     preset_dimensions = Config.get(:preset_dimensions, %{}, :bonfire_boundaries)
     membership_slugs = get_in(preset_dimensions, [:membership, :slug_order]) || []
 
+    # Matches the WHOLE signature, the same way `group_dimension_slugs/1` does, rather than returning the first slug that claims any one of the group's ACLs. One ACL is not enough to identify a membership: `everyone_may_request` belongs to `open`, `local:members` and `on_request` alike, so the per-ACL lookup answered with whichever came first in `slug_order` and read every `on_request` group as `open`. That decides whether a joiner is auto-added to the members circle (`Categories.do_join_group/4`), so it has to be the sound matcher.
     matched =
       Controlleds.list_acls_on_object(group)
-      |> Enum.find_value(fn controlled ->
-        acl_id = e(controlled, :acl_id, nil) || e(controlled, :acl, :id, nil)
-        match_membership_slug(acl_id, membership_slugs)
-      end)
+      |> Enum.map(&(e(&1, :acl_id, nil) || e(&1, :acl, :id, nil)))
+      |> Enum.reject(&is_nil/1)
+      |> MapSet.new()
+      |> then(&match_dimension(expected_dimension_acl_ids()[:membership], &1))
 
     matched || List.last(membership_slugs) || "invite_only"
   end
@@ -440,27 +441,25 @@ defmodule Bonfire.Boundaries.Presets do
   defp match_membership_slug(nil, _slugs), do: nil
 
   defp match_membership_slug(acl_id, slugs) do
-    membership_acls = Map.get(dim_acls(), :membership, %{})
+    # `dim_acls/0` answers with an ordered list of `{slug, acls}` per dim, so look up by key rather than by `[]` access
+    membership_acls = Map.get(dim_acls(), :membership, [])
 
     Enum.find(slugs, fn slug ->
-      expected = Enum.map(membership_acls[slug] || [], &Acls.get_id!/1)
+      expected =
+        case List.keyfind(membership_acls, slug, 0) do
+          {_slug, acls} -> Enum.map(acls, &Acls.get_id!/1)
+          _ -> []
+        end
+
       acl_id in expected
     end)
   end
 
   @doc """
-  Per-dim ACL signatures for back-translating a group's stored boundaries into its
-  (membership, visibility, participation) slugs. Derived from `:preset_acls` and
-  the per-dim `:slug_order` list in `:preset_dimensions` — there's no separate
-  `:group_dim_acls` config to keep in sync.
+  Per-dim ACL signatures for back-translating a group's stored boundaries into its (membership, visibility, participation) slugs. Derived from `:preset_acls` and the per-dim `:slug_order` list in `:preset_dimensions`, there's no separate `:group_dim_acls` config to keep in sync.
 
-  Slugs with empty ACL signatures (e.g. `archipelago`, `archipelago:contributors`)
-  are filtered out — they're forward-declared but federation-gated, and including
-  them would make every dim ambiguous (an empty subset matches anything). Slugs
-  whose ACL signatures are circle-controlled (e.g. `members:private`,
-  `group_members`, `moderators`, `invite_only`) are also absent from `:preset_acls`
-  and so naturally don't appear here; they're detected by absence/fallback in the
-  caller.
+  Slugs with empty ACL signatures (e.g. `archipelago`, `archipelago:contributors`) are filtered out, they're forward-declared but federation-gated, and including them would make every dim ambiguous (an empty subset matches anything). Slugs whose ACL signatures are circle-controlled (e.g. `members:private`,
+  `group_members`, `moderators`, `invite_only`) are also absent from `:preset_acls` and so naturally don't appear here; they're detected by absence/fallback in the caller.
   """
   def dim_acls do
     preset_dimensions = Config.get(:preset_dimensions, %{}, :bonfire_boundaries)
@@ -469,14 +468,14 @@ defmodule Bonfire.Boundaries.Presets do
     for dim <- [:membership, :visibility, :participation], into: %{} do
       slugs = get_in(preset_dimensions, [dim, :slug_order]) || []
 
-      dim_map =
+      # Kept as an ordered LIST, in `slug_order`, rather than collapsed into a map: two signatures of equal size can both match a group, and `match_dimension/2` breaks that tie by taking the earliest, which is only meaningful while the order survives, so eg. `nonfederated` and `local` (both two ACLs) are not wrongly decided alphabetically.
+      dim_signatures =
         for slug <- slugs,
             acls = Map.get(preset_acls, slug, []),
             acls != [],
-            into: %{},
             do: {slug, acls}
 
-      {dim, dim_map}
+      {dim, dim_signatures}
     end
   end
 
@@ -531,7 +530,9 @@ defmodule Bonfire.Boundaries.Presets do
   defp expected_dimension_acl_ids do
     dim_acls()
     |> Map.new(fn {dimension, slugs} ->
-      {dimension, Map.new(slugs, fn {slug, acls} -> {slug, MapSet.new(acls, &Acls.get_id!/1)} end)}
+      # `Enum.map`, not `Map.new`, so the per-dim signatures stay in `slug_order` so `match_dimension/2` can break ties by it
+      {dimension,
+       Enum.map(slugs, fn {slug, acls} -> {slug, MapSet.new(acls, &Acls.get_id!/1)} end)}
     end)
   end
 
@@ -553,6 +554,8 @@ defmodule Bonfire.Boundaries.Presets do
 
   # Whole-set matching disambiguates slugs whose ACL signatures overlap. For example,
   # `local:contributors` is a subset of `anyone`, so the most specific complete set wins.
+  #
+  # Sizes can still TIE, because one ACL may legitimately appear in signatures for different dims: a group with `visibility: nonfederated` and `membership: local:members` carries `locals_may_reply` for the first reason and `everyone_may_request` for the second, which together also satisfy the two-ACL `local` visibility signature. `expected_slugs` arrives in `slug_order` and `Enum.max_by/3` returns the FIRST maximal element, so the tie goes to the earlier slug (eg. `nonfederated` over `local`) which is the more general audience and the one the group was actually created with.
   defp match_dimension(expected_slugs, group_acl_ids) do
     expected_slugs
     |> Enum.filter(fn {_slug, ids} ->

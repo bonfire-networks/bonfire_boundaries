@@ -50,8 +50,10 @@ defmodule Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries do
   end
 
   defp prepare_boundaries(user, acls_extra, opts) do
+    # `defaults` lets a caller that is not a user bring its own set, since everything below only needs a caretaker to hang the rows off. `Scaffold.Groups` passes `category_block_boundaries` so a category can be silenced through the same machinery, rather than a second copy of the stereotype and caretaker wiring, which is the part that is easy to get subtly wrong.
     user_default_boundaries =
-      Boundaries.user_default_boundaries(!(opts == :remote or opts[:local] == false))
+      (is_list(opts) and opts[:defaults]) ||
+        Boundaries.user_default_boundaries(!(opts == :remote or opts[:local] == false))
 
     # |> debug("user_default_boundaries")
 
@@ -154,9 +156,10 @@ defmodule Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries do
 
   defp maybe_request_before_follow(bool) do
     if bool || Bonfire.Common.Config.get([Bonfire.Me.Users, :request_before_follow]) do
-      [:no_follow]
+      # Reviewing follows is now a grant WITHHELD rather than a denial added: this account simply never receives `everyone_may_follow`, and gets the ask instead. `no_follow` existed only because `:follow` rode in every role from `interact` up, so the restriction could not be said any other way.
+      [:everyone_may_request]
     else
-      []
+      [:everyone_may_follow, :everyone_may_request]
     end
   end
 

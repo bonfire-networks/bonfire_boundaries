@@ -278,13 +278,16 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     end
 
     verbs_basics = [:bookmark, :flag]
-    verbs_see_request = [:see, :request]
-    verbs_read_request = [:read, :request]
-    verbs_see_read_request = [:read, :see, :request] ++ verbs_basics
-    verbs_interaction = [:follow]
+
+    # The bottom of the cumulative ladder `role_verbs_interact` and friends build on, and the `read` role's exact verb list.
+    # `:request` is deliberately NOT here. Asking is granted where it is MEANT (`everyone_may_request`), never as a side effect of being allowed to read — otherwise an invite-only group or a moderators-only channel invites requests it will never grant.
+    verbs_see_read_basics = [:read, :see] ++ verbs_basics
+
     verbs_liking = [:like]
     verbs_sharing = [:boost]
-    verbs_partake = [:join, :vote]
+
+    # `:join` is NOT here, for the same reason `:request` is not in `verbs_see_read_basics`: it is a MEMBERSHIP verb, and leaving it in a participation bundle meant `participation: "anyone"` granted it to every local whatever the membership dimension said. It is granted only by `locals_may_join` and `everyone_may_join`.
+    verbs_partake = [:vote]
     verbs_ping = [:reply, :mention, :message]
     verbs_critique = [:quote]
     verbs_curate = [:tag, :describe, :annotate, :pin]
@@ -293,10 +296,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     verbs_mod = [:invite, :label, :mediate, :block, :delete]
 
     # verbs_interact_minus_follow =
-    #   verbs_see_read_request ++ [:like]
+    #   verbs_see_read_basics ++ [:like]
 
-    verbs_interact_minus_boost = verbs_see_read_request ++ verbs_interaction ++ verbs_liking
-    verbs_interact_minus_like = verbs_see_read_request ++ verbs_interaction ++ verbs_sharing
+    verbs_interact_minus_boost = verbs_see_read_basics ++ verbs_liking
+    verbs_interact_minus_like = verbs_see_read_basics ++ verbs_sharing
 
     # like + bookmark + flag + vote — quiet reactions that don't amplify reach (safe for unlisted/quiet content)
     verbs_react_quiet = verbs_liking ++ [:bookmark, :flag]
@@ -304,9 +307,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     # like + boost + bookmark + flag + vote — full reactions including amplification (for discoverable/preview content)
     verbs_react = verbs_react_quiet ++ verbs_sharing
 
+    # `:follow` is NOT in the role ladder. While it was here, every role from `interact` up handed it out, so a user's `SELF` ACLs (`locals_may_reply`, `remotes_may_reply`) always granted following and "follows need approval" could only be said by taking it back, which is what `no_follow` was for. Granted positively instead, by `everyone_may_follow` for people and by each group's visibility signature.
     role_verbs_interact =
-      verbs_see_read_request ++
-        verbs_interaction ++ verbs_liking ++ verbs_sharing
+      verbs_see_read_basics ++ verbs_liking ++ verbs_sharing
 
     # verbs_participate_message_minus_follow =
     #   verbs_interact_minus_follow ++ verbs_ping
@@ -330,6 +333,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     # `:edit` so group admins/moderators can edit the object they moderate (e.g. a group's profile & images)
     role_verbs_moderate = role_verbs_contribute ++ [:edit] ++ verbs_mod
 
+    # Builds a `cannot_*` rung: deny every verb except the ones in the rung below.
+    # `:request` is always kept, which is the ladder's floor: however denied someone is, they may still ask to follow or join. Taking that away too is a separate decision, so it gets its own role (`cannot_participate_or_request`) rather than being folded in here. `cannot_anything` is the other exception: it bypasses this and denies everything.
+    cannot_except = fn keep ->
+      Enum.reject(all_verb_names, fn v -> v in keep or v == :request end)
+    end
+
     # preset ACLs to show when editing boundaries
     basic_acls = [
       :everyone_may_see_read,
@@ -345,7 +354,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       default_verbs_for: default_verbs_for,
       role_verbs: %{
         none: %{read_only: true, label: l("None")},
-        read: %{can_verbs: verbs_see_read_request, read_only: true, label: l("Read")},
+        read: %{can_verbs: verbs_see_read_basics, read_only: true, label: l("Read")},
         react: %{can_verbs: verbs_interact_minus_boost, read_only: true, label: l("React")},
         share: %{can_verbs: verbs_interact_minus_like, read_only: true, label: l("Share")},
         interact: %{
@@ -392,61 +401,67 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           label: l("Moderate")
         },
         administer: %{can_verbs: all_verb_names, read_only: true, label: l("Administer")},
+        # the only rung with no `:request` floor — it denies asking along with everything else
         cannot_anything: %{
           cannot_verbs: all_verb_names,
           read_only: true,
-          label: l("Cannot do anything")
+          label: l("Cannot do anything, not even ask")
         },
         cannot_request: %{cannot_verbs: [:request], read_only: true, label: l("Cannot request")},
         cannot_discover: %{
-          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_read_request end),
+          cannot_verbs: cannot_except.([:read]),
           read_only: true,
           label: l("Cannot discover")
         },
         cannot_read: %{
-          cannot_verbs: Enum.reject(all_verb_names, fn v -> v == :request end),
+          cannot_verbs: cannot_except.([]),
           read_only: true,
-          label: l("Cannot read")
+          label: l("Cannot do anything except ask")
         },
         cannot_react: %{
-          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_interact_minus_like end),
+          cannot_verbs: cannot_except.(verbs_interact_minus_like),
           read_only: true,
           label: l("Cannot react")
         },
         cannot_share: %{
-          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_interact_minus_boost end),
+          cannot_verbs: cannot_except.(verbs_interact_minus_boost),
           read_only: true,
           label: l("Cannot share")
         },
         cannot_interact: %{
-          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in verbs_see_read_request end),
+          cannot_verbs: cannot_except.(verbs_see_read_basics),
           read_only: true,
           label: l("Cannot interact")
         },
         cannot_participate: %{
-          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_interact end),
+          cannot_verbs: cannot_except.(role_verbs_interact),
           read_only: true,
           label: l("Cannot participate")
         },
+        # `cannot_participate` plus the floor: for where the asking itself is the problem, such as an announcement channel nobody may petition to post in
+        cannot_participate_or_request: %{
+          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_interact end),
+          read_only: true,
+          label: l("Cannot participate or ask")
+        },
         cannot_critique: %{
-          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_participate end),
+          cannot_verbs: cannot_except.(role_verbs_participate),
           read_only: true,
           label: l("Cannot critique")
         },
         cannot_curate: %{
-          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_critique end),
+          cannot_verbs: cannot_except.(role_verbs_critique),
           read_only: true,
           label: l("Cannot curate")
         },
         cannot_contribute: %{
           usage: :ops,
-          cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_curate end),
+          cannot_verbs: cannot_except.(role_verbs_curate),
           read_only: true,
           label: l("Cannot contribute")
         },
         cannot_administer: %{
-          cannot_verbs:
-            Enum.reject(all_verb_names, fn v -> v in role_verbs_editor_and_contribute end),
+          cannot_verbs: cannot_except.(role_verbs_editor_and_contribute),
           read_only: true,
           label: l("Cannot administer")
         }
@@ -488,24 +503,32 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "public" => [
           :everyone_may_see_read,
           :locals_may_reply,
-          :remotes_may_reply
+          :remotes_may_reply,
+          # asking to quote is on by default: `Quotes.check_quote_permission/3` reads `:request` on the quoted post to tell "ask the author" from "not allowed at all". `:request` is granted positively rather than riding along with `:read`, so a post needs it named here, as these single-dim presets are for posts what the membership dimension is for groups.
+          :everyone_may_request
         ],
-        "local" => [:locals_may_reply],
+        # `:locals_may_follow` for the same reason as `nonfederated` below: the other ACL here grants a ROLE, and `:follow` no longer rides in one. Harmless on the post side of this shared key, where following is meaningless.
+        "local" => [:locals_may_reply, :everyone_may_request, :locals_may_follow],
         "private" => [],
 
         # --- Membership presets ---
         # `open` historically bundled the participation ACLs (`*_may_contribute`) too, but those belong to participation slugs (`anyone` / `local:contributors`), keeping them here would mis-detect any anyone-participation group as `open` membership. The form cascades `open` → `participation: anyone` so the contributes still get applied via the participation slug.
-        "open" => [:everyone_may_see_read],
-        "local:members" => [:locals_may_join],
+        # `:request` is granted by the MEMBERSHIP dimension and nowhere else. It is one verb for all asking, so it needs a single home, and the ACL's own name says which one ("Everyone may request (eg. to join)"). Every membership value that means yes grants it; `invite_only` grants nothing, which is how an announcement channel (`invite_only` + `moderators` participation) ends up offering no ask at all, by omission rather than by a negative rule anyone had to write.
+        "open" => [:everyone_may_see_read, :everyone_may_join, :everyone_may_request],
+        "local:members" => [:locals_may_join, :everyone_may_request],
         "archipelago:members" => [],
-        "on_request" => [:everyone_may_request, :no_follow],
-        # "invite_only": no grants, members circle controls
+        # reviewing entry is a MEMBERSHIP rule, so it grants the asking and withholds `:join`, and says nothing about following: whether someone may subscribe to the group's feed is the visibility dimension's answer. Mobilizon states the same pair on the wire, `manuallyApprovesFollowers: false` alongside `openness: "moderated"`.
+        "on_request" => [:everyone_may_request],
+        # circle-controlled: no global grants, written as an explicit `[]`. EVERY slug a group can hold needs an entry here, including the ones that grant nothing: this map is what makes a slug passable as `to_boundaries`, so a slug listed with `[]` is applied and grants nothing, while one that is absent is treated as an ACL id by `boundaries_normalise_direct/1`.
+        "invite_only" => [],
 
         # --- Participation presets  ---
         "anyone" => [:locals_may_contribute, :remotes_may_contribute],
         "archipelago:contributors" => [],
         "local:contributors" => [:locals_may_contribute],
-        # "group_members"/"moderators": circle-controlled, no grants here
+        # circle-controlled, no global grants. see the note on `invite_only` above
+        "group_members" => [],
+        "moderators" => [],
 
         # --- Group visibility presets ---
         # full (see+read+interact): global/archipelago disabled until groups federation ships
@@ -516,7 +539,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # in Classify.Boundaries. Mirrors `public`/`local` (which grant `:locals_may_reply`)
         # minus the federation reach — so a public-on-instance community's posts are
         # replyable by locals, not capped at read-only interact.
-        "nonfederated" => [:guests_may_see_read, :locals_may_reply],
+        # `:locals_may_follow` is explicit here because the other ACL in this signature grants a ROLE, and `:follow` no longer rides in one. The visibility slugs whose ACLs list verbs directly (`*_see_interact`, `*_read_interact`, …) already splice `[:follow]` themselves.
+        "nonfederated" => [:guests_may_see_read, :locals_may_reply, :locals_may_follow],
         "nonfederated:discoverable" => [:guests_may_see, :locals_may_see_interact],
         "nonfederated:unlisted" => [:guests_may_read, :locals_may_read_reply],
         "members:private" => [],
@@ -552,23 +576,36 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :everyone_may_read,
           :everyone_may_see_read,
           :remotes_may_interact,
-          :remotes_may_reply
+          :remotes_may_reply,
+          :remotes_may_reply_follow_join_request
         ],
         "unlisted" => [:everyone_may_read_interact],
+        # the `*_follow_join_request` / `*_request` entries are the DEPRECATED ACLs, listed so objects created before those ACLs were versioned still back-translate to the same preset. This is what "matcher entries can be wider than the applier" is for.
         "local" => [
           :locals_may_read_interact,
           :locals_may_read_reply,
           :locals_may_interact,
-          :locals_may_reply
+          :locals_may_reply,
+          :locals_may_reply_follow_join_request
         ],
         "local:unlisted" => [:locals_may_read_interact, :locals_may_read_reply],
         "local:discoverable" => [:locals_may_see_interact],
         "discoverable" => [:everyone_may_see_interact],
         "global" => [:everyone_may_see_read_interact],
-        "nonfederated" => [:guests_may_see_read, :locals_may_reply],
-        "nonfederated:discoverable" => [:guests_may_see, :locals_may_see_interact],
+        "nonfederated" => [
+          :guests_may_see_read,
+          :guests_may_see_read_request,
+          :locals_may_reply,
+          :locals_may_reply_follow_join_request
+        ],
+        "nonfederated:discoverable" => [
+          :guests_may_see,
+          :guests_may_see_request,
+          :locals_may_see_interact
+        ],
         "nonfederated:unlisted" => [
           :guests_may_read,
+          :guests_may_read_request,
           :locals_may_read_interact,
           :locals_may_read_reply
         ]
@@ -734,29 +771,56 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           id: "3EVERY0NEMAYSEEEEEEEEEEEEE",
           name: l("Everyone may read")
         },
+        # ⚠️ The six `*_deprecated`-flagged ACLs below keep the ORIGINAL ids while their live namesakes take new ones. `:request` left the read bundles and `:join` left `verbs_partake`, but grants are upserted and never pruned (`Scaffold.Instance.upsert_grants_helper/1`), so every existing row still grants both. Editing those rows in place was not an option: preset ACLs are global fixtures, so a post from last year points at the same row as one created tomorrow. Versioning instead leaves existing objects exactly as they are and lets the group `DataMigration` re-point only groups. `fixtures/0` skips anything `deprecated`, so a fresh install never creates them.
         guests_may_see_read: %{
-          id: "7W1DE1YAVA11AB1ET0SEENREAD",
+          id: "7W1DE1YAVA11AB1ET0SEEREAD2",
           name: l("Publicly discoverable and readable")
         },
+        guests_may_see_read_request: %{
+          id: "7W1DE1YAVA11AB1ET0SEENREAD",
+          name: l("Publicly discoverable and readable, and more may be asked"),
+          deprecated: true
+        },
         guests_may_see: %{
-          id: "50VCANF1NDMEBVTCAN0T0PENME",
+          id: "50VCANF1NDMEBVTCAN0T0PEN22",
           name: l("Publicly discoverable, but contents may be hidden")
         },
+        guests_may_see_request: %{
+          id: "50VCANF1NDMEBVTCAN0T0PENME",
+          name: l("Publicly discoverable, contents may be hidden, and more may be asked"),
+          deprecated: true
+        },
         guests_may_read: %{
-          id: "50VCANREAD1FY0VHAVETHE11NK",
+          id: "50VCANREAD1FY0VHAVETHE1122",
           name: l("Publicly readable, but not necessarily discoverable")
+        },
+        guests_may_read_request: %{
+          id: "50VCANREAD1FY0VHAVETHE11NK",
+          name: l("Publicly readable (but not necessarily discoverable), and more may be asked"),
+          deprecated: true
         },
         remotes_may_interact: %{
           id: "5REM0TEPE0P1E1NTERACTREACT",
           name: l("Remote actors may read and interact")
         },
         remotes_may_reply: %{
-          id: "5REM0TEPE0P1E1NTERACTREP1Y",
+          id: "5REM0TEPE0P1E1NTERACTREP12",
           name: l("Remote actors may read, interact and reply")
         },
+        # versioned because this ACL is in every user's SELF controlleds and grants the `participate` ROLE, which used to carry `:follow`. A legacy row would let a remote actor follow a `request_before_follow` account outright, bypassing the review it asked for.
+        remotes_may_reply_follow_join_request: %{
+          id: "5REM0TEPE0P1E1NTERACTREP1Y",
+          name: l("Remote actors may read, interact, reply, follow, join and ask for more"),
+          deprecated: true
+        },
         remotes_may_contribute: %{
-          id: "7REM0TEACT0RSCANC0NTR1BVTE",
+          id: "7REM0TEACT0RSCANC0NTR1BV22",
           name: l("Remote actors may contribute")
+        },
+        remotes_may_contribute_follow_join_request: %{
+          id: "7REM0TEACT0RSCANC0NTR1BVTE",
+          name: l("Remote actors may contribute, join and ask for more"),
+          deprecated: true
         },
         locals_may_read_interact: %{
           id: "10CA1SMAYSEEANDREAD0N1YN0W",
@@ -771,12 +835,22 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: l("Local users may read and interact")
         },
         locals_may_reply: %{
-          id: "710CA1SMY1NTERACTANDREP1YY",
+          id: "710CA1SMY1NTERACTANDREP122",
           name: l("Local users may read, interact and reply")
         },
+        locals_may_reply_follow_join_request: %{
+          id: "710CA1SMY1NTERACTANDREP1YY",
+          name: l("Local users may read, interact, reply, join and ask for more"),
+          deprecated: true
+        },
         locals_may_contribute: %{
-          id: "1ANY10CA1VSERCANC0NTR1BVTE",
+          id: "1ANY10CA1VSERCANC0NTR1BV22",
           name: l("Local users may contribute")
+        },
+        locals_may_contribute_follow_join_request: %{
+          id: "1ANY10CA1VSERCANC0NTR1BVTE",
+          name: l("Local users may contribute, join and ask for more"),
+          deprecated: true
         },
         locals_may_see: %{
           id: "10CA1SMAYSEEEEEEEEEEEEEN0W",
@@ -789,6 +863,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         locals_may_join: %{
           id: "10CA1SMAYJ01NNNNNNNNNNNNNN",
           name: l("Local users may join")
+        },
+        everyone_may_join: %{
+          id: "3EVERY0NEMAYJ01NNNNNNNNNNN",
+          name: l("Everyone may join")
+        },
+        everyone_may_follow: %{
+          id: "3EVERY0NEMAYF0110WWWWWWWWW",
+          name: l("Everyone may follow")
         },
         everyone_may_request: %{
           id: "3EVERY0NEMAYREQVEST1111111",
@@ -844,9 +926,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
         ## "Negative" ACLs
 
+        # Deprecated now that `:follow` has one home and maually-reviewed follows is by not including a grant (`everyone_may_request` instead of `everyone_may_follow`) rather than a denial added on top. Kept in config so existing rows still resolve by id, and excluded from fixtures so no new object attaches to it. Nothing applies it any more.
         no_follow: %{
           id: "1MVSTREQVESTBEF0REF0110W1N",
-          name: l("People must request to follow")
+          name: l("People must request to follow"),
+          deprecated: true
         },
 
         # Apply overrides for ghosting and silencing purposes.
@@ -902,19 +986,19 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           local: [:see, :read],
           activity_pub: [:see, :read]
         },
-        guests_may_see: %{guest: verbs_see_request ++ verbs_basics},
-        guests_may_read: %{guest: verbs_read_request ++ verbs_basics},
+        guests_may_see: %{guest: [:see] ++ verbs_basics},
+        guests_may_read: %{guest: [:read] ++ verbs_basics},
         guests_may_see_read: %{guest: :read},
         # interact but NOT reply/message/mention
         remotes_may_interact: %{activity_pub: :interact},
         # interact and reply/message/mention
         remotes_may_reply: %{activity_pub: :participate},
-        locals_may_read_interact: %{local: [:read] ++ verbs_interaction ++ verbs_react_quiet},
+        locals_may_read_interact: %{local: [:read, :follow] ++ verbs_react_quiet},
         # read + quiet-react + reply/mention/message, but NOT boost — for readable-but-
         # low-reach tiers (unlisted/quiet): locals can hold a conversation without the
         # content being amplified. `locals_may_read_interact` + `verbs_ping`.
         locals_may_read_reply: %{
-          local: [:read] ++ verbs_interaction ++ verbs_react_quiet ++ verbs_ping
+          local: [:read, :follow] ++ verbs_react_quiet ++ verbs_ping
         },
         # interact but NOT reply/message/mention
         locals_may_interact: %{local: :interact},
@@ -925,33 +1009,33 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         remotes_may_contribute: %{activity_pub: :contribute},
         locals_may_see: %{local: [:see]},
         locals_may_follow: %{local: [:follow]},
+        # `:follow` is granted positively rather than inherited from a role, so an account that reviews follows simply does not carry this, instead of carrying `no_follow` to take it back. Guests are excluded: following needs an identity.
+        everyone_may_follow: %{local: [:follow], activity_pub: [:follow]},
         locals_may_join: %{local: [:join, :follow]},
+        # the positive grant that `open` membership is made of. `:join` is granted only here and by `locals_may_join`, so absence of both IS denial and no `no_join` negative is needed.
+        everyone_may_join: %{guest: [:join], local: [:join], activity_pub: [:join]},
         everyone_may_request: %{local: [:request], activity_pub: [:request]},
-        # The `*_interact` ACLs include `:follow` (the `verbs_interaction` set) on
-        # top of the reaction verbs (`verbs_react`). Without `:follow` the ACL name
-        # is a lie — the only way to "interact with" a discoverable group is by
-        # subscribing to it, and a follow attempt without permission falls through
-        # to a join request, which conflates the Follow and Join UX.
+        # The `*_interact` ACLs include `:follow` (the `verbs_interaction` set) on top of the reaction verbs (`verbs_react`). 
         everyone_may_see_interact: %{
           guest: [:see],
-          local: [:see] ++ verbs_interaction ++ verbs_react,
-          activity_pub: [:see] ++ verbs_interaction ++ verbs_react
+          local: [:see, :follow] ++ verbs_react,
+          activity_pub: [:see, :follow] ++ verbs_react
         },
         locals_may_see_interact: %{
-          local: [:see] ++ verbs_interaction ++ verbs_react
+          local: [:see, :follow] ++ verbs_react
         },
         everyone_may_see_read_interact: %{
           guest: [:see, :read],
-          local: [:see, :read] ++ verbs_interaction ++ verbs_react,
-          activity_pub: [:see, :read] ++ verbs_interaction ++ verbs_react
+          local: [:see, :read, :follow] ++ verbs_react,
+          activity_pub: [:see, :read, :follow] ++ verbs_react
         },
         locals_may_see_read_interact: %{
-          local: [:see, :read] ++ verbs_interaction ++ verbs_react
+          local: [:see, :read, :follow] ++ verbs_react
         },
         everyone_may_read_interact: %{
           guest: [:read],
-          local: [:read] ++ verbs_interaction ++ verbs_react_quiet,
-          activity_pub: [:read] ++ verbs_interaction ++ verbs_react_quiet
+          local: [:read, :follow] ++ verbs_react_quiet,
+          activity_pub: [:read, :follow] ++ verbs_react_quiet
         },
         # negative grants:
         ghosted_cannot_anything: %{ghost_them: verbs_negative.(all_verb_names)},
@@ -1045,6 +1129,38 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               :i_may_administer
               # note that extra ACLs are added by `Bonfire.Boundaries.Scaffold.Users.default_visibility/0`
             ] ++ negative_grants
+        }
+      },
+      # A Category (group or topic) is an actor with a character of its own, so it can be silenced like anyone else. Silencing keeps a reverse index on the object BEING silenced, so the category needs its own `silence_me` circle, its own negative ACL, and the grant joining the two. Users get all this at signup; a category gets it the first time somebody silences it, since most are never blocked by anyone and scaffolding it up front is rows on every group and topic ever created.
+      #
+      # Deliberately only what blocking needs. `ghost_them` and `silence_them` are the BLOCKER's own lists and the blocker is a user; a category ghosting somebody would be group moderation, which is a different feature.
+      # Keyed by stereotype so each one carries its own complete wiring (circle, ACL, grant, and the ACL attached to the actor itself) and can be created alone. A given block only ever uses one of them, so only that one gets rows.
+      # TODO: use these for users too, to keep DRY but also so they're each created on-demand and don't bloat the DB.
+      block_boundaries_by_stereotype: %{
+        # somebody silenced this category: the reverse index lives on the thing being silenced
+        silence_me: %{
+          circles: %{silence_me: %{stereotype: :silence_me}},
+          acls: %{my_cannot_discover_if_silenced: %{stereotype: :cannot_discover_if_silenced}},
+          grants: %{my_cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])}},
+          controlleds: %{SELF: [:my_cannot_discover_if_silenced]}
+        },
+        # this category ghosted somebody, which is what a member ban is
+        ghost_them: %{
+          circles: %{ghost_them: %{stereotype: :ghost_them}},
+          acls: %{my_ghosted_cannot_anything: %{stereotype: :ghosted_cannot_anything}},
+          grants: %{my_ghosted_cannot_anything: %{ghost_them: verbs_negative.(all_verb_names)}},
+          controlleds: %{SELF: [:my_ghosted_cannot_anything]}
+        },
+        # this category silenced somebody, the softer moderation act
+        silence_them: %{
+          circles: %{silence_them: %{stereotype: :silence_them}},
+          acls: %{my_silenced_cannot_reach_me: %{stereotype: :silenced_cannot_reach_me}},
+          grants: %{
+            my_silenced_cannot_reach_me: %{
+              silence_them: verbs_negative.([:request, :mention, :message])
+            }
+          },
+          controlleds: %{SELF: [:my_silenced_cannot_reach_me]}
         }
       },
       remote_user_boundaries: %{

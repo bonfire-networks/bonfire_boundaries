@@ -9,7 +9,6 @@ defmodule Bonfire.Boundaries do
   # alias Bonfire.Data.AccessControl.Grant
   alias Bonfire.Data.AccessControl.Acl
   alias Bonfire.Data.Identity.Caretaker
-  alias Bonfire.Boundaries.Summary
   alias Bonfire.Boundaries.Verbs
   alias Bonfire.Boundaries.Acls
   alias Bonfire.Boundaries.Controlleds
@@ -77,7 +76,11 @@ defmodule Bonfire.Boundaries do
       case users_grants_on(current_user, list_of_ids) do
         custom when is_list(custom) and custom != [] ->
           custom
-          |> Map.new(&{&1.object_id, Map.take(&1, [:verbs, :value])})
+          # grouped first, because `Map.new/2` keyed by `object_id` keeps only the LAST entry per object, and there are now several per object
+          |> Enum.group_by(&e(&1, :object_id, nil))
+          |> Map.new(fn {object_id, entries} ->
+            {object_id, combine_users_grants_on(entries)}
+          end)
           |> debug("my_grants_on")
           |> deep_merge(presets || [], replace_lists: false)
           |> debug("merged boundaries")
@@ -101,8 +104,7 @@ defmodule Bonfire.Boundaries do
         custom when is_list(custom) and custom != [] ->
           custom
           |> debug("users_grants_on")
-          |> List.first()
-          |> Map.take([:verbs, :value])
+          |> combine_users_grants_on()
           |> debug("my_grants_on")
           |> Map.merge(preset || %{})
           |> debug("merged boundaries")
@@ -116,6 +118,28 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
+  Combines several `users_grants_on/2` entries for ONE object into the permissions the subject actually holds.
+
+  That function groups by `{subject, object, value}`, so one user's permissions on one object arrive as several entries: their own grants plus each locality circle they belong to, with positives and negatives split apart. Negatives win, matching `boundarise/3`'s `bool_and` in SQL rather than inventing a second rule.
+
+  Callers that took `List.first/1`, keyed a map by `object_id`, or matched a one-element list were correct only while the query matched the user's own id alone and could return no more than one entry per object.
+  """
+  def combine_users_grants_on(entries) do
+    {denied, allowed} = Enum.split_with(entries, &(e(&1, :value, nil) == false))
+
+    denied_verbs = Enum.flat_map(denied, &(e(&1, :verbs, []) || []))
+
+    verbs =
+      allowed
+      |> Enum.flat_map(&(e(&1, :verbs, []) || []))
+      |> Enum.uniq()
+      |> Enum.reject(&(&1 in denied_verbs))
+      |> Enum.sort()
+
+    %{verbs: verbs, value: true}
+  end
+
+  @doc """
   Lists grants for a given set of objects.
 
   ## Examples
@@ -123,9 +147,7 @@ defmodule Bonfire.Boundaries do
       iex> Bonfire.Boundaries.list_grants_on([1, 2, 3])
   """
   def list_grants_on(things) do
-    from(s in Summary,
-      where: s.object_id in ^Types.uids(things)
-    )
+    Queries.query_grants_on(things)
     |> all_grouped_by_verb()
   end
 
@@ -137,10 +159,9 @@ defmodule Bonfire.Boundaries do
       iex> Bonfire.Boundaries.list_grants_on([1, 2, 3], [:see, :read])
   """
   def list_grants_on(things, verbs) do
-    from(s in Summary,
-      where: s.object_id in ^Types.uids(things)
-    )
-    |> filter_grants_by_verbs(verbs)
+    Queries.query_grants_on(things, verbs)
+    |> all_grouped_by_verb()
+    |> only_with_all_verbs(verbs)
   end
 
   @doc """
@@ -151,7 +172,7 @@ defmodule Bonfire.Boundaries do
       iex> Bonfire.Boundaries.users_grants_on([%{id: 1}], [%{id: 2}])
   """
   def users_grants_on(users, things) do
-    query_users_grants_on(users, things)
+    Queries.query_users_grants_on(users, things)
     |> all_grouped_by_verb()
   end
 
@@ -164,36 +185,23 @@ defmodule Bonfire.Boundaries do
       [%Bonfire.Boundaries.Summary{object_id: 2, subject_id: 1}]
   """
   def users_grants_on(users, things, verbs) do
-    query_users_grants_on(users, things)
-    |> filter_grants_by_verbs(verbs)
+    Queries.query_users_grants_on(users, things, verbs)
+    |> all_grouped_by_verb()
+    |> only_with_all_verbs(verbs)
   end
 
-  defp query_users_grants_on(users, things) do
-    from(s in Summary,
-      where: s.object_id in ^Types.uids(things),
-      where: s.subject_id in ^Types.uids(users)
-    )
-  end
-
-  defp filter_grants_by_verbs(query, verbs) do
-    verb_ids =
+  # The verb FILTER is applied in SQL by `Queries.query_users_grants_on/3`; what remains here is the "holds ALL of them" test, which cannot join it without a subquery, the rows are still needed to build each entry's `:verbs` list.
+  defp only_with_all_verbs(entries, verbs) do
+    verb_names =
       List.wrap(verbs)
       |> Enum.map(fn
         slug when is_atom(slug) -> Verbs.get_id!(slug)
         id when is_binary(id) or is_map(id) -> uid(id)
       end)
-
-    verb_names =
-      Enum.map(verb_ids, &Verbs.get(&1).verb)
+      |> Enum.map(&Verbs.get(&1).verb)
       |> Enum.sort()
 
-    # |> debug()
-
-    from(s in query,
-      where: s.verb_id in ^verb_ids
-    )
-    |> all_grouped_by_verb()
-    |> Enum.filter(&(&1.verbs == verb_names))
+    Enum.filter(entries, &(&1.verbs == verb_names))
   end
 
   defp all_grouped_by_verb(query) do

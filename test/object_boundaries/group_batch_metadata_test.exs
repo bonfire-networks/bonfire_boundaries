@@ -15,22 +15,47 @@ defmodule Bonfire.Boundaries.GroupBatchMetadataTest do
     Circles.add_to_circles(empty_owner, populated)
     assert Circles.count_members(populated) == 2
 
-    counts = Circles.count_members_of_objects([populated_owner, empty_owner, missing_owner], :group_members)
-    require Logger
-    Logger.info("Batch member counts: #{inspect(counts)}; empty circle count: #{Circles.count_members(empty)}")
+    counts =
+      Circles.count_members_of_objects(
+        [populated_owner, empty_owner, missing_owner],
+        :group_members
+      )
 
-    assert counts == %{populated_owner.id => Circles.count_members(populated), empty_owner.id => 0}
-    assert counts == Circles.count_members_of_objects([populated_owner.id, empty_owner.id, missing_owner.id], :group_members)
+    require Logger
+
+    Logger.info(
+      "Batch member counts: #{inspect(counts)}; empty circle count: #{Circles.count_members(empty)}"
+    )
+
+    assert counts == %{
+             populated_owner.id => Circles.count_members(populated),
+             empty_owner.id => 0
+           }
+
+    assert counts ==
+             Circles.count_members_of_objects(
+               [populated_owner.id, empty_owner.id, missing_owner.id],
+               :group_members
+             )
   end
 
   test "batch ACLs and listing dimensions agree with individual reads across presets" do
     creator = Fake.fake_user!()
+
     groups =
       for dims <- [
-        %{membership: "local:members", visibility: "nonfederated", participation: "group_members"},
-        %{membership: "on_request", visibility: "local:discoverable", participation: "group_members"},
-        %{membership: "invite_only", visibility: "nonfederated", participation: "moderators"}
-      ] do
+            %{
+              membership: "local:members",
+              visibility: "nonfederated",
+              participation: "group_members"
+            },
+            %{
+              membership: "on_request",
+              visibility: "local:discoverable",
+              participation: "group_members"
+            },
+            %{membership: "invite_only", visibility: "nonfederated", participation: "moderators"}
+          ] do
         Bonfire.Classify.Simulate.fake_group!(creator, Map.put(dims, :name, Faker.Lorem.word()))
       end
 
@@ -44,8 +69,10 @@ defmodule Bonfire.Boundaries.GroupBatchMetadataTest do
         |> MapSet.new()
 
       assert acls[group.id] == expected_acls
+
       assert Map.take(dimensions[group.id], [:membership, :visibility]) ==
                Map.take(Presets.group_dimension_slugs(group), [:membership, :visibility])
+
       assert dimensions[group.id].participation == nil
     end
 

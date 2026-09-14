@@ -176,10 +176,12 @@ defmodule Bonfire.Boundaries.Blocks do
            ) do
       # debug(result, "blooocked")
 
-      if user_or_instance_to_block != :instance_wide and scope != :instance_wide do
+      # Severing follows is OPT-IN, because it can signal the block to the blocked person. Unfollowing when silencing would drop their follower count (and leaving removes us from their followers list). `unblock/3` does not restore the follow either, so what it costs is permanent.
+      # UI may well want provide a "mute and unfollow", so it stays available, they just have to ask for it rather than have it happen unannounced.
+      if e(scope, :also_unfollow, false) and user_or_instance_to_block != :instance_wide and
+           scope != :instance_wide do
         me = Utils.current_user_required!(scope)
 
-        # TODO: what about if I block and later unblock someone? they should probably not have to re-follow...
         if :ghost_them in types_blocked do
           debug("make the person I am ghosting unfollow me - TODO: do not federate this?")
 
@@ -537,7 +539,7 @@ defmodule Bonfire.Boundaries.Blocks do
          block_type,
          circle_caretaker
        ) do
-    case per_user_circles(circle_caretaker, block_type) do
+    case per_user_circles(circle_caretaker, block_type, block_or_unblock == :block) do
       [] ->
         error(circle_caretaker, "This user has no circles for block type #{inspect(block_type)}")
 
@@ -691,7 +693,27 @@ defmodule Bonfire.Boundaries.Blocks do
   #       debug(instance_to_block, "instance_to_block with #{inspect block_types}")
   #   raise "Instance silencing not implemented"
   # end
-  defp per_user_circles(current_user, block_types),
+  # `create?` is for the mutating path only, and only in the adding direction.
+  #
+  # Only users are scaffolded with block circles, but a Category is an actor with a character of its own and can be silenced like anyone else. Silencing keeps a reverse index on the object BEING silenced (`silence_me`, "people who silenced me"), so that object needs the circle, and it gets one the first time somebody silences it. On demand rather than scaffolded, which would be rows on every group and topic ever created to serve the ones nobody ever blocks.
+  #
+  # The read paths must never create: asking who someone has blocked is not an act that should write. Nor is unblocking, where there is nothing to remove from a circle that was never made.
+  defp per_user_circles(current_user, block_types, create? \\ false)
+
+  defp per_user_circles(current_user, block_types, true) do
+    case Circles.stereotype_circles_for(current_user, block_types) do
+      [] ->
+        # The circle alone denies nothing: what makes a block bite is the ACL granting negatively against it, plus that ACL being attached to the actor. So the whole set is created together, and only for the stereotypes THIS block uses.
+        # Reached only when the actor has none, which for a user is never, so the usual path is the one lookup below and no writes.
+        Bonfire.Boundaries.Scaffold.create_missing_block_boundaries(current_user, block_types)
+        Circles.stereotype_circles_for(current_user, block_types)
+
+      circles ->
+        circles
+    end
+  end
+
+  defp per_user_circles(current_user, block_types, _no_create),
     do: Circles.stereotype_circles_for(current_user, block_types)
 
   defp per_user_circle_ids(current_user, block_types),

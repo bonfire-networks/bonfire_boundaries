@@ -153,9 +153,20 @@ defmodule Bonfire.Boundaries.Roles do
     end
   end
 
-  defp role_from_verb_names(verbs) do
-    role_from_verb(verbs, :verb) || :custom
+  # Granted by their own single-purpose ACLs rather than by any rung of the ladder.
+  @verbs_outside_roles [:request, :follow, :join]
+
+  # A preset's ACLs are unioned PER CIRCLE before matching, so `locals_may_reply` plus `everyone_may_request` arrives as `participate` plus `:request` and matches no role. The retry drops the verbs that belong to no rung, and comes second so an exact match always wins first: `role_from_verbs/5` identifies the all-verbs role by COUNT, and that role does hold these three.
+  def role_from_verb_names(verbs) do
+    role_from_verbs(verbs, :verb) ||
+      role_from_verbs(
+        io_inspect(verbs -- verb_names(@verbs_outside_roles), "Filtered Verbs"),
+        :verb
+      ) ||
+      :custom
   end
+
+  defp verb_names(slugs), do: Enum.map(slugs, &e(Verbs.get(&1), :verb, nil))
 
   @doc """
   Determines the matching role (if any) from a list of verbs.
@@ -181,13 +192,13 @@ defmodule Bonfire.Boundaries.Roles do
       positive != [] and negative == [] ->
         verb_ids_from_grants(positive)
         |> debug("this is a role with only positive permissions")
-        |> role_from_verb(:id, all_role_verbs) ||
+        |> role_from_verbs(:id, all_role_verbs) ||
           if(opts[:fallback_to_list], do: Enum.join(display_verb_grants(positive, :can), ";"))
 
       positive == [] and negative != [] ->
         verb_ids_from_grants(negative)
         |> debug("this is a role with only negative permissions")
-        |> cannot_role_from_verb(:id, all_role_verbs) ||
+        |> cannot_role_from_verbs(:id, all_role_verbs) ||
           if(opts[:fallback_to_list],
             do: Enum.join(display_verb_grants(negative, :cannot), ";")
           )
@@ -232,16 +243,16 @@ defmodule Bonfire.Boundaries.Roles do
 
   ## Examples
 
-      iex> cannot_role_from_verb(verbs)
+      iex> cannot_role_from_verbs(verbs)
   """
-  def cannot_role_from_verb(
+  def cannot_role_from_verbs(
         verbs,
         verb_field \\ :verb,
         all_role_verbs \\ role_verbs(:all),
         role_for_all \\ :read,
         verbs_field \\ :cannot_verbs
       ) do
-    role_from_verb(verbs, verb_field, all_role_verbs, role_for_all, verbs_field)
+    role_from_verbs(verbs, verb_field, all_role_verbs, role_for_all, verbs_field)
   end
 
   @doc """
@@ -249,9 +260,9 @@ defmodule Bonfire.Boundaries.Roles do
 
   ## Examples
 
-      iex> role_from_verb(verbs)
+      iex> role_from_verbs(verbs)
   """
-  def role_from_verb(
+  def role_from_verbs(
         verbs,
         verb_field \\ :verb,
         all_role_verbs \\ role_verbs(:all),
@@ -287,7 +298,7 @@ defmodule Bonfire.Boundaries.Roles do
           nil
       end
     end
-    |> debug("role_from_verbs")
+    |> io_inspect("role_from_verbs")
   end
 
   @doc """

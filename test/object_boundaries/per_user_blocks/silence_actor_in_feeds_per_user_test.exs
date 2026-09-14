@@ -93,6 +93,40 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
       refute Bonfire.Social.FeedLoader.feed_contains?(:my, post, me)
     end
 
+    # The sibling tests all read feeds the silenced person's posts are pushed INTO. This one reads their own outbox, which is the feed someone goes looking at deliberately. Whether silencing reaches that far was never asserted either way, and the answer decides whether the same gap for groups (`bonfire_classify`'s `group_block_test.exs`) is a bug or the intended shape.
+    test "does not show in their own outbox a post from a per-user silenced user" do
+      me = Bonfire.Me.Fake.fake_user!(@my_name)
+      other_user = Bonfire.Me.Fake.fake_user!(@other_name)
+
+      assert {:ok, post} =
+               Posts.publish(
+                 current_user: other_user,
+                 post_attrs: @attrs,
+                 boundary: "public"
+               )
+
+      assert Bonfire.Social.FeedLoader.feed_contains?(:user_activities, post,
+               by: other_user,
+               current_user: me
+             ),
+             "the control: their outbox reaches me before the block, so the refusal below is the block rather than the fixture"
+
+      Bonfire.Boundaries.Blocks.block(other_user, :silence, current_user: me)
+
+      refute Bonfire.Social.FeedLoader.feed_contains?(:user_activities, post,
+               by: other_user,
+               current_user: me
+             )
+
+      third_user = Bonfire.Me.Fake.fake_user!()
+
+      assert Bonfire.Social.FeedLoader.feed_contains?(:user_activities, post,
+               by: other_user,
+               current_user: third_user
+             ),
+             "and only for me: silencing is per-user, so everyone else still sees their outbox"
+    end
+
     test "does not show in any feeds a post from a per-user silenced user" do
       me = Bonfire.Me.Fake.fake_user!(@my_name)
       other_user = Bonfire.Me.Fake.fake_user!(@other_name)

@@ -403,11 +403,16 @@ defmodule Bonfire.Boundaries.Controlleds do
     |> MapSet.new()
   end
 
+  # "Which ACLs does a preset OWN?" and "which preset is this object on?" are different questions, and only the second one is `:preset_acls_match`. Both configs are consulted here because an ACL a preset APPLIES has to be swapped out when the preset changes, even when it is deliberately absent from the matcher, eg. `everyone_may_request` is applied by `public` and `local` but kept out of matching, since `preset_boundary_tuple_from_acl/3` tests `public` first and would otherwise read every local post as public. Reading only the matcher leaves such an ACL stranded on the object across a preset change.
   defp all_visibility_acl_ids do
-    preset_acls = Bonfire.Common.Config.get!(:preset_acls_match)
+    preset_acls_match = Bonfire.Common.Config.get!(:preset_acls_match)
+    preset_acls_applied = Bonfire.Common.Config.get!(:preset_acls)
 
     ["public", "unlisted", "local"]
-    |> Enum.flat_map(&Acls.preset_acl_ids(&1, preset_acls))
+    |> Enum.flat_map(fn preset ->
+      Acls.preset_acl_ids(preset, preset_acls_match) ++
+        Acls.preset_acl_ids(preset, preset_acls_applied)
+    end)
     |> Enum.concat(Acls.remote_public_acl_ids())
     |> Enum.uniq()
   end
@@ -422,23 +427,16 @@ defmodule Bonfire.Boundaries.Controlleds do
   """
   def list_objects_with_followers_grants(object_ids)
       when is_list(object_ids) and length(object_ids) > 0 do
-    alias Bonfire.Data.AccessControl.Grant
-    followers_circle_id = Bonfire.Boundaries.Circles.get_id(:followers)
+    case followers_grants_query(object_ids) do
+      nil ->
+        MapSet.new()
 
-    if followers_circle_id do
-      from(c in Controlled,
-        join: g in Grant,
-        on: g.acl_id == c.acl_id,
-        left_join: s in Bonfire.Data.AccessControl.Stereotyped,
-        on: s.id == g.subject_id,
-        where: c.id in ^uids(object_ids) and g.value == true,
-        where: g.subject_id == ^followers_circle_id or s.stereotype_id == ^followers_circle_id,
-        select: c.id
-      )
-      |> repo().all()
-      |> MapSet.new()
-    else
-      MapSet.new()
+      query ->
+        query
+        |> select([c], c.id)
+        |> distinct(true)
+        |> repo().all()
+        |> MapSet.new()
     end
   end
 
@@ -448,9 +446,31 @@ defmodule Bonfire.Boundaries.Controlleds do
   Checks if a single object has a grant to the followers stereotype circle.
   """
   def object_has_followers_grant?(object_id) do
-    [object_id]
-    |> list_objects_with_followers_grants()
-    |> MapSet.member?(uid(object_id))
+    # asks Postgres the yes/no question rather than listing the matches and deciding here: the join yields a row per matching grant, so the set-building version ships every one of them to us only to answer a boolean that `exists?` short-circuits on the first
+    case followers_grants_query([object_id]) do
+      nil -> false
+      query -> query |> limit(1) |> repo().exists?()
+    end
+  end
+
+  # shared so the two answers cannot drift apart: a grant counts when it targets the followers circle DIRECTLY or targets a circle stereotyped as one, and only when it actually grants (`value == true`) rather than denies
+  defp followers_grants_query(object_ids) do
+    alias Bonfire.Data.AccessControl.Grant
+
+    case Bonfire.Boundaries.Circles.get_id(:followers) do
+      nil ->
+        nil
+
+      followers_circle_id ->
+        from(c in Controlled,
+          join: g in Grant,
+          on: g.acl_id == c.acl_id,
+          left_join: s in Bonfire.Data.AccessControl.Stereotyped,
+          on: s.id == g.subject_id,
+          where: c.id in ^uids(object_ids) and g.value == true,
+          where: g.subject_id == ^followers_circle_id or s.stereotype_id == ^followers_circle_id
+        )
+    end
   end
 
   @doc """
@@ -517,6 +537,28 @@ defmodule Bonfire.Boundaries.Controlleds do
   """
   def grant_role(subject_id, object, role, opts \\ []) do
     with {:ok, acl} <- Acls.get_or_create_object_custom_acl(object, current_user(opts)) do
+      Grants.grant_role(subject_id, acl, role, opts)
+    end
+  end
+
+  @doc """
+  Grants a role to a subject for an object, first clearing the roles in `revoke_previous_roles`.
+
+  A role only GRANTS verbs, and writes negatives solely for explicit "cannot" roles, so granting a narrower role on top of a wider one leaves the wider one's verbs in place. Callers that mean "this role, and only this role" need the clearing, and doing it here keeps both halves on a single ACL resolution.
+
+  `revoke_previous_roles` should name only the roles the caller itself may set, never every role the subject holds: something granted for an unrelated reason must survive.
+
+  ## Examples
+
+      iex> regrant_role(subject_id, object, :contribute, [:interact, :contribute])
+      {:ok, %Grant{}}
+  """
+  def regrant_role(subject_id, object, role, revoke_previous_roles, opts \\ []) do
+    with {:ok, acl} <- Acls.get_or_create_object_custom_acl(object, current_user(opts)) do
+      for revoke <- revoke_previous_roles, revoke != role do
+        Grants.remove_role(subject_id, acl, revoke, opts)
+      end
+
       Grants.grant_role(subject_id, acl, role, opts)
     end
   end
