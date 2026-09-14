@@ -160,7 +160,7 @@ defmodule Bonfire.Boundaries.Roles do
   def role_from_verb_names(verbs) do
     role_from_verbs(verbs, :verb) ||
       role_from_verbs(
-        io_inspect(verbs -- verb_names(@verbs_outside_roles), "Filtered Verbs"),
+        (verbs -- verb_names(@verbs_outside_roles), "Filtered Verbs"),
         :verb
       ) ||
       :custom
@@ -298,7 +298,7 @@ defmodule Bonfire.Boundaries.Roles do
           nil
       end
     end
-    |> io_inspect("role_from_verbs")
+    |> debug("role_from_verbs")
   end
 
   @doc """
