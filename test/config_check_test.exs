@@ -41,4 +41,40 @@ defmodule Bonfire.Boundaries.ConfigCheckTest do
       {:error, violations} -> flunk(Enum.join(violations, "\n"))
     end
   end
+
+  # The reverse of "every dim slug has an ACL signature": a `:preset_acls` entry nothing offers reads like a working slug to anyone editing the config, and would be taken for an ACL id if a caller ever passed it.
+  test "every :preset_acls entry is offered by a dimension or declared as not being" do
+    case ConfigCheck.report().acls_are_offered_or_declared do
+      :ok -> :ok
+      {:error, violations} -> flunk(Enum.join(violations, "\n"))
+    end
+  end
+
+  test "no two slugs in one dimension share an ACL signature" do
+    case ConfigCheck.report().no_duplicate_signatures_within_dim do
+      :ok -> :ok
+      {:error, violations} -> flunk(Enum.join(violations, "\n"))
+    end
+  end
+
+  test "every visibility and content-default slug declares how much access it grants" do
+    case ConfigCheck.report().grid_slugs_have_a_role do
+      :ok -> :ok
+      {:error, violations} -> flunk(Enum.join(violations, "\n"))
+    end
+  end
+
+  test "a slug offered by both grid dimensions means the same thing in each" do
+    case ConfigCheck.report().shared_slugs_agree_on_role do
+      :ok -> :ok
+      {:error, violations} -> flunk(Enum.join(violations, "\n"))
+    end
+  end
+
+  test "every membership slug says what joining it means" do
+    case ConfigCheck.report().membership_slugs_have_a_join_mode do
+      :ok -> :ok
+      {:error, violations} -> flunk(Enum.join(violations, "\n"))
+    end
+  end
 end

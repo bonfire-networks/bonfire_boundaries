@@ -629,14 +629,29 @@ defmodule Bonfire.Boundaries.Presets do
   end
 
   @doc """
-  Iconify name for a group's preset, falling back to `default` for custom (no-preset) groups.
-  Reads from the `[:preset_slug]` group-scoped setting recorded at create time.
+  Iconify name for a group's preset, falling back to `default` for custom groups whose dimensions match no preset.
+
+  Derived from the group's current dimensions rather than read from a stored slug, so it follows a boundary edit. For a LIST of groups use `group_icons/2`, which resolves them all in one query.
   """
   def group_icon(group, default \\ "ph:users-three-duotone") do
-    # `[:preset_slug]` may be stored as a string or an atom (see `group_preset_meta/1`), so accept
-    # any non-nil value and normalise to a string before matching the config.
-    with slug when not is_nil(slug) <- Settings.get([:preset_slug], nil, scope: group),
-         slug when slug != "" <- to_string(slug),
+    group
+    |> group_dimension_slugs()
+    |> icon_from_dims(default)
+  end
+
+  @doc """
+  Same as `group_icon/2` for several groups at once, returning a map of group id to icon.
+
+  `group_listing_dimension_slugs/1` resolves the whole list in one query, and leaves circle-dependent participation as `nil` — which `preset_slug_from_dims/1` accepts as a wildcard, since the configured presets are unique on (membership, visibility).
+  """
+  def group_icons(groups, default \\ "ph:users-three-duotone") when is_list(groups) do
+    groups
+    |> group_listing_dimension_slugs()
+    |> Map.new(fn {group_id, dims} -> {group_id, icon_from_dims(dims, default)} end)
+  end
+
+  defp icon_from_dims(dims, default) do
+    with slug when is_binary(slug) <- preset_slug_from_dims(dims),
          %{icon: icon} when is_binary(icon) <- group_preset_meta(slug) do
       icon
     else
@@ -678,6 +693,14 @@ defmodule Bonfire.Boundaries.Presets do
   @doc "Ordered slug list for a single dimension (identifiers only — no display strings to localise)."
   def dimension_slug_order(dim),
     do: get_in(preset_dimensions_config(), [dim, :slug_order]) || []
+
+  @doc """
+  Raw metadata for ONE dimension slug, unlocalised.
+
+  For reading the non-display keys (`role:`, `join_mode:`) without paying to re-localise every label and description in the dimension, which `dimension_options/1` does on each call. Use that one when rendering.
+  """
+  def dimension_slug_meta(dim, slug),
+    do: get_in(preset_dimensions_config(), [dim, :options, slug]) || %{}
 
   @doc "`:bonfire_boundaries, :scopes` config, with `l/1` display strings re-localised per-request."
   def scopes do

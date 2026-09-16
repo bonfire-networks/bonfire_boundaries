@@ -25,7 +25,7 @@ defmodule Bonfire.Boundaries.RequestVerbTest do
     group = Simulate.fake_group!(creator, %{type: :group})
 
     :ok =
-      Bonfire.Classify.Boundaries.apply(
+      Bonfire.Classify.Boundaries.replace(
         group,
         creator,
         Map.merge(

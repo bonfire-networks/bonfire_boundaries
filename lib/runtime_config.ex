@@ -516,7 +516,15 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # `:request` is granted by the MEMBERSHIP dimension and nowhere else. It is one verb for all asking, so it needs a single home, and the ACL's own name says which one ("Everyone may request (eg. to join)"). Every membership value that means yes grants it; `invite_only` grants nothing, which is how an announcement channel (`invite_only` + `moderators` participation) ends up offering no ask at all, by omission rather than by a negative rule anyone had to write.
         "open" => [:everyone_may_see_read, :everyone_may_join, :everyone_may_request],
         "local:members" => [:locals_may_join, :everyone_may_request],
-        "archipelago:members" => [],
+        # ARCHIPELAGO slugs are commented out across all four dimensions until the grants exist.
+        # Not because archipelago is unbuilt (it ships, as a federation mode): what is unbuilt is a
+        # group carrying its OWN allow-list. With the instance in archipelago mode, federating
+        # already means federating to the archipelago, so `global` and `nonfederated` cover it.
+        # They were listed here with `[]`, which is worse than absent for a slug that grants
+        # nothing YET: an empty signature cannot be detected, so `archipelago:members` read back as
+        # `invite_only` and `archipelago:contributors` as `group_members`, reporting rules no group
+        # was given. Restore these together with the ACLs that make them mean something.
+        # "archipelago:members" => [],
         # reviewing entry is a MEMBERSHIP rule, so it grants the asking and withholds `:join`, and says nothing about following: whether someone may subscribe to the group's feed is the visibility dimension's answer. Mobilizon states the same pair on the wire, `manuallyApprovesFollowers: false` alongside `openness: "moderated"`.
         "on_request" => [:everyone_may_request],
         # circle-controlled: no global grants, written as an explicit `[]`. EVERY slug a group can hold needs an entry here, including the ones that grant nothing: this map is what makes a slug passable as `to_boundaries`, so a slug listed with `[]` is applied and grants nothing, while one that is absent is treated as an ACL id by `boundaries_normalise_direct/1`.
@@ -524,16 +532,18 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
         # --- Participation presets  ---
         "anyone" => [:locals_may_contribute, :remotes_may_contribute],
-        "archipelago:contributors" => [],
+        # see the archipelago note under the membership presets above
+        # "archipelago:contributors" => [],
         "local:contributors" => [:locals_may_contribute],
         # circle-controlled, no global grants. see the note on `invite_only` above
         "group_members" => [],
         "moderators" => [],
 
         # --- Group visibility presets ---
-        # full (see+read+interact): global/archipelago disabled until groups federation ships
+        # full (see+read+interact): global disabled until groups federation ships
         "global" => [:everyone_may_see_read_interact],
-        "archipelago" => [],
+        # see the archipelago note under the membership presets above
+        # "archipelago" => [],
         # nonfederated — the non-federated equivalent of "public": guests see+read,
         # locals get full participation (incl. reply/mention/message), AP-deny applied
         # in Classify.Boundaries. Mirrors `public`/`local` (which grant `:locals_may_reply`)
@@ -546,11 +556,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "members:private" => [],
         # unlisted (readable via direct link, not listed)
         "unlisted" => [:everyone_may_read_interact],
-        "archipelago:unlisted" => [],
+        # "archipelago:unlisted" => [],
         "local:unlisted" => [:locals_may_read_reply],
         # discoverable (see+react, but :read for members only — granted in Classify.Boundaries)
         "discoverable" => [:everyone_may_see_interact],
-        "archipelago:discoverable" => [],
+        # "archipelago:discoverable" => [],
         "local:discoverable" => [:locals_may_see_interact],
 
         # --- Default content visibility (DCV) presets ---
@@ -560,10 +570,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "nonfederated:preview" => [:guests_may_see, :locals_may_see_interact],
         # everyone reads/interacts (federated); locals additionally get reply (no boost)
         "public:quiet" => [:everyone_may_read_interact, :locals_may_read_reply],
-        "archipelago:quiet" => [],
+        # "archipelago:quiet" => [],
         "local:quiet" => [:locals_may_read_reply],
         "public:preview" => [:everyone_may_see_interact],
-        "archipelago:preview" => [],
+        # "archipelago:preview" => [],
         "local:preview" => [:locals_may_see_interact]
       },
       # Used for back-translating saved boundaries to a preset slug, for single-dim
@@ -1246,37 +1256,49 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           slug_order: [
             "open",
             "local:members",
-            "archipelago:members",
+            # see the archipelago note in :preset_acls above
+            # "archipelago:members",
             "on_request",
             "invite_only"
           ],
+          # `join_mode:` is what each slug MEANS for joining, and it is a public contract: the
+          # Mastodon-compatible groups API returns it verbatim and derives `Account.locked` from it
+          # (`"free" | "request" | "invite"`, see MASTO_GROUPS_API.md). Declared per slug here so a
+          # new membership gets its behaviour from the one place that defines the slug, rather than
+          # from a hand-maintained list somewhere else.
           options: %{
             "open" => %{
               label: l("Anyone"),
               icon: "fluent:globe-person-20-regular",
               description: l("Anyone (including remote users) can join freely"),
+              join_mode: "free",
               disabled: l("Coming soon: requires groups federation")
             },
             "local:members" => %{
               label: l("Local members"),
               icon: "ph:campfire-duotone",
-              description: l("Anyone on this instance can join freely")
+              description: l("Anyone on this instance can join freely"),
+              join_mode: "free"
             },
-            "archipelago:members" => %{
-              label: l("Archipelago members"),
-              icon: "ph:planet-duotone",
-              description: l("Anyone on a trusted linked instance can join freely"),
-              disabled: l("Coming soon: requires archipelago feature")
-            },
+            # see the archipelago note in :preset_acls above
+            # "archipelago:members" => %{
+            #   label: l("Archipelago members"),
+            #   icon: "ph:planet-duotone",
+            #   description: l("Anyone on a trusted linked instance can join freely"),
+            #   join_mode: "free",
+            #   disabled: l("Coming soon: requires archipelago feature")
+            # },
             "on_request" => %{
               label: l("On request"),
               icon: "ph:hand-waving-duotone",
-              description: l("Anyone can request to join; a moderator approves")
+              description: l("Anyone can request to join; a moderator approves"),
+              join_mode: "request"
             },
             "invite_only" => %{
               label: l("Invite only"),
               icon: "ph:lock-duotone",
-              description: l("Only moderators can add members")
+              description: l("Only moderators can add members"),
+              join_mode: "invite"
             }
           }
         },
@@ -1289,7 +1311,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             "nonfederated:unlisted",
             "discoverable",
             "unlisted",
-            "archipelago",
+            # see the archipelago note in :preset_acls above
+            # "archipelago",
             "local",
             "local:discoverable",
             "local:unlisted",
@@ -1330,13 +1353,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
                 ),
               role: :unlisted_read
             },
-            "archipelago" => %{
-              label: l("Archipelago"),
-              icon: "ph:planet-duotone",
-              description: l("Anyone on a trusted linked instance can see and read"),
-              role: :interact,
-              disabled: l("Coming soon: requires archipelago feature")
-            },
+            # see the archipelago note in :preset_acls above
+            # "archipelago" => %{
+            #   label: l("Archipelago"),
+            #   icon: "ph:planet-duotone",
+            #   description: l("Anyone on a trusted linked instance can see and read"),
+            #   role: :interact,
+            #   disabled: l("Coming soon: requires archipelago feature")
+            # },
             "local" => %{
               label: l("Local"),
               icon: "ph:campfire-duotone",
@@ -1383,7 +1407,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           label: l("Who can post and interact?"),
           slug_order: [
             "anyone",
-            "archipelago:contributors",
+            # see the archipelago note in :preset_acls above
+            # "archipelago:contributors",
             "local:contributors",
             "group_members",
             "moderators"
@@ -1395,12 +1420,13 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               description: l("Anyone (including remote users) can post and interact"),
               disabled: l("Coming soon: requires groups federation")
             },
-            "archipelago:contributors" => %{
-              label: l("Archipelago contributors"),
-              icon: "ph:planet-duotone",
-              description: l("Users on trusted linked instances can post and interact"),
-              disabled: l("Coming soon: requires archipelago feature")
-            },
+            # see the archipelago note in :preset_acls above
+            # "archipelago:contributors" => %{
+            #   label: l("Archipelago contributors"),
+            #   icon: "ph:planet-duotone",
+            #   description: l("Users on trusted linked instances can post and interact"),
+            #   disabled: l("Coming soon: requires archipelago feature")
+            # },
             "local:contributors" => %{
               label: l("Local contributors"),
               icon: "ph:campfire-duotone",
@@ -1427,7 +1453,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           slug_order: [
             "public",
             "nonfederated",
-            "archipelago",
+            # see the archipelago note in :preset_acls above
+            # "archipelago",
             "local",
             "public:preview",
             "nonfederated:preview",
@@ -1467,13 +1494,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
                 l("Readable via direct link on this instance, not in feeds, no boosting"),
               role: :unlisted_read
             },
-            "archipelago" => %{
-              label: l("Archipelago"),
-              icon: "ph:planet-duotone",
-              description: l("Posts visible to trusted linked instances"),
-              role: :interact,
-              disabled: l("Coming soon: requires archipelago feature")
-            },
+            # see the archipelago note in :preset_acls above
+            # "archipelago" => %{
+            #   label: l("Archipelago"),
+            #   icon: "ph:planet-duotone",
+            #   description: l("Posts visible to trusted linked instances"),
+            #   role: :interact,
+            #   disabled: l("Coming soon: requires archipelago feature")
+            # },
             "local" => %{
               label: l("Local"),
               icon: "ph:campfire-duotone",
