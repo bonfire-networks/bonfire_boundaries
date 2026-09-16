@@ -51,7 +51,7 @@ defmodule Bonfire.Boundaries.GroupBatchMetadataTest do
             },
             %{
               membership: "on_request",
-              visibility: "local:discoverable",
+              visibility: "local:preview",
               participation: "group_members"
             },
             %{membership: "invite_only", visibility: "nonfederated", participation: "moderators"}

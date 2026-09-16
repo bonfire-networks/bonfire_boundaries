@@ -364,7 +364,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           description: l("Can see, read, and interact with content"),
           icon: "ph:eye-duotone"
         },
-        # see + react (no read) — for discoverable visibility
+        # see + react (no read) — for preview visibility
         discover: %{
           can_verbs: [:see] ++ verbs_react,
           read_only: true,
@@ -493,8 +493,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       #    - General object boundaries (posts/single-dim): "public", "unlisted", "local", "private"
       #    - Group membership: "open", "local:members", "archipelago:members", "on_request", "invite_only"
       #    - Group participation: "anyone", "archipelago:contributors", "local:contributors", "group_members", "moderators"
-      #    - Group visibility: "global", "nonfederated", "nonfederated:{discoverable,unlisted}",
-      #      "archipelago", "local", "local:{discoverable,unlisted}", "discoverable", "unlisted",
+      #    - Group visibility: "global", "nonfederated", "nonfederated:{preview,unlisted}",
+      #      "archipelago", "local", "local:{preview,unlisted}", "preview", "unlisted",
       #      "members:private"
       #    - Default content visibility: visibility slugs above plus "{public,local,nonfederated}:{quiet,preview}"
       #  Slugs not listed below have no ACL signature (members/moderators circle controlled, or open by default).
@@ -551,30 +551,29 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # replyable by locals, not capped at read-only interact.
         # `:locals_may_follow` is explicit here because the other ACL in this signature grants a ROLE, and `:follow` no longer rides in one. The visibility slugs whose ACLs list verbs directly (`*_see_interact`, `*_read_interact`, …) already splice `[:follow]` themselves.
         "nonfederated" => [:guests_may_see_read, :locals_may_reply, :locals_may_follow],
-        "nonfederated:discoverable" => [:guests_may_see, :locals_may_see_interact],
+        "nonfederated:preview" => [:guests_may_see, :locals_may_see_interact],
         "nonfederated:unlisted" => [:guests_may_read, :locals_may_read_reply],
         "members:private" => [],
         # unlisted (readable via direct link, not listed)
         "unlisted" => [:everyone_may_read_interact],
         # "archipelago:unlisted" => [],
         "local:unlisted" => [:locals_may_read_reply],
-        # discoverable (see+react, but :read for members only — granted in Classify.Boundaries)
-        "discoverable" => [:everyone_may_see_interact],
-        # "archipelago:discoverable" => [],
-        "local:discoverable" => [:locals_may_see_interact],
+        # preview (see+react, but :read for members only — granted in Classify.Boundaries). Called
+        # `discoverable` until 2026-09-16: that name said only half of what the slug means, since being findable is compatible with being readable and that was confusing. The DCV dimension already called this `preview`, with identical grants, so the scoped ones below are now the same entries rather than twins.
+        "preview" => [:everyone_may_see_interact],
+        # "archipelago:preview" => [],
+        "local:preview" => [:locals_may_see_interact],
 
         # --- Default content visibility (DCV) presets ---
         # Uses some visibility slugs as-is ("public", "local", "nonfederated", "members:private")
         # plus :quiet (readable + reply, no boost) and :preview (see-only) variants.
         "nonfederated:quiet" => [:guests_may_read, :locals_may_read_reply],
-        "nonfederated:preview" => [:guests_may_see, :locals_may_see_interact],
+        # `nonfederated:preview` and `local:preview` are declared once, up in the visibility block: both dimensions want the same grants for them, and one flat map cannot hold the key twice.
         # everyone reads/interacts (federated); locals additionally get reply (no boost)
         "public:quiet" => [:everyone_may_read_interact, :locals_may_read_reply],
         # "archipelago:quiet" => [],
         "local:quiet" => [:locals_may_read_reply],
-        "public:preview" => [:everyone_may_see_interact],
-        # "archipelago:preview" => [],
-        "local:preview" => [:locals_may_see_interact]
+        "public:preview" => [:everyone_may_see_interact]
       },
       # Used for back-translating saved boundaries to a preset slug, for single-dim
       # objects (posts). Group dimension detection uses :group_dim_acls below.
@@ -599,8 +598,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :locals_may_reply_follow_join_request
         ],
         "local:unlisted" => [:locals_may_read_interact, :locals_may_read_reply],
-        "local:discoverable" => [:locals_may_see_interact],
-        "discoverable" => [:everyone_may_see_interact],
+        "local:preview" => [:locals_may_see_interact],
+        "preview" => [:everyone_may_see_interact],
         "global" => [:everyone_may_see_read_interact],
         "nonfederated" => [
           :guests_may_see_read,
@@ -608,7 +607,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :locals_may_reply,
           :locals_may_reply_follow_join_request
         ],
-        "nonfederated:discoverable" => [
+        "nonfederated:preview" => [
           :guests_may_see,
           :guests_may_see_request,
           :locals_may_see_interact
@@ -788,16 +787,16 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         },
         guests_may_see_read_request: %{
           id: "7W1DE1YAVA11AB1ET0SEENREAD",
-          name: l("Publicly discoverable and readable, and more may be asked"),
+          name: l("Publicly discoverable and readable, and may request more access"),
           deprecated: true
         },
         guests_may_see: %{
           id: "50VCANF1NDMEBVTCAN0T0PEN22",
-          name: l("Publicly discoverable, but contents may be hidden")
+          name: l("Publicly discoverable, contents may be hidden")
         },
         guests_may_see_request: %{
           id: "50VCANF1NDMEBVTCAN0T0PENME",
-          name: l("Publicly discoverable, contents may be hidden, and more may be asked"),
+          name: l("Publicly discoverable, contents may be hidden, and may request more access"),
           deprecated: true
         },
         guests_may_read: %{
@@ -806,7 +805,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         },
         guests_may_read_request: %{
           id: "50VCANREAD1FY0VHAVETHE11NK",
-          name: l("Publicly readable (but not necessarily discoverable), and more may be asked"),
+          name:
+            l("Publicly readable (but not necessarily discoverable), and may request more access"),
           deprecated: true
         },
         remotes_may_interact: %{
@@ -1307,14 +1307,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           slug_order: [
             "global",
             "nonfederated",
-            "nonfederated:discoverable",
+            "nonfederated:preview",
             "nonfederated:unlisted",
-            "discoverable",
+            "preview",
             "unlisted",
             # see the archipelago note in :preset_acls above
             # "archipelago",
             "local",
-            "local:discoverable",
+            "local:preview",
             "local:unlisted",
             "members:private"
           ],
@@ -1335,14 +1335,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
                 ),
               role: :interact
             },
-            "nonfederated:discoverable" => %{
+            "nonfederated:preview" => %{
               label: l("Discoverable · Members-only content"),
               icon: "fluent:globe-search-24-regular",
               description:
                 l(
                   "Anyone on this instance can see the group exists, but only members can read content; not federated"
                 ),
-              role: :discover
+              role: :preview_discover
             },
             "nonfederated:unlisted" => %{
               label: l("Public, unlisted"),
@@ -1367,20 +1367,20 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               description: l("Anyone on this instance can see and read the group"),
               role: :interact
             },
-            "discoverable" => %{
+            "preview" => %{
               label: l("Discoverable"),
               icon: "fluent:globe-search-24-regular",
               description:
                 l("Anyone can see the group exists, but only members can read content"),
-              role: :discover,
+              role: :preview_discover,
               disabled: l("Coming soon: requires groups federation")
             },
-            "local:discoverable" => %{
+            "local:preview" => %{
               label: l("Locally discoverable"),
               icon: "ph:eye-duotone",
               description:
                 l("Local users can see the group exists, but only members can read content"),
-              role: :discover
+              role: :preview_discover
             },
             "unlisted" => %{
               label: l("Unlisted"),
@@ -1485,7 +1485,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               icon: "ph:eye-duotone",
               description:
                 l("Post appears in feeds but full content is members-only; not federated"),
-              role: :discover
+              role: :preview_discover
             },
             "nonfederated:quiet" => %{
               label: l("Quiet (public)"),
@@ -1512,14 +1512,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               label: l("Preview (public)"),
               icon: "ph:eye-duotone",
               description: l("Post appears in public feeds but full content is members-only"),
-              role: :discover,
+              role: :preview_discover,
               disabled: l("Coming soon: requires groups federation")
             },
             "local:preview" => %{
               label: l("Preview (local)"),
               icon: "ph:eye-duotone",
               description: l("Post appears in local feeds but full content is members-only"),
-              role: :discover
+              role: :preview_discover
             },
             "public:quiet" => %{
               label: l("Quiet (public)"),

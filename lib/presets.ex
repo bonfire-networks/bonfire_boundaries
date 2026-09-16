@@ -729,7 +729,7 @@ defmodule Bonfire.Boundaries.Presets do
 
   @doc """
   Returns the scope portion of a dimension slug (the part before the first `:`).
-  E.g. `"local:discoverable"` → `"local"`, `"nonfederated"` → `"nonfederated"`.
+  E.g. `"local:preview"` → `"local"`, `"nonfederated"` → `"nonfederated"`.
   Falls back to `"global"` when the prefix is not a known scope.
   """
   def slug_scope(slug) when is_binary(slug) do

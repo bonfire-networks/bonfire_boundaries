@@ -43,7 +43,7 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
       assert "private_club" ==
                Presets.preset_slug_from_dims(%{
                  membership: "on_request",
-                 visibility: "local:discoverable",
+                 visibility: "local:preview",
                  participation: "group_members"
                })
     end
@@ -81,7 +81,7 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
     test "returns metadata for a known preset" do
       assert %{} = meta = Presets.group_preset_meta("private_club")
       assert meta[:membership] == "on_request"
-      assert meta[:visibility] == "local:discoverable"
+      assert meta[:visibility] == "local:preview"
       assert meta[:participation] == "group_members"
       assert is_binary(meta[:icon])
     end
@@ -136,13 +136,13 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
       group =
         Simulate.fake_group!(creator, %{
           membership: "on_request",
-          visibility: "local:discoverable",
+          visibility: "local:preview",
           participation: "group_members"
         })
 
       assert %{
                membership: "on_request",
-               visibility: "local:discoverable",
+               visibility: "local:preview",
                participation: "group_members"
              } = Presets.group_dimension_slugs(group)
     end
