@@ -307,7 +307,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     # like + boost + bookmark + flag + vote — full reactions including amplification (for discoverable/preview content)
     verbs_react = verbs_react_quiet ++ verbs_sharing
 
-    # `:follow` is NOT in the role ladder. While it was here, every role from `interact` up handed it out, so a user's `SELF` ACLs (`locals_may_reply`, `remotes_may_reply`) always granted following and "follows need approval" could only be said by taking it back, which is what `no_follow` was for. Granted positively instead, by `everyone_may_follow` for people and by each group's visibility signature.
+    # `:follow` is NOT in the role ladder. While it was here, every role from `interact` up handed it out, so a user's `SELF` ACLs (`locals_may_reply`, `remotes_may_participate`) always granted following and "follows need approval" could only be said by taking it back, which is what `no_follow` was for. Granted positively instead, by `everyone_may_follow` for people and by each group's visibility signature.
     role_verbs_interact =
       verbs_see_read_basics ++ verbs_liking ++ verbs_sharing
 
@@ -343,7 +343,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     basic_acls = [
       :everyone_may_see_read,
       :remotes_may_interact,
-      :remotes_may_reply,
+      :remotes_may_participate,
       :locals_may_interact,
       :locals_may_reply
     ]
@@ -503,7 +503,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "public" => [
           :everyone_may_see_read,
           :locals_may_reply,
-          :remotes_may_reply,
+          :remotes_may_participate,
           # asking to quote is on by default: `Quotes.check_quote_permission/3` reads `:request` on the quoted post to tell "ask the author" from "not allowed at all". `:request` is granted positively rather than riding along with `:read`, so a post needs it named here, as these single-dim presets are for posts what the membership dimension is for groups.
           :everyone_may_request
         ],
@@ -517,13 +517,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         "open" => [:everyone_may_see_read, :everyone_may_join, :everyone_may_request],
         "local:members" => [:locals_may_join, :everyone_may_request],
         # ARCHIPELAGO slugs are commented out across all four dimensions until the grants exist.
-        # Not because archipelago is unbuilt (it ships, as a federation mode): what is unbuilt is a
-        # group carrying its OWN allow-list. With the instance in archipelago mode, federating
-        # already means federating to the archipelago, so `global` and `nonfederated` cover it.
-        # They were listed here with `[]`, which is worse than absent for a slug that grants
-        # nothing YET: an empty signature cannot be detected, so `archipelago:members` read back as
-        # `invite_only` and `archipelago:contributors` as `group_members`, reporting rules no group
-        # was given. Restore these together with the ACLs that make them mean something.
+        # Not because archipelago is unbuilt (it ships, as a federation mode): what is unbuilt is a group carrying its OWN allow-list. With the instance in archipelago mode, federating already means federating to the archipelago, so `global` and `nonfederated` cover it.
+        # They were listed here with `[]`, which is worse than absent for a slug that grants nothing YET: an empty signature cannot be detected, so `archipelago:members` read back as `invite_only` and `archipelago:contributors` as `group_members`, reporting rules no group was given. Restore these together with the ACLs that make them mean something.
         # "archipelago:members" => [],
         # reviewing entry is a MEMBERSHIP rule, so it grants the asking and withholds `:join`, and says nothing about following: whether someone may subscribe to the group's feed is the visibility dimension's answer. Mobilizon states the same pair on the wire, `manuallyApprovesFollowers: false` alongside `openness: "moderated"`.
         "on_request" => [:everyone_may_request],
@@ -542,37 +537,31 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # --- Group visibility presets ---
         # full (see+read+interact): global disabled until groups federation ships
         "global" => [:everyone_may_see_read_interact],
-        # see the archipelago note under the membership presets above
-        # "archipelago" => [],
-        # nonfederated — the non-federated equivalent of "public": guests see+read,
-        # locals get full participation (incl. reply/mention/message), AP-deny applied
-        # in Classify.Boundaries. Mirrors `public`/`local` (which grant `:locals_may_reply`)
-        # minus the federation reach — so a public-on-instance community's posts are
-        # replyable by locals, not capped at read-only interact.
+        # see the archipelago note under the membership presets above "archipelago" => [],
+        # nonfederated: the non-federated equivalent of "public": guests see+read, locals get full participation (incl. reply/mention/message), AP-deny applied in Classify.Boundaries. Mirrors `public`/`local` (which grant `:locals_may_reply`) minus the federation reach, so a public-on-instance community's posts are replyable by locals, not capped at read-only interact.
         # `:locals_may_follow` is explicit here because the other ACL in this signature grants a ROLE, and `:follow` no longer rides in one. The visibility slugs whose ACLs list verbs directly (`*_see_interact`, `*_read_interact`, …) already splice `[:follow]` themselves.
         "nonfederated" => [:guests_may_see_read, :locals_may_reply, :locals_may_follow],
         "nonfederated:preview" => [:guests_may_see, :locals_may_see_interact],
         "nonfederated:unlisted" => [:guests_may_read, :locals_may_read_reply],
         "members:private" => [],
-        # unlisted (readable via direct link, not listed)
-        "unlisted" => [:everyone_may_read_interact],
+        # unlisted (readable via direct link, not listed). The two `*_may_read_reply` ACLs are what its `nonfederated:` and `local:` siblings already grant and this one was missing: they add `verbs_ping`, so someone who can already read an unlisted thing can reply to, mention and message it. Without them an unlisted POST would be one nobody could answer. Granted to remotes as well as locals, since a post reached by link is reached the same way from either side. Safe to add rather than backfill because the slug has never been selectable (see its `disabled:` below), so no object holds it.
+        "unlisted" => [
+          :everyone_may_read_interact,
+          :locals_may_read_reply,
+          :remotes_may_read_reply
+        ],
         # "archipelago:unlisted" => [],
         "local:unlisted" => [:locals_may_read_reply],
-        # preview (see+react, but :read for members only — granted in Classify.Boundaries). Called
-        # `discoverable` until 2026-09-16: that name said only half of what the slug means, since being findable is compatible with being readable and that was confusing. The DCV dimension already called this `preview`, with identical grants, so the scoped ones below are now the same entries rather than twins.
+        # preview (see+react, but :read for members only — granted in Classify.Boundaries). Called `discoverable` until 2026-09-16: that name said only half of what the slug means, since being findable is compatible with being readable and that was confusing. The DCV dimension already called this `preview`, with identical grants, so the scoped ones below are now the same entries rather than twins.
         "preview" => [:everyone_may_see_interact],
         # "archipelago:preview" => [],
         "local:preview" => [:locals_may_see_interact],
 
         # --- Default content visibility (DCV) presets ---
-        # Uses some visibility slugs as-is ("public", "local", "nonfederated", "members:private")
-        # plus :quiet (readable + reply, no boost) and :preview (see-only) variants.
-        "nonfederated:quiet" => [:guests_may_read, :locals_may_read_reply],
-        # `nonfederated:preview` and `local:preview` are declared once, up in the visibility block: both dimensions want the same grants for them, and one flat map cannot hold the key twice.
-        # everyone reads/interacts (federated); locals additionally get reply (no boost)
-        "public:quiet" => [:everyone_may_read_interact, :locals_may_read_reply],
+        # Uses some visibility slugs as-is ("public", "local", "nonfederated", "members:private") plus :quiet (readable + reply, no boost) and :preview (see-only) variants.
+        # `nonfederated:preview`, `local:preview`, `nonfederated:unlisted` and `local:unlisted` are declared once, up in the visibility block: both dimensions want the same grants, and one flat map cannot hold a key twice. `nonfederated:quiet` and `local:quiet` were those same two signatures under a second name, so they are gone rather than renamed.
+        # `public:quiet` was this role's global-scope entry for posts, and is now `unlisted` as well: it only ever differed by the `verbs_ping` grant that `unlisted` was missing, which is the one thing a post in this tier actually needs. So `quiet` is gone as a vocabulary, and each scope names this role once for both dimensions.
         # "archipelago:quiet" => [],
-        "local:quiet" => [:locals_may_read_reply],
         "public:preview" => [:everyone_may_see_interact]
       },
       # Used for back-translating saved boundaries to a preset slug, for single-dim
@@ -585,10 +574,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           :everyone_may_read,
           :everyone_may_see_read,
           :remotes_may_interact,
-          :remotes_may_reply,
+          :remotes_may_participate,
           :remotes_may_reply_follow_join_request
         ],
-        "unlisted" => [:everyone_may_read_interact],
+        "unlisted" => [
+          :everyone_may_read_interact,
+          :locals_may_read_reply,
+          :remotes_may_read_reply
+        ],
         # the `*_follow_join_request` / `*_request` entries are the DEPRECATED ACLs, listed so objects created before those ACLs were versioned still back-translate to the same preset. This is what "matcher entries can be wider than the applier" is for.
         "local" => [
           :locals_may_read_interact,
@@ -813,7 +806,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           id: "5REM0TEPE0P1E1NTERACTREACT",
           name: l("Remote actors may read and interact")
         },
-        remotes_may_reply: %{
+        remotes_may_participate: %{
           id: "5REM0TEPE0P1E1NTERACTREP12",
           name: l("Remote actors may read, interact and reply")
         },
@@ -839,6 +832,10 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         locals_may_read_reply: %{
           id: "10CA1SMAYREADREP1YN0B00ST7",
           name: l("Local users may read, reply and interact (but not boost)")
+        },
+        remotes_may_read_reply: %{
+          id: "5REM0TESMAYREADREP1YN0B00T",
+          name: l("Remote actors may read, reply and interact (but not boost)")
         },
         locals_may_interact: %{
           id: "710CA1SMY1NTERACTN0TREP1YY",
@@ -1002,13 +999,17 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # interact but NOT reply/message/mention
         remotes_may_interact: %{activity_pub: :interact},
         # interact and reply/message/mention
-        remotes_may_reply: %{activity_pub: :participate},
+        remotes_may_participate: %{activity_pub: :participate},
         locals_may_read_interact: %{local: [:read, :follow] ++ verbs_react_quiet},
         # read + quiet-react + reply/mention/message, but NOT boost — for readable-but-
         # low-reach tiers (unlisted/quiet): locals can hold a conversation without the
         # content being amplified. `locals_may_read_interact` + `verbs_ping`.
         locals_may_read_reply: %{
           local: [:read, :follow] ++ verbs_react_quiet ++ verbs_ping
+        },
+        # the same tier for remote actors. Spelled as an explicit verb list rather than the `participate` ROLE for the same reason as its local twin: `role_verbs_participate` includes `verbs_sharing`, and boost is exactly what this tier withholds.
+        remotes_may_read_reply: %{
+          activity_pub: [:read, :follow] ++ verbs_react_quiet ++ verbs_ping
         },
         # interact but NOT reply/message/mention
         locals_may_interact: %{local: :interact},
@@ -1135,7 +1136,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             [
               # positive permissions
               :locals_may_reply,
-              :remotes_may_reply,
+              :remotes_may_participate,
               :i_may_administer
               # note that extra ACLs are added by `Bonfire.Boundaries.Scaffold.Users.default_visibility/0`
             ] ++ negative_grants
@@ -1459,9 +1460,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             "public:preview",
             "nonfederated:preview",
             "local:preview",
-            "public:quiet",
-            "nonfederated:quiet",
-            "local:quiet",
+            "unlisted",
+            "nonfederated:unlisted",
+            "local:unlisted",
             "members:private"
           ],
           options: %{
@@ -1487,8 +1488,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
                 l("Post appears in feeds but full content is members-only; not federated"),
               role: :preview_discover
             },
-            "nonfederated:quiet" => %{
-              label: l("Quiet (public)"),
+            "nonfederated:unlisted" => %{
+              label: l("Unlisted (public)"),
               icon: "ph:link-simple-duotone",
               description:
                 l("Readable via direct link on this instance, not in feeds, no boosting"),
@@ -1521,15 +1522,15 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               description: l("Post appears in local feeds but full content is members-only"),
               role: :preview_discover
             },
-            "public:quiet" => %{
-              label: l("Quiet (public)"),
+            "unlisted" => %{
+              label: l("Unlisted (public)"),
               icon: "ph:link-simple-duotone",
               description: l("Readable via direct link, not in feeds, no boosting"),
               role: :unlisted_read,
               disabled: l("Coming soon: requires groups federation")
             },
-            "local:quiet" => %{
-              label: l("Quiet (local)"),
+            "local:unlisted" => %{
+              label: l("Unlisted (local)"),
               icon: "ph:link-simple-duotone",
               description:
                 l("Readable via direct link for local users, not in feeds, no boosting"),
@@ -1559,6 +1560,18 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           icon: "ph:campfire-duotone",
           description: l("Everyone on this instance."),
           tooltip: l("Local: everyone on this instance can see, interact, and reply.")
+        },
+        # the same slug the visibility and content-default dimensions use, so a post and a group mean the same thing by it. `disabled:` until the composer offers it, the way `global` and `preview` are carried here before their features land.
+        # ⚠️ the SLUG says unlisted (it matches Mastodon's API value, which is what code matches on) but the COPY must not: this federates as `cc: Public`, so receiving servers do list it, in remote followers' home timelines and on the author's profile. Naming the three places it skips is claimable; "unlisted" or "only people with the link" is not. See the unlisted plan doc.
+        "unlisted" => %{
+          label: l("Quiet public"),
+          icon: "ph:link-simple-duotone",
+          description: l("Public, but not promoted."),
+          tooltip:
+            l(
+              "Quiet public: anyone can read it, and it may reach your followers, but it stays out of discovery feeds and search."
+            ),
+          disabled: l("Coming soon")
         },
         "mentions" => %{
           label: l("Mentions"),

@@ -96,7 +96,7 @@ defmodule Bonfire.Boundaries.Acls do
       Enum.map(
         [
           :remotes_may_interact,
-          :remotes_may_reply,
+          :remotes_may_participate,
           :remotes_may_reply_follow_join_request,
           :remotes_may_contribute,
           :remotes_may_contribute_follow_join_request

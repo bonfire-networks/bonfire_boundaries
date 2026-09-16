@@ -139,7 +139,7 @@ defmodule Bonfire.Boundaries.InitUserBoundariesTest do
         controlleds: %{
           SELF: [
             :locals_may_reply,
-            :remotes_may_reply,
+            :remotes_may_participate,
             :i_may_administer
           ]
         }
