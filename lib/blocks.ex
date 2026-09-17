@@ -20,6 +20,8 @@ defmodule Bonfire.Boundaries.Blocks do
   def federation_module,
     do: [
       "Block",
+      # `ap_receive_activity/3` has handled this since before it was declared here, so an incoming unblock was parsed and then routed nowhere
+      {"Undo", "Block"},
       # a moderator closing a thread to further replies, which is a `:lock` block on the object
       "Lock",
       {"Undo", "Lock"}
@@ -178,17 +180,26 @@ defmodule Bonfire.Boundaries.Blocks do
 
       # Severing follows is OPT-IN, because it can signal the block to the blocked person. Unfollowing when silencing would drop their follower count (and leaving removes us from their followers list). `unblock/3` does not restore the follow either, so what it costs is permanent.
       # UI may well want provide a "mute and unfollow", so it stays available, they just have to ask for it rather than have it happen unannounced.
-      if e(scope, :also_unfollow, false) and user_or_instance_to_block != :instance_wide and
+      if e(scope, :also_unfollow_and_notify, false) and
+           user_or_instance_to_block != :instance_wide and
            scope != :instance_wide do
         me = Utils.current_user_required!(scope)
 
         if :ghost_them in types_blocked do
-          debug("make the person I am ghosting unfollow me - TODO: do not federate this?")
+          # Their follow of me, so nothing about it is ours to announce: `Follows.ap_publish_activity/3` skips a non-local follower rather than trying to sign an `Undo{Follow}` as them. The `Block` below is what their server hears.
+          debug("make the person I am ghosting unfollow me")
 
           Utils.maybe_apply(Bonfire.Social.Graph.Follows, :unfollow, [
             user_or_instance_to_block,
             me
           ])
+
+          # ONLY for a ghost, which is the half a remote can act on. Ghosting says "they cannot see me", and `Block` is how the fediverse says that: Mastodon and everything copying it drops the follow and hides the blocker's content on receipt.
+          #
+          # A silence says "I do not see them", which is a MUTE, and mutes do not federate anywhere, Mastodon's are local-only. Their server cannot help me not-see them, my own feed filtering does that, so sending one would be a disclosure that buys nothing and would be read as far stronger than what was asked for.
+          #
+          # Blocking (both types at once) therefore emits exactly one `Block`, from this half.
+          maybe_federate_block(me, user_or_instance_to_block)
         end
 
         if :silence_them in types_blocked do
@@ -205,6 +216,34 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
+  # Telling their server rides on the SAME opt-in as severing the follow, because they are two halves of one choice: both reach further than our own instance can, and both are noticeable. Removing someone from our followers stops us addressing them; telling their server is what can stop a post it has ALREADY received from being shown to them, which is the case a shared inbox leaves open.
+  #
+  # Only for a remote person. Blocking a local one is enforced by our own boundaries, so there is nobody to tell.
+  defp maybe_federate_block(me, user_or_instance_to_block, verb \\ :block) do
+    object = load_for_locality_check(user_or_instance_to_block)
+
+    # Not about an INSTANCE, and not about someone local. A `Block` names an actor, so blocking a whole host has no shape to send and nobody to send it to: that is local policy, enforced by our own delivery checks. And blocking someone local needs no telling, since our boundaries are the enforcement.
+    #
+    # ⚠️ stated as "not a Peer" rather than "is a character". The obvious allow-list spelling, `Types.object_type(object) in Config.get(:types_character_schemas, [], :bonfire)`, reads `[]` because that key is unset (the default lives at each call site, see `AdapterUtils`), so the condition is never true and every Block is silently dropped. `maybe_federate_lock/3` survives the same expression only because it asks `not in`, where an empty list fails open.
+    if Types.object_type(object) != Bonfire.Data.ActivityPub.Peer and
+         Utils.maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :is_local?, [object],
+           fallback_return: true
+         ) != true do
+      try do
+        Utils.maybe_apply(
+          Bonfire.Federate.ActivityPub.Outgoing,
+          :maybe_federate,
+          [me, verb, object, [federation_module: __MODULE__]],
+          fallback_return: nil
+        )
+      rescue
+        e -> error(e, "Could not federate the #{verb}")
+      catch
+        :exit, e -> error(e, "Could not federate the #{verb}")
+      end
+    end
+  end
+
   @doc """
   Unblocks a user or instance.
 
@@ -217,7 +256,18 @@ defmodule Bonfire.Boundaries.Blocks do
       {:ok, "Unblocked"}
   """
   def unblock(user_or_instance_to_unblock, block_type \\ nil, scope) do
-    mutate(:unblock, user_or_instance_to_unblock, block_type, scope)
+    with {:ok, result} <- mutate(:unblock, user_or_instance_to_unblock, block_type, scope) do
+      # unconditional, unlike the block: `ap_publish_activity/3` sends nothing unless a `Block` actually went out, so this cannot disclose a block the person kept to themselves. Leaving a remote holding a block we have lifted would be worse than telling it
+      if user_or_instance_to_unblock != :instance_wide and scope != :instance_wide,
+        do:
+          maybe_federate_block(
+            Utils.current_user_required!(scope),
+            user_or_instance_to_unblock,
+            :unblock
+          )
+
+      {:ok, result}
+    end
   end
 
   @doc """
@@ -254,6 +304,34 @@ defmodule Bonfire.Boundaries.Blocks do
 
   ⚠️ The moderator's REASON has nowhere to come from yet: an incoming lock carries it in `summary` and we store it (`maybe_store_moderation_reason/2`), but a local lock creates grants rather than a record, so there is nothing to read back. Emitted without one until that is decided.
   """
+  # Emitted only when the person asked for it (`also_unfollow_and_notify`), which is what makes a block a disclosure: the remote is told outright and may show them. See `maybe_federate_block/2`.
+  # `ActivityPub.block/2` severs no follows of its own, deliberately: which follow a block ends depends on the block TYPE, and `block/3` has already done it in the right direction by the time this runs.
+  def ap_publish_activity(subject, :block, object) do
+    with {:ok, actor} <- ActivityPub.Actor.get_cached(pointer: subject),
+         {:ok, blocked_actor} <- ActivityPub.Actor.get_cached(pointer: object) do
+      ActivityPub.block(%{actor: actor, object: blocked_actor})
+    else
+      e -> error(e, "Could not find the actor or the person to block")
+    end
+  end
+
+  # Only when we actually sent the `Block`
+  def ap_publish_activity(subject, :unblock, object) do
+    with {:ok, actor} <- ActivityPub.Actor.get_cached(pointer: subject),
+         {:ok, blocked_actor} <- ActivityPub.Actor.get_cached(pointer: object) do
+      case ActivityPub.Object.fetch_latest_block(actor, blocked_actor) do
+        %{} = _block ->
+          ActivityPub.unblock(%{actor: actor, object: blocked_actor})
+
+        _ ->
+          debug("no Block was ever sent for this pair, so there is nothing to undo")
+          :ok
+      end
+    else
+      e -> error(e, "Could not find the actor or the person to unblock")
+    end
+  end
+
   def ap_publish_activity(subject, verb, object) when verb in [:lock, :unlock] do
     with {:ok, actor} <- ActivityPub.Actor.get_cached(pointer: subject),
          {:ok, ap_object} <- ActivityPub.Object.get_cached(pointer: object) do
@@ -269,20 +347,23 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
-  defp maybe_federate_lock(verb, object_or_id, scope) do
-    # callers pass an id as readily as a struct (the locking LiveView handler passes one), and the locality check below deliberately RAISES rather than guessing when `:peered` is not loaded — so load it here, mirroring what `AdapterUtils.preload_peered/1` asks of an object
-    object =
-      case object_or_id do
-        id when is_binary(id) ->
-          case Bonfire.Common.Needles.get(id, skip_boundary_check: true) do
-            {:ok, object} -> object
-            _ -> nil
-          end
+  # Callers pass an id as readily as a struct (the block live handler and the locking one both pass ids), and the locality checks below deliberately RAISE rather than guessing when `:peered` is not loaded. So load it here, mirroring what `AdapterUtils.preload_peered/1` asks of an object.
+  defp load_for_locality_check(object_or_id) do
+    case object_or_id do
+      id when is_binary(id) ->
+        case Bonfire.Common.Needles.get(id, skip_boundary_check: true) do
+          {:ok, object} -> object
+          _ -> nil
+        end
 
-        object ->
-          object
-      end
-      |> repo().maybe_preload([:peered, created: [creator: :peered]], prune: true)
+      object ->
+        object
+    end
+    |> repo().maybe_preload([:peered, created: [creator: :peered]], prune: true)
+  end
+
+  defp maybe_federate_lock(verb, object_or_id, scope) do
+    object = load_for_locality_check(object_or_id)
 
     character_schemas =
       Bonfire.Common.Config.get(:types_character_schemas, [], :bonfire)
