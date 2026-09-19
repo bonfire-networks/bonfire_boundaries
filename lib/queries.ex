@@ -456,15 +456,30 @@ defmodule Bonfire.Boundaries.Queries do
   defp user_and_circle_ids(subject) when is_struct(subject),
     do: subject_ids_with_locality(subject)
 
-  defp user_and_circle_ids(subjects) do
-    case Types.uids(subjects) do
+  defp user_and_circle_ids(subjects) when is_list(subjects) do
+    case subjects do
       [] ->
         [Bonfire.Boundaries.Circles.circles()[:guest][:id]]
 
+      subjects ->
+        # each subject classified as it would be on its own, so a batch check sees the same grants a single check would: subjects in one list can differ in locality, so this is a union of their circles rather than one circle for all of them. Each subject still needs `:peered` loaded to be classifiable (see `subject_ids_with_locality/1`)
+        subjects
+        |> Enum.flat_map(&user_and_circle_ids/1)
+        |> Enum.uniq()
+    end
+  end
+
+  defp user_and_circle_ids(subject) do
+    case Types.uids(subject) do
+      [] ->
+        # no subject at all is a guest, which is a real case rather than a mistake
+        [Bonfire.Boundaries.Circles.circles()[:guest][:id]]
+
       ids when is_list(ids) ->
-        warn(
-          ids,
-          "You may get unexpected results when checking permissions for several subjects, as :local or :activity_pub circles won't be added"
+        # a shape we can't classify without a fetch (an id-only map, say), so least privilege: the subject's own id and no locality circle, which silently narrows what they can see. Same treatment as `subject_ids_with_locality/1` gives an unclassifiable struct, including raising in `:test` to surface the caller
+        err(
+          subject,
+          "Cannot tell this subject's locality without loading it, so no locality circle applies. Pass a struct with `character: [:peered]` loaded"
         )
 
         ids

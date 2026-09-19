@@ -1,13 +1,8 @@
 defmodule Bonfire.Boundaries.QueriesSubjectCirclesTest do
   @moduledoc """
-  Pins down how `Bonfire.Boundaries.Queries.query_with_summary/3` picks the
-  extra subject circle (`:local` vs `:activity_pub`) — every boundarised query
-  checks permissions not just for the subject's own id but also for the circle
-  matching their locality, so getting this wrong changes what a subject can see.
+  Pins down how `Bonfire.Boundaries.Queries.query_with_summary/3` picks the extra subject circle (`:local` vs `:activity_pub`) — every boundarised query checks permissions not just for the subject's own id but also for the circle matching their locality, so getting this wrong changes what a subject can see.
 
-  Documents three issues found while profiling page loads (the failing,
-  `:todo`-tagged tests describe the DESIRED behavior — run them with
-  `--include todo` to see the current behavior they demonstrate):
+  Documents three issues found while profiling page loads (the failing, `:todo`-tagged tests describe the DESIRED behavior — run them with `--include todo` to see the current behavior they demonstrate):
 
   1. N+1: for a subject struct without `:peered` loaded, `is_local?/2`
      preloads `[:peered, created: [creator: :peered]]` on EVERY query build
