@@ -461,7 +461,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       alias Bonfire.Social.API.GraphQLMasto.Adapter, as: SocialAdapter
 
       params
-      |> PaginationHelpers.build_feed_params(%{
+      |> PaginationHelpers.build_timeline_params(%{
         "subject_circles" => [list_id],
         "feed_name" => nil
       })
