@@ -5,30 +5,13 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
   use Bonfire.Common.Localise
 
   @doc """
-  NOTE: you can override this default config in your app's runtime.exs, by placing similarly-named config keys below the `Bonfire.Common.Config.LoadExtensionsConfig.load_configs` line
+  Every verb this instance knows, before an instance's own config has a say.
+
+  A function rather than a literal inside `config/0` so that it can be read while the extensions compile, which is when `Bonfire.Social.Localise` has to register each verb's name and past tense for gettext. `config/0` only runs at boot, far too late for the extractor, so a verb reachable only through `:bonfire, :verbs` would read as English in every locale with nothing failing. `Bonfire.Social.Activities.all_verb_names/0` reads the config first and falls back to this, so an instance can still add or rename a verb.
   """
-  def config do
-    import Config
-
-    # Which query shape `boundarise` uses for the :see/:read check (see
-    # `Bonfire.Boundaries.Queries.boundarise_query/6`). Only set when the env var is
-    # present so it doesn't override per-env config (e.g. test.exs) with a default.
-    case System.get_env("BOUNDARISE_STRATEGY") do
-      "direct_exists" ->
-        config :bonfire, Bonfire.Boundaries, boundarise_strategy: :direct_exists
-
-      "view" ->
-        config :bonfire, Bonfire.Boundaries, boundarise_strategy: :view
-
-      "summary_subquery" ->
-        config :bonfire, Bonfire.Boundaries, boundarise_strategy: :summary_subquery
-
-      _ ->
-        nil
-    end
-
-    ### Verbs are like permissions. Each represents some activity or operation that may or may not be able to perform.
-    verbs = [
+  # Verbs are like permissions. Each represents some activity or operation that somebody may or may not be able to perform.
+  def declared_verbs do
+    [
       request: %{
         id: "1NEEDPERM1SS10NT0D0TH1SN0W",
         verb: l("Request"),
@@ -224,6 +207,30 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         scope: :instance
       }
     ]
+  end
+
+  @doc """
+  NOTE: you can override this default config in your app's runtime.exs, by placing similarly-named config keys below the `Bonfire.Common.Config.LoadExtensionsConfig.load_configs` line
+  """
+  def config do
+    import Config
+
+    # Which query shape `boundarise` uses for the :see/:read check (see `Bonfire.Boundaries.Queries.boundarise_query/6`). Only set when the env var is present so it doesn't override per-env config (e.g. test.exs) with a default.
+    case System.get_env("BOUNDARISE_STRATEGY") do
+      "direct_exists" ->
+        config :bonfire, Bonfire.Boundaries, boundarise_strategy: :direct_exists
+
+      "view" ->
+        config :bonfire, Bonfire.Boundaries, boundarise_strategy: :view
+
+      "summary_subquery" ->
+        config :bonfire, Bonfire.Boundaries, boundarise_strategy: :summary_subquery
+
+      _ ->
+        nil
+    end
+
+    verbs = declared_verbs()
 
     all_verb_names = Enum.map(verbs, &elem(&1, 0))
 
