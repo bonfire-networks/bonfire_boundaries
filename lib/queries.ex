@@ -418,7 +418,10 @@ defmodule Bonfire.Boundaries.Queries do
       where: c.id == field(parent_as(^parent_alias), ^parent_field),
       where: g.verb_id in ^verb_ids,
       where: g.value == ^value,
-      where: g.subject_id in ^subject_ids or g.subject_id in subquery(circle_ids),
+      # `= ANY(ARRAY(subquery))` rather than `IN (subquery)`, and the difference is the cost model rather than the semantics: both mean "the grant is to some circle this subject is in", and an empty set is false either way. `ARRAY(...)` of an uncorrelated subquery is an InitPlan, costed and run once per statement, while `IN (subquery)` nested inside the correlated EXISTS below is costed as part of every probe evaluation. For a viewer in thousands of circles that inflated one probe pair's estimate to ~33M, which swamped every join decision in the outer query and left the winner arbitrary: a sequential scan of millions of `replied` rows, and a notifications page that hit the 15s statement timeout. Same rows, same permissions, 98ms instead
+      where:
+        g.subject_id in ^subject_ids or
+          fragment("? = ANY(ARRAY(?)::uuid[])", g.subject_id, subquery(circle_ids)),
       select: 1
     )
   end

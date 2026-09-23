@@ -78,11 +78,23 @@ defmodule Bonfire.Boundaries.BoundariseStrategyEquivalenceTest do
     # ACL holds `false` grants on everything: carol must lose ALL the author's objects
     {:ok, _} = Blocks.block(carol, :ghost, current_user: author)
 
+    # dave is in no circle anybody made, so the probe's membership lookup returns the one circle every local user is in and nothing else: dave sees what public and local grant. The membership set that is genuinely empty belongs to the anonymous viewer below, which is where an empty result has to evaluate to false without taking the rest of the disjunction with it
+    dave = Bonfire.Me.Fake.fake_user!()
+
+    # the premise is asserted rather than assumed, since what dave can see follows from it: being local IS a circle membership, and were that to change this would quietly stop being the ordinary-viewer case
+    assert [Bonfire.Boundaries.Circles.get_id!(:local)] ==
+             repo().all(
+               from(e in Bonfire.Data.AccessControl.Encircle,
+                 where: e.subject_id == ^dave.id,
+                 select: e.circle_id
+               )
+             )
+
     all = MapSet.new([public, local, private, to_circle, denied_direct, denied_cross_verb])
     publics = MapSet.new([public, denied_direct, denied_cross_verb])
 
     assert_equivalent_visibility(
-      [author: author, bob: bob, carol: carol, anon: nil],
+      [author: author, bob: bob, carol: carol, dave: dave, anon: nil],
       %{
         # author sees everything of their own
         author: all,
@@ -90,6 +102,8 @@ defmodule Bonfire.Boundaries.BoundariseStrategyEquivalenceTest do
         bob: MapSet.new([public, local, to_circle]),
         # carol is ghosted by the author: nothing, despite public boundaries
         carol: MapSet.new([]),
+        # dave is in no circle anybody made, so only what public and local grant, and the two denies are bob's
+        dave: MapSet.new([public, local, denied_direct, denied_cross_verb]),
         # anon sees only public posts — including the ones denying BOB (denies are per-subject)
         anon: publics
       }
