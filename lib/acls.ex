@@ -509,6 +509,10 @@ defmodule Bonfire.Boundaries.Acls do
     |> filter_empty([])
   end
 
+  # Who a post grants beyond its preset, from three sources, and the rule they add up to:
+  # - @-mentions (`mentions_grants/3`) only NOTIFY, and grant only under the `public` and `mentions` presets (`local` too, for local accounts). A mention in a members-private group post does not add the person to the group's audience
+  # - the person being answered IS granted the answer, whatever the preset, even outside the audience. That grant comes through `to_circles`, which the reply composer (`Threads.LiveHandler.prepare_reply_assigns/4`) fills with whoever is being answered, not through `reply_to_grants/3`, which covers only `public` and `local`
+  # - `to_circles` itself is granted unconditionally, since it is also how a group's top-level posts carry their audience (the group, its members and moderators)
   defp custom_recipients(changeset_or_obj, preset, opts) do
     (List.wrap(reply_to_grants(changeset_or_obj, preset, opts)) ++
        List.wrap(mentions_grants(changeset_or_obj, preset, opts)) ++
