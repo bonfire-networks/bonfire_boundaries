@@ -1280,7 +1280,7 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc """
-  Lists members of a circle with cursor-based pagination using Paginator.
+  Lists members of a circle with cursor-based pagination using Paginator. Pass `:search` to match a substring of their name or username, case-insensitively, before pagination.
 
   ## Options
     * `:cursor` - The cursor for pagination (optional)
@@ -1309,6 +1309,21 @@ defmodule Bonfire.Boundaries.Circles do
             from(ec in Encircle, where: ec.circle_id in ^circle_ids, select: ec.subject_id)
 
           where(query, [e], e.subject_id not in subquery(mod_subquery))
+
+        _ ->
+          query
+      end
+
+    query =
+      case opts[:search] do
+        search when is_binary(search) and search != "" ->
+          from [e] in query,
+            join: subject in assoc(e, :subject),
+            left_join: profile in assoc(subject, :profile),
+            left_join: character in assoc(subject, :character),
+            where:
+              fragment("strpos(lower(coalesce(?, '')), lower(?)) > 0", profile.name, ^search) or
+                fragment("strpos(lower(coalesce(?, '')), lower(?)) > 0", character.username, ^search)
 
         _ ->
           query
