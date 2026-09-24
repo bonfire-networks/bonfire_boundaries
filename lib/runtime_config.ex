@@ -633,7 +633,6 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           label: l("Public (federated)"),
           description: l("Visible to everyone including the wider fediverse"),
           icon: "ph:globe-duotone",
-          disabled: l("Coming soon: requires groups federation")
         },
         nonfederated: %{
           label: l("Public"),
@@ -1279,8 +1278,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               label: l("Anyone"),
               icon: "fluent:globe-person-20-regular",
               description: l("Anyone (including remote users) can join freely"),
-              join_mode: "free",
-              disabled: l("Coming soon: requires groups federation")
+              join_mode: "free"
             },
             "local:members" => %{
               label: l("Local members"),
@@ -1332,7 +1330,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               icon: "ph:globe-duotone",
               description: l("Anyone (including guests) can see and read the group; federated"),
               role: :interact,
-              disabled: l("Coming soon: requires groups federation")
+              # disabled: l("Coming soon: requires groups federation") # enabled 2026-09-24 while in alpha, for Bonfire-to-Bonfire testing
             },
             "nonfederated" => %{
               label: l("Public"),
@@ -1381,6 +1379,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               description:
                 l("Anyone can see the group exists, but only members can read content"),
               role: :preview_discover,
+              # only `open_network` federates for now
               disabled: l("Coming soon: requires groups federation")
             },
             "local:preview" => %{
@@ -1395,6 +1394,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               icon: "ph:link-simple-duotone",
               description: l("Readable with a direct link, not shown in listings"),
               role: :unlisted_read,
+              # only `open_network` federates for now
               disabled: l("Coming soon: requires groups federation")
             },
             "local:unlisted" => %{
@@ -1426,7 +1426,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               label: l("Anyone"),
               icon: "ph:globe-duotone",
               description: l("Anyone (including remote users) can post and interact"),
-              disabled: l("Coming soon: requires groups federation")
+              # disabled: l("Coming soon: requires groups federation") # enabled 2026-09-24 while in alpha, for Bonfire-to-Bonfire testing
             },
             # see the archipelago note in :preset_acls above
             # "archipelago:contributors" => %{
@@ -1479,7 +1479,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               description:
                 l("Posts visible to anyone including guests and remote users; federated"),
               role: :interact,
-              disabled: l("Coming soon: requires groups federation")
+              # disabled: l("Coming soon: requires groups federation") # enabled 2026-09-24 while in alpha, for Bonfire-to-Bonfire testing
             },
             "nonfederated" => %{
               label: l("Public"),
@@ -1521,6 +1521,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               icon: "ph:eye-duotone",
               description: l("Post appears in public feeds but full content is members-only"),
               role: :preview_discover,
+              # only `open_network` federates for now
               disabled: l("Coming soon: requires groups federation")
             },
             "local:preview" => %{
@@ -1534,6 +1535,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               icon: "ph:link-simple-duotone",
               description: l("Readable via direct link, not in feeds, no boosting"),
               role: :unlisted_read,
+              # only `open_network` federates for now
               disabled: l("Coming soon: requires groups federation")
             },
             "local:unlisted" => %{
