@@ -632,7 +632,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         global: %{
           label: l("Public (federated)"),
           description: l("Visible to everyone including the wider fediverse"),
-          icon: "ph:globe-duotone",
+          icon: "ph:globe-duotone"
         },
         nonfederated: %{
           label: l("Public"),
@@ -1329,7 +1329,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               label: l("Public (federated)"),
               icon: "ph:globe-duotone",
               description: l("Anyone (including guests) can see and read the group; federated"),
-              role: :interact,
+              role: :interact
               # disabled: l("Coming soon: requires groups federation") # enabled 2026-09-24 while in alpha, for Bonfire-to-Bonfire testing
             },
             "nonfederated" => %{
@@ -1425,7 +1425,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             "anyone" => %{
               label: l("Anyone"),
               icon: "ph:globe-duotone",
-              description: l("Anyone (including remote users) can post and interact"),
+              description: l("Anyone (including remote users) can post and interact")
               # disabled: l("Coming soon: requires groups federation") # enabled 2026-09-24 while in alpha, for Bonfire-to-Bonfire testing
             },
             # see the archipelago note in :preset_acls above
@@ -1478,7 +1478,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               icon: "ph:globe-duotone",
               description:
                 l("Posts visible to anyone including guests and remote users; federated"),
-              role: :interact,
+              role: :interact
               # disabled: l("Coming soon: requires groups federation") # enabled 2026-09-24 while in alpha, for Bonfire-to-Bonfire testing
             },
             "nonfederated" => %{
