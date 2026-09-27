@@ -1323,7 +1323,11 @@ defmodule Bonfire.Boundaries.Circles do
             left_join: character in assoc(subject, :character),
             where:
               fragment("strpos(lower(coalesce(?, '')), lower(?)) > 0", profile.name, ^search) or
-                fragment("strpos(lower(coalesce(?, '')), lower(?)) > 0", character.username, ^search)
+                fragment(
+                  "strpos(lower(coalesce(?, '')), lower(?)) > 0",
+                  character.username,
+                  ^search
+                )
 
         _ ->
           query
