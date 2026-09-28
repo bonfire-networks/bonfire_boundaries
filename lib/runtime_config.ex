@@ -1342,11 +1342,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               role: :interact
             },
             "nonfederated:preview" => %{
-              label: l("Discoverable · Members-only content"),
+              label: l("Discoverable group preview"),
               icon: "fluent:globe-search-24-regular",
               description:
                 l(
-                  "Anyone on this instance can see the group exists, but only members can read content; not federated"
+                  "Anyone, including guests, can see the group preview on this instance. Access to discussions depends on membership, participation rules and each post's audience; not federated"
                 ),
               role: :preview_discover
             },
@@ -1377,7 +1377,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               label: l("Discoverable"),
               icon: "fluent:globe-search-24-regular",
               description:
-                l("Anyone can see the group exists, but only members can read content"),
+                l("Anyone can see the group preview. Access to discussions depends on membership, participation rules and each post's audience"),
               role: :preview_discover,
               # only `open_network` federates for now
               disabled: l("Coming soon: requires groups federation")
@@ -1386,7 +1386,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               label: l("Locally discoverable"),
               icon: "ph:eye-duotone",
               description:
-                l("Local users can see the group exists, but only members can read content"),
+                l("Local users can see the group preview. Access to discussions depends on membership, participation rules and each post's audience"),
               role: :preview_discover
             },
             "unlisted" => %{

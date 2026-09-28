@@ -581,27 +581,30 @@ defmodule Bonfire.Boundaries.Circles do
   """
   def encircled_by_objects_stereoptypes?(subject, object_ids, stereotype)
       when is_list(object_ids) do
+    if is_nil(Types.uid(subject)) or Enum.empty?(object_ids) do
+      %{}
+    else
+      query_object_ids_for_member(subject, stereotype)
+      |> where([caretaker: c], c.caretaker_id in ^Types.uids(object_ids))
+      |> repo().all()
+      |> Map.new(&{&1, true})
+    end
+  end
+
+  @doc "Returns a subquery of owner IDs whose named stereotype circle contains the subject; callers must check access to the owners."
+  def query_object_ids_for_member(subject, stereotype) do
     subject_id = Types.uid(subject)
     stereotype_id = get_id!(stereotype)
 
-    if is_nil(subject_id) or Enum.empty?(object_ids) do
-      %{}
-    else
-      repo().all(
-        from(e in Bonfire.Data.AccessControl.Encircle,
-          join: s in Bonfire.Data.AccessControl.Stereotyped,
-          on: s.id == e.circle_id,
-          join: c in Bonfire.Data.Identity.Caretaker,
-          on: c.id == e.circle_id,
-          where:
-            e.subject_id == ^subject_id and
-              c.caretaker_id in ^Types.uids(object_ids) and
-              s.stereotype_id == ^stereotype_id,
-          select: c.caretaker_id
-        )
-      )
-      |> Map.new(&{&1, true})
-    end
+    from(e in Encircle,
+      join: s in Bonfire.Data.AccessControl.Stereotyped,
+      on: s.id == e.circle_id,
+      join: c in Caretaker,
+      as: :caretaker,
+      on: c.id == e.circle_id,
+      where: e.subject_id == ^subject_id and s.stereotype_id == ^stereotype_id,
+      select: c.caretaker_id
+    )
   end
 
   @doc """
