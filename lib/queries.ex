@@ -95,23 +95,42 @@ defmodule Bonfire.Boundaries.Queries do
       require Untangle
       query = unquote(query)
       opts = unquote(opts)
-      verbs = List.wrap(e(opts, :verbs, [:see, :read]))
 
-      case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
-        true ->
-          query || Bonfire.Boundaries.Queries.always_true_subquery()
+      case Bonfire.Boundaries.Queries.verbs_from_opts(opts) do
+        # an unresolvable verb option fails closed rather than falling back to a weaker check
+        {:error, _} ->
+          Bonfire.Boundaries.Queries.deny_all(query)
 
-        :admins ->
-          agent =
-            Common.Utils.current_user_or_id(opts) || Common.Utils.current_account(opts)
-
-          case Bonfire.Me.Accounts.is_admin?(agent) do
+        {:ok, verbs} ->
+          case Bonfire.Boundaries.Queries.skip_boundary_check?(opts) do
             true ->
-              Untangle.debug("Skipping boundary checks for instance administrator")
-
               query || Bonfire.Boundaries.Queries.always_true_subquery()
 
-            _ ->
+            :admins ->
+              agent =
+                Common.Utils.current_user_or_id(opts) || Common.Utils.current_account(opts)
+
+              case Bonfire.Me.Accounts.is_admin?(agent) do
+                true ->
+                  Untangle.debug("Skipping boundary checks for instance administrator")
+
+                  query || Bonfire.Boundaries.Queries.always_true_subquery()
+
+                _ ->
+                  Bonfire.Boundaries.Queries.boundarise_query(
+                    query,
+                    agent,
+                    verbs,
+                    unquote(alia),
+                    unquote(field),
+                    opts
+                  )
+              end
+
+            _false ->
+              agent =
+                Common.Utils.current_user_or_id(opts) || Common.Utils.current_account(opts)
+
               Bonfire.Boundaries.Queries.boundarise_query(
                 query,
                 agent,
@@ -121,19 +140,6 @@ defmodule Bonfire.Boundaries.Queries do
                 opts
               )
           end
-
-        _false ->
-          agent =
-            Common.Utils.current_user_or_id(opts) || Common.Utils.current_account(opts)
-
-          Bonfire.Boundaries.Queries.boundarise_query(
-            query,
-            agent,
-            verbs,
-            unquote(alia),
-            unquote(field),
-            opts
-          )
       end
     end
   end
@@ -172,6 +178,39 @@ defmodule Bonfire.Boundaries.Queries do
     # NOTE: ugly temp workaround
     from(s in Bonfire.Data.AccessControl.Verb, select: fragment("true"), limit: 1)
   end
+
+  @doc """
+  The verbs a boundary query checks, read from `opts`.
+
+  The option is `verbs:`, a list, defaulting to `[:see, :read]`. A singular `verb:` is taken as `verbs: [verb]` but still errors, so its callers move to `verbs:`: it used to be ignored, which silently checked only the default. Both at once is refused, since `verbs:` passes anyone holding ANY of them, so merging would widen the check, and quietly picking one would hide the mistake.
+
+  `err/2` raises in dev and test, and only logs in production.
+  """
+  def verbs_from_opts(opts) do
+    case {e(opts, :verbs, nil), e(opts, :verb, nil)} do
+      {nil, nil} ->
+        {:ok, [:see, :read]}
+
+      {verbs, nil} ->
+        {:ok, List.wrap(verbs)}
+
+      {nil, verb} ->
+        err(verb, "Please pass a list of `verbs`, not a `verb` (singular) in opts")
+        {:ok, List.wrap(verb)}
+
+      {verbs, verb} ->
+        error(
+          {verbs, verb},
+          "Boundaries were given both `verbs:` and `verb:`, so refusing rather than widen or guess"
+        )
+    end
+  end
+
+  @doc "Fails a boundary check closed: the query matches nothing."
+  def deny_all(nil),
+    do: from(s in Bonfire.Data.AccessControl.Verb, select: fragment("true"), where: false)
+
+  def deny_all(query), do: where(query, [], false)
 
   def base_summary_query(strategy \\ :summary_subquery)
   def base_summary_query(:view), do: Summary
