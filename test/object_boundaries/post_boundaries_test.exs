@@ -149,6 +149,49 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
   end
 
   describe "thread locking:" do
+    defp public_post!(author) do
+      assert {:ok, post} =
+               Posts.publish(
+                 current_user: author,
+                 post_attrs: %{post_content: %{html_body: "<p>a thread</p>"}},
+                 boundary: "public"
+               )
+
+      post
+    end
+
+    # paired with the refusal below: the author passing is what shows a refusal is the check and not a lock that never works
+    test "its author can lock and unlock a thread through `Blocks.lock/2`" do
+      author = Bonfire.Me.Fake.fake_user!()
+      commenter = Bonfire.Me.Fake.fake_user!()
+      post = public_post!(author)
+
+      assert {:ok, _} = Bonfire.Boundaries.Blocks.lock(post, current_user: author)
+      refute Boundaries.can?(commenter, :reply, post)
+
+      assert {:ok, _} = Bonfire.Boundaries.Blocks.unlock(post, current_user: author)
+      assert Boundaries.can?(commenter, :reply, post)
+    end
+
+    test "someone who is neither its author nor allowed to change its boundary cannot lock a thread" do
+      author = Bonfire.Me.Fake.fake_user!()
+      stranger = Bonfire.Me.Fake.fake_user!()
+      post = public_post!(author)
+
+      assert {:error, _} = Bonfire.Boundaries.Blocks.lock(post, current_user: stranger)
+      assert Boundaries.can?(stranger, :reply, post), "the thread must still be open"
+    end
+
+    test "someone who is neither its author nor allowed to change its boundary cannot unlock a thread" do
+      author = Bonfire.Me.Fake.fake_user!()
+      stranger = Bonfire.Me.Fake.fake_user!()
+      post = public_post!(author)
+      {:ok, _} = Bonfire.Boundaries.Blocks.lock(post, current_user: author)
+
+      assert {:error, _} = Bonfire.Boundaries.Blocks.unlock(post, current_user: stranger)
+      refute Boundaries.can?(stranger, :reply, post), "the thread must still be locked"
+    end
+
     test "locking a post prevents replies from other users, and unlocking allows them again" do
       author = Bonfire.Me.Fake.fake_user!()
       commenter = Bonfire.Me.Fake.fake_user!()

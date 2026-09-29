@@ -52,10 +52,12 @@ defmodule Bonfire.Boundaries.RequestVerbTest do
       assert Bonfire.Boundaries.can?(silenced, :request, group) == true,
              "the group grants asking, which is the state this test then takes away from"
 
-      Controlleds.grant_role(uid(silenced), group, :cannot_participate, current_user: creator)
+      Controlleds.grant_role(uid(silenced), group, :cannot_participate_or_more,
+        current_user: creator
+      )
 
       refute Bonfire.Boundaries.can?(silenced, :reply, group) == true,
-             "`cannot_participate` is the silencing, so it has to actually silence"
+             "`cannot_participate_or_more` is the silencing, so it has to actually silence"
 
       assert Bonfire.Boundaries.can?(silenced, :request, group) == true,
              "denying someone the ask as well is a separate decision, so picking this rung must not make it for them"

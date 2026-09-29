@@ -268,17 +268,23 @@ defmodule Bonfire.Boundaries.Acls do
     object_id = uid(changeset) || "no_id"
     debug("=== cast CALLED for object #{object_id} ===")
 
+    # ACLs that come with WHERE it is published rather than with its boundary, such as a group's shared ones, so they apply whatever boundary was chosen
+    extra_acls = Enum.map(List.wrap(e(opts, :acl_ids, nil)), &%{acl_id: &1})
+
+    # once each: a reply that copies its thread's ACLs (`clone_context`) already has the group's, and an object can hold an ACL only once
+    with_extra = &Enum.uniq_by(&1 ++ extra_acls, fn %{acl_id: acl_id} -> acl_id end)
+
     case prepare_cast(changeset, creator, opts) do
       {:ok, control_acls} ->
         debug("=== cast: putting assoc for #{object_id} ===")
-        Changesets.put_assoc(changeset, :controlled, control_acls)
+        Changesets.put_assoc(changeset, :controlled, with_extra.(control_acls))
 
       {fun, control_acls} when is_function(fun) ->
         debug("=== cast: using prepare_changes for #{object_id} ===")
 
         changeset
         |> Changeset.prepare_changes(fun)
-        |> Changesets.put_assoc!(:controlled, control_acls)
+        |> Changesets.put_assoc!(:controlled, with_extra.(control_acls))
     end
     |> debug("after cast")
   end
@@ -616,8 +622,10 @@ defmodule Bonfire.Boundaries.Acls do
           uids(mentions)
 
         "local" ->
-          # include only if local
+          # include only if local. As `Feeds.within_boundary/3` does: a bare id is not someone to grant to (a group page names its group with `mentions: [group_id]`, which only puts the post in the group), and locality needs `:peered` loaded rather than guessed from an id
           mentions
+          |> Enum.reject(&(is_nil(&1) || is_binary(&1)))
+          |> repo().maybe_preload([character: [:peered]], prune: true)
           |> Enum.filter(&is_local?/1)
           |> uids()
 

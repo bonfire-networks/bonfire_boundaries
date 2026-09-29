@@ -415,7 +415,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           label: l("Cannot do anything, not even ask")
         },
         cannot_request: %{cannot_verbs: [:request], read_only: true, label: l("Cannot request")},
-        cannot_discover: %{
+        can_only_read: %{
           cannot_verbs: cannot_except.([:read]),
           read_only: true,
           label: l("Cannot discover")
@@ -425,43 +425,49 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           read_only: true,
           label: l("Cannot do anything except ask")
         },
-        cannot_react: %{
+        cannot_react_or_more: %{
           cannot_verbs: cannot_except.(verbs_interact_minus_like),
           read_only: true,
           label: l("Cannot react")
         },
-        cannot_share: %{
+        cannot_share_or_more: %{
           cannot_verbs: cannot_except.(verbs_interact_minus_boost),
           read_only: true,
           label: l("Cannot share")
         },
-        cannot_interact: %{
+        cannot_interact_or_more: %{
           cannot_verbs: cannot_except.(verbs_see_read_basics),
           read_only: true,
           label: l("Cannot interact")
         },
-        cannot_participate: %{
+        cannot_participate_or_more: %{
           cannot_verbs: cannot_except.(role_verbs_interact),
+          read_only: true,
+          label: l("Cannot participate (or more)")
+        },
+        # this one is NOT a rung of the ladder: denies only the participate verbs themselves, leaving whatever else is granted alone, where `cannot_participate_or_more` denies everything above interacting. For closing a thread (`Blocks.lock/2`): its author and moderators must keep `:grant`/`:mediate` to reopen it, and `:edit`/`:delete` for their own post
+        cannot_participate: %{
+          cannot_verbs: verbs_ping ++ verbs_partake,
           read_only: true,
           label: l("Cannot participate")
         },
-        # `cannot_participate` plus the floor: for where the asking itself is the problem, such as an announcement channel nobody may petition to post in
+        # `cannot_participate_or_more` plus the floor: for where the asking itself is the problem, such as an announcement channel nobody may petition to post in
         cannot_participate_or_request: %{
           cannot_verbs: Enum.reject(all_verb_names, fn v -> v in role_verbs_interact end),
           read_only: true,
           label: l("Cannot participate or ask")
         },
-        cannot_critique: %{
+        cannot_critique_or_more: %{
           cannot_verbs: cannot_except.(role_verbs_participate),
           read_only: true,
           label: l("Cannot critique")
         },
-        cannot_curate: %{
+        cannot_curate_or_more: %{
           cannot_verbs: cannot_except.(role_verbs_critique),
           read_only: true,
           label: l("Cannot curate")
         },
-        cannot_contribute: %{
+        cannot_contribute_or_more: %{
           usage: :ops,
           cannot_verbs: cannot_except.(role_verbs_curate),
           read_only: true,

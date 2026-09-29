@@ -57,7 +57,12 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
         maybe_debug(epic, act, "boundaries", "Casting")
 
         changeset
-        |> Acls.cast(current_user, epic.assigns[:options])
+        # plus the ACLs that come with where it is published, which the Tag act (run before this one) resolved
+        |> Acls.cast(
+          current_user,
+          List.wrap(epic.assigns[:options]) ++
+            [acl_ids: List.wrap(epic.assigns[:published_in_acl_ids])]
+        )
         |> Epic.assign(epic, on, ...)
 
       changeset.action == :delete ->

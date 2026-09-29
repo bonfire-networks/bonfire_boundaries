@@ -73,7 +73,7 @@ defmodule Bonfire.Boundaries.QueriesUsersGrantsBatchTest do
     carol: carol,
     post: post
   } do
-    # a local person's permission on public content comes through the `:local` circle, so denying that circle has to reach them: this is the shape a hide/block relies on (`Blocks.hide/3` grants `:cannot_discover` the same way)
+    # a local person's permission on public content comes through the `:local` circle, so denying that circle has to reach them: this is the shape a hide/block relies on (`Blocks.hide/3` grants `:can_only_read` the same way)
     assert bob.id in permitted_ids([bob, carol], post)
 
     {:ok, acl} = Bonfire.Boundaries.Acls.get_or_create_object_custom_acl(post, alice)
@@ -81,7 +81,7 @@ defmodule Bonfire.Boundaries.QueriesUsersGrantsBatchTest do
     Bonfire.Boundaries.Grants.grant_role(
       Bonfire.Boundaries.Circles.get_id!(:local),
       acl,
-      :cannot_discover,
+      :can_only_read,
       current_user: alice
     )
 

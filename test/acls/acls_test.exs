@@ -169,7 +169,7 @@ defmodule Bonfire.Boundaries.AclTest do
     {:ok, acl} = Acls.simple_create(me, name)
 
     # add bob to Acl
-    Grants.grant_role(bob.id, acl.id, "cannot_participate", current_user: me)
+    Grants.grant_role(bob.id, acl.id, "cannot_participate_or_more", current_user: me)
     |> debug("1stgrant")
 
     {:ok, acl} =
@@ -215,7 +215,7 @@ defmodule Bonfire.Boundaries.AclTest do
            end)
 
     # change bob's role
-    Grants.change_role(bob.id, acl.id, "cannot_participate", current_user: me)
+    Grants.change_role(bob.id, acl.id, "cannot_participate_or_more", current_user: me)
     |> debug("3rdgrant")
 
     {:ok, acl} =
