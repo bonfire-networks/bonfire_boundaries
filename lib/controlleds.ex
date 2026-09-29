@@ -153,6 +153,19 @@ defmodule Bonfire.Boundaries.Controlleds do
     end
   end
 
+  @doc "Loads every ACL applied to an object, with its grants, in one query. Unlike `list_on_object/2` and `list_q/1`, nothing is excluded, so denial-only ACLs such as ghosting and silencing are included (eg. when deriving a reply's boundary from its parent)."
+  def list_all_acls_on_object(object) do
+    object_id = uid(object)
+
+    from(acl in Acl,
+      join: controlled in Controlled,
+      on: controlled.acl_id == acl.id and controlled.id == ^object_id,
+      left_join: grants in assoc(acl, :grants),
+      preload: [grants: grants]
+    )
+    |> repo().all()
+  end
+
   @doc """
   Lists ALL boundaries (ACLs and grants) applied to an object.
   Only call this as an admin or curator of the object.

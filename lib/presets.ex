@@ -26,6 +26,10 @@ defmodule Bonfire.Boundaries.Presets do
   alias Bonfire.Data.AccessControl.Stereotyped
   alias Needle.Pointer
 
+  @doc "The general preset slugs offered when choosing who can see a post, in display order."
+  def preset_order,
+    do: Bonfire.Common.Config.get(:preset_order, ["public", "local", "mentions"], :bonfire_boundaries)
+
   @doc """
   Returns a flat map of all known slug → metadata, merging general presets and all
   dimension options. General presets take priority on slug conflicts.

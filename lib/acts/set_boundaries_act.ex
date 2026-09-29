@@ -56,13 +56,34 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
         # boundary = epic.assigns[:options][:boundary]
         maybe_debug(epic, act, "boundaries", "Casting")
 
+        options = List.wrap(epic.assigns[:options])
+        context_options = List.wrap(epic.assigns[:published_in_boundary_options])
+        reply_to = epic.assigns[:reply_to]
+
+        boundary_options =
+          cond do
+            context_options != [] ->
+              context_options
+
+            reply_to && Bonfire.Common.Types.object_type(reply_to) != Bonfire.Data.Social.Message ->
+              case Acls.requested_boundary(options) do
+                # addressed-only presets grant no general audience, so they can never be broader than the parent (eg. Mastodon API "direct" replies arrive as `mentions`)
+                requested when requested in ["mentions", "private"] ->
+                  Acls.retain_reply_denials(reply_to, options)
+
+                "reply_participants" ->
+                  Acls.narrow_reply_options(reply_to, [])
+
+                _ ->
+                  Acls.inherit_reply_options(reply_to)
+              end
+
+            true ->
+              []
+          end
+
         changeset
-        # plus the ACLs that come with where it is published, which the Tag act (run before this one) resolved
-        |> Acls.cast(
-          current_user,
-          List.wrap(epic.assigns[:options]) ++
-            [acl_ids: List.wrap(epic.assigns[:published_in_acl_ids])]
-        )
+        |> Acls.cast(current_user, Keyword.merge(options, boundary_options))
         |> Epic.assign(epic, on, ...)
 
       changeset.action == :delete ->

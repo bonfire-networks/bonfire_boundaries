@@ -15,7 +15,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     alias Bonfire.API.GraphQL
     alias Bonfire.Boundaries.Circles
     alias Bonfire.Boundaries.Blocks
-    alias Bonfire.Common.Config
 
     @desc "A circle (group of users) for organizing boundaries"
     object :circle do
@@ -368,8 +367,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     defp boundary_options(_parent, _args, info) do
       user = GraphQL.current_user(info)
 
-      preset_order =
-        Config.get(:preset_order, ["public", "local", "mentions"], :bonfire_boundaries)
+      preset_order = Bonfire.Boundaries.Presets.preset_order()
 
       presets =
         for slug <- preset_order, meta = Bonfire.Boundaries.Presets.for_preset(slug) do

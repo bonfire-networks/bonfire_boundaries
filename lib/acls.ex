@@ -809,6 +809,73 @@ defmodule Bonfire.Boundaries.Acls do
     }
   end
 
+  @doc "The boundary a caller requested, resolved like `prepare_cast/3` does (`:boundary`, else `:to_boundaries`), as a single slug or tuple."
+  def requested_boundary(options) do
+    (maybe_from_opts(options, :boundary, nil) || maybe_from_opts(options, :to_boundaries, nil))
+    |> List.wrap()
+    |> List.first()
+  end
+
+  @doc "Reply options inheriting the immediate parent's audience by attaching its ACLs (so later changes to them apply to the reply too), plus `retained_acl_ids`. Denial-only ACLs such as ghosting are left out of that clone, so they are shared explicitly."
+  def inherit_reply_options(parent, retained_acl_ids \\ []) do
+    {acl_ids, _denials} = split_parent_acls(parent, retained_acl_ids)
+    reply_options(parent, {:clone, uid(parent)}, acl_ids, [])
+  end
+
+  @doc "Reply options private to the parent's author, the replier and `retained_acl_ids`. The parent's other ACLs are not attached, so their denials are copied, otherwise removing their positive grants could expose excluded readers. Callers must validate the narrower audience against the parent and its publication context."
+  def narrow_reply_options(parent, retained_acl_ids) do
+    {acl_ids, denials} = split_parent_acls(parent, retained_acl_ids)
+    reply_options(parent, "private", acl_ids, denials)
+  end
+
+  @doc "Keeps a reply's own addressed-only boundary (eg. `mentions`, or `private` with explicit recipients) and adds the parent's denials, so addressing a reply narrowly can't readmit people the parent excludes."
+  def retain_reply_denials(parent, options) do
+    {acl_ids, denials} = split_parent_acls(parent, [])
+
+    [
+      verb_grants: List.wrap(options[:verb_grants]) ++ denials,
+      acl_ids: Enum.uniq(List.wrap(options[:acl_ids]) ++ acl_ids)
+    ]
+  end
+
+  # `verb_grants` is always set, so merging these over a caller's options replaces theirs
+  defp reply_options(parent, boundary, acl_ids, verb_grants) do
+    [
+      boundary: boundary,
+      to_circles: reply_author_recipients(parent),
+      verb_grants: verb_grants,
+      acl_ids: acl_ids
+    ]
+  end
+
+  # the parent's author keeps access to replies, since the parent's own admin ACL is never cloned
+  defp reply_author_recipients(parent) do
+    case e(parent, :created, :creator_id, nil) ||
+           e(repo().get(Bonfire.Data.Social.Created, uid(parent)), :creator_id, nil) do
+      nil -> []
+      author_id -> [{author_id, :participate}]
+    end
+  end
+
+  # The parent's ACLs to attach (retained or denial-only), and the denials within the rest.
+  defp split_parent_acls(parent, retained_acl_ids) do
+    {shared, other} =
+      parent
+      |> Controlleds.list_all_acls_on_object()
+      |> Enum.split_with(fn acl ->
+        acl.id in retained_acl_ids or Enum.all?(acl.grants, &denial?/1)
+      end)
+
+    denials =
+      for acl <- other, grant <- acl.grants, denial?(grant), uniq: true do
+        {grant.subject_id, grant.verb_id, false}
+      end
+
+    {Enum.uniq(retained_acl_ids ++ Enum.map(shared, & &1.id)), denials}
+  end
+
+  defp denial?(grant), do: grant.value == false
+
   defp apply_same_acls_as_existing_object(controlled_object_id) do
     {nil,
      Controlleds.list_on_object(controlled_object_id)
