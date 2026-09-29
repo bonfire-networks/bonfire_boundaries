@@ -7,6 +7,7 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
   alias Ecto.Changeset
   import Epics
   use Arrows
+  require Untangle
 
   def run(epic, act) do
     on = Keyword.get(act.options, :on, :post)
@@ -81,6 +82,11 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
             true ->
               []
           end
+        # TEMP probe for CI
+        Untangle.warn(
+          epic.assigns[:published_in_acl_ids],
+          "DEBUG SetBoundaries published_in_acl_ids"
+        )
 
         changeset
         |> Acls.cast(current_user, Keyword.merge(options, boundary_options))
