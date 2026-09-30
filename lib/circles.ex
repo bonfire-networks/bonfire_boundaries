@@ -142,6 +142,15 @@ defmodule Bonfire.Boundaries.Circles do
     uid(circle) in stereotype_ids
   end
 
+  @doc "The id of a circle given by name, where a stereotype (eg. `:followers`) means `owner`'s own circle of that kind, since nobody is a member of the stereotype itself. `nil` when the owner has none."
+  def resolve_id(circle, owner) do
+    circle_id = get_id!(circle)
+
+    if is_stereotype?(circle_id),
+      do: List.first(get_stereotype_circle_ids(owner, [%{id: circle_id}])),
+      else: circle_id
+  end
+
   @doc """
   Retrieves a circle by its slug or ID.
 

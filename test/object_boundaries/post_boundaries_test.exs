@@ -148,6 +148,133 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
     refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: me)
   end
 
+  # a reply's audience defaults to its parent's, but its author may choose another, broader or narrower; the parent's blocks still apply
+  describe "a reply's audience:" do
+    defp reply!(user, parent, opts) do
+      {:ok, reply} =
+        Posts.publish(
+          [
+            current_user: user,
+            post_attrs: %{post_content: %{html_body: "a reply"}, reply_to_id: parent.id}
+          ] ++ opts
+        )
+
+      reply
+    end
+
+    defp post_with!(user, boundary) do
+      {:ok, post} =
+        Posts.publish(
+          current_user: user,
+          post_attrs: %{post_content: %{html_body: "a post"}},
+          boundary: boundary
+        )
+
+      post
+    end
+
+    test "with no audience chosen, is its parent's" do
+      reply = reply!(Fake.fake_user!(), post_with!(Fake.fake_user!(), "local"), [])
+      assert Boundaries.can?(Fake.fake_user!(), :read, reply), "a local user reads it"
+      refute Boundaries.can?(:guest, :read, reply), "a guest doesn't"
+    end
+
+    test "with a broader audience chosen, is the chosen one" do
+      reply =
+        reply!(Fake.fake_user!(), post_with!(Fake.fake_user!(), "local"), boundary: "public")
+
+      assert Boundaries.can?(:guest, :read, reply), "a guest reads it"
+    end
+
+    test "with a narrower audience chosen, is the chosen one" do
+      reply =
+        reply!(Fake.fake_user!(), post_with!(Fake.fake_user!(), "public"), boundary: "local")
+
+      assert Boundaries.can?(Fake.fake_user!(), :read, reply), "a local user reads it"
+      refute Boundaries.can?(:guest, :read, reply), "a guest doesn't"
+    end
+
+    test "with a broader audience chosen, still excludes people the parent's author blocked" do
+      author = Fake.fake_user!()
+      excluded = Fake.fake_user!()
+      {:ok, _} = Boundaries.Blocks.block(excluded, :ghost, current_user: author)
+      reply = reply!(Fake.fake_user!(), post_with!(author, "local"), boundary: "public")
+      assert Boundaries.can?(:guest, :read, reply), "control: the reply is public"
+      refute Boundaries.can?(excluded, :read, reply), "the blocked person doesn't read it"
+    end
+  end
+
+  # an editor opened on a post writes nothing until a grant is changed, and then creates the post's custom ACL once
+  describe "the ACL a grant is written to:" do
+    test "for a post with no custom ACL, is created on first use, then reused" do
+      me = Fake.fake_user!()
+      post = post_with!(me, "public")
+
+      assert {:error, _} = Bonfire.Boundaries.Acls.get_object_custom_acl(post),
+             "control: none yet"
+
+      acl = Bonfire.Boundaries.Acls.acl_to_grant_on(nil, post, me)
+      assert {:ok, custom} = Bonfire.Boundaries.Acls.get_object_custom_acl(post)
+      assert custom.id == acl.id, "it's the post's custom ACL"
+
+      assert Bonfire.Boundaries.Acls.acl_to_grant_on(nil, post, me).id == acl.id,
+             "reused, not created again"
+    end
+
+    test "is the one being edited, when there is one" do
+      acl = %Bonfire.Data.AccessControl.Acl{id: "01ACLBE1NGED1TEDN0TCREATED"}
+      assert Bonfire.Boundaries.Acls.acl_to_grant_on(acl, "any-object", nil) == acl
+    end
+  end
+
+  # a `to_circles` entry `{circle, verbs: …}` grants or denies single verbs (an incoming object's `interactionPolicy` restricts one verb at a time), without making the circle a recipient
+  describe "a per-verb to_circles entry:" do
+    for {denied, still_allowed} <- [like: :reply, boost: :reply, reply: :like, quote: :reply] do
+      @denied denied
+      @still_allowed still_allowed
+      test "`verbs: [#{denied}: false]` denies #{denied} to the circle, and not #{still_allowed}" do
+        {:ok, post} =
+          Posts.publish(
+            current_user: Fake.fake_user!(),
+            post_attrs: %{post_content: %{html_body: "a post"}},
+            boundary: "public",
+            to_circles: [{:local, verbs: [{@denied, false}]}]
+          )
+
+        other = Fake.fake_user!()
+        assert Boundaries.can?(other, :read, post), "control: a local user reads it"
+        refute Boundaries.can?(other, @denied, post), "#{@denied} is denied"
+        assert Boundaries.can?(other, @still_allowed, post), "#{@still_allowed} is still allowed"
+      end
+    end
+
+    test "`verbs: [:quote]` grants quoting to the circle, without letting it read the post" do
+      recipient = Fake.fake_user!()
+
+      custom_post = fn extra_circles ->
+        {:ok, post} =
+          Posts.publish(
+            current_user: Fake.fake_user!(),
+            post_attrs: %{post_content: %{html_body: "a post"}},
+            boundary: "custom",
+            to_circles: [recipient.id] ++ extra_circles
+          )
+
+        post
+      end
+
+      other = Fake.fake_user!()
+
+      refute Boundaries.can?(recipient, :quote, custom_post.([])),
+             "control: without it, even a recipient may not quote"
+
+      post = custom_post.([{:local, verbs: [:quote]}])
+      assert Boundaries.can?(recipient, :read, post), "control: its recipient reads it"
+      assert Boundaries.can?(other, :quote, post), "a local user may quote"
+      refute Boundaries.can?(other, :read, post), "but isn't made a recipient"
+    end
+  end
+
   describe "thread locking:" do
     defp public_post!(author) do
       assert {:ok, post} =

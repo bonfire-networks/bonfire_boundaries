@@ -32,6 +32,7 @@ defmodule Bonfire.Boundaries.Acls do
   alias Bonfire.Boundaries.Scaffold
   alias Bonfire.Boundaries.Grants
   alias Bonfire.Boundaries.Roles
+  alias Bonfire.Boundaries.VerbGrants
   alias Ecto.Changeset
   alias Needle.Changesets
   alias Needle.ULID
@@ -314,11 +315,16 @@ defmodule Bonfire.Boundaries.Acls do
 
     context_id = maybe_from_opts(opts, :context_id)
 
+    # `{subject, verbs: …}` entries grant or deny single verbs, without making the subject a recipient
+    {circle_verb_grants, to_circles} =
+      VerbGrants.split_from_circles(maybe_from_opts(opts, :to_circles, []), creator)
+
     {preset, control_acls} =
       case maybe_from_opts(opts, :boundary, nil) || maybe_from_opts(opts, :to_boundaries, nil) do
         {:clone, controlled_object_id} ->
           apply_same_acls_as_existing_object(controlled_object_id)
 
+        # copies the THREAD's (`context_id`) ACLs; a reply never gets here, since `SetBoundaries` sets `boundary: {:clone, reply_to}` (above) to copy the post it replies to instead
         ["clone_context"] when is_binary(context_id) and context_id != "" ->
           apply_same_acls_as_existing_object(context_id)
 
@@ -335,10 +341,7 @@ defmodule Bonfire.Boundaries.Acls do
         nil ->
           preset_acls_tuple(
             creator,
-            default_boundary_preset(
-              maybe_from_opts(opts, :to_circles, nil),
-              e(opts, :for_module, nil)
-            ),
+            default_boundary_preset(to_circles, e(opts, :for_module, nil)),
             opts
           )
 
@@ -352,20 +355,25 @@ defmodule Bonfire.Boundaries.Acls do
 
     verb_grants =
       case e(opts, :verb_grants, []) do
-        verb_grants
-        when is_list(verb_grants) or
-               (is_map(verb_grants) and verb_grants != [] and verb_grants != %{}) ->
+        verb_grants when is_list(verb_grants) ->
+          verb_grants ++ circle_verb_grants
+
+        verb_grants when is_map(verb_grants) and verb_grants != %{} ->
           verb_grants
 
         _ ->
-          []
+          circle_verb_grants
       end
       |> debug("verb_grants input")
 
     #     repo().all(from c in Caretaker, where: c.caretaker_id == ^uid(creator), select: c.id)
     # |> debug("DEBUG Raw caretaker IDs in find_acls")
 
-    case custom_recipients(changeset_or_obj, preset, opts) do
+    recipients = custom_recipients(changeset_or_obj, preset, to_circles, creator, opts)
+
+    verb_grants = drop_verb_grants_changing_nothing(verb_grants, preset, recipients, opts)
+
+    case recipients do
       [] when verb_grants == [] ->
         debug(control_acls, "=== prepare_cast RETURNING {:ok, control_acls} for #{object_id} ===")
         {:ok, control_acls}
@@ -435,6 +443,55 @@ defmodule Bonfire.Boundaries.Acls do
         }
     end
   end
+
+  # A direct verb grant that changes nothing is dropped, so what the boundary already gives or withholds isn't repeated as rows:
+  # - a denial of a verb nobody would get anyway (neither the preset's ACLs nor the recipients' default verbs give it);
+  # - a grant of a verb the subject already has from the preset's ACLs, or, on an object the subject can't read other than as a recipient, one the recipients' default verbs already include.
+  # What the preset gives is read from config (its ACLs' grants), not the database.
+  defp drop_verb_grants_changing_nothing(verb_grants, preset, recipients, opts)
+       when is_list(verb_grants) and verb_grants != [] do
+    config_grants = Grants.grants()
+
+    preset_grants =
+      for acl_name <- Bonfire.Boundaries.Presets.acls_from_preset_boundary_names(preset),
+          {circle, verbs} <- Map.get(Map.new(config_grants), acl_name, %{}),
+          circle != :SELF,
+          verb <- Scaffold.Instance.list_verbs(verbs),
+          Enums.maybe_elem(verb, 1, true),
+          into: MapSet.new(),
+          do: {Circles.get_id!(circle), Verbs.get_id!(Enums.maybe_elem(verb, 0) || verb)}
+
+    preset_verb_ids = MapSet.new(preset_grants, &elem(&1, 1))
+
+    recipient_verb_ids =
+      if recipients == [],
+        do: [],
+        else:
+          (e(opts, :verbs_to_grant, nil) || Config.get!([:verbs_to_grant, :default]))
+          |> Enum.map(&Verbs.get_id!/1)
+
+    read_id = Verbs.get_id!(:read)
+
+    Enum.filter(verb_grants, fn {subject, verb, value} ->
+      subject_id = uid(subject)
+      verb_id = Verbs.get_id!(verb)
+
+      if value == false do
+        # keep a denial only where someone would otherwise get the verb
+        MapSet.member?(preset_verb_ids, verb_id) or verb_id in recipient_verb_ids
+      else
+        already_given? =
+          MapSet.member?(preset_grants, {subject_id, verb_id}) or
+            (verb_id in recipient_verb_ids and
+               not MapSet.member?(preset_grants, {subject_id, read_id}))
+
+        not already_given?
+      end
+    end)
+  end
+
+  defp drop_verb_grants_changing_nothing(verb_grants, _preset, _recipients, _opts),
+    do: verb_grants
 
   defp preset_acls_tuple(creator, to_boundaries, opts \\ []) do
     {preset, base_acls, direct_acl_ids} =
@@ -519,10 +576,10 @@ defmodule Bonfire.Boundaries.Acls do
   # - @-mentions (`mentions_grants/3`) only NOTIFY, and grant only under the `public` and `mentions` presets (`local` too, for local accounts). A mention in a members-private group post does not add the person to the group's audience
   # - the person being answered IS granted the answer, whatever the preset, even outside the audience. That grant comes through `to_circles`, which the reply composer (`Threads.LiveHandler.prepare_reply_assigns/4`) fills with whoever is being answered, not through `reply_to_grants/3`, which covers only `public` and `local`
   # - `to_circles` itself is granted unconditionally, since it is also how a group's top-level posts carry their audience (the group, its members and moderators)
-  defp custom_recipients(changeset_or_obj, preset, opts) do
+  defp custom_recipients(changeset_or_obj, preset, to_circles, creator, opts) do
     (List.wrap(reply_to_grants(changeset_or_obj, preset, opts)) ++
        List.wrap(mentions_grants(changeset_or_obj, preset, opts)) ++
-       List.wrap(maybe_custom_circles_or_users(maybe_from_opts(opts, :to_circles, []))))
+       List.wrap(maybe_custom_circles_or_users(to_circles, creator)))
     |> debug("custom_recipients input")
     |> Enum.map(fn
       nil -> nil
@@ -542,12 +599,13 @@ defmodule Bonfire.Boundaries.Acls do
     |> debug("custom_recipients output")
   end
 
-  defp maybe_custom_circles_or_users(to_circles) when is_list(to_circles) or is_map(to_circles) do
+  defp maybe_custom_circles_or_users(to_circles, creator)
+       when is_list(to_circles) or is_map(to_circles) do
     to_circles
     |> debug("to_circles input")
     |> Enum.map(fn
       {circle, val} when is_atom(circle) ->
-        {Circles.get_id!(circle), val}
+        if circle_id = Circles.resolve_id(circle, creator), do: {circle_id, val}
 
       {key, val} ->
         # with custom role
@@ -562,8 +620,8 @@ defmodule Bonfire.Boundaries.Acls do
     |> debug("maybe_custom_circles_or_users output")
   end
 
-  defp maybe_custom_circles_or_users(to_circles),
-    do: maybe_custom_circles_or_users(List.wrap(to_circles))
+  defp maybe_custom_circles_or_users(to_circles, creator),
+    do: maybe_custom_circles_or_users(List.wrap(to_circles), creator)
 
   defp reply_to_grants(changeset_or_obj, preset, _opts) do
     reply_to_creator =
@@ -751,6 +809,18 @@ defmodule Bonfire.Boundaries.Acls do
 
     # |> debug("custom acl")
   end
+
+  @doc "The ACL an editor writes a grant to: the one it is editing, or else `object`'s custom ACL, created now if it has none. So opening an editor on an object writes nothing until a grant is actually changed."
+  def acl_to_grant_on(%{} = acl, _object, _caretaker), do: acl
+
+  def acl_to_grant_on(_acl, object, caretaker) when not is_nil(object) do
+    case get_or_create_object_custom_acl(object, caretaker) do
+      {:ok, acl} -> acl
+      _ -> nil
+    end
+  end
+
+  def acl_to_grant_on(_acl, _object, _caretaker), do: nil
 
   def get_or_create_object_custom_acl(object, caretaker \\ nil) do
     case get_object_custom_acl(object) do

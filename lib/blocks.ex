@@ -149,7 +149,10 @@ defmodule Bonfire.Boundaries.Blocks do
       debug(user_or_circle, "found by ID or username")
       block(user_or_circle, block_type, scope)
     else
-      _ ->
+      # TEMP probe
+      other ->
+        warn({user_or_instance_id_or_username, other}, "DEBUG Blocks.block: Needles.get failed")
+
         if Types.is_uid?(user_or_instance_id_or_username) do
           debug("assume it's an instance display_hostname")
 

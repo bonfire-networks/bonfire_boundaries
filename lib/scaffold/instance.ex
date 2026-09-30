@@ -46,9 +46,10 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
           "0AND0MSTRANGERS0FF1NTERNET"
         ]
 
-  defp list_verbs(verbs) when is_list(verbs) or is_map(verbs), do: verbs
+  @doc "The verbs a config grant entry (`Bonfire.Boundaries.Grants.grants/0`) gives: a list or map of verbs, or a role's, each as a verb or `{verb, true | false}`."
+  def list_verbs(verbs) when is_list(verbs) or is_map(verbs), do: verbs
 
-  defp list_verbs(role) when is_atom(role) do
+  def list_verbs(role) when is_atom(role) do
     # Use scope: :instance_wide to read directly from app config, not DB settings.
     # In test env, instance_scope_settings reads from DB only (no fallback), so
     # without this, role aliases like :participate resolve to %{} and no grants are seeded.

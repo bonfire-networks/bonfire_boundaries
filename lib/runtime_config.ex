@@ -634,6 +634,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
     # Scope metadata for the two-level boundary selector UI (visibility + DCV dims).
     # Each scope maps to label/icon/disabled status; the actual ACL grants are in preset_acls above.
     config :bonfire_boundaries,
+      # who non-members may be, narrowest first: a slug letting them join freely or post is offered when its scope is no wider than the group's own (see `Bonfire.Classify.Boundaries.disabled_options_by_reach/2`). Not every scope is here: `nonfederated` adds only guests, who can't join or post, so it counts as `local`; a scope not listed (eg. members only) admits no non-members
+      participant_scopes_by_reach: ["local", "archipelago", "global"],
       scopes: %{
         global: %{
           label: l("Public (federated)"),
@@ -652,14 +654,19 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           disabled: l("Coming soon: requires archipelago feature")
         },
         local: %{
-          label: l("Local"),
+          label: l("Users of this instance"),
           description: l("Visible only to users on this instance"),
           icon: "ph:campfire-duotone"
         },
         members: %{
-          label: l("Members only"),
+          label: l("Group members only"),
           description: l("Visible only to group members"),
           icon: "ph:users-three-duotone"
+        },
+        moderators: %{
+          label: l("Group moderators only"),
+          description: l("Visible only to group moderators"),
+          icon: "ph:shield-duotone"
         }
       }
 
@@ -1287,7 +1294,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               join_mode: "free"
             },
             "local:members" => %{
-              label: l("Local members"),
+              label: l("Users of this instance"),
               icon: "ph:campfire-duotone",
               description: l("Anyone on this instance can join freely"),
               join_mode: "free"
@@ -1374,7 +1381,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             #   disabled: l("Coming soon: requires archipelago feature")
             # },
             "local" => %{
-              label: l("Local"),
+              label: l("Users of this instance"),
               icon: "ph:campfire-duotone",
               description: l("Anyone on this instance can see and read the group"),
               role: :interact
@@ -1391,7 +1398,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               disabled: l("Coming soon: requires groups federation")
             },
             "local:preview" => %{
-              label: l("Locally discoverable"),
+              label: l("Discoverable to users of this instance"),
               icon: "ph:eye-duotone",
               description:
                 l(
@@ -1408,13 +1415,13 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               disabled: l("Coming soon: requires groups federation")
             },
             "local:unlisted" => %{
-              label: l("Locally unlisted"),
+              label: l("Unlisted, for users of this instance"),
               icon: "ph:link-simple-duotone",
               description: l("Local users can read with a direct link; not listed"),
               role: :unlisted_read
             },
             "members:private" => %{
-              label: l("Members only"),
+              label: l("Group members only"),
               icon: "ph:lock-duotone",
               description: l("Only members can see or read the group"),
               role: :interact
@@ -1446,12 +1453,12 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             #   disabled: l("Coming soon: requires archipelago feature")
             # },
             "local:contributors" => %{
-              label: l("Local contributors"),
+              label: l("Users of this instance"),
               icon: "ph:campfire-duotone",
               description: l("Any local user can post and interact")
             },
             "group_members" => %{
-              label: l("Members only"),
+              label: l("Group members only"),
               icon: "ph:users-three-duotone",
               description: l("Only group members can post and interact")
             },
@@ -1480,7 +1487,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             "unlisted",
             "nonfederated:unlisted",
             "local:unlisted",
-            "members:private"
+            "members:private",
+            # eg. a submissions group: members' posts go to its moderators unless their authors widen them
+            "moderators"
           ],
           options: %{
             "public" => %{
@@ -1521,7 +1530,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             #   disabled: l("Coming soon: requires archipelago feature")
             # },
             "local" => %{
-              label: l("Local"),
+              label: l("Users of this instance"),
               icon: "ph:campfire-duotone",
               description: l("Posts visible to logged-in users on this instance"),
               role: :interact
@@ -1556,9 +1565,15 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               role: :unlisted_read
             },
             "members:private" => %{
-              label: l("Members only"),
+              label: l("Group members only"),
               icon: "ph:lock-duotone",
               description: l("Posts only visible to group members"),
+              role: :interact
+            },
+            "moderators" => %{
+              label: l("Group moderators only"),
+              icon: "ph:shield-duotone",
+              description: l("Posts only visible to group moderators"),
               role: :interact
             }
           }

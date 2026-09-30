@@ -59,7 +59,9 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
 
         options = List.wrap(epic.assigns[:options])
         context_options = List.wrap(epic.assigns[:published_in_boundary_options])
-        reply_to = epic.assigns[:reply_to]
+
+        # or the opening post of the thread a post was placed in without replying to anything (see `Bonfire.Social.Acts.Threaded`), whose audience it follows the same way
+        reply_to = epic.assigns[:reply_to] || epic.assigns[:context_thread]
 
         boundary_options =
           cond do
@@ -68,13 +70,21 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
 
             reply_to && Bonfire.Common.Types.object_type(reply_to) != Bonfire.Data.Social.Message ->
               case Acls.requested_boundary(options) do
-                # addressed-only presets grant no general audience, so they can never be broader than the parent (eg. Mastodon API "direct" replies arrive as `mentions`)
-                requested when requested in ["mentions", "private"] ->
-                  Acls.retain_reply_denials(reply_to, options)
+                # requested when requested in ["mentions", "private"] ->
+                #   Acls.retain_reply_denials(reply_to, options)
 
                 "reply_participants" ->
                   Acls.narrow_reply_options(reply_to, [])
 
+                # "same as the original post", as the reply composer offers it. Despite the name, this copies the post replied to (`reply_to`), not the thread (`context_id`), which is what `clone_context` means in `Acls.prepare_cast`: the `boundary: {:clone, reply_to}` merged in here is read first
+                "clone_context" ->
+                  Acls.inherit_reply_options(reply_to)
+
+                # the audience the author chose, even if broader or narrower than the parent's (the UI defaults to the parent's, but doesn't stop anyone opening up); the parent's blocks still apply
+                requested when is_binary(requested) ->
+                  Acls.retain_reply_denials(reply_to, options)
+
+                # none chosen (or a `{:clone_context, label}` from the composer): the parent's
                 _ ->
                   Acls.inherit_reply_options(reply_to)
               end
@@ -82,10 +92,20 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
             true ->
               []
           end
+
         # TEMP probe for CI
         Untangle.warn(
-          epic.assigns[:published_in_acl_ids],
-          "DEBUG SetBoundaries published_in_acl_ids"
+          {Bonfire.Common.Types.uid(reply_to), Acls.requested_boundary(options), boundary_options,
+           Keyword.take(options, [
+             :boundary,
+             :to_boundaries,
+             :to_circles,
+             :mentions,
+             :context_id,
+             :verb_grants,
+             :acl_ids
+           ])},
+          "DEBUG SetBoundaries {reply_to, requested, boundary_options, options}"
         )
 
         changeset

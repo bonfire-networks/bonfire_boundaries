@@ -36,6 +36,44 @@ defmodule Bonfire.Boundaries.VerbGrants do
   end
 
   @doc """
+  Splits the per-verb entries out of a `to_circles` list, returning `{verb_grants, recipients}`.
+
+  A `to_circles` entry is either a recipient (a circle or user, optionally `{subject, role}`), or `{subject, verbs: verbs}`, which grants or denies single verbs without making the subject a recipient: `verbs` lists verbs to grant (`[:like, :reply]`) or each verb's value (`[like: false, reply: true]`). A subject may be a circle's name, as elsewhere in `to_circles`, a stereotype (eg. `:followers`) meaning `creator`'s own circle (`Bonfire.Boundaries.Circles.resolve_id/2`); an entry for a circle the creator doesn't have is dropped.
+
+      iex> split_from_circles(["user_id", {"circle_id", verbs: [:like, quote: false]}], creator)
+      {[{"circle_id", :like, true}, {"circle_id", :quote, false}], ["user_id"]}
+  """
+  def split_from_circles(to_circles, creator) when is_list(to_circles) do
+    {verb_entries, recipients} =
+      Enum.split_with(to_circles, fn
+        {_subject, opts} when is_list(opts) ->
+          Keyword.keyword?(opts) and Keyword.has_key?(opts, :verbs)
+
+        _ ->
+          false
+      end)
+
+    verb_grants =
+      for {subject, opts} <- verb_entries,
+          subject =
+            if(is_atom(subject),
+              do: Bonfire.Boundaries.Circles.resolve_id(subject, creator),
+              else: subject
+            ),
+          subject,
+          verb <- List.wrap(opts[:verbs]) do
+        case verb do
+          {verb, value} -> {subject, verb, value}
+          verb -> {subject, verb, true}
+        end
+      end
+
+    {verb_grants, recipients}
+  end
+
+  def split_from_circles(to_circles, _creator), do: {[], to_circles}
+
+  @doc """
   Transforms ACL subject verb grants to verb permissions format for display.
 
   Takes ACL grants structure:
