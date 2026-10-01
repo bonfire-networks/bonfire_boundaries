@@ -99,7 +99,9 @@ defmodule Bonfire.Boundaries.API.GraphQLTest do
   test "returns group presets from runtime config" do
     {:ok, result} = Absinthe.run(@query, Schema, variables: %{"ctx" => "group"})
     ids = get_in(result, [:data, "boundaries", "presets"]) |> Enum.map(& &1["id"])
-    assert "public_local_community" in ids
+    assert "local_community" in ids
+    # replaced by `local_community`, so not offered (still defined, for groups already on it)
+    refute "public_local_community" in ids
     assert "private_club" in ids
     assert "announcement_channel" in ids
   end
