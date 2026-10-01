@@ -44,14 +44,7 @@ defmodule Bonfire.Boundaries.VerbGrants do
       {[{"circle_id", :like, true}, {"circle_id", :quote, false}], ["user_id"]}
   """
   def split_from_circles(to_circles, creator) when is_list(to_circles) do
-    {verb_entries, recipients} =
-      Enum.split_with(to_circles, fn
-        {_subject, opts} when is_list(opts) ->
-          Keyword.keyword?(opts) and Keyword.has_key?(opts, :verbs)
-
-        _ ->
-          false
-      end)
+    {verb_entries, recipients} = Enum.split_with(to_circles, &verbs_entry?/1)
 
     verb_grants =
       for {subject, opts} <- verb_entries,
@@ -72,6 +65,12 @@ defmodule Bonfire.Boundaries.VerbGrants do
   end
 
   def split_from_circles(to_circles, _creator), do: {[], to_circles}
+
+  @doc "Whether a `to_circles` entry grants or denies single verbs (`{subject, verbs: …}`), rather than naming a recipient."
+  def verbs_entry?({_subject, opts}) when is_list(opts),
+    do: Keyword.keyword?(opts) and Keyword.has_key?(opts, :verbs)
+
+  def verbs_entry?(_), do: false
 
   @doc """
   Transforms ACL subject verb grants to verb permissions format for display.

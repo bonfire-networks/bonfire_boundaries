@@ -353,6 +353,15 @@ defmodule Bonfire.Boundaries.Acls do
     # |> Enum.map(&Needle.ULID.as_uuid(&1.acl_id))
     # |> debug()
 
+    #     repo().all(from c in Caretaker, where: c.caretaker_id == ^uid(creator), select: c.id)
+    # |> debug("DEBUG Raw caretaker IDs in find_acls")
+
+    recipients = custom_recipients(changeset_or_obj, preset, to_circles, creator, opts)
+
+    # only the per-verb `to_circles` entries (eg. an incoming `interactionPolicy`) drop what changes nothing; an explicit `verb_grants:` (the composer's toggles, the API's permissions) is kept as given, since what else grants a verb (eg. the author's own default boundaries) isn't all known here, and a redundant denial is harmless where a missing one can let someone through
+    circle_verb_grants =
+      drop_verb_grants_changing_nothing(circle_verb_grants, preset, recipients, opts)
+
     verb_grants =
       case e(opts, :verb_grants, []) do
         verb_grants when is_list(verb_grants) ->
@@ -366,12 +375,7 @@ defmodule Bonfire.Boundaries.Acls do
       end
       |> debug("verb_grants input")
 
-    #     repo().all(from c in Caretaker, where: c.caretaker_id == ^uid(creator), select: c.id)
-    # |> debug("DEBUG Raw caretaker IDs in find_acls")
-
-    recipients = custom_recipients(changeset_or_obj, preset, to_circles, creator, opts)
-
-    verb_grants = drop_verb_grants_changing_nothing(verb_grants, preset, recipients, opts)
+    {control_acls, verb_grants} = maybe_copy_preset_for_exceptions(preset, control_acls, verb_grants)
 
     case recipients do
       [] when verb_grants == [] ->
@@ -443,6 +447,61 @@ defmodule Bonfire.Boundaries.Acls do
         }
     end
   end
+
+  # An action turned off with exceptions: every circle the preset grants a verb to is denied it, and some other circle is granted it. A denial always wins, so those denials would also refuse the exception's members (eg. people I follow are local or remote users too), and the preset's shared ACLs can't have the verb taken out for one object. So instead the object doesn't get the preset's ACLs: its own ACL gets the preset's grants without that verb (from config), plus the exception grants, and the denials are dropped. Only then: an action off with no exceptions keeps the preset's ACLs and the denials.
+  defp maybe_copy_preset_for_exceptions(preset, control_acls, verb_grants)
+       when is_binary(preset) and is_list(verb_grants) and verb_grants != [] do
+    acl_names = Bonfire.Boundaries.Presets.acls_from_preset_boundary_names(preset)
+    config_grants = Map.new(Grants.grants())
+
+    # the preset's grants, as {circle_id, verb, value}
+    preset_rows =
+      for acl_name <- acl_names,
+          {circle, verbs} <- Map.get(config_grants, acl_name, %{}),
+          circle != :SELF,
+          verb <- Scaffold.Instance.list_verbs(verbs),
+          uniq: true,
+          do: {Circles.get_id!(circle), Enums.maybe_elem(verb, 0) || verb, Enums.maybe_elem(verb, 1, true)}
+
+    granted_to = fn verb_id ->
+      for {circle_id, verb, true} <- preset_rows, Verbs.get_id!(verb) == verb_id, uniq: true, do: circle_id
+    end
+
+    explicit = Enum.map(verb_grants, fn {subject, verb, value} -> {uid(subject), Verbs.get_id!(verb), value} end)
+
+    off_verb_ids =
+      for {_subject_id, verb_id, _value} <- explicit,
+          audience = granted_to.(verb_id),
+          audience != [],
+          Enum.all?(audience, &({&1, verb_id, false} in explicit)),
+          Enum.any?(explicit, fn {subject_id, v, value} ->
+            v == verb_id and value == true and subject_id not in audience
+          end),
+          uniq: true,
+          do: verb_id
+
+    if off_verb_ids == [] do
+      {control_acls, verb_grants}
+    else
+      preset_acl_ids = Enum.map(acl_names, &get_id!/1)
+
+      copied =
+        for {circle_id, verb, value} <- preset_rows,
+            not (value == true and Verbs.get_id!(verb) in off_verb_ids),
+            do: {circle_id, verb, value}
+
+      kept =
+        Enum.reject(verb_grants, fn {subject, verb, value} ->
+          verb_id = Verbs.get_id!(verb)
+          value == false and verb_id in off_verb_ids and uid(subject) in granted_to.(verb_id)
+        end)
+
+      {Enum.reject(control_acls, &(e(&1, :acl_id, nil) in preset_acl_ids)), copied ++ kept}
+    end
+  end
+
+  defp maybe_copy_preset_for_exceptions(_preset, control_acls, verb_grants),
+    do: {control_acls, verb_grants}
 
   # A direct verb grant that changes nothing is dropped, so what the boundary already gives or withholds isn't repeated as rows:
   # - a denial of a verb nobody would get anyway (neither the preset's ACLs nor the recipients' default verbs give it);
