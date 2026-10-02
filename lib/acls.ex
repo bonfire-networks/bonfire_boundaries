@@ -375,7 +375,8 @@ defmodule Bonfire.Boundaries.Acls do
       end
       |> debug("verb_grants input")
 
-    {control_acls, verb_grants} = maybe_copy_preset_for_exceptions(preset, control_acls, verb_grants)
+    {control_acls, verb_grants} =
+      maybe_copy_preset_for_exceptions(preset, control_acls, verb_grants)
 
     case recipients do
       [] when verb_grants == [] ->
@@ -461,13 +462,21 @@ defmodule Bonfire.Boundaries.Acls do
           circle != :SELF,
           verb <- Scaffold.Instance.list_verbs(verbs),
           uniq: true,
-          do: {Circles.get_id!(circle), Enums.maybe_elem(verb, 0) || verb, Enums.maybe_elem(verb, 1, true)}
+          do:
+            {Circles.get_id!(circle), Enums.maybe_elem(verb, 0) || verb,
+             Enums.maybe_elem(verb, 1, true)}
 
     granted_to = fn verb_id ->
-      for {circle_id, verb, true} <- preset_rows, Verbs.get_id!(verb) == verb_id, uniq: true, do: circle_id
+      for {circle_id, verb, true} <- preset_rows,
+          Verbs.get_id!(verb) == verb_id,
+          uniq: true,
+          do: circle_id
     end
 
-    explicit = Enum.map(verb_grants, fn {subject, verb, value} -> {uid(subject), Verbs.get_id!(verb), value} end)
+    explicit =
+      Enum.map(verb_grants, fn {subject, verb, value} ->
+        {uid(subject), Verbs.get_id!(verb), value}
+      end)
 
     off_verb_ids =
       for {_subject_id, verb_id, _value} <- explicit,
