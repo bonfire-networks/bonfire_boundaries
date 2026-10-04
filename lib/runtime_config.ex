@@ -57,6 +57,13 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
             "Flag an object for a moderator to review (please note that anyone who can see or read something can flag it anyway)"
           )
       },
+      # an ACTION recorded in the moderation log (a `Moderation` record's verb), not a permission: who may lock is decided by `:mediate`/`:grant`
+      lock: %{
+        id: "10CKTHREADT0FVRTHERREP11ES",
+        verb: l("Lock"),
+        icon: "ph:lock-duotone",
+        summary: l("Close a thread to further replies")
+      },
       reply: %{
         id: "71TCREAT1NGA11NKEDRESP0NSE",
         verb: l("Reply"),

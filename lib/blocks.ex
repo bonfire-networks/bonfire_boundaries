@@ -281,8 +281,17 @@ defmodule Bonfire.Boundaries.Blocks do
       iex> Bonfire.Boundaries.Blocks.lock(post, current_user: moderator)
   """
   def lock(object, scope) do
+    # TODO: the grants and the record in one transaction, so neither exists without the other
     with {:ok, object} <- may_lock(object, scope),
          {:ok, _} = ok <- block(object, :lock, scope) do
+      # the moderation log's record of it, with the reason (`scope[:reason]`) if one was given. Through `maybe_apply` since records live in bonfire_social, which boundaries doesn't depend on
+      maybe_apply(
+        Bonfire.Social.Moderations,
+        :record,
+        [current_user(scope), :lock, object, [reason: e(scope, :reason, nil)]],
+        fallback_return: nil
+      )
+
       maybe_federate_lock(:lock, object, scope)
       ok
     end
@@ -290,6 +299,7 @@ defmodule Bonfire.Boundaries.Blocks do
 
   @doc "Reopens an object closed by `lock/2`. Needs the same standing as locking it."
   def unlock(object, scope) do
+    # TODO: an `unlock` record, with `reverses:` the lock's record when there is one (a lock made before records has none)
     with {:ok, object} <- may_lock(object, scope),
          {:ok, _} = ok <- unblock(object, :lock, scope) do
       maybe_federate_lock(:unlock, object, scope)
@@ -368,6 +378,7 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   def ap_publish_activity(subject, verb, object) when verb in [:lock, :unlock] do
+    # TODO: build it from the lock's record: `pointer:` the record (so the stored AP activity points back to it), `summary:` its reason, `audience:` the group
     with {:ok, actor} <- ActivityPub.Actor.get_cached(pointer: subject),
          {:ok, ap_object} <- ActivityPub.Object.get_cached(pointer: object) do
       # no `pointer:` — a lock creates GRANTS rather than a record, so the activity has no local pointable of its own, and claiming the locked object's would collide with the AP object already holding it
@@ -977,7 +988,7 @@ defmodule Bonfire.Boundaries.Blocks do
   defp maybe_store_moderation_reason(_object, reason) when reason in [nil, ""], do: :ok
 
   defp maybe_store_moderation_reason(object, reason) do
-    # TODO: where to store the reason? The object may be a post, comment, or thread, etc
+    # TODO: replaced by passing the `summary` to `lock/2` as `reason:`, so a remote moderator's lock becomes a record with them as subject, linked to the AP activity it came from
     # Utils.maybe_apply(Bonfire.Common.Settings, :put, [[:moderation_reason], reason, [scope: object]],
     #   fallback_return: nil
     # )
