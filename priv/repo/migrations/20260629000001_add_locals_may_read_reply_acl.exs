@@ -6,6 +6,6 @@ defmodule Bonfire.Boundaries.Repo.Migrations.AddLocalsMayReadReplyAcl do
 
   # Seeds the new `:locals_may_read_reply` stereotype ACL (+ its grants) used by the
   # readable-but-low-reach tiers (unlisted/quiet) so locals can reply without boosting.
-  def up, do: Bonfire.Boundaries.Scaffold.Instance.upsert_acls()
+  def up, do: Bonfire.Boundaries.Scaffold.Instance.upsert_verbs_acls_and_grants()
   def down, do: nil
 end

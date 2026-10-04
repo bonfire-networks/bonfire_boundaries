@@ -229,22 +229,26 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
   end
 
   @doc """
-  Inserts or updates the ACLs in the database.
+  Inserts or updates the verbs, ACLs and grants in the database, from the current config.
 
-  Useful for migrations when adding new built-in ACLs. This will:
-  - Insert the ACL records (ignoring if they already exist)
+  Useful for migrations when adding new built-in ACLs or grants. The verbs go first because each grant references one: the grants come from the current config, which can name a verb that a later migration adds, and the grant insert fails without its row.
   """
+  def upsert_verbs_acls_and_grants() do
+    upsert_verbs()
+    upsert_acls()
+    upsert_grants()
+  end
+
   def upsert_acls() do
     config_current_acls()
     |> upsert_acls_helper()
-
-    upsert_grants()
   end
 
   # `deprecated` ACLs are never created or granted. They stay in config so their ids keep resolving for instances that already hold rows pointing at them, and so nothing new is ever attached to one. `Acls.get_id/1` reads config rather than the DB, so omitting them here costs no lookups. Dropping them here also drops them from `named` in `fixtures/0`, which derives from this list.
   defp config_current_acls, do: Acls.acls() |> Keyword.values() |> Enum.reject(& &1[:deprecated])
 
-  def upsert_grants() do
+  # private because we need to be sure any new verbs and ACLs are inserted before the grants that reference them
+  defp upsert_grants() do
     grants_fixtures()
     |> upsert_grants_helper()
 

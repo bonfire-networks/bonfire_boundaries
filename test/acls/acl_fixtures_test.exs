@@ -30,7 +30,7 @@ defmodule Bonfire.Boundaries.AclFixturesTest do
       |> Enum.map(&elem(&1, 0))
 
     assert missing == [],
-           "declared in config with no row, so anything granting through them silently permits nothing: #{inspect(missing)}. A new built-in ACL needs a migration calling `Scaffold.Instance.upsert_acls/0` — migrations run once, so adding one to an existing migration does not re-run it."
+           "declared in config with no row, so anything granting through them silently permits nothing: #{inspect(missing)}. A new built-in ACL needs a migration calling `Scaffold.Instance.upsert_verbs_acls_and_grants/0` — migrations run once, so adding one to an existing migration does not re-run it."
   end
 
   # Asked of the FIXTURES rather than of the database, because the database cannot answer it. A deprecated ACL's row is EXPECTED to exist on any instance that held it before the deprecation, which is the whole reason its config entry stays. Nothing deletes one, deliberately, since objects still point at it. So querying rows conflates "this install created it" with "it has been here since before", and would fail on every upgraded instance including a developer's own test database. What has to hold is that the scaffold never creates another.

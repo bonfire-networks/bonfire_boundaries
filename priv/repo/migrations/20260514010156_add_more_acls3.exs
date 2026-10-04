@@ -4,6 +4,6 @@ defmodule Bonfire.Boundaries.Repo.Migrations.AddMoreAcls3 do
 
   import Bonfire.Boundaries.Scaffold
 
-  def up, do: Bonfire.Boundaries.Scaffold.Instance.upsert_acls()
+  def up, do: Bonfire.Boundaries.Scaffold.Instance.upsert_verbs_acls_and_grants()
   def down, do: nil
 end
