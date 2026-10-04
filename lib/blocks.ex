@@ -144,8 +144,9 @@ defmodule Bonfire.Boundaries.Blocks do
 
   def block(user_or_instance_id_or_username, block_type, scope)
       when is_binary(user_or_instance_id_or_username) do
+    # resolved only to know WHAT to block, so not as anyone: a block is sometimes of something the blocker can't see (someone who ghosted them, a members-only or paid post), and an instance-wide one has no user to look it up as. Whether the block is allowed is the caller's to check
     with {:ok, user_or_circle} <-
-           Bonfire.Common.Needles.get(user_or_instance_id_or_username) do
+           Bonfire.Common.Needles.get(user_or_instance_id_or_username, skip_boundary_check: true) do
       debug(user_or_circle, "found by ID or username")
       block(user_or_circle, block_type, scope)
     else
