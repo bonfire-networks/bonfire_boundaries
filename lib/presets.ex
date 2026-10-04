@@ -73,6 +73,10 @@ defmodule Bonfire.Boundaries.Presets do
     debug(boundaries, "inputted")
     preset_acls = Config.get!(:preset_acls)
 
+    # a group's dimension slugs arrive together (eg. `["open", "unlisted", "anyone"]`), and each has to keep its own ACLs, where a post names one preset plus direct ACL ids. So `local` and `unlisted`, which are also group visibility slugs, only collapse to a single preset when no other preset slug is beside them
+    multi_preset? =
+      Enum.count(boundaries, &(is_binary(&1) and Map.has_key?(preset_acls, &1))) > 1
+
     # Note: only one applies, in priority from most to least restrictive
     cond do
       "admins" in boundaries ->
@@ -81,10 +85,10 @@ defmodule Bonfire.Boundaries.Presets do
       "mentions" in boundaries ->
         "mentions"
 
-      "local" in boundaries ->
+      "local" in boundaries and not multi_preset? ->
         "local"
 
-      "unlisted" in boundaries ->
+      "unlisted" in boundaries and not multi_preset? ->
         "unlisted"
 
       "public" in boundaries ->

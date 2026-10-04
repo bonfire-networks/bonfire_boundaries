@@ -100,7 +100,8 @@ defmodule Bonfire.Boundaries.Acls do
           :remotes_may_participate,
           :remotes_may_reply_follow_join_request,
           :remotes_may_contribute,
-          :remotes_may_contribute_follow_join_request
+          :remotes_may_contribute_follow_join_request,
+          :remotes_may_contribute_see_read_interact
         ],
         &get_id!/1
       )

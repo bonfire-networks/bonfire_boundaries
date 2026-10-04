@@ -333,6 +333,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
 
     role_verbs_contribute = role_verbs_curate ++ verbs_contrib
 
+    # the `contribute` rung WITHOUT the ones below it, for a group's participation dimension: who may post says nothing about who may find, read or react, which is the visibility dimension's answer (each visibility grants its own see/read/interact). Granted rather than the cumulative role, the way `cannot_participate` denies only its own rung
+    verbs_contribute_above_interact = role_verbs_contribute -- role_verbs_interact
+
     role_verbs_editor_and_contribute = role_verbs_editor ++ verbs_contrib
 
     # verbs_join_and_contribute = role_verbs_contribute ++ [:invite]
@@ -527,7 +530,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         # --- Membership presets ---
         # `open` historically bundled the participation ACLs (`*_may_contribute`) too, but those belong to participation slugs (`anyone` / `local:contributors`), keeping them here would mis-detect any anyone-participation group as `open` membership. The form cascades `open` → `participation: anyone` so the contributes still get applied via the participation slug.
         # `:request` is granted by the MEMBERSHIP dimension and nowhere else. It is one verb for all asking, so it needs a single home, and the ACL's own name says which one ("Everyone may request (eg. to join)"). Every membership value that means yes grants it; `invite_only` grants nothing, which is how an announcement channel (`invite_only` + `moderators` participation) ends up offering no ask at all, by omission rather than by a negative rule anyone had to write.
-        "open" => [:everyone_may_see_read, :everyone_may_join, :everyone_may_request],
+        # `open` also used to grant `everyone_may_see_read`, the same kind of overreach: seeing a group is the visibility dimension's answer, and an `unlisted` group exists to withhold it, so an open unlisted group was listed anyway. Existing groups lose it in `GroupAclSignaturesDataMigration`
+        "open" => [:everyone_may_join, :everyone_may_request],
         "local:members" => [:locals_may_join, :everyone_may_request],
         # ARCHIPELAGO slugs are commented out across all four dimensions until the grants exist.
         # Not because archipelago is unbuilt (it ships, as a federation mode): what is unbuilt is a group carrying its OWN allow-list. With the instance in archipelago mode, federating already means federating to the archipelago, so `global` and `nonfederated` cover it.
@@ -836,8 +840,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           deprecated: true
         },
         remotes_may_contribute: %{
-          id: "7REM0TEACT0RSCANC0NTR1BV22",
+          id: "7REM0TEACT0RSCANC0NTR1BV33",
           name: l("Remote actors may contribute")
+        },
+        # versioned when it stopped granting the rungs below contribute (see, read, interact), which made a group anyone may post in visible and readable to anyone whatever its visibility. Grants are never pruned, so the old id keeps its old grants and groups are re-pointed by `GroupAclSignaturesDataMigration`
+        remotes_may_contribute_see_read_interact: %{
+          id: "7REM0TEACT0RSCANC0NTR1BV22",
+          name: l("Remote actors may see, read, interact and contribute"),
+          deprecated: true
         },
         remotes_may_contribute_follow_join_request: %{
           id: "7REM0TEACT0RSCANC0NTR1BVTE",
@@ -870,8 +880,14 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           deprecated: true
         },
         locals_may_contribute: %{
-          id: "1ANY10CA1VSERCANC0NTR1BV22",
+          id: "1ANY10CA1VSERCANC0NTR1BV33",
           name: l("Local users may contribute")
+        },
+        # versioned the same way as `remotes_may_contribute_see_read_interact` above
+        locals_may_contribute_see_read_interact: %{
+          id: "1ANY10CA1VSERCANC0NTR1BV22",
+          name: l("Local users may see, read, interact and contribute"),
+          deprecated: true
         },
         locals_may_contribute_follow_join_request: %{
           id: "1ANY10CA1VSERCANC0NTR1BVTE",
@@ -1034,9 +1050,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         locals_may_interact: %{local: :interact},
         # interact and reply/message/mention
         locals_may_reply: %{local: :participate},
-        # join + interact + contribute
-        locals_may_contribute: %{local: :contribute},
-        remotes_may_contribute: %{activity_pub: :contribute},
+        # contribute only, without the rungs below it: the group's visibility grants see/read/interact
+        locals_may_contribute: %{local: verbs_contribute_above_interact},
+        remotes_may_contribute: %{activity_pub: verbs_contribute_above_interact},
         locals_may_see: %{local: [:see]},
         locals_may_follow: %{local: [:follow]},
         # `:follow` is granted positively rather than inherited from a role, so an account that reviews follows simply does not carry this, instead of carrying `no_follow` to take it back. Guests are excluded: following needs an identity.

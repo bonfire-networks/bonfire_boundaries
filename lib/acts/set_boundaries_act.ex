@@ -93,21 +93,6 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
               []
           end
 
-        # TEMP probe for CI
-        Untangle.warn(
-          {Bonfire.Common.Types.uid(reply_to), Acls.requested_boundary(options), boundary_options,
-           Keyword.take(options, [
-             :boundary,
-             :to_boundaries,
-             :to_circles,
-             :mentions,
-             :context_id,
-             :verb_grants,
-             :acl_ids
-           ])},
-          "DEBUG SetBoundaries {reply_to, requested, boundary_options, options}"
-        )
-
         changeset
         |> Acls.cast(current_user, Keyword.merge(options, boundary_options))
         |> Epic.assign(epic, on, ...)
