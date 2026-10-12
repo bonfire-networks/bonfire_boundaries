@@ -404,7 +404,9 @@ defmodule Bonfire.Boundaries.Blocks do
           maybe_apply(
             Bonfire.Federate.ActivityPub.AdapterUtils,
             :maybe_determine_audience,
-            [object], fallback_return: nil)
+            [object],
+            fallback_return: nil
+          )
         )
         # the lock's moderation record, so the stored AP activity points back to it. Never the locked object's own id, which its AP object already holds
         |> Enums.maybe_put(:pointer, opts[:record])
