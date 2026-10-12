@@ -165,6 +165,11 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   def block(user_or_instance_to_block, block_type, scope) do
+    with {:ok, scope} <- maybe_on_behalf_of(scope),
+         do: do_block(user_or_instance_to_block, block_type, scope)
+  end
+
+  defp do_block(user_or_instance_to_block, block_type, scope) do
     types_blocked =
       types_blocked(block_type)
 
@@ -188,6 +193,9 @@ defmodule Bonfire.Boundaries.Blocks do
            scope != :instance_wide do
         me = Utils.current_user_required!(scope)
 
+        # blocking on behalf of a group (`on_behalf_of:`): its silence federates too, since it keeps someone out of the group's discussions, which other instances following the group need to know
+        on_behalf_of_group? = not is_nil(e(scope, :acting_user, nil))
+
         if :ghost_them in types_blocked do
           # Their follow of me, so nothing about it is ours to announce: `Follows.ap_publish_activity/3` skips a non-local follower rather than trying to sign an `Undo{Follow}` as them. The `Block` below is what their server hears.
           debug("make the person I am ghosting unfollow me")
@@ -202,16 +210,22 @@ defmodule Bonfire.Boundaries.Blocks do
           # A silence says "I do not see them", which is a MUTE, and mutes do not federate anywhere, Mastodon's are local-only. Their server cannot help me not-see them, my own feed filtering does that, so sending one would be a disclosure that buys nothing and would be read as far stronger than what was asked for.
           #
           # Blocking (both types at once) therefore emits exactly one `Block`, from this half.
-          maybe_federate_block(me, user_or_instance_to_block)
+          maybe_federate_block(me, user_or_instance_to_block, :block, scope)
         end
 
         if :silence_them in types_blocked do
-          debug("unfollow the person I am silencing")
+          if on_behalf_of_group? do
+            # a group follows nobody, and the person keeps their follow of it, since someone the group silenced may still read it. One `Block` for both halves: the ghost half above already sent it
+            if :ghost_them not in types_blocked,
+              do: maybe_federate_block(me, user_or_instance_to_block, :block, scope)
+          else
+            debug("unfollow the person I am silencing")
 
-          Utils.maybe_apply(Bonfire.Social.Graph.Follows, :unfollow, [
-            me,
-            user_or_instance_to_block
-          ])
+            Utils.maybe_apply(Bonfire.Social.Graph.Follows, :unfollow, [
+              me,
+              user_or_instance_to_block
+            ])
+          end
         end
       end
 
@@ -219,24 +233,62 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
+  # Blocking on behalf of a group (`on_behalf_of: group`): the group is the blocker, so its own block circles hold the person, and its block ACLs, on the group and on what is published in it, deny them. Whoever acted is kept as `acting_user`, who sends whatever federates. Only someone who may moderate the group (`:mediate`) may
+  defp maybe_on_behalf_of(scope) do
+    case e(scope, :on_behalf_of, nil) do
+      nil ->
+        {:ok, scope}
+
+      group ->
+        acting_user = Utils.current_user(scope)
+
+        # as an id too (eg. from a form), loaded since it becomes the blocker, whose circles hold the block
+        group =
+          if is_binary(group),
+            do: Bonfire.Common.Needles.get!(group, skip_boundary_check: true),
+            else: group
+
+        if Bonfire.Boundaries.can?(acting_user, :mediate, group),
+          do:
+            {:ok,
+             scope
+             |> Keyword.new()
+             |> Keyword.delete(:on_behalf_of)
+             |> Keyword.merge(current_user: group, acting_user: acting_user)},
+          else:
+            error(:not_permitted, "Only someone who moderates the group may block on its behalf")
+    end
+  end
+
   # Telling their server rides on the SAME opt-in as severing the follow, because they are two halves of one choice: both reach further than our own instance can, and both are noticeable. Removing someone from our followers stops us addressing them; telling their server is what can stop a post it has ALREADY received from being shown to them, which is the case a shared inbox leaves open.
   #
-  # Only for a remote person. Blocking a local one is enforced by our own boundaries, so there is nobody to tell.
-  defp maybe_federate_block(me, user_or_instance_to_block, verb \\ :block) do
+  # Only for a remote person. Blocking a local one is enforced by our own boundaries, so there is nobody to tell. Except a block on behalf of a group (`on_behalf_of:`), which is for the group's followers on other instances as much as for the person's, so it goes out whoever is blocked; the scope goes along, so `ap_publish_activity/4` sends it from whoever acted.
+  defp maybe_federate_block(me, user_or_instance_to_block, verb \\ :block, scope \\ []) do
     object = load_for_locality_check(user_or_instance_to_block)
+    on_behalf_of_group? = not is_nil(e(scope, :acting_user, nil))
 
     # Not about an INSTANCE, and not about someone local. A `Block` names an actor, so blocking a whole host has no shape to send and nobody to send it to: that is local policy, enforced by our own delivery checks. And blocking someone local needs no telling, since our boundaries are the enforcement.
     #
     # ⚠️ stated as "not a Peer" rather than "is a character". The obvious allow-list spelling, `Types.object_type(object) in Config.get(:types_character_schemas, [], :bonfire)`, reads `[]` because that key is unset (the default lives at each call site, see `AdapterUtils`), so the condition is never true and every Block is silently dropped. `maybe_federate_lock/3` survives the same expression only because it asks `not in`, where an empty list fails open.
     if Types.object_type(object) != Bonfire.Data.ActivityPub.Peer and
-         Utils.maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :is_local?, [object],
-           fallback_return: true
-         ) != true do
+         (on_behalf_of_group? or
+            Utils.maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :is_local?, [object],
+              fallback_return: true
+            ) != true) do
       try do
         Utils.maybe_apply(
           Bonfire.Federate.ActivityPub.Outgoing,
           :maybe_federate,
-          [me, verb, object, [federation_module: __MODULE__]],
+          [
+            me,
+            verb,
+            object,
+            [federation_module: __MODULE__] ++
+              Keyword.take(List.wrap(if Keyword.keyword?(scope), do: scope), [
+                :acting_user,
+                :reason
+              ])
+          ],
           fallback_return: nil
         )
       rescue
@@ -259,14 +311,16 @@ defmodule Bonfire.Boundaries.Blocks do
       {:ok, "Unblocked"}
   """
   def unblock(user_or_instance_to_unblock, block_type \\ nil, scope) do
-    with {:ok, result} <- mutate(:unblock, user_or_instance_to_unblock, block_type, scope) do
+    with {:ok, scope} <- maybe_on_behalf_of(scope),
+         {:ok, result} <- mutate(:unblock, user_or_instance_to_unblock, block_type, scope) do
       # unconditional, unlike the block: `ap_publish_activity/3` sends nothing unless a `Block` actually went out, so this cannot disclose a block the person kept to themselves. Leaving a remote holding a block we have lifted would be worse than telling it
       if user_or_instance_to_unblock != :instance_wide and scope != :instance_wide,
         do:
           maybe_federate_block(
             Utils.current_user_required!(scope),
             user_or_instance_to_unblock,
-            :unblock
+            :unblock,
+            scope
           )
 
       {:ok, result}
@@ -301,7 +355,9 @@ defmodule Bonfire.Boundaries.Blocks do
         end
 
       maybe_federate_lock(:lock, object, scope, reason: reason, record: record)
-      ok
+
+      # the record when one was written, so whoever applied an incoming `Lock` can link its AP activity to it (which is how a relayed copy of it is known to be applied already)
+      if record, do: {:ok, record}, else: ok
     end
   end
 
@@ -357,35 +413,30 @@ defmodule Bonfire.Boundaries.Blocks do
 
   ⚠️ The moderator's REASON has nowhere to come from yet: an incoming lock carries it in `summary` and we store it (`maybe_store_moderation_reason/2`), but a local lock creates grants rather than a record, so there is nothing to read back. Emitted without one until that is decided.
   """
-  # Emitted only when the person asked for it (`also_unfollow_and_notify`), which is what makes a block a disclosure: the remote is told outright and may show them. See `maybe_federate_block/2`.
+  # Emitted only when the person asked for it (`also_unfollow_and_notify`), which is what makes a block a disclosure: the remote is told outright and may show them. See `maybe_federate_block/4`.
   # `ActivityPub.block/2` severs no follows of its own, deliberately: which follow a block ends depends on the block TYPE, and `block/3` has already done it in the right direction by the time this runs.
-  def ap_publish_activity(subject, :block, object) do
-    with {:ok, actor} <- ActivityPub.Actor.get_cached(pointer: subject),
-         {:ok, blocked_actor} <- ActivityPub.Actor.get_cached(pointer: object) do
-      ActivityPub.block(%{actor: actor, object: blocked_actor})
+  # Blocking on behalf of a group (`on_behalf_of:` in `block/3`, here `opts[:acting_user]`) has the group as subject, and goes out as the threadiverse keeps someone out of a community (Lemmy's `block_user.json`): sent by whoever acted, `to` Public, `cc`, `target` and `audience` the group, the reason in `summary`, and relayed by the group to its followers. Its `Undo` is addressed as the `Block` was (the fork copies it)
+  def ap_publish_activity(subject, verb, object, opts) when verb in [:block, :unblock] do
+    on_behalf_of = if e(opts, :acting_user, nil), do: subject
+
+    with {:ok, actor} <-
+           ActivityPub.Actor.get_cached(pointer: e(opts, :acting_user, nil) || subject),
+         {:ok, blocked_actor} <- ActivityPub.Actor.get_cached(pointer: object),
+         {:ok, activity} <- publish_block(verb, actor, blocked_actor, on_behalf_of, opts) do
+      if on_behalf_of,
+        do:
+          maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :maybe_group_relays, [
+            on_behalf_of,
+            activity
+          ])
+
+      {:ok, activity}
     else
-      e -> error(e, "Could not find the actor or the person to block")
+      :ok -> :ok
+      e -> error(e, "Could not federate the #{verb}")
     end
   end
 
-  # Only when we actually sent the `Block`
-  def ap_publish_activity(subject, :unblock, object) do
-    with {:ok, actor} <- ActivityPub.Actor.get_cached(pointer: subject),
-         {:ok, blocked_actor} <- ActivityPub.Actor.get_cached(pointer: object) do
-      case ActivityPub.Object.fetch_latest_block(actor, blocked_actor) do
-        %{} = _block ->
-          ActivityPub.unblock(%{actor: actor, object: blocked_actor})
-
-        _ ->
-          debug("no Block was ever sent for this pair, so there is nothing to undo")
-          :ok
-      end
-    else
-      e -> error(e, "Could not find the actor or the person to unblock")
-    end
-  end
-
-  # `Outgoing` calls the 4-arity version whenever a module exports one, so the verbs that need no `opts` go on to the clauses above
   def ap_publish_activity(subject, verb, object, opts) when verb in [:lock, :unlock] do
     with {:ok, actor} <- ActivityPub.Actor.get_cached(pointer: subject),
          {:ok, ap_object} <- ActivityPub.Object.get_cached(pointer: object) do
@@ -429,8 +480,37 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
-  def ap_publish_activity(subject, verb, object, _opts),
-    do: ap_publish_activity(subject, verb, object)
+  defp publish_block(:block, actor, blocked_actor, nil = _on_behalf_of, _opts),
+    do: ActivityPub.block(%{actor: actor, object: blocked_actor})
+
+  defp publish_block(:block, actor, blocked_actor, group, opts) do
+    with {:ok, %{ap_id: group_ap_id}} <- ActivityPub.Actor.get_cached(pointer: group) do
+      ActivityPub.block(%{
+        actor: actor,
+        object: blocked_actor,
+        to: [ActivityPub.Config.public_uri()],
+        cc: [group_ap_id],
+        target: group_ap_id,
+        audience: group_ap_id,
+        summary:
+          maybe_apply(Bonfire.Social.Moderations, :summary, [opts[:reason], :block],
+            fallback_return: opts[:reason]
+          )
+      })
+    end
+  end
+
+  # only when we actually sent the `Block`
+  defp publish_block(:unblock, actor, blocked_actor, _on_behalf_of, _opts) do
+    case ActivityPub.Object.fetch_latest_block(actor, blocked_actor) do
+      %{} = _block ->
+        ActivityPub.unblock(%{actor: actor, object: blocked_actor})
+
+      _ ->
+        debug("no Block was ever sent for this pair, so there is nothing to undo")
+        :ok
+    end
+  end
 
   # Callers pass an id as readily as a struct (the block live handler and the locking one both pass ids), and the locality checks below deliberately RAISE rather than guessing when `:peered` is not loaded. So load it here, mirroring what `AdapterUtils.preload_peered/1` asks of an object.
   defp load_for_locality_check(object_or_id) do
@@ -964,14 +1044,16 @@ defmodule Bonfire.Boundaries.Blocks do
 
       iex> Bonfire.Boundaries.Blocks.ap_receive_activity(blocker, activity, blocked)
   """
-  def ap_receive_activity(locker, %{data: %{"type" => "Lock"} = data} = _activity, object) do
+  def ap_receive_activity(locker, %{data: %{"type" => "Lock"} = data} = activity, object) do
     info("apply incoming Lock")
 
     # standing is checked by `lock/2` like anyone else's: a remote moderator is in the mirrored group's moderators circle, which its ACL on the object names. The `audience` the activity claims is not trusted for it
     with {:ok, object} <- ap_receive_object_to_lock(object),
-         {:ok, locked} <- lock(object, current_user: locker) do
+         {:ok, locked} <-
+           with_moderators_resynced(object, fn -> lock(object, current_user: locker) end) do
       # the reason a moderator gave, which the wire carries in `summary` (as a mod-removal `Delete` does). A `Flag` keeps its comment because a flag is an Edge record with a `named` mixin; a lock creates no record, only grants, so where this goes is still open (see the group federation plan).
       maybe_store_moderation_reason(object, data["summary"])
+      maybe_relay_received(object, activity)
       {:ok, locked}
     else
       e -> error(e, "Could not lock the object")
@@ -980,17 +1062,67 @@ defmodule Bonfire.Boundaries.Blocks do
 
   def ap_receive_activity(
         unlocker,
-        %{data: %{"type" => "Undo", "object" => %{"type" => "Lock"}}} = _activity,
+        %{data: %{"type" => "Undo", "object" => %{"type" => "Lock"}}} = activity,
         object
       ) do
     info("apply incoming Undo of a Lock")
 
     # reopening needs the same standing as closing, which `unlock/2` checks
     with {:ok, object} <- ap_receive_object_to_lock(object),
-         {:ok, unlocked} <- unlock(object, current_user: unlocker) do
+         {:ok, unlocked} <-
+           with_moderators_resynced(object, fn -> unlock(object, current_user: unlocker) end) do
+      maybe_relay_received(object, activity)
       {:ok, unlocked}
     else
       e -> error(e, "Could not unlock the object")
+    end
+  end
+
+  # A remote moderator's action on something in a group WE host, once applied, is passed on unchanged by the group to its followers, as Lemmy's communities do (`RawAnnouncableActivities::receive` → `AnnounceActivity::send(self, …)`): their copies of the group need it, and it is how the moderator's own instance learns the group applied it. A no-op for a group we only mirror (`maybe_group_relays/2` relays only for a local group)
+  defp maybe_relay_received(object, activity) do
+    maybe_apply(
+      Bonfire.Federate.ActivityPub.AdapterUtils,
+      :maybe_group_relays,
+      [object, activity], fallback_return: nil)
+  end
+
+  # a remote moderator refused here may have been added since we last synced the group's moderators, so the refusal re-syncs them from the origin and tries again (`Categories.with_moderators_resynced/2`); through `maybe_apply` since boundaries doesn't depend on classify, which without it just runs the action
+  defp with_moderators_resynced(object, action) do
+    maybe_apply(Bonfire.Classify.Categories, :with_moderators_resynced, [object, action],
+      fallback_fun: fn _object, action -> action.() end
+    )
+  end
+
+  defp receive_block_on_behalf_of(block_or_unblock, sender, target, blocked, activity) do
+    with {:ok, %{__struct__: Bonfire.Classify.Category} = group} <-
+           maybe_apply(
+             Bonfire.Federate.ActivityPub.AdapterUtils,
+             :get_by_url_ap_id_or_username,
+             [ActivityPub.Object.get_ap_id(target)],
+             fallback_return: nil
+           ),
+         {:ok, blocked} <-
+           maybe_apply(
+             Bonfire.Federate.ActivityPub.AdapterUtils,
+             :get_or_fetch_character_by_ap_id,
+             [blocked]
+           ) do
+      case with_moderators_resynced(group, fn ->
+             apply(__MODULE__, block_or_unblock, [
+               blocked,
+               :silence,
+               [current_user: sender, on_behalf_of: group]
+             ])
+           end) do
+        {:ok, _} = done ->
+          maybe_relay_received(group, activity)
+          done
+
+        refused ->
+          refused
+      end
+    else
+      e -> error(e, "Could not apply a block on behalf of a group")
     end
   end
 
@@ -1041,6 +1173,33 @@ defmodule Bonfire.Boundaries.Blocks do
     # Utils.maybe_apply(Bonfire.Common.Settings, :put, [[:moderation_reason], reason, [scope: object]],
     #   fallback_return: nil
     # )
+  end
+
+  # A `Block` with `target` a group we mirror, sent by one of its moderators (the threadiverse's way of keeping someone out of a community, Lemmy's `block_user.json`): it keeps them from taking part, which is our silence, made on the group's behalf by the sender, who needs `:mediate` on the mirror (`on_behalf_of:`), its moderators re-synced on a refusal. Without `target`, the sender's own block (the clauses after these)
+  def ap_receive_activity(
+        blocker,
+        %{data: %{"type" => "Block", "target" => target}} = activity,
+        %{data: %{}} = blocked
+      )
+      # an id, or the target's whole object as the fork expands it on the way in
+      when not is_nil(target) do
+    info("apply incoming Block on behalf of a group")
+    receive_block_on_behalf_of(:block, blocker, target, blocked, activity)
+  end
+
+  def ap_receive_activity(
+        unblocker,
+        %{
+          data: %{
+            "type" => "Undo",
+            "object" => %{"type" => "Block", "object" => blocked_id, "target" => target}
+          }
+        } = activity,
+        _object
+      )
+      when not is_nil(target) do
+    info("apply incoming Undo of a Block on behalf of a group")
+    receive_block_on_behalf_of(:unblock, unblocker, target, blocked_id, activity)
   end
 
   def ap_receive_activity(

@@ -1186,7 +1186,7 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       },
       # A Category (group or topic) is an actor with a character of its own, so it can be silenced like anyone else. Silencing keeps a reverse index on the object BEING silenced, so the category needs its own `silence_me` circle, its own negative ACL, and the grant joining the two. Users get all this at signup; a category gets it the first time somebody silences it, since most are never blocked by anyone and scaffolding it up front is rows on every group and topic ever created.
       #
-      # Deliberately only what blocking needs. `ghost_them` and `silence_them` are the BLOCKER's own lists and the blocker is a user; a category ghosting somebody would be group moderation, which is a different feature.
+      # `ghost_them` and `silence_them` are the BLOCKER's own lists. A category is the blocker when a group bans somebody (`Bonfire.Classify.Categories.ban/4`), which is what its entries below are for; a group gets them when it is created, so they also travel with what is published in it.
       # Keyed by stereotype so each one carries its own complete wiring (circle, ACL, grant, and the ACL attached to the actor itself) and can be created alone. A given block only ever uses one of them, so only that one gets rows.
       # TODO: use these for users too, to keep DRY but also so they're each created on-demand and don't bloat the DB.
       block_boundaries_by_stereotype: %{
@@ -1204,13 +1204,23 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           grants: %{my_ghosted_cannot_anything: %{ghost_them: verbs_negative.(all_verb_names)}},
           controlleds: %{SELF: [:my_ghosted_cannot_anything]}
         },
-        # this category silenced somebody, the softer moderation act
+        # this category silenced somebody, the softer moderation act: a participation ban, Lemmy's meaning. No posting into the group (`:tag`, `:create`), replying, liking or boosting in it, while still reading it and keeping a follow or membership (Mayel, 12 October). The ACL is attached to the group and to what is published in it (`Bonfire.Classify.Boundaries.acl_ids_for_published_in/1`), so it covers posts from before the ban
         silence_them: %{
           circles: %{silence_them: %{stereotype: :silence_them}},
           acls: %{my_silenced_cannot_reach_me: %{stereotype: :silenced_cannot_reach_me}},
           grants: %{
             my_silenced_cannot_reach_me: %{
-              silence_them: verbs_negative.([:request, :mention, :message])
+              silence_them:
+                verbs_negative.([
+                  :request,
+                  :mention,
+                  :message,
+                  :tag,
+                  :create,
+                  :reply,
+                  :like,
+                  :boost
+                ])
             }
           },
           controlleds: %{SELF: [:my_silenced_cannot_reach_me]}
