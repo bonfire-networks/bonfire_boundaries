@@ -180,6 +180,29 @@ defmodule Bonfire.Boundaries.Boundaries.SilenceActorFeedsPerUserTest do
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
     end
 
+    # Silencing is a mute, not an access block: `silence_me` denies `:see` (feeds, listings) but leaves `:read`, so a direct link still opens the post, as the silence description in the UI promises.
+    test "a post from a per-user silenced user is still readable by direct link, but not discoverable" do
+      me = Bonfire.Me.Fake.fake_user!(@my_name)
+      other_user = Bonfire.Me.Fake.fake_user!(@other_name)
+
+      assert {:ok, post} =
+               Posts.publish(
+                 current_user: other_user,
+                 post_attrs: @attrs,
+                 boundary: "public"
+               )
+
+      assert Bonfire.Boundaries.can?(me, :see, post),
+             "the control: I can discover the post before silencing, so the refusal below is the silence rather than the fixture"
+
+      Bonfire.Boundaries.Blocks.block(other_user, :silence, current_user: me)
+
+      refute Bonfire.Boundaries.can?(me, :see, post)
+
+      assert {:ok, read} = Posts.read(post.id, current_user: me)
+      assert read.id == post.id
+    end
+
     test "a plain unblock/2 (default nil block_type) also clears the per-user :silence_me reverse-index, so the post shows again" do
       me = Bonfire.Me.Fake.fake_user!(@my_name)
       other_user = Bonfire.Me.Fake.fake_user!(@other_name)

@@ -170,11 +170,13 @@ defmodule Bonfire.Boundaries.Blocks do
 
     # |> debug("types_blocked for #{inspect block_type}")
 
+    # the type as given: a missing one (or a list) would otherwise mean every type it stands for, which `mutate/4` runs one by one through each type's own clause. `List.first(types_blocked)` here made a plain `block/2` silence only, never ghost, while everything below acts on `types_blocked` as if both had happened
+    # block_type || List.first(types_blocked),
     with {:ok, result} <-
            mutate(
              :block,
              user_or_instance_to_block,
-             block_type || List.first(types_blocked),
+             block_type,
              scope
            ) do
       # debug(result, "blooocked")
@@ -577,12 +579,21 @@ defmodule Bonfire.Boundaries.Blocks do
 
   # a `nil`/`:any`/`:block` block type means "all block types": delegate to the per-type paths so the `:silence` clauses (which also maintain the `:silence_me` reverse-index that boundary queries filter on) are used. The generic clauses below only touch `:silence_them`/`:ghost_them`, so a plain `block/2`/`unblock/2` (nil type) or `block(x, :block, scope)` would otherwise leave `:silence_me` dangling (and a later per-type `unblock(x, :silence, scope)` would fail finding nothing to remove there). Works for both per-user and instance-wide scopes (each delegated type re-dispatches to its own clause).
   defp mutate(block_or_unblock, user_or_instance_to_block, block_type, scope)
-       when block_type in [nil, :any, :block] do
-    # succeed if either type changed something (one side may legitimately have nothing to do),
-    # returning a flat `{:ok, _}`/`{:error, _}` like the sibling clauses
-    [:ghost, :silence]
-    |> Enum.map(&mutate(block_or_unblock, user_or_instance_to_block, &1, scope))
-    |> Enums.first_ok_or_error()
+       when block_type in [nil, :any, :block] or is_list(block_type) do
+    block_types = if is_list(block_type), do: block_type, else: [:ghost, :silence]
+
+    results =
+      Enum.map(block_types, &mutate(block_or_unblock, user_or_instance_to_block, &1, scope))
+
+    case block_or_unblock do
+      # a ghost and a silence do opposite-facing jobs, so a block is done only when every one of them is: reporting the first success would tell someone they are blocked when only half of it applied. Adding to a circle that already holds them still succeeds, so a block has no "nothing to do" case to excuse
+      :block ->
+        Enums.first_ok_if_all_ok(results)
+
+      # an unblock CAN legitimately have nothing to do on one side (lifting a block that was only ever a silence), so it succeeds when any of them removed something
+      :unblock ->
+        Enums.first_ok_or_error(results)
+    end
   end
 
   defp mutate(
