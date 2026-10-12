@@ -286,15 +286,21 @@ defmodule Bonfire.Boundaries.Blocks do
     # TODO: the grants and the record in one transaction, so neither exists without the other
     with {:ok, object} <- may_lock(object, scope),
          {:ok, _} = ok <- block(object, :lock, scope) do
-      # the moderation log's record of it, with the reason (`scope[:reason]`) if one was given. Through `maybe_apply` since records live in bonfire_social, which boundaries doesn't depend on
-      maybe_apply(
-        Bonfire.Social.Moderations,
-        :record,
-        [current_user(scope), :lock, object, [reason: e(scope, :reason, nil)]],
-        fallback_return: nil
-      )
+      reason = e(scope, :reason, nil)
 
-      maybe_federate_lock(:lock, object, scope)
+      # the moderation log's record of it, with the reason if one was given. Through `maybe_apply` since records live in bonfire_social, which boundaries doesn't depend on
+      record =
+        case maybe_apply(
+               Bonfire.Social.Moderations,
+               :record,
+               [current_user(scope), :lock, object, [reason: reason]],
+               fallback_return: nil
+             ) do
+          {:ok, record} -> record
+          _ -> nil
+        end
+
+      maybe_federate_lock(:lock, object, scope, reason: reason, record: record)
       ok
     end
   end
@@ -379,21 +385,50 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
-  def ap_publish_activity(subject, verb, object) when verb in [:lock, :unlock] do
-    # TODO: build it from the lock's record: `pointer:` the record (so the stored AP activity points back to it), `summary:` its reason, `audience:` the group
+  # `Outgoing` calls the 4-arity version whenever a module exports one, so the verbs that need no `opts` go on to the clauses above
+  def ap_publish_activity(subject, verb, object, opts) when verb in [:lock, :unlock] do
     with {:ok, actor} <- ActivityPub.Actor.get_cached(pointer: subject),
          {:ok, ap_object} <- ActivityPub.Object.get_cached(pointer: object) do
-      # no `pointer:` — a lock creates GRANTS rather than a record, so the activity has no local pointable of its own, and claiming the locked object's would collide with the AP object already holding it
-      params = %{actor: actor, object: ap_object}
+      params =
+        %{actor: actor, object: ap_object}
+        # the reason, which Lemmy logs from `summary`; falling back when none was given, as every moderator activity does (`Bonfire.Social.Moderations.summary/2`)
+        |> Enums.maybe_put(
+          :summary,
+          maybe_apply(Bonfire.Social.Moderations, :summary, [opts[:reason], verb],
+            fallback_return: opts[:reason]
+          )
+        )
+        # the group the thread is in, which is what a receiver checks a moderator's standing against, as Lemmy sends it on every community lock
+        |> Enums.maybe_put(
+          :audience,
+          maybe_apply(
+            Bonfire.Federate.ActivityPub.AdapterUtils,
+            :maybe_determine_audience,
+            [object], fallback_return: nil)
+        )
+        # the lock's moderation record, so the stored AP activity points back to it. Never the locked object's own id, which its AP object already holds
+        |> Enums.maybe_put(:pointer, opts[:record])
 
-      case verb do
-        :lock -> ActivityPub.lock(params)
-        :unlock -> ActivityPub.unlock(params)
+      with {:ok, activity} <-
+             (case verb do
+                :lock -> ActivityPub.lock(params)
+                :unlock -> ActivityPub.unlock(params)
+              end) do
+        # the group's followers hear of it through the group, as for every activity in a group we host
+        maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :maybe_group_relays, [
+          object,
+          activity
+        ])
+
+        {:ok, activity}
       end
     else
       e -> error(e, "Could not find the actor or object to #{verb}")
     end
   end
+
+  def ap_publish_activity(subject, verb, object, _opts),
+    do: ap_publish_activity(subject, verb, object)
 
   # Callers pass an id as readily as a struct (the block live handler and the locking one both pass ids), and the locality checks below deliberately RAISE rather than guessing when `:peered` is not loaded. So load it here, mirroring what `AdapterUtils.preload_peered/1` asks of an object.
   defp load_for_locality_check(object_or_id) do
@@ -410,7 +445,8 @@ defmodule Bonfire.Boundaries.Blocks do
     |> repo().maybe_preload([:peered, created: [creator: :peered]], prune: true)
   end
 
-  defp maybe_federate_lock(verb, object_or_id, scope) do
+  # `publish_opts` reach `ap_publish_activity/4` through `Outgoing.maybe_federate/4`: the lock's moderation `record` and its `reason`
+  defp maybe_federate_lock(verb, object_or_id, scope, publish_opts \\ []) do
     object = load_for_locality_check(object_or_id)
 
     character_schemas =
@@ -425,7 +461,7 @@ defmodule Bonfire.Boundaries.Blocks do
         Utils.maybe_apply(
           Bonfire.Federate.ActivityPub.Outgoing,
           :maybe_federate,
-          [current_user(scope), verb, object, [federation_module: __MODULE__]],
+          [current_user(scope), verb, object, [federation_module: __MODULE__] ++ publish_opts],
           fallback_return: nil
         )
       rescue
