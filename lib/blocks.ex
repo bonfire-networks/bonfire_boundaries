@@ -24,7 +24,10 @@ defmodule Bonfire.Boundaries.Blocks do
       {"Undo", "Block"},
       # a moderator closing a thread to further replies, which is a `:lock` block on the object
       "Lock",
-      {"Undo", "Lock"}
+      {"Undo", "Lock"},
+      # a group elsewhere refusing one of our moderators' actions on it
+      {"Reject", "Lock"},
+      {"Reject", "Block"}
     ]
 
   @doc """
@@ -165,16 +168,51 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   def block(user_or_instance_to_block, block_type, scope) do
+    # one of our moderators banning someone on behalf of a group hosted elsewhere: the ban goes to the group, and the group's echo of it is what applies it here (`ap_receive_activity/3`), so it is pending until then. With their locality loaded, which the check needs
+    user = current_user(scope) |> repo().maybe_preload(character: [:peered])
+    on_behalf_of = e(scope, :on_behalf_of, nil)
+
+    elsewhere? =
+      not is_nil(on_behalf_of) and
+        maybe_apply(
+          Bonfire.Social.Moderations,
+          :moderating_elsewhere?,
+          [load_for_locality_check(on_behalf_of), user],
+          fallback_return: false
+        )
+
+    scope = if elsewhere?, do: Keyword.put(Keyword.new(scope), :pending, true), else: scope
+
     # the status, as callers show it (eg. as a flash); `lock/2` takes the record from `block_and_record/3`
-    with {:ok, status, _record} <- block_and_record(user_or_instance_to_block, block_type, scope),
-         do: {:ok, status}
+    with {:ok, status, record} <- block_and_record(user_or_instance_to_block, block_type, scope) do
+      # sent from the moderator, naming the group, whatever the federation box says: it only takes effect through the group
+      if elsewhere?,
+        do:
+          maybe_federate_block(user, user_or_instance_to_block, :block,
+            acting_user: user,
+            on_behalf_of: load_for_locality_check(on_behalf_of),
+            reason: e(scope, :reason, nil),
+            record: record
+          )
+
+      {:ok, status}
+    end
   end
 
   # the moderation log's record of it, written here for every type so there is one place that does (a lock included), and returned beside the status (nil when nobody acted), so `lock/2` can federate it and whoever applied an incoming one can link its AP activity to it
   defp block_and_record(user_or_instance_to_block, block_type, scope) do
     with {:ok, scope} <- maybe_on_behalf_of(scope),
          {who_acted, scope} = instance_wide_with_actor(scope),
-         {:ok, status} <- do_block(user_or_instance_to_block, block_type, scope) do
+         # `pending: true`: one of our moderators acting on a group hosted elsewhere, applied here once the group has (unless `apply_now:`, defaulting to config), so recorded as pending
+         {:ok, status} <-
+           if(
+             e(scope, :pending, nil) &&
+               !maybe_apply(Bonfire.Social.Moderations, :apply_now?, [scope],
+                 fallback_return: true
+               ),
+             do: {:ok, :pending},
+             else: do_block(user_or_instance_to_block, block_type, scope)
+           ) do
       case maybe_record(who_acted, block_type, user_or_instance_to_block, scope) do
         {:ok, record} -> {:ok, status, record}
         _ -> {:ok, status, nil}
@@ -193,6 +231,8 @@ defmodule Bonfire.Boundaries.Blocks do
   defp maybe_record({nil, _opts}, _block_type, _object, _scope), do: nil
 
   defp maybe_record({subject, opts}, block_type, object, scope) do
+    current_user = current_user(opts)
+
     maybe_apply(
       Bonfire.Social.Moderations,
       :record,
@@ -202,8 +242,14 @@ defmodule Bonfire.Boundaries.Blocks do
         object,
         [
           reason: e(opts, :reason, nil),
-          group: if(e(opts, :acting_user, nil), do: current_user(opts)),
-          instance_wide: scope == :instance_wide
+          current_user: current_user,
+          # where it applies: the group it was made on behalf of, or the instance
+          scope:
+            if(e(opts, :acting_user, nil),
+              do: current_user,
+              else: if(scope == :instance_wide, do: :instance_wide)
+            ),
+          pending: e(opts, :pending, nil)
         ]
       ],
       fallback_return: nil
@@ -283,22 +329,22 @@ defmodule Bonfire.Boundaries.Blocks do
       nil ->
         {:ok, scope}
 
-      group ->
+      on_behalf_of ->
         acting_user = Utils.current_user(scope)
 
         # as an id too (eg. from a form), loaded since it becomes the blocker, whose circles hold the block
-        group =
-          if is_binary(group),
-            do: Bonfire.Common.Needles.get!(group, skip_boundary_check: true),
-            else: group
+        on_behalf_of =
+          if is_binary(on_behalf_of),
+            do: Bonfire.Common.Needles.get!(on_behalf_of, skip_boundary_check: true),
+            else: on_behalf_of
 
-        if Bonfire.Boundaries.can?(acting_user, :mediate, group),
+        if Bonfire.Boundaries.can?(acting_user, :mediate, on_behalf_of),
           do:
             {:ok,
              scope
              |> Keyword.new()
              |> Keyword.delete(:on_behalf_of)
-             |> Keyword.merge(current_user: group, acting_user: acting_user)},
+             |> Keyword.merge(current_user: on_behalf_of, acting_user: acting_user)},
           else:
             error(:not_permitted, "Only someone who moderates the group may block on its behalf")
     end
@@ -330,7 +376,9 @@ defmodule Bonfire.Boundaries.Blocks do
             [federation_module: __MODULE__] ++
               Keyword.take(List.wrap(if Keyword.keyword?(scope), do: scope), [
                 :acting_user,
-                :reason
+                :reason,
+                :on_behalf_of,
+                :record
               ])
           ],
           fallback_return: nil
@@ -383,11 +431,36 @@ defmodule Bonfire.Boundaries.Blocks do
       iex> Bonfire.Boundaries.Blocks.lock(post, current_user: moderator)
   """
   def lock(object, scope) do
+    # one of our moderators locking something a group elsewhere hosts: its `Lock` goes to the group, and the group's echo of it is what locks it here (`ap_receive_activity/3`). With their locality loaded, which the check needs
+    user = current_user(scope) |> repo().maybe_preload(character: [:peered])
+
+    # as a moderator of the group it is in, when that group is hosted elsewhere
+    group =
+      case maybe_apply(Bonfire.Classify.Categories, :group_of_object, [object],
+             fallback_return: nil
+           ) do
+        {:ok, _object, %{} = group} -> repo().maybe_preload(group, character: [:peered])
+        _ -> nil
+      end
+
+    elsewhere? =
+      maybe_apply(
+        Bonfire.Social.Moderations,
+        :moderating_elsewhere?,
+        [group, user],
+        fallback_return: false
+      )
+
     # TODO: the grants and the record in one transaction, so neither exists without the other
     with {:ok, object} <- may_lock(object, scope),
          # the block writes the moderation log's record, with the reason if one was given
-         {:ok, status, record} <- block_and_record(object, :lock, scope) do
-      maybe_federate_lock(:lock, object, scope, reason: e(scope, :reason, nil), record: record)
+         {:ok, status, record} <-
+           block_and_record(object, :lock, Keyword.put(Keyword.new(scope), :pending, elsewhere?)) do
+      maybe_federate_lock(:lock, object, scope,
+        reason: e(scope, :reason, nil),
+        record: record,
+        moderating_elsewhere: elsewhere?
+      )
 
       # the record when one was written, so whoever applied an incoming `Lock` can link its AP activity to it (which is how a relayed copy of it is known to be applied already)
       {:ok, record || status}
@@ -450,7 +523,8 @@ defmodule Bonfire.Boundaries.Blocks do
   # `ActivityPub.block/2` severs no follows of its own, deliberately: which follow a block ends depends on the block TYPE, and `block/3` has already done it in the right direction by the time this runs.
   # Blocking on behalf of a group (`on_behalf_of:` in `block/3`, here `opts[:acting_user]`) has the group as subject, and goes out as the threadiverse keeps someone out of a community (Lemmy's `block_user.json`): sent by whoever acted, `to` Public, `cc`, `target` and `audience` the group, the reason in `summary`, and relayed by the group to its followers. Its `Undo` is addressed as the `Block` was (the fork copies it)
   def ap_publish_activity(subject, verb, object, opts) when verb in [:block, :unblock] do
-    on_behalf_of = if e(opts, :acting_user, nil), do: subject
+    # the group, given when the moderator is the one sending (a group hosted elsewhere), else the subject the block was made as
+    on_behalf_of = e(opts, :on_behalf_of, nil) || if e(opts, :acting_user, nil), do: subject
 
     with {:ok, actor} <-
            ActivityPub.Actor.get_cached(pointer: e(opts, :acting_user, nil) || subject),
@@ -516,19 +590,21 @@ defmodule Bonfire.Boundaries.Blocks do
   defp publish_block(:block, actor, blocked_actor, nil = _on_behalf_of, _opts),
     do: ActivityPub.block(%{actor: actor, object: blocked_actor})
 
-  defp publish_block(:block, actor, blocked_actor, group, opts) do
-    with {:ok, %{ap_id: group_ap_id}} <- ActivityPub.Actor.get_cached(pointer: group) do
+  defp publish_block(:block, actor, blocked_actor, on_behalf_of, opts) do
+    with {:ok, %{ap_id: on_behalf_of_ap_id}} <- ActivityPub.Actor.get_cached(pointer: on_behalf_of) do
       ActivityPub.block(%{
         actor: actor,
         object: blocked_actor,
         to: [ActivityPub.Config.public_uri()],
-        cc: [group_ap_id],
-        target: group_ap_id,
-        audience: group_ap_id,
+        cc: [on_behalf_of_ap_id],
+        target: on_behalf_of_ap_id,
+        audience: on_behalf_of_ap_id,
         summary:
           maybe_apply(Bonfire.Social.Moderations, :summary, [opts[:reason], :block],
             fallback_return: opts[:reason]
-          )
+          ),
+        # its moderation record, so the group's echo of it is known as ours and finds it
+        pointer: opts[:record]
       })
     end
   end
@@ -567,11 +643,12 @@ defmodule Bonfire.Boundaries.Blocks do
     character_schemas =
       Bonfire.Common.Config.get(:types_character_schemas, [], :bonfire)
 
-    # and only for objects WE host: applying an incoming `Lock` goes through this same function (`ap_receive_activity/3` below, and `Threads.ap_receive_comments_enabled/4` for the `commentsEnabled` form), so announcing a remote object's lock would echo the origin's own decision back at the fediverse as though it were ours
+    # and only for objects WE host: applying an incoming `Lock` goes through this same function (`ap_receive_activity/3` below, and `Threads.ap_receive_comments_enabled/4` for the `commentsEnabled` form), so announcing a remote object's lock would echo the origin's own decision back at the fediverse as though it were ours. Or one of OUR moderators locking something a group elsewhere hosts, which is theirs to send, to that group
     if Types.object_type(object) not in character_schemas and
-         Utils.maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :is_local?, [object],
-           fallback_return: false
-         ) == true do
+         (publish_opts[:moderating_elsewhere] == true or
+            Utils.maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :is_local?, [object],
+              fallback_return: false
+            ) == true) do
       try do
         Utils.maybe_apply(
           Bonfire.Federate.ActivityPub.Outgoing,
@@ -1077,6 +1154,91 @@ defmodule Bonfire.Boundaries.Blocks do
 
       iex> Bonfire.Boundaries.Blocks.ap_receive_activity(blocker, activity, blocked)
   """
+  # The group elsewhere REFUSED our moderator's `Lock`: its request is refused, and the lock undone here in case it was applied at once (`apply_now:`), so our copy doesn't say what the group didn't
+  def ap_receive_activity(
+        _rejecter,
+        %{data: %{"type" => "Reject"}} = _activity,
+        %{local: true, data: %{"type" => "Lock", "actor" => actor} = data} = ours
+      ) do
+    info("the group refused our moderator's Lock")
+
+    maybe_apply(Bonfire.Social.Moderations, :refuse_applied, [
+      ours,
+      fn _record ->
+        # only when it was applied: a lock waiting for the group (the default) left no ACL to take it out of
+        with {:ok, %{pointer_id: object_id}} when is_binary(object_id) <-
+               ActivityPub.Object.get_cached(ap_id: ActivityPub.Object.get_ap_id(data["object"])),
+             {:ok, _acl} <- Acls.get_object_custom_acl(object_id),
+             {:ok, moderator} <- ActivityPub.Actor.get_cached(ap_id: actor) do
+          mutate(:unblock, object_id, :lock, current_user: moderator.pointer_id)
+        end
+      end
+    ])
+  end
+
+  # The group elsewhere REFUSED our moderator's ban: its request is refused, and the ban lifted here in case it was applied at once (`apply_now:`): taken out of the group's block circles for the type it was recorded as, which changes nothing if it never put them there
+  def ap_receive_activity(
+        _rejecter,
+        %{data: %{"type" => "Reject"}} = _activity,
+        %{local: true, data: %{"type" => "Block", "target" => target, "actor" => actor} = data} =
+          ours
+      )
+      when not is_nil(target) do
+    info("the group refused our moderator's ban")
+
+    maybe_apply(Bonfire.Social.Moderations, :refuse_applied, [
+      ours,
+      fn record ->
+        with {:ok, %{__struct__: Bonfire.Classify.Category} = group} <-
+               maybe_apply(
+                 Bonfire.Federate.ActivityPub.AdapterUtils,
+                 :get_by_url_ap_id_or_username,
+                 [ActivityPub.Object.get_ap_id(target)]
+               ),
+             {:ok, banned} <-
+               maybe_apply(
+                 Bonfire.Federate.ActivityPub.AdapterUtils,
+                 :get_or_fetch_character_by_ap_id,
+                 [ActivityPub.Object.get_ap_id(data["object"])]
+               ),
+             # loaded, since blocking on a group's behalf checks they may moderate it
+             {:ok, moderator} <-
+               maybe_apply(
+                 Bonfire.Federate.ActivityPub.AdapterUtils,
+                 :get_or_fetch_character_by_ap_id,
+                 [actor]
+               ),
+             {:ok, scope} <- maybe_on_behalf_of(current_user: moderator, on_behalf_of: group) do
+          mutate(:unblock, banned, recorded_block_type(record), scope)
+        end
+      end
+    ])
+  end
+
+  # the block type a moderation record of a ban was written as (its verb), else a silence, which is what a ban from a community means
+  defp recorded_block_type(record) do
+    with %{} <- record,
+         verb_id when is_binary(verb_id) <-
+           record |> repo().maybe_preload(:activity) |> e(:activity, :verb_id, nil) do
+      Bonfire.Boundaries.Verbs.get_slug(verb_id)
+    end || :silence
+  end
+
+  # OUR moderator's `Lock`, relayed back by the group elsewhere that applied it (`lock/2` sent it, pending): that is what applies it here, if it's still waiting (the stored activity points at its moderation record)
+  def ap_receive_activity(locker, %{local: true, data: %{"type" => "Lock"}} = activity, object) do
+    info("our moderator's Lock, applied by the group")
+
+    with {:ok, object} <- ap_receive_object_to_lock(object) do
+      maybe_apply(
+        Bonfire.Social.Moderations,
+        :confirm_applied,
+        [activity, fn _record -> do_block(object, :lock, current_user: locker) end],
+        # with no records (social not available) nothing was pending, so just apply it
+        fallback_fun: fn _activity, apply -> apply.(nil) end
+      )
+    end
+  end
+
   def ap_receive_activity(locker, %{data: %{"type" => "Lock"} = data} = activity, object) do
     info("apply incoming Lock")
 
@@ -1129,7 +1291,7 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   defp receive_block_on_behalf_of(block_or_unblock, sender, target, blocked, activity) do
-    with {:ok, %{__struct__: Bonfire.Classify.Category} = group} <-
+    with {:ok, %{__struct__: Bonfire.Classify.Category} = on_behalf_of} <-
            maybe_apply(
              Bonfire.Federate.ActivityPub.AdapterUtils,
              :get_by_url_ap_id_or_username,
@@ -1142,15 +1304,15 @@ defmodule Bonfire.Boundaries.Blocks do
              :get_or_fetch_character_by_ap_id,
              [blocked]
            ) do
-      case with_moderators_resynced(group, fn ->
+      case with_moderators_resynced(on_behalf_of, fn ->
              apply(__MODULE__, block_or_unblock, [
                blocked,
                :silence,
-               [current_user: sender, on_behalf_of: group]
+               [current_user: sender, on_behalf_of: on_behalf_of]
              ])
            end) do
         {:ok, _} = done ->
-          maybe_relay_received(group, activity)
+          maybe_relay_received(on_behalf_of, activity)
           done
 
         refused ->
@@ -1211,6 +1373,43 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   # A `Block` with `target` a group we mirror, sent by one of its moderators (the threadiverse's way of keeping someone out of a community, Lemmy's `block_user.json`): it keeps them from taking part, which is our silence, made on the group's behalf by the sender, who needs `:mediate` on the mirror (`on_behalf_of:`), its moderators re-synced on a refusal. Without `target`, the sender's own block (the clauses after these)
+  # OUR moderator's ban, relayed back by the group elsewhere that applied it (`block/3` sent it, pending): that is what applies it here, if it's still waiting, as the type it was recorded as
+  def ap_receive_activity(
+        moderator,
+        %{local: true, data: %{"type" => "Block", "target" => target}} = activity,
+        %{data: %{}} = blocked
+      )
+      when not is_nil(target) do
+    info("our moderator's ban, applied by the group")
+
+    maybe_apply(
+      Bonfire.Social.Moderations,
+      :confirm_applied,
+      [
+        activity,
+        fn record ->
+        with {:ok, %{__struct__: Bonfire.Classify.Category} = group} <-
+               maybe_apply(
+                 Bonfire.Federate.ActivityPub.AdapterUtils,
+                 :get_by_url_ap_id_or_username,
+                 [ActivityPub.Object.get_ap_id(target)]
+               ),
+             {:ok, blocked} <-
+               maybe_apply(
+                 Bonfire.Federate.ActivityPub.AdapterUtils,
+                 :get_or_fetch_character_by_ap_id,
+                 [blocked]
+               ),
+             {:ok, scope} <- maybe_on_behalf_of(current_user: moderator, on_behalf_of: group) do
+          do_block(blocked, recorded_block_type(record), scope)
+        end
+      end
+      ],
+      # with no records (social not available) nothing was pending, so just apply it
+      fallback_fun: fn _activity, apply -> apply.(nil) end
+    )
+  end
+
   def ap_receive_activity(
         blocker,
         %{data: %{"type" => "Block", "target" => target}} = activity,
