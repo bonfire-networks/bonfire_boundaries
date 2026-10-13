@@ -591,18 +591,18 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
 
     defp block_user(%{id: id}, info) do
       with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info) do
-        ghost_result = Blocks.block(id, :ghost, current_user: user)
-        silence_result = Blocks.block(id, :silence, current_user: user)
+        # one call for both, so one action leaves one `block` record (two calls left a `ghost` and a `silence` one)
+        result = Blocks.block(id, :block, current_user: user)
 
         if blocked?(id, user) do
-          case {ghost_result, silence_result} do
-            {{:ok, _}, {:ok, _}} ->
+          case result do
+            {:ok, _} ->
               :ok
 
             _ ->
               warn(
-                {ghost_result, silence_result},
-                "blockUser reached the desired final state with partial operation results"
+                result,
+                "blockUser reached the desired final state with a failed operation result"
               )
           end
 

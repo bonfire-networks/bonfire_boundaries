@@ -165,9 +165,53 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   def block(user_or_instance_to_block, block_type, scope) do
-    with {:ok, scope} <- maybe_on_behalf_of(scope),
-         do: do_block(user_or_instance_to_block, block_type, scope)
+    # the status, as callers show it (eg. as a flash); `lock/2` takes the record from `block_and_record/3`
+    with {:ok, status, _record} <- block_and_record(user_or_instance_to_block, block_type, scope),
+         do: {:ok, status}
   end
+
+  # the moderation log's record of it, written here for every type so there is one place that does (a lock included), and returned beside the status (nil when nobody acted), so `lock/2` can federate it and whoever applied an incoming one can link its AP activity to it
+  defp block_and_record(user_or_instance_to_block, block_type, scope) do
+    with {:ok, scope} <- maybe_on_behalf_of(scope),
+         {who_acted, scope} = instance_wide_with_actor(scope),
+         {:ok, status} <- do_block(user_or_instance_to_block, block_type, scope) do
+      case maybe_record(who_acted, block_type, user_or_instance_to_block, scope) do
+        {:ok, record} -> {:ok, status, record}
+        _ -> {:ok, status, nil}
+      end
+    end
+  end
+
+  # `current_user: admin, scope: :instance_wide`: an instance-wide block that names who made it, for its record. The rest of this module takes the bare `:instance_wide`, which is also how a caller with nobody acting asks for one
+  defp instance_wide_with_actor(scope) do
+    if Keyword.keyword?(scope) and scope[:scope] == :instance_wide,
+      do: {{current_user(scope), scope}, :instance_wide},
+      else: {{e(scope, :acting_user, nil) || current_user(scope), scope}, scope}
+  end
+
+  # One record per action, its verb the type (`block` for both at once), its subject whoever acted (`acting_user` when on a group's behalf, whose group then is where it's logged). Nobody acting, nothing recorded. Through `maybe_apply` since records live in bonfire_social, which boundaries doesn't depend on
+  defp maybe_record({nil, _opts}, _block_type, _object, _scope), do: nil
+
+  defp maybe_record({subject, opts}, block_type, object, scope) do
+    maybe_apply(
+      Bonfire.Social.Moderations,
+      :record,
+      [
+        subject,
+        record_verb(block_type),
+        object,
+        [
+          reason: e(opts, :reason, nil),
+          group: if(e(opts, :acting_user, nil), do: current_user(opts)),
+          instance_wide: scope == :instance_wide
+        ]
+      ],
+      fallback_return: nil
+    )
+  end
+
+  defp record_verb(type) when type in [:silence, :ghost, :hide, :lock], do: type
+  defp record_verb(_both), do: :block
 
   defp do_block(user_or_instance_to_block, block_type, scope) do
     types_blocked =
@@ -312,6 +356,8 @@ defmodule Bonfire.Boundaries.Blocks do
   """
   def unblock(user_or_instance_to_unblock, block_type \\ nil, scope) do
     with {:ok, scope} <- maybe_on_behalf_of(scope),
+         # lifting writes no record, so who did it isn't needed here, only the scope it names
+         {_who_acted, scope} = instance_wide_with_actor(scope),
          {:ok, result} <- mutate(:unblock, user_or_instance_to_unblock, block_type, scope) do
       # unconditional, unlike the block: `ap_publish_activity/3` sends nothing unless a `Block` actually went out, so this cannot disclose a block the person kept to themselves. Leaving a remote holding a block we have lifted would be worse than telling it
       if user_or_instance_to_unblock != :instance_wide and scope != :instance_wide,
@@ -339,25 +385,12 @@ defmodule Bonfire.Boundaries.Blocks do
   def lock(object, scope) do
     # TODO: the grants and the record in one transaction, so neither exists without the other
     with {:ok, object} <- may_lock(object, scope),
-         {:ok, _} = ok <- block(object, :lock, scope) do
-      reason = e(scope, :reason, nil)
-
-      # the moderation log's record of it, with the reason if one was given. Through `maybe_apply` since records live in bonfire_social, which boundaries doesn't depend on
-      record =
-        case maybe_apply(
-               Bonfire.Social.Moderations,
-               :record,
-               [current_user(scope), :lock, object, [reason: reason]],
-               fallback_return: nil
-             ) do
-          {:ok, record} -> record
-          _ -> nil
-        end
-
-      maybe_federate_lock(:lock, object, scope, reason: reason, record: record)
+         # the block writes the moderation log's record, with the reason if one was given
+         {:ok, status, record} <- block_and_record(object, :lock, scope) do
+      maybe_federate_lock(:lock, object, scope, reason: e(scope, :reason, nil), record: record)
 
       # the record when one was written, so whoever applied an incoming `Lock` can link its AP activity to it (which is how a relayed copy of it is known to be applied already)
-      if record, do: {:ok, record}, else: ok
+      {:ok, record || status}
     end
   end
 
@@ -1083,7 +1116,9 @@ defmodule Bonfire.Boundaries.Blocks do
     maybe_apply(
       Bonfire.Federate.ActivityPub.AdapterUtils,
       :maybe_group_relays,
-      [object, activity], fallback_return: nil)
+      [object, activity],
+      fallback_return: nil
+    )
   end
 
   # a remote moderator refused here may have been added since we last synced the group's moderators, so the refusal re-syncs them from the origin and tries again (`Categories.with_moderators_resynced/2`); through `maybe_apply` since boundaries doesn't depend on classify, which without it just runs the action

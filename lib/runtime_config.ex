@@ -64,6 +64,25 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
         icon: "ph:lock-duotone",
         summary: l("Close a thread to further replies")
       },
+      # the block types, as ACTIONS recorded in the moderation log, not permissions (who may block is decided elsewhere; the `block` verb below, which a record of blocking both at once also uses, is the permission to manage blocks)
+      silence: %{
+        id: "551ENCEDTHEMFR0MPART1C1PAT",
+        verb: l("Silence"),
+        icon: "ph:speaker-simple-slash-duotone",
+        summary: l("Stop someone from reaching or taking part")
+      },
+      ghost: %{
+        id: "6H0STTHEMS0THEYCANTSEEME00",
+        verb: l("Ghost"),
+        icon: "ph:ghost-duotone",
+        summary: l("Stop someone from seeing")
+      },
+      hide: %{
+        id: "0H1DEAP0STFR0MAFEEDBYAM0DS",
+        verb: l("Hide"),
+        icon: "ph:eye-slash-duotone",
+        summary: l("Hide something, reversibly")
+      },
       reply: %{
         id: "71TCREAT1NGA11NKEDRESP0NSE",
         verb: l("Reply"),
