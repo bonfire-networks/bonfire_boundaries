@@ -38,11 +38,7 @@ defmodule Bonfire.Boundaries do
   end
 
   def object_public?(object) do
-    # FIXME: use `get_preset_on_object` instead of loading them all, or at least only load the IDs
-    acls =
-      list_object_acls(object)
-      |> debug("post_acls")
-      |> object_acls_public?()
+    Controlleds.has_any_acl?(object, Bonfire.Boundaries.Acls.remote_public_acl_ids())
   end
 
   def object_acls_public?(acls) do
@@ -140,7 +136,9 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Lists grants for a given set of objects.
+  Lists the grants on a set of objects, by any subject, one entry per `{subject, object, value}` with the verbs it covers.
+
+  For inspecting grants, as `Bonfire.Boundaries.Debug` does, NOT for deciding what someone may do: an entry with `value: false` is a denial, and a grant to a circle is listed under the circle rather than its members. Use `can?/4` for one subject, or `permitted_users/3` for several.
 
   ## Examples
 
@@ -152,7 +150,9 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Lists grants for a given set of objects and verbs.
+  As `list_grants_on/1`, narrowed to the entries covering every one of these verbs.
+
+  An entry covering `[:see, :read]` may be a denial of both (`value: false`), so this is not "who may see and read it" either: that is `permitted_users/3`.
 
   ## Examples
 
@@ -165,7 +165,32 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc """
-  Lists grants for a given set of users on a set of objects.
+  Which of these users may do every one of these verbs on the object, each as `can?/3` would answer for them alone, in one query whatever their number. Returns those of the given users who may, as given.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.permitted_users([bob, carol], [:see, :read], post)
+      [bob]
+  """
+  def permitted_users(users, verbs, object) do
+    case List.wrap(users) do
+      [] ->
+        []
+
+      users ->
+        permitted =
+          Queries.permitted_users(users, verbs, uid!(object))
+          |> repo().all()
+          |> MapSet.new()
+
+        Enum.filter(users, &MapSet.member?(permitted, uid(&1)))
+    end
+  end
+
+  @doc """
+  Lists the grants that count for these users on a set of objects: their own, and their locality circle's, one entry per `{subject, object, value}`.
+
+  The raw material of a user's permissions rather than the answer: `combine_users_grants_on/1` combines one user's entries into what they hold (as the loaded boundaries `can?/4` reads do), an entry with `value: false` is a denial, and a locality circle's grants are listed under the circle. To decide what someone may do, use `can?/4`, or `permitted_users/3` for several.
 
   ## Examples
 
@@ -176,19 +201,20 @@ defmodule Bonfire.Boundaries do
     |> all_grouped_by_verb()
   end
 
-  @doc """
-  Lists grants for a given set of users on a set of objects, filtered by verbs.
-
-  ## Examples
-
-      iex> Bonfire.Boundaries.users_grants_on([%{id: 1}], [%{id: 2}], [:see, :read])
-      [%Bonfire.Boundaries.Summary{object_id: 2, subject_id: 1}]
-  """
-  def users_grants_on(users, things, verbs) do
-    Queries.query_users_grants_on(users, things, verbs)
-    |> all_grouped_by_verb()
-    |> only_with_all_verbs(verbs)
-  end
+  # Retired 14 October 2026: its callers all asked "which of these users may", which `permitted_users/3` answers in SQL with `can?/3`'s rules. This returned grant ENTRIES instead, one per `{subject, value}`, so each caller had to notice a denial itself (fan-out didn't, and notified people denied the object)
+  # @doc """
+  # Lists grants for a given set of users on a set of objects, filtered by verbs.
+  #
+  # ## Examples
+  #
+  #     iex> Bonfire.Boundaries.users_grants_on([%{id: 1}], [%{id: 2}], [:see, :read])
+  #     [%Bonfire.Boundaries.Summary{object_id: 2, subject_id: 1}]
+  # """
+  # def users_grants_on(users, things, verbs) do
+  #   Queries.query_users_grants_on(users, things, verbs)
+  #   |> all_grouped_by_verb()
+  #   |> only_with_all_verbs(verbs)
+  # end
 
   # The verb FILTER is applied in SQL by `Queries.query_users_grants_on/3`; what remains here is the "holds ALL of them" test, which cannot join it without a subquery, the rows are still needed to build each entry's `:verbs` list.
   defp only_with_all_verbs(entries, verbs) do

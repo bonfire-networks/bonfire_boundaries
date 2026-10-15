@@ -71,6 +71,14 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   @doc """
+  Whether any of these ACLs is applied to the object, asked of the DB as a true/false rather than loading its ACLs to look.
+  """
+  def has_any_acl?(object, acl_ids) do
+    from(c in Controlled, where: c.id == ^uid(object) and c.acl_id in ^acl_ids)
+    |> repo().exists?()
+  end
+
+  @doc """
   Returns true if the given subject has a per-object grant with the given verb on the object.
   Only checks non-preset (per-object) ACLs.
   """

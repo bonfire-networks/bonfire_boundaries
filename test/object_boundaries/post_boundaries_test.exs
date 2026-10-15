@@ -446,4 +446,33 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
       assert is_nil(new_post.replied.reply_to_id), "Should not be a reply"
     end
   end
+
+  describe "object_public?/1" do
+    defp post_with_boundary(boundary) do
+      {:ok, post} =
+        Posts.publish(
+          current_user: Fake.fake_user!(),
+          post_attrs: %{post_content: %{html_body: "a #{boundary} post"}},
+          boundary: boundary
+        )
+
+      post
+    end
+
+    test "is true for a public post" do
+      assert Boundaries.object_public?(post_with_boundary("public"))
+    end
+
+    test "is false for a local-only post" do
+      refute Boundaries.object_public?(post_with_boundary("local"))
+    end
+
+    test "is false for a post only its mentions may see" do
+      refute Boundaries.object_public?(post_with_boundary("mentions"))
+    end
+
+    test "takes an id as well as the object" do
+      assert Boundaries.object_public?(id(post_with_boundary("public")))
+    end
+  end
 end

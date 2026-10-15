@@ -365,7 +365,7 @@ defmodule Bonfire.Boundaries.Queries do
     do: where(query, [summary], summary.verb_id in ^Verbs.ids(verbs))
 
   @doc """
-  Returns the list of subject_ids (e.g. user or circle ids) that have permission for all the given verb_ids on the given object_id.
+  Which of these subjects (eg. circles) may do every one of these verbs on one object, each answering for itself alone: a grant to a circle counts for that circle, with no locality circle pooled in. A denial wins. Returns their ids.
 
   ## Examples
 
@@ -373,15 +373,47 @@ defmodule Bonfire.Boundaries.Queries do
       ["circle1"]
 
   """
-  def permitted_subjects(subject_ids, verb_ids, object_id) do
-    from(summary in Bonfire.Boundaries.Summary,
-      where:
-        summary.subject_id in ^subject_ids and
-          summary.verb_id in ^verb_ids and
-          summary.object_id == ^object_id,
-      group_by: summary.subject_id,
-      having: fragment("bool_and(?)", summary.value),
-      select: summary.subject_id
+  def permitted_subjects(subject_ids, verbs, object_id) do
+    subject_ids
+    |> Enum.map(&%{for_id: &1, subject_id: &1})
+    |> permitted_for(verbs, object_id)
+  end
+
+  @doc """
+  Which of these users may do every one of these verbs on one object, each answered as a check of them alone would be: their own grants pooled with their locality circle's (`user_and_circle_ids/1`), and a denial winning. Returns the users' ids.
+
+  ## Examples
+
+      iex> permitted_users([bob, carol], [:see, :read], object_id) |> repo().all()
+      [bob_id]
+  """
+  def permitted_users(users, verbs, object_id) do
+    for(
+      user <- List.wrap(users),
+      subject_id <- user_and_circle_ids(user),
+      do: %{for_id: Types.uid(user), subject_id: subject_id}
+    )
+    |> permitted_for(verbs, object_id)
+  end
+
+  # One query for any number of askers: each is paired with the subjects whose grants count for them (themselves, and for a user their locality circle), and the summary rows are grouped by asker. Nobody asking is answered by nobody, as `values/2` takes no empty list
+  defp permitted_for([], _verbs, _object_id), do: deny_all(nil)
+
+  defp permitted_for(pairs, verbs, object_id) do
+    verb_ids = Verbs.ids(verbs) |> Enum.uniq()
+    id_type = Summary.__schema__(:type, :subject_id)
+
+    from(pair in values(pairs, %{for_id: id_type, subject_id: id_type}),
+      join: summary in Summary,
+      on: summary.subject_id == pair.subject_id,
+      where: summary.object_id == ^object_id and summary.verb_id in ^verb_ids,
+      group_by: pair.for_id,
+      # `bool_and` refuses any denial; the count requires a GRANT of every verb, since a verb with no row, or only an undecided (null) one, is not granted
+      having:
+        fragment("bool_and(?)", summary.value) and
+          fragment("count(distinct ?) filter (where ?)", summary.verb_id, summary.value) ==
+            ^length(verb_ids),
+      select: pair.for_id
     )
   end
 
