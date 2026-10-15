@@ -663,7 +663,8 @@ defmodule Bonfire.Boundaries.Presets do
     |> Map.new(fn {group_id, dims} -> {group_id, icon_from_dims(dims, default)} end)
   end
 
-  defp icon_from_dims(dims, default) do
+  @doc "The preset icon for dimensions already fetched with `group_listing_dimension_slugs/1`."
+  def icon_from_dims(dims, default \\ "ph:users-three-duotone") do
     with slug when is_binary(slug) <- preset_slug_from_dims(dims),
          %{icon: icon} when is_binary(icon) <- group_preset_meta(slug) do
       icon
