@@ -1215,10 +1215,10 @@ defmodule Bonfire.Boundaries.Blocks do
     maybe_apply(Bonfire.Social.Moderations, :refuse_applied, [
       ours,
       fn _record ->
-        # only when it was applied: a lock waiting for the group (the default) left no ACL to take it out of
+        # only when it was applied: a lock waiting for the group (the default) attached no `locked` ACL to take off
         with {:ok, %{pointer_id: object_id}} when is_binary(object_id) <-
                ActivityPub.Object.get_cached(ap_id: ActivityPub.Object.get_ap_id(data["object"])),
-             {:ok, _acl} <- Acls.get_object_custom_acl(object_id),
+             true <- is_blocked?(object_id, :lock),
              {:ok, moderator} <- ActivityPub.Actor.get_cached(ap_id: actor) do
           mutate(:unblock, object_id, :lock, current_user: moderator.pointer_id)
         end
