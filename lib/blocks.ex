@@ -11,7 +11,8 @@ defmodule Bonfire.Boundaries.Blocks do
   import Bonfire.Boundaries.Integration
   alias Bonfire.Boundaries.Circles
   alias Bonfire.Boundaries.Acls
-  alias Bonfire.Boundaries.Grants
+  alias Bonfire.Boundaries.Controlleds
+  # alias Bonfire.Boundaries.Grants
   # alias Bonfire.Data.Identity.User
   # alias Bonfire.Data.AccessControl.Grant
   # alias Bonfire.Data.Identity.Caretaker
@@ -688,122 +689,154 @@ defmodule Bonfire.Boundaries.Blocks do
   defp mutate(block_or_unblock, user_or_instance_to_block_or_unblock, block_type, :instance),
     do: mutate(block_or_unblock, user_or_instance_to_block_or_unblock, block_type, :instance_wide)
 
-  defp mutate(:block, object_to_hide, :hide, scope) do
-    current_user = current_user(scope)
-    acl = Acls.get_or_create_object_custom_acl(object_to_hide, current_user || scope)
+  # Locking or hiding an object attaches the ONE ACL for that kind of block (declared in config: `locked`, `hidden`, and each person's `hidden_by_me`), and undoing it detaches it. Nothing is written into the object's own ACL, so a lock and a hide no longer share grants, and undoing one leaves the other alone.
+  defp mutate(block_or_unblock, object, block_type, scope) when block_type in [:lock, :hide] do
+    with {:ok, acl_id} <- object_block_acl_id(block_type, scope, block_or_unblock == :block) do
+      done =
+        case block_or_unblock do
+          :block -> Controlleds.add_acls(object, acl_id)
+          :unblock -> Controlleds.remove_acls(object, [acl_id])
+        end
 
-    who_to_hide_it_from =
-      if scope == :instance_wide do
-        # hiding instance-wide means we hide for these circles
-        instance_wide_circles([:guest, :local, :activity_pub])
-      else
-        current_user
+      case {done, block_or_unblock, block_type} do
+        {{:error, e}, _, _} -> error(e, l("Could not change it"))
+        {_, :block, :lock} -> {:ok, l("Locked")}
+        {_, :unblock, :lock} -> {:ok, l("Unlocked")}
+        {_, :block, :hide} -> {:ok, l("Hidden")}
+        {_, :unblock, :hide} -> {:ok, l("Unhidden")}
       end
+    end
+  end
 
-    granted =
-      Grants.grant_role(who_to_hide_it_from, acl, :can_only_read,
-        current_user: current_user,
-        scope: scope
+  # Replaced by the clause above (one shared ACL per kind of block, attached and detached), as these wrote grants into the object's own ACL, where a lock and a hide overlapped: both deny `:reply`, so unhiding instance-wide also reopened a locked thread, and neither could be told apart from the other. Grants they already wrote are left as they are: they still deny what they did, but aren't read as a lock or hide, nor removed on undo.
+  # defp mutate(:block, object_to_hide, :hide, scope) do
+  #   current_user = current_user(scope)
+  #   acl = Acls.get_or_create_object_custom_acl(object_to_hide, current_user || scope)
+  #
+  #   who_to_hide_it_from =
+  #     if scope == :instance_wide do
+  #       # hiding instance-wide means we hide for these circles
+  #       instance_wide_circles([:guest, :local, :activity_pub])
+  #     else
+  #       current_user
+  #     end
+  #
+  #   granted =
+  #     Grants.grant_role(who_to_hide_it_from, acl, :can_only_read,
+  #       current_user: current_user,
+  #       scope: scope
+  #     )
+  #
+  #   if Enums.all_ok?(granted) do
+  #     {:ok, l("Hidden")}
+  #   else
+  #     error(granted, l("Could not hide it"))
+  #   end
+  # end
+  #
+  # defp mutate(:unblock, object_to_hide, :hide, scope) do
+  #   current_user = current_user(scope)
+  #   acl = Acls.get_or_create_object_custom_acl(object_to_hide, current_user || scope)
+  #
+  #   who_to_unhide_for =
+  #     if scope == :instance_wide do
+  #       instance_wide_circles([:guest, :local, :activity_pub])
+  #     else
+  #       current_user
+  #     end
+  #
+  #   removed =
+  #     Grants.remove_role(who_to_unhide_for, acl, :can_only_read,
+  #       current_user: current_user,
+  #       scope: scope
+  #     )
+  #
+  #   if Enums.all_ok?(removed) do
+  #     {:ok, l("Unhidden")}
+  #   else
+  #     error(removed, l("Could not unhide it"))
+  #   end
+  # end
+  #
+  # defp mutate(:block, object_to_lock, :lock, scope) do
+  #   current_user = current_user(scope)
+  #   acl = Acls.get_or_create_object_custom_acl(object_to_lock, current_user || scope)
+  #
+  #   who_to_lock = instance_wide_circles([:guest, :local, :activity_pub])
+  #
+  #   granted =
+  #     Grants.grant_role(who_to_lock, acl, :cannot_participate,
+  #       current_user: current_user,
+  #       scope: scope
+  #     )
+  #
+  #   if Enums.all_ok?(granted) do
+  #     {:ok, l("Locked")}
+  #   else
+  #     error(granted, l("Could not lock it"))
+  #   end
+  # end
+  #
+  # defp mutate(:unblock, object_to_unlock, :lock, scope) do
+  #   current_user = current_user(scope)
+  #   acl = Acls.get_or_create_object_custom_acl(object_to_unlock, current_user || scope)
+  #
+  #   who_to_unlock = instance_wide_circles([:guest, :local, :activity_pub])
+  #
+  #   # also the ladder rung, which is what threads locked before `:cannot_participate` existed carry, so those reopen fully too
+  #   granted =
+  #     Grants.remove_role(who_to_unlock, acl, :cannot_participate,
+  #       current_user: current_user,
+  #       scope: scope
+  #     ) ++
+  #       Grants.remove_role(who_to_unlock, acl, :cannot_participate_or_more,
+  #         current_user: current_user,
+  #         scope: scope
+  #       )
+  #
+  #   if Enums.all_ok?(granted) do
+  #     {:ok, l("Unlocked")}
+  #   else
+  #     error(granted, l("Could not unlock it"))
+  #   end
+  # end
+
+  # The ACL a lock or hide attaches. A lock applies to everyone whoever does it; a hide is instance-wide or one person's own, theirs created the first time they hide something (`create?`), since most people never do
+  defp object_block_acl_id(:lock, _scope, _create?), do: {:ok, Acls.get_id!(:locked)}
+  defp object_block_acl_id(:hide, :instance_wide, _create?), do: {:ok, Acls.get_id!(:hidden)}
+
+  defp object_block_acl_id(:hide, scope, create?) do
+    case current_user(scope) do
+      nil ->
+        error(:not_permitted, "Only someone signed in can hide something for themselves")
+
+      user ->
+        case hidden_by_me_acl(user) do
+          %{} = acl ->
+            {:ok, id(acl)}
+
+          nil when create? ->
+            Bonfire.Boundaries.Scaffold.create_missing_block_boundaries(user, [:hidden_by_me])
+
+            case hidden_by_me_acl(user) do
+              %{} = acl -> {:ok, id(acl)}
+              _ -> error(:not_found, "Could not create the ACL for what they hide")
+            end
+
+          # nothing to undo for someone who never hid anything
+          nil ->
+            error(:not_found, "Nothing hidden")
+        end
+    end
+  end
+
+  defp hidden_by_me_acl(user),
+    do:
+      Bonfire.Boundaries.find_caretaker_stereotype(
+        user,
+        [Acls.get_id!(:hidden_by_me)],
+        Bonfire.Data.AccessControl.Acl
       )
-
-    # |> debug("done")
-
-    if Enums.all_ok?(granted) do
-      {:ok, l("Hidden")}
-    else
-      error(granted, l("Could not hide it"))
-    end
-  end
-
-  defp mutate(:unblock, object_to_hide, :hide, scope) do
-    # Reverse of the `:hide` block above: remove the `:can_only_read` grants
-    # we added to the object's custom ACL for the relevant circle(s).
-    current_user = current_user(scope)
-    acl = Acls.get_or_create_object_custom_acl(object_to_hide, current_user || scope)
-
-    who_to_unhide_for =
-      if scope == :instance_wide do
-        instance_wide_circles([:guest, :local, :activity_pub])
-      else
-        current_user
-      end
-
-    removed =
-      Grants.remove_role(who_to_unhide_for, acl, :can_only_read,
-        current_user: current_user,
-        scope: scope
-      )
-
-    if Enums.all_ok?(removed) do
-      {:ok, l("Unhidden")}
-    else
-      error(removed, l("Could not unhide it"))
-    end
-  end
-
-  defp mutate(:block, object_to_lock, :lock, scope) do
-    current_user = current_user(scope)
-    acl = Acls.get_or_create_object_custom_acl(object_to_lock, current_user || scope)
-
-    # if scope == ? do
-    #   # TODO: lock for specific circles
-    # else
-    # locking for all means these circles
-    # FIXME: should we optimise by simply applying a preset ACL?
-    who_to_lock =
-      instance_wide_circles([:guest, :local, :activity_pub])
-
-    # end
-
-    # only the participate verbs: the ladder's `:cannot_participate_or_more` would also deny the author and moderators the `:grant`/`:mediate` needed to reopen it, and `:edit`/`:delete` on their own post
-    granted =
-      Grants.grant_role(who_to_lock, acl, :cannot_participate,
-        current_user: current_user,
-        scope: scope
-      )
-
-    # |> debug("locks granted")
-
-    if Enums.all_ok?(granted) do
-      {:ok, l("Locked")}
-    else
-      error(granted, l("Could not lock it"))
-    end
-  end
-
-  defp mutate(:unblock, object_to_unlock, :lock, scope) do
-    current_user = current_user(scope)
-    acl = Acls.get_or_create_object_custom_acl(object_to_unlock, current_user || scope)
-
-    # if scope == ? do
-    #   # TODO: lock for specific circles
-    # else
-    # locking for all means these circles
-    # FIXME: should we optimise by simply applying a preset ACL?
-    who_to_unlock =
-      instance_wide_circles([:guest, :local, :activity_pub])
-
-    # end
-
-    # also the ladder rung, which is what threads locked before `:cannot_participate` existed carry, so those reopen fully too
-    granted =
-      Grants.remove_role(who_to_unlock, acl, :cannot_participate,
-        current_user: current_user,
-        scope: scope
-      ) ++
-        Grants.remove_role(who_to_unlock, acl, :cannot_participate_or_more,
-          current_user: current_user,
-          scope: scope
-        )
-
-    # |> debug("done")
-
-    if Enums.all_ok?(granted) do
-      {:ok, l("Unlocked")}
-    else
-      error(granted, l("Could not unlock it"))
-    end
-  end
 
   # a `nil`/`:any`/`:block` block type means "all block types": delegate to the per-type paths so the `:silence` clauses (which also maintain the `:silence_me` reverse-index that boundary queries filter on) are used. The generic clauses below only touch `:silence_them`/`:ghost_them`, so a plain `block/2`/`unblock/2` (nil type) or `block(x, :block, scope)` would otherwise leave `:silence_me` dangling (and a later per-type `unblock(x, :silence, scope)` would fail finding nothing to remove there). Works for both per-user and instance-wide scopes (each delegated type re-dispatches to its own clause).
   defp mutate(block_or_unblock, user_or_instance_to_block, block_type, scope)
@@ -989,6 +1022,23 @@ defmodule Bonfire.Boundaries.Blocks do
   # just for typos ;)
   def is_blocked?(user_or_instance, block_type, :instance),
     do: is_blocked?(user_or_instance, block_type, :instance_wide)
+
+  # an object's lock or hide is whether the ACL for it is attached (see `mutate/4`), not circles. A boundary that simply allows no replies is not a lock, since that's a preset rather than the `locked` ACL
+  def is_blocked?(object, :lock, _scope),
+    do: Controlleds.has_any_acl?(object, [Acls.get_id!(:locked)])
+
+  def is_blocked?(object, :hide, :instance_wide),
+    do: Controlleds.has_any_acl?(object, [Acls.get_id!(:hidden)])
+
+  def is_blocked?(object, :hide, opts) do
+    with %{} = user <- current_user(opts),
+         %{} = acl <- hidden_by_me_acl(user) do
+      Controlleds.has_any_acl?(object, [id(acl)])
+    else
+      # signed out, or never hid anything
+      _ -> false
+    end
+  end
 
   def is_blocked?(user_or_instance, block_type, :instance_wide)
       when not is_nil(user_or_instance) do

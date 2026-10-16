@@ -867,16 +867,54 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def get_object_custom_acl(object) do
-    from(a in Acl,
-      join: c in Controlled,
-      on: a.id == c.acl_id and c.id == ^uid(object),
-      join: s in Stereotyped,
-      on: a.id == s.id and s.stereotype_id == ^Scaffold.Instance.custom_acl(),
-      preload: [stereotyped: s]
-    )
+    object_custom_acl_q(object)
+    |> preload([stereotyped: s], stereotyped: s)
     |> repo().single()
 
     # |> debug("custom acl")
+  end
+
+  @doc """
+  Whether `object`'s own (custom) ACL grants `verb` with `value` (`true` for a grant, `false` for a denial) to any of `subject_ids`.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Acls.object_custom_acl_grants?(post, [circle_id], :reply, false)
+      false
+  """
+  def object_custom_acl_grants?(object, subject_ids, verb, value) when is_boolean(value) do
+    if id = uid(object) do
+      object_custom_acl_grants_q(id, subject_ids, verb, value)
+      |> repo().exists?()
+    else
+      false
+    end
+  end
+
+  def object_custom_acl_grants_q(object, subject_ids, verb, value) when is_boolean(value) do
+
+  verb_id = Verbs.get_id!(verb)
+      subject_ids = uids(subject_ids)
+
+      object_custom_acl_q(object)
+      |> join(:inner, [acl: acl], grant in assoc(acl, :grants), as: :grant)
+      |> where(
+        [grant: grant],
+        grant.subject_id in ^subject_ids and grant.verb_id == ^verb_id and grant.value == ^value
+      )
+
+end
+
+  @doc "Query for `object`'s own (custom) ACL, as `:acl`, for callers to narrow further."
+  def object_custom_acl_q(object) do
+    from(a in Acl,
+      as: :acl,
+      join: c in Controlled,
+      on: a.id == c.acl_id and c.id == ^uid(object),
+      join: s in Stereotyped,
+      as: :stereotyped,
+      on: a.id == s.id and s.stereotype_id == ^Scaffold.Instance.custom_acl()
+    )
   end
 
   @doc "The ACL an editor writes a grant to: the one it is editing, or else `object`'s custom ACL, created now if it has none. So opening an editor on an object writes nothing until a grant is actually changed."

@@ -1016,6 +1016,22 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           id: "2HEYS11ENCEDMES0CAN0TSEEME",
           name: l("People who silenced me cannot discover me"),
           stereotype: true
+        },
+
+        # Object blocks (`Blocks.block(object, :lock | :hide, …)`): one ACL per kind, attached to every object it applies to and detached to undo it, so they write no grants into the object's own ACL, where a lock and a hide overlapped (both deny `:reply`) and undoing one undid the other
+        locked: %{
+          id: "5T0PREP11ESANDTHEREACT10NS",
+          name: l("Locked: nobody may reply")
+        },
+        hidden: %{
+          id: "4H1DDENFR0MEVERY0NEBVTREAD",
+          name: l("Hidden from everyone (but still readable by link)")
+        },
+        # what one person hid from themselves: each has their own, created the first time they hide something
+        hidden_by_me: %{
+          id: "2H1DDENBYMEBVTST1NNREADAB1",
+          name: l("Things I hid"),
+          stereotype: true
         }
       ],
       ### Grants are the entries of an ACL and define the permissions a user or circle has for content using this ACL.
@@ -1115,6 +1131,18 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           silence_them: verbs_negative.([:request, :mention, :message])
         },
         cannot_discover_if_silenced: %{silence_me: verbs_negative.([:see])},
+        # only the participate verbs, what the `:cannot_participate` role denies: denying more would also take from the author and moderators the `:grant`/`:mediate` needed to reopen it, and `:edit`/`:delete` on their own post
+        locked: %{
+          guest: verbs_negative.(verbs_ping ++ verbs_partake),
+          local: verbs_negative.(verbs_ping ++ verbs_partake),
+          activity_pub: verbs_negative.(verbs_ping ++ verbs_partake)
+        },
+        # only `:see`: hiding takes it out of feeds and lists and nothing more, so it stays readable by link, and its author keeps `:edit`/`:delete`/`:grant` on it (denials win, so denying more here would take those from them too)
+        hidden: %{
+          guest: verbs_negative.([:see]),
+          local: verbs_negative.([:see]),
+          activity_pub: verbs_negative.([:see])
+        },
         no_follow: %{local: verbs_negative.([:follow]), activity_pub: verbs_negative.([:follow])}
         # |> IO.inspect(label: "no_follow")
       ]
@@ -1209,6 +1237,11 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       # Keyed by stereotype so each one carries its own complete wiring (circle, ACL, grant, and the ACL attached to the actor itself) and can be created alone. A given block only ever uses one of them, so only that one gets rows.
       # TODO: use these for users too, to keep DRY but also so they're each created on-demand and don't bloat the DB.
       block_boundaries_by_stereotype: %{
+        # somebody hid something from themselves (`Blocks.block(object, :hide, current_user: …)`): their one ACL, denying only them `:see`, attached to whatever they hide. Only `:see`, so hiding their own post leaves them able to edit, delete or unhide it. Not attached to the actor itself, so no `controlleds`
+        hidden_by_me: %{
+          acls: %{my_hidden: %{stereotype: :hidden_by_me}},
+          grants: %{my_hidden: %{SELF: verbs_negative.([:see])}}
+        },
         # somebody silenced this category: the reverse index lives on the thing being silenced
         silence_me: %{
           circles: %{silence_me: %{stereotype: :silence_me}},

@@ -300,6 +300,108 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
       assert Boundaries.can?(commenter, :reply, post)
     end
 
+    test "`Blocks.is_blocked?/3` reads whether a thread is locked" do
+      author = Bonfire.Me.Fake.fake_user!()
+      post = public_post!(author)
+
+      refute Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide)
+
+      {:ok, _} = Bonfire.Boundaries.Blocks.lock(post, current_user: author)
+      assert Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide)
+      assert Bonfire.Boundaries.Blocks.is_blocked?(id(post), :lock, :instance_wide), "by id as well"
+
+      {:ok, _} = Bonfire.Boundaries.Blocks.unlock(post, current_user: author)
+      refute Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide)
+    end
+
+    # nobody here being able to reply is what a boundary may say anyway, without anyone having locked it
+    test "`Blocks.is_blocked?/3` says a post whose boundary allows no replies but was never locked isn't locked" do
+      author = Bonfire.Me.Fake.fake_user!()
+      someone = Bonfire.Me.Fake.fake_user!()
+
+      assert {:ok, post} =
+               Posts.publish(
+                 current_user: author,
+                 post_attrs: %{post_content: %{html_body: "<p>only for mentions</p>"}},
+                 boundary: "mentions"
+               )
+
+      refute Boundaries.can?(someone, :reply, post), "control: no replies from them"
+      refute Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide)
+    end
+
+    test "`Blocks.is_blocked?/3` reads whether someone hid a post for themselves, and not for others" do
+      author = Bonfire.Me.Fake.fake_user!()
+      me = Bonfire.Me.Fake.fake_user!()
+      other = Bonfire.Me.Fake.fake_user!()
+      post = public_post!(author)
+
+      refute Bonfire.Boundaries.Blocks.is_blocked?(post, :hide, current_user: me)
+
+      {:ok, _} = Bonfire.Boundaries.Blocks.block(post, :hide, current_user: me)
+      assert Bonfire.Boundaries.Blocks.is_blocked?(post, :hide, current_user: me)
+      refute Bonfire.Boundaries.Blocks.is_blocked?(post, :hide, current_user: other)
+      refute Bonfire.Boundaries.Blocks.is_blocked?(post, :hide, :instance_wide)
+
+      {:ok, _} = Bonfire.Boundaries.Blocks.unblock(post, :hide, current_user: me)
+      refute Bonfire.Boundaries.Blocks.is_blocked?(post, :hide, current_user: me)
+    end
+
+    # a lock and a hide both deny `:reply`, so when both wrote grants into the post's own ACL, unhiding took the lock's denial with it
+    test "hiding and unhiding a locked thread instance-wide leaves it locked, and a hidden post isn't read as locked" do
+      author = Bonfire.Me.Fake.fake_user!()
+      {:ok, admin} = Bonfire.Me.Users.make_admin(Bonfire.Me.Fake.fake_user!())
+      commenter = Bonfire.Me.Fake.fake_user!()
+      post = public_post!(author)
+
+      {:ok, _} =
+        Bonfire.Boundaries.Blocks.block(post, :hide, current_user: admin, scope: :instance_wide)
+
+      refute Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide),
+             "hidden, not locked"
+
+      # its author still may, hiding having taken only `:see`
+      {:ok, _} = Bonfire.Boundaries.Blocks.lock(post, current_user: author)
+      {:ok, _} = Bonfire.Boundaries.Blocks.unblock(post, :hide, :instance_wide)
+
+      assert Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide)
+      refute Boundaries.can?(commenter, :reply, post), "still locked"
+    end
+
+    test "hiding my own post takes it out of what I see, and nothing else" do
+      author = Bonfire.Me.Fake.fake_user!()
+      post = public_post!(author)
+
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, author), "control: listed"
+
+      {:ok, _} = Bonfire.Boundaries.Blocks.block(post, :hide, current_user: author)
+
+      # seeing is what feeds ask, where `can?/3` lets a post's creator through whatever it says
+      refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, author), "hidden from me"
+      assert Boundaries.can?(author, :read, post), "still readable by link"
+      assert Boundaries.can?(author, :edit, post)
+      assert Boundaries.can?(author, :delete, post)
+
+      {:ok, _} = Bonfire.Boundaries.Blocks.unblock(post, :hide, current_user: author)
+      assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, author), "listed again"
+    end
+
+    test "`Blocks.is_blocked?/3` reads whether a post was hidden instance-wide" do
+      author = Bonfire.Me.Fake.fake_user!()
+      {:ok, admin} = Bonfire.Me.Users.make_admin(Bonfire.Me.Fake.fake_user!())
+      post = public_post!(author)
+
+      refute Bonfire.Boundaries.Blocks.is_blocked?(post, :hide, :instance_wide)
+
+      {:ok, _} =
+        Bonfire.Boundaries.Blocks.block(post, :hide, current_user: admin, scope: :instance_wide)
+
+      assert Bonfire.Boundaries.Blocks.is_blocked?(post, :hide, :instance_wide)
+
+      {:ok, _} = Bonfire.Boundaries.Blocks.unblock(post, :hide, :instance_wide)
+      refute Bonfire.Boundaries.Blocks.is_blocked?(post, :hide, :instance_wide)
+    end
+
     test "someone who is neither its author nor allowed to change its boundary cannot lock a thread" do
       author = Bonfire.Me.Fake.fake_user!()
       stranger = Bonfire.Me.Fake.fake_user!()

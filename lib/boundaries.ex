@@ -401,17 +401,26 @@ defmodule Bonfire.Boundaries do
   end
 
   @doc "Optimistic (template) variant of `can_interact?/4`, mirroring `can_or_unloaded?/3`."
-  def can_interact_or_unloaded?(subject, verb, object_boundary, opts \\ []) do
-    case can_or_unloaded?(subject, verb, object_boundary) do
-      true ->
-        case opts[:target_user] || object_boundary do
-          # no resolvable target → stay optimistic (the server-side `can_interact?` is the real gate)
-          target when target in [nil, :skip_boundary_preload] -> true
-          target -> federated_interaction_allowed?(subject, target, opts)
-        end
+  def can_interact_or_unloaded?(subject, verb, object_boundary, opts \\ []),
+    do: is_nil(interaction_refusal(subject, verb, object_boundary, opts))
 
-      other ->
-        other
+  @doc """
+  Why `can_interact_or_unloaded?/4` refuses, so a disabled button can say: `nil` when it doesn't, `:boundary` when the object's boundary does, `:federation` when the target is remote and federation can't reach it from here (off, paused, or not allowlisted).
+  """
+  def interaction_refusal(subject, verb, object_boundary, opts \\ []) do
+    cond do
+      can_or_unloaded?(subject, verb, object_boundary) != true ->
+        :boundary
+
+      # no resolvable target → stay optimistic (the server-side `can_interact?` is the real gate)
+      (opts[:target_user] || object_boundary) in [nil, :skip_boundary_preload] ->
+        nil
+
+      federated_interaction_allowed?(subject, opts[:target_user] || object_boundary, opts) != true ->
+        :federation
+
+      true ->
+        nil
     end
   end
 
