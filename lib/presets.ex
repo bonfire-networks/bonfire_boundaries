@@ -294,6 +294,16 @@ defmodule Bonfire.Boundaries.Presets do
   """
   def preset_boundary_from_acl(acl, object_type \\ nil)
 
+  # a loaded boundary (`Boundaries.boundaries_on_objects/3`): the role from its verbs, the name from its preset
+  def preset_boundary_from_acl(%{object_id: _, verbs: verbs, preset: preset}, object_type)
+      when is_list(verbs) do
+    {Roles.preset_boundary_role_from_acl(%{verbs: verbs}),
+     preset_boundary_tuple_from_acl(preset, object_type)}
+  end
+
+  def preset_boundary_from_acl(%{object_id: _, preset: preset}, object_type),
+    do: preset_boundary_tuple_from_acl(preset, object_type)
+
   def preset_boundary_from_acl(
         %{verbs: verbs, __typename: Bonfire.Data.AccessControl.Acl, id: acl_id} = _summary,
         object_type
@@ -327,6 +337,10 @@ defmodule Bonfire.Boundaries.Presets do
 
   def preset_boundary_tuple_from_acl(acl, %{__struct__: schema} = _object, opts),
     do: preset_boundary_tuple_from_acl(acl, schema, opts)
+
+  # a loaded boundary (`Boundaries.boundaries_on_objects/3`) names its boundary by the preset it holds
+  def preset_boundary_tuple_from_acl(%{object_id: _, preset: preset}, object_type, opts),
+    do: preset_boundary_tuple_from_acl(preset, object_type, opts)
 
   def preset_boundary_tuple_from_acl(%Acl{id: acl_id} = _acl, object_type, opts)
       when object_type in [Bonfire.Classify.Category, :group] do

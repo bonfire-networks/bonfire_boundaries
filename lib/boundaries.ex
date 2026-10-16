@@ -66,51 +66,54 @@ defmodule Bonfire.Boundaries do
     )
   end
 
-  def boundaries_on_objects(list_of_ids, presets, current_user) do
-    if not is_nil(current_user) do
-      # display user's computed permission if we have current_user
-      case users_grants_on(current_user, list_of_ids) do
-        custom when is_list(custom) and custom != [] ->
-          custom
-          # grouped first, because `Map.new/2` keyed by `object_id` keeps only the LAST entry per object, and there are now several per object
-          |> Enum.group_by(&e(&1, :object_id, nil))
-          |> Map.new(fn {object_id, entries} ->
-            {object_id, combine_users_grants_on(entries)}
-          end)
-          |> debug("my_grants_on")
-          |> deep_merge(presets || [], replace_lists: false)
-          |> debug("merged boundaries")
+  @doc """
+  The boundary each of these objects has for the viewer, as a map of object id to `%{id: object_id, object_id: object_id, verbs: verbs, preset: preset}`, so templates can ask `can?/3` without a query each.
 
-        _empty ->
-          presets
-      end
-    else
-      presets
-    end
+  - `verbs`: what the viewer may do (`Queries.granted_verbs_on/2`, a guest's included), so `can?/3` answers in memory. A boundary built elsewhere with `verbs: nil` is asked about as the object it names, by its `id`
+  - `preset`: the object's preset ACL, which names its boundary ("Public", "Local"…, `Presets.preset_boundary_tuple_from_acl/3`)
+
+  Kept apart rather than merged: a merge made the preset ACL's id the boundary's id, so a boundary with no verbs had `can?/3` ask about the ACL instead of the object. `nil` for an object with neither.
+  """
+  def boundaries_on_objects(list_of_ids, presets, current_user) do
+    object_ids = uids(list_of_ids)
+
+    # a guest's too (`nil` is the guest circle), so every viewer's verbs are loaded
+    verbs =
+      Queries.granted_verbs_on(current_user, object_ids)
+      |> repo().all()
+      |> Enum.group_by(fn {object_id, _} -> object_id end, fn {_, verb_id} ->
+        Verbs.get!(verb_id).verb
+      end)
+
+    presets = presets || %{}
+
+    object_ids
+    |> Map.new(fn object_id ->
+      {object_id, loaded_boundary(object_id, verbs[object_id], presets[object_id])}
+    end)
+    |> debug("loaded boundaries")
   end
+
+  defp loaded_boundary(_object_id, nil, nil), do: nil
+
+  defp loaded_boundary(object_id, verbs, preset),
+    do: %{
+      id: object_id,
+      object_id: object_id,
+      verbs: Enum.sort(verbs || []),
+      preset: preset
+    }
 
   def boundary_on_object(id, current_user) do
     boundary_on_object(id, Controlleds.get_preset_on_object(id), current_user)
   end
 
+  @doc "As `boundaries_on_objects/3`, for one object."
   def boundary_on_object(id, preset \\ nil, current_user) do
-    if not is_nil(current_user) do
-      # display user's computed permission if we have current_user
-      case users_grants_on(current_user, id) do
-        custom when is_list(custom) and custom != [] ->
-          custom
-          |> debug("users_grants_on")
-          |> combine_users_grants_on()
-          |> debug("my_grants_on")
-          |> Map.merge(preset || %{})
-          |> debug("merged boundaries")
+    object_id = uid(id)
 
-        _empty ->
-          preset
-      end
-    else
-      preset
-    end
+    boundaries_on_objects([object_id], %{object_id => preset}, current_user)
+    |> Map.get(object_id)
   end
 
   @doc """
@@ -132,7 +135,7 @@ defmodule Bonfire.Boundaries do
       |> Enum.reject(&(&1 in denied_verbs))
       |> Enum.sort()
 
-    %{verbs: verbs, value: true}
+    %{verbs: verbs}
   end
 
   @doc """
@@ -364,7 +367,7 @@ defmodule Bonfire.Boundaries do
   @doc """
   Optimistic permission check for use in feed action button templates that may
   render before `object_boundary` has been preloaded by `update_many` as
-  `%{verbs: ..., value: true}`.
+  `%{object_id: ..., verbs: ...}` (`boundaries_on_objects/3`).
 
   Returns `true` (so the button stays enabled) when:
     * `object_boundary` is `nil` or `:skip_boundary_preload` — defer to server-side
@@ -373,7 +376,7 @@ defmodule Bonfire.Boundaries do
       on click (consistent with the existing boost/like/reply UX)
 
   Otherwise delegates to `can?/3` against the preloaded boundary, which runs
-  in-memory (no DB query) on the `%{verbs: ..., value: true}` fast path.
+  in-memory (no DB query) when the viewer's verbs are loaded.
 
   Use this instead of `can?/3` in any per-activity template to avoid n+1
   permission queries when the surrounding preload chain didn't finish.
@@ -425,30 +428,42 @@ defmodule Bonfire.Boundaries do
   @doc """
   Checks if a subject has permission to conduct the specified action(s)/verb(s) on an object.
 
+  A list means ALL of them: every verb, on every object. `{:any, list}` in place of the verbs or the objects means at least one. Several subjects in a plain list are pooled, as one person's grants and circles are; `{:any, subjects}` (each on their own) is not supported yet, and `permitted_users/3` answers which of several users may.
+
   ## Examples
 
       iex> Bonfire.Boundaries.can?(%User{id: 1}, [:see], %{id: 2})
       false
+
+      iex> Bonfire.Boundaries.can?(moderator, {:any, [:grant, :mediate]}, post)
+      true
   """
   def can?(subject, verbs, object, opts \\ [])
+
+  def can?({:any, _subjects}, _verbs, _object, _opts),
+    do:
+      raise(
+        "Asking whether any of several subjects may is not supported yet: `permitted_users/3` says which of them may"
+      )
 
   # just for typos ;)
   def can?(subject, can_verbs?, :instance_wide, opts),
     do: can?(subject, can_verbs?, :instance, opts)
 
-  def can?(subject, can_verbs?, %{verbs: can_verbs!, value: true} = object_boundary, opts)
+  # a loaded boundary (`boundaries_on_objects/3`) with the viewer's verbs loaded; without (`verbs: nil`) it is asked about as the object it names, by its `id`
+  def can?(subject, can_verbs?, %{object_id: _, verbs: can_verbs!} = object_boundary, opts)
       when is_list(can_verbs!) do
     debug(object_boundary, " preloaded object_boundary")
 
     skip? = Queries.skip_boundary_check?(opts)
 
-    skip? =
-      skip? == true ||
-        (skip? == :admins and
-           Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, :is_admin?, [subject],
-             fallback_return: nil
-           )) ||
-        Enum.all?(List.wrap(can_verbs?), &Enum.member?(can_verbs!, Verbs.get(&1)[:verb]))
+    # the loaded boundary's verbs are those granted and not denied (`combine_users_grants_on/1`), so holding one is being permitted it
+    skip? == true ||
+      (skip? == :admins and
+         Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, :is_admin?, [subject],
+           fallback_return: nil
+         )) ||
+      holds_verbs?(can_verbs!, can_verbs?)
   end
 
   def can?(circle_name, verbs, object, opts) when is_atom(circle_name) do
@@ -456,61 +471,12 @@ defmodule Bonfire.Boundaries do
     can?([current_user: Circles.get_id(circle_name)], verbs, object, opts)
   end
 
+  def can?(subject, verbs, {:any, objects}, opts) when is_list(objects),
+    do: can_on_objects?(:any, subject, verbs, objects, opts)
+
   def can?(subject, verbs, object, opts)
-      when is_map(object) or is_binary(object) or is_list(object) do
-    skip? =
-      Queries.skip_boundary_check?(opts)
-      |> debug("check object?")
-
-    skip? =
-      skip? == true ||
-        (skip? == :admins and
-           Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, :is_admin?, [subject],
-             fallback_return: nil
-           )) ||
-        (
-          # `current_user_or_id` so a bare subject id (eg. the circle-as-subject clause above) is honored instead of silently downgrading the check to guest
-          current_user = current_user_or_id(subject)
-          current_user_id = id(current_user)
-
-          {first_object, objects} =
-            if is_list(object) do
-              objects =
-                Enum.reject(object, fn o -> is_nil(o) or o in @skip_object_placeholders end)
-
-              {List.first(objects), objects}
-            else
-              {object, nil}
-            end
-
-          creator_id =
-            if is_map(first_object),
-              # TODO: include caretaker
-              do:
-                e(first_object, :created, :creator_id, nil) ||
-                  e(first_object, :created, :creator, :id, nil) ||
-                  e(first_object, :creator_id, nil) || e(first_object, :creator, :id, nil)
-
-          case (not is_nil(current_user_id) and creator_id == current_user_id) or
-                 pointer_permitted?(objects || first_object,
-                   current_user: current_user,
-                   current_account: current_account(subject),
-                   verbs: verbs,
-                   ids_only: true
-                 ) do
-            true ->
-              true
-
-            %{id: _} ->
-              true
-
-            other ->
-              debug(verbs, "no permission to")
-              debug(other)
-              false
-          end
-        )
-  end
+      when is_map(object) or is_binary(object) or is_list(object),
+      do: can_on_objects?(:all, subject, verbs, List.wrap(object), opts)
 
   def can?(_subject, _verbs, object, _opts)
       when is_nil(object) or object in @skip_object_placeholders do
@@ -539,6 +505,62 @@ defmodule Bonfire.Boundaries do
   def can?(_subject, _verbs, object, _opts) do
     warn(object, "no object or boundary data")
     nil
+  end
+
+  defp holds_verbs?(held, {:any, verbs}), do: Enum.any?(List.wrap(verbs), &holds_verb?(held, &1))
+  defp holds_verbs?(held, verbs), do: Enum.all?(List.wrap(verbs), &holds_verb?(held, &1))
+  defp holds_verb?(held, verb), do: Enum.member?(held, Verbs.get(verb)[:verb])
+
+  # `mode` is `:all` (every object) or `:any` (at least one). What the subject created needs no check
+  defp can_on_objects?(mode, subject, verbs, objects, opts) do
+    skip? =
+      Queries.skip_boundary_check?(opts)
+      |> debug("check object?")
+
+    skip? == true ||
+      (skip? == :admins and
+         Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, :is_admin?, [subject],
+           fallback_return: nil
+         )) ||
+      (
+        # `current_user_or_id` so a bare subject id (eg. the circle-as-subject clause above) is honored instead of silently downgrading the check to guest
+        current_user = current_user_or_id(subject)
+        objects = Enum.reject(objects, fn o -> is_nil(o) or o in @skip_object_placeholders end)
+        to_check = Enum.reject(objects, &created_by?(&1, id(current_user)))
+
+        cond do
+          objects == [] -> false
+          to_check == [] -> true
+          mode == :any and to_check != objects -> true
+          true -> permitted_objects?(mode, to_check, current_user, subject, verbs)
+        end
+      )
+  end
+
+  # TODO: include caretaker
+  defp created_by?(_object, nil), do: false
+
+  defp created_by?(object, user_id) when is_map(object),
+    do:
+      (e(object, :created, :creator_id, nil) || e(object, :created, :creator, :id, nil) ||
+         e(object, :creator_id, nil) || e(object, :creator, :id, nil)) == user_id
+
+  defp created_by?(_object, _user_id), do: false
+
+  defp permitted_objects?(mode, objects, current_user, subject, verbs) do
+    opts = [current_user: current_user, current_account: current_account(subject), verbs: verbs]
+
+    case {mode, uids(objects) |> Enum.uniq()} do
+      {_, []} ->
+        false
+
+      {:any, ids} ->
+        pointer_permitted?(ids, opts) == true
+
+      # every one of them loads for the subject, rather than the first that does
+      {:all, ids} ->
+        load_query(ids, true, opts) |> repo().all() |> length() == length(ids)
+    end
   end
 
   def can!(subject, verbs, object, opts \\ []) do
@@ -593,6 +615,9 @@ defmodule Bonfire.Boundaries do
       %Needle.Pointer{id: 1}
   """
   def load_pointer(item, opts) do
+    # one object is OPENED, so checked for `:read` unless the caller asks otherwise (`load_pointers/2` lists, so takes the listing default)
+    opts = opts |> to_options() |> Keyword.put_new(:verbs, [:read])
+
     case uids(item) do
       ids when is_list(ids) and ids != [] ->
         load_query(ids, e(opts, :ids_only, nil), opts ++ [limit: 1])

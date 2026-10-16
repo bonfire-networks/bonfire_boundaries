@@ -12,10 +12,14 @@ defmodule Bonfire.Boundaries.CanOrUnloadedTest do
   alias Bonfire.Boundaries
   alias Bonfire.Me.Fake
 
+  # the shape `Boundaries.boundaries_on_objects/3` loads, with the viewer's verbs
+  defp loaded(verbs, object_id \\ "01HB0ABCDEFGHJKMNPQRSTVWXY"),
+    do: %{id: object_id, object_id: object_id, verbs: verbs, preset: nil}
+
   describe "can_or_unloaded?/3" do
     test "returns true (optimistic) when there is no current user" do
       assert Boundaries.can_or_unloaded?(%{}, :like, nil)
-      assert Boundaries.can_or_unloaded?(%{current_user: nil}, :boost, %{verbs: [], value: true})
+      assert Boundaries.can_or_unloaded?(%{current_user: nil}, :boost, loaded([]))
     end
 
     test "returns true when object_boundary is nil" do
@@ -35,17 +39,18 @@ defmodule Bonfire.Boundaries.CanOrUnloadedTest do
 
     test "delegates to can?/3 (returns true) when boundary is preloaded and verb is granted" do
       user = Fake.fake_user!()
-      # Boundary fast-path expects %{verbs: [..verb names..], value: true}
-      boundary = %{verbs: ["Like", "Read", "See"], value: true}
 
-      assert Boundaries.can_or_unloaded?(%{current_user: user}, :like, boundary)
+      assert Boundaries.can_or_unloaded?(
+               %{current_user: user},
+               :like,
+               loaded(["Like", "Read", "See"])
+             )
     end
 
     test "delegates to can?/3 (returns false) when boundary is preloaded and verb is missing" do
       user = Fake.fake_user!()
-      boundary = %{verbs: ["Read", "See"], value: true}
 
-      refute Boundaries.can_or_unloaded?(%{current_user: user}, :like, boundary)
+      refute Boundaries.can_or_unloaded?(%{current_user: user}, :like, loaded(["Read", "See"]))
     end
 
     test "passes through a verb list to can?/3" do
@@ -53,23 +58,30 @@ defmodule Bonfire.Boundaries.CanOrUnloadedTest do
       # check multiple verbs at once (e.g. `can?(ctx, [:see, :read], boundary)`)
       # must still benefit from the same in-memory fast path.
       user = Fake.fake_user!()
-      boundary = %{verbs: ["Like", "Read", "See"], value: true}
+      boundary = loaded(["Like", "Read", "See"])
 
       assert Boundaries.can_or_unloaded?(%{current_user: user}, [:like, :read], boundary)
       refute Boundaries.can_or_unloaded?(%{current_user: user}, [:like, :boost], boundary)
     end
 
-    test "with `value: false` boundary, falls through to can?/3 slow path" do
-      # The fast path at `boundaries.ex:367` only matches `value: true`. A
-      # `value: false` boundary (explicit denial) does NOT match the fast
-      # path and falls through to the DB-querying clause via
-      # `pointer_permitted?`. If you see this shape flowing through
-      # templates and triggering n+1 queries, add an explicit short-circuit
-      # for `value: false` to `can_or_unloaded?/3`.
+    # no verbs loaded (no grants of the viewer's to load): asked about as the object it names, in the database
+    test "with no verbs loaded, asks about the object itself" do
       user = Fake.fake_user!()
-      boundary = %{verbs: [], value: false}
+      author = Fake.fake_user!()
 
-      refute Boundaries.can_or_unloaded?(%{current_user: user}, :like, boundary)
+      publish = fn boundary ->
+        {:ok, post} =
+          Bonfire.Posts.publish(
+            current_user: author,
+            post_attrs: %{post_content: %{html_body: "a #{boundary} post"}},
+            boundary: boundary
+          )
+
+        loaded(nil, id(post))
+      end
+
+      assert Boundaries.can_or_unloaded?(%{current_user: user}, :like, publish.("public"))
+      refute Boundaries.can_or_unloaded?(%{current_user: user}, :like, publish.("mentions"))
     end
   end
 end

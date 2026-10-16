@@ -15,9 +15,10 @@ defmodule Bonfire.Boundaries.BoundariseStrategyEquivalenceTest do
     direct_exists: [boundarise_strategy: :direct_exists]
   ]
 
+  # both verbs asked, rather than the default (`[:see]`, listing), since the cross-verb deny below is what this exercises: a list means all of them, so denying either vetoes
   defp visible_ids(subject, strategy_opts) do
     from(p in Bonfire.Data.Social.Post, as: :main_object)
-    |> Queries.object_boundarised([current_user: subject] ++ strategy_opts)
+    |> Queries.object_boundarised([current_user: subject, verbs: [:see, :read]] ++ strategy_opts)
     |> repo().all()
     |> Enum.map(& &1.id)
     |> MapSet.new()

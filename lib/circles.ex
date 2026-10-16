@@ -175,7 +175,8 @@ defmodule Bonfire.Boundaries.Circles do
 
   @doc "Gets a circle by ID, after checking boundaries to see if this is a list shared with me"
   def get(id, opts) do
-    opts = opts ++ @default_q_opts
+    # one circle is OPENED, so `[:read]` unless the caller asks otherwise
+    opts = (opts ++ @default_q_opts) |> Keyword.put_new(:verbs, [:read])
     caretaker = current_user(opts)
 
     with {:ok, circle} <-

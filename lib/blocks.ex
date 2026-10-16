@@ -495,7 +495,7 @@ defmodule Bonfire.Boundaries.Blocks do
       true ->
         case Bonfire.Common.Needles.get(uid(object),
                current_user: current_user,
-               verbs: [:grant, :mediate]
+               verbs: {:any, [:grant, :mediate]}
              ) do
           {:ok, loaded} ->
             {:ok, load_for_locality_check(loaded)}

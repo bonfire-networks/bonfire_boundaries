@@ -153,10 +153,7 @@ defmodule Bonfire.Boundaries.Queries do
   def boundarise_query(query, agent, verbs, alia, field, opts) do
     case boundarise_strategy(opts) do
       :direct_exists when not is_nil(query) ->
-        pos = permission_probe(agent, verbs, true, alia, field)
-        neg = permission_probe(agent, verbs, false, alia, field)
-
-        where(query, [], exists(pos) and not exists(neg))
+        where(query, ^direct_exists_permitted(agent, verbs, alia, field))
 
       strategy ->
         vis =
@@ -174,6 +171,30 @@ defmodule Bonfire.Boundaries.Queries do
     end
   end
 
+  # The `:direct_exists` condition. All the verbs: a grant of each, and no denial of any, so one probe per verb plus one (a single verb, as listing by `:see` is, keeps the two probes it always had). `{:any, verbs}`: each verb judged on its own, granted and not denied, any one passing
+  defp direct_exists_permitted(agent, {:any, verbs}, alia, field) do
+    verbs
+    |> List.wrap()
+    |> Enum.uniq()
+    |> Enum.reduce(dynamic(false), fn verb, acc ->
+      pos = permission_probe(agent, [verb], true, alia, field)
+      neg = permission_probe(agent, [verb], false, alia, field)
+      dynamic(^acc or (exists(pos) and not exists(neg)))
+    end)
+  end
+
+  defp direct_exists_permitted(agent, verbs, alia, field) do
+    neg = permission_probe(agent, verbs, false, alia, field)
+
+    verbs
+    |> List.wrap()
+    |> Enum.uniq()
+    |> Enum.reduce(dynamic(not exists(neg)), fn verb, acc ->
+      pos = permission_probe(agent, [verb], true, alia, field)
+      dynamic(^acc and exists(pos))
+    end)
+  end
+
   def always_true_subquery do
     # NOTE: ugly temp workaround
     from(s in Bonfire.Data.AccessControl.Verb, select: fragment("true"), limit: 1)
@@ -182,14 +203,17 @@ defmodule Bonfire.Boundaries.Queries do
   @doc """
   The verbs a boundary query checks, read from `opts`.
 
-  The option is `verbs:`, a list, defaulting to `[:see, :read]`. A singular `verb:` is taken as `verbs: [verb]` but still errors, so its callers move to `verbs:`: it used to be ignored, which silently checked only the default. Both at once is refused, since `verbs:` passes anyone holding ANY of them, so merging would widen the check, and quietly picking one would hide the mistake.
+  The option is `verbs:`: a list, which means ALL of them, or `{:any, list}`, which means at least one. It defaults to `[:see]`, which is whether something may be LISTED (feeds, threads, listings); opening one object by its link asks for `[:read]`, and showing its content to whoever finds it (public search) `[:see, :read]`. A singular `verb:` is taken as `verbs: [verb]` but still errors, so its callers move to `verbs:`: it used to be ignored, which silently checked only the default. Both at once is refused, since quietly picking one would hide the mistake.
 
   `err/2` raises in dev and test, and only logs in production.
   """
   def verbs_from_opts(opts) do
     case {e(opts, :verbs, nil), e(opts, :verb, nil)} do
       {nil, nil} ->
-        {:ok, [:see, :read]}
+        {:ok, [:see]}
+
+      {{:any, verbs}, nil} ->
+        {:ok, {:any, List.wrap(verbs)}}
 
       {verbs, nil} ->
         {:ok, List.wrap(verbs)}
@@ -219,12 +243,12 @@ defmodule Bonfire.Boundaries.Queries do
   @doc """
   Creates a subquery to filter results based on user permissions.
 
-  Filters out results that the current user is not permitted to perform *all* of the specified verbs on.
+  Keeps the objects the user may do ALL of these verbs on (a grant of each, a denial of none), or with `{:any, verbs}` at least one of them (each verb judged on its own).
 
   ## Parameters
 
   - `user`: The current user or their ID
-  - `verbs`: A list of verbs to check permissions for (default: [:see, :read])
+  - `verbs`: A list of verbs, or `{:any, verbs}`
   - `query`: An initial query on `Summary` to filter objects (optional)
 
   ## Examples
@@ -238,17 +262,38 @@ defmodule Bonfire.Boundaries.Queries do
   def query_with_summary(user, verbs, strategy) when strategy in [:view, :summary_subquery],
     do: query_with_summary(user, verbs, base_summary_query(strategy))
 
-  def query_with_summary(user, verbs, query) do
+  def query_with_summary(user, {:any, verbs}, query) do
     subject_ids = user_and_circle_ids(user)
     verbs = Verbs.ids(verbs)
+
+    # grouped by object AND verb, so each verb passes or fails on its own rows, and the object is kept for any that passes
+    from(summary in query,
+      where:
+        summary.subject_id in ^subject_ids and
+          summary.verb_id in ^verbs,
+      group_by: [summary.object_id, summary.verb_id],
+      having: fragment("bool_and(?)", summary.value),
+      select: %{
+        subjects: count(summary.subject_id),
+        object_id: summary.object_id
+      }
+    )
+  end
+
+  def query_with_summary(user, verbs, query) do
+    subject_ids = user_and_circle_ids(user)
+    verbs = Verbs.ids(verbs) |> Enum.uniq()
 
     from(summary in query,
       where:
         summary.subject_id in ^subject_ids and
           summary.verb_id in ^verbs,
       group_by: summary.object_id,
-      # `bool_and` (built-in C aggregate) has the same HAVING semantics as our deprecated plpgsql `agg_perms`m SQL aggregates skip NULL inputs, so both compute the AND of the non-null values, and an all-null group yields NULL which fails HAVING either way, but without an interpreted function call per input row (measured ~2× faster over prod-scale grant data)
-      having: fragment("bool_and(?)", summary.value),
+      # `bool_and` (built-in C aggregate) has the same HAVING semantics as our deprecated plpgsql `agg_perms`m SQL aggregates skip NULL inputs, so both compute the AND of the non-null values, and an all-null group yields NULL which fails HAVING either way, but without an interpreted function call per input row (measured ~2× faster over prod-scale grant data). It refuses any denial; the count requires a GRANT of every verb, since a verb with no row, or only an undecided (null) one, is not granted
+      having:
+        fragment("bool_and(?)", summary.value) and
+          fragment("count(distinct ?) filter (where ?)", summary.verb_id, summary.value) ==
+            ^length(verbs),
       select: %{
         subjects: count(summary.subject_id),
         object_id: summary.object_id
@@ -472,15 +517,7 @@ defmodule Bonfire.Boundaries.Queries do
   A correlated subquery probing for the existence of a grant with the given `value` (`true` = permitting, `false` = denying) matching the parent row's object, the given verbs, and the subject or any circle the subject belongs to. Used in pairs by the `:direct_exists` strategy: `EXISTS(true-probe) AND NOT EXISTS(false-probe)`, which is exactly `HAVING bool_and(value)` decomposed (≥1 true and no false among matched grants), but with pure index lookups instead of a per-row aggregation over the summary shape.
   """
   def permission_probe(subject, verbs, value, parent_alias, parent_field) do
-    subject_ids = user_and_circle_ids(subject)
     verb_ids = Verbs.ids(verbs)
-
-    # the subject's circle memberships, resolved as an uncorrelated semi-join: it depends only on query parameters, so the planner evaluates it once per statement against encircle's (subject_id, circle_id) unique index, NOT once per candidate row like the summary shape's `g.subject_id = pointer.id OR encircle...` disjunction, which forced a full encircle scan per row (91% of a measured 17s thread query)
-    circle_ids =
-      from(e in Bonfire.Data.AccessControl.Encircle,
-        where: e.subject_id in ^subject_ids,
-        select: e.circle_id
-      )
 
     # NOTE: no named `as:` bindings in here, this runs as a correlated subquery inside arbitrary outer queries, and named bindings could clash with theirs
     from(c in Bonfire.Data.AccessControl.Controlled,
@@ -489,11 +526,45 @@ defmodule Bonfire.Boundaries.Queries do
       where: c.id == field(parent_as(^parent_alias), ^parent_field),
       where: g.verb_id in ^verb_ids,
       where: g.value == ^value,
-      # `= ANY(ARRAY(subquery))` rather than `IN (subquery)`, and the difference is the cost model rather than the semantics: both mean "the grant is to some circle this subject is in", and an empty set is false either way. `ARRAY(...)` of an uncorrelated subquery is an InitPlan, costed and run once per statement, while `IN (subquery)` nested inside the correlated EXISTS below is costed as part of every probe evaluation. For a viewer in thousands of circles that inflated one probe pair's estimate to ~33M, which swamped every join decision in the outer query and left the winner arbitrary: a sequential scan of millions of `replied` rows, and a notifications page that hit the 15s statement timeout. Same rows, same permissions, 98ms instead
-      where:
-        g.subject_id in ^subject_ids or
-          fragment("? = ANY(ARRAY(?)::uuid[])", g.subject_id, subquery(circle_ids)),
       select: 1
+    )
+    |> where_granted_to(subject)
+  end
+
+  @doc """
+  The verbs the subject may do on each of these objects, as `{object_id, verb_id}` pairs: granted to them or a circle they are in, and denied to neither, judged per verb (`bool_and`). One query for any number of objects, straight from the grants as `permission_probe/5` reads them rather than through the summary view, which for a page of a feed was ~20× slower (483ms against 23ms, measured on prod 16 October).
+
+  `Bonfire.Boundaries.boundaries_on_objects/3` loads a feed page's boundaries with it. A subject of `nil` is a guest.
+  """
+  def granted_verbs_on(subject, object_ids) do
+    from(c in Bonfire.Data.AccessControl.Controlled,
+      join: g in Bonfire.Data.AccessControl.Grant,
+      on: g.acl_id == c.acl_id,
+      where: c.id in ^Types.uids(object_ids),
+      group_by: [c.id, g.verb_id],
+      having: fragment("bool_and(?)", g.value),
+      select: {c.id, g.verb_id}
+    )
+    |> where_granted_to(subject)
+  end
+
+  # Keeps the grants to the subject or any circle they are in, of a query on `Controlled` joined to `Grant` (the second binding).
+  # The circle memberships are resolved as an uncorrelated semi-join: it depends only on query parameters, so the planner evaluates it once per statement against encircle's (subject_id, circle_id) unique index, NOT once per candidate row like the summary shape's `g.subject_id = pointer.id OR encircle...` disjunction, which forced a full encircle scan per row (91% of a measured 17s thread query)
+  defp where_granted_to(query, subject) do
+    subject_ids = user_and_circle_ids(subject)
+
+    circle_ids =
+      from(e in Bonfire.Data.AccessControl.Encircle,
+        where: e.subject_id in ^subject_ids,
+        select: e.circle_id
+      )
+
+    # `= ANY(ARRAY(subquery))` rather than `IN (subquery)`, and the difference is the cost model rather than the semantics: both mean "the grant is to some circle this subject is in", and an empty set is false either way. `ARRAY(...)` of an uncorrelated subquery is an InitPlan, costed and run once per statement, while `IN (subquery)` nested inside a correlated EXISTS is costed as part of every probe evaluation. For a viewer in thousands of circles that inflated one probe pair's estimate to ~33M, which swamped every join decision in the outer query and left the winner arbitrary: a sequential scan of millions of `replied` rows, and a notifications page that hit the 15s statement timeout. Same rows, same permissions, 98ms instead
+    where(
+      query,
+      [_c, g],
+      g.subject_id in ^subject_ids or
+        fragment("? = ANY(ARRAY(?)::uuid[])", g.subject_id, subquery(circle_ids))
     )
   end
 
