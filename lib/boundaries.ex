@@ -77,9 +77,9 @@ defmodule Bonfire.Boundaries do
   def boundaries_on_objects(list_of_ids, presets, current_user) do
     object_ids = uids(list_of_ids)
 
-    # a guest's too (`nil` is the guest circle), so every viewer's verbs are loaded
+    # a guest's too (`nil` is the guest circle), so every viewer's verbs are loaded. Per object or per ACL as configured, to compare them live
     verbs =
-      Queries.granted_verbs_on(current_user, object_ids)
+      Queries.granted_verbs_query(current_user, object_ids)
       |> repo().all()
       |> Enum.group_by(fn {object_id, _} -> object_id end, fn {_, verb_id} ->
         Verbs.get!(verb_id).verb

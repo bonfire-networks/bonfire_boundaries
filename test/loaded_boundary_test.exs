@@ -43,4 +43,50 @@ defmodule Bonfire.Boundaries.LoadedBoundaryTest do
     assert Boundaries.can?(reader, :read, loaded) == true
     refute Boundaries.can?(reader, :delete, loaded), "and refuses what they may not do"
   end
+
+  # the two ways of loading a page's verbs (`granted_verbs_strategy`), compared on a live instance, must say the same: shared ACLs, an object's own, and denials in either
+  test "per object and per ACL load the same verbs" do
+    author = Fake.fake_user!()
+    viewer = Fake.fake_user!()
+
+    publish = fn boundary, extra ->
+      {:ok, post} =
+        Posts.publish(
+          [
+            current_user: author,
+            post_attrs: %{
+              post_content: %{
+                html_body: "<p>a #{boundary} post @#{viewer.character.username}</p>"
+              }
+            },
+            boundary: boundary
+          ] ++ extra
+        )
+
+      post
+    end
+
+    public = publish.("public", [])
+    local = publish.("local", [])
+    mentions = publish.("mentions", [])
+    locked = publish.("public", [])
+    {:ok, _} = Bonfire.Boundaries.Blocks.lock(locked, current_user: author)
+    hidden = publish.("public", [])
+    {:ok, _} = Bonfire.Boundaries.Blocks.block(hidden, :hide, current_user: viewer)
+
+    ids = Enum.map([public, local, mentions, locked, hidden], &id/1)
+
+    for who <- [author, viewer, nil] do
+      per_object =
+        Bonfire.Boundaries.Queries.granted_verbs_on(who, ids) |> repo().all() |> MapSet.new()
+
+      per_acl =
+        Bonfire.Boundaries.Queries.granted_verbs_on_per_acl(who, ids)
+        |> repo().all()
+        |> MapSet.new()
+
+      assert MapSet.size(per_object) > 0, "control: something is granted"
+      assert per_acl == per_object, "#{if who, do: id(who), else: "guest"}"
+    end
+  end
 end

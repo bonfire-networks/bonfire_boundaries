@@ -308,7 +308,9 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
 
       {:ok, _} = Bonfire.Boundaries.Blocks.lock(post, current_user: author)
       assert Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide)
-      assert Bonfire.Boundaries.Blocks.is_blocked?(id(post), :lock, :instance_wide), "by id as well"
+
+      assert Bonfire.Boundaries.Blocks.is_blocked?(id(post), :lock, :instance_wide),
+             "by id as well"
 
       {:ok, _} = Bonfire.Boundaries.Blocks.unlock(post, current_user: author)
       refute Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide)
@@ -575,6 +577,18 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
 
     test "takes an id as well as the object" do
       assert Boundaries.object_public?(id(post_with_boundary("public")))
+    end
+
+    # `nonfederated` gives guests `guests_may_see_read`, whose `guest: :read` is the `read` ROLE (`[:read, :see, …]`), so a guest may find it as well as open it, which is what public search asks (`[:see, :read]`)
+    test "a nonfederated post may be found and read by a guest" do
+      post = post_with_boundary("nonfederated")
+
+      assert Boundaries.can?(nil, :see, post), "found"
+      assert Boundaries.can?(nil, :read, post), "read"
+      assert Boundaries.can?(nil, [:see, :read], post), "both, as search asks"
+
+      loaded = Boundaries.boundaries_on_objects([id(post)], nil) |> Map.get(id(post))
+      assert Boundaries.can?(nil, [:see, :read], loaded), "the same from its loaded boundary"
     end
   end
 end

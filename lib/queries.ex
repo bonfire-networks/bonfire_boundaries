@@ -447,11 +447,15 @@ defmodule Bonfire.Boundaries.Queries do
   defp permitted_for(pairs, verbs, object_id) do
     verb_ids = Verbs.ids(verbs) |> Enum.uniq()
     id_type = Summary.__schema__(:type, :subject_id)
+    subject_ids = pairs |> Enum.map(& &1.subject_id) |> Enum.uniq()
 
     from(pair in values(pairs, %{for_id: id_type, subject_id: id_type}),
       join: summary in Summary,
       on: summary.subject_id == pair.subject_id,
-      where: summary.object_id == ^object_id and summary.verb_id in ^verb_ids,
+      # the subjects as a literal list too, as `query_with_summary/3` gives them: the view has a row per pointer as subject, and only a list Postgres can see lets it narrow those before building rows. The join to `VALUES` alone isn't pushed into the view, so it built rows for every pointer first, timing out for ONE recipient on prod (17 October)
+      where:
+        summary.subject_id in ^subject_ids and summary.object_id == ^object_id and
+          summary.verb_id in ^verb_ids,
       group_by: pair.for_id,
       # `bool_and` refuses any denial; the count requires a GRANT of every verb, since a verb with no row, or only an undecided (null) one, is not granted
       having:
@@ -546,6 +550,49 @@ defmodule Bonfire.Boundaries.Queries do
       select: {c.id, g.verb_id}
     )
     |> where_granted_to(subject)
+  end
+
+  @doc """
+  The same pairs as `granted_verbs_on/2`, judged once per ACL rather than once per object and ACL: objects mostly share preset ACLs, so a feed page's 20 posts reach ~230 ACL attachments but few distinct ACLs, and the per-object query looked the same grants up again for each (229 lookups, 65-74ms of a page on prod, 17 October). Each distinct ACL's grants to the subject are reduced to `bool_and` per verb once, then per object across its ACLs, which is the same rule (a denial on any of its ACLs wins), so the two must agree.
+
+  `Bonfire.Boundaries.boundaries_on_objects/3` uses this one, unless `config :bonfire_boundaries, Bonfire.Boundaries, granted_verbs_strategy: :per_object` says otherwise, kept so the two can be compared on a live instance.
+  """
+  def granted_verbs_on_per_acl(subject, object_ids) do
+    object_ids = Types.uids(object_ids)
+
+    acl_ids =
+      from(c in Bonfire.Data.AccessControl.Controlled,
+        where: c.id in ^object_ids,
+        distinct: true,
+        select: %{acl_id: c.acl_id}
+      )
+
+    # grouped, so the planner computes it once rather than folding it back into a per-object loop
+    per_acl =
+      from(a in subquery(acl_ids),
+        join: g in Bonfire.Data.AccessControl.Grant,
+        on: g.acl_id == a.acl_id,
+        group_by: [g.acl_id, g.verb_id],
+        select: %{acl_id: g.acl_id, verb_id: g.verb_id, granted: fragment("bool_and(?)", g.value)}
+      )
+      |> where_granted_to(subject)
+
+    from(c in Bonfire.Data.AccessControl.Controlled,
+      join: v in subquery(per_acl),
+      on: v.acl_id == c.acl_id,
+      where: c.id in ^object_ids,
+      group_by: [c.id, v.verb_id],
+      having: fragment("bool_and(?)", v.granted),
+      select: {c.id, v.verb_id}
+    )
+  end
+
+  @doc "`granted_verbs_on_per_acl/2` or `granted_verbs_on/2`, as configured (`:granted_verbs_strategy`, default `:per_acl`; `:per_object` to compare)."
+  def granted_verbs_query(subject, object_ids) do
+    case Common.Config.get([Bonfire.Boundaries, :granted_verbs_strategy], :per_acl) do
+      :per_object -> granted_verbs_on(subject, object_ids)
+      _ -> granted_verbs_on_per_acl(subject, object_ids)
+    end
   end
 
   # Keeps the grants to the subject or any circle they are in, of a query on `Controlled` joined to `Grant` (the second binding).

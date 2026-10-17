@@ -14,7 +14,9 @@ defmodule Bonfire.Boundaries.QueriesVerbsOptsTest do
   test "`verbs:` is used as given" do
     assert {:ok, [:mediate]} = Queries.verbs_from_opts(verbs: [:mediate])
     assert {:ok, [:read]} = Queries.verbs_from_opts(verbs: :read)
-    assert {:ok, {:any, [:see, :request]}} = Queries.verbs_from_opts(verbs: {:any, [:see, :request]})
+
+    assert {:ok, {:any, [:see, :request]}} =
+             Queries.verbs_from_opts(verbs: {:any, [:see, :request]})
   end
 
   # listing: opening one object asks for `[:read]`, and showing its content to whoever finds it `[:see, :read]`

@@ -592,7 +592,8 @@ defmodule Bonfire.Boundaries.Blocks do
     do: ActivityPub.block(%{actor: actor, object: blocked_actor})
 
   defp publish_block(:block, actor, blocked_actor, on_behalf_of, opts) do
-    with {:ok, %{ap_id: on_behalf_of_ap_id}} <- ActivityPub.Actor.get_cached(pointer: on_behalf_of) do
+    with {:ok, %{ap_id: on_behalf_of_ap_id}} <-
+           ActivityPub.Actor.get_cached(pointer: on_behalf_of) do
       ActivityPub.block(%{
         actor: actor,
         object: blocked_actor,
@@ -1438,22 +1439,22 @@ defmodule Bonfire.Boundaries.Blocks do
       [
         activity,
         fn record ->
-        with {:ok, %{__struct__: Bonfire.Classify.Category} = group} <-
-               maybe_apply(
-                 Bonfire.Federate.ActivityPub.AdapterUtils,
-                 :get_by_url_ap_id_or_username,
-                 [ActivityPub.Object.get_ap_id(target)]
-               ),
-             {:ok, blocked} <-
-               maybe_apply(
-                 Bonfire.Federate.ActivityPub.AdapterUtils,
-                 :get_or_fetch_character_by_ap_id,
-                 [blocked]
-               ),
-             {:ok, scope} <- maybe_on_behalf_of(current_user: moderator, on_behalf_of: group) do
-          do_block(blocked, recorded_block_type(record), scope)
+          with {:ok, %{__struct__: Bonfire.Classify.Category} = group} <-
+                 maybe_apply(
+                   Bonfire.Federate.ActivityPub.AdapterUtils,
+                   :get_by_url_ap_id_or_username,
+                   [ActivityPub.Object.get_ap_id(target)]
+                 ),
+               {:ok, blocked} <-
+                 maybe_apply(
+                   Bonfire.Federate.ActivityPub.AdapterUtils,
+                   :get_or_fetch_character_by_ap_id,
+                   [blocked]
+                 ),
+               {:ok, scope} <- maybe_on_behalf_of(current_user: moderator, on_behalf_of: group) do
+            do_block(blocked, recorded_block_type(record), scope)
+          end
         end
-      end
       ],
       # with no records (social not available) nothing was pending, so just apply it
       fallback_fun: fn _activity, apply -> apply.(nil) end

@@ -892,18 +892,16 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   def object_custom_acl_grants_q(object, subject_ids, verb, value) when is_boolean(value) do
+    verb_id = Verbs.get_id!(verb)
+    subject_ids = uids(subject_ids)
 
-  verb_id = Verbs.get_id!(verb)
-      subject_ids = uids(subject_ids)
-
-      object_custom_acl_q(object)
-      |> join(:inner, [acl: acl], grant in assoc(acl, :grants), as: :grant)
-      |> where(
-        [grant: grant],
-        grant.subject_id in ^subject_ids and grant.verb_id == ^verb_id and grant.value == ^value
-      )
-
-end
+    object_custom_acl_q(object)
+    |> join(:inner, [acl: acl], grant in assoc(acl, :grants), as: :grant)
+    |> where(
+      [grant: grant],
+      grant.subject_id in ^subject_ids and grant.verb_id == ^verb_id and grant.value == ^value
+    )
+  end
 
   @doc "Query for `object`'s own (custom) ACL, as `:acl`, for callers to narrow further."
   def object_custom_acl_q(object) do
