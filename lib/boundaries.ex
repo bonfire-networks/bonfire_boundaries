@@ -685,8 +685,14 @@ defmodule Bonfire.Boundaries do
   end
 
   defp load_query(ids, _, opts) do
+    # scheduled objects are included unless `exclude_scheduled`: built-in boundaries such as the instance ACL have fixed ids that read as future dates, so the scheduled-content filter dropped them, and `can?(_, _, :instance)` was false for all but admins
     (opts[:from] ||
-       Bonfire.Common.Needles.query_base(if opts[:include_deleted], do: :include_deleted))
+       Bonfire.Common.Needles.query_base(
+         deleted: opts[:include_deleted],
+         include_scheduled: !opts[:exclude_scheduled]
+       ))
+    # (opts[:from] ||
+    #    Bonfire.Common.Needles.query_base(if opts[:include_deleted], do: :include_deleted))
     |> where([p], p.id in ^List.wrap(ids))
     |> boundarise(main_object.id, opts)
   end
