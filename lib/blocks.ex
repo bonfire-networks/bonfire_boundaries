@@ -1302,7 +1302,9 @@ defmodule Bonfire.Boundaries.Blocks do
       maybe_relay_received(object, activity)
       {:ok, locked}
     else
-      e -> error(e, "Could not lock the object")
+      e ->
+        maybe_reject_refused(group_of_refused(object), activity)
+        error(e, "Could not lock the object")
     end
   end
 
@@ -1332,6 +1334,25 @@ defmodule Bonfire.Boundaries.Blocks do
       [object, activity],
       fallback_return: nil
     )
+  end
+
+  # a refusal tells the moderator's instance, so it takes back what it applied straight away (`Outgoing.send_reject/2`, only for a group we host)
+  defp maybe_reject_refused(group, activity) do
+    maybe_apply(Bonfire.Federate.ActivityPub.Outgoing, :send_reject, [group, activity],
+      fallback_return: nil
+    )
+  end
+
+  defp group_of_refused(object) do
+    with {:ok, object} <- ap_receive_object_to_lock(object),
+         {:ok, _, %{} = group} <-
+           maybe_apply(Bonfire.Classify.Categories, :group_of_object, [object],
+             fallback_return: nil
+           ) do
+      group
+    else
+      _ -> nil
+    end
   end
 
   # a remote moderator refused here may have been added since we last synced the group's moderators, so the refusal re-syncs them from the origin and tries again (`Categories.with_moderators_resynced/2`); through `maybe_apply` since boundaries doesn't depend on classify, which without it just runs the action
@@ -1367,6 +1388,7 @@ defmodule Bonfire.Boundaries.Blocks do
           done
 
         refused ->
+          maybe_reject_refused(on_behalf_of, activity)
           refused
       end
     else
