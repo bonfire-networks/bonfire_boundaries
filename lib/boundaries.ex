@@ -541,7 +541,7 @@ defmodule Bonfire.Boundaries do
           objects == [] -> false
           to_check == [] -> true
           mode == :any and to_check != objects -> true
-          true -> permitted_objects?(mode, to_check, current_user, subject, verbs)
+          true -> permitted_objects?(mode, to_check, current_user, subject, verbs, opts)
         end
       )
   end
@@ -556,8 +556,17 @@ defmodule Bonfire.Boundaries do
 
   defp created_by?(_object, _user_id), do: false
 
-  defp permitted_objects?(mode, objects, current_user, subject, verbs) do
-    opts = [current_user: current_user, current_account: current_account(subject), verbs: verbs]
+  # the caller's options reach the query (eg. `include_deleted`: soft-deleted objects are left out unless asked for, as when restoring an archived group, and asking keeps their boundaries in force), with the subject and verbs resolved here taking precedence
+  defp permitted_objects?(mode, objects, current_user, subject, verbs, opts) do
+    # without the caller's own `verb`/`verbs`: a singular `verb:` overrides `verbs:` in the query, so eg. a delete epic's `verb: :delete` turned "may the activity_pub circle read this user" into "may it delete them", refusing the group's federated `Delete`
+    opts =
+      opts
+      |> Keyword.drop([:verb, :verbs])
+      |> Keyword.merge(
+        current_user: current_user,
+        current_account: current_account(subject),
+        verbs: verbs
+      )
 
     case {mode, uids(objects) |> Enum.uniq()} do
       {_, []} ->

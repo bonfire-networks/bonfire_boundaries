@@ -646,7 +646,7 @@ defmodule Bonfire.Boundaries.Blocks do
       Bonfire.Common.Config.get(:types_character_schemas, [], :bonfire)
 
     # and only for objects WE host: applying an incoming `Lock` goes through this same function (`ap_receive_activity/3` below, and `Threads.ap_receive_comments_enabled/4` for the `commentsEnabled` form), so announcing a remote object's lock would echo the origin's own decision back at the fediverse as though it were ours. Or one of OUR moderators locking something a group elsewhere hosts, which is theirs to send, to that group
-    if Types.object_type(object) not in character_schemas and
+    if Types.object_type_schema(object) not in character_schemas and
          (publish_opts[:moderating_elsewhere] == true or
             Utils.maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :is_local?, [object],
               fallback_return: false

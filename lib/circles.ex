@@ -781,6 +781,28 @@ defmodule Bonfire.Boundaries.Circles do
       when not is_nil(stereotype) and stereotype != [],
       do: get_stereotype_circles(subject, [stereotype])
 
+  @doc """
+  Which of `caretaker_ids` have a circle of this stereotype (eg. `:group_members`), in one query, without creating any (unlike `get_or_create_stereotype_circle/2`).
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.caretakers_with_stereotype([group_id, topic_id], :group_members)
+      [group_id]
+  """
+  def caretakers_with_stereotype([], _stereotypes), do: []
+
+  def caretakers_with_stereotype(caretaker_ids, stereotypes) do
+    query_my(caretaker_ids, skip_boundary_check: true)
+    |> where(
+      [stereotyped: stereotyped],
+      stereotyped.stereotype_id in ^stereotype_ids(List.wrap(stereotypes))
+    )
+    # only the ids, so none of `query/1`'s preloads
+    |> exclude(:preload)
+    |> select([caretaker: caretaker], caretaker.caretaker_id)
+    |> repo().all()
+  end
+
   defp do_get_stereotype_circles(subject, stereotype_ids)
        when is_list(stereotype_ids) and stereotype_ids != [] do
     # skip boundaries since we should only use this query internally
