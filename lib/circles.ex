@@ -1632,7 +1632,12 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   def add_to_circles(subject, circle) when not is_nil(circle) do
-    repo().insert(Encircle.changeset(%{circle_id: uid!(circle), subject_id: uid!(subject)}))
+    # a re-add (eg. a mirrored group's moderators synced again) is a no-op answering with the membership they already have: a plain insert hit the unique index, and Postgres aborts the transaction around a violated constraint even when Ecto turns it into a changeset error. `{:replace, [:subject_id]}` writes back the same value, which is what makes `returning` give the existing row's id
+    repo().insert(Encircle.changeset(%{circle_id: uid!(circle), subject_id: uid!(subject)}),
+      on_conflict: {:replace, [:subject_id]},
+      conflict_target: [:subject_id, :circle_id],
+      returning: true
+    )
   end
 
   @doc """

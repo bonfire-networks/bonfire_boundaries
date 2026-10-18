@@ -16,6 +16,25 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
     assert length(circles) == 5
   end
 
+  # A re-add (eg. a mirrored group's moderators synced again) must not hit the unique index: Postgres aborts the transaction around a violated constraint even when Ecto turns it into a changeset error, so everything after it in the transaction failed with "transaction rolling back"
+  test "adding someone already in a circle is a no-op, also inside a transaction, and answers with their membership" do
+    user = Bonfire.Me.Fake.fake_user!()
+    member = Bonfire.Me.Fake.fake_user!()
+    assert {:ok, circle} = Circles.create(user, "regulars")
+
+    assert {:ok, first} = Circles.add_to_circles(member, circle)
+
+    assert {:ok, :done} =
+             repo().transact_with(fn ->
+               assert {:ok, again} = Circles.add_to_circles(member, circle)
+               assert again.id == first.id, "the membership they already have"
+
+               # the transaction is still usable
+               assert Circles.is_encircled_by?(member, circle)
+               {:ok, :done}
+             end)
+  end
+
   test "creation works" do
     user = Bonfire.Me.Fake.fake_user!()
     name = "test circle"
