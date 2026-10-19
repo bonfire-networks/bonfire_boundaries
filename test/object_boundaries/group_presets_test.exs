@@ -34,6 +34,16 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
       assert "announcement_channel" ==
                Presets.preset_slug_from_dims(%{
                  membership: "invite_only",
+                 visibility: "global",
+                 participation: "moderators"
+               })
+    end
+
+    # the preset federates now, but groups made before that keep their local dimensions, which still resolve to it so their chip and icon stay
+    test "still matches the announcement_channel preset for a group on its local dimensions" do
+      assert "announcement_channel" ==
+               Presets.preset_slug_from_dims(%{
+                 membership: "invite_only",
                  visibility: "nonfederated",
                  participation: "moderators"
                })
@@ -195,6 +205,25 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
       assert chip[:membership] == "local:members"
       assert chip[:visibility] == "nonfederated"
       assert chip[:participation] == "local:contributors"
+    end
+
+    # one chip and icon for the announcement channel, whether the group was made federated or before the preset federated
+    for {visibility, which} <- [{"global", "federated"}, {"nonfederated", "local"}] do
+      test "a #{which} announcement channel shows as the announcement_channel preset" do
+        creator = Fake.fake_user!()
+
+        group =
+          Simulate.fake_group!(creator, %{
+            membership: "invite_only",
+            visibility: unquote(visibility),
+            participation: "moderators"
+          })
+
+        assert %{label: "Announcement channel", icon: "ph:megaphone-duotone"} =
+                 Presets.group_row_chip(group)
+
+        assert "ph:megaphone-duotone" == Presets.group_icon(group)
+      end
     end
 
     test "falls back to the membership dimension meta for a custom dim combination" do

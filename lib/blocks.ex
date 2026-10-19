@@ -301,7 +301,14 @@ defmodule Bonfire.Boundaries.Blocks do
           # A silence says "I do not see them", which is a MUTE, and mutes do not federate anywhere, Mastodon's are local-only. Their server cannot help me not-see them, my own feed filtering does that, so sending one would be a disclosure that buys nothing and would be read as far stronger than what was asked for.
           #
           # Blocking (both types at once) therefore emits exactly one `Block`, from this half.
-          maybe_federate_block(me, user_or_instance_to_block, :block, scope)
+          #
+          # On a group's behalf it is the other way round: a peer can only act on a group's `Block` as a ban from taking part, which is the SILENCE half (Lemmy, PieFed and Mbin read it so, with no type; the microblog software not at all). A group's ghost alone stays on this instance, and a group's block sends from here because it has the silence half.
+          if not on_behalf_of_group? or :silence_them in types_blocked,
+            do: maybe_federate_block(me, user_or_instance_to_block, :block, scope)
+
+          # A group's block (not its silence) also goes to the banned person as the group's own `Block`, since Mastodon and the like read only a `Block` addressed to them, and the moderator's reaches them only through the group's relay, which skips someone the group ghosts
+          if on_behalf_of_group? and :silence_them in types_blocked,
+            do: maybe_federate_group_own_block(me, user_or_instance_to_block, :block, scope)
         end
 
         if :silence_them in types_blocked do
@@ -379,7 +386,8 @@ defmodule Bonfire.Boundaries.Blocks do
                 :acting_user,
                 :reason,
                 :on_behalf_of,
-                :record
+                :record,
+                :personal
               ])
           ],
           fallback_return: nil
@@ -390,6 +398,17 @@ defmodule Bonfire.Boundaries.Blocks do
         :exit, e -> error(e, "Could not federate the #{verb}")
       end
     end
+  end
+
+  # The group's own `Block` (or its `Undo`) to the banned person, in the shape of a personal block: sent by the group, to the person alone, with no `target`, so a server that reads only a block addressed to its user (Mastodon, Pleroma, Akkoma) acts on it. Only a group hosted here can sign it
+  defp maybe_federate_group_own_block(group, blocked, verb, scope) do
+    if Utils.maybe_apply(
+         Bonfire.Federate.ActivityPub.AdapterUtils,
+         :is_local?,
+         [load_for_locality_check(group)],
+         fallback_return: false
+       ) == true,
+       do: maybe_federate_block(group, blocked, verb, Keyword.put(scope, :personal, true))
   end
 
   @doc """
@@ -409,14 +428,15 @@ defmodule Bonfire.Boundaries.Blocks do
          {_who_acted, scope} = instance_wide_with_actor(scope),
          {:ok, result} <- mutate(:unblock, user_or_instance_to_unblock, block_type, scope) do
       # unconditional, unlike the block: `ap_publish_activity/3` sends nothing unless a `Block` actually went out, so this cannot disclose a block the person kept to themselves. Leaving a remote holding a block we have lifted would be worse than telling it
-      if user_or_instance_to_unblock != :instance_wide and scope != :instance_wide,
-        do:
-          maybe_federate_block(
-            Utils.current_user_required!(scope),
-            user_or_instance_to_unblock,
-            :unblock,
-            scope
-          )
+      if user_or_instance_to_unblock != :instance_wide and scope != :instance_wide do
+        me = Utils.current_user_required!(scope)
+
+        maybe_federate_block(me, user_or_instance_to_unblock, :unblock, scope)
+
+        # the group's own `Block` went out with the ghost half of a block, so lifting that half takes it back. Nothing is sent when it never went out (`publish_block/5`)
+        if not is_nil(e(scope, :acting_user, nil)) and :ghost_them in types_blocked(block_type),
+          do: maybe_federate_group_own_block(me, user_or_instance_to_unblock, :unblock, scope)
+      end
 
       {:ok, result}
     end
@@ -524,11 +544,18 @@ defmodule Bonfire.Boundaries.Blocks do
   # `ActivityPub.block/2` severs no follows of its own, deliberately: which follow a block ends depends on the block TYPE, and `block/3` has already done it in the right direction by the time this runs.
   # Blocking on behalf of a group (`on_behalf_of:` in `block/3`, here `opts[:acting_user]`) has the group as subject, and goes out as the threadiverse keeps someone out of a community (Lemmy's `block_user.json`): sent by whoever acted, `to` Public, `cc`, `target` and `audience` the group, the reason in `summary`, and relayed by the group to its followers. Its `Undo` is addressed as the `Block` was (the fork copies it)
   def ap_publish_activity(subject, verb, object, opts) when verb in [:block, :unblock] do
+    # `personal: true`: the group's own block of the person, sent by the group as any user's block is, so not a ban naming a group
+    personal? = e(opts, :personal, nil) == true
+
     # the group, given when the moderator is the one sending (a group hosted elsewhere), else the subject the block was made as
-    on_behalf_of = e(opts, :on_behalf_of, nil) || if e(opts, :acting_user, nil), do: subject
+    on_behalf_of =
+      if not personal?,
+        do: e(opts, :on_behalf_of, nil) || if(e(opts, :acting_user, nil), do: subject)
 
     with {:ok, actor} <-
-           ActivityPub.Actor.get_cached(pointer: e(opts, :acting_user, nil) || subject),
+           ActivityPub.Actor.get_cached(
+             pointer: if(personal?, do: subject, else: e(opts, :acting_user, nil) || subject)
+           ),
          {:ok, blocked_actor} <- ActivityPub.Actor.get_cached(pointer: object),
          {:ok, activity} <- publish_block(verb, actor, blocked_actor, on_behalf_of, opts) do
       if on_behalf_of,
@@ -1316,7 +1343,7 @@ defmodule Bonfire.Boundaries.Blocks do
     info("apply incoming Undo of a Lock")
 
     # reopening needs the same standing as closing, which `unlock/2` checks
-    with {:ok, object} <- ap_receive_object_to_lock(object),
+    with {:ok, object} <- ap_receive_locked_object(object),
          {:ok, unlocked} <-
            with_moderators_resynced(object, fn -> unlock(object, current_user: unlocker) end) do
       maybe_relay_received(object, activity)
@@ -1395,6 +1422,18 @@ defmodule Bonfire.Boundaries.Blocks do
       e -> error(e, "Could not apply a block on behalf of a group")
     end
   end
+
+  # For an `Undo` of a `Lock` what the adapter hands us is the `Lock` activity embedded in it, not the thread it closed, which is that activity's own `object`. So the thread to reopen is read from there
+  defp ap_receive_locked_object(%{data: %{"type" => "Lock", "object" => locked}}) do
+    with {:ok, %{pointer_id: pointer_id}} when is_binary(pointer_id) <-
+           ActivityPub.Object.get_cached(ap_id: ActivityPub.Object.get_ap_id(locked)) do
+      Bonfire.Common.Needles.get(pointer_id)
+    else
+      other -> error(other, "No thread to reopen")
+    end
+  end
+
+  defp ap_receive_locked_object(other), do: ap_receive_object_to_lock(other)
 
   defp ap_receive_object_to_lock(%{pointer_id: pointer_id}) when is_binary(pointer_id),
     do: Bonfire.Common.Needles.get(pointer_id)
