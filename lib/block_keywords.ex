@@ -3,6 +3,8 @@ defmodule Bonfire.Boundaries.BlockKeywords do
   use Bonfire.Common.Settings
   use Bonfire.Common.E
 
+  @behaviour Bonfire.Common.SettingsHookModule
+
   def text_fields_match?(content_map, fields, patterns) do
     Enum.any?(fields, fn field ->
       case Map.get(content_map, field) do
@@ -51,7 +53,20 @@ defmodule Bonfire.Boundaries.BlockKeywords do
     false
   end
 
-  def settings_load_hook_process(mrf_keyword) do
+  @impl Bonfire.Common.SettingsHookModule
+  def settings_hook_paths, do: [[:activity_pub, :mrf_keyword]]
+
+  # Runs on every read of an `:activity_pub` setting, so the compile is cached. The key is a hash of the whole stored value, collision-proof (not `phash2`) because a collision would give one user's keywords to another. The default cache is in memory on this node, so the compiled pattern's reference is never serialised.
+  @impl Bonfire.Common.SettingsHookModule
+  def settings_loaded([:activity_pub, :mrf_keyword], mrf_keyword) do
+    Bonfire.Common.Cache.maybe_apply_cached({__MODULE__, :process_mrf_keyword}, [mrf_keyword],
+      cache_key:
+        {__MODULE__, :mrf_keyword, :crypto.hash(:sha256, :erlang.term_to_binary(mrf_keyword))}
+    )
+  end
+
+  @doc "Downcases the keywords to reject and compiles them into one pattern (`reject_compiled`). Called through the cache by `settings_loaded/2`, once per distinct list."
+  def process_mrf_keyword(mrf_keyword) do
     if reject = e(mrf_keyword, :reject, nil) do
       reject =
         reject
