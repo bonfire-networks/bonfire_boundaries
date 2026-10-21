@@ -1472,10 +1472,14 @@ defmodule Bonfire.Boundaries.Acls do
         )
       )
 
+    # ARRAY(subquery) runs once as an InitPlan, so both sides of the OR become primary key lookups. Filtering on the joined caretaker, or a plain `IN (subquery)` inside the OR, scans the whole ACL table instead (one ACL is created per post with custom grants)
+    caretaken_ids =
+      from(c in Caretaker, where: c.caretaker_id == ^uid!(user), select: c.id)
+
     list_q(skip_boundary_check: true)
     |> where(
-      [acl, caretaker: caretaker],
-      caretaker.caretaker_id == ^uid!(user) or
+      [acl],
+      fragment("? = ANY(ARRAY(?))", acl.id, subquery(caretaken_ids)) or
         (acl.id in ^e(opts, :extra_ids_to_include, []) and
            acl.id not in ^exclude)
     )
