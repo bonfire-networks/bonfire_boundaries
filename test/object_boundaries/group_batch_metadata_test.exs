@@ -93,7 +93,7 @@ defmodule Bonfire.Boundaries.GroupBatchMetadataTest do
         attrs =
           preset
           |> Map.take([:membership, :visibility, :participation, :default_content_visibility])
-          |> Map.merge(%{name: Faker.Lorem.word(), preset_slug: slug})
+          |> Map.merge(%{name: Bonfire.Common.Simulation.word(), preset_slug: slug})
 
         {slug, Bonfire.Classify.Simulate.fake_group!(creator, attrs)}
       end)
