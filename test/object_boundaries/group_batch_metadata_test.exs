@@ -56,7 +56,11 @@ defmodule Bonfire.Boundaries.GroupBatchMetadataTest do
             },
             %{membership: "invite_only", visibility: "nonfederated", participation: "moderators"}
           ] do
-        Bonfire.Classify.Simulate.fake_group!(creator, Map.put(dims, :name, Faker.Lorem.word()))
+        # not a lone `Faker.Lorem.word()`: it can be "a", which makes a username too short to be valid, and `fake_group!` raises on that
+        Bonfire.Classify.Simulate.fake_group!(
+          creator,
+          Map.put(dims, :name, "batch group #{System.unique_integer([:positive])}")
+        )
       end
 
     acls = Controlleds.list_acl_ids_on_objects(groups)
