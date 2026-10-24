@@ -558,13 +558,7 @@ defmodule Bonfire.Boundaries.Blocks do
            ),
          {:ok, blocked_actor} <- ActivityPub.Actor.get_cached(pointer: object),
          {:ok, activity} <- publish_block(verb, actor, blocked_actor, on_behalf_of, opts) do
-      if on_behalf_of,
-        do:
-          maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :maybe_group_relays, [
-            on_behalf_of,
-            activity
-          ])
-
+      # a ban from a group is announced by that group to its followers (`Outgoing`)
       {:ok, activity}
     else
       :ok -> :ok
@@ -597,18 +591,10 @@ defmodule Bonfire.Boundaries.Blocks do
         # the lock's moderation record, so the stored AP activity points back to it. Never the locked object's own id, which its AP object already holds
         |> Enums.maybe_put(:pointer, opts[:record])
 
-      with {:ok, activity} <-
-             (case verb do
-                :lock -> ActivityPub.lock(params)
-                :unlock -> ActivityPub.unlock(params)
-              end) do
-        # the group's followers hear of it through the group, as for every activity in a group we host
-        maybe_apply(Bonfire.Federate.ActivityPub.AdapterUtils, :maybe_group_relays, [
-          object,
-          activity
-        ])
-
-        {:ok, activity}
+      # the group's followers hear of it through the group, as for every activity in a group we host (`Outgoing`)
+      case verb do
+        :lock -> ActivityPub.lock(params)
+        :unlock -> ActivityPub.unlock(params)
       end
     else
       e -> error(e, "Could not find the actor or object to #{verb}")
@@ -1326,7 +1312,6 @@ defmodule Bonfire.Boundaries.Blocks do
            with_moderators_resynced(object, fn -> lock(object, current_user: locker) end) do
       # the reason a moderator gave, which the wire carries in `summary` (as a mod-removal `Delete` does). A `Flag` keeps its comment because a flag is an Edge record with a `named` mixin; a lock creates no record, only grants, so where this goes is still open (see the group federation plan).
       maybe_store_moderation_reason(object, data["summary"])
-      maybe_relay_received(object, activity)
       {:ok, locked}
     else
       e ->
@@ -1337,7 +1322,7 @@ defmodule Bonfire.Boundaries.Blocks do
 
   def ap_receive_activity(
         unlocker,
-        %{data: %{"type" => "Undo", "object" => %{"type" => "Lock"}}} = activity,
+        %{data: %{"type" => "Undo", "object" => %{"type" => "Lock"}}} = _activity,
         object
       ) do
     info("apply incoming Undo of a Lock")
@@ -1346,21 +1331,10 @@ defmodule Bonfire.Boundaries.Blocks do
     with {:ok, object} <- ap_receive_locked_object(object),
          {:ok, unlocked} <-
            with_moderators_resynced(object, fn -> unlock(object, current_user: unlocker) end) do
-      maybe_relay_received(object, activity)
       {:ok, unlocked}
     else
       e -> error(e, "Could not unlock the object")
     end
-  end
-
-  # A remote moderator's action on something in a group WE host, once applied, is passed on unchanged by the group to its followers, as Lemmy's communities do (`RawAnnouncableActivities::receive` → `AnnounceActivity::send(self, …)`): their copies of the group need it, and it is how the moderator's own instance learns the group applied it. A no-op for a group we only mirror (`maybe_group_relays/2` relays only for a local group)
-  defp maybe_relay_received(object, activity) do
-    maybe_apply(
-      Bonfire.Federate.ActivityPub.AdapterUtils,
-      :maybe_group_relays,
-      [object, activity],
-      fallback_return: nil
-    )
   end
 
   # a refusal tells the moderator's instance, so it takes back what it applied straight away (`Outgoing.send_reject/2`, only for a group we host)
@@ -1411,7 +1385,6 @@ defmodule Bonfire.Boundaries.Blocks do
              ])
            end) do
         {:ok, _} = done ->
-          maybe_relay_received(on_behalf_of, activity)
           done
 
         refused ->
