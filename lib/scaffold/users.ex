@@ -74,18 +74,14 @@ defmodule Bonfire.Boundaries.Scaffold.Users do
   @doc """
   Removes from the list stereotypes already present in the database
   """
-  defp reject_existing_stereotypes(stereotypes, user) do
-    existing_stereotypes =
-      stereotypes
-      |> Enum.map(&e(&1, :stereotype_id, nil))
-      |> debug("all stereos")
-      |> Boundaries.find_caretaker_stereotypes(user, ...)
-      |> Enum.map(&e(&1, :stereotyped, :stereotype_id, nil))
-      |> debug("existing stereos")
-
+  # the caretaker's circles and ACLs that already exist, as `%{stereotype_id => id}`
+  defp existing_stereotype_ids(stereotypes, user) do
     stereotypes
-    |> Enum.reject(&(e(&1, :stereotype_id, nil) in existing_stereotypes))
-    |> debug("new stereos")
+    |> Enum.map(&e(&1, :stereotype_id, nil))
+    |> debug("all stereos")
+    |> Boundaries.find_caretaker_stereotypes(user, ...)
+    |> Map.new(&{e(&1, :stereotyped, :stereotype_id, nil), &1.id})
+    |> debug("existing stereos")
   end
 
   @doc """
@@ -109,24 +105,40 @@ defmodule Bonfire.Boundaries.Scaffold.Users do
       stereotypes: stereotypes
     } = PreparedBoundaries.from_config(user, Keyword.put(opts, :skip_extra_acls, true))
 
-    missing_stereotypes = stereotypes |> reject_existing_stereotypes(user)
-    missing_stereotypes_ids = stereotypes |> Enum.map(& &1.stereotype_id)
+    existing = existing_stereotype_ids(stereotypes, user)
+
+    # the config's rows come with fresh ids, so whatever the caretaker has already is pointed at instead: a new ACL's grants then apply to the circle the caretaker's blocked people are already in, rather than to a duplicate of it
+    existing_ids =
+      for %{id: new_id, stereotype_id: stereotype_id} <- stereotypes,
+          existing_id = existing[stereotype_id],
+          into: %{},
+          do: {new_id, existing_id}
+
+    to_existing = &Map.get(existing_ids, &1, &1)
+
+    missing_stereotypes =
+      stereotypes
+      |> Enum.reject(&Map.has_key?(existing, &1.stereotype_id))
+      |> debug("new stereos")
+
+    missing_ids = MapSet.new(missing_stereotypes, & &1.id)
 
     missing_acls =
       acls
-      |> Enum.filter(&(e(&1, :stereotype_id, nil) in missing_stereotypes_ids))
+      |> Enum.filter(&MapSet.member?(missing_ids, &1.id))
       |> debug("missing acls")
 
     missing_circles =
       circles
-      |> Enum.filter(&(e(&1, :stereotype_id, nil) in missing_stereotypes_ids))
+      |> Enum.filter(&MapSet.member?(missing_ids, &1.id))
       |> debug("missing circles")
 
-    missing_acl_ids = missing_acls |> Enum.map(& &1.id)
-
+    # every grant the config asks for, on the rows as they now are: one already there is skipped by the unique index on `[:acl_id, :subject_id, :verb_id]`, so this also restores grants missing from an ACL that exists
     missing_grants =
       grants
-      |> Enum.filter(&(e(&1, :acl_id, nil) in missing_acl_ids))
+      |> Enum.map(
+        &%{&1 | acl_id: to_existing.(&1.acl_id), subject_id: to_existing.(&1.subject_id)}
+      )
       |> debug("missing grants")
 
     insert_prepared_boundaries(
@@ -134,12 +146,14 @@ defmodule Bonfire.Boundaries.Scaffold.Users do
         acls: missing_acls,
         circles: missing_circles,
         grants: missing_grants,
-        named: named,
-        controlleds: controlleds,
+        named: Enum.filter(named, &MapSet.member?(missing_ids, &1.id)),
+        controlleds: Enum.map(controlleds, &Map.update!(&1, :acl_id, to_existing)),
         stereotypes: missing_stereotypes
       },
       user
     )
+
+    missing_acls
   end
 
   defp add_caretaker(objects, user),

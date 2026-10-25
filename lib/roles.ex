@@ -227,8 +227,10 @@ defmodule Bonfire.Boundaries.Roles do
     Enum.map(grants, &l("Cannot %{verb}", verb: grant_verb_name(&1)))
   end
 
+  # lowercased since it sits mid-sentence
   defp grant_verb_name(grant) do
     Bonfire.Boundaries.Verbs.verb_name(%{verb: e(grant, :verb, :verb, nil)})
+    |> String.downcase()
   end
 
   defp verb_ids_from_grants(grants) do

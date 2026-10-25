@@ -6,6 +6,8 @@ defmodule Bonfire.Boundaries.Scaffold do
   """
 
   use Bonfire.Common.Config
+  use Bonfire.Common.E
+  import Ecto.Query
 
   alias Bonfire.Boundaries.Scaffold
 
@@ -30,7 +32,34 @@ defmodule Bonfire.Boundaries.Scaffold do
 
       needed ->
         Scaffold.Users.create_missing_boundaries(caretaker, defaults: merge_boundaries(needed))
+        |> attach_to_existing_objects(caretaker)
     end
+  end
+
+  # An ACL that every new object gets (`:object_default_boundaries`, eg. the ghost one, which `Acls` finds by stereotype on each object its caretaker creates), but created only now, after they made some: a remote actor's arrives the first time they block one of ours. Attached to what they already made too, as if it had existed all along
+  defp attach_to_existing_objects(new_acls, caretaker) do
+    default_stereotype_ids = object_default_stereotype_ids()
+
+    for %{id: acl_id, stereotype_id: stereotype_id} <- new_acls,
+        stereotype_id in default_stereotype_ids do
+      from(c in Bonfire.Data.Social.Created,
+        where: c.creator_id == ^Bonfire.Common.Types.uid(caretaker),
+        select: %{id: c.id, acl_id: type(^acl_id, Needle.ULID)}
+      )
+      |> then(
+        &Bonfire.Common.Repo.insert_all(Bonfire.Data.AccessControl.Controlled, &1,
+          on_conflict: :nothing
+        )
+      )
+    end
+
+    new_acls
+  end
+
+  defp object_default_stereotype_ids do
+    for name <- Bonfire.Common.Config.get!([:object_default_boundaries, :acls]),
+        stereotype = e(Bonfire.Boundaries.Acls.user_default_acl(true, name), :stereotype, nil),
+        do: Bonfire.Boundaries.Acls.get_id!(stereotype)
   end
 
   # each stereotype's entry is a whole set of circles/acls/grants/controlleds, so composing two of them is a merge per section rather than of the top level

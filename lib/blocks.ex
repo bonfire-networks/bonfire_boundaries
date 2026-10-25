@@ -1144,17 +1144,40 @@ defmodule Bonfire.Boundaries.Blocks do
     case Circles.stereotype_circles_for(current_user, block_types) do
       [] ->
         # The circle alone denies nothing: what makes a block bite is the ACL granting negatively against it, plus that ACL being attached to the actor. So the whole set is created together, and only for the stereotypes THIS block uses.
-        # Reached only when the actor has none, which for a user is never, so the usual path is the one lookup below and no writes.
+        # Reached only when the actor has none, which for a local user is never, so the usual path is the lookups below and no writes.
         Bonfire.Boundaries.Scaffold.create_missing_block_boundaries(current_user, block_types)
         Circles.stereotype_circles_for(current_user, block_types)
 
       circles ->
+        # A remote actor is scaffolded with the circles but not the ACLs reading them (`:remote_user_boundaries`), so their block of one of ours would deny nothing until the ACLs exist
+        if block_acls_missing?(current_user, block_types),
+          do:
+            Bonfire.Boundaries.Scaffold.create_missing_block_boundaries(current_user, block_types)
+
         circles
     end
   end
 
   defp per_user_circles(current_user, block_types, _no_create),
     do: Circles.stereotype_circles_for(current_user, block_types)
+
+  defp block_acls_missing?(current_user, block_types) do
+    config = Config.get!(:block_boundaries_by_stereotype)
+
+    acl_stereotype_ids =
+      for type <- block_types,
+          {_name, %{stereotype: stereotype}} <- e(config, type, :acls, %{}),
+          do: Acls.get_id!(stereotype)
+
+    acl_stereotype_ids != [] and
+      length(
+        Bonfire.Boundaries.find_caretaker_stereotypes(
+          current_user,
+          acl_stereotype_ids,
+          Bonfire.Data.AccessControl.Acl
+        )
+      ) < length(acl_stereotype_ids)
+  end
 
   defp per_user_circle_ids(current_user, block_types),
     do: Circles.stereotype_circle_ids_for(current_user, block_types)
@@ -1535,7 +1558,8 @@ defmodule Bonfire.Boundaries.Blocks do
              [blocked]
            )
            |> debug("character to_block"),
-         {:ok, block} <- block(blocked, current_user: blocker) |> debug("blocked?") do
+         # a person's `Block` says "they cannot see me", which is our ghost: it is how `do_block/3` sends one (from the ghost half only) and how Mastodon reads one. A silence is a mute, and mutes don't federate
+         {:ok, block} <- block(blocked, :ghost, current_user: blocker) |> debug("blocked?") do
       {:ok, block}
     else
       e ->
