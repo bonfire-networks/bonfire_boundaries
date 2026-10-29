@@ -897,6 +897,7 @@ defmodule Bonfire.Boundaries.Circles do
 
   def ids_for_stereotypes(stereotype), do: ids_for_stereotypes([stereotype])
 
+  # TODO: not safe against two callers at once, as nothing keeps the pair of caretaker and stereotype unique (they are in two mixin tables, so one unique index cannot cover them): both read none and both create, and every later call returns the error below. `Instances.create/2` avoids it for a new Peer by letting only the job that made the Peer make its circles; `DuplicateStereotypeCirclesDataMigration` merges the ones already made
   def get_or_create_stereotype_circle(caretaker, stereotype) do
     case get_stereotype_circles(caretaker, [stereotype]) do
       [] ->
