@@ -746,7 +746,7 @@ defmodule Bonfire.Boundaries.Acls do
           uids(mentions)
 
         "mentions" ->
-          uids(mentions)
+          uids(mentions) ++ moderator_ids_if_service_character_mentioned(mentions)
 
         "local" ->
           # include only if local. As `Feeds.within_boundary/3` does: a bare id is not someone to grant to (a group page names its group with `mentions: [group_id]`, which only puts the post in the group), and locality needs `:peered` loaded rather than guessed from an id
@@ -763,6 +763,18 @@ defmodule Bonfire.Boundaries.Acls do
     else
       []
     end
+  end
+
+  # A post that mentions the instance's federation bot is for the people who can moderate the instance. They are granted to read it here, and not added to the mentions, which would tag them on it and show them to the sender. The bot's id lives in `bonfire_federate_activitypub`.
+  defp moderator_ids_if_service_character_mentioned(mentions) do
+    maybe_apply(
+      Bonfire.Federate.ActivityPub.AdapterUtils,
+      :moderators_if_service_character,
+      [mentions],
+      fallback_return: []
+    )
+    |> List.wrap()
+    |> uids()
   end
 
   defp find_acls(acls, user)

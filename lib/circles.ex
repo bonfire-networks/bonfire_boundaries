@@ -1316,6 +1316,26 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc """
+  The members of a circle as users, in one query, with their character (and its `peered`) loaded, which is what a notification feed is looked up from. Not paginated. `list_members/2` returns the `Encircle` rows instead, with the subject not loaded.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.list_member_users(circle)
+      [%Bonfire.Data.Identity.User{}, ...]
+  """
+  def list_member_users(circle) do
+    circle_id = Types.uid!(circle)
+
+    from(u in User,
+      join: e in Encircle,
+      on: e.subject_id == u.id,
+      where: e.circle_id == ^circle_id
+    )
+    |> repo().many()
+    |> repo().maybe_preload(character: [:peered])
+  end
+
+  @doc """
   Lists members of a circle with cursor-based pagination using Paginator. Pass `:search` to match a substring of their name or username, case-insensitively, before pagination.
 
   ## Options
