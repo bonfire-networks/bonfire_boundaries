@@ -423,6 +423,45 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
       refute Boundaries.can?(stranger, :reply, post), "the thread must still be locked"
     end
 
+    # `block/3` and `unblock/3` take any type the caller names (a LiveView event's `block_type` among them), so the standing `lock/2` and `unlock/2` check has to hold there too
+    test "`block/3` and `unblock/3` with `:lock` need the same standing as `lock/2` and `unlock/2`" do
+      author = Bonfire.Me.Fake.fake_user!()
+      stranger = Bonfire.Me.Fake.fake_user!()
+      post = public_post!(author)
+
+      assert {:error, _} = Bonfire.Boundaries.Blocks.block(post, :lock, current_user: stranger)
+
+      assert {:error, _} =
+               Bonfire.Boundaries.Blocks.block(id(post), :lock, current_user: stranger)
+
+      refute Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide),
+             "a stranger locked someone else's thread"
+
+      assert Boundaries.can?(stranger, :reply, post), "the thread must still be open"
+
+      {:ok, _} = Bonfire.Boundaries.Blocks.lock(post, current_user: author)
+
+      assert {:error, _} = Bonfire.Boundaries.Blocks.unblock(post, :lock, current_user: stranger)
+
+      assert {:error, _} =
+               Bonfire.Boundaries.Blocks.unblock(id(post), :lock, current_user: stranger)
+
+      assert Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide),
+             "a stranger reopened someone else's locked thread"
+    end
+
+    test "its author can still lock and unlock through `block/3` and `unblock/3`" do
+      author = Bonfire.Me.Fake.fake_user!()
+      commenter = Bonfire.Me.Fake.fake_user!()
+      post = public_post!(author)
+
+      assert {:ok, _} = Bonfire.Boundaries.Blocks.block(post, :lock, current_user: author)
+      refute Boundaries.can?(commenter, :reply, post)
+
+      assert {:ok, _} = Bonfire.Boundaries.Blocks.unblock(post, :lock, current_user: author)
+      assert Boundaries.can?(commenter, :reply, post)
+    end
+
     test "locking a post prevents replies from other users, and unlocking allows them again" do
       author = Bonfire.Me.Fake.fake_user!()
       commenter = Bonfire.Me.Fake.fake_user!()

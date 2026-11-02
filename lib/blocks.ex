@@ -185,7 +185,9 @@ defmodule Bonfire.Boundaries.Blocks do
     scope = if elsewhere?, do: Keyword.put(Keyword.new(scope), :pending, true), else: scope
 
     # the status, as callers show it (eg. as a flash); `lock/2` takes the record from `block_and_record/3`
-    with {:ok, status, record} <- block_and_record(user_or_instance_to_block, block_type, scope) do
+    with {:ok, _} <- maybe_check_lock_standing(user_or_instance_to_block, block_type, scope),
+         {:ok, status, record} <-
+           block_and_record(user_or_instance_to_block, block_type, scope) do
       # sent from the moderator, naming the group, whatever the federation box says: it only takes effect through the group
       if elsewhere?,
         do:
@@ -423,7 +425,8 @@ defmodule Bonfire.Boundaries.Blocks do
       {:ok, "Unblocked"}
   """
   def unblock(user_or_instance_to_unblock, block_type \\ nil, scope) do
-    with {:ok, scope} <- maybe_on_behalf_of(scope),
+    with {:ok, _} <- maybe_check_lock_standing(user_or_instance_to_unblock, block_type, scope),
+         {:ok, scope} <- maybe_on_behalf_of(scope),
          # lifting writes no record, so who did it isn't needed here, only the scope it names
          {_who_acted, scope} = instance_wide_with_actor(scope),
          {:ok, result} <- mutate(:unblock, user_or_instance_to_unblock, block_type, scope) do
@@ -496,6 +499,13 @@ defmodule Bonfire.Boundaries.Blocks do
       maybe_federate_lock(:unlock, object, scope)
       ok
     end
+  end
+
+  # `block/3` and `unblock/3` take whatever type the caller names (a LiveView event's `block_type` among them), and a lock is one of those, so the standing `lock/2` and `unlock/2` need has to be checked wherever the type is decided: otherwise anyone could send a lock or unlock for any thread. Locking through `lock/2` has been checked already and goes to `block_and_record/3` directly; `unlock/2` is checked again here, for the price of one lookup
+  defp maybe_check_lock_standing(object, block_type, scope) do
+    if :lock in List.wrap(block_type),
+      do: may_lock(object, scope),
+      else: {:ok, object}
   end
 
   # Who may close (or reopen) a thread is a boundary question like any other, for local and remote actors alike: the object must load for them with `:grant` (its author, or whoever may change its boundary) or `:mediate` (a moderator of the group it was published in, or that group itself, through the group's ACLs). Instance admins may too, as the UI offers them. Without it anyone could lock any thread, since the grants below check nothing
@@ -1244,13 +1254,14 @@ defmodule Bonfire.Boundaries.Blocks do
   # The group elsewhere REFUSED our moderator's `Lock`: its request is refused, and the lock undone here in case it was applied at once (`apply_now:`), so our copy doesn't say what the group didn't
   def ap_receive_activity(
         _rejecter,
-        %{data: %{"type" => "Reject"}} = _activity,
+        %{data: %{"type" => "Reject"} = reject} = _activity,
         %{local: true, data: %{"type" => "Lock", "actor" => actor} = data} = ours
       ) do
     info("the group refused our moderator's Lock")
 
     maybe_apply(Bonfire.Social.Moderations, :refuse_applied, [
       ours,
+      ActivityPub.Object.get_ap_id(reject["actor"]),
       fn _record ->
         # only when it was applied: a lock waiting for the group (the default) attached no `locked` ACL to take off
         with {:ok, %{pointer_id: object_id}} when is_binary(object_id) <-
@@ -1266,7 +1277,7 @@ defmodule Bonfire.Boundaries.Blocks do
   # The group elsewhere REFUSED our moderator's ban: its request is refused, and the ban lifted here in case it was applied at once (`apply_now:`): taken out of the group's block circles for the type it was recorded as, which changes nothing if it never put them there
   def ap_receive_activity(
         _rejecter,
-        %{data: %{"type" => "Reject"}} = _activity,
+        %{data: %{"type" => "Reject"} = reject} = _activity,
         %{local: true, data: %{"type" => "Block", "target" => target, "actor" => actor} = data} =
           ours
       )
@@ -1275,6 +1286,7 @@ defmodule Bonfire.Boundaries.Blocks do
 
     maybe_apply(Bonfire.Social.Moderations, :refuse_applied, [
       ours,
+      ActivityPub.Object.get_ap_id(reject["actor"]),
       fn record ->
         with {:ok, %{__struct__: Bonfire.Classify.Category} = group} <-
                maybe_apply(
@@ -1319,9 +1331,13 @@ defmodule Bonfire.Boundaries.Blocks do
       maybe_apply(
         Bonfire.Social.Moderations,
         :confirm_applied,
-        [activity, fn _record -> do_block(object, :lock, current_user: locker) end],
+        [
+          activity,
+          e(activity, :relayed_by, nil),
+          fn _record -> do_block(object, :lock, current_user: locker) end
+        ],
         # with no records (social not available) nothing was pending, so just apply it
-        fallback_fun: fn _activity, apply -> apply.(nil) end
+        fallback_fun: fn _activity, _announced_by, apply -> apply.(nil) end
       )
     end
   end
@@ -1495,6 +1511,7 @@ defmodule Bonfire.Boundaries.Blocks do
       :confirm_applied,
       [
         activity,
+        e(activity, :relayed_by, nil),
         fn record ->
           with {:ok, %{__struct__: Bonfire.Classify.Category} = group} <-
                  maybe_apply(
@@ -1514,7 +1531,7 @@ defmodule Bonfire.Boundaries.Blocks do
         end
       ],
       # with no records (social not available) nothing was pending, so just apply it
-      fallback_fun: fn _activity, apply -> apply.(nil) end
+      fallback_fun: fn _activity, _announced_by, apply -> apply.(nil) end
     )
   end
 
