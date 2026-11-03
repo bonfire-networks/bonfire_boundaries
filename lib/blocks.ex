@@ -491,14 +491,26 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
-  @doc "Reopens an object closed by `lock/2`. Needs the same standing as locking it."
+  @doc "Reopens an object closed by `lock/2`. Needs the same standing as locking it, and, for a lock someone else made, the standing of a moderator: an author reopens their own lock, not a moderator's."
   def unlock(object, scope) do
     # TODO: an `unlock` record, with `reverses:` the lock's record when there is one (a lock made before records has none)
     with {:ok, object} <- may_lock(object, scope),
+         :ok <- may_reopen(object, scope),
          {:ok, _} = ok <- unblock(object, :lock, scope) do
       maybe_federate_lock(:unlock, object, scope)
       ok
     end
+  end
+
+  # A moderator closing a thread is moderating it, which would mean nothing if its author could reopen it (by unlocking it here, or by an `Update` saying `commentsEnabled: true`).
+  defp may_reopen(object, scope) do
+    # who locked it is the lock's record, which is social's (`Moderations.may_undo?/3`); with no records (social not available) it is reopened as before
+    if maybe_apply(Bonfire.Social.Moderations, :may_undo?, [current_user(scope), object, :lock],
+         fallback_return: true
+       ) == true,
+       do: :ok,
+       else:
+         error(:not_permitted, "A thread a moderator closed can only be reopened by a moderator")
   end
 
   # `block/3` and `unblock/3` take whatever type the caller names (a LiveView event's `block_type` among them), and a lock is one of those, so the standing `lock/2` and `unlock/2` need has to be checked wherever the type is decided: otherwise anyone could send a lock or unlock for any thread. Locking through `lock/2` has been checked already and goes to `block_and_record/3` directly; `unlock/2` is checked again here, for the price of one lookup
