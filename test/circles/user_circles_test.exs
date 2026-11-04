@@ -43,6 +43,19 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
     assert user.id == circle.caretaker.caretaker_id
   end
 
+  test "creating a circle with stereotyped params makes it a circle of that stereotype" do
+    user = Bonfire.Me.Fake.fake_user!()
+    stereotype_id = Circles.get_id!(:silence_me)
+
+    assert {:ok, circle} =
+             Circles.create(user, %{
+               named: %{name: "quiet ones"},
+               stereotyped: %{stereotype_id: stereotype_id}
+             })
+
+    assert stereotype_id == repo().maybe_preload(circle, :stereotyped).stereotyped.stereotype_id
+  end
+
   test "listing my circles (which I'm caretaker of) works" do
     user = Bonfire.Me.Fake.fake_user!()
     name = "test circle"
