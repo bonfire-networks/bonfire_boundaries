@@ -23,6 +23,11 @@ defmodule Bonfire.Boundaries do
 
   @skip_object_placeholders [:skip, :skip_boundary_check, :loading]
 
+  # the group visibility ACLs that let guests see and read (`global`, `nonfederated`)
+  @guests_may_see_read_acls [:everyone_may_see_read_interact, :guests_may_see_read]
+  # the group visibility ACLs that let guests see but not read (`preview`, `nonfederated:preview`)
+  @guests_may_see_acls [:everyone_may_see_interact, :guests_may_see]
+
   @doc """
   Lists ACLs for a given object.
 
@@ -40,6 +45,34 @@ defmodule Bonfire.Boundaries do
   def object_public?(object) do
     Controlleds.has_any_acl?(object, Bonfire.Boundaries.Acls.remote_public_acl_ids())
   end
+
+  @doc """
+  Whether a guest may find (`:see`) this object, used to choose its search index. `:see` is discoverability: an object a guest may see but not read (`preview`) goes in the public index too, and is shown there without its content, as feeds show it.
+
+  Unlike `object_public?/1`, this does not decide federation: a post that guests may see but not read must not be addressed to everyone.
+  """
+  # TODO: the index should instead ask whether a guest may see the object, with a boundary check as a guest, which works for every object type without a list of ACL ids.
+  def object_guest_discoverable?(object) do
+    Controlleds.has_any_acl?(object, guest_discoverable_acl_ids())
+  end
+
+  defp guest_discoverable_acl_ids do
+    Acls.remote_public_acl_ids() ++
+      Enum.map(@guests_may_see_read_acls ++ @guests_may_see_acls, &Acls.get_id!/1)
+  end
+
+  # Renamed to `object_guest_discoverable?/1`, which counts the see-only ACLs for every object rather than for categories only
+  # def object_guest_visible?(object) do
+  #   Controlleds.has_any_acl?(object, guest_visible_acl_ids(object))
+  # end
+  #
+  # defp guest_visible_acl_ids(object) do
+  #   see_read = Acls.remote_public_acl_ids() ++ Enum.map(@guests_may_see_read_acls, &Acls.get_id!/1)
+  #
+  #   if Types.object_type(object, only_schemas: true) == Bonfire.Classify.Category,
+  #     do: see_read ++ Enum.map(@guests_may_see_acls, &Acls.get_id!/1),
+  #     else: see_read
+  # end
 
   def object_acls_public?(acls) do
     public_acl_ids = Bonfire.Boundaries.Acls.remote_public_acl_ids()

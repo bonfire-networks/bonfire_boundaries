@@ -1084,20 +1084,82 @@ defmodule Bonfire.Boundaries.Blocks do
   end
 
   def is_blocked?(user_or_instance, block_type, opts) when not is_nil(user_or_instance) do
-    is_blocked?(user_or_instance, block_type, :instance_wide) ||
-      is_blocked_by?(
-        user_or_instance,
-        block_type,
-        debug(
-          e(opts, :user_ids, nil) || current_user(opts),
-          "check if blocked #{inspect(block_type)} per-user, if any has/have been provided in opts"
-        )
-      )
+    user_ids = e(opts, :user_ids, nil) || current_user(opts)
+
+    case pre_resolved_blocked?(user_or_instance, block_type, user_ids, opts) do
+      nil ->
+        is_blocked?(user_or_instance, block_type, :instance_wide) ||
+          is_blocked_by?(
+            user_or_instance,
+            block_type,
+            debug(
+              user_ids,
+              "check if blocked #{inspect(block_type)} per-user, if any has/have been provided in opts"
+            )
+          )
+
+      blocked? ->
+        blocked?
+    end
   end
 
   def is_blocked?(_user_or_instance, _block_type, _opts) do
     warn("no object provided to check")
     false
+  end
+
+  @doc """
+  Which of `subjects` (users, instance circles, or their ids) are blocked with `block_type`, answered for all of them at once, the way `is_blocked?/3` answers for one with the same `opts`: blocked instance-wide, or by any of the users in `opts` (`:user_ids`, else the current user).
+
+  Put the result in `opts[:resolved][:blocked]` and `is_blocked?/3` answers from it for those subjects, with the same block type and users, rather than querying. For anything else it still queries.
+  """
+  def blocked_subset_for(subjects, block_type, opts) when is_list(subjects) do
+    user_ids = scope_user_ids(e(opts, :user_ids, nil) || current_user(opts))
+    block_types = types_blocked(block_type)
+
+    checked_ids =
+      subjects
+      |> Enum.map(&uid/1)
+      |> Enum.reject(&is_nil/1)
+      |> Enum.uniq()
+
+    circles =
+      instance_wide_circles(block_types) ++
+        Enum.flat_map(user_ids, &per_user_circle_ids(&1, block_types))
+
+    %{
+      block_types: block_types,
+      user_ids: user_ids,
+      checked_ids: MapSet.new(checked_ids),
+      blocked_ids: Circles.encircled_subset(checked_ids, circles)
+    }
+  end
+
+  defp pre_resolved_blocked?(subject, block_type, user_ids, opts) do
+    with %{
+           block_types: block_types,
+           user_ids: resolved_user_ids,
+           checked_ids: checked_ids,
+           blocked_ids: blocked_ids
+         } <- ed(opts, :resolved, :blocked, nil),
+         true <-
+           block_types == types_blocked(block_type) and
+             resolved_user_ids == scope_user_ids(user_ids),
+         id when is_binary(id) <- uid(subject),
+         true <- MapSet.member?(checked_ids, id) do
+      MapSet.member?(blocked_ids, id)
+    else
+      _ -> nil
+    end
+  end
+
+  # the users whose own block lists apply, as `is_blocked_by?/3` reads them
+  defp scope_user_ids(users) do
+    users
+    |> List.wrap()
+    |> Enum.map(&uid/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
   end
 
   @doc """
