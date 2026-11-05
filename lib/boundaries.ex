@@ -81,7 +81,8 @@ defmodule Bonfire.Boundaries do
       iex> Bonfire.Boundaries.boundary_guest_discoverable?(nil)
       false
   """
-  def boundary_guest_discoverable?(boundaries) when is_binary(boundaries) or is_list(boundaries) do
+  def boundary_guest_discoverable?(boundaries)
+      when is_binary(boundaries) or is_list(boundaries) do
     preset_acls = Config.get!(:preset_acls)
     discoverable_ids = guest_discoverable_acl_ids()
 
