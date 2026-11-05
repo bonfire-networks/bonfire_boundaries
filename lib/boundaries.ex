@@ -61,6 +61,43 @@ defmodule Bonfire.Boundaries do
       Enum.map(@guests_may_see_read_acls ++ @guests_may_see_acls, &Acls.get_id!/1)
   end
 
+  @doc """
+  Whether a boundary name (or any of a list of them), as given when publishing, applies an ACL that lets guests find the object, so an object is put in the same search index on create (by its boundary name) as on an edit (by its ACLs, `object_guest_discoverable?/1`). Read from the presets' ACLs, the same map that publishing applies.
+
+      iex> Bonfire.Boundaries.boundary_guest_discoverable?("public")
+      true
+      iex> Bonfire.Boundaries.boundary_guest_discoverable?("public_remote")
+      true
+      iex> Bonfire.Boundaries.boundary_guest_discoverable?("public:preview")
+      true
+      iex> Bonfire.Boundaries.boundary_guest_discoverable?("nonfederated")
+      true
+      iex> Bonfire.Boundaries.boundary_guest_discoverable?(["mentions", "nonfederated:preview"])
+      true
+      iex> Bonfire.Boundaries.boundary_guest_discoverable?("local:preview")
+      false
+      iex> Bonfire.Boundaries.boundary_guest_discoverable?("mentions")
+      false
+      iex> Bonfire.Boundaries.boundary_guest_discoverable?(nil)
+      false
+  """
+  def boundary_guest_discoverable?(boundaries) when is_binary(boundaries) or is_list(boundaries) do
+    preset_acls = Config.get!(:preset_acls)
+    discoverable_ids = guest_discoverable_acl_ids()
+
+    boundaries
+    |> List.wrap()
+    |> Enum.filter(&is_binary/1)
+    # `preset_name/1` maps a name that isn't a preset of its own, eg. `"public_remote"`, to the preset it applies
+    |> Enum.flat_map(&List.wrap(Bonfire.Boundaries.Presets.preset_name(&1)))
+    |> Enum.any?(fn preset ->
+      is_binary(preset) and
+        Enum.any?(Acls.preset_acl_ids(preset, preset_acls), &(&1 in discoverable_ids))
+    end)
+  end
+
+  def boundary_guest_discoverable?(_), do: false
+
   # Renamed to `object_guest_discoverable?/1`, which counts the see-only ACLs for every object rather than for categories only
   # def object_guest_visible?(object) do
   #   Controlleds.has_any_acl?(object, guest_visible_acl_ids(object))

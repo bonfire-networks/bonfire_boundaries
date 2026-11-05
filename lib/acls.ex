@@ -323,11 +323,11 @@ defmodule Bonfire.Boundaries.Acls do
     {preset, control_acls} =
       case maybe_from_opts(opts, :boundary, nil) || maybe_from_opts(opts, :to_boundaries, nil) do
         {:clone, controlled_object_id} ->
-          apply_same_acls_as_existing_object(controlled_object_id)
+          apply_same_acls_as_existing_object(controlled_object_id, creator, opts)
 
         # copies the THREAD's (`context_id`) ACLs; a reply never gets here, since `SetBoundaries` sets `boundary: {:clone, reply_to}` (above) to copy the post it replies to instead
         ["clone_context"] when is_binary(context_id) and context_id != "" ->
-          apply_same_acls_as_existing_object(context_id)
+          apply_same_acls_as_existing_object(context_id, creator, opts)
 
         ["clone_context"] ->
           # the target context was lost (eg. composer cleared it) — fail closed with
@@ -337,7 +337,7 @@ defmodule Bonfire.Boundaries.Acls do
           preset_acls_tuple(creator, [], opts)
 
         nil when is_binary(context_id) ->
-          apply_same_acls_as_existing_object(context_id)
+          apply_same_acls_as_existing_object(context_id, creator, opts)
 
         nil ->
           preset_acls_tuple(
@@ -1063,11 +1063,18 @@ defmodule Bonfire.Boundaries.Acls do
 
   defp denial?(grant), do: grant.value == false
 
-  defp apply_same_acls_as_existing_object(controlled_object_id) do
-    {nil,
-     Controlleds.list_on_object(controlled_object_id)
-     |> Enum.map(&Map.take(&1, [:acl_id]))
-     |> debug()}
+  # The copied object's ACLs, plus the creator's own defaults (`:object_default_boundaries`, eg. "I may administer" and their ghost and silence ACLs), as a preset would add. `Controlleds.list_on_object/1` leaves out those of the copied object's creator, so without this the creator of eg. a reply that inherits its parent's audience could not edit or delete it, and whoever they ghosted could see it.
+  defp apply_same_acls_as_existing_object(controlled_object_id, creator, opts) do
+    copied =
+      Controlleds.list_on_object(controlled_object_id)
+      |> Enum.map(&Map.take(&1, [:acl_id]))
+
+    creator_defaults =
+      (opts[:universal_boundaries] || Config.get!([:object_default_boundaries, :acls]))
+      |> find_acls(creator)
+      |> Enum.map(&%{acl_id: id(&1)})
+
+    {nil, Enum.uniq_by(copied ++ creator_defaults, & &1.acl_id) |> debug()}
   end
 
   ## invariants:
