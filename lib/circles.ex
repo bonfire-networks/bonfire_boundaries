@@ -210,6 +210,20 @@ defmodule Bonfire.Boundaries.Circles do
   def get_id!(slug) when is_atom(slug), do: get_built_in!(slug).id
 
   @doc """
+  The built-in circle a viewer counts as, for content loaded once and shared by everyone in that circle (eg. a widget's cache), and the opts to load it as that circle: `{:guest, []}` with no viewer, `{:local, [current_user_id: <the local users circle's id>]}` for a signed-in one. Key the cache on the circle, and check what each viewer may see when rendering (eg. `Bonfire.UI.Boundaries.IfCan`), since a viewer may have blocked someone in it.
+
+  ## Examples
+
+      iex> Bonfire.Boundaries.Circles.query_as_circle(nil)
+      {:guest, []}
+  """
+  def query_as_circle(current_user) do
+    if current_user_id(current_user),
+      do: {:local, [current_user_id: get_id!(:local)]},
+      else: {:guest, []}
+  end
+
+  @doc """
   Retrieves a tuple containing the name and ID of a circle by its slug or ID.
 
   ## Examples

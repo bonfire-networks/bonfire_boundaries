@@ -93,6 +93,17 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
               []
           end
 
+        # a post with one of the instance's filtered keywords stays with its author, whatever boundary was asked for, and doesn't federate (`Bonfire.Social.Acts.Federate` reads `skip_federation`: otherwise the people it mentions would be sent it). Its author isn't told
+        kept_to_author? =
+          Bonfire.Boundaries.BlockKeywords.instance_match?(changeset_text(changeset))
+
+        {boundary_options, epic} =
+          if kept_to_author?,
+            do:
+              {Bonfire.Boundaries.BlockKeywords.author_only_boundary_opts(),
+               Epic.assign(epic, :options, Keyword.put(options, :skip_federation, true))},
+            else: {boundary_options, epic}
+
         changeset
         |> Acls.cast(current_user, Keyword.merge(options, boundary_options))
         |> Epic.assign(epic, on, ...)
@@ -100,6 +111,17 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
       changeset.action == :delete ->
         # TODO: deletion
         epic
+    end
+  end
+
+  # what a reader would see of the new object, as `Bonfire.Social.Acts.PostContents` puts it in the changeset
+  defp changeset_text(changeset) do
+    case changeset.changes do
+      %{post_content: %Changeset{changes: changes}} ->
+        [changes[:html_body], changes[:summary], changes[:name]]
+
+      _ ->
+        []
     end
   end
 end
