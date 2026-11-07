@@ -156,7 +156,8 @@ defmodule Bonfire.Boundaries.Allowlist do
   def list_members(scope, opts \\ []) do
     case circle(scope) do
       nil -> []
-      circle -> Circles.list_members(circle, opts)
+      # every member: an allowlist is enforced, not shown
+      circle -> Circles.list_members(circle, Keyword.put_new(opts, :skip_boundary_check, true))
     end
   end
 

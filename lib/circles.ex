@@ -1403,6 +1403,28 @@ defmodule Bonfire.Boundaries.Circles do
           query
       end
 
+    # members are listed as `current_user` may `:see` them (a guest without one), as `get/2` checks the circle: its caretaker sees every member they added, instance admins too (`skip_boundary_check: :admins` by default), anyone else not someone who chose to be undiscoverable. Internal uses that need every member pass `skip_boundary_check: true`
+    opts = Keyword.put_new(opts, :skip_boundary_check, :admins)
+
+    query =
+      if Bonfire.Boundaries.Queries.skip_boundary_check?(opts) == true do
+        query
+      else
+        see_opts = Keyword.put(opts, :verbs, [:see])
+
+        from([e] in query,
+          join: member in Needle.Pointer,
+          as: :member,
+          on: member.id == e.subject_id,
+          left_join: circle_caretaker in Caretaker,
+          as: :circle_caretaker,
+          on: circle_caretaker.id == e.circle_id,
+          where:
+            circle_caretaker.caretaker_id in ^uids(current_user(opts)) or
+              exists(boundarise(member.id, see_opts))
+        )
+      end
+
     # Order by insertion time for consistent cursor pagination
     query =
       query
@@ -1516,7 +1538,7 @@ defmodule Bonfire.Boundaries.Circles do
   defp do_list_suggested_profiles do
     circle_id = Bonfire.Boundaries.Scaffold.Instance.suggested_profiles_circle()
 
-    case list_members(circle_id, paginate: false) do
+    case list_members(circle_id, paginate: false, skip_boundary_check: true) do
       members when is_list(members) -> extract_subjects(members)
       %{edges: members} -> extract_subjects(members)
       _ -> []

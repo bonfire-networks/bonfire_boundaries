@@ -93,16 +93,20 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
               []
           end
 
-        # a post with one of the instance's filtered keywords stays with its author, whatever boundary was asked for, and doesn't federate (`Bonfire.Social.Acts.Federate` reads `skip_federation`: otherwise the people it mentions would be sent it). Its author isn't told
-        kept_to_author? =
-          Bonfire.Boundaries.BlockKeywords.instance_match?(changeset_text(changeset))
-
-        {boundary_options, epic} =
-          if kept_to_author?,
-            do:
+        # The instance's keyword lists, checked once. A post matching the one to hide completely stays with its author, whatever boundary was asked for, and doesn't federate (`Bonfire.Social.Acts.Federate` reads `skip_federation`: otherwise the people it mentions would be sent it); its author isn't told. One matching the list to warn about is published as asked, marked sensitive with a warning, which federates with it
+        {boundary_options, epic, changeset} =
+          case Bonfire.Boundaries.BlockKeywords.instance_verdict(changeset_text(changeset)) do
+            :reject ->
               {Bonfire.Boundaries.BlockKeywords.author_only_boundary_opts(),
-               Epic.assign(epic, :options, Keyword.put(options, :skip_federation, true))},
-            else: {boundary_options, epic}
+               Epic.assign(epic, :options, Keyword.put(options, :skip_federation, true)),
+               changeset}
+
+            :warn ->
+              {boundary_options, epic, with_warning(changeset)}
+
+            nil ->
+              {boundary_options, epic, changeset}
+          end
 
         changeset
         |> Acls.cast(current_user, Keyword.merge(options, boundary_options))
@@ -112,6 +116,38 @@ defmodule Bonfire.Boundaries.Acts.SetBoundaries do
         # TODO: deletion
         epic
     end
+  end
+
+  # marked sensitive, with `BlockKeywords.warn_summary/0` as its warning when it has no summary of its own
+  defp with_warning(changeset) do
+    Bonfire.Common.Utils.maybe_apply(
+      Bonfire.Social.Objects,
+      :cast_sensitivity,
+      [changeset, true],
+      fallback_return: changeset
+    )
+    |> then(fn
+      %Changeset{changes: %{post_content: %Changeset{} = post_content} = changes} = changeset ->
+        if Changeset.get_field(post_content, :summary) in [nil, ""],
+          # the post content's own changeset, as `Bonfire.Social.Acts.PostContents` cast it, with the summary added
+          do: %{
+            changeset
+            | changes:
+                Map.put(
+                  changes,
+                  :post_content,
+                  Changeset.put_change(
+                    post_content,
+                    :summary,
+                    Bonfire.Boundaries.BlockKeywords.warn_summary()
+                  )
+                )
+          },
+          else: changeset
+
+      changeset ->
+        changeset
+    end)
   end
 
   # what a reader would see of the new object, as `Bonfire.Social.Acts.PostContents` puts it in the changeset

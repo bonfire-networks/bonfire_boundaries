@@ -420,6 +420,8 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
            {:ok, circle} <- Circles.get_for_caretaker(circle_id, user) do
         opts =
           [
+            # the caretaker (the only one who gets here) sees every member
+            current_user: user,
             limit: args[:limit] || 40,
             after: args[:after],
             before: args[:before]

@@ -279,26 +279,28 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
       ]
     ]
 
+    # uniq: a verb in both lists (eg. `:vote`) would otherwise be listed twice, and a role built from the list would then never match the grants stored for it (one per verb), so a `cannot_*` exclusion read back as no role at all
     preferred_verb_order =
-      default_verbs_for[:objects] ++
-        [
-          :create,
-          :mention,
-          :message,
-          :follow,
-          :join,
-          :pin,
-          :schedule,
-          :vote,
-          :toggle,
-          :describe,
-          :grant,
-          :assign,
-          :invite,
-          :mediate,
-          :block,
-          :configure
-        ]
+      (default_verbs_for[:objects] ++
+         [
+           :create,
+           :mention,
+           :message,
+           :follow,
+           :join,
+           :pin,
+           :schedule,
+           :vote,
+           :toggle,
+           :describe,
+           :grant,
+           :assign,
+           :invite,
+           :mediate,
+           :block,
+           :configure
+         ])
+      |> Enum.uniq()
 
     # make sure all_verb_names lists the ordered ones first, in the preferred order
     all_verb_names =
