@@ -271,6 +271,9 @@ defmodule Bonfire.Boundaries.Roles do
     if Enum.count(verbs) == Verbs.verbs_count() do
       role_for_all
     else
+      # compared as sets: grants come back in whatever order the database returns them
+      verbs = verbs |> Enum.uniq() |> Enum.sort()
+
       case (all_role_verbs || role_verbs(:all))
            |> debug("all_role_verbs")
            |> Enum.filter(fn
@@ -278,6 +281,7 @@ defmodule Bonfire.Boundaries.Roles do
                verbs ==
                  a_role_verbs
                  |> Enum.map(&e(Verbs.get(&1), verb_field, []))
+                 |> Enum.uniq()
                  |> Enum.sort()
                  |> debug("#{role} role_verbs")
 

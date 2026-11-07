@@ -55,9 +55,12 @@ defmodule Bonfire.Boundaries.RolesFromGrantsTest do
         {:ok, can, cannot} = Roles.verbs_for_role(unquote(role), [])
         expected = (can ++ cannot) |> Enum.map(&Verbs.get_id!/1) |> Enum.sort()
 
-        assert Roles.role_from_grants(grants, current_user: me) ==
-                 String.to_existing_atom(unquote(role)),
-               "stored verbs not in the role: #{inspect(stored -- expected)}; role verbs not stored: #{inspect(expected -- stored)}"
+        # in both orders: grants come back in whatever order the database returns them
+        for grants <- [grants, Enum.reverse(grants)] do
+          assert Roles.role_from_grants(grants, current_user: me) ==
+                   String.to_existing_atom(unquote(role)),
+                 "stored verbs not in the role: #{inspect(stored -- expected)}; role verbs not stored: #{inspect(expected -- stored)}"
+        end
       end
     end
   end
