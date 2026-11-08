@@ -1442,7 +1442,9 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               role: :interact
             },
             "nonfederated:preview" => %{
-              label: l("Discoverable group preview"),
+              # label: l("Discoverable group preview"),
+              # guests and local users get `:see`, remote servers nothing
+              label: l("Anyone can preview (but doesn't federate)"),
               icon: "fluent:globe-search-24-regular",
               description:
                 l(
@@ -1474,7 +1476,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               role: :interact
             },
             "preview" => %{
-              label: l("Discoverable"),
+              # label: l("Discoverable"),
+              label: l("Anyone can preview"),
               icon: "fluent:globe-search-24-regular",
               description:
                 l(
@@ -1485,7 +1488,8 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
               disabled: l("Coming soon: requires groups federation")
             },
             "local:preview" => %{
-              label: l("Discoverable to users of this instance"),
+              # label: l("Discoverable to users of this instance"),
+              label: l("Users of this instance can preview"),
               icon: "ph:eye-duotone",
               description:
                 l(
