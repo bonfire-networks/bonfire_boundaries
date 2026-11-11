@@ -42,7 +42,7 @@ defmodule Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries do
         []
       else
         default_profile_visibility(opts[:undiscoverable]) ++
-          maybe_request_before_follow(opts[:request_before_follow])
+          maybe_request_before_follow(opts[:request_before_follow], opts[:local] != false)
       end
 
     prepare_boundaries(user, acls_extra, opts)
@@ -154,8 +154,9 @@ defmodule Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries do
     end
   end
 
-  defp maybe_request_before_follow(bool) do
-    if bool || Bonfire.Common.Config.get([Bonfire.Me.Users, :request_before_follow]) do
+  # the instance setting is for our own signups: a person on another server follows their own declaration of whether they review followers
+  defp maybe_request_before_follow(bool, local?) do
+    if bool || (local? && Bonfire.Common.Config.get([Bonfire.Me.Users, :request_before_follow])) do
       # Reviewing follows is now a grant WITHHELD rather than a denial added: this account simply never receives `everyone_may_follow`, and gets the ask instead. `no_follow` existed only because `:follow` rode in every role from `interact` up, so the restriction could not be said any other way.
       [:everyone_may_request]
     else

@@ -1588,6 +1588,41 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc """
+  The ids of a circle's members who are `:remote` (their character has a `Peered` row) or `:local`, except those given in `:except` (eg. a group, which is a member of its own circle and is peered when mirrored).
+
+  One query, with no member loaded.
+  """
+  def member_ids(circle, locality, opts \\ []) when locality in [:local, :remote] do
+    circle
+    |> members_by_locality_query(locality, opts)
+    |> select([e], e.subject_id)
+    |> repo().all()
+  end
+
+  @doc "Whether a circle has a `:remote` or `:local` member (see `member_ids/3`), as one `exists?` query."
+  def member_exists?(circle, locality, opts \\ []) when locality in [:local, :remote] do
+    circle
+    |> members_by_locality_query(locality, opts)
+    |> repo().exists?()
+  end
+
+  defp members_by_locality_query(circle, locality, opts) do
+    except = Types.uids(opts[:except] || [])
+
+    query =
+      from(e in Encircle,
+        left_join: p in Bonfire.Data.ActivityPub.Peered,
+        on: p.id == e.subject_id,
+        where: e.circle_id == ^Types.uid!(circle) and e.subject_id not in ^except
+      )
+
+    case locality do
+      :remote -> where(query, [_e, p], not is_nil(p.id))
+      :local -> where(query, [_e, p], is_nil(p.id))
+    end
+  end
+
+  @doc """
   Counts the total number of subjects present in ALL of the given circles (intersection count).
   Used to get the total blocked count for the blocked tab where a subject must be in both ghost_them and silence_them circles.
   """

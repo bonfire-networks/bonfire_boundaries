@@ -92,21 +92,18 @@ defmodule Bonfire.Boundaries.Grants do
       {:ok, %Grant{}}
 
       iex> Bonfire.Boundaries.Grants.upsert_or_delete(%{acl_id: "456", subject_id: "123", verb_id: "789", value: nil}, [])
-      {:ok, _deleted}
+      {:ok, 1}
   """
   def upsert_or_delete(
         %{acl_id: acl_id, subject_id: subject_id, verb_id: verb_id, value: value} = _attrs,
         :remove_grant
       ) do
-    case repo().get_by(Grant,
-           acl_id: acl_id,
-           subject_id: subject_id,
-           verb_id: verb_id,
-           value: value
-         ) do
-      nil -> nil
-      grant -> repo().delete(grant)
-    end
+    from(g in Grant,
+      where:
+        g.acl_id == ^acl_id and g.subject_id == ^subject_id and g.verb_id == ^verb_id and
+          g.value == ^value
+    )
+    |> delete_grants()
   end
 
   #  we don't store nil values as they are implied
@@ -114,14 +111,10 @@ defmodule Bonfire.Boundaries.Grants do
         %{acl_id: acl_id, subject_id: subject_id, verb_id: verb_id, value: nil} = _attrs,
         _action
       ) do
-    case repo().get_by(Grant,
-           acl_id: acl_id,
-           subject_id: subject_id,
-           verb_id: verb_id
-         ) do
-      nil -> nil
-      grant -> repo().delete(grant)
-    end
+    from(g in Grant,
+      where: g.acl_id == ^acl_id and g.subject_id == ^subject_id and g.verb_id == ^verb_id
+    )
+    |> delete_grants()
   end
 
   def upsert_or_delete(%{} = attrs, _action) do
@@ -130,6 +123,12 @@ defmodule Bonfire.Boundaries.Grants do
       attrs,
       [:acl_id, :subject_id, :verb_id]
     )
+  end
+
+  # One query rather than loading the grant then deleting it: when two processes remove the same grant at once, the one that finds it already gone gets `{:ok, 0}` instead of an `Ecto.StaleEntryError`.
+  defp delete_grants(query) do
+    {count, _} = repo().delete_many(query)
+    {:ok, count}
   end
 
   @doc """

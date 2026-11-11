@@ -5,6 +5,7 @@ defmodule Bonfire.Boundaries.Scaffold.Users do
 
   use Bonfire.Common.Utils
   import Bonfire.Boundaries.Integration
+  require Ecto.Query
   alias Bonfire.Boundaries.Scaffold.Users.PreparedBoundaries
   alias Bonfire.Boundaries
   alias Bonfire.Boundaries.Acls
@@ -38,6 +39,27 @@ defmodule Bonfire.Boundaries.Scaffold.Users do
       opts
     )
     |> insert_prepared_boundaries(user)
+  end
+
+  @doc """
+  Sets whether following `user` needs their approval, on a user that already exists: `true` withholds the `everyone_may_follow` grant (leaving the ask to `everyone_may_request`), `false` gives it back. The same rule `create_default_boundaries/2` applies at creation with `request_before_follow`, for an account whose choice changes later (eg. a remote person who starts, or stops, approving followers by hand). Idempotent.
+
+  ## Examples
+
+      > Bonfire.Boundaries.Scaffold.Users.set_request_before_follow(user, true)
+  """
+  def set_request_before_follow(user, true) do
+    acl_id = Acls.get_id!(:everyone_may_follow)
+
+    repo().delete_all(
+      Ecto.Query.from(c in Controlled, where: c.id == ^id(user) and c.acl_id == ^acl_id)
+    )
+  end
+
+  def set_request_before_follow(user, false) do
+    repo().insert_all_or_ignore(Controlled, [
+      %{id: id(user), acl_id: Acls.get_id!(:everyone_may_follow)}
+    ])
   end
 
   defp insert_prepared_boundaries(
