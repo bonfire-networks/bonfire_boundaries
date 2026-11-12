@@ -21,8 +21,10 @@ defmodule Bonfire.Boundaries.GroupPresetsTest do
   end
 
   describe "preset_slug_from_dims/1" do
+    # `public_local_community` is an alias of `local_community`, which has the same dimensions, so they resolve to `local_community`
     test "matches the public_local_community preset" do
-      assert "public_local_community" ==
+      # assert "public_local_community" ==
+      assert "local_community" ==
                Presets.preset_slug_from_dims(%{
                  membership: "local:members",
                  visibility: "nonfederated",
