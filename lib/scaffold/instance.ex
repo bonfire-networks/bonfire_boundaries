@@ -187,7 +187,9 @@ defmodule Bonfire.Boundaries.Scaffold.Instance do
     |> info("Init caretakers")
 
     # make the instance ACL control the instance object (which are the same)
-    Bonfire.Boundaries.Controlleds.add_acls(instance_acl(), instance_acl())
+    Bonfire.Boundaries.Controlleds.add_acls(instance_acl(), instance_acl(),
+      skip_boundary_check: true
+    )
     |> info("Init instance ACL")
 
     :ok

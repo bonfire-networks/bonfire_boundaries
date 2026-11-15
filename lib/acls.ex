@@ -931,7 +931,7 @@ defmodule Bonfire.Boundaries.Acls do
   def acl_to_grant_on(%{} = acl, _object, _caretaker), do: acl
 
   def acl_to_grant_on(_acl, object, caretaker) when not is_nil(object) do
-    case get_or_create_object_custom_acl(object, caretaker) do
+    case get_or_create_object_custom_acl(object, current_user: caretaker) do
       {:ok, acl} -> acl
       _ -> nil
     end
@@ -939,21 +939,53 @@ defmodule Bonfire.Boundaries.Acls do
 
   def acl_to_grant_on(_acl, _object, _caretaker), do: nil
 
-  def get_or_create_object_custom_acl(object, caretaker \\ nil) do
-    case get_object_custom_acl(object) do
-      {:ok, acl} ->
-        {:ok, acl}
+  @doc """
+  The object's own (custom) ACL, created now if it has none, with the acting user as its caretaker. Requires `current_user:` (who must be able to configure the object) or `skip_boundary_check: true` for system paths, and returns `{:error, :not_permitted}` otherwise. A user struct in place of the options stands for `current_user:`.
+  """
+  def get_or_create_object_custom_acl(object, opts \\ [])
 
-      _ ->
-        with {:ok, acl} <-
-               create(
-                 prepare_custom_acl_maps(Needle.UID.generate(Acl)),
-                 current_user: caretaker
-               ),
-             {:ok, _} <- Controlleds.add_acls(object, acl) do
+  def get_or_create_object_custom_acl(object, opts) when is_list(opts) do
+    opts = Keyword.take(opts, [:current_user, :current_account, :skip_boundary_check])
+
+    with :ok <- check_configure_object(object, opts) do
+      case get_object_custom_acl(object) do
+        {:ok, acl} ->
           {:ok, acl}
-        end
+
+        _ ->
+          with {:ok, acl} <-
+                 create(
+                   prepare_custom_acl_maps(Needle.UID.generate(Acl)),
+                   current_user: current_user(opts) || %{id: object_caretaker_id(object)}
+                 ),
+               # the new ACL is the caller's own, and the object's configuring was checked above
+               {:ok, _} <- Controlleds.do_add_acls(object, acl) do
+            {:ok, acl}
+          end
+      end
     end
+  end
+
+  def get_or_create_object_custom_acl(object, %{} = caretaker),
+    do: get_or_create_object_custom_acl(object, current_user: caretaker)
+
+  def get_or_create_object_custom_acl(object, _no_caretaker),
+    do: get_or_create_object_custom_acl(object, [])
+
+  # who owns the new ACL when no user acts (an explicit skip): the object's caretaker, else its creator, else the object itself
+  defp object_caretaker_id(object) do
+    object_id = uid(object)
+
+    repo().one(from(c in Caretaker, where: c.id == ^object_id, select: c.caretaker_id)) ||
+      repo().one(
+        from(c in Bonfire.Data.Social.Created, where: c.id == ^object_id, select: c.creator_id)
+      ) || object_id
+  end
+
+  defp check_configure_object(object, opts) do
+    if skip_check?(opts) or Controlleds.may_configure?(current_user(opts), object),
+      do: :ok,
+      else: {:error, :not_permitted}
   end
 
   defp insert_custom_acl_and_grants(repo_or_changeset \\ repo(), acl_id, custom_grants)
@@ -1313,6 +1345,77 @@ defmodule Bonfire.Boundaries.Acls do
   end
 
   @doc """
+  Whether the caller (`current_user:`, or `skip_boundary_check: true` for system paths) may change the ACL or its grants. Only its caretaker, an instance admin, or (for an object's own custom ACL) someone who may configure that object. A built-in ACL is only for instance admins.
+  """
+  def may_edit?(acl, opts) do
+    acl_id = uid(acl)
+    user = current_user(opts)
+
+    cond do
+      skip_check?(opts) -> true
+      is_nil(acl_id) or is_nil(user) -> false
+      # a built-in ACL is only for instance admins
+      is_built_in?(acl_id) -> instance_admin?(user, acl_id)
+      # one cheap query, before the instance's permissions
+      caretaker_of?(acl_id, user) -> true
+      instance_admin?(user, acl_id) -> true
+      true -> may_configure_controlled?(acl_id, user)
+    end
+  end
+
+  @doc "Like `may_edit?/2`, but returns `:ok` or `{:error, :not_permitted}`."
+  def check_edit(acl, opts) do
+    if may_edit?(acl, opts), do: :ok, else: {:error, :not_permitted}
+  end
+
+  @doc """
+  Whether the caller may attach the ACL to an object they configure: one of their own, a built-in one (such as a preset meant to be attached), or anything for an instance admin. Never another user's custom ACL.
+  """
+  def may_attach?(acl, opts) do
+    acl_id = if is_atom(acl) and not is_nil(acl), do: get_id!(acl), else: uid(acl)
+    user = current_user(opts)
+
+    cond do
+      skip_check?(opts) -> true
+      is_nil(acl_id) or is_nil(user) -> false
+      is_built_in?(acl_id) -> true
+      instance_admin?(user, acl_id) -> true
+      true -> caretaker_of?(acl_id, user)
+    end
+  end
+
+  defp skip_check?(opts), do: Bonfire.Boundaries.Queries.skip_boundary_check?(opts) == true
+
+  defp instance_admin?(user, acl_id) do
+    verbs =
+      if acl_id == Scaffold.Instance.instance_acl(),
+        do: [:configure, :assign, :grant],
+        else: [:configure, :assign]
+
+    Enum.any?(verbs, &(Boundaries.can?(user, &1, :instance) == true))
+  end
+
+  defp caretaker_of?(acl_id, user) do
+    repo().exists?(from(c in Caretaker, where: c.id == ^acl_id and c.caretaker_id == ^uid(user)))
+  end
+
+  # an object's own ACL may be changed by anyone who may configure that object
+  defp may_configure_controlled?(acl_id, user) do
+    from(c in Controlled,
+      join: s in Stereotyped,
+      on: s.id == c.acl_id and s.stereotype_id == ^Scaffold.Instance.custom_acl(),
+      where: c.acl_id == ^acl_id,
+      select: c.id,
+      limit: 1
+    )
+    |> repo().one()
+    |> case do
+      nil -> false
+      object_id -> Controlleds.may_configure?(user, object_id)
+    end
+  end
+
+  @doc """
   Checks if an ACL is a custom ACL for an object.
 
   ## Examples
@@ -1559,15 +1662,16 @@ defmodule Bonfire.Boundaries.Acls do
 
       iex> Bonfire.Boundaries.Acls.edit(%Acl{}, user, %{name: "Updated ACL"})
   """
-  def edit(%Acl{} = acl, %User{} = _user, params) do
-    # TODO: check edit permission
-    acl = repo().maybe_preload(acl, [:named, :extra_info])
+  def edit(%Acl{} = acl, %User{} = user, params) do
+    with :ok <- check_edit(acl, current_user: user) do
+      acl = repo().maybe_preload(acl, [:named, :extra_info])
 
-    params
-    |> input_to_atoms()
-    |> Changesets.put_id_on_mixins([:named, :extra_info], acl)
-    |> changeset_cast(acl, ...)
-    |> repo().update()
+      params
+      |> input_to_atoms()
+      |> Changesets.put_id_on_mixins([:named, :extra_info], acl)
+      |> changeset_cast(acl, ...)
+      |> repo().update()
+    end
   end
 
   def edit(id, %User{} = user, params) do
@@ -1580,20 +1684,22 @@ defmodule Bonfire.Boundaries.Acls do
   Fully delete the ACL, including permissions/grants and controlled information. This will affect all objects previously shared with this ACL.
   """
   def delete(%Acl{} = acl, opts) do
-    assocs = [
-      :grants,
-      :controlled,
-      :caretaker,
-      :named,
-      :extra_info,
-      :stereotyped
-    ]
+    with :ok <- check_edit(acl, opts) do
+      assocs = [
+        :grants,
+        :controlled,
+        :caretaker,
+        :named,
+        :extra_info,
+        :stereotyped
+      ]
 
-    Bonfire.Common.Utils.maybe_apply(
-      Bonfire.Social.Objects,
-      :maybe_generic_delete,
-      [Acl, acl, [current_user: current_user(opts), delete_associations: assocs]]
-    )
+      Bonfire.Common.Utils.maybe_apply(
+        Bonfire.Social.Objects,
+        :maybe_generic_delete,
+        [Acl, acl, [current_user: current_user(opts), delete_associations: assocs]]
+      )
+    end
   end
 
   def delete(id, opts) do
@@ -1605,11 +1711,13 @@ defmodule Bonfire.Boundaries.Acls do
   @doc """
   Soft-delete the ACL, meaning it will not be displayed anymore, but permissions/grants and controlled information will be preserved. This will not affect objects previously shared with this ACL.
   """
-  def soft_delete(%Acl{} = acl, _opts) do
-    # FIXME
-    Bonfire.Common.Repo.Delete.soft_delete(acl)
+  def soft_delete(%Acl{} = acl, opts) do
+    with :ok <- check_edit(acl, opts) do
+      # FIXME
+      Bonfire.Common.Repo.Delete.soft_delete(acl)
 
-    # acl |> repo().delete()
+      # acl |> repo().delete()
+    end
   end
 
   def soft_delete(id, opts) do

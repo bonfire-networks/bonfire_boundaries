@@ -528,7 +528,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     defp add_to_circle(%{circle_id: circle_id, subject_ids: subject_ids}, info) do
       with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info),
            {:ok, circle} <- Circles.get_for_caretaker(circle_id, user) do
-        Circles.add_to_circles(subject_ids, circle)
+        Circles.add_to_circles(subject_ids, circle, current_user: user)
         |> circle_membership_result("Could not add users to circle")
       end
     end
@@ -536,7 +536,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     defp remove_from_circle(%{circle_id: circle_id, subject_ids: subject_ids}, info) do
       with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info),
            {:ok, circle} <- Circles.get_for_caretaker(circle_id, user) do
-        Circles.remove_from_circles(subject_ids, circle)
+        Circles.remove_from_circles(subject_ids, circle, current_user: user)
         |> circle_membership_result("Could not remove users from circle")
       end
     end

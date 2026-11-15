@@ -42,7 +42,11 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideHidePostFeedsPerUserTest do
       refute Bonfire.Boundaries.can?(nil, :see, post.id),
              "control: a guest can't see this post, so looking it up as one finds nothing"
 
-      assert {:ok, _} = Bonfire.Boundaries.Blocks.block(post.id, :hide, :instance_wide)
+      assert {:ok, _} =
+               Bonfire.Boundaries.Blocks.block(post.id, :hide,
+                 scope: :instance_wide,
+                 skip_boundary_check: true
+               )
     end
 
     test "does not show in local feeds an instance-wide hidden post" do
@@ -58,7 +62,10 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideHidePostFeedsPerUserTest do
 
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
 
-      Bonfire.Boundaries.Blocks.block(post, :hide, :instance_wide)
+      Bonfire.Boundaries.Blocks.block(post, :hide,
+        scope: :instance_wide,
+        skip_boundary_check: true
+      )
 
       refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, me)
     end

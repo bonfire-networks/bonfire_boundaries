@@ -139,38 +139,42 @@ defmodule Bonfire.Boundaries.Grants do
   - `acl_id`: what ACL we're applying a grant to
   - `verb`: which verb/action
   - `value`: true, false, or nil
-  - `opts`: additional options
+  - `opts`: additional options, which must include `current_user:` (the ACL's caretaker, or an instance admin) or `skip_boundary_check: true` for system paths, or the grant is refused with `{:error, :not_permitted}`
 
   ## Examples
 
-      iex> Bonfire.Boundaries.Grants.grant("subject_123", "acl_456", :read, true)
+      iex> Bonfire.Boundaries.Grants.grant("subject_123", "acl_456", :read, true, current_user: user)
   """
-  def grant(subject_id, acl_id, verb, value, opts \\ [])
+  def grant(subject_id, acl_id, verb, value, opts \\ []) do
+    with :ok <- Bonfire.Boundaries.Acls.check_edit(acl_id, opts) do
+      do_grant(subject_id, acl_id, verb, value, opts)
+    end
+  end
 
   # TODO: optimise?
-  def grant(subject_ids, acl_id, verb, value, opts) when is_list(subject_ids),
+  defp do_grant(subject_ids, acl_id, verb, value, opts) when is_list(subject_ids),
     do:
       subject_ids
       |> Circles.circle_ids()
-      |> Enum.map(&grant(&1, acl_id, verb, value, opts))
+      |> Enum.map(&do_grant(&1, acl_id, verb, value, opts))
 
   # TODO: optimise?
-  def grant(subject_id, acl_id, verbs, value, opts) when is_list(verbs),
-    do: Enum.map(verbs, &grant(subject_id, acl_id, &1, value, opts))
+  defp do_grant(subject_id, acl_id, verbs, value, opts) when is_list(verbs),
+    do: Enum.map(verbs, &do_grant(subject_id, acl_id, &1, value, opts))
 
-  def grant(subject_id, acl_id, verb, value, opts)
-      when is_atom(verb) and not is_nil(verb) do
+  defp do_grant(subject_id, acl_id, verb, value, opts)
+       when is_atom(verb) and not is_nil(verb) do
     debug(verb, "lookup verb")
 
     verb_id =
       Bonfire.Boundaries.Verbs.get!(verb)[:id]
       |> debug
 
-    grant(subject_id, acl_id, verb_id, value, opts)
+    do_grant(subject_id, acl_id, verb_id, value, opts)
   end
 
-  def grant(subject_id, acl, verb_id, value, opts)
-      when is_binary(subject_id) and is_binary(verb_id) do
+  defp do_grant(subject_id, acl, verb_id, value, opts)
+       when is_binary(subject_id) and is_binary(verb_id) do
     value = grant_value(value)
 
     upsert_or_delete(
@@ -184,14 +188,14 @@ defmodule Bonfire.Boundaries.Grants do
     )
   end
 
-  def grant(subject_id, acl_id, access, value, opts)
-      when not is_nil(subject_id) do
+  defp do_grant(subject_id, acl_id, access, value, opts)
+       when not is_nil(subject_id) do
     subject_id
     |> Circles.circle_ids()
-    |> grant(acl_id, access, value, opts)
+    |> do_grant(acl_id, access, value, opts)
   end
 
-  def grant(_, _, _, _, _) do
+  defp do_grant(_, _, _, _, _) do
     error("No function matched")
     nil
   end
@@ -219,11 +223,21 @@ defmodule Bonfire.Boundaries.Grants do
   """
   def grant_role(subject, acl_id, role, opts \\ [])
 
+  # checked once for all of them
   def grant_role(subjects, acl_id, role, opts) when is_list(subjects) do
-    Enum.flat_map(subjects, &grant_role(&1, acl_id, role, opts))
+    with :ok <- Bonfire.Boundaries.Acls.check_edit(acl_id, opts) do
+      Enum.flat_map(subjects, &do_grant_role(&1, acl_id, role, opts))
+    end
   end
 
   def grant_role(subject_id, acl_id, role, opts) do
+    with :ok <- Bonfire.Boundaries.Acls.check_edit(acl_id, opts) do
+      do_grant_role(subject_id, acl_id, role, opts)
+    end
+  end
+
+  @doc "Grants a role with no check, for internal use: please call `grant_role/4` which checks for permission."
+  def do_grant_role(subject_id, acl_id, role, opts) do
     debug(opts, "opts")
 
     with {:ok, can_verbs, cannot_verbs} <- Roles.verbs_for_role(role, opts) do
@@ -231,8 +245,8 @@ defmodule Bonfire.Boundaries.Grants do
       debug(cannot_verbs, "grant false for verbs")
 
       # TODO: optimise with an insert_all or single changeset?
-      grant(subject_id, acl_id, can_verbs, true, opts) ++
-        grant(subject_id, acl_id, cannot_verbs, false, opts)
+      do_grant(subject_id, acl_id, can_verbs, true, opts) ++
+        do_grant(subject_id, acl_id, cannot_verbs, false, opts)
     else
       {:error, e} ->
         raise e
@@ -253,11 +267,21 @@ defmodule Bonfire.Boundaries.Grants do
   """
   def remove_role(subject, acl_id, role, opts \\ [])
 
+  # checked once for all of them
   def remove_role(subjects, acl_id, role, opts) when is_list(subjects) do
-    Enum.flat_map(subjects, &remove_role(&1, acl_id, role, opts))
+    with :ok <- Bonfire.Boundaries.Acls.check_edit(acl_id, opts) do
+      Enum.flat_map(subjects, &do_remove_role(&1, acl_id, role, opts))
+    end
   end
 
   def remove_role(subject_id, acl_id, role, opts) do
+    with :ok <- Bonfire.Boundaries.Acls.check_edit(acl_id, opts) do
+      do_remove_role(subject_id, acl_id, role, opts)
+    end
+  end
+
+  @doc "Removes a role's grants with no check, for internal use: please call `remove_role/4` which checks for permission."
+  def do_remove_role(subject_id, acl_id, role, opts) do
     debug(opts, "opts")
 
     with {:ok, can_verbs, cannot_verbs} <- Roles.verbs_for_role(role, opts) do
@@ -266,8 +290,8 @@ defmodule Bonfire.Boundaries.Grants do
       opts = opts ++ [action: :remove_grant]
 
       # TODO: optimise with an insert_all or single changeset?
-      grant(subject_id, acl_id, can_verbs, true, opts) ++
-        grant(subject_id, acl_id, cannot_verbs, false, opts)
+      do_grant(subject_id, acl_id, can_verbs, true, opts) ++
+        do_grant(subject_id, acl_id, cannot_verbs, false, opts)
     else
       {:error, e} ->
         raise e
@@ -288,20 +312,29 @@ defmodule Bonfire.Boundaries.Grants do
   """
   def change_role(subject, acl_id, role, opts \\ [])
 
+  # checked once for all of them
   def change_role(subjects, acl_id, role, opts) when is_list(subjects) do
-    Enum.flat_map(subjects, &change_role(&1, acl_id, role, opts))
+    with :ok <- Bonfire.Boundaries.Acls.check_edit(acl_id, opts) do
+      Enum.flat_map(subjects, &do_change_role(&1, acl_id, role, opts))
+    end
   end
 
   def change_role(subject_id, acl_id, role, opts) do
+    with :ok <- Bonfire.Boundaries.Acls.check_edit(acl_id, opts) do
+      do_change_role(subject_id, acl_id, role, opts)
+    end
+  end
+
+  defp do_change_role(subject_id, acl_id, role, opts) do
     debug(opts, "opts")
 
     # first remove existing grants to this subject
     # FIXME: what if the user granted a separate role or custom verbs to the same subject? we should only remove grants that match the previous role that we're changing from (if any)
-    remove_subject_from_acl(subject_id, acl_id)
+    do_remove_subject_from_acl(subject_id, List.wrap(acl_id))
     |> debug("clean before granting #{role}")
 
     # then re-add based on role
-    grant_role(subject_id, acl_id, role, opts)
+    do_grant_role(subject_id, acl_id, role, opts)
   end
 
   @doc """
@@ -309,22 +342,31 @@ defmodule Bonfire.Boundaries.Grants do
 
   ## Examples
 
-      iex> Bonfire.Boundaries.Grants.remove_subject_from_acl("subject_123", ["acl_456", "acl_789"])
+      iex> Bonfire.Boundaries.Grants.remove_subject_from_acl("subject_123", ["acl_456", "acl_789"], current_user: user)
       {:ok, %{}}
+
+  Requires `current_user:` (who may change each ACL) or `skip_boundary_check: true` for system paths, and returns `{:error, :not_permitted}` otherwise.
   """
-  def remove_subject_from_acl(_subject, acls)
+  def remove_subject_from_acl(subject, acls, opts \\ [])
+
+  def remove_subject_from_acl(_subject, acls, _opts)
       when is_nil(acls) or (is_list(acls) and length(acls) == 0),
       do: error("No boundary ID provided, so could not remove.")
 
-  def remove_subject_from_acl(subject, acls) when is_list(acls) do
+  def remove_subject_from_acl(subject, acls, opts) do
+    acls = List.wrap(acls)
+
+    if Enum.all?(acls, &Bonfire.Boundaries.Acls.may_edit?(&1, opts)),
+      do: do_remove_subject_from_acl(subject, acls),
+      else: {:error, :not_permitted}
+  end
+
+  @doc "Removes a subject's grants from ACLs with no check, for internal use: please call `remove_subject_from_acl/3` which checks for permission."
+  def do_remove_subject_from_acl(subject, acls) do
     from(e in Grant,
       where: e.subject_id == ^uid(subject) and e.acl_id in ^Types.uids(acls)
     )
     |> repo().delete_many()
-  end
-
-  def remove_subject_from_acl(subject, acl) do
-    remove_subject_from_acl(subject, [acl])
   end
 
   @doc """

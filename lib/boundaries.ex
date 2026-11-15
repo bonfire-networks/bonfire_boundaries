@@ -330,6 +330,18 @@ defmodule Bonfire.Boundaries do
   """
   def set_boundaries(creator, object, opts)
       when is_list(opts) and is_struct(object) do
+    # the acting user (`creator`) must be able to configure the object, unless the caller has checked already and passes `skip_boundary_check: true`
+    if Queries.skip_boundary_check?(opts) == true or
+         Controlleds.may_configure?(creator, object) do
+      do_set_boundaries(creator, object, opts)
+    else
+      error(object, "No permission to change the boundaries of this")
+      {:error, :not_permitted}
+    end
+  end
+
+  # for internal use, please call `set_boundaries/3` which checks for permission
+  def do_set_boundaries(creator, object, opts) do
     if opts[:to_boundaries] == "private" do
       with {num, nil} <- Bonfire.Boundaries.Controlleds.remove_all_acls(object) do
         {:ok, num}
@@ -359,18 +371,21 @@ defmodule Bonfire.Boundaries do
              e(object, :created, :creator, nil) || e(object, :created, :creator_id, nil) ||
                e(object, :creator, nil) || e(object, :creator_id, nil) || creator,
              object,
-             previous_preset
+             previous_preset,
+             # the caller has checked permission already (`set_boundaries/3`, or `Objects.reset_preset_boundary/5`)
+             skip_boundary_check: true
            ),
          {:ok, _pointer} <- Acls.set(object, creator, opts) do
       {:ok, :granted}
     end
   end
 
-  defp maybe_remove_previous_preset(creator, object, [preset]) do
-    maybe_remove_previous_preset(creator, object, preset)
+  # `creator` is the object's original creator, only for working out which ACLs the preset gave it. `check_opts` says who is acting (or that the caller has checked already)
+  defp maybe_remove_previous_preset(creator, object, [preset], check_opts) do
+    maybe_remove_previous_preset(creator, object, preset, check_opts)
   end
 
-  defp maybe_remove_previous_preset(creator, object, {preset, _description})
+  defp maybe_remove_previous_preset(creator, object, {preset, _description}, check_opts)
        when is_binary(preset) and preset != "mentions" do
     debug(preset, "WIP")
 
@@ -378,14 +393,15 @@ defmodule Bonfire.Boundaries do
     |> debug("base_acls_from_preset to remove")
     |> Bonfire.Boundaries.Controlleds.remove_acls(
       object,
-      ...
+      ...,
+      check_opts
     )
     |> debug("removed?")
 
     :ok
   end
 
-  defp maybe_remove_previous_preset(_, _, preset) do
+  defp maybe_remove_previous_preset(_, _, preset, _check_opts) do
     warn(preset, "could not remove previous preset")
     :ok
   end

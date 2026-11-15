@@ -22,11 +22,13 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
     member = Bonfire.Me.Fake.fake_user!()
     assert {:ok, circle} = Circles.create(user, "regulars")
 
-    assert {:ok, first} = Circles.add_to_circles(member, circle)
+    assert {:ok, first} = Circles.add_to_circles(member, circle, skip_boundary_check: true)
 
     assert {:ok, :done} =
              repo().transact_with(fn ->
-               assert {:ok, again} = Circles.add_to_circles(member, circle)
+               assert {:ok, again} =
+                        Circles.add_to_circles(member, circle, skip_boundary_check: true)
+
                assert again.id == first.id, "the membership they already have"
 
                # the transaction is still usable
@@ -135,8 +137,8 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
 
     # create a circle with alice and bob
     {:ok, circle} = Circles.create(me, %{named: %{name: "family"}})
-    {:ok, _} = Circles.add_to_circles(alice, circle)
-    {:ok, _} = Circles.add_to_circles(bob, circle)
+    {:ok, _} = Circles.add_to_circles(alice, circle, skip_boundary_check: true)
+    {:ok, _} = Circles.add_to_circles(bob, circle, skip_boundary_check: true)
 
     assert Bonfire.Boundaries.Circles.is_encircled_by?(alice, circle)
     assert Bonfire.Boundaries.Circles.is_encircled_by?(bob, circle)
@@ -149,7 +151,7 @@ defmodule Bonfire.Boundaries.UserCirclesTest do
     members = Enum.map(1..4, fn _ -> Bonfire.Me.Fake.fake_user!(account) end)
 
     {:ok, circle} = Circles.create(me, %{named: %{name: "organisers"}})
-    Enum.each(members, &Circles.add_to_circles(&1, circle))
+    Enum.each(members, &Circles.add_to_circles(&1, circle, skip_boundary_check: true))
 
     [listed_circle] =
       Circles.list_my_for_manager(me,

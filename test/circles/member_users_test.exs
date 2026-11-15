@@ -15,8 +15,8 @@ defmodule Bonfire.Boundaries.Circles.MemberUsersTest do
     other_member = Fake.fake_user!()
     outsider = Fake.fake_user!()
     assert {:ok, circle} = Circles.create(owner, "regulars")
-    assert {:ok, _} = Circles.add_to_circles(member, circle)
-    assert {:ok, _} = Circles.add_to_circles(other_member, circle)
+    assert {:ok, _} = Circles.add_to_circles(member, circle, skip_boundary_check: true)
+    assert {:ok, _} = Circles.add_to_circles(other_member, circle, skip_boundary_check: true)
 
     users = Circles.list_member_users(circle)
 
@@ -40,7 +40,7 @@ defmodule Bonfire.Boundaries.Circles.MemberUsersTest do
     owner = Fake.fake_user!()
     member = Fake.fake_user!()
     assert {:ok, circle} = Circles.create(owner, "regulars")
-    assert {:ok, _} = Circles.add_to_circles(member, circle)
+    assert {:ok, _} = Circles.add_to_circles(member, circle, skip_boundary_check: true)
 
     assert [%User{id: id}] = Circles.list_member_users(circle.id)
     assert id == member.id

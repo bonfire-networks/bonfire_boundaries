@@ -64,7 +64,7 @@ defmodule Bonfire.Boundaries.ObjectBoundarisedFunctionTest do
     test "bypasses for an admin, and for nobody else" do
       author = Fake.fake_user!()
       stranger = Fake.fake_user!()
-      {:ok, admin} = Bonfire.Me.Users.make_admin(Fake.fake_user!())
+      {:ok, admin} = Bonfire.Me.Users.make_admin(Fake.fake_user!(), skip_boundary_check: true)
       post = mentions_only_post(author)
 
       refute MapSet.member?(visible_ids(stranger), post.id),

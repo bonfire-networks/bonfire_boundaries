@@ -11,8 +11,8 @@ defmodule Bonfire.Boundaries.GroupBatchMetadataTest do
     missing_owner = Fake.fake_user!()
     assert {:ok, populated} = Circles.create_stereotype_circle(populated_owner, :group_members)
     assert {:ok, empty} = Circles.create_stereotype_circle(empty_owner, :group_members)
-    Circles.add_to_circles(populated_owner, populated)
-    Circles.add_to_circles(empty_owner, populated)
+    Circles.add_to_circles(populated_owner, populated, skip_boundary_check: true)
+    Circles.add_to_circles(empty_owner, populated, skip_boundary_check: true)
     assert Circles.count_members(populated) == 2
 
     counts =

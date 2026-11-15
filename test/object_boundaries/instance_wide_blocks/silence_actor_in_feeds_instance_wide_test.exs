@@ -52,7 +52,10 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
       # discover
       assert Bonfire.Boundaries.can?(alice, :see, bob)
 
-      Bonfire.Boundaries.Blocks.block(bob, :silence, :instance_wide)
+      Bonfire.Boundaries.Blocks.block(bob, :silence,
+        scope: :instance_wide,
+        skip_boundary_check: true
+      )
 
       silence_list = Bonfire.Boundaries.Blocks.instance_wide_circles([:silence_them])
 
@@ -121,12 +124,20 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post)
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
 
-      Bonfire.Boundaries.Blocks.block(bob, :silence, :instance_wide)
+      Bonfire.Boundaries.Blocks.block(bob, :silence,
+        scope: :instance_wide,
+        skip_boundary_check: true
+      )
+
       refute Bonfire.Social.FeedLoader.feed_contains?(:local, post)
       refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
 
       # we show it once again
-      Bonfire.Boundaries.Blocks.unblock(bob, :silence, :instance_wide)
+      Bonfire.Boundaries.Blocks.unblock(bob, :silence,
+        scope: :instance_wide,
+        skip_boundary_check: true
+      )
+
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post)
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
     end
@@ -142,13 +153,17 @@ defmodule Bonfire.Boundaries.Boundaries.InstanceWideSilenceActorFeedsPerUserTest
                  boundary: "public"
                )
 
-      Bonfire.Boundaries.Blocks.block(bob, :silence, :instance_wide)
+      Bonfire.Boundaries.Blocks.block(bob, :silence,
+        scope: :instance_wide,
+        skip_boundary_check: true
+      )
+
       refute Bonfire.Social.FeedLoader.feed_contains?(:local, post)
       refute Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
 
       # `unblock/2` with no block_type must remove all instance-wide blocks, including the
       # `:silence_me` reverse-index that feed queries filter on
-      Bonfire.Boundaries.Blocks.unblock(bob, :instance_wide)
+      Bonfire.Boundaries.Blocks.unblock(bob, scope: :instance_wide, skip_boundary_check: true)
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post)
       assert Bonfire.Social.FeedLoader.feed_contains?(:local, post, current_user: alice)
     end

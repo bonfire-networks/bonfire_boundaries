@@ -29,6 +29,18 @@ defmodule Bonfire.Boundaries.AclTest do
     assert user.id == acl.caretaker.caretaker_id
   end
 
+  test "editing only the summary of a named ACL I own keeps its name" do
+    user = Bonfire.Me.Fake.fake_user!()
+    assert {:ok, acl} = Acls.simple_create(user, "test acl")
+
+    assert {:ok, _} = Acls.edit(acl.id, user, %{extra_info: %{summary: "about it"}})
+
+    assert {:ok, acl} = Acls.get_for_caretaker(acl.id, user)
+    acl = repo().maybe_preload(acl, [:named, :extra_info], force: true)
+    assert acl.named.name == "test acl"
+    assert acl.extra_info.summary == "about it"
+  end
+
   test "listing my ACLs (which I'm caretaker of) works" do
     user = Bonfire.Me.Fake.fake_user!()
     name = "test circle"
@@ -92,7 +104,7 @@ defmodule Bonfire.Boundaries.AclTest do
 
     # create a circle with alice and bob
     {:ok, circle} = Circles.create(me, %{named: %{name: "family"}})
-    {:ok, _} = Circles.add_to_circles(alice, circle)
+    {:ok, _} = Circles.add_to_circles(alice, circle, skip_boundary_check: true)
 
     assert Bonfire.Boundaries.Circles.is_encircled_by?(alice, circle)
 
@@ -131,7 +143,7 @@ defmodule Bonfire.Boundaries.AclTest do
 
     # create a circle with alice and bob
     {:ok, circle} = Circles.create(me, %{named: %{name: "family"}})
-    {:ok, _} = Circles.add_to_circles(alice, circle)
+    {:ok, _} = Circles.add_to_circles(alice, circle, skip_boundary_check: true)
 
     assert Bonfire.Boundaries.Circles.is_encircled_by?(alice, circle)
 

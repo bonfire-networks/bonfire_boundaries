@@ -1675,22 +1675,40 @@ defmodule Bonfire.Boundaries.Circles do
       iex> Bonfire.Boundaries.Circles.edit(circle, user, %{name: "Updated Circle"})
       {:ok, %Circle{id: "circle_id", name: "Updated Circle"}}
   """
-  def edit(%Circle{} = circle, %User{} = _user, params) do
+  def edit(circle_or_id, %User{} = user, params) do
+    # the same standing as changing who is in a circle: its caretaker or someone who may configure it, never a built-in or stereotype circle (whose members follow from who follows whom)
+    with {:ok, circle} <- get_for_manager(uid(circle_or_id), user) do
+      do_edit(circle, params)
+    end
+  end
+
+  # the write, once the caller has established that the user may edit this circle
+  defp do_edit(%Circle{} = circle, params) do
     circle = repo().maybe_preload(circle, [:encircles, :named, :extra_info])
 
     params
     |> input_to_atoms()
+    |> put_circle_id_on_entries(:encircles, circle)
     |> Changesets.put_id_on_mixins([:named, :extra_info], circle)
-    # |> input_to_atoms()
-    # |> Map.update(:named, nil, &Map.put(&1, :id, uid(circle)))
-    # |> Map.update(:extra_info, nil, &Map.put(&1, :id, uid(circle)))
     |> changeset(:update, circle, ...)
     |> repo().update()
   end
 
-  def edit(id, %User{} = user, params) do
-    with {:ok, circle} <- get_for_caretaker(id, user) do
-      edit(circle, user, params)
+  # a member entry always belongs to the circle being edited, whatever `circle_id` the client sent
+  defp put_circle_id_on_entries(params, key, circle) do
+    case params do
+      %{^key => entries} when is_list(entries) ->
+        Map.put(
+          params,
+          key,
+          Enum.map(entries, fn
+            %{} = entry -> Map.put(entry, :circle_id, circle.id)
+            other -> other
+          end)
+        )
+
+      _ ->
+        params
     end
   end
 
@@ -1705,25 +1723,33 @@ defmodule Bonfire.Boundaries.Circles do
       iex> Bonfire.Boundaries.Circles.add_to_circles([user1, user2], [circle1, circle2])
       [{{:ok, %Encircle{}}, {:ok, %Encircle{}}}, {{:ok, %Encircle{}}, {:ok, %Encircle{}}}]
   """
-  def add_to_circles(_subject, circles)
+  def add_to_circles(subject, circles, opts \\ [])
+
+  def add_to_circles(_subject, circles, _opts)
       when is_nil(circles) or (is_list(circles) and length(circles) == 0),
       do: error(circles, "No circle provided to add to")
 
-  def add_to_circles(subjects, _circles)
+  def add_to_circles(subjects, _circles, _opts)
       when is_nil(subjects) or (is_list(subjects) and length(subjects) == 0),
       do: error(subjects, "No subject provided to add to a circle")
 
-  def add_to_circles(subjects, circle) when is_list(subjects) do
-    # TODO: optimise
-    Enum.map(subjects, &add_to_circles(&1, circle))
+  def add_to_circles(subjects, circles, opts) do
+    with :ok <- check_may_manage_circles(circles, opts) do
+      do_add_to_circles(subjects, circles)
+    end
   end
 
-  def add_to_circles(subject, circles) when is_list(circles) do
+  defp do_add_to_circles(subjects, circle) when is_list(subjects) do
     # TODO: optimise
-    Enum.map(circles, &add_to_circles(subject, &1))
+    Enum.map(subjects, &do_add_to_circles(&1, circle))
   end
 
-  def add_to_circles(subject, circle) when not is_nil(circle) do
+  defp do_add_to_circles(subject, circles) when is_list(circles) do
+    # TODO: optimise
+    Enum.map(circles, &do_add_to_circles(subject, &1))
+  end
+
+  defp do_add_to_circles(subject, circle) when not is_nil(circle) do
     # a re-add (eg. a mirrored group's moderators synced again) is a no-op answering with the membership they already have: a plain insert hit the unique index, and Postgres aborts the transaction around a violated constraint even when Ecto turns it into a changeset error. `{:replace, [:subject_id]}` writes back the same value, which is what makes `returning` give the existing row's id
     repo().insert(Encircle.changeset(%{circle_id: uid!(circle), subject_id: uid!(subject)}),
       on_conflict: {:replace, [:subject_id]},
@@ -1743,19 +1769,110 @@ defmodule Bonfire.Boundaries.Circles do
       iex> Bonfire.Boundaries.Circles.remove_from_circles(user, [circle1, circle2])
       {2, nil}
   """
-  def remove_from_circles(_subject, circles)
+  def remove_from_circles(subject, circles, opts \\ [])
+
+  def remove_from_circles(_subject, circles, _opts)
       when is_nil(circles) or circles == [],
       do: error("No circle provided, so could not remove")
 
-  def remove_from_circles(subject, _circles)
+  def remove_from_circles(subject, _circles, _opts)
       when is_nil(subject) or subject == [],
       do: error("No subject provided, so could not remove")
 
-  def remove_from_circles(subject, circles) do
+  def remove_from_circles(subject, circles, opts) do
+    with :ok <- check_may_manage_circles(circles, opts) do
+      do_remove_from_circles(subject, circles)
+    end
+  end
+
+  defp do_remove_from_circles(subject, circles) do
     from(e in Encircle,
       where: e.subject_id in ^Types.uids(subject) and e.circle_id in ^Types.uids(circles)
     )
     |> repo().delete_many()
+  end
+
+  # Membership changes need `current_user` to manage every circle (`get_for_manager/3`: its caretaker or someone who may configure it, never a built-in or stereotype circle, whose members change through their own context, eg. a group's through its Categories), or an explicit `skip_boundary_check: true` from system code that has established standing another way
+  defp check_may_manage_circles(circles, opts) do
+    user = current_user(opts)
+
+    cond do
+      Keyword.get(opts, :skip_boundary_check) == true ->
+        :ok
+
+      is_nil(user) ->
+        error(:not_permitted, "Changing who is in a circle needs a user or skip_boundary_check")
+
+      true ->
+        ids = circles |> List.wrap() |> Enum.map(&uid/1) |> Enum.uniq()
+
+        if ids != [] and Enum.all?(ids, &is_binary/1) and may_manage_all?(ids, user, opts),
+          do: :ok,
+          else: error(:not_permitted, "You cannot change who is in this circle")
+    end
+  end
+
+  # The same standing as `get_for_manager/3`, for all the circles at once, in a fixed number of queries however many there are: the ones the user is caretaker of (one query), then for the rest the ones the instance admin circle is caretaker of when they may assign on the instance (one), then the rest loaded (one) and checked for `:configure` (two). Any circle that is built-in, a stereotype, missing or not manageable refuses the whole call
+  defp may_manage_all?(ids, user, opts) do
+    owned = managed_by_caretaker(ids, [user])
+
+    with true <- all_editable?(owned),
+         [_ | _] = rest <- ids -- Enum.map(owned, & &1.id) do
+      may_manage_rest?(rest, user, opts)
+    else
+      [] -> true
+      _ -> false
+    end
+  end
+
+  defp may_manage_rest?(ids, user, opts) do
+    admin_owned =
+      if Bonfire.Boundaries.can?(current_account(opts) || user, :assign, :instance),
+        do: managed_by_caretaker(ids, [Bonfire.Boundaries.Scaffold.Instance.admin_circle()]),
+        else: []
+
+    with true <- all_editable?(admin_owned),
+         [_ | _] = rest <- ids -- Enum.map(admin_owned, & &1.id) do
+      may_configure_all?(rest, user)
+    else
+      [] -> true
+      _ -> false
+    end
+  end
+
+  defp managed_by_caretaker(ids, caretakers) do
+    caretakers
+    |> query_my(@default_q_opts)
+    |> where([circle], circle.id in ^ids)
+    |> repo().all()
+  end
+
+  defp may_configure_all?(ids, user) do
+    # loaded as `get/2` loads one, so a circle the user may not `:read` counts as missing even when they may `:configure` it
+    opts = [current_user: user, verbs: [:read]] ++ @default_q_opts
+
+    circles =
+      query(opts)
+      |> where([circle], circle.id in ^ids and exists(boundarise(circle.id, opts)))
+      |> repo().all()
+
+    boundaries = Bonfire.Boundaries.boundaries_on_objects(ids, user)
+
+    length(circles) == length(ids) and all_editable?(circles) and
+      Enum.all?(ids, fn id ->
+        boundary = boundaries[id]
+        not is_nil(boundary) and Bonfire.Boundaries.can?(user, :configure, boundary) == true
+      end)
+  end
+
+  defp all_editable?(circles) do
+    built_in_ids = built_in_ids()
+
+    circles
+    |> repo().maybe_preload(:stereotyped)
+    |> Enum.all?(
+      &(not is_built_in?(&1, built_in_ids) and is_nil(e(&1, :stereotyped, :stereotype_id, nil)))
+    )
   end
 
   @doc """

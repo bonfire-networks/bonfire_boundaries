@@ -50,7 +50,7 @@ defmodule Bonfire.Boundaries.BoundariseStrategyEquivalenceTest do
 
     # a circle containing bob, used for both a positive custom-circle grant and a circle deny
     {:ok, circle} = Circles.create(author, %{named: %{name: "besties"}})
-    {:ok, _} = Circles.add_to_circles(bob.id, circle)
+    {:ok, _} = Circles.add_to_circles(bob.id, circle, skip_boundary_check: true)
 
     public = publish!(author, boundary: "public")
     local = publish!(author, boundary: "local")

@@ -36,7 +36,11 @@ defmodule Bonfire.Boundaries.Circles.DuplicateStereotypeCirclesTest do
 
     Enum.each(members, fn {circle, subject} ->
       assert {:ok, _} =
-               Circles.add_to_circles(subject, if(circle == :first, do: first, else: second))
+               Circles.add_to_circles(
+                 subject,
+                 if(circle == :first, do: first, else: second),
+                 skip_boundary_check: true
+               )
     end)
 
     {first, second}

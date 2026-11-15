@@ -352,7 +352,10 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
     # a lock and a hide both deny `:reply`, so when both wrote grants into the post's own ACL, unhiding took the lock's denial with it
     test "hiding and unhiding a locked thread instance-wide leaves it locked, and a hidden post isn't read as locked" do
       author = Bonfire.Me.Fake.fake_user!()
-      {:ok, admin} = Bonfire.Me.Users.make_admin(Bonfire.Me.Fake.fake_user!())
+
+      {:ok, admin} =
+        Bonfire.Me.Users.make_admin(Bonfire.Me.Fake.fake_user!(), skip_boundary_check: true)
+
       commenter = Bonfire.Me.Fake.fake_user!()
       post = public_post!(author)
 
@@ -364,7 +367,9 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
 
       # its author still may, hiding having taken only `:see`
       {:ok, _} = Bonfire.Boundaries.Blocks.lock(post, current_user: author)
-      {:ok, _} = Bonfire.Boundaries.Blocks.unblock(post, :hide, :instance_wide)
+
+      {:ok, _} =
+        Bonfire.Boundaries.Blocks.unblock(post, :hide, current_user: admin, scope: :instance_wide)
 
       assert Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide)
       refute Boundaries.can?(commenter, :reply, post), "still locked"
@@ -390,7 +395,10 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
 
     test "`Blocks.is_blocked?/3` reads whether a post was hidden instance-wide" do
       author = Bonfire.Me.Fake.fake_user!()
-      {:ok, admin} = Bonfire.Me.Users.make_admin(Bonfire.Me.Fake.fake_user!())
+
+      {:ok, admin} =
+        Bonfire.Me.Users.make_admin(Bonfire.Me.Fake.fake_user!(), skip_boundary_check: true)
+
       post = public_post!(author)
 
       refute Bonfire.Boundaries.Blocks.is_blocked?(post, :hide, :instance_wide)
@@ -400,7 +408,9 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
 
       assert Bonfire.Boundaries.Blocks.is_blocked?(post, :hide, :instance_wide)
 
-      {:ok, _} = Bonfire.Boundaries.Blocks.unblock(post, :hide, :instance_wide)
+      {:ok, _} =
+        Bonfire.Boundaries.Blocks.unblock(post, :hide, current_user: admin, scope: :instance_wide)
+
       refute Bonfire.Boundaries.Blocks.is_blocked?(post, :hide, :instance_wide)
     end
 
@@ -448,6 +458,29 @@ defmodule Bonfire.Boundaries.PostBoundariesTest do
 
       assert Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide),
              "a stranger reopened someone else's locked thread"
+    end
+
+    # the author holds `:grant` and `:mediate` on their own post, so those alone can't tell a lock they applied from a moderator's
+    test "its author can't reopen a thread a moderator locked, and a moderator can" do
+      author = Bonfire.Me.Fake.fake_user!()
+      commenter = Bonfire.Me.Fake.fake_user!()
+
+      {:ok, moderator} =
+        Bonfire.Me.Users.make_admin(Bonfire.Me.Fake.fake_user!(), skip_boundary_check: true)
+
+      post = public_post!(author)
+
+      assert {:ok, _} = Bonfire.Boundaries.Blocks.lock(post, current_user: moderator)
+      refute Boundaries.can?(commenter, :reply, post), "control: the moderator's lock applies"
+
+      assert {:error, _} = Bonfire.Boundaries.Blocks.unlock(post, current_user: author)
+      assert {:error, _} = Bonfire.Boundaries.Blocks.unblock(post, :lock, current_user: author)
+
+      assert Bonfire.Boundaries.Blocks.is_blocked?(post, :lock, :instance_wide),
+             "the author reopened a thread a moderator locked"
+
+      assert {:ok, _} = Bonfire.Boundaries.Blocks.unlock(post, current_user: moderator)
+      assert Boundaries.can?(commenter, :reply, post), "control: the moderator's unlock applies"
     end
 
     test "its author can still lock and unlock through `block/3` and `unblock/3`" do

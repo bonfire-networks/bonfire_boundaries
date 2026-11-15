@@ -70,11 +70,11 @@ defmodule Bonfire.Boundaries.Blocks do
 
   ## Examples
 
-      iex> Bonfire.Boundaries.Blocks.instance_wide_block(user, :ghost)
+      iex> Bonfire.Boundaries.Blocks.instance_wide_block(user, :ghost, current_user: admin)
       {:ok, "Blocked"}
   """
-  def instance_wide_block(user_or_instance_to_block, block_type \\ nil) do
-    block(user_or_instance_to_block, block_type, :instance_wide)
+  def instance_wide_block(user_or_instance_to_block, block_type \\ nil, opts) do
+    block(user_or_instance_to_block, block_type, Keyword.put(opts, :scope, :instance_wide))
   end
 
   @doc """
@@ -108,7 +108,7 @@ defmodule Bonfire.Boundaries.Blocks do
 
   ## Block a user for everyone on the instance (as an admin/mod)
 
-      iex> Bonfire.Boundaries.Blocks.block(user, :instance_wide)
+      iex> Bonfire.Boundaries.Blocks.block(user, current_user: admin, scope: :instance_wide)
       {:ok, "Blocked"}
 
   ## Silence a user for current user
@@ -118,7 +118,7 @@ defmodule Bonfire.Boundaries.Blocks do
 
   ## Silence a user for everyone on the instance (as an admin/mod)
 
-      iex> Bonfire.Boundaries.Blocks.block(user, :silence, :instance_wide)
+      iex> Bonfire.Boundaries.Blocks.block(user, :silence, current_user: admin, scope: :instance_wide)
       {:ok, "Blocked"}
 
   ## Ghost a user for current user
@@ -128,14 +128,19 @@ defmodule Bonfire.Boundaries.Blocks do
 
   ## Ghost a user for everyone on the instance (as an admin/mod)
 
-      iex> Bonfire.Boundaries.Blocks.block(user, :ghost, :instance_wide)
+      iex> Bonfire.Boundaries.Blocks.block(user, :ghost, current_user: admin, scope: :instance_wide)
+      {:ok, "Blocked"}
+
+  ## For system paths (federation, scaffolding, migrations), where nobody acts
+
+      iex> Bonfire.Boundaries.Blocks.block(user, :ghost, scope: :instance_wide, skip_boundary_check: true)
       {:ok, "Blocked"}
   """
   def block(user_or_instance_to_block, block_type \\ nil, scope)
 
-  # just for typos ;)
-  def block(user_or_instance, block_type, :instance),
-    do: block(user_or_instance, block_type, :instance_wide)
+  # (was: a typo alias for `:instance_wide`, which forwarded a bare scope that `check_scope_standing/1` always refuses; nothing calls it, and a call now reaches the clauses below, which refuse it the same way)
+  # def block(user_or_instance, block_type, :instance),
+  #   do: block(user_or_instance, block_type, :instance_wide)
 
   # def block(
   #       %{__struct__: schema, display_hostname: display_hostname} = _instance_to_block,
@@ -185,7 +190,8 @@ defmodule Bonfire.Boundaries.Blocks do
     scope = if elsewhere?, do: Keyword.put(Keyword.new(scope), :pending, true), else: scope
 
     # the status, as callers show it (eg. as a flash); `lock/2` takes the record from `block_and_record/3`
-    with {:ok, _} <- maybe_check_lock_standing(user_or_instance_to_block, block_type, scope),
+    with :ok <- check_scope_standing(scope),
+         {:ok, _} <- maybe_check_lock_standing(user_or_instance_to_block, block_type, scope),
          {:ok, status, record} <-
            block_and_record(user_or_instance_to_block, block_type, scope) do
       # sent from the moderator, naming the group, whatever the federation box says: it only takes effect through the group
@@ -199,6 +205,30 @@ defmodule Bonfire.Boundaries.Blocks do
           )
 
       {:ok, status}
+    end
+  end
+
+  # Who acts is never taken from the caller's say-so: the scope is either a user's own (`current_user: user`, or the user), or the instance's (`scope: :instance_wide`), which takes `:block` on the instance. Nobody acting is refused, as a guest has no user either, unless the caller names a system path with `skip_boundary_check: true` (federation, scaffolding, migrations)
+  defp check_scope_standing(scope) do
+    user = current_user(scope)
+    keyword? = Keyword.keyword?(scope)
+
+    cond do
+      keyword? and Keyword.get(scope, :skip_boundary_check) == true ->
+        :ok
+
+      is_nil(user) ->
+        error(:not_permitted, "Blocking needs a user acting, or skip_boundary_check")
+
+      keyword? and Keyword.get(scope, :scope) in [:instance_wide, :instance] and
+          not Bonfire.Boundaries.can?(user, :block, :instance) ->
+        error(
+          :not_permitted,
+          "Only someone who may block on the instance can do so instance-wide"
+        )
+
+      true ->
+        :ok
     end
   end
 
@@ -223,11 +253,13 @@ defmodule Bonfire.Boundaries.Blocks do
     end
   end
 
-  # `current_user: admin, scope: :instance_wide`: an instance-wide block that names who made it, for its record. The rest of this module takes the bare `:instance_wide`, which is also how a caller with nobody acting asks for one
+  # `current_user: admin, scope: :instance_wide`: an instance-wide block that names who made it, for its record. The rest of this module takes the bare `:instance_wide`, which this turns the scope into once `check_scope_standing/1` has passed it. With `skip_boundary_check: true` and nobody acting, nothing is recorded
   defp instance_wide_with_actor(scope) do
+    user = current_user(scope)
+
     if Keyword.keyword?(scope) and scope[:scope] == :instance_wide,
-      do: {{current_user(scope), scope}, :instance_wide},
-      else: {{e(scope, :acting_user, nil) || current_user(scope), scope}, scope}
+      do: {{user, scope}, :instance_wide},
+      else: {{e(scope, :acting_user, nil) || user, scope}, scope}
   end
 
   # One record per action, its verb the type (`block` for both at once), its subject whoever acted (`acting_user` when on a group's behalf, whose group then is where it's logged). Nobody acting, nothing recorded. Through `maybe_apply` since records live in bonfire_social, which boundaries doesn't depend on
@@ -421,11 +453,18 @@ defmodule Bonfire.Boundaries.Blocks do
       iex> Bonfire.Boundaries.Blocks.unblock(user, :ghost, current_user: unblocker)
       {:ok, "Unblocked"}
 
-      iex> Bonfire.Boundaries.Blocks.unblock(user, :silence, :instance_wide)
+      iex> Bonfire.Boundaries.Blocks.unblock(user, :silence, current_user: admin, scope: :instance_wide)
       {:ok, "Unblocked"}
   """
   def unblock(user_or_instance_to_unblock, block_type \\ nil, scope) do
-    with {:ok, _} <- maybe_check_lock_standing(user_or_instance_to_unblock, block_type, scope),
+    with {:ok, _} <- maybe_check_unlock_standing(user_or_instance_to_unblock, block_type, scope) do
+      do_unblock(user_or_instance_to_unblock, block_type, scope)
+    end
+  end
+
+  # the standing to reopen a lock was checked by the caller
+  defp do_unblock(user_or_instance_to_unblock, block_type, scope) do
+    with :ok <- check_scope_standing(scope),
          {:ok, scope} <- maybe_on_behalf_of(scope),
          # lifting writes no record, so who did it isn't needed here, only the scope it names
          {_who_acted, scope} = instance_wide_with_actor(scope),
@@ -496,7 +535,7 @@ defmodule Bonfire.Boundaries.Blocks do
     # TODO: an `unlock` record, with `reverses:` the lock's record when there is one (a lock made before records has none)
     with {:ok, object} <- may_lock(object, scope),
          :ok <- may_reopen(object, scope),
-         {:ok, _} = ok <- unblock(object, :lock, scope) do
+         {:ok, _} = ok <- do_unblock(object, :lock, scope) do
       maybe_federate_lock(:unlock, object, scope)
       ok
     end
@@ -520,7 +559,15 @@ defmodule Bonfire.Boundaries.Blocks do
       else: {:ok, object}
   end
 
-  # Who may close (or reopen) a thread is a boundary question like any other, for local and remote actors alike: the object must load for them with `:grant` (its author, or whoever may change its boundary) or `:mediate` (a moderator of the group it was published in, or that group itself, through the group's ACLs). Instance admins may too, as the UI offers them. Without it anyone could lock any thread, since the grants below check nothing
+  # the same for reopening, which also needs `may_reopen/2`: lifting a lock someone else made is a moderator's, whichever way it is asked for
+  defp maybe_check_unlock_standing(object, block_type, scope) do
+    with {:ok, loaded} <- maybe_check_lock_standing(object, block_type, scope),
+         :ok <- if(:lock in List.wrap(block_type), do: may_reopen(loaded, scope), else: :ok) do
+      {:ok, loaded}
+    end
+  end
+
+  # Who may close (or reopen) a thread is a boundary question like any other, for local and remote actors alike: the object must load for them with `:grant` (its author, or whoever may change its boundary) or `:mediate` (a moderator of the group it was published in, or that group itself, through the group's ACLs). Instance admins (`:grant` on the instance) and instance moderators (`:mediate` on the instance) may too, outside any group as well, as the UI offers them. Without it anyone could lock any thread, since the grants below check nothing
   defp may_lock(object, scope) do
     current_user = current_user(scope)
 
@@ -528,7 +575,8 @@ defmodule Bonfire.Boundaries.Blocks do
       is_nil(current_user) ->
         error(:not_permitted, "Only someone signed in can lock a thread")
 
-      Bonfire.Boundaries.can?(current_user, :grant, :instance) ->
+      Bonfire.Boundaries.can?(current_user, :grant, :instance) or
+          Bonfire.Boundaries.can?(current_user, :mediate, :instance) ->
         case load_for_locality_check(object) do
           nil -> error(:not_found, "Could not find what to lock")
           object -> {:ok, object}
@@ -730,8 +778,9 @@ defmodule Bonfire.Boundaries.Blocks do
     with {:ok, acl_id} <- object_block_acl_id(block_type, scope, block_or_unblock == :block) do
       done =
         case block_or_unblock do
-          :block -> Controlleds.add_acls(object, acl_id)
-          :unblock -> Controlleds.remove_acls(object, [acl_id])
+          # standing was checked by the callers (`lock/2`, `unlock/2`, `block/3`, `unblock/3`), and `remove_acls/3` refuses these ACLs to anyone
+          :block -> Controlleds.do_add_acls(object, acl_id)
+          :unblock -> Controlleds.do_remove_acls(object, [acl_id])
         end
 
       case {done, block_or_unblock, block_type} do
@@ -1022,7 +1071,7 @@ defmodule Bonfire.Boundaries.Blocks do
   defp do_mutate_blocklists(:block, user_or_instance_to_block, circles) do
     # TODO: properly validate the inserts
     with done when is_list(done) <-
-           Circles.add_to_circles(user_or_instance_to_block, circles) do
+           Circles.add_to_circles(user_or_instance_to_block, circles, skip_boundary_check: true) do
       {:ok, "Blocked"}
     else
       e ->
@@ -1033,7 +1082,9 @@ defmodule Bonfire.Boundaries.Blocks do
 
   defp do_mutate_blocklists(:unblock, user_or_instance_to_unblock, circles) do
     with {deleted, _} when deleted > 0 <-
-           Circles.remove_from_circles(user_or_instance_to_unblock, circles) do
+           Circles.remove_from_circles(user_or_instance_to_unblock, circles,
+             skip_boundary_check: true
+           ) do
       {:ok, "Unblocked"}
     else
       e ->

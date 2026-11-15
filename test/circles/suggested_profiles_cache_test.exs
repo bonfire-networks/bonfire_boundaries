@@ -23,21 +23,29 @@ defmodule Bonfire.Boundaries.Circles.SuggestedProfilesCacheTest do
 
   test "lists the members of the suggested-profiles circle" do
     user = fake_user!()
-    {:ok, _} = Circles.add_to_circles(user, Instance.suggested_profiles_circle())
+
+    {:ok, _} =
+      Circles.add_to_circles(user, Instance.suggested_profiles_circle(),
+        skip_boundary_check: true
+      )
 
     assert user.id in suggested_ids()
   end
 
   test "the list is cached, and reset/0 busts it so an edit shows immediately" do
     a = fake_user!()
-    {:ok, _} = Circles.add_to_circles(a, Instance.suggested_profiles_circle())
+
+    {:ok, _} =
+      Circles.add_to_circles(a, Instance.suggested_profiles_circle(), skip_boundary_check: true)
 
     # warm the cache
     assert a.id in suggested_ids()
 
     # an admin adds a second member AFTER the list was cached
     b = fake_user!()
-    {:ok, _} = Circles.add_to_circles(b, Instance.suggested_profiles_circle())
+
+    {:ok, _} =
+      Circles.add_to_circles(b, Instance.suggested_profiles_circle(), skip_boundary_check: true)
 
     # still serving the stale cached list — this is the #2069 symptom
     refute b.id in suggested_ids()

@@ -113,23 +113,61 @@ defmodule Bonfire.Boundaries.Allowlist do
     end)
   end
 
-  @doc "Add a subject to an allowlist. `scope` is `:instance_wide` or a user struct/id."
-  def allow(subject, scope \\ :instance_wide) do
-    with circles when circles != [] <- allow_circles(scope),
-         done when is_list(done) <- Circles.add_to_circles(subject, circles) do
+  @doc "Add a subject to an allowlist: the acting `current_user`'s own, or with `scope: :instance_wide` the instance's, which takes `:configure` on the instance. A caller with nobody acting is refused unless it names a system path with `skip_boundary_check: true`. A user struct given instead of `opts` acts for themselves."
+  def allow(subject, opts \\ []) do
+    opts = allowlist_opts(opts)
+
+    with :ok <- check_may_change_allowlist(opts),
+         circles when circles != [] <- allow_circles(opts),
+         done when is_list(done) <-
+           Circles.add_to_circles(subject, circles, skip_boundary_check: true) do
       {:ok, "Allowlisted"}
     else
+      {:error, :not_permitted} = refused -> refused
       _ -> {:error, "Could not add to allowlist"}
     end
   end
 
-  @doc "Remove a subject from an allowlist."
-  def unallow(subject, scope \\ :instance_wide) do
-    with circles when circles != [] <- allow_circles(scope),
-         done when is_list(done) <- Circles.remove_from_circles(subject, circles) do
+  @doc "Remove a subject from an allowlist. Takes the same `opts` as `allow/2`."
+  def unallow(subject, opts \\ []) do
+    opts = allowlist_opts(opts)
+
+    with :ok <- check_may_change_allowlist(opts),
+         circles when circles != [] <- allow_circles(opts),
+         {removed, _} when is_integer(removed) <-
+           Circles.remove_from_circles(subject, circles, skip_boundary_check: true) do
       {:ok, "Removed from allowlist"}
     else
+      {:error, :not_permitted} = refused -> refused
       _ -> {:error, "Could not remove from allowlist"}
+    end
+  end
+
+  defp allowlist_opts(opts) when is_list(opts), do: opts
+  defp allowlist_opts(nil), do: []
+  defp allowlist_opts(user) when is_map(user), do: [current_user: user]
+  defp allowlist_opts(_), do: []
+
+  # The server decides whose list it is: the acting user's own, or the instance's with `:configure` on the instance. Nobody acting is not "system", since a guest has no user either, so only `skip_boundary_check: true` is
+  defp check_may_change_allowlist(opts) do
+    user = current_user(opts)
+
+    cond do
+      Keyword.get(opts, :skip_boundary_check) == true ->
+        :ok
+
+      is_nil(user) ->
+        error(:not_permitted, "Changing an allowlist needs a user acting, or skip_boundary_check")
+
+      Keyword.get(opts, :scope) == :instance_wide and
+          not Bonfire.Boundaries.can?(user, :configure, :instance) ->
+        error(
+          :not_permitted,
+          "Only someone who may configure the instance can change its allowlist"
+        )
+
+      true ->
+        :ok
     end
   end
 
@@ -181,12 +219,11 @@ defmodule Bonfire.Boundaries.Allowlist do
     false
   end
 
-  defp allow_circles(:instance_wide), do: Circles.ids_for_stereotypes(@stereotypes)
-
-  defp allow_circles(opts) when is_list(opts),
-    do: get_or_create_allow_circles(current_user(opts))
-
-  defp allow_circles(user), do: get_or_create_allow_circles(user)
+  defp allow_circles(opts) do
+    if Keyword.get(opts, :scope) == :instance_wide,
+      do: Circles.ids_for_stereotypes(@stereotypes),
+      else: get_or_create_allow_circles(current_user(opts))
+  end
 
   defp get_or_create_allow_circles(nil), do: []
 

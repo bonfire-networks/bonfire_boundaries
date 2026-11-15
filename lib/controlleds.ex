@@ -495,17 +495,43 @@ defmodule Bonfire.Boundaries.Controlleds do
   end
 
   @doc """
-  Removes the given ACLs from an object.
+  Removes the given ACLs from an object. Requires `current_user:` (who must be able to configure the object) or `skip_boundary_check: true` for system paths, and returns `{:error, :not_permitted}` otherwise.
+
+  The ACLs a lock or a hide attaches (`:locked`, `:hidden`, and each person's own hide) are refused whoever asks, since someone else applied them and they restrict everyone but the creator: they only come off through `Bonfire.Boundaries.Blocks.unblock/3`, which applies the standing each one needs.
 
   ## Examples
 
-      iex> remove_acls(object, acls)
+      iex> remove_acls(object, acls, current_user: user)
   """
-  def remove_acls(_object, acls)
+  def remove_acls(object, acls, opts \\ [])
+
+  def remove_acls(_object, acls, _opts)
       when is_nil(acls) or acls == [],
       do: error("No acl ID provided, so could not remove")
 
-  def remove_acls(object, acls) do
+  def remove_acls(object, acls, opts) do
+    with :ok <- check_not_block_acls(acls),
+         :ok <- check_may_configure(object, opts) do
+      do_remove_acls(object, acls)
+    end
+  end
+
+  # the ACLs `Blocks` attaches for a lock (`:locked`) or a hide (`:hidden` for everyone, or one made from the person's own `hidden_by_me` stereotype)
+  defp check_not_block_acls(acls) do
+    ids = uids_or(acls, &acl_id/1)
+
+    if Enum.any?(ids, &(&1 in [Acls.get_id!(:locked), Acls.get_id!(:hidden)])) or
+         repo().exists?(
+           from(s in Bonfire.Data.AccessControl.Stereotyped,
+             where: s.id in ^ids and s.stereotype_id == ^Acls.get_id!(:hidden_by_me)
+           )
+         ),
+       do: {:error, :not_permitted},
+       else: :ok
+  end
+
+  @doc "Removes the given ACLs from an object with no check, for internal use: please call `remove_acls/3` which checks for permission."
+  def do_remove_acls(object, acls) do
     from(e in Controlled,
       where:
         e.id == ^uid!(object) and
@@ -525,27 +551,80 @@ defmodule Bonfire.Boundaries.Controlleds do
   defp acl_id(id), do: Bonfire.Boundaries.Acls.get_id(id)
 
   @doc """
-  Adds the given ACL to an object.
+  Adds the given ACL to an object. Requires `current_user:` (who must be able to configure the object, and may only attach their own ACLs or built-in ones) or `skip_boundary_check: true` for system paths, and returns `{:error, :not_permitted}` otherwise.
 
   ## Examples
 
-      iex> add_acls(object, :acl)
+      iex> add_acls(object, :acl, current_user: user)
       {:ok, %Controlled{}}
 
   """
-  def add_acls(object, acl) when is_atom(acl) do
-    Bonfire.Boundaries.Acls.get_id!(acl)
-    |> add_acls(object, ...)
+  def add_acls(object, acls, opts \\ []) do
+    with :ok <- check_may_configure(object, opts),
+         :ok <- check_may_attach(acls, opts) do
+      do_add_acls(object, acls)
+    end
   end
 
-  def add_acls(object, acl) when not is_list(acl) do
+  @doc "Adds the given ACL to an object with no check, for internal use: please call `add_acls/3` which checks for permission."
+  def do_add_acls(object, acl) when is_atom(acl) do
+    Bonfire.Boundaries.Acls.get_id!(acl)
+    |> do_add_acls(object, ...)
+  end
+
+  def do_add_acls(object, acl) when not is_list(acl) do
     create(%{id: uid!(object), acl_id: uid!(acl)})
   end
 
-  def add_acls(object, acls) when is_list(acls) do
+  def do_add_acls(object, acls) when is_list(acls) do
     # TODO: optimise
-    Enum.map(acls, &add_acls(object, &1))
+    Enum.map(acls, &do_add_acls(object, &1))
   end
+
+  @doc """
+  Whether the user may change the boundaries of the object: they created it, are its caretaker, or are permitted to `:configure` it.
+  """
+  def may_configure?(user, object) do
+    user_id = id(user)
+    object_id = uid(object)
+
+    cond do
+      is_nil(user_id) or is_nil(object_id) ->
+        false
+
+      repo().exists?(
+        from(c in Bonfire.Data.Social.Created,
+          where: c.id == ^object_id and c.creator_id == ^user_id
+        )
+      ) ->
+        true
+
+      repo().exists?(
+        from(c in Bonfire.Data.Identity.Caretaker,
+          where: c.id == ^object_id and c.caretaker_id == ^user_id
+        )
+      ) ->
+        true
+
+      true ->
+        Bonfire.Boundaries.can?(user, :configure, object) == true
+    end
+  end
+
+  defp check_may_configure(object, opts) do
+    if skip_check?(opts) or may_configure?(current_user(opts), object),
+      do: :ok,
+      else: {:error, :not_permitted}
+  end
+
+  defp check_may_attach(acls, opts) do
+    if skip_check?(opts) or
+         Enum.all?(List.wrap(acls), &Acls.may_attach?(&1, opts)),
+       do: :ok,
+       else: {:error, :not_permitted}
+  end
+
+  defp skip_check?(opts), do: Bonfire.Boundaries.Queries.skip_boundary_check?(opts) == true
 
   @doc """
   Grants a role to a subject for an object.
@@ -557,8 +636,9 @@ defmodule Bonfire.Boundaries.Controlleds do
 
   """
   def grant_role(subject_id, object, role, opts \\ []) do
-    with {:ok, acl} <- Acls.get_or_create_object_custom_acl(object, current_user(opts)) do
-      Grants.grant_role(subject_id, acl, role, opts)
+    # checked once, by whoever gets the object's own ACL: which is who may configure the object, the same standing as changing its grants
+    with {:ok, acl} <- Acls.get_or_create_object_custom_acl(object, opts) do
+      Grants.do_grant_role(subject_id, acl, role, opts)
     end
   end
 
@@ -575,12 +655,12 @@ defmodule Bonfire.Boundaries.Controlleds do
       {:ok, %Grant{}}
   """
   def regrant_role(subject_id, object, role, revoke_previous_roles, opts \\ []) do
-    with {:ok, acl} <- Acls.get_or_create_object_custom_acl(object, current_user(opts)) do
+    with {:ok, acl} <- Acls.get_or_create_object_custom_acl(object, opts) do
       for revoke <- revoke_previous_roles, revoke != role do
-        Grants.remove_role(subject_id, acl, revoke, opts)
+        Grants.do_remove_role(subject_id, acl, revoke, opts)
       end
 
-      Grants.grant_role(subject_id, acl, role, opts)
+      Grants.do_grant_role(subject_id, acl, role, opts)
     end
   end
 
