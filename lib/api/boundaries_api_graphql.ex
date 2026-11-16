@@ -158,6 +158,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     object :boundaries_queries do
       @desc "Returns boundary config (presets, toggles, dimensions) for a given context. No auth required."
       field :boundaries, :boundaries do
+        meta(public: true)
         arg(:context, :string)
         resolve(&boundaries_config/2)
       end

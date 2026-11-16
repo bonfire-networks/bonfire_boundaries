@@ -14,7 +14,7 @@ defmodule Bonfire.Boundaries.Scaffold.DuplicateStereotypeCirclesDataMigration do
   alias EctoSparkles.DataMigration
   use DataMigration
 
-  # not `repo()`: `use DataMigration` imports `Ecto.Migration`'s, which needs a migration runner
+  # `migrate/2` takes the repo it acts on from its opts, not from `repo()`: `use DataMigration` imports `Ecto.Migration`'s, which needs the migration's own process, and this runs in the runner's task when async
   alias Bonfire.Common.Repo
   alias Bonfire.Data.AccessControl.Encircle
   alias Bonfire.Data.AccessControl.Stereotyped
@@ -56,25 +56,31 @@ defmodule Bonfire.Boundaries.Scaffold.DuplicateStereotypeCirclesDataMigration do
   end
 
   @impl DataMigration
-  def migrate(results) do
-    Enum.each(results, &safely_merge/1)
+  def migrate(results), do: migrate(results, [])
+
+  # `opts[:repo]` is the repo the migration runs on (the migration passes its own `repo/0`), else the normal one
+  @impl DataMigration
+  def migrate(results, opts) do
+    repo = Keyword.get(opts, :repo, Repo)
+    Enum.each(results, &safely_merge(&1, repo))
   end
 
   # one at a time, so a circle that fails loses only itself, not the rest of its batch
-  defp safely_merge(%{id: duplicate_id}) do
-    Repo.transact_with(fn -> merge(duplicate_id) end)
+  defp safely_merge(%{id: duplicate_id}, repo) do
+    repo.transact_with(fn -> merge(duplicate_id, repo) end)
   rescue
     e -> error(e, "could not merge duplicate stereotype circle #{duplicate_id}")
   end
 
-  defp merge(duplicate_id) do
-    with {caretaker_id, stereotype_id} <- caretaker_and_stereotype(duplicate_id),
-         keeper_id when is_binary(keeper_id) <- earliest_circle(caretaker_id, stereotype_id),
+  defp merge(duplicate_id, repo) do
+    with {caretaker_id, stereotype_id} <- caretaker_and_stereotype(duplicate_id, repo),
+         keeper_id when is_binary(keeper_id) <-
+           earliest_circle(caretaker_id, stereotype_id, repo),
          true <- keeper_id != duplicate_id do
       member_ids =
-        Repo.all(from(e in Encircle, where: e.circle_id == ^duplicate_id, select: e.subject_id))
+        repo.all(from(e in Encircle, where: e.circle_id == ^duplicate_id, select: e.subject_id))
 
-      Repo.insert_all_or_ignore(
+      repo.insert_all_or_ignore(
         Encircle,
         Enum.map(
           member_ids,
@@ -83,7 +89,7 @@ defmodule Bonfire.Boundaries.Scaffold.DuplicateStereotypeCirclesDataMigration do
       )
 
       # the circle's mixins, and its memberships, are removed with its pointer
-      Repo.delete_all(from(p in Needle.Pointer, where: p.id == ^duplicate_id))
+      repo.delete_all(from(p in Needle.Pointer, where: p.id == ^duplicate_id))
 
       {:ok, keeper_id}
     else
@@ -91,8 +97,8 @@ defmodule Bonfire.Boundaries.Scaffold.DuplicateStereotypeCirclesDataMigration do
     end
   end
 
-  defp caretaker_and_stereotype(circle_id) do
-    Repo.one(
+  defp caretaker_and_stereotype(circle_id, repo) do
+    repo.one(
       from(c in Caretaker,
         join: s in Stereotyped,
         on: s.id == c.id,
@@ -102,8 +108,8 @@ defmodule Bonfire.Boundaries.Scaffold.DuplicateStereotypeCirclesDataMigration do
     )
   end
 
-  defp earliest_circle(caretaker_id, stereotype_id) do
-    Repo.one(
+  defp earliest_circle(caretaker_id, stereotype_id, repo) do
+    repo.one(
       from(c in Caretaker,
         join: s in Stereotyped,
         on: s.id == c.id,

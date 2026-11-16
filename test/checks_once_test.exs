@@ -169,7 +169,9 @@ defmodule Bonfire.Boundaries.ChecksOnceTest do
                      someone.id,
                      post,
                      "contribute",
-                     ["read", "contribute"], current_user: me)
+                     ["read", "contribute"],
+                     current_user: me
+                   )
         end)
 
       assert checks[{Controlleds, :may_configure?}] == 1

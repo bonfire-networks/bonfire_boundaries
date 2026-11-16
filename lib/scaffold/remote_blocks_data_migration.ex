@@ -60,13 +60,20 @@ defmodule Bonfire.Boundaries.Scaffold.RemoteBlocksDataMigration do
   end
 
   @impl DataMigration
-  def migrate(results) do
-    Enum.each(results, &safely_scaffold/1)
+  def migrate(results), do: migrate(results, [])
+
+  # `opts[:repo]` is the repo the migration runs on (the migration passes its own `repo/0`), else the normal one
+  @impl DataMigration
+  def migrate(results, opts) do
+    # the contexts reached from here find their repo through `repo()`, which reads this process: the runner's task when async, which does not inherit the migration's
+    if repo = opts[:repo], do: Process.put(:ecto_repo_module, repo)
+
+    Enum.each(results, &safely_scaffold(&1, opts))
   end
 
   # one at a time, so an actor that fails loses only themselves, not the rest of their batch
-  defp safely_scaffold(%{id: _} = actor) do
-    Bonfire.Boundaries.Scaffold.create_missing_block_boundaries(actor, [:ghost_them])
+  defp safely_scaffold(%{id: _} = actor, opts) do
+    Bonfire.Boundaries.Scaffold.create_missing_block_boundaries(actor, [:ghost_them], opts)
   rescue
     e ->
       error(e, "Could not apply the blocks of #{inspect(actor)}, going on with the next")

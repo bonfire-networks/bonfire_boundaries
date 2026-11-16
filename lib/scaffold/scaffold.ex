@@ -23,7 +23,7 @@ defmodule Bonfire.Boundaries.Scaffold do
 
   `stereotypes` is what the act in hand actually uses, so a silence creates nothing a ban would need and the other way round. Each entry in `:block_boundaries_by_stereotype` carries its own complete wiring, so they compose without overlapping: `silence_me` is the reverse index kept on whatever is being silenced, while `ghost_them` and `silence_them` are the blocker's OWN lists, which a category needs once it blocks somebody itself, a member ban being exactly that.
   """
-  def create_missing_block_boundaries(caretaker, stereotypes) do
+  def create_missing_block_boundaries(caretaker, stereotypes, opts \\ []) do
     config = Bonfire.Common.Config.get!(:block_boundaries_by_stereotype)
 
     case stereotypes |> List.wrap() |> Enum.flat_map(&List.wrap(config[&1])) do
@@ -32,12 +32,12 @@ defmodule Bonfire.Boundaries.Scaffold do
 
       needed ->
         Scaffold.Users.create_missing_boundaries(caretaker, defaults: merge_boundaries(needed))
-        |> attach_to_existing_objects(caretaker)
+        |> attach_to_existing_objects(caretaker, Keyword.get(opts, :repo, Bonfire.Common.Repo))
     end
   end
 
   # An ACL that every new object gets (`:object_default_boundaries`, eg. the ghost one, which `Acls` finds by stereotype on each object its caretaker creates), but created only now, after they made some: a remote actor's arrives the first time they block one of ours. Attached to what they already made too, as if it had existed all along
-  defp attach_to_existing_objects(new_acls, caretaker) do
+  defp attach_to_existing_objects(new_acls, caretaker, repo) do
     default_stereotype_ids = object_default_stereotype_ids()
 
     for %{id: acl_id, stereotype_id: stereotype_id} <- new_acls,
@@ -46,11 +46,7 @@ defmodule Bonfire.Boundaries.Scaffold do
         where: c.creator_id == ^Bonfire.Common.Types.uid(caretaker),
         select: %{id: c.id, acl_id: type(^acl_id, Needle.ULID)}
       )
-      |> then(
-        &Bonfire.Common.Repo.insert_all(Bonfire.Data.AccessControl.Controlled, &1,
-          on_conflict: :nothing
-        )
-      )
+      |> then(&repo.insert_all(Bonfire.Data.AccessControl.Controlled, &1, on_conflict: :nothing))
     end
 
     new_acls
