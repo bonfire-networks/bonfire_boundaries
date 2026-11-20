@@ -580,10 +580,16 @@ defmodule Bonfire.Boundaries do
     nil
   end
 
-  def can?(subject, verbs, :instance, _opts) do
+  # An instance admin may do anything on the instance, as the admin flag on the subject's account says; anyone else as the instance ACL grants them. With `ensure_admin_check: true` (for admin actions, where a wrong `false` would lock an admin out), an account whose flag isn't loaded is an error, raising in tests so the caller can preload it, then the flag is loaded and read (`Bonfire.Me.Accounts.is_admin!/1`); without it, such an account reads as not an admin and nothing is fetched (`is_admin?/1`)
+  def can?(subject, verbs, :instance, opts) do
     current_account = current_account(subject)
 
-    Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, :is_admin?, [current_account],
+    admin_check =
+      if e(opts, :ensure_admin_check, nil) == true and not is_nil(current_account),
+        do: :is_admin!,
+        else: :is_admin?
+
+    Bonfire.Common.Utils.maybe_apply(Bonfire.Me.Accounts, admin_check, [current_account],
       fallback_return: nil
     ) ||
       (

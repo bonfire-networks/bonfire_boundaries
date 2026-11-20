@@ -748,20 +748,24 @@ defmodule Bonfire.Boundaries.RuntimeConfig do
           name: l("Remote public activities"),
           icon: "ph:planet-duotone"
         },
+        ### `encircle_requires` says who may change a built-in circle's members with a plain add or remove: `{verb, :instance}` (that verb on the instance), `{verb, :circle}` (that verb on the circle, through its own ACLs), or `false` for nobody. A built-in without it is nobody too. Circles with their own context (admins through `make_admin`, block lists, allowlists, follows) change their members through it instead.
         admin: %{
           id: "0ADM1NSVSERW1THSVPERP0WERS",
           name: l("Instance Admins"),
-          icon: "ph:hard-hat-duotone"
+          icon: "ph:hard-hat-duotone",
+          encircle_requires: false
         },
         mod: %{
           id: "10VE1YM0DSHE1PHEA1THYC0MMS",
           name: l("Instance Moderators"),
-          icon: "ph:shield-plus-duotone"
+          icon: "ph:shield-plus-duotone",
+          encircle_requires: {:assign, :instance}
         },
         suggested_profiles: %{
           id: "5VGGESTEDPR0F11EST0F0110WS",
           name: l("Suggested Profiles"),
-          icon: "ph:users-three-duotone"
+          icon: "ph:users-three-duotone",
+          encircle_requires: {:mediate, :instance}
         },
 
         ### Stereotypes - placeholders for special per-user circles the system will manage.
