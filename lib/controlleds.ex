@@ -463,6 +463,50 @@ defmodule Bonfire.Boundaries.Controlleds do
 
   def list_objects_with_followers_grants(_), do: MapSet.new()
 
+  @doc "Mastodon's visibility word for each object (public, unlisted, private, direct), from its preset ACLs and followers grant: two queries for the lot."
+  def visibility_on_objects(object_ids) when is_list(object_ids) and object_ids != [] do
+    acl_ids = list_preset_acl_ids_on_objects(object_ids)
+
+    no_preset =
+      Enum.filter(object_ids, &(MapSet.size(Map.get(acl_ids, &1, MapSet.new())) == 0))
+
+    followers = list_objects_with_followers_grants(no_preset)
+
+    Map.new(object_ids, fn id ->
+      {id, visibility_for(Map.get(acl_ids, id, MapSet.new()), MapSet.member?(followers, id))}
+    end)
+  end
+
+  def visibility_on_objects(_), do: %{}
+
+  @doc "Mastodon's visibility word for one object's preset ACL ids: public when it grants the remote public ACL, unlisted for the public, unlisted or local presets, else private or direct by the followers grant (`visibility_test` pins it)."
+  def visibility_for(%MapSet{} = acl_ids, followers_grant?) do
+    if MapSet.size(acl_ids) == 0 do
+      # no preset ACLs: followers-only or mentions-only
+      if followers_grant?, do: "private", else: "direct"
+    else
+      remote_ids = MapSet.new(Acls.remote_public_acl_ids())
+      has_remote = not MapSet.disjoint?(acl_ids, remote_ids)
+
+      preset_acls = Bonfire.Common.Config.get!(:preset_acls_match)
+      public_ids = MapSet.new(Acls.preset_acl_ids("public", preset_acls))
+      unlisted_ids = MapSet.new(Acls.preset_acl_ids("unlisted", preset_acls))
+      local_ids = MapSet.new(Acls.preset_acl_ids("local", preset_acls))
+      has_public = not MapSet.disjoint?(acl_ids, public_ids)
+      has_local = not MapSet.disjoint?(acl_ids, local_ids)
+
+      cond do
+        has_remote -> "public"
+        not MapSet.disjoint?(acl_ids, unlisted_ids) -> "unlisted"
+        has_public -> "unlisted"
+        has_local -> "unlisted"
+        true -> "direct"
+      end
+    end
+  end
+
+  def visibility_for(_, _), do: "public"
+
   @doc """
   Checks if a single object has a grant to the followers stereotype circle.
   """
