@@ -1180,16 +1180,18 @@ defmodule Bonfire.Boundaries.Acls do
       {:ok, acl}
     else
       {:error, :not_found} ->
-        if Bonfire.Boundaries.can?(current_account(opts) || caretaker, :assign, :instance),
-          do:
-            repo().single(
-              get_for_caretaker_q(
-                id,
-                Bonfire.Boundaries.Scaffold.Instance.admin_circle(),
-                opts
-              )
-            ),
-          else: {:error, :not_found}
+        if Bonfire.Boundaries.can?(current_account(opts) || caretaker, :assign, :instance,
+             ensure_admin_check: true
+           ),
+           do:
+             repo().single(
+               get_for_caretaker_q(
+                 id,
+                 Bonfire.Boundaries.Scaffold.Instance.admin_circle(),
+                 opts
+               )
+             ),
+           else: {:error, :not_found}
     end
   end
 

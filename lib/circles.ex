@@ -127,6 +127,45 @@ defmodule Bonfire.Boundaries.Circles do
     uid(circle) in built_in_ids
   end
 
+  @doc "What a built-in circle's config says about changing its members with a plain add or remove: `{verb, :instance}` (that verb on the instance), `{verb, :circle}` (that verb on the circle, through its own ACLs), or `false` for nobody, which is also the answer for a built-in that doesn't say and for any other circle."
+  def encircle_requires(circle) do
+    id = uid(circle)
+
+    Enum.find_value(circles(), false, fn
+      {_name, %{id: ^id} = built_in} -> Map.get(built_in, :encircle_requires) || false
+      _ -> nil
+    end)
+  end
+
+  @doc "Whether `user` may change the members of the built-in `circles` with a plain add or remove, as each one's `encircle_requires/1` says. Answers for all of them at once: one that doesn't allow it refuses the lot. A change of members is an admin action, so an acting user whose admin flag isn't loaded is an error in tests rather than a silent refusal (see `Bonfire.Boundaries.can?/4`'s `ensure_admin_check`)."
+  def may_encircle_built_ins?(circles, user)
+  def may_encircle_built_ins?(_circles, nil), do: false
+
+  def may_encircle_built_ins?(circles, user) do
+    rules = circles |> List.wrap() |> Enum.map(&{uid(&1), encircle_requires(&1)})
+
+    # loaded together, for the circles whose rule is a verb on the circle itself
+    on_circle = for {id, {_verb, :circle}} <- rules, do: id
+
+    boundaries =
+      if on_circle != [],
+        do: Bonfire.Boundaries.boundaries_on_objects(on_circle, user),
+        else: %{}
+
+    rules != [] and
+      Enum.all?(rules, fn
+        {_id, {verb, :instance}} ->
+          Bonfire.Boundaries.can?(user, verb, :instance, ensure_admin_check: true) == true
+
+        {id, {verb, :circle}} ->
+          boundary = boundaries[id]
+          not is_nil(boundary) and Bonfire.Boundaries.can?(user, verb, boundary) == true
+
+        _ ->
+          false
+      end)
+  end
+
   @doc """
   Checks if a circle is a stereotype circle.
 
@@ -288,9 +327,13 @@ defmodule Bonfire.Boundaries.Circles do
            repo().single(query_my_by_id(id, caretaker, opts)) do
       {:ok, circle}
     else
+      # a circle the admin circle takes care of: for whoever may assign on the instance, or, for a built-in, whoever its `encircle_requires` lets change its members (eg. moderators on Suggested Profiles)
       {:error, :not_found} ->
-        if Bonfire.Boundaries.can?(current_account(opts) || caretaker, :assign, :instance) ||
-             opts[:scope] == :instance_wide,
+        if Bonfire.Boundaries.can?(current_account(opts) || caretaker, :assign, :instance,
+             ensure_admin_check: true
+           ) ||
+             opts[:scope] == :instance_wide ||
+             (is_built_in?(id) and may_encircle_built_ins?(id, caretaker)),
            do:
              repo().single(
                query_my_by_id(
@@ -1792,7 +1835,7 @@ defmodule Bonfire.Boundaries.Circles do
     |> repo().delete_many()
   end
 
-  # Membership changes need `current_user` to manage every circle (`get_for_manager/3`: its caretaker or someone who may configure it, never a built-in or stereotype circle, whose members change through their own context, eg. a group's through its Categories), or an explicit `skip_boundary_check: true` from system code that has established standing another way
+  # Membership changes need `current_user` to manage every circle, or an explicit `skip_boundary_check: true` from system code that has established standing another way. A built-in circle is managed as its config's `encircle_requires` says (`may_encircle_built_ins?/2`), nobody when it doesn't say. Any other circle as `get_for_manager/3` allows: its caretaker or someone who may configure it, never a stereotype circle, whose members change through their own context (eg. block lists through `Blocks`, a group's through its Categories)
   defp check_may_manage_circles(circles, opts) do
     user = current_user(opts)
 
@@ -1806,10 +1849,18 @@ defmodule Bonfire.Boundaries.Circles do
       true ->
         ids = circles |> List.wrap() |> Enum.map(&uid/1) |> Enum.uniq()
 
-        if ids != [] and Enum.all?(ids, &is_binary/1) and may_manage_all?(ids, user, opts),
+        if ids != [] and Enum.all?(ids, &is_binary/1) and may_manage_ids?(ids, user, opts),
           do: :ok,
           else: error(:not_permitted, "You cannot change who is in this circle")
     end
+  end
+
+  defp may_manage_ids?(ids, user, opts) do
+    built_in_ids = built_in_ids()
+    {built_ins, rest} = Enum.split_with(ids, &(&1 in built_in_ids))
+
+    (built_ins == [] or may_encircle_built_ins?(built_ins, user)) and
+      (rest == [] or may_manage_all?(rest, user, opts))
   end
 
   # The same standing as `get_for_manager/3`, for all the circles at once, in a fixed number of queries however many there are: the ones the user is caretaker of (one query), then for the rest the ones the instance admin circle is caretaker of when they may assign on the instance (one), then the rest loaded (one) and checked for `:configure` (two). Any circle that is built-in, a stereotype, missing or not manageable refuses the whole call
@@ -1827,9 +1878,11 @@ defmodule Bonfire.Boundaries.Circles do
 
   defp may_manage_rest?(ids, user, opts) do
     admin_owned =
-      if Bonfire.Boundaries.can?(current_account(opts) || user, :assign, :instance),
-        do: managed_by_caretaker(ids, [Bonfire.Boundaries.Scaffold.Instance.admin_circle()]),
-        else: []
+      if Bonfire.Boundaries.can?(current_account(opts) || user, :assign, :instance,
+           ensure_admin_check: true
+         ),
+         do: managed_by_caretaker(ids, [Bonfire.Boundaries.Scaffold.Instance.admin_circle()]),
+         else: []
 
     with true <- all_editable?(admin_owned),
          [_ | _] = rest <- ids -- Enum.map(admin_owned, & &1.id) do
