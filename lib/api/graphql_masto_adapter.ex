@@ -43,12 +43,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
 
             accounts =
               users
-              |> Enum.map(
-                &Mappers.Account.from_user(&1,
-                  current_user: current_user,
-                  skip_expensive_stats: true
-                )
-              )
+              |> Enum.map(&Mappers.Account.from_user/1)
               |> Enum.reject(&is_nil/1)
 
             RestAdapter.json(conn, accounts)
@@ -391,7 +386,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
               |> Enum.flat_map(fn member ->
                 subject = Map.get(member, :subject) || Map.get(member, "subject")
 
-                case subject && Mappers.Account.from_user(subject, skip_expensive_stats: true) do
+                case subject && Mappers.Account.from_user(subject) do
                   nil -> []
                   account -> [account]
                 end
