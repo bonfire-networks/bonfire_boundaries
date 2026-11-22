@@ -29,7 +29,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
     alias Bonfire.Social.Graph.Follows
 
     # User profile fragment inlined for compile-order independence
-    @user_profile Fragments.user_profile()
+    @account_fields Fragments.account_fields()
 
     defp list_restricted_accounts(conn, query_name, data_key) do
       current_user = conn.assigns[:current_user]
@@ -61,7 +61,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
 
     @graphql "query {
       muted_users {
-        #{@user_profile}
+        #{@account_fields}
       }
     }"
     @doc "List muted accounts for current user"
@@ -69,7 +69,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
 
     @graphql "query {
       blocked_users {
-        #{@user_profile}
+        #{@account_fields}
       }
     }"
     @doc "List blocked accounts for current user"
@@ -195,7 +195,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
     subject_id: subjectId
     subject {
       ... on User {
-        #{@user_profile}
+        #{@account_fields}
       }
     }
     "
