@@ -24,11 +24,14 @@ defmodule Bonfire.Boundaries.Circles.ReadableIdsTest do
     assert Circles.readable_ids([silence_circle], me) == []
   end
 
-  test "a guest reads no circle, and junk is dropped" do
+  # as `get/2`: a guest opens a circle shared publicly (the circle page), not a private one
+  test "a guest reads only circles shared publicly, and junk is dropped" do
     other = Fake.fake_user!()
     {:ok, theirs} = Circles.create(other, %{named: %{name: "theirs"}})
+    {:ok, shared} = Circles.create(other, %{named: %{name: "shared"}})
+    Bonfire.Boundaries.set_boundaries(other, shared, boundary: "public")
 
-    assert Circles.readable_ids([theirs.id], nil) == []
+    assert Circles.readable_ids([theirs.id, shared.id], nil) == [shared.id]
     assert Circles.readable_ids(["not an id", nil], other) == []
   end
 end

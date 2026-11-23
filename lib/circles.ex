@@ -212,36 +212,53 @@ defmodule Bonfire.Boundaries.Circles do
       raise RuntimeError, message: "Missing built-in circle: #{inspect(slug)}"
   end
 
-  @doc "Gets a circle by ID, after checking boundaries to see if this is a list shared with me"
-  @doc "The circle ids, of those given, that `user` may read (as `get/2` opens a circle, with `:read`); a guest reads none, and anything that is not an id is dropped. For filters that narrow a feed to a circle's members: anyone else's list or block circle would show who is in it."
-  def readable_ids(ids, %{} = user) do
-    ids
-    |> List.wrap()
-    |> Enum.filter(&Types.is_uid?/1)
-    |> Enum.uniq()
-    |> Enum.filter(&match?({:ok, _}, get(&1, current_user: user)))
+  @doc "The circle ids, of those given, that `user` may read (as `get/2` opens a circle, with `:read`); a guest (`nil`) reads only circles shared with guests, and anything that is not an id is dropped. For filters that narrow a feed to a circle's members: anyone else's list or block circle would show who is in it."
+  def readable_ids(ids, user) do
+    case ids |> List.wrap() |> Enum.filter(&Types.is_uid?/1) |> Enum.uniq() do
+      [] ->
+        []
+
+      ids ->
+        # one query for all of them, with the same rule as `get/2`
+        opts = [current_user: user, verbs: [:read]] ++ @default_q_opts
+
+        readable =
+          query(opts)
+          |> where([circle], circle.id in ^ids)
+          |> where_readable(opts)
+          |> exclude(:preload)
+          |> select([circle], circle.id)
+          |> repo().all()
+
+        Enum.filter(ids, &(&1 in readable))
+    end
   end
 
-  def readable_ids(_ids, _guest), do: []
-
+  @doc "Gets a circle by ID, after checking boundaries to see if this is a list shared with me"
   def get(id, opts) do
     # one circle is OPENED, so `[:read]` unless the caller asks otherwise
     opts = (opts ++ @default_q_opts) |> Keyword.put_new(:verbs, [:read])
-    caretaker = current_user(opts)
 
     with {:ok, circle} <-
            query(opts)
            |> query_by_id(id, opts)
-           #  |> boundarise(circle.id, opts)
-           |> where(
-             [circle, caretaker: caretaker],
-             exists(boundarise(circle.id, opts)) or
-               caretaker.caretaker_id in ^uids(caretaker) or
-               circle.id in ^e(opts, :extra_ids_to_include, [])
-           )
+           |> where_readable(opts)
            |> repo().single() do
       {:ok, circle}
     end
+  end
+
+  # who may open a circle: anyone its boundary lets `opts[:verbs]`, its caretaker, or an id the caller adds
+  defp where_readable(query, opts) do
+    caretaker = current_user(opts)
+
+    where(
+      query,
+      [circle, caretaker: caretaker],
+      exists(boundarise(circle.id, opts)) or
+        caretaker.caretaker_id in ^uids(caretaker) or
+        circle.id in ^e(opts, :extra_ids_to_include, [])
+    )
   end
 
   @doc """
