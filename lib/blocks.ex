@@ -1314,9 +1314,14 @@ defmodule Bonfire.Boundaries.Blocks do
 
     query =
       case opts[:before] do
-        nil -> order_by(query, [enc], desc: enc.subject_id)
+        nil ->
+          order_by(query, [enc], desc: enc.subject_id)
+
         # the closest newer ids first, reversed by the caller
-        before_id -> query |> where([enc], enc.subject_id > ^before_id) |> order_by([enc], asc: enc.subject_id)
+        before_id ->
+          query
+          |> where([enc], enc.subject_id > ^before_id)
+          |> order_by([enc], asc: enc.subject_id)
       end
 
     case opts[:limit] do
