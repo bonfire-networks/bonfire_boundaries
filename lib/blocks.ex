@@ -1251,6 +1251,80 @@ defmodule Bonfire.Boundaries.Blocks do
     |> repo().maybe_preload(encircles: [:peer, subject: [:profile, :character]])
   end
 
+  @doc "A page of the user ids someone restricts, newest id first. `:silenced` is everyone silenced; Mastodon keeps two lists: `:block` is everyone both ghosted and silenced (a full block), `:mute` everyone silenced and not ghosted (a full block silences too); ghosted-only accounts are in neither. Users only, so a silenced group or a gone account never takes a slot on a page. Opts: `current_user:`, `limit:`, `after:` (older ids), `before:` (the closest newer ids, for Mastodon's `min_id`)."
+  def restricted_ids(kind, opts) when kind in [:silenced, :block, :mute] do
+    import Ecto.Query
+
+    user = current_user(opts)
+    silenced = per_user_circle_ids(user, types_blocked(:silence))
+    ghosted = per_user_circle_ids(user, types_blocked(:ghost))
+    # a cursor that is not an id, or a limit below 1, is ignored rather than cast into the query
+    opts = [
+      after: valid_cursor(opts[:after]),
+      before: valid_cursor(opts[:before]),
+      limit: if(is_integer(opts[:limit]) and opts[:limit] > 0, do: opts[:limit])
+    ]
+
+    from(enc in Bonfire.Data.AccessControl.Encircle,
+      join: u in Bonfire.Data.Identity.User,
+      on: u.id == enc.subject_id,
+      where: enc.circle_id in ^silenced,
+      distinct: true,
+      select: enc.subject_id
+    )
+    |> restricted_to(kind, ghosted)
+    |> restricted_page(opts)
+    |> repo().all()
+    # newest first either way
+    |> then(&if opts[:before], do: Enum.reverse(&1), else: &1)
+  end
+
+  defp restricted_to(query, :silenced, _ghosted), do: query
+
+  defp restricted_to(query, :block, ghosted) do
+    import Ecto.Query
+    where(query, [enc], enc.subject_id in subquery(encircled_q(ghosted)))
+  end
+
+  defp restricted_to(query, :mute, ghosted) do
+    import Ecto.Query
+    where(query, [enc], enc.subject_id not in subquery(encircled_q(ghosted)))
+  end
+
+  defp encircled_q(circle_ids) do
+    import Ecto.Query
+
+    from(g in Bonfire.Data.AccessControl.Encircle,
+      where: g.circle_id in ^circle_ids,
+      select: g.subject_id
+    )
+  end
+
+  defp valid_cursor(id), do: if(Types.is_uid?(id), do: id)
+
+  # ids compared by the database, in binary order, which is time order for ULIDs and UUIDv7 alike
+  defp restricted_page(query, opts) do
+    import Ecto.Query
+
+    query =
+      case opts[:after] do
+        nil -> query
+        after_id -> where(query, [enc], enc.subject_id < ^after_id)
+      end
+
+    query =
+      case opts[:before] do
+        nil -> order_by(query, [enc], desc: enc.subject_id)
+        # the closest newer ids first, reversed by the caller
+        before_id -> query |> where([enc], enc.subject_id > ^before_id) |> order_by([enc], asc: enc.subject_id)
+      end
+
+    case opts[:limit] do
+      limit when is_integer(limit) -> limit(query, ^limit)
+      _ -> query
+    end
+  end
+
   ###
 
   def instance_wide_circles(block_types) when is_list(block_types) do

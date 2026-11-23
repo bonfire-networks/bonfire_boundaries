@@ -213,6 +213,17 @@ defmodule Bonfire.Boundaries.Circles do
   end
 
   @doc "Gets a circle by ID, after checking boundaries to see if this is a list shared with me"
+  @doc "The circle ids, of those given, that `user` may read (as `get/2` opens a circle, with `:read`); a guest reads none, and anything that is not an id is dropped. For filters that narrow a feed to a circle's members: anyone else's list or block circle would show who is in it."
+  def readable_ids(ids, %{} = user) do
+    ids
+    |> List.wrap()
+    |> Enum.filter(&Types.is_uid?/1)
+    |> Enum.uniq()
+    |> Enum.filter(&match?({:ok, _}, get(&1, current_user: user)))
+  end
+
+  def readable_ids(_ids, _guest), do: []
+
   def get(id, opts) do
     # one circle is OPENED, so `[:read]` unless the caller asks otherwise
     opts = (opts ++ @default_q_opts) |> Keyword.put_new(:verbs, [:read])

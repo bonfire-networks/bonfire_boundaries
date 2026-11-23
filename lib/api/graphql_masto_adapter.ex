@@ -31,22 +31,34 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
     # User profile fragment inlined for compile-order independence
     @account_fields Fragments.account_fields()
 
-    defp list_restricted_accounts(conn, query_name, data_key) do
+    # Mastodon's mutes and blocks, paged by account id: one more than `limit` is asked for, to know whether a next page exists
+    defp list_restricted_accounts(conn, params, query_name, data_key) do
       current_user = conn.assigns[:current_user]
 
       if is_nil(current_user) do
         RestAdapter.error_fn({:error, :unauthorized}, conn)
       else
-        case graphql(conn, query_name, %{}) do
+        limit = PaginationHelpers.validate_limit(params["limit"])
+
+        variables =
+          %{"limit" => limit + 1}
+          |> PaginationHelpers.maybe_add_cursor(params, "max_id", "after")
+          |> PaginationHelpers.maybe_add_cursor(params, "since_id", "before")
+          |> PaginationHelpers.maybe_add_cursor(params, "min_id", "before")
+
+        case graphql(conn, query_name, variables) do
           %{data: data} when is_map(data) ->
             users = Map.get(data, data_key, []) || []
 
-            accounts =
-              users
-              |> Enum.map(&Mappers.Account.from_user/1)
-              |> Enum.reject(&is_nil/1)
+            newer? = Map.has_key?(variables, "before")
+            accounts = page_accounts(users, limit, newer?)
 
-            RestAdapter.json(conn, accounts)
+            # `add_simple_link_headers/4` takes the cursors from the first and last account
+            page_info = %{has_next_page: newer? or length(users) > limit}
+
+            conn
+            |> PaginationHelpers.add_simple_link_headers(params, page_info, accounts)
+            |> RestAdapter.json(accounts)
 
           %{errors: errors} ->
             error(errors, "GraphQL error in #{query_name}")
@@ -59,21 +71,29 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       end
     end
 
-    @graphql "query {
-      muted_users {
+    # with `min_id`/`since_id` the extra row is on the newer side: keep the `limit` closest to the cursor (an older page always exists then: the cursor's own account)
+    defp page_accounts(users, limit, newer?) do
+      users
+      |> Enum.take(if newer?, do: -limit, else: limit)
+      |> Enum.map(&Mappers.Account.from_user/1)
+      |> Enum.reject(&is_nil/1)
+    end
+
+    @graphql "query ($limit: Int, $after: ID, $before: ID) {
+      muted_users(exclude_blocked: true, limit: $limit, after: $after, before: $before) {
         #{@account_fields}
       }
     }"
-    @doc "List muted accounts for current user"
-    def mutes(_params, conn), do: list_restricted_accounts(conn, :mutes, :muted_users)
+    @doc "List muted accounts for current user: silenced and not blocked, as Mastodon keeps the two apart"
+    def mutes(params, conn), do: list_restricted_accounts(conn, params, :mutes, :muted_users)
 
-    @graphql "query {
-      blocked_users {
+    @graphql "query ($limit: Int, $after: ID, $before: ID) {
+      blocked_users(limit: $limit, after: $after, before: $before) {
         #{@account_fields}
       }
     }"
     @doc "List blocked accounts for current user"
-    def blocks(_params, conn), do: list_restricted_accounts(conn, :blocks, :blocked_users)
+    def blocks(params, conn), do: list_restricted_accounts(conn, params, :blocks, :blocked_users)
 
     @doc "Mute an account"
     def mute_account(%{"id" => id}, conn), do: handle_block_action(conn, id, :mute)
@@ -164,8 +184,8 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
     This is used by both block/mute endpoints and the relationships endpoint.
     """
     def build_relationship(current_user, target_id) do
-      blocking = Blocks.is_blocked?(target_id, :ghost, current_user: current_user)
-      muting = Blocks.is_blocked?(target_id, :silence, current_user: current_user)
+      ghosting = Blocks.is_blocked?(target_id, :ghost, current_user: current_user)
+      silencing = Blocks.is_blocked?(target_id, :silence, current_user: current_user)
       following = Follows.following?(current_user, target_id)
       followed_by = Follows.following?(target_id, current_user)
 
@@ -173,15 +193,16 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       # "requested" = Are you waiting for this user to accept your follow request?
       requested = if not following, do: Follows.requested?(current_user, target_id), else: false
 
-      Schemas.Relationship.new(%{
-        "id" => to_string(target_id),
-        "following" => following,
-        "followed_by" => followed_by,
-        "blocking" => blocking,
-        "muting" => muting,
-        "muting_notifications" => muting,
-        "requested" => requested
-      })
+      Schemas.Relationship.new(
+        %{
+          "id" => to_string(target_id),
+          "following" => following,
+          "followed_by" => followed_by,
+          "requested" => requested
+        }
+        # the same rule as /relationships, /blocks and /mutes
+        |> Map.merge(Schemas.Relationship.restrictions(ghosting, silencing))
+      )
     end
 
     @circle "
@@ -442,25 +463,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
     }"
     def remove_from_list(id, params, conn) do
       modify_circle_members(conn, id, params, :remove_from_list, :remove_from_circle)
-    end
-
-    @doc """
-    Get the timeline for a list (posts from list members).
-
-    Returns statuses from accounts in the specified list.
-    Delegates to Social adapter's feed function with subject_circles filter.
-
-    Endpoint: GET /api/v1/timelines/list/:list_id
-    """
-    def list_timeline(list_id, params, conn) do
-      alias Bonfire.Social.API.GraphQLMasto.Adapter, as: SocialAdapter
-
-      params
-      |> PaginationHelpers.build_timeline_params(%{
-        "subject_circles" => [list_id],
-        "feed_name" => nil
-      })
-      |> SocialAdapter.feed(conn)
     end
 
     defp with_valid_title(params, conn, fun) do

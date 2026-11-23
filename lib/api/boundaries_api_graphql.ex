@@ -188,13 +188,25 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
         resolve(&list_circle_members/3)
       end
 
-      @desc "List users blocked by the current user (both ghosted and silenced)"
+      @desc "List users blocked by the current user (both ghosted and silenced), newest account id first"
       field :blocked_users, list_of(:user) do
+        arg(:limit, :integer)
+        @desc "Only accounts with an id older than this one"
+        arg(:after, :id)
+        @desc "Only accounts with an id newer than this one"
+        arg(:before, :id)
         resolve(&list_blocked_users/3)
       end
 
-      @desc "List users muted/silenced by the current user"
+      @desc "List users muted/silenced by the current user, newest account id first"
       field :muted_users, list_of(:user) do
+        @desc "Leave out users who are also ghosted (fully blocked), as Mastodon keeps mutes and blocks apart"
+        arg(:exclude_blocked, :boolean, default_value: false)
+        arg(:limit, :integer)
+        @desc "Only accounts with an id older than this one"
+        arg(:after, :id)
+        @desc "Only accounts with an id newer than this one"
+        arg(:before, :id)
         resolve(&list_muted_users/3)
       end
     end
@@ -564,31 +576,27 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     defp circle_membership_success?({count, nil}) when is_integer(count) and count >= 0, do: true
     defp circle_membership_success?(_), do: false
 
-    defp list_blocked_users(_parent, _args, info) do
+    defp list_blocked_users(_parent, args, info), do: restricted_users(:block, args, info)
+
+    defp list_muted_users(_parent, %{exclude_blocked: true} = args, info),
+      do: restricted_users(:mute, args, info)
+
+    # the field's own meaning: everyone silenced, blocked users included
+    defp list_muted_users(_parent, args, info), do: restricted_users(:silenced, args, info)
+
+    # a page of ids from `Blocks.restricted_ids/2`, then only those users, in that order
+    defp restricted_users(kind, args, info) do
       with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info) do
-        # Get users who are BOTH ghosted AND silenced (full block = Mastodon semantics)
-        ghost_circles = Blocks.list(:ghost, current_user: user)
-        silence_circles = Blocks.list(:silence, current_user: user)
+        ids =
+          Blocks.restricted_ids(kind,
+            current_user: user,
+            limit: args[:limit],
+            after: args[:after],
+            before: args[:before]
+          )
 
-        ghosted_ids = extract_user_ids_from_circles(ghost_circles)
-        silenced_ids = extract_user_ids_from_circles(silence_circles)
-
-        # Intersection: users who are both ghosted AND silenced
-        blocked_ids =
-          MapSet.intersection(MapSet.new(ghosted_ids), MapSet.new(silenced_ids))
-          |> MapSet.to_list()
-
-        users = Bonfire.Me.Users.by_ids(blocked_ids)
-        {:ok, users}
-      end
-    end
-
-    defp list_muted_users(_parent, _args, info) do
-      with {:ok, user} <- GraphQL.current_user_or_not_logged_in(info) do
-        circles = Blocks.list(:silence, current_user: user)
-        user_ids = extract_user_ids_from_circles(circles)
-        users = Bonfire.Me.Users.by_ids(user_ids)
-        {:ok, users}
+        by_id = ids |> Bonfire.Me.Users.by_ids() |> Map.new(&{&1.id, &1})
+        {:ok, Enum.flat_map(ids, &List.wrap(by_id[&1]))}
       end
     end
 
@@ -659,32 +667,6 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled and
     defp blocked?(id, user) do
       Blocks.is_blocked?(id, :ghost, current_user: user) and
         Blocks.is_blocked?(id, :silence, current_user: user)
-    end
-
-    # Helper to extract users from block circles
-    defp extract_users_from_circles(circles) when is_list(circles) do
-      circles
-      |> Enum.flat_map(fn circle ->
-        case circle do
-          %{encircles: encircles} when is_list(encircles) ->
-            Enum.map(encircles, &e(&1, :subject, nil))
-
-          _ ->
-            []
-        end
-      end)
-      |> Enum.reject(&is_nil/1)
-      |> Enum.uniq_by(&Bonfire.Common.Types.uid/1)
-    end
-
-    defp extract_users_from_circles(_), do: []
-
-    # Helper to extract user IDs from block circles
-    defp extract_user_ids_from_circles(circles) do
-      circles
-      |> extract_users_from_circles()
-      |> Enum.map(&Bonfire.Common.Types.uid/1)
-      |> Enum.reject(&is_nil/1)
     end
   end
 end
