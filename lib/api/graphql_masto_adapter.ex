@@ -203,7 +203,10 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
              }
              # the same rule as /relationships, /blocks and /mutes
              |> Map.merge(
-               Schemas.Relationship.restrictions(relationship["ghosting"], relationship["silencing"])
+               Schemas.Relationship.restrictions(
+                 relationship["ghosting"],
+                 relationship["silencing"]
+               )
              )
            )}
 
