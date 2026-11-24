@@ -24,9 +24,7 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       AbsintheClient.default_pipeline(schema, Keyword.put(opts, :context, context_with_loader))
     end
 
-    alias Bonfire.Boundaries.Blocks
     alias Bonfire.API.MastoCompat.{Fragments, Mappers, Schemas, PaginationHelpers}
-    alias Bonfire.Social.Graph.Follows
 
     # User profile fragment inlined for compile-order independence
     @account_fields Fragments.account_fields()
@@ -162,13 +160,11 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
 
         case result do
           %{data: data} when is_map(data) ->
-            relationship = build_relationship(current_user, target_id)
-            RestAdapter.json(conn, relationship)
+            respond_with_relationship(conn, current_user, target_id)
 
           %{errors: _errors} when action in [:unmute, :unblock] ->
             # Mastodon API expects unmute/unblock to be idempotent
-            relationship = build_relationship(current_user, target_id)
-            RestAdapter.json(conn, relationship)
+            respond_with_relationship(conn, current_user, target_id)
 
           %{errors: errors} ->
             RestAdapter.error_fn({:error, errors}, conn)
@@ -179,30 +175,44 @@ if Application.compile_env(:bonfire_api_graphql, :modularity) != :disabled do
       end
     end
 
-    @doc """
-    Build a Mastodon Relationship object by querying actual state.
-    This is used by both block/mute endpoints and the relationships endpoint.
-    """
-    def build_relationship(current_user, target_id) do
-      ghosting = Blocks.is_blocked?(target_id, :ghost, current_user: current_user)
-      silencing = Blocks.is_blocked?(target_id, :silence, current_user: current_user)
-      following = Follows.following?(current_user, target_id)
-      followed_by = Follows.following?(target_id, current_user)
+    defp respond_with_relationship(conn, user, target_id) do
+      case read_relationship(user, target_id) do
+        {:ok, relationship} -> RestAdapter.json(conn, relationship)
+        {:error, error} -> RestAdapter.error_fn({:error, error}, conn)
+      end
+    end
 
-      # Check for pending follow request (only if not already following)
-      # "requested" = Are you waiting for this user to accept your follow request?
-      requested = if not following, do: Follows.requested?(current_user, target_id), else: false
+    @relationship_query "query($id: ID!, $target: ID!) { user(filter: {id: $id}) { relationship(with: $target) { following followed requested ghosting silencing } } }"
 
-      Schemas.Relationship.new(
-        %{
-          "id" => to_string(target_id),
-          "following" => following,
-          "followed_by" => followed_by,
-          "requested" => requested
-        }
-        # the same rule as /relationships, /blocks and /mutes
-        |> Map.merge(Schemas.Relationship.restrictions(ghosting, silencing))
-      )
+    @doc "The Mastodon Relationship of `user` to `target_id`, read through GraphQL; `notifying?` is the caller's to know (bells live in `bonfire_notify`)."
+    def read_relationship(user, target_id, notifying? \\ false) do
+      case Absinthe.run(@relationship_query, Bonfire.API.GraphQL.Schema,
+             variables: %{"id" => user.id, "target" => target_id},
+             context: Bonfire.API.GraphQL.Schema.context(%{current_user: user})
+           ) do
+        {:ok, %{data: %{"user" => %{"relationship" => relationship}}}}
+        when is_map(relationship) ->
+          {:ok,
+           Schemas.Relationship.new(
+             %{
+               "id" => to_string(target_id),
+               "following" => relationship["following"],
+               "followed_by" => relationship["followed"],
+               "requested" => relationship["requested"],
+               "notifying" => notifying?
+             }
+             # the same rule as /relationships, /blocks and /mutes
+             |> Map.merge(
+               Schemas.Relationship.restrictions(relationship["ghosting"], relationship["silencing"])
+             )
+           )}
+
+        {:ok, %{errors: errors}} ->
+          {:error, errors}
+
+        _ ->
+          {:error, :not_found}
+      end
     end
 
     @circle "
