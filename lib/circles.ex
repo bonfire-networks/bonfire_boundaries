@@ -1750,6 +1750,7 @@ defmodule Bonfire.Boundaries.Circles do
     # the same standing as changing who is in a circle: its caretaker or someone who may configure it, never a built-in or stereotype circle (whose members follow from who follows whom)
     with {:ok, circle} <- get_for_manager(uid(circle_or_id), user) do
       do_edit(circle, params)
+      |> purge_members_embed()
     end
   end
 
@@ -1807,7 +1808,17 @@ defmodule Bonfire.Boundaries.Circles do
   def add_to_circles(subjects, circles, opts) do
     with :ok <- check_may_manage_circles(circles, opts) do
       do_add_to_circles(subjects, circles)
+      |> purge_members_embed()
     end
+  end
+
+  # who a circle shows changed, so the saved copies of the circle members widget's embed go (every circle's, as they share one tag); passes the result through
+  defp purge_members_embed(result) do
+    Bonfire.Common.Utils.maybe_apply(Bonfire.UI.Common.Widgets, :bust_embed, [:circle_members],
+      fallback_return: nil
+    )
+
+    result
   end
 
   defp do_add_to_circles(subjects, circle) when is_list(subjects) do
@@ -1853,6 +1864,7 @@ defmodule Bonfire.Boundaries.Circles do
   def remove_from_circles(subject, circles, opts) do
     with :ok <- check_may_manage_circles(circles, opts) do
       do_remove_from_circles(subject, circles)
+      |> purge_members_embed()
     end
   end
 
@@ -1969,6 +1981,7 @@ defmodule Bonfire.Boundaries.Circles do
       where: e.circle_id in ^uids(circles)
     )
     |> repo().delete_many()
+    |> purge_members_embed()
   end
 
   @doc """
@@ -2008,6 +2021,7 @@ defmodule Bonfire.Boundaries.Circles do
         ]
       ]
     )
+    |> purge_members_embed()
   end
 
   def delete(id, opts) do
