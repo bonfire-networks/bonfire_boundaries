@@ -888,6 +888,24 @@ defmodule Bonfire.Boundaries.Circles do
     |> repo().all()
   end
 
+  @doc """
+  The circles of these stereotypes (eg. `:group_members`) that each of `caretaker_ids` has, as `{caretaker_id, stereotype_id, circle_id}`, in one query, without creating any (as `caretakers_with_stereotype/2`). For `list_member_previews/2`, which is keyed by circle.
+  """
+  def stereotype_circle_ids_by_caretaker(caretaker_ids, stereotypes) do
+    query_my(caretaker_ids, skip_boundary_check: true)
+    |> where(
+      [stereotyped: stereotyped],
+      stereotyped.stereotype_id in ^stereotype_ids(List.wrap(stereotypes))
+    )
+    # only the ids, so none of `query/1`'s preloads
+    |> exclude(:preload)
+    |> select(
+      [circle: circle, caretaker: caretaker, stereotyped: stereotyped],
+      {caretaker.caretaker_id, stereotyped.stereotype_id, circle.id}
+    )
+    |> repo().all()
+  end
+
   defp do_get_stereotype_circles(subject, stereotype_ids)
        when is_list(stereotype_ids) and stereotype_ids != [] do
     # skip boundaries since we should only use this query internally
